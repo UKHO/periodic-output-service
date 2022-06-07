@@ -286,4 +286,4 @@ __pycache__/
 appsettings.local.overrides.json
 
 # Log txt files
-/UKHO.PeriodicOutputService.Fulfilment/UKHO.GriddedBathymetryService.API/Logs
+/UKHO.PeriodicOutputService.Fulfilment/Logs
