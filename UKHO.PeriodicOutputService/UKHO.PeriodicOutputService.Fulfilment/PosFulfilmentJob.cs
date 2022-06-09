@@ -1,22 +1,29 @@
-﻿using Microsoft.Azure.WebJobs;
-using Microsoft.Extensions.Options;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
+﻿using Microsoft.Azure.Storage.Queue;
+using Microsoft.Azure.WebJobs;
+using UKHO.PeriodicOutputService.Fulfilment.Services;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
     public class PosFulfilmentJob
     {
-        private readonly IOptions<FleetManagerB2BApiConfiguration> _fleetManagerB2BApiConfig;
+        private readonly IFulfilmentDataService _fulfilmentDataService;
 
-        public PosFulfilmentJob(IOptions<FleetManagerB2BApiConfiguration> fleetManagerB2BApiConfig)
+        public PosFulfilmentJob(IFulfilmentDataService fulfilmentDataService)
         {
-            _fleetManagerB2BApiConfig = fleetManagerB2BApiConfig;
+            _fulfilmentDataService = fulfilmentDataService;
         }
 
         //This method is queue-triggered for temporary purpose
-        public void ProcessWebJob([QueueTrigger("ess-fulfilment-queue")] string message)
+        public async Task ProcessWebJob([QueueTrigger("ess-fulfilment-queue")] string message)
         {
-            Console.WriteLine(_fleetManagerB2BApiConfig.Value.BaseUrl);
+            try
+            {
+                string result = await _fulfilmentDataService.CreatePosExchangeSet();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.InnerException);
+            }
         }
     }
 }

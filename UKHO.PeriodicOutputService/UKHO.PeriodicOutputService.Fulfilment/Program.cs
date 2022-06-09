@@ -9,6 +9,9 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
+using UKHO.PeriodicOutputService.Fulfilment.Services;
+using UKHO.PeriodicOutputService.Common.Helpers;
+using System.Net.Http.Headers;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
@@ -69,6 +72,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                  services.Configure<FleetManagerB2BApiConfiguration>(ConfigurationBuilder.GetSection("FleetManagerB2BApiConfiguration"));
 
                  services.AddScoped<IFleetManagerB2BApiConfiguration, FleetManagerB2BApiConfiguration>();
+                 services.AddScoped<IFleetManagerService, FleetManagerService>();
+                 services.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
+
+                 services.AddHttpClient<IFleetManagerClient, FleetManagerClient>();
              })
               .ConfigureWebJobs(b =>
               {
