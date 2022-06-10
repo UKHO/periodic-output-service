@@ -85,10 +85,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                     builder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
                 }
 
-                #if DEBUG
+#if DEBUG
                 //Add development overrides configuration
                 builder.AddJsonFile("appsettings.local.overrides.json", true, true);
-                #endif
+#endif
 
                 //Add environment variables
                 builder.AddEnvironmentVariables();
@@ -99,13 +99,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             {
                 builder.AddConfiguration(s_configurationBuilder?.GetSection("Logging"));
 
-                #if DEBUG
+#if DEBUG
                 builder.AddSerilog(new LoggerConfiguration()
                                 .WriteTo.File("Logs/UKHO.PeriodicOutputService.Fulfilment.Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
                                 .MinimumLevel.Information()
                                 .MinimumLevel.Override("UKHO", LogEventLevel.Information)
                                 .CreateLogger(), dispose: true);
-                #endif
+#endif
 
                 builder.AddConsole();
 
