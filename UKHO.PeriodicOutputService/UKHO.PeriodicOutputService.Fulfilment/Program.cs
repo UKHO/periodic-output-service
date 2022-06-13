@@ -81,7 +81,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 if (!string.IsNullOrWhiteSpace(kvServiceUri))
                 {
                     var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
-                                                        new DefaultAzureCredentialOptions()));
+                                                        new DefaultAzureCredentialOptions { ManagedIdentityClientId = tempConfig["POSManagedIdentity:ClientId"] }));
                     builder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
                 }
 
@@ -152,7 +152,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
                 services.Configure<QueuesOptions>(s_configurationBuilder?.GetSection("QueuesOptions"));
                 services.AddScoped<IAzureStorageConfiguration, AzureStorageConfiguration>();
-                services.Configure<AzureStorageConfiguration>(s_configurationBuilder?.GetSection("PosAzureStorageConfiguration"));
+                services.Configure<AzureStorageConfiguration>(s_configurationBuilder?.GetSection("POSAzureStorageConfiguration"));
             })
             .ConfigureWebJobs(b =>
             {
