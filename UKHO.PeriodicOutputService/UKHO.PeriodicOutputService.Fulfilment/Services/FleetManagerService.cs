@@ -1,6 +1,7 @@
 ﻿using UKHO.PeriodicOutputService.Common.Helpers;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
+using System.Xml;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
@@ -20,7 +21,18 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             HttpResponseMessage httpResponse = await _fleetManagerClient.GetCatalogue(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, accessToken, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
 
-            return await httpResponse.Content.ReadAsStringAsync();
+            XmlDocument xdoc = new XmlDocument();
+            xdoc.Load(httpResponse.Content.ReadAsStringAsync().Result);
+
+            XmlElement root = xdoc.DocumentElement;
+            XmlNodeList nodes = root.SelectNodes("//ShortName");
+
+            foreach (XmlNode node in nodes)
+            {
+                Console.WriteLine(node.Value);
+            }
+
+            return String.Empty;
         }
 
         public async Task<string> GetJwtAuthJwtToken(string accessToken)

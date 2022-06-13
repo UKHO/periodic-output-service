@@ -75,7 +75,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                  services.AddScoped<IFleetManagerService, FleetManagerService>();
                  services.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
 
-                 services.AddHttpClient<IFleetManagerClient, FleetManagerClient>();
+                 services.AddHttpClient<IFleetManagerClient, FleetManagerClient>(client =>
+                 {
+                     var productHeaderValue = new ProductInfoHeaderValue(PeriodicOutputServiceUserAgent, AssemblyVersion);
+                     client.DefaultRequestHeaders.UserAgent.Add(productHeaderValue);
+                     client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
+                 });
              })
               .ConfigureWebJobs(b =>
               {
