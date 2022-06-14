@@ -1,4 +1,6 @@
-﻿namespace UKHO.PeriodicOutputService.Fulfilment.Services
+﻿using System.Text;
+
+namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public class FulfilmentDataService : IFulfilmentDataService
     {
@@ -9,9 +11,9 @@
             _fleetManagerService = fleetManagerService;
         }
 
-        public async Task<string> CreatePosExchangeSet()
+        public async Task<StringBuilder> CreatePosExchangeSet()
         {
-            string catalougeXml = string.Empty;
+            StringBuilder catalougeXml = new();
 
             try
             {
@@ -32,7 +34,7 @@
             {
                 Console.WriteLine(ex.InnerException);
 
-                return string.Empty;
+                return catalougeXml;
             }
         }
     }

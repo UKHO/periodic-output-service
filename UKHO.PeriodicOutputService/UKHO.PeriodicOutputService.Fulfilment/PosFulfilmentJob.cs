@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Storage.Queue;
+﻿using System.Text;
+using Microsoft.Azure.Storage.Queue;
 using Microsoft.Azure.WebJobs;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
@@ -16,9 +17,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment
         //This method is queue-triggered for temporary purpose
         public async Task ProcessWebJob([QueueTrigger("ess-fulfilment-queue")] string message)
         {
+            StringBuilder result = new();
+
             try
             {
-                string result = await _fulfilmentDataService.CreatePosExchangeSet();
+                result = await _fulfilmentDataService.CreatePosExchangeSet();
             }
             catch (Exception ex)
             {

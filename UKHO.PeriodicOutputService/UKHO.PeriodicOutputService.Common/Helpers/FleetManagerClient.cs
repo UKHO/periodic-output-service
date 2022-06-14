@@ -5,11 +5,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     [ExcludeFromCodeCoverage] ////Excluded from code coverage as it has actual http calls 
     public class FleetManagerClient : IFleetManagerClient
     {
-        private readonly HttpClient httpClient;
+        private readonly HttpClient _httpClient;
 
         public FleetManagerClient(HttpClient httpClient)
         {
-            this.httpClient = httpClient;
+            _httpClient = httpClient;
         }
 
         public async Task<HttpResponseMessage> GetJwtAuthUnpToken(HttpMethod method, string baseUrl, string base64Credentials, string subscriptionKey)
@@ -26,7 +26,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
             }
-            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
         public async Task<HttpResponseMessage> GetJwtAuthJwtToken(HttpMethod method, string baseUrl, string accessToken, string subscriptionKey)
@@ -43,11 +43,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
             }
-            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
         public async Task<HttpResponseMessage> GetCatalogue(HttpMethod method, string baseUrl, string accessToken, string subscriptionKey)
         {
+            HttpClient httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
+
             string uri = $"{baseUrl}/catalogues/1";
 
             var httpRequestMessage = new HttpRequestMessage(method, uri);

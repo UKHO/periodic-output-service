@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using System.Xml;
+using System.Text;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
@@ -17,22 +18,37 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fleetManagerClient = fleetManagerClient;
         }
 
-        public async Task<string> GetCatalogue(string accessToken)
+        public async Task<StringBuilder> GetCatalogue(string accessToken)
         {
-            HttpResponseMessage httpResponse = await _fleetManagerClient.GetCatalogue(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, accessToken, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
+            StringBuilder productIdentifiers = new();
 
-            XmlDocument xdoc = new XmlDocument();
-            xdoc.Load(httpResponse.Content.ReadAsStringAsync().Result);
-
-            XmlElement root = xdoc.DocumentElement;
-            XmlNodeList nodes = root.SelectNodes("//ShortName");
-
-            foreach (XmlNode node in nodes)
+            try
             {
-                Console.WriteLine(node.Value);
-            }
+                HttpResponseMessage httpResponse = await _fleetManagerClient.GetCatalogue(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, accessToken, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
 
-            return String.Empty;
+                Stream stream = httpResponse.Content.ReadAsStream();
+
+                XmlReaderSettings settings = new();
+                settings.Async = true;
+
+                using (XmlReader reader = XmlReader.Create(stream, settings))
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        if (reader.Name == "ShortName")
+                        {
+                            reader.Read();
+                            productIdentifiers.Append(reader.Value + ",");
+                        }
+                    }
+                    productIdentifiers.Remove(productIdentifiers.Length - 1, 1);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+            return productIdentifiers;
         }
 
         public async Task<string> GetJwtAuthJwtToken(string accessToken)
