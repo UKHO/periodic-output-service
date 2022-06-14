@@ -17,8 +17,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
         //This method is queue-triggered for temporary purpose
         public async Task ProcessWebJob([QueueTrigger("ess-fulfilment-queue")] string message)
         {
-            StringBuilder result = new();
-
+            string result = string.Empty;
             try
             {
                 result = await _fulfilmentDataService.CreatePosExchangeSet();

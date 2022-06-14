@@ -18,37 +18,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fleetManagerClient = fleetManagerClient;
         }
 
-        public async Task<StringBuilder> GetCatalogue(string accessToken)
+        public async Task<string> GetCatalogue(string accessToken)
         {
-            StringBuilder productIdentifiers = new();
-
-            try
+            string responseContent = string.Empty;
+            HttpResponseMessage httpResponse = await _fleetManagerClient.GetCatalogue(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, accessToken, _fleetManagerB2BApiConfig.Value.SubscriptionKey); if (httpResponse.IsSuccessStatusCode)
             {
-                HttpResponseMessage httpResponse = await _fleetManagerClient.GetCatalogue(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, accessToken, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
-
-                Stream stream = httpResponse.Content.ReadAsStream();
-
-                XmlReaderSettings settings = new();
-                settings.Async = true;
-
-                using (XmlReader reader = XmlReader.Create(stream, settings))
-                {
-                    while (await reader.ReadAsync())
-                    {
-                        if (reader.Name == "ShortName")
-                        {
-                            reader.Read();
-                            productIdentifiers.Append(reader.Value + ",");
-                        }
-                    }
-                    productIdentifiers.Remove(productIdentifiers.Length - 1, 1);
-                }
+                responseContent = await httpResponse.Content.ReadAsStringAsync();
             }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            return productIdentifiers;
+            return responseContent;
         }
 
         public async Task<string> GetJwtAuthJwtToken(string accessToken)

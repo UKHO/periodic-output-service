@@ -77,7 +77,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
                  services.AddHttpClient<IFleetManagerClient, FleetManagerClient>(client =>
                  {
-                     client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(10));
+                     client.MaxResponseContentBufferSize = 2147483647;
+                     client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(3));
                  });
              })
               .ConfigureWebJobs(b =>

@@ -11,9 +11,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fleetManagerService = fleetManagerService;
         }
 
-        public async Task<StringBuilder> CreatePosExchangeSet()
+        public async Task<string> CreatePosExchangeSet()
         {
-            StringBuilder catalougeXml = new();
+            string catalougeXml = string.Empty;
 
             try
             {
