@@ -51,7 +51,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         public async Task<string> GetJwtAuthUnpToken()
         {
             string responseContent = string.Empty;
-            var base64Credentials = CommonHelper.Base64Encode(_fleetManagerB2BApiConfig.Value.UserName, _fleetManagerB2BApiConfig.Value.Password);
+            var base64Credentials = CommonHelper.GetBase64EncodedCredentials(_fleetManagerB2BApiConfig.Value.UserName, _fleetManagerB2BApiConfig.Value.Password);
 
             HttpResponseMessage httpResponse = await _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, base64Credentials, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
 
