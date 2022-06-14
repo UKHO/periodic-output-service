@@ -7,7 +7,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebJobs", "WebJobs", "{1592
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.PeriodicOutputService.Fulfilment", "UKHO.PeriodicOutputService.Fulfilment\UKHO.PeriodicOutputService.Fulfilment.csproj", "{0424FA31-5242-4F3C-B194-97816CF60ED4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.PeriodicOutputService.Common", "UKHO.PeriodicOutputService.Common\UKHO.PeriodicOutputService.Common.csproj", "{0C5EB31F-A03F-4141-BFD4-DA62FECCFC93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.PeriodicOutputService.Common", "UKHO.PeriodicOutputService.Common\UKHO.PeriodicOutputService.Common.csproj", "{0C5EB31F-A03F-4141-BFD4-DA62FECCFC93}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{675F9CB2-C21C-4225-946E-87B65F9AEA6A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.PeriodicOutputService.Fulfilment.UnitTests", "UKHO.PeriodicOutputService.Fulfilment.UnitTests\UKHO.PeriodicOutputService.Fulfilment.UnitTests.csproj", "{D726ABD1-C0A6-4847-9D9A-59F233CD4654}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,12 +27,17 @@ Global
 		{0C5EB31F-A03F-4141-BFD4-DA62FECCFC93}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C5EB31F-A03F-4141-BFD4-DA62FECCFC93}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C5EB31F-A03F-4141-BFD4-DA62FECCFC93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D726ABD1-C0A6-4847-9D9A-59F233CD4654}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D726ABD1-C0A6-4847-9D9A-59F233CD4654}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D726ABD1-C0A6-4847-9D9A-59F233CD4654}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D726ABD1-C0A6-4847-9D9A-59F233CD4654}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0424FA31-5242-4F3C-B194-97816CF60ED4} = {1592E1AE-C3E7-46D6-B0A6-15785835EBD2}
+		{D726ABD1-C0A6-4847-9D9A-59F233CD4654} = {675F9CB2-C21C-4225-946E-87B65F9AEA6A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3412128A-AFD7-431C-AA35-E39C4668DC9F}
