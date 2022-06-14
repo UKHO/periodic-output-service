@@ -21,6 +21,9 @@ variables:
     value: $[counter(format('{0:yyyyMMdd}', pipeline.startTime), 1)]
   - name: DeploymentPool
     value: "UKHO Ubuntu 1804"
+  - name: Container
+    value: "ukhydrographicoffice/terraform-azure-powershell:1.2.2"
+
 
 stages:
   - stage: PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
@@ -174,3 +177,24 @@ stages:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService'
               ArtifactName: PeriodicOutputService
         
+  - stage: Devdeploy
+    displayName: "Devdeploy (inc terraform, webapp deploy)"
+    variables:
+      - group: "ESS-Deployment-Variables-DEV"
+      - group: "ESS-Dev-Variables"
+    jobs:
+      - deployment: DevDeployTerraform
+        displayName: "Dev - Deploy Terraform and Dotnet App"
+        environment: "Ess-Dev"
+        pool: $(DeploymentPool)
+        container: ${{variables.Container}}
+        workspace:
+          clean: all
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: Deployment/templates/continuous-deployment.yml
+                  parameters:
+                    ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+                    AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
