@@ -1,8 +1,6 @@
-﻿using UKHO.PeriodicOutputService.Common.Helpers;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
+using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
-using System.Xml;
-using System.Text;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
@@ -36,7 +34,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             if (httpResponse.IsSuccessStatusCode)
             {
                 responseContent = await httpResponse.Content.ReadAsStringAsync();
-                responseContent = responseContent.Split(",")[0].Split(":")[1].Remove(0, 1).Replace("\"", "");
+                responseContent = CommonHelper.ExtractAccessToken(responseContent);
             }
             return responseContent;
         }
@@ -51,7 +49,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             if (httpResponse.IsSuccessStatusCode)
             {
                 responseContent = await httpResponse.Content.ReadAsStringAsync();
-                responseContent = responseContent.Split(",")[0].Split(":")[1].Remove(0, 1).Replace("\"", "");
+                responseContent = CommonHelper.ExtractAccessToken(responseContent);
             }
             return responseContent;
         }

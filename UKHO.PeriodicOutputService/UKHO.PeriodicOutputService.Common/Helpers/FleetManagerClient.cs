@@ -48,9 +48,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public async Task<HttpResponseMessage> GetCatalogue(HttpMethod method, string baseUrl, string accessToken, string subscriptionKey)
         {
-            HttpClient httpClient = new HttpClient();
-            httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
-
             string uri = $"{baseUrl}/catalogues/1";
 
             var httpRequestMessage = new HttpRequestMessage(method, uri);
@@ -63,7 +60,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
             }
-            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
     }
 }
