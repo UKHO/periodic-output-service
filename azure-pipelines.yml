@@ -1,19 +1,176 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+name: $(BuildDefinitionName)_$(SourceBranchName)_$(Date:yy)$(DayOfYear).$(BuildCounter)
+
+parameters:
+  - name: ContinueEvenIfResourcesAreGettingDestroyed
+    displayName: "Continue even if resources are getting destroyed"
+    type: boolean
+    default: false
 
 trigger:
-- main
+  - main
+  - release/*
 
-pool:
-  vmImage: ubuntu-latest
+pool: NautilusBuild
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+variables:
+  - name: BuildConfiguration
+    value: "release"
+  - name: BuildPlatform
+    value: "any cpu"
+  - name: BuildCounter
+    value: $[counter(format('{0:yyyyMMdd}', pipeline.startTime), 1)]
+  - name: DeploymentPool
+    value: "UKHO Ubuntu 1804"
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+  - stage: PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+    displayName: "Build (inc DependencyChecker, Dotnet Build , dotnet test and publish artifact )"
+    dependsOn: []
+    jobs:
+      - job: Dependencychecker
+        workspace:
+          clean: all
+        displayName: "Dependencychecker"
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core 6.0.x sdk'
+            inputs:
+              packageType: sdk
+              useGlobalJson: true
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+
+          - task: DotNetCoreCLI@2
+            displayName: ".Net Core - NuGet restore non test projects only"
+            inputs:
+              command: "restore"
+              projects: |
+                **/*.csproj
+                !**/*Tests.csproj
+              feedsToUse: config
+              noCache: true
+              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+              packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packages'
+
+          - task: CmdLine@1
+            displayName: "Run OWASP Dependency Checker"
+            inputs:
+              filename: 'dependency-check.bat'
+              arguments: '--project "periodic-output-service - $(Build.SourceBranchName)" --scan "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService" --out "$(Build.ArtifactStagingDirectory)\DCReport" --suppression $(Build.SourcesDirectory)\NVDSuppressions.xml --noupdate'
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Artifact: OWASP Dependency Checker Report"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)\DCReport'
+              ArtifactName: "OWASP Dependency Checker Report"
+
+          - task: PowerShell@1
+            displayName: "Fail Build if Dependency Check Finds Any Vulnerabilities"
+            inputs:
+              scriptType: inlineScript
+              arguments: '-ReportLocation $(Build.ArtifactStagingDirectory)\DCReport\*'
+              inlineScript: |
+                param($ReportLocation)
+                Invoke-VulnerabilityCheck -ReportLocation $ReportLocation
+
+      - job: UnitTestsAndCodeCoverage
+        workspace:
+          clean: all
+        displayName: "Dotnet Test and Publish Code Coverage"
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET 6.0.x sdk'
+            inputs:
+              packageType: sdk
+              useGlobalJson: true
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+
+          - task: DotNetCoreCLI@2
+            displayName: ".Net Core - NuGet restore test projects only"
+            inputs:
+              command: "restore"
+              projects: "**/*Tests.csproj"
+              feedsToUse: config
+              noCache: true
+              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+              packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packagesForTests'
+
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet test - Perform Unit Tests"
+            inputs:
+              command: "test"
+              projects: "**/*UnitTests.csproj"
+              arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
+              publishTestResults: true
+              testRunTitle: "UnitTests"
+
+          - task: PowerShell@2
+            displayName: "Generate code coverage report"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)\CodeCoverageReport.ps1'
+              arguments: '-source "$(Build.SourcesDirectory)" -reportFolder "$(Build.ArtifactStagingDirectory)"'
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Code coverage"
+            inputs:
+              PathtoPublish: "$(Build.ArtifactStagingDirectory)/codecoveragereport"
+              ArtifactName: codecoveragereport
+
+
+      - job: BuildAndPublishWebJob
+        workspace:
+          clean: all
+        displayName: "Dotnet Build publish WebJob"
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core 6.0.x sdk'
+            inputs:
+              packageType: sdk
+              useGlobalJson: true
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+
+          - task: DotNetCoreCLI@2
+            displayName: ".Net Core - NuGet restore"
+            inputs:
+              command: restore
+              projects: |
+                **/*.csproj
+              feedsToUse: config
+              noCache: true
+              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet build task"
+            inputs:
+              command: "build"
+              projects: "**/*.csproj"
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
+
+          - task: DotNetCoreCLI@2
+            displayName: "Publish POS Fulfilment Service Code"
+            inputs:
+              command: "publish"
+              publishWebProjects: false
+              projects: "**/*UKHO.PeriodicOutputService.Fulfilment.csproj"
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob'
+              zipAfterPublish: false
+              modifyOutputPath: false
+
+          - task: ArchiveFiles@2
+            displayName: "Zip POS fulfilment service"
+            inputs:
+              rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\'
+              includeRootFolder: false
+              archiveType: "zip"
+              archiveFile: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\PeriodicOutputFulfilmentService.zip'
+              replaceExistingArchive: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish PeriodicOutputFulfilmentService Artifact"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService'
+              ArtifactName: PeriodicOutputService
+        
