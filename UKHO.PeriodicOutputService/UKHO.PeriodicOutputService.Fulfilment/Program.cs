@@ -1,94 +1,106 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 #pragma warning disable S1128 // Unused "using" should be removed
 #pragma warning disable S1128 // Unused "using" should be removed
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using System.Net.Http.Headers;
+using Microsoft.ApplicationInsights.Channel;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static IConfiguration? s_ConfigurationBuilder;
-        private static string AssemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
-        public const string PeriodicOutputServiceUserAgent = "PeriodicOutputService";
+        private static readonly InMemoryChannel s_aIChannel = new();
 
-        public static void Main(string[] args)
+        public static async Task Main()
         {
-            HostBuilder hostBuilder = BuildHostConfiguration();
-
-            IHost host = hostBuilder.Build();
-
-            using (host)
+            try
             {
-                host.Run();
+                int delayTime = 5000;
+
+                //Build configuration
+                IConfigurationRoot? configuration = BuildConfiguration();
+
+                var serviceCollection = new ServiceCollection();
+
+                //Configure required services
+                ConfigureServices(serviceCollection, configuration);
+
+                //Create service provider. This will be used in logging.
+                ServiceProvider? serviceProvider = serviceCollection.BuildServiceProvider();
+
+                try
+                {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    await serviceProvider.GetService<PosFulfilmentJob>().ProcessFulfilmentJob();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                }
+                finally
+                {
+                    //Ensure all buffered app insights logs are flushed into Azure
+                    s_aIChannel.Flush();
+                    await Task.Delay(delayTime);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
+                throw;
             }
         }
-        private static HostBuilder BuildHostConfiguration()
+
+        private static IConfigurationRoot BuildConfiguration()
         {
-            HostBuilder hostBuilder = new HostBuilder();
-            hostBuilder.ConfigureAppConfiguration((hostContext, builder) =>
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true);
+
+            //Add environment specific configuration files.
+            string? environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            if (!string.IsNullOrWhiteSpace(environmentName))
             {
-                builder.AddJsonFile("appsettings.json");
-                //Add environment specific configuration files.
-                var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                if (!string.IsNullOrWhiteSpace(environmentName))
-                {
-                    builder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
-                }
+                configBuilder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
+            }
 
-                var tempConfig = builder.Build();
-                string kvServiceUri = tempConfig["KeyVaultSettings:ServiceUri"];
-                if (!string.IsNullOrWhiteSpace(kvServiceUri))
-                {
-                    var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
-                                                        new DefaultAzureCredentialOptions { ManagedIdentityClientId = tempConfig["ESSManagedIdentity:ClientId"] }));
-                    builder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
-                }
-
+            IConfigurationRoot tempConfig = configBuilder.Build();
+            string kvServiceUri = tempConfig["KeyVaultSettings:ServiceUri"];
+            if (!string.IsNullOrWhiteSpace(kvServiceUri))
+            {
+                var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
+                                                        new DefaultAzureCredentialOptions()));
+                configBuilder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+            }
 #if DEBUG
-                //Add development overrides configuration
-                builder.AddJsonFile("appsettings.local.overrides.json", true, true);
+            //Add development overrides configuration
+            configBuilder.AddJsonFile("appsettings.local.overrides.json", true, true);
 #endif
 
-                //Add environment variables
-                builder.AddEnvironmentVariables();
+            //Add environment variables
+            configBuilder.AddEnvironmentVariables();
 
-                Program.s_ConfigurationBuilder = builder.Build();
-            })
-             .ConfigureServices((hostContext, services) =>
-             {
-                 var buildServiceProvider = services.BuildServiceProvider();
+            return configBuilder.Build();
+        }
 
-                 if (s_ConfigurationBuilder != null)
-                     services.Configure<FleetManagerB2BApiConfiguration>(s_ConfigurationBuilder.GetSection("FleetManagerB2BApiConfiguration"));
+        private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
+        {
+            if (configuration != null)
+                serviceCollection.Configure<FleetManagerB2BApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
 
-                 services.AddScoped<IFleetManagerB2BApiConfiguration, FleetManagerB2BApiConfiguration>();
-                 services.AddScoped<IFleetManagerService, FleetManagerService>();
-                 services.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
+            serviceCollection.AddTransient<PosFulfilmentJob>();
 
-                 services.AddHttpClient<IFleetManagerClient, FleetManagerClient>(client =>
-                 {
-                     client.MaxResponseContentBufferSize = 2147483647;
-                     client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
-                 });
-             })
-              .ConfigureWebJobs(b =>
-              {
-                  b.AddAzureStorageCoreServices();
-                  b.AddAzureStorage();
-              });
+            serviceCollection.AddScoped<IFleetManagerB2BApiConfiguration, FleetManagerB2BApiConfiguration>();
+            serviceCollection.AddScoped<IFleetManagerService, FleetManagerService>();
+            serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
 
-            return hostBuilder;
+            serviceCollection.AddHttpClient<IFleetManagerClient, FleetManagerClient>(client =>
+            {
+                client.MaxResponseContentBufferSize = 2147483647;
+                client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
+            });
         }
     }
 }

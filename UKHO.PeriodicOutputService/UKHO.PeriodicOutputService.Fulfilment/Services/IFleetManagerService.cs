@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace UKHO.PeriodicOutputService.Fulfilment.Services
+﻿namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public interface IFleetManagerService
     {
