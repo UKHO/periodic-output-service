@@ -18,7 +18,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static IConfiguration ConfigurationBuilder;
+        private static IConfiguration? s_ConfigurationBuilder;
         private static string AssemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         public const string PeriodicOutputServiceUserAgent = "PeriodicOutputService";
 
@@ -63,13 +63,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 //Add environment variables
                 builder.AddEnvironmentVariables();
 
-                Program.ConfigurationBuilder = builder.Build();
+                Program.s_ConfigurationBuilder = builder.Build();
             })
              .ConfigureServices((hostContext, services) =>
              {
                  var buildServiceProvider = services.BuildServiceProvider();
 
-                 services.Configure<FleetManagerB2BApiConfiguration>(ConfigurationBuilder.GetSection("FleetManagerB2BApiConfiguration"));
+                 if (s_ConfigurationBuilder != null)
+                     services.Configure<FleetManagerB2BApiConfiguration>(s_ConfigurationBuilder.GetSection("FleetManagerB2BApiConfiguration"));
 
                  services.AddScoped<IFleetManagerB2BApiConfiguration, FleetManagerB2BApiConfiguration>();
                  services.AddScoped<IFleetManagerService, FleetManagerService>();
@@ -78,7 +79,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                  services.AddHttpClient<IFleetManagerClient, FleetManagerClient>(client =>
                  {
                      client.MaxResponseContentBufferSize = 2147483647;
-                     client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(3));
+                     client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
                  });
              })
               .ConfigureWebJobs(b =>
