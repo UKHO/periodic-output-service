@@ -24,15 +24,6 @@ locals {
   }
 }
 
-variable "sku_name" {
-  type = map(any)
-  default = {
-             "dev"  =  "P1v2"
-             "qa"   =  "P1v3"
-             "live" =  "P1v3"
-            }
-}
-
 variable "agent_rg" {
   type = string
 }

@@ -22,10 +22,6 @@ variable "tags" {
 
 }
 
-variable "sku_name" {
-
-}
-
 variable "env_name" {
   type = string
 }
