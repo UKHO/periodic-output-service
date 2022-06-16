@@ -3,7 +3,7 @@
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 {
     [TestFixture]
-    public class CommonHelperTest
+    public class CommonHelperTests
     {
         [SetUp]
         public void Setup()
