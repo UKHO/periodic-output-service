@@ -15,6 +15,7 @@ using Serilog;
 using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
 using System.Reflection;
+using Microsoft.ApplicationInsights.Extensibility;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
@@ -138,6 +139,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                     });
                 }
             });
+
+            serviceCollection.Configure<TelemetryConfiguration>(
+                (config) =>
+                {
+                    config.TelemetryChannel = s_aIChannel;
+                }
+            );
 
             if (configuration != null)
                 serviceCollection.Configure<FleetManagerB2BApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
