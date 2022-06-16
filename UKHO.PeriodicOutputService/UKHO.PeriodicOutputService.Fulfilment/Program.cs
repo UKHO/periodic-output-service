@@ -10,6 +10,11 @@ using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using Microsoft.ApplicationInsights.Channel;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Events;
+using UKHO.Logging.EventHubLogProvider;
+using System.Reflection;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
@@ -17,6 +22,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
     public static class Program
     {
         private static readonly InMemoryChannel s_aIChannel = new();
+        private static readonly string s_assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
 
         public static async Task Main()
         {
@@ -87,6 +93,52 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
         private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
         {
+            //Add logging
+            serviceCollection.AddLogging(loggingBuilder =>
+            {
+                loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
+
+                string instrumentationKey = configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
+                if (!string.IsNullOrEmpty(instrumentationKey))
+                {
+                    loggingBuilder.AddApplicationInsights(instrumentationKey);
+                }
+
+#if DEBUG
+                loggingBuilder.AddSerilog(new LoggerConfiguration()
+                                .WriteTo.File("Logs/UKHO.PeriodicOutputService.Fulfilment-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
+                                .MinimumLevel.Information()
+                                .MinimumLevel.Override("UKHO", LogEventLevel.Debug)
+                                .CreateLogger(), dispose: true);
+#endif
+
+                loggingBuilder.AddConsole();
+                loggingBuilder.AddDebug();
+
+                EventHubLoggingConfiguration eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+
+                if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
+                {
+                    loggingBuilder.AddEventHub(config =>
+                    {
+                        config.Environment = eventHubConfig.Environment;
+                        config.DefaultMinimumLogLevel =
+                            (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.MinimumLoggingLevel, true);
+                        config.MinimumLogLevels["UKHO"] =
+                            (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.UkhoMinimumLoggingLevel, true);
+                        config.EventHubConnectionString = eventHubConfig.ConnectionString;
+                        config.EventHubEntityPath = eventHubConfig.EntityPath;
+                        config.System = eventHubConfig.System;
+                        config.Service = eventHubConfig.Service;
+                        config.NodeName = eventHubConfig.NodeName;
+                        config.AdditionalValuesProvider = additionalValues =>
+                        {
+                            additionalValues["_AssemblyVersion"] = s_assemblyVersion;
+                        };
+                    });
+                }
+            });
+
             if (configuration != null)
                 serviceCollection.Configure<FleetManagerB2BApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
 
