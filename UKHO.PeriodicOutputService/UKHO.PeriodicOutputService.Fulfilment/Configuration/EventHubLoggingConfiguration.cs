@@ -5,13 +5,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Configuration
     [ExcludeFromCodeCoverage]
     public class EventHubLoggingConfiguration
     {
-        public string MinimumLoggingLevel { get; set; } = "Default Key";
-        public string UkhoMinimumLoggingLevel { get; set; } = "Default Key";
-        public string Environment { get; set; } = "Default Key";
-        public string EntityPath { get; set; } = "Default Key";
-        public string System { get; set; } = "Default Key";
-        public string Service { get; set; } = "Default Key";
-        public string NodeName { get; set; } = "Default Key";
-        public string ConnectionString { get; set; } = "Default Key";
+        public string MinimumLoggingLevel { get; set; } = string.Empty;
+        public string UkhoMinimumLoggingLevel { get; set; } = string.Empty;
+        public string Environment { get; set; } = string.Empty;
+        public string EntityPath { get; set; } = string.Empty;
+        public string System { get; set; } = string.Empty;
+        public string Service { get; set; } = string.Empty;
+        public string NodeName { get; set; } = string.Empty;
+        public string ConnectionString { get; set; } = string.Empty;
     }
 }
