@@ -191,6 +191,7 @@ stages:
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
     variables:
+      - group: "ESS-Dev-Variables"
       - group: "ESS-Deployment-Variables-DEV"
       - group: "POS-Dev-Variables"
     jobs:
