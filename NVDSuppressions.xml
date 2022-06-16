@@ -1,5 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
-  
+  <suppress>
+    <notes>
+      <![CDATA[
+        file name: System.Threading.Tasks.Extensions.dll
+        Suppressing this CVE Because it relates to a mobile "Tasks" application (Astrid Tasks) version before 9.7.3. ESS is not a mobile application.
+      ]]>
+    </notes>
+    <cve>CVE-2020-22475</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+        file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
+        See https://github.com/dotnet/announcements/issues/111 for MS details on this CVE.
+        Package name: System.Text.RegularExpressions.dll (included as part of the .Net Core runtime)
+        Vulnerable versions: 4.3.0 and below
+        Secure versions: 4.3.1+
+        This CVE applies to .Net Core versions below 2.2.107 (runtime 2.2.5). ESS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
+       ]]>
+    </notes>
+    <cve>CVE-2019-0820</cve>
+  </suppress>
 </suppressions>
