@@ -6,13 +6,6 @@ parameters:
     type: string
 
 steps:
-  - task: FileTransform@1
-    displayName: "File Transform: POS Config"
-    inputs:
-      folderPath: '$(Pipeline.Workspace)/terraformartifact/src'
-      fileType: 'json'
-      targetFiles: 'appsettings.json'
-
   - task: PowerShell@2
     displayName: "Terraform $(Environment)deploy"
     name: TerraformDeploy

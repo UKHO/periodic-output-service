@@ -121,7 +121,6 @@ stages:
               PathtoPublish: "$(Build.ArtifactStagingDirectory)/codecoveragereport"
               ArtifactName: codecoveragereport
 
-
       - job: BuildAndPublishWebJob
         workspace:
           clean: all
@@ -176,12 +175,24 @@ stages:
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService'
               ArtifactName: PeriodicOutputService
-        
+
+      - job: PublishTerraformArtifacts
+        workspace:
+          clean: all
+        displayName: "Publish Terraform Artifacts"
+        steps:
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish terraform Artifacts"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\Deployment'
+              ArtifactName: terraformartifact
+     
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
     variables:
       - group: "ESS-Deployment-Variables-DEV"
-      - group: "ESS-Dev-Variables"
+      - group: "POS-Dev-Variables"
     jobs:
       - deployment: DevDeployTerraform
         displayName: "Dev - Deploy Terraform and Dotnet App"
