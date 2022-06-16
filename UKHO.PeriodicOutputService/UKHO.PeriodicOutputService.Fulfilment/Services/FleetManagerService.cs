@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Xml;
+using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 
@@ -16,17 +17,34 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fleetManagerClient = fleetManagerClient;
         }
 
-        public async Task<string> GetCatalogue(string accessToken)
+        public async Task<List<string>> GetCatalogue(string accessToken)
         {
-            string responseContent = string.Empty;
+            List<string> productIdentifiers = new();
 
             HttpResponseMessage httpResponse = await _fleetManagerClient.GetCatalogue(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, accessToken, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                responseContent = await httpResponse.Content.ReadAsStringAsync();
+                using (Stream stream = httpResponse.Content.ReadAsStream())
+                {
+                    XmlReaderSettings settings = new();
+                    settings.Async = true;
+                    settings.IgnoreWhitespace = true;
+
+                    using (XmlReader reader = XmlReader.Create(stream, settings))
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            if (reader.Name == "ShortName")
+                            {
+                                reader.Read();
+                                if (reader.HasValue) productIdentifiers.Add(reader.Value);
+                            }
+                        }
+                    }
+                }
             }
-            return responseContent;
+            return productIdentifiers;
         }
 
         public async Task<string> GetJwtAuthJwtToken(string accessToken)

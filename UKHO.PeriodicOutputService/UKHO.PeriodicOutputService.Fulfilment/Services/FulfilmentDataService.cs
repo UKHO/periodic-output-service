@@ -11,8 +11,7 @@
 
         public async Task<string> CreatePosExchangeSet()
         {
-            string catalougeXml = string.Empty;
-
+            List<string> productIdentifiers = new();
             try
             {
                 string unpAccessToken = await _fleetManagerService.GetJwtAuthUnpToken();
@@ -22,17 +21,17 @@
                     string jwtAccessToken = await _fleetManagerService.GetJwtAuthJwtToken(unpAccessToken);
                     if (!string.IsNullOrEmpty(jwtAccessToken))
                     {
-                        catalougeXml = await _fleetManagerService.GetCatalogue(jwtAccessToken);
+                        productIdentifiers = await _fleetManagerService.GetCatalogue(jwtAccessToken);
+
+                        return "Fleet Manager full AVCS ProductIdentifiers received";
                     }
                 }
-
-                return catalougeXml;
+                return "Fleet Manager full AVCS ProductIdentifiers not received";
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.InnerException);
-
-                return catalougeXml;
+                return "Exception occured while getting full AVCS ProductIdentifiers from Fleet Manager";
             }
         }
     }

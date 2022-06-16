@@ -19,12 +19,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public async Task WhenPOSWebjobTrigger_ThenCallFleetManagerAndGetFullAVCSCatalogueXMLSuccessfully()
         {
+            List<string> productIdentifiers = new() { "Product1", "Product2" };
             A.CallTo(() => fakeFleetManagerService.GetJwtAuthUnpToken())
               .Returns("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123");
             A.CallTo(() => fakeFleetManagerService.GetJwtAuthJwtToken(A<string>.Ignored))
               .Returns("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ456");
             A.CallTo(() => fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
-              .Returns("TestCatalogueXML");
+              .Returns(productIdentifiers);
 
             string result = await fulfilmentDataService.CreatePosExchangeSet();
 

@@ -4,6 +4,6 @@
     {
         Task<string> GetJwtAuthUnpToken();
         Task<string> GetJwtAuthJwtToken(string accessToken);
-        Task<string> GetCatalogue(string accessToken);
+        Task<List<string>> GetCatalogue(string accessToken);
     }
 }
