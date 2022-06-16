@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.PeriodicOutputService.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0316516B-C6E9-47BF-9305-3E566EB1EC55}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.PeriodicOutputService.API.FunctionalTests", "UKHO.PeriodicOutputService.API.FunctionalTests\UKHO.PeriodicOutputService.API.FunctionalTests.csproj", "{894E9D4D-A6BB-4DD8-8378-4089C09D7AEA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.PeriodicOutputService.Fulfilment.FunctionalTests", "UKHO.PeriodicOutputService.Fulfilment.FunctionalTests\UKHO.PeriodicOutputService.Fulfilment.FunctionalTests.csproj", "{894E9D4D-A6BB-4DD8-8378-4089C09D7AEA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.PeriodicOutputService.Fulfilment.UnitTests", "UKHO.PeriodicOutputService.Fulfilment.UnitTests\UKHO.PeriodicOutputService.Fulfilment.UnitTests.csproj", "{9C526F75-05C6-4C17-871B-D8D95F19F633}"
 EndProject
