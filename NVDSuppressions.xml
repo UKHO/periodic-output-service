@@ -5,7 +5,7 @@
     <notes>
       <![CDATA[
    file name: System.Threading.Tasks.Extensions.dll
-   Suppressing this CVE Because it relates to a mobile "Tasks" application (Astrid Tasks) version before 9.7.3. ESS is not a mobile application.
+   Suppressing this CVE Because it relates to a mobile "Tasks" application (Astrid Tasks) version before 9.7.3. POS is not a mobile application.
    ]]>
     </notes>
     <cve>CVE-2020-22475</cve>
@@ -18,7 +18,7 @@
         Package name: System.Text.RegularExpressions.dll (included as part of the .Net Core runtime)
       	Vulnerable versions: 4.3.0 and below
         Secure versions: 4.3.1+
-    This CVE applies to .Net Core versions below 2.2.107 (runtime 2.2.5). ESS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
+    This CVE applies to .Net Core versions below 2.2.107 (runtime 2.2.5). POS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
     ]]>
     </notes>
     <cve>CVE-2019-0820</cve>

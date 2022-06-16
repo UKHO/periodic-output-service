@@ -1,7 +1,9 @@
-﻿using UKHO.PeriodicOutputService.Fulfilment.Services;
+﻿using System.Diagnostics.CodeAnalysis;
+using UKHO.PeriodicOutputService.Fulfilment.Services;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
+    [ExcludeFromCodeCoverage]
     public class PosFulfilmentJob
     {
         private readonly IFulfilmentDataService _fulfilmentDataService;
