@@ -7,13 +7,6 @@ parameters:
 
 steps:
 
-  - task: FileTransform@1
-    displayName: "File Transform: POS Config"
-    inputs:
-      folderPath: '$(Pipeline.Workspace)/PeriodicOutputFulfilmentService/*.zip'
-      fileType: 'json'
-      targetFiles: 'appsettings.json'
-
   - task: PowerShell@2
     displayName: "Terraform $(Environment)deploy"
     name: TerraformDeploy
@@ -30,6 +23,13 @@ steps:
       TF_VAR_agent_vnet_name: $(agentVnetName)
       TF_VAR_agent_subnet_name: $(agentSubnetName)
       TF_VAR_agent_subscription_id: $(agentSubscriptionId)
+
+  - task: FileTransform@1
+    displayName: "File Transform: POS Config"
+    inputs:
+      folderPath: '$(Pipeline.Workspace)/PeriodicOutputFulfilmentService/*.zip'
+      fileType: 'json'
+      targetFiles: 'appsettings.json'
 
   - task: AzureWebApp@1
     displayName: "Azure App Deploy: pos-$(Environment)-webapp"
