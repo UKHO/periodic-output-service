@@ -22,7 +22,7 @@ variables:
   - name: DeploymentPool
     value: "UKHO Ubuntu 1804"
   - name: Container
-    value: "ukhydrographicoffice/terraform-azure-powershell:1.2.2"
+    value: "ukhydrographicoffice/terraform-azure-powershell:1.1.9"
 
 
 stages:
