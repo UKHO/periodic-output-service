@@ -1,58 +1,56 @@
-﻿using System.Reflection;
-using Azure.Extensions.AspNetCore.Configuration.Secrets;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using UKHO.PeriodicOutputService.Fulfilment.Configuration;
+using UKHO.PeriodicOutputService.Fulfilment.Services;
+using UKHO.PeriodicOutputService.Common.Helpers;
 using Microsoft.ApplicationInsights.Channel;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
-using UKHO.PeriodicOutputService.Fulfilment.Models.Configuration;
+using System.Reflection;
+using Microsoft.ApplicationInsights.Extensibility;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
+    [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static IConfiguration? s_configurationBuilder;
+        private static readonly InMemoryChannel s_aIChannel = new();
         private static readonly string s_assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
-        static readonly InMemoryChannel s_aiChannel = new();
 
-        static async Task Main()
+        public static async Task Main()
         {
             try
             {
                 int delayTime = 5000;
 
-                HostBuilder builder = BuildHostConfiguration();
-                IHost host = builder.Build();
-                using (host)
+                //Build configuration
+                IConfigurationRoot? configuration = BuildConfiguration();
+
+                var serviceCollection = new ServiceCollection();
+
+                //Configure required services
+                ConfigureServices(serviceCollection, configuration);
+
+                //Create service provider. This will be used in logging.
+                ServiceProvider? serviceProvider = serviceCollection.BuildServiceProvider();
+
+                try
                 {
-                    if (host.Services.GetService(typeof(IJobHost)) is JobHost jobHost)
-                    {
-                        try
-                        {
-                            await host.StartAsync();
-                            await jobHost.CallAsync("ProcessWebJob");
-                            await host.StopAsync();
-                        }
-                        finally
-                        {
-                            //Ensure all buffered app insights logs are flushed into Azure
-                            s_aiChannel.Flush();
-                            await Task.Delay(delayTime);
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Exception: jobHost is null");
-                    }
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+                    await serviceProvider.GetService<PosFulfilmentJob>().ProcessFulfilmentJob();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+                }
+                finally
+                {
+                    //Ensure all buffered app insights logs are flushed into Azure
+                    s_aIChannel.Flush();
+                    await Task.Delay(delayTime);
                 }
             }
             catch (Exception ex)
@@ -62,105 +60,105 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             }
         }
 
-        private static HostBuilder BuildHostConfiguration()
+        private static IConfigurationRoot BuildConfiguration()
         {
-            HostBuilder hostBuilder = new HostBuilder();
-            hostBuilder.ConfigureAppConfiguration((hostContext, builder) =>
+            IConfigurationBuilder configBuilder = new ConfigurationBuilder().AddJsonFile("appsettings.json", true, true);
+
+            //Add environment specific configuration files.
+            string? environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+            if (!string.IsNullOrWhiteSpace(environmentName))
             {
-                builder.AddJsonFile("appsettings.json");
+                configBuilder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
+            }
 
-                //Add environment specific configuration files.
-                string? environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-                if (!string.IsNullOrWhiteSpace(environmentName))
-                {
-                    builder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
-                }
-
-                IConfigurationRoot tempConfig = builder.Build();
-                string kvServiceUri = tempConfig["KeyVaultSettings:ServiceUri"];
-                if (!string.IsNullOrWhiteSpace(kvServiceUri))
-                {
-                    var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
-                                                        new DefaultAzureCredentialOptions { ManagedIdentityClientId = tempConfig["POSManagedIdentity:ClientId"] }));
-                    builder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
-                }
-
+            IConfigurationRoot tempConfig = configBuilder.Build();
+            string kvServiceUri = tempConfig["KeyVaultSettings:ServiceUri"];
+            if (!string.IsNullOrWhiteSpace(kvServiceUri))
+            {
+                var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
+                                                        new DefaultAzureCredentialOptions()));
+                configBuilder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+            }
 #if DEBUG
-                //Add development overrides configuration
-                builder.AddJsonFile("appsettings.local.overrides.json", true, true);
+            //Add development overrides configuration
+            configBuilder.AddJsonFile("appsettings.local.overrides.json", true, true);
 #endif
 
-                //Add environment variables
-                builder.AddEnvironmentVariables();
+            //Add environment variables
+            configBuilder.AddEnvironmentVariables();
 
-                Program.s_configurationBuilder = builder.Build();
-            })
-            .ConfigureLogging((hostContext, builder) =>
+            return configBuilder.Build();
+        }
+
+        private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
+        {
+            //Add logging
+            serviceCollection.AddLogging(loggingBuilder =>
             {
-                builder.AddConfiguration(s_configurationBuilder?.GetSection("Logging"));
+                loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
+
+                string instrumentationKey = configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
+                if (!string.IsNullOrEmpty(instrumentationKey))
+                {
+                    loggingBuilder.AddApplicationInsights(instrumentationKey);
+                }
 
 #if DEBUG
-                builder.AddSerilog(new LoggerConfiguration()
-                                .WriteTo.File("Logs/UKHO.PeriodicOutputService.Fulfilment.Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
+                loggingBuilder.AddSerilog(new LoggerConfiguration()
+                                .WriteTo.File("Logs/UKHO.PeriodicOutputService.Fulfilment-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
                                 .MinimumLevel.Information()
-                                .MinimumLevel.Override("UKHO", LogEventLevel.Information)
+                                .MinimumLevel.Override("UKHO", LogEventLevel.Debug)
                                 .CreateLogger(), dispose: true);
 #endif
 
-                builder.AddConsole();
+                loggingBuilder.AddConsole();
+                loggingBuilder.AddDebug();
 
-                //Add Application Insights if needed(if key exists in settings)
-                string? instrumentationKey = s_configurationBuilder?["APPINSIGHTS_INSTRUMENTATIONKEY"];
-                if (!string.IsNullOrEmpty(instrumentationKey))
+                EventHubLoggingConfiguration eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+
+                if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
                 {
-                    builder.AddApplicationInsightsWebJobs(o => o.InstrumentationKey = instrumentationKey);
-                }
-
-                EventHubLoggingConfiguration? eventhubConfig = s_configurationBuilder?.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
-
-                if (!string.IsNullOrWhiteSpace(eventhubConfig?.ConnectionString))
-                {
-                    builder.AddEventHub(config =>
+                    loggingBuilder.AddEventHub(config =>
                     {
-                        config.Environment = eventhubConfig.Environment;
+                        config.Environment = eventHubConfig.Environment;
                         config.DefaultMinimumLogLevel =
-                            (LogLevel)Enum.Parse(typeof(LogLevel), eventhubConfig.MinimumLoggingLevel, true);
+                            (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.MinimumLoggingLevel, true);
                         config.MinimumLogLevels["UKHO"] =
-                            (LogLevel)Enum.Parse(typeof(LogLevel), eventhubConfig.UkhoMinimumLoggingLevel, true);
-                        config.EventHubConnectionString = eventhubConfig.ConnectionString;
-                        config.EventHubEntityPath = eventhubConfig.EntityPath;
-                        config.System = eventhubConfig.System;
-                        config.Service = eventhubConfig.Service;
-                        config.NodeName = eventhubConfig.NodeName;
+                            (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.UkhoMinimumLoggingLevel, true);
+                        config.EventHubConnectionString = eventHubConfig.ConnectionString;
+                        config.EventHubEntityPath = eventHubConfig.EntityPath;
+                        config.System = eventHubConfig.System;
+                        config.Service = eventHubConfig.Service;
+                        config.NodeName = eventHubConfig.NodeName;
                         config.AdditionalValuesProvider = additionalValues =>
                         {
                             additionalValues["_AssemblyVersion"] = s_assemblyVersion;
                         };
                     });
                 }
-            })
-            .ConfigureServices((hostContext, services) =>
-            {
-                //services.BuildServiceProvider();
+            });
 
-                services.Configure<TelemetryConfiguration>(
+            serviceCollection.Configure<TelemetryConfiguration>(
                 (config) =>
                 {
-                    config.TelemetryChannel = s_aiChannel;
+                    config.TelemetryChannel = s_aIChannel;
                 }
             );
 
-                services.Configure<QueuesOptions>(s_configurationBuilder?.GetSection("QueuesOptions"));
-                services.AddScoped<IAzureStorageConfiguration, AzureStorageConfiguration>();
-                services.Configure<AzureStorageConfiguration>(s_configurationBuilder?.GetSection("POSAzureStorageConfiguration"));
-            })
-            .ConfigureWebJobs(b =>
-            {
-                b.AddAzureStorageCoreServices();
-                b.AddAzureStorage();
-            });
+            if (configuration != null)
+                serviceCollection.Configure<FleetManagerB2BApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
 
-            return hostBuilder;
+            serviceCollection.AddTransient<PosFulfilmentJob>();
+
+            serviceCollection.AddScoped<IFleetManagerB2BApiConfiguration, FleetManagerB2BApiConfiguration>();
+            serviceCollection.AddScoped<IFleetManagerService, FleetManagerService>();
+            serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
+
+            serviceCollection.AddHttpClient<IFleetManagerClient, FleetManagerClient>(client =>
+            {
+                client.MaxResponseContentBufferSize = 2147483647;
+                client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
+            });
         }
     }
 }
