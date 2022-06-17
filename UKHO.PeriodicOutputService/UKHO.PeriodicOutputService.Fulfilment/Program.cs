@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-#pragma warning disable S1128 // Unused "using" should be removed
-#pragma warning disable S1128 // Unused "using" should be removed
 using System.Diagnostics.CodeAnalysis;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;

@@ -55,8 +55,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                responseContent = await httpResponse.Content.ReadAsStringAsync();
-                responseContent = CommonHelper.ExtractAccessToken(responseContent);
+                responseContent = CommonHelper.ExtractAccessToken(await httpResponse.Content.ReadAsStringAsync());
             }
             return responseContent;
         }
@@ -71,8 +70,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                responseContent = await httpResponse.Content.ReadAsStringAsync();
-                responseContent = CommonHelper.ExtractAccessToken(responseContent);
+                responseContent = CommonHelper.ExtractAccessToken(await httpResponse.Content.ReadAsStringAsync());
             }
             return responseContent;
         }
