@@ -29,7 +29,7 @@ steps:
     inputs:
       folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
       fileType: 'json'
-      targetFiles: 'appsettings.json'
+      targetFiles: '**/appsettings.json'
 
   - task: AzureWebApp@1
     displayName: "Azure App Deploy: pos-$(Environment)-webapp"
