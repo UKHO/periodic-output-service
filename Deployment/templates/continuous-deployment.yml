@@ -27,7 +27,7 @@ steps:
   - task: FileTransform@1
     displayName: "File Transform: POS Config"
     inputs:
-      folderPath: '$(Pipeline.Workspace)/PeriodicOutputFulfilmentService/*.zip'
+      folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
       fileType: 'json'
       targetFiles: 'appsettings.json'
 
@@ -37,4 +37,4 @@ steps:
       azureSubscription: "${{ parameters.AzureSubscription }}"
       appType: webApp
       appName: "$(WEB_APP_NAME)"
-      package: "$(Pipeline.Workspace)/PeriodicOutputFulfilmentService/PeriodicOutputFulfilmentService.zip"
+      package: "$(Pipeline.Workspace)/PeriodicOutputService/PeriodicOutputFulfilmentService.zip"
