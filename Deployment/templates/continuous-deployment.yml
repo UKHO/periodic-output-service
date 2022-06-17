@@ -10,7 +10,7 @@ steps:
   - task: FileTransform@1
     displayName: "File Transform: POS Config"
     inputs:
-      folderPath: '$(Pipeline.Workspace)/terraformartifact/src'
+      folderPath: '$(Pipeline.Workspace)/PeriodicOutputFulfilmentService/*.zip'
       fileType: 'json'
       targetFiles: 'appsettings.json'
 
