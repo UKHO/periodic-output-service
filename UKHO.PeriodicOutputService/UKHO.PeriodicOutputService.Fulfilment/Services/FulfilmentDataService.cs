@@ -11,14 +11,15 @@
 
         public async Task<string> CreatePosExchangeSet()
         {
-            string unpAccessToken = await _fleetManagerService.GetJwtAuthUnpToken();
-
+            string? unpAccessToken = _fleetManagerService.GetJwtAuthUnpToken().Result.AuthToken;
+            
             if (!string.IsNullOrEmpty(unpAccessToken))
             {
-                string jwtAccessToken = await _fleetManagerService.GetJwtAuthJwtToken(unpAccessToken);
+                string? jwtAccessToken = _fleetManagerService.GetJwtAuthJwtToken(unpAccessToken).Result.AuthToken;
                 if (!string.IsNullOrEmpty(jwtAccessToken))
                 {
-                    List<string> productIdentifiers = await _fleetManagerService.GetCatalogue(jwtAccessToken);
+                    await Task.Delay(2000);
+                    List<string>? productIdentifiers = _fleetManagerService.GetCatalogue(jwtAccessToken).Result.ProductIdentifiers;
 
                     return "Fleet Manager full AVCS ProductIdentifiers received";
                 }
