@@ -61,7 +61,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
                 requestHeaders.Add(header.Key, header.Value);
             }
             string path = this.configuration.GetSection("FileDirectoryPath")["response"];
-            if (token == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9}")
+            if (token == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
             {
                 XDocument doc = XDocument.Load(path);
                 HttpResponseMessage httpResponse = new();
