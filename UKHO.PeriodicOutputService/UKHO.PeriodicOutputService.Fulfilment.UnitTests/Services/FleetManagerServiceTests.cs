@@ -41,6 +41,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 });
 
             FleetMangerGetAuthTokenResponse result = await _fakeFleetManagerService.GetJwtAuthUnpToken();
+
             Assert.Multiple(() =>
             {
                 Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
@@ -67,52 +68,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.Multiple(() =>
             {
                 Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
-                Assert.That(result.AuthToken, Is.Null);
-            });
-        }
-
-        [Test]
-        public async Task DoesGetJwtAuthJwtToken_Returns_Token_WhenValidAccessTokenPassed()
-        {
-            A.CallTo(() => _fakeFleetManagerClient.GetJwtAuthJwtToken(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
-                .Returns(new HttpResponseMessage()
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    RequestMessage = new HttpRequestMessage()
-                    {
-                        RequestUri = new Uri("http://test.com")
-                    },
-                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6I1234212CJ9.VLSE9fRk0ifQ.fd73LguLf_6VBefVQqu0nj8j3dovfUNVeqZDYGZ4567\",\"expiration\":\"2022-06-15T16:02:52Z\"}")))
-                });
-
-            FleetMangerGetAuthTokenResponse result = await _fakeFleetManagerService.GetJwtAuthJwtToken("JwtAuthUnpAccessToken");
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(result.AuthToken, Is.Not.Null);
-            });
-            Assert.That(result.AuthToken, Is.EqualTo("eyJhbGciOiJIUzI1NiIsInR5cCI6I1234212CJ9.VLSE9fRk0ifQ.fd73LguLf_6VBefVQqu0nj8j3dovfUNVeqZDYGZ4567"));
-        }
-
-        [Test]
-        public async Task DoesGetJwtAuthJwtToken_Returns_403_WhenInvalidAccessTokenPassed()
-        {
-            A.CallTo(() => _fakeFleetManagerClient.GetJwtAuthJwtToken(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
-                .Returns(new HttpResponseMessage()
-                {
-                    StatusCode = HttpStatusCode.Forbidden,
-                    RequestMessage = new HttpRequestMessage()
-                    {
-                        RequestUri = new Uri("http://test.com")
-                    },
-                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("Forbidden")))
-                });
-
-            FleetMangerGetAuthTokenResponse result = await _fakeFleetManagerService.GetJwtAuthJwtToken("InvalidJwtAuthUnpAccessToken");
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
-                Assert.That(result.AuthToken, Is.Null);
+                Assert.That(result.AuthToken, Is.Empty);
             });
         }
 
