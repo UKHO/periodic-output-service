@@ -1,19 +1,21 @@
 using System.Text;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.Extensions.Options;
+using UKHO.FleetManagerMock.API.Common;
 
 namespace UKHO.FleetManagerMock.API.Controllers
 {
     [ApiController]
     public class FleetManagerController : ControllerBase
     {
-        protected IConfiguration configuration;
-        
-        public FleetManagerController(IConfiguration configuration)
+        private readonly IOptions<FleetManagerApiConfiguration> _fleetManagerApiConfiguration;
+        private readonly IOptions<FileDirectoryPathConfiguration> _fileDirectoryPathConfiguration;
+
+        public FleetManagerController(IOptions<FleetManagerApiConfiguration> fleetManagerApiConfiguration, IOptions<FileDirectoryPathConfiguration> fileDirectoryPathConfiguration)
         {
-            this.configuration = configuration;
-            
+            _fleetManagerApiConfiguration = fleetManagerApiConfiguration;
+            _fileDirectoryPathConfiguration = fileDirectoryPathConfiguration;
         }
 
         [HttpGet]
@@ -26,23 +28,21 @@ namespace UKHO.FleetManagerMock.API.Controllers
                 requestHeaders.Add(header.Key, header.Value);
             }
 
-            string userName = configuration.GetSection("FleetManagerB2BApiConfiguration")["userName"];
-            string password = configuration.GetSection("FleetManagerB2BApiConfiguration")["password"];
-           
+            string userName = _fleetManagerApiConfiguration.Value.UserName;
+            string password = _fleetManagerApiConfiguration.Value.Password;
+
             string base64Credentials = GetBase64EncodedCredentials(userName, password);
             HttpResponseMessage httpResponse = new();
             string AuthToken = string.Empty;
             if (userPass == base64Credentials)
             {
-
-               string? token = "token':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+               string? token = "token':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'";
                httpResponse.StatusCode = System.Net.HttpStatusCode.OK;
 
                if (httpResponse.IsSuccessStatusCode)
                 {
                    AuthToken = token;
                 }
-                
             }
             else
             {
@@ -60,7 +60,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
             {
                 requestHeaders.Add(header.Key, header.Value);
             }
-            string path = this.configuration.GetSection("FileDirectoryPath")["response"];
+            string path = _fileDirectoryPathConfiguration.Value.AVCSCatalogDataFilePath;
             if (token == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
             {
                 XDocument doc = XDocument.Load(path);
@@ -84,6 +84,5 @@ namespace UKHO.FleetManagerMock.API.Controllers
             byte[]? userCredentialsBytes = System.Text.Encoding.UTF8.GetBytes(userName + ":" + password);
             return Convert.ToBase64String(userCredentialsBytes);
         }
-
     }
 }
