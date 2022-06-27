@@ -1,13 +1,8 @@
-using System.Globalization;
 using System.Text;
-using System.Net.Http.Json;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using UKHO.FleetManagerMock.API.Common;
-using System.Text.RegularExpressions;
-using System.Web.Helpers;
 
 namespace UKHO.FleetManagerMock.API.Controllers
 {
@@ -24,34 +19,36 @@ namespace UKHO.FleetManagerMock.API.Controllers
         }
 
         [HttpGet]
-        [Produces("application/json")]
         [Route("/auth/unp")]
-        public IActionResult GetJwtAuthUnpToken([FromHeader(Name = "userPass")] string userPass, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string subscriptionkey)
+        public IActionResult GetJwtAuthUnpToken([FromHeader(Name = "userPass")] string userPass, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string subscriptionKey)
         {
             Dictionary<string, string> requestHeaders = new();
             foreach (KeyValuePair<string, Microsoft.Extensions.Primitives.StringValues> header in Request.Headers)
             {
                 requestHeaders.Add(header.Key, header.Value);
             }
+
             string userName = _fleetManagerApiConfiguration.Value.UserName;
             string password = _fleetManagerApiConfiguration.Value.Password;
+
             string base64Credentials = GetBase64EncodedCredentials(userName, password);
             HttpResponseMessage httpResponse = new();
             string AuthToken = string.Empty;
-            if (userPass == base64Credentials && subscriptionkey == "jsdkjsaldka")
+            if (userPass == base64Credentials)
             {
-                string? token = "{\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\", \"expiration\":\"" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture) + "\"}";
-                httpResponse.StatusCode = System.Net.HttpStatusCode.OK;
-                if (httpResponse.IsSuccessStatusCode)
+               string? token = "token':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'";
+               httpResponse.StatusCode = System.Net.HttpStatusCode.OK;
+
+               if (httpResponse.IsSuccessStatusCode)
                 {
-                    AuthToken = token;
+                   AuthToken = token;
                 }
             }
             else
             {
                 return BadRequest(httpResponse.StatusCode);
             }
-            return Ok(JsonConvert.DeserializeObject<JwtAuthUnpToken>(AuthToken));
+            return Ok(AuthToken);
         }
 
         [HttpGet]
@@ -64,8 +61,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
                 requestHeaders.Add(header.Key, header.Value);
             }
             string path = _fileDirectoryPathConfiguration.Value.AVCSCatalogDataFilePath;
-           
-            if (token == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" && subscriptionkey== "jsdkjsaldka")
+            if (token == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9")
             {
                 XDocument doc = XDocument.Load(path);
                 HttpResponseMessage httpResponse = new();
@@ -76,6 +72,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
                 {
                     httpResponse.StatusCode = System.Net.HttpStatusCode.OK;
                     return File(docAsBytes, "application/xml", path);
+                    
                 }
             }
             return Unauthorized();
