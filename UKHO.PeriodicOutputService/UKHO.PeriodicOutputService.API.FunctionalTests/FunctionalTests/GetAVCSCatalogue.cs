@@ -70,7 +70,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        public async Task WhenICallTheApiWithValidDetails_ThenASuccessResponseIsReturned()
+        public async Task WhenICallTheCatalogueApiWithValidDetails_ThenASuccessResponseIsReturned()
         {
             var unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
 
