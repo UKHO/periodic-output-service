@@ -18,11 +18,26 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fleetManagerClient = fleetManagerClient;
         }
 
+        public async Task<FleetMangerGetAuthTokenResponse> GetJwtAuthUnpToken()
+        {
+            string jwtAuthUnpToken = string.Empty;
+
+            string base64Credentials = CommonHelper.GetBase64EncodedCredentials(_fleetManagerB2BApiConfig.Value.UserName, _fleetManagerB2BApiConfig.Value.Password);
+
+            HttpResponseMessage httpResponse = await _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, base64Credentials, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                jwtAuthUnpToken = CommonHelper.ExtractAccessToken(await httpResponse.Content.ReadAsStringAsync());
+            }
+
+            return new FleetMangerGetAuthTokenResponse() { StatusCode = httpResponse.StatusCode, AuthToken = jwtAuthUnpToken };
+        }
+
         public async Task<FleetManagerGetCatalogueResponse> GetCatalogue(string accessToken)
         {
             List<string> productIdentifiers = new();
-            FleetManagerGetCatalogueResponse fleetManagerGetCatalogueResponse = new();
-            
+
             HttpResponseMessage httpResponse = await _fleetManagerClient.GetCatalogue(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, accessToken, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
 
             if (httpResponse.IsSuccessStatusCode)
@@ -46,44 +61,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     }
                 }
             }
-            fleetManagerGetCatalogueResponse.StatusCode = httpResponse.StatusCode;
-            fleetManagerGetCatalogueResponse.ProductIdentifiers = productIdentifiers;
-            return fleetManagerGetCatalogueResponse;
-        }
-
-        public async Task<FleetMangerGetAuthTokenResponse> GetJwtAuthJwtToken(string accessToken)
-        {
-            string responseContent = string.Empty;
-            FleetMangerGetAuthTokenResponse fleetMangerGetAuthTokenResponse = new FleetMangerGetAuthTokenResponse();
-
-            HttpResponseMessage httpResponse = await _fleetManagerClient.GetJwtAuthJwtToken(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, accessToken, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
-            fleetMangerGetAuthTokenResponse.StatusCode = httpResponse.StatusCode;
-
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                responseContent = CommonHelper.ExtractAccessToken(await httpResponse.Content.ReadAsStringAsync());
-                fleetMangerGetAuthTokenResponse.AuthToken = responseContent;
-            }
-
-            return fleetMangerGetAuthTokenResponse;
-        }
-
-        public async Task<FleetMangerGetAuthTokenResponse> GetJwtAuthUnpToken()
-        {
-            string responseContent = string.Empty;
-            FleetMangerGetAuthTokenResponse fleetMangerGetAuthTokenResponse = new FleetMangerGetAuthTokenResponse();
-
-            string base64Credentials = CommonHelper.GetBase64EncodedCredentials(_fleetManagerB2BApiConfig.Value.UserName, _fleetManagerB2BApiConfig.Value.Password);
-
-            HttpResponseMessage httpResponse = await _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, base64Credentials, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
-            fleetMangerGetAuthTokenResponse.StatusCode = httpResponse.StatusCode;
-            if (httpResponse.IsSuccessStatusCode)
-            {
-                responseContent = CommonHelper.ExtractAccessToken(await httpResponse.Content.ReadAsStringAsync());
-                fleetMangerGetAuthTokenResponse.AuthToken = responseContent;
-            }
-
-            return fleetMangerGetAuthTokenResponse;
+            return new FleetManagerGetCatalogueResponse() { StatusCode = httpResponse.StatusCode, ProductIdentifiers = productIdentifiers };
         }
     }
 }
