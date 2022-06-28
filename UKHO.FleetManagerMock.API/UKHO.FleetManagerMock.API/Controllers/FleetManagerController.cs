@@ -1,12 +1,10 @@
 using System.Globalization;
 using System.Text;
-using System.Net.Http.Json;
 using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.FleetManagerMock.API.Common;
-using System.Text.RegularExpressions;
 using System.Net;
 using Microsoft.Extensions.Primitives;
 
@@ -41,9 +39,18 @@ namespace UKHO.FleetManagerMock.API.Controllers
             string base64Credentials = GetBase64EncodedCredentials(userName, password);
             HttpResponseMessage httpResponse = new();
             string AuthToken = string.Empty;
-            if (subscriptionKey == _subscriptionKey)
+            if(string.IsNullOrEmpty(subscriptionKey))
             {
-                if (userPass == base64Credentials)
+                string? invalidSubscriptionKeyResponse = "{\"statusCode\": 401, \"message\":\"Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API.\"}";
+                httpResponse.StatusCode = HttpStatusCode.Unauthorized;
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    return Unauthorized(JsonConvert.DeserializeObject<InvalidSubscriptionKeyResponse>(invalidSubscriptionKeyResponse));
+                }
+            }
+            if(subscriptionKey == _subscriptionKey)
+            {
+                if(userPass == base64Credentials)
                 {
                     string? authTokenResponse = "{\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\", \"expiration\":\"" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture) + "\"}";
                     httpResponse.StatusCode = HttpStatusCode.OK;
@@ -79,22 +86,31 @@ namespace UKHO.FleetManagerMock.API.Controllers
         public IActionResult GetCatalogue([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionkey)
         {
             Dictionary<string, string> requestHeaders = new();
-            foreach (KeyValuePair<string, StringValues> header in Request.Headers)
+            foreach(KeyValuePair<string, StringValues> header in Request.Headers)
             {
                 requestHeaders.Add(header.Key, header.Value);
             }
             string path = _fileDirectoryPathConfiguration.Value.AVCSCatalogDataFilePath;
             HttpResponseMessage httpResponse = new();
 
-            if (subscriptionkey == _subscriptionKey)
+            if(string.IsNullOrEmpty(subscriptionkey))
             {
-                if (token == _jwtUnpAuthToken)
+                string? invalidSubscriptionKeyResponse = "{\"statusCode\": 401, \"message\":\"Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API.\"}";
+                httpResponse.StatusCode = HttpStatusCode.Unauthorized;
+                if (!httpResponse.IsSuccessStatusCode)
+                {
+                    return Unauthorized(JsonConvert.DeserializeObject<InvalidSubscriptionKeyResponse>(invalidSubscriptionKeyResponse));
+                }
+            }
+            if(subscriptionkey == _subscriptionKey)
+            {
+                if(token == _jwtUnpAuthToken)
                 {
                     XDocument doc = XDocument.Load(path);
                     Encoding encoding = Encoding.UTF8;
                     byte[] docAsBytes = encoding.GetBytes(doc.ToString());
 
-                    if (docAsBytes != null)
+                    if(docAsBytes != null)
                     {
                         httpResponse.StatusCode = HttpStatusCode.OK;
                         return File(docAsBytes, "application/xml", path);
