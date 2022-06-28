@@ -30,7 +30,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service web job set at {DateTime} | Exception:{Message} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, tempCorrelationId);
+                Console.WriteLine(ex.Message, ex.StackTrace);
+                _logger.LogError(EventIds.UnhandledException.ToEventId(), ex.Message, ex.StackTrace);
+                //_logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service web job set at {DateTime} | Exception:{Message} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, tempCorrelationId);
             }
         }
     }

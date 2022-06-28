@@ -10,6 +10,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     {
         public IFulfilmentDataService fulfilmentDataService;
         public IFleetManagerService fakeFleetManagerService;
+        public IExchangeSetApiService fakeExchangeSetApiService;
+
         public FleetMangerGetAuthTokenResponse jwtauthUnpToken = new();
         public FleetMangerGetAuthTokenResponse jwtAuthJwtToken = new();
 
@@ -17,7 +19,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         public void Setup()
         {
             fakeFleetManagerService = A.Fake<IFleetManagerService>();
-            fulfilmentDataService = new FulfilmentDataService(fakeFleetManagerService);
+            fakeExchangeSetApiService = A.Fake<IExchangeSetApiService>();
+            fulfilmentDataService = new FulfilmentDataService(fakeFleetManagerService, fakeExchangeSetApiService);
         }
 
         [Test]
@@ -69,12 +72,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         public async Task Does_CreatePosExchangeSet_Check_If_GetJwtAuthJwtToken_IsNull()
         {
             jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
-            jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
+            jwtauthUnpToken.AuthToken = "";
 
-            jwtAuthJwtToken.StatusCode = HttpStatusCode.OK;
-            jwtAuthJwtToken.AuthToken = "";
-
-            A.CallTo(() => fakeFleetManagerService.GetJwtAuthUnpToken()).Returns(jwtauthUnpToken);
             A.CallTo(() => fakeFleetManagerService.GetJwtAuthJwtToken(A<string>.Ignored)).Returns(jwtAuthJwtToken);
 
             string result = await fulfilmentDataService.CreatePosExchangeSet();
