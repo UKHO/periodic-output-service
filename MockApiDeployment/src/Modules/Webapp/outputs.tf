@@ -7,7 +7,7 @@ output "web_app_object_id_fm_mock" {
 }
 
 output "default_site_hostname_fm_mock" {
-  value = azurerm_windows_web_app.fm_mock_webapp.default_site_hostname
+  value = azurerm_windows_web_app.fm_mock_webapp.default_hostname
 }
 
 
