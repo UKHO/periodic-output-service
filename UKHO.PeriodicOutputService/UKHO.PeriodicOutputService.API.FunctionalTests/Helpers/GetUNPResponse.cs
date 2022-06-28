@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
-    public class GetJwtAuthUnp { 
+    public class GetUNPResponse { 
         static HttpClient httpClient = new HttpClient();
 
         public async Task<HttpResponseMessage> GetJwtAuthUnpToken(string baseUrl, string base64Credentials, string subscriptionKey)

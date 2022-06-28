@@ -8,7 +8,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
     {
         public string userCredentialsBytes;
 
-        private GetJwtAuthUnp getunp { get; set; }
+        private GetUNPResponse getunp { get; set; }
         private TestConfiguration config { get; set; }
         private GetCatalogue getcat { get; set; }
 
@@ -18,10 +18,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task Setup()
         {
             config = new TestConfiguration();
-            getunp = new GetJwtAuthUnp();
+            getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
 
-            userCredentialsBytes = CommonHelper.getbase64encodedcredentials(fleet.userName , fleet.password);
+            userCredentialsBytes = CommonHelper.getbase64encodedcredentials(fleet.userName, fleet.password);
         }
 
         [Test]
@@ -32,8 +32,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        [TestCase("ABCD", "Access denied due to invalid subscription key. Make sure to provide a valid key for an active subscription.", TestName = "Invalid SubscriptionKey for UNP")]
-        [TestCase(null, "Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API.", TestName = "Null SubscriptionKey for UNP")]
+        [TestCase("ABCD", "Access denied due to invalid subscription key. Make sure to provide a valid key for an active subscription.", TestName = "WhenICallTheUNPApiWithInvalidSubscription_ThenAnUnauthorizedRequestStatusIsReturned")]
+        [TestCase(null, "Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API.", TestName = "WhenICallTheUNPApiWithNullSubscription_ThenAnUnauthorizedRequestStatusIsReturned")]
         public async Task WhenICallTheUNPApiWithInValidSubscriptionKey_ThenUnauthorizedStatusIsReturned(string subkey,string message)
         {
             var unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, subkey);
@@ -44,8 +44,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        [TestCase("ER@#$", TestName = "Invalid Unp token for Catalogue")]
-        [TestCase(null, TestName = "Null Unp token for Catalogue")]
+        [TestCase("ER@#$", TestName = "WhenICallTheCatalogueApiWithInValidUnpToken_ThenForbiddentatusIsReturned")]
+        [TestCase(null, TestName = "WhenICallTheCatalogueApiWithNullUnpToken_ThenForbiddentatusIsReturned")]
         public async Task WhenICallTheCatalogueApiWithInValidUnpToken_ThenForbiddentatusIsReturned(string unpToken)
         {
             var Catalogue_Response = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
@@ -53,8 +53,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        [TestCase("ER@#$", "Access denied due to invalid subscription key. Make sure to provide a valid key for an active subscription.", TestName = "Invalid Subscription Key for catalogue")]
-        [TestCase(null, "Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API.", TestName = "Null Subscription Key for catalogue")]
+        [TestCase("ER@#$", "Access denied due to invalid subscription key. Make sure to provide a valid key for an active subscription.", TestName = "WhenICallTheCatalogueApiWithInvalidSubscription_ThenAnUnauthorizedRequestStatusIsReturned")]
+        [TestCase(null, "Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API.", TestName = "WhenICallTheCatalogueApiWithNullSubscription_ThenAnUnauthorizedRequestStatusIsReturned")]
         public async Task WhenICallTheCatalogueApiWithInValidSubscriptionKey_ThenUnauthorizedStatusIsReturned(string subsKey, string message)
         {
             var unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
@@ -73,9 +73,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheCatalogueApiWithValidDetails_ThenASuccessResponseIsReturned()
         {
             var unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
-
             string unp_token = await CommonHelper.DeserializeAsyncToken(unpResponse);
-            Thread.Sleep(2000);
 
             var Catalogue_Response = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unp_token, fleet.subscriptionKey);
             Assert.AreEqual(200, (int)Catalogue_Response.StatusCode, $"Incorrect status code is returned {Catalogue_Response.StatusCode}, instead of the expected status 200.");
@@ -83,10 +81,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             var apiResponseDetails_catalogue = await Catalogue_Response.ReadAsStringAsync();
             dynamic apiReadXml = await CommonHelper.XmlReadAsynch(apiResponseDetails_catalogue);
 
-            string ordName = apiReadXml.UKHOCatalogueFile.BaseFileMetadata.MD_PointOfContact.ResponsibleParty.organisationName;
-            Assert.AreEqual("The United Kingdom Hydrographic Office", ordName, $"Value is not matching, Actual value is : {ordName}");
+            string orgName = apiReadXml.UKHOCatalogueFile.BaseFileMetadata.MD_PointOfContact.ResponsibleParty.organisationName;
+            Assert.AreEqual("The United Kingdom Hydrographic Office", orgName, $"Value is not matching, Actual value is : {orgName}");
             string product = apiReadXml.UKHOCatalogueFile.Products.Digital.ENC[0].ShortName;
-            Assert.AreEqual("AR201010", product, $"Value is not matching, Actual value is : {product}");
+            Assert.AreEqual("C1615454", product, $"Value is not matching, Actual value is : {product}");
         }
     }
 }

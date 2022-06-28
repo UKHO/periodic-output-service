@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
@@ -19,20 +14,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string baseUrl { get; set; }
 
             public string subscriptionKey { get; set; }
-
-            public string jwtAuthUnpEndpoint { get; set; }
-
-            public string jwtAuthJwtEndpoint { get; set; }
-
-            public string catalogueEndpoint { get; set; }
-
-            public string invalidjwttoken { get; set; }
-
-            public string nulljwttoken { get; set; }
-
-            public string invalidsubscriptionkey { get; set; }
-
-            public string nullsubscriptionkey { get; set; }
 
         }
 
