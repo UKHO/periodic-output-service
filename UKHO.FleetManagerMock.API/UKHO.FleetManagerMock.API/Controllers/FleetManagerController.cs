@@ -29,7 +29,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
         [HttpGet]
         [Produces("application/json")]
         [Route("/auth/unp")]
-        public IActionResult GetJwtAuthUnpToken([FromHeader(Name = "userPass")] string userPass, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string subscriptionKey)
+        public IActionResult GetJwtAuthUnpToken([FromHeader(Name = "userPass")] string userPass, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             Dictionary<string, string> requestHeaders = new();
             foreach (KeyValuePair<string, StringValues> header in Request.Headers)
@@ -76,7 +76,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
 
         [HttpGet]
         [Route("/catalogues/{catalogueId}")]
-        public IActionResult GetCatalogue([FromHeader(Name = "token")] string token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string subscriptionkey)
+        public IActionResult GetCatalogue([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionkey)
         {
             Dictionary<string, string> requestHeaders = new();
             foreach (KeyValuePair<string, StringValues> header in Request.Headers)
