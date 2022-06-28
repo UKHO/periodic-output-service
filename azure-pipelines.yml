@@ -279,7 +279,7 @@ stages:
         variables:
           - group: "ESS-Deployment-Variables-DEV"
           - group: "ESS-Dev-Variables"
-          - group: "POS-Dev-Variables"
+          - group: "POS-QC-Variables"
           - name: "Environment"
             value: "qc"
 

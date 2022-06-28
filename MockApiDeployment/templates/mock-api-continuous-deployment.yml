@@ -16,9 +16,9 @@ steps:
       ARM_SUBSCRIPTION_ID: $(TERRAFORM-SUBSCRIPTION-ID)
 
   - task: FileTransform@1
-    displayName: "File Transform: WebJob"
+    displayName: "File Transform: WebApp"
     inputs:
-      folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
+      folderPath: '$(Pipeline.Workspace)/MockWebAPI/*.zip'
       fileType: 'json'
       targetFiles: '**/appsettings.json'
 
