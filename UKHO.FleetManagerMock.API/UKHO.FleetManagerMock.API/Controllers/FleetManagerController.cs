@@ -15,7 +15,6 @@ namespace UKHO.FleetManagerMock.API.Controllers
     {
         private readonly IOptions<FleetManagerApiConfiguration> _fleetManagerApiConfiguration;
         private readonly IOptions<FileDirectoryPathConfiguration> _fileDirectoryPathConfiguration;
-        private const string _subscriptionKey = "jsdkjsaldka";
         private const string _jwtUnpAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
 
         public FleetManagerController(IOptions<FleetManagerApiConfiguration> fleetManagerApiConfiguration, IOptions<FileDirectoryPathConfiguration> fileDirectoryPathConfiguration)
@@ -34,12 +33,13 @@ namespace UKHO.FleetManagerMock.API.Controllers
             {
                 requestHeaders.Add(header.Key, header.Value);
             }
-            string userName = _fleetManagerApiConfiguration.Value.UserName;
-            string password = _fleetManagerApiConfiguration.Value.Password;
+            string? userName = _fleetManagerApiConfiguration.Value.UserName;
+            string? password = _fleetManagerApiConfiguration.Value.Password;
+            string? subscriptionkey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
             string base64Credentials = GetBase64EncodedCredentials(userName, password);
             HttpResponseMessage httpResponse = new();
             string AuthToken = string.Empty;
-            if(string.IsNullOrEmpty(subscriptionKey))
+            if (string.IsNullOrEmpty(subscriptionKey))
             {
                 string? invalidSubscriptionKeyResponse = "{\"statusCode\": 401, \"message\":\"Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API.\"}";
                 httpResponse.StatusCode = HttpStatusCode.Unauthorized;
@@ -48,9 +48,9 @@ namespace UKHO.FleetManagerMock.API.Controllers
                     return Unauthorized(JsonConvert.DeserializeObject<InvalidSubscriptionKeyResponse>(invalidSubscriptionKeyResponse));
                 }
             }
-            if(subscriptionKey == _subscriptionKey)
+            if (subscriptionKey == subscriptionkey)
             {
-                if(userPass == base64Credentials)
+                if (userPass == base64Credentials)
                 {
                     string? authTokenResponse = "{\"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\", \"expiration\":\"" + DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture) + "\"}";
                     httpResponse.StatusCode = HttpStatusCode.OK;
@@ -83,17 +83,18 @@ namespace UKHO.FleetManagerMock.API.Controllers
 
         [HttpGet]
         [Route("/catalogues/{catalogueId}")]
-        public IActionResult GetCatalogue([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionkey)
+        public IActionResult GetCatalogue([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             Dictionary<string, string> requestHeaders = new();
-            foreach(KeyValuePair<string, StringValues> header in Request.Headers)
+            foreach (KeyValuePair<string, StringValues> header in Request.Headers)
             {
                 requestHeaders.Add(header.Key, header.Value);
             }
-            string path = _fileDirectoryPathConfiguration.Value.AVCSCatalogDataFilePath;
+            string? subscriptionkey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
+            string? path = _fileDirectoryPathConfiguration.Value.AVCSCatalogDataFilePath;
             HttpResponseMessage httpResponse = new();
 
-            if(string.IsNullOrEmpty(subscriptionkey))
+            if (string.IsNullOrEmpty(subscriptionKey))
             {
                 string? invalidSubscriptionKeyResponse = "{\"statusCode\": 401, \"message\":\"Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API.\"}";
                 httpResponse.StatusCode = HttpStatusCode.Unauthorized;
@@ -102,15 +103,15 @@ namespace UKHO.FleetManagerMock.API.Controllers
                     return Unauthorized(JsonConvert.DeserializeObject<InvalidSubscriptionKeyResponse>(invalidSubscriptionKeyResponse));
                 }
             }
-            if(subscriptionkey == _subscriptionKey)
+            if (subscriptionKey == subscriptionkey)
             {
-                if(token == _jwtUnpAuthToken)
+                if (token == _jwtUnpAuthToken && !string.IsNullOrEmpty(path))
                 {
                     XDocument doc = XDocument.Load(path);
                     Encoding encoding = Encoding.UTF8;
                     byte[] docAsBytes = encoding.GetBytes(doc.ToString());
 
-                    if(docAsBytes != null)
+                    if (docAsBytes != null)
                     {
                         httpResponse.StatusCode = HttpStatusCode.OK;
                         return File(docAsBytes, "application/xml", path);
@@ -136,10 +137,14 @@ namespace UKHO.FleetManagerMock.API.Controllers
         }
 
         [NonAction]
-        public static string GetBase64EncodedCredentials(string userName, string password)
+        public static string GetBase64EncodedCredentials(string? userName, string? password)
         {
-            byte[]? userCredentialsBytes = System.Text.Encoding.UTF8.GetBytes(userName + ":" + password);
-            return Convert.ToBase64String(userCredentialsBytes);
+            if (!string.IsNullOrEmpty(userName) && !string.IsNullOrEmpty(password))
+            {
+                byte[]? userCredentialsBytes = System.Text.Encoding.UTF8.GetBytes(userName + ":" + password);
+                return Convert.ToBase64String(userCredentialsBytes);
+            }
+            return string.Empty;
         }
     }
 }
