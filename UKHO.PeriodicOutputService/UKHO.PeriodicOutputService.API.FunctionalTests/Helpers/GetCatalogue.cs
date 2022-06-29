@@ -8,11 +8,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
     public class GetCatalogue
     {
+        static HttpClient httpClient = new HttpClient();
         public async Task<HttpResponseMessage> GetCatalogueEndpoint(string baseUrl, string accessToken, string subscriptionKey)
         {
-            HttpClient httpClient = new HttpClient();
-            httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
-
             string uri = $"{baseUrl}/catalogues/1";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);

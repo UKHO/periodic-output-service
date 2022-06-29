@@ -32,13 +32,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             return bodyJson;
         }
 
-        public static async Task<dynamic> XmlReadAsynch(string xmlreponse)
+        public static dynamic XmlReadAsynch(string xmlreponse)
         {
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xmlreponse);
             string jsonText = JsonConvert.SerializeXmlNode(doc);
-            dynamic test = JsonConvert.DeserializeObject(jsonText);
-            return test;
+            dynamic deserializeJsonText = JsonConvert.DeserializeObject(jsonText);
+            return deserializeJsonText;
         }
 
         public static string getbase64encodedcredentials(string username, string password)
