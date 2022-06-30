@@ -35,7 +35,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
             }
             string? userName = _fleetManagerApiConfiguration.Value.UserName;
             string? password = _fleetManagerApiConfiguration.Value.Password;
-            string? subscriptionkey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
+            string? fleetManagerStubSubscriptionKey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
             string base64Credentials = GetBase64EncodedCredentials(userName, password);
             HttpResponseMessage httpResponse = new();
             string AuthToken = string.Empty;
@@ -48,7 +48,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
                     return Unauthorized(JsonConvert.DeserializeObject<InvalidSubscriptionKeyResponse>(invalidSubscriptionKeyResponse));
                 }
             }
-            if (subscriptionKey == subscriptionkey)
+            if (subscriptionKey == fleetManagerStubSubscriptionKey)
             {
                 if (userPass == base64Credentials)
                 {
@@ -90,7 +90,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
             {
                 requestHeaders.Add(header.Key, header.Value);
             }
-            string? subscriptionkey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
+            string? fleetManagerStubSubscriptionKey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
             string? path = _fileDirectoryPathConfiguration.Value.AVCSCatalogDataFilePath;
             HttpResponseMessage httpResponse = new();
 
@@ -103,7 +103,7 @@ namespace UKHO.FleetManagerMock.API.Controllers
                     return Unauthorized(JsonConvert.DeserializeObject<InvalidSubscriptionKeyResponse>(invalidSubscriptionKeyResponse));
                 }
             }
-            if (subscriptionKey == subscriptionkey)
+            if (subscriptionKey == fleetManagerStubSubscriptionKey)
             {
                 if (token == _jwtUnpAuthToken && !string.IsNullOrEmpty(path))
                 {
