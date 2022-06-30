@@ -1,15 +1,16 @@
-namespace UKHO.PeriodicOutputService.Fulfilment.FunctionalTests;
-
-public class Tests
+namespace UKHO.PeriodicOutputService.Fulfilment.FunctionalTests
 {
-    [SetUp]
-    public void Setup()
+    public class Tests
     {
-    }
+        [SetUp]
+        public void Setup()
+        {
+        }
 
-    [Test]
-    public void Test1()
-    {
-        Assert.Pass();
+        [Test]
+        public void Test1()
+        {
+            Assert.Pass();
+        }
     }
 }
