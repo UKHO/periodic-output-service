@@ -13,12 +13,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="appsettings.json" />
-    <None Remove="appsettings.local.overrides.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="appsettings.local.overrides.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
