@@ -26,11 +26,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<ExchangeSetGetBatchResponse> GetProductIdentifiersData(List<string> productIdentifiers)
         {
-            string accessToken = await _authTokenProvider.GetManagedIdentityAuthAsync(_exchangeSetApiConfiguration.Value.EssClientId, _exchangeSetApiConfiguration.Value.ManagedIdentityClientId);
+            _logger.LogInformation("Started getting access token");
 
-            _logger.LogInformation("Access Token is : {0}", accessToken);
+            string accessToken = await _authTokenProvider.GetManagedIdentityAuthAsync(_exchangeSetApiConfiguration.Value.EssClientId);
+
+            _logger.LogInformation("Completed getting access token", accessToken);
 
             ExchangeSetGetBatchResponse exchangeSetGetBatchResponse = new();
+
+            _logger.LogInformation("Started getting product identifiers data");
 
             HttpResponseMessage httpResponse = await _exchangeSetApiClient.GetProductIdentifiersDataAsync(_exchangeSetApiConfiguration.Value.BaseUrl, productIdentifiers, accessToken);
 
@@ -39,6 +43,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
                 exchangeSetGetBatchResponse = JsonConvert.DeserializeObject<ExchangeSetGetBatchResponse>(bodyJson);
             }
+            else
+            {
+                _logger.LogInformation("Failed getting product identifiers data");
+
+            }
+
+            _logger.LogInformation("Completed getting product identifiers data");
 
             return exchangeSetGetBatchResponse;
         }

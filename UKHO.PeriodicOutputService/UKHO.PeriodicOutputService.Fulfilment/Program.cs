@@ -148,7 +148,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             );
 
             if (configuration != null)
+            {
                 serviceCollection.Configure<FleetManagerB2BApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
+                serviceCollection.Configure<ExchangeSetApiConfiguration>(configuration.GetSection("ESSManagedIdentity"));
+                serviceCollection.Configure<ExchangeSetApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+            }
 
             var essAzureADConfiguration = new ExchangeSetApiConfiguration();
             configuration.Bind("ESSAzureADConfiguration", essAzureADConfiguration);
@@ -168,9 +172,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 client.MaxResponseContentBufferSize = 2147483647;
                 client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
             });
-
-            if (configuration != null)
-                serviceCollection.Configure<ExchangeSetApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
         }
     }
 }

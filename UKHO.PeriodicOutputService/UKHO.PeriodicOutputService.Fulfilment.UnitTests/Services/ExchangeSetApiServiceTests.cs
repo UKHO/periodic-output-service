@@ -24,7 +24,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [SetUp]
         public void Setup()
         {
-            _fakeExchangeSetApiConfiguration = Options.Create(new ExchangeSetApiConfiguration() { ManagedIdentityClientId = "ClientId1", EssClientId = "ClientId2" });
+            _fakeExchangeSetApiConfiguration = Options.Create(new ExchangeSetApiConfiguration() { EssClientId = "ClientId2" });
 
             _fakeExchangeSetApiClient = A.Fake<IExchangeSetApiClient>();
 
@@ -74,7 +74,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                       Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()))
                   });
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored));
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored));
 
             ExchangeSetGetBatchResponse response = await _fakeExchangeSetApiService.GetProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
@@ -100,7 +100,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                       Content = new StringContent(JsonConvert.SerializeObject(GetInValidExchangeSetGetBatchResponse()))
                   });
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored));
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored));
 
             ExchangeSetGetBatchResponse response = await _fakeExchangeSetApiService.GetProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
