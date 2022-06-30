@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
@@ -11,10 +12,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private readonly IOptions<ExchangeSetApiConfiguration> _exchangeSetApiConfiguration;
         private readonly IExchangeSetApiClient _exchangeSetApiClient;
         private readonly IAuthTokenProvider _authTokenProvider;
+        private readonly ILogger<ExchangeSetApiService> _logger;
 
-        public ExchangeSetApiService(IOptions<ExchangeSetApiConfiguration> exchangeSetApiConfiguration,
-                            IExchangeSetApiClient exchangeSetApiClient, IAuthTokenProvider authTokenProvider)
+        public ExchangeSetApiService(ILogger<ExchangeSetApiService> logger,
+                                     IOptions<ExchangeSetApiConfiguration> exchangeSetApiConfiguration,
+                                     IExchangeSetApiClient exchangeSetApiClient, IAuthTokenProvider authTokenProvider)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _exchangeSetApiConfiguration = exchangeSetApiConfiguration ?? throw new ArgumentNullException(nameof(exchangeSetApiConfiguration));
             _exchangeSetApiClient = exchangeSetApiClient ?? throw new ArgumentNullException(nameof(exchangeSetApiClient));
             _authTokenProvider = authTokenProvider ?? throw new ArgumentNullException(nameof(authTokenProvider));
@@ -22,6 +26,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<ExchangeSetGetBatchResponse> GetProductIdentifiersData(List<string> productIdentifiers)
         {
+            _logger.LogInformation("Config values are : {0} and {1}", _exchangeSetApiConfiguration.Value.BaseUrl, _exchangeSetApiConfiguration.Value.ClientId);
+
             string accessToken = await _authTokenProvider.GetManagedIdentityAuthAsync(_exchangeSetApiConfiguration.Value.ClientId);
             ExchangeSetGetBatchResponse exchangeSetGetBatchResponse = new();
 
