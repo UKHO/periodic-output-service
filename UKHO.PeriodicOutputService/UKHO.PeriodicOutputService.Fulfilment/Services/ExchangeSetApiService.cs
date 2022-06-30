@@ -29,6 +29,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _logger.LogInformation("Config values are : {0} and {1}", _exchangeSetApiConfiguration.Value.BaseUrl, _exchangeSetApiConfiguration.Value.ClientId);
 
             string accessToken = await _authTokenProvider.GetManagedIdentityAuthAsync(_exchangeSetApiConfiguration.Value.ClientId);
+
+            _logger.LogInformation("Access Token is : {0}", accessToken);
+
             ExchangeSetGetBatchResponse exchangeSetGetBatchResponse = new();
 
             HttpResponseMessage httpResponse = await _exchangeSetApiClient.GetProductIdentifiersDataAsync(_exchangeSetApiConfiguration.Value.BaseUrl, productIdentifiers, accessToken);
