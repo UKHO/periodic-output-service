@@ -1,4 +1,6 @@
-﻿namespace UKHO.PeriodicOutputService.Fulfilment.Services
+﻿using UKHO.PeriodicOutputService.Fulfilment.Models;
+
+namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public class FulfilmentDataService : IFulfilmentDataService
     {
@@ -13,17 +15,17 @@
 
         public async Task<string> CreatePosExchangeSet()
         {
-            string? unpAccessToken = _fleetManagerService.GetJwtAuthUnpToken().Result.AuthToken;
+            FleetMangerGetAuthTokenResponse tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
 
-            if (!string.IsNullOrEmpty(unpAccessToken))
+            if (!string.IsNullOrEmpty(tokenResponse.AuthToken))
             {
-                List<string>? productIdentifiers = _fleetManagerService.GetCatalogue(unpAccessToken).Result.ProductIdentifiers;
+                FleetManagerGetCatalogueResponse catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
 
-                if (productIdentifiers != null)
+                if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
                 {
-                    var response = _exchangeSetApiService.GetProductIdentifiersData(productIdentifiers).Result;
+                    var response = await _exchangeSetApiService.GetProductIdentifiersData(catalogueResponse.ProductIdentifiers);
+                    return "Fleet Manager full AVCS ProductIdentifiers received";
                 }
-                return "Fleet Manager full AVCS ProductIdentifiers received";
             }
             return "Fleet Manager full AVCS ProductIdentifiers not received";
         }

@@ -29,9 +29,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
             jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
 
-            jwtAuthJwtToken.StatusCode = HttpStatusCode.OK;
-            jwtAuthJwtToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ456";
-
             FleetManagerGetCatalogueResponse fleetManagerGetCatalogue = new()
             {
                 StatusCode = HttpStatusCode.OK,
@@ -40,8 +37,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => fakeFleetManagerService.GetJwtAuthUnpToken())
               .Returns(jwtauthUnpToken);
-            A.CallTo(() => fakeFleetManagerService.GetJwtAuthJwtToken(A<string>.Ignored))
-              .Returns(jwtAuthJwtToken);
             A.CallTo(() => fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
@@ -58,23 +53,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             jwtauthUnpToken.AuthToken = "";
 
             A.CallTo(() => fakeFleetManagerService.GetJwtAuthUnpToken()).Returns(jwtauthUnpToken);
-
-            string result = await fulfilmentDataService.CreatePosExchangeSet();
-
-            A.CallTo(() => fakeFleetManagerService.GetJwtAuthJwtToken(A<string>.Ignored)).MustNotHaveHappened();
-            A.CallTo(() => fakeFleetManagerService.GetCatalogue(A<string>.Ignored)).MustNotHaveHappened();
-
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.EqualTo("Fleet Manager full AVCS ProductIdentifiers not received"));
-        }
-
-        [Test]
-        public async Task Does_CreatePosExchangeSet_Check_If_GetJwtAuthJwtToken_IsNull()
-        {
-            jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
-            jwtauthUnpToken.AuthToken = "";
-
-            A.CallTo(() => fakeFleetManagerService.GetJwtAuthJwtToken(A<string>.Ignored)).Returns(jwtAuthJwtToken);
 
             string result = await fulfilmentDataService.CreatePosExchangeSet();
 
