@@ -8,6 +8,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public interface IAuthTokenProvider
     {
-        Task<string> GetManagedIdentityAuthAsync(string resource);
+        Task<string> GetManagedIdentityAuthAsync(string essClientId, string managedIdentityClientId);
     }
 }

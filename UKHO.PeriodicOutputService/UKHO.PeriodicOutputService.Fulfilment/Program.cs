@@ -153,24 +153,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             var essAzureADConfiguration = new ExchangeSetApiConfiguration();
             configuration.Bind("ESSAzureADConfiguration", essAzureADConfiguration);
 
-            serviceCollection.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                 .AddJwtBearer("AzureADB2C", options =>
-                 {
-                     options.Audience = essAzureADConfiguration.ClientId;
-                     options.Authority = $"{essAzureADConfiguration.MicrosoftOnlineLoginUrl}{essAzureADConfiguration.TenantId}";
-                     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                     {
-                         ValidAudience = essAzureADConfiguration.ClientId,
-                         ValidIssuer = $"{essAzureADConfiguration.MicrosoftOnlineLoginUrl}{essAzureADConfiguration.TenantId}/v2.0"
-                     };
-                 });
-            serviceCollection.AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .AddAuthenticationSchemes("AzureADB2C")
-                .Build();
-            });
             serviceCollection.AddTransient<PosFulfilmentJob>();
 
             serviceCollection.AddScoped<IFleetManagerB2BApiConfiguration, FleetManagerB2BApiConfiguration>();

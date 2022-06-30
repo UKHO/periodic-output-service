@@ -26,9 +26,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<ExchangeSetGetBatchResponse> GetProductIdentifiersData(List<string> productIdentifiers)
         {
-            _logger.LogInformation("Config values are : {0} and {1}", _exchangeSetApiConfiguration.Value.BaseUrl, _exchangeSetApiConfiguration.Value.ClientId);
-
-            string accessToken = await _authTokenProvider.GetManagedIdentityAuthAsync(_exchangeSetApiConfiguration.Value.ClientId);
+            string accessToken = await _authTokenProvider.GetManagedIdentityAuthAsync(_exchangeSetApiConfiguration.Value.EssClientId, _exchangeSetApiConfiguration.Value.ManagedIdentityClientId);
 
             _logger.LogInformation("Access Token is : {0}", accessToken);
 
