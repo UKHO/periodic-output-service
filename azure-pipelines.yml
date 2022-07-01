@@ -331,11 +331,11 @@ stages:
                     AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
       - job: FunctionalTests
         dependsOn:
-        - DevDeploy
+        - DevDeployApp
         pool: $(DeploymentPool)
         displayName: "Dev Functional Automated Tests"
         #variables: 
-         #FleetManagerB2BApiConfiguration.baseUrl: $[ dependencies.DevDeploy.outputs['DevDeploy.TerraformDeploy.FleetManagerB2BApiConfiguration.baseUrl']  ]
+         #FleetManagerB2BApiConfiguration.baseUrl: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.FleetManagerB2BApiConfiguration.baseUrl']  ]
         workspace:
          clean: all
         steps:
@@ -374,7 +374,6 @@ stages:
   - stage: QAdeploy
     dependsOn:
     - Devdeploy
-    - QCdeploy
     displayName: "QAdeploy (inc terraform, webapp deploy)"
     variables:
       - group: "ESS-QA-Variables"
