@@ -46,7 +46,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             else
             {
-                _logger.LogInformation(EventIds.ExceptionInExchangeSetRequest.ToEventId(), "Failed getting exchange set details");
+                _logger.LogError(EventIds.ExceptionInExchangeSetRequest.ToEventId(), "Failed getting exchange set details");
 
             }
 
