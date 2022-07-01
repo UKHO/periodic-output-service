@@ -198,10 +198,16 @@ stages:
         steps:
 
           - task: PublishBuildArtifacts@1
-            displayName: "Publish terraform Artifacts"
+            displayName: "Publish Dev terraform Artifacts"
             inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\Deployment'
-              ArtifactName: terraformartifact
+              PathtoPublish: '$(Build.SourcesDirectory)\DevDeployment'
+              ArtifactName: devterraformartifact
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish QA and Live terraform Artifacts"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\QALiveDeployment'
+              ArtifactName: qaliveterraformartifact
 
       - job: PublishFunctionalTests
         workspace:
@@ -387,7 +393,7 @@ stages:
           runOnce:
             deploy:
               steps:
-                - template: Deployment/templates/continuous-deployment.yml
+                - template: QALiveDeployment/templates/continuous-deployment.yml
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-QA-A-008-02"

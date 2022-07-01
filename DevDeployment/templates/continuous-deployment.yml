@@ -12,7 +12,7 @@ steps:
     name: TerraformDeploy
     inputs:
       targetType: filePath
-      filePath: '$(Pipeline.Workspace)/terraformartifact/terraform_conditional_run.ps1'
+      filePath: '$(Pipeline.Workspace)/devterraformartifact/terraform_conditional_run.ps1'
       arguments: '-deploymentResourceGroupName $(DeploymentResourceGroupName) -deploymentStorageAccountName $(DeploymentStorageAccountName) -workSpace $(Environment) -continueEvenIfResourcesAreGettingDestroyed $${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }} -terraformJsonOutputFile $(Pipeline.Workspace)/terraformartifact/terraform_output.json'
     env:
       ARM_CLIENT_ID: $(TERRAFORM-CLIENT-ID)
@@ -37,7 +37,7 @@ steps:
       azureSubscription: "${{ parameters.AzureSubscription }}"
       scriptType: 'pscore'
       scriptLocation: 'scriptPath'
-      scriptPath: '$(Pipeline.Workspace)/mockapiterraformartifact/mock_api_deployment.ps1'
+      scriptPath: '$(Pipeline.Workspace)/devterraformartifact/mock_api_deployment.ps1'
       arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FleetManagerMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
 
   - task: FileTransform@1

@@ -6,7 +6,7 @@ param (
     [Parameter(Mandatory = $true)] [string] $terraformJsonOutputFile
 )
 
-cd $env:AGENT_BUILDDIRECTORY/terraformartifact/src
+cd $env:AGENT_BUILDDIRECTORY/qaliveterraformartifact/src
 
 terraform --version
 
