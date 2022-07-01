@@ -13,3 +13,4 @@ output "webapp_rg" {
 output "Website_Url" {
   value = "https://${module.webapp_service.default_site_hostname}/"
 }
+

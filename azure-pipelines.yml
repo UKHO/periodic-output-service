@@ -298,7 +298,7 @@ stages:
           - task: PublishBuildArtifacts@1
             displayName: "Publish Mock terraform Artifacts"
             inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\MockApiDeployment'
+              PathtoPublish: '$(Build.SourcesDirectory)\DevDeployment'
               ArtifactName: mockapiterraformartifact              
      
   - stage: Devdeploy
@@ -308,7 +308,7 @@ stages:
       - group: "ESS-Deployment-Variables-DEV"
       - group: "POS-Dev-Variables"
     jobs:
-      - deployment: DevDeployTerraform
+      - deployment: DevDeploy
         displayName: "Dev - Deploy Terraform and Dotnet App"
         environment: "Ess-Dev"
         pool: $(DeploymentPool)
@@ -319,71 +319,20 @@ stages:
           runOnce:
             deploy:
               steps:
-                - template: Deployment/templates/continuous-deployment.yml
+                - template: DevDeployment/templates/continuous-deployment.yml
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download Functional test Artifact"
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'functionaltests'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
-                - task: FileTransform@1
-                  displayName: "File Transform: functionaltests"
-                  inputs:
-                    folderPath: '$(Build.SourcesDirectory)/functionaltests/'
-                    fileType: json
-                    targetFiles: '**/appsettings.json'
-
-                - task: UseDotNet@2
-                  displayName: 'Use .NET Core sdk'
-                  inputs:
-                    packageType: sdk
-                    version: 6.0.x
-
-                - task: DotNetCoreCLI@2
-                  displayName: "Run Functional tests"
-                  inputs:
-                    command: "test"
-                    projects: |
-                      **/*FunctionalTest*.dll
-                      !**/*TestAdapter.dll
-                      !**/obj/**
-                    arguments: '--filter Category=SmokeTest'
-                    testRunTitle: "Dev-AutomationTests"
-                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
-
-  - stage: QCdeploy
-    dependsOn:
-    - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
-    displayName: "QCdeploy (inc terraform, mock webapp deploy)"
-    jobs:
-      - deployment: QCDeployApp
-        displayName: "QC - deploy terraform and WebApps"
-        environment: "Ess-Dev"
+      - job: FunctionalTests
+        dependsOn:
+        - DevDeploy
         pool: $(DeploymentPool)
-        container: ${{variables.Container}}
+        displayName: "Dev Functional Automated Tests"
+        variables: 
+         #FleetManagerB2BApiConfiguration.baseUrl: $[ dependencies.DevDeploy.outputs['DevDeploy.TerraformDeploy.FleetManagerB2BApiConfiguration.baseUrl']  ]
         workspace:
-          clean: all
-        variables:
-          - group: "ESS-Deployment-Variables-DEV"
-          - group: "ESS-Dev-Variables"
-          - group: "POS-Dev-Variables"
-          - name: "Environment"
-            value: "qc"
-
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - template: MockApiDeployment/templates/mock-api-continuous-deployment.yml
-                  parameters:
-                    AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-
+         clean: all
+        steps:
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download Functional test Artifact"
                   inputs:
@@ -413,8 +362,7 @@ stages:
                       **/*FunctionalTest*.dll
                       !**/*TestAdapter.dll
                       !**/obj/**
-                    arguments: '--filter Category=QCOnlyTest'
-                    testRunTitle: "QC-AutomationTests"
+                    testRunTitle: "Dev-AutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
 
   - stage: QAdeploy

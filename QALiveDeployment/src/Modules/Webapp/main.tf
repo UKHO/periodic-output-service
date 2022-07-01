@@ -1,11 +1,5 @@
-resource "random_string" "unique_string" {
-  length  = 5
-  special = false
-  upper   = false
-}
-
-resource "azurerm_windows_web_app" "fm_mock_webapp" {
-  name                = "${var.service_name}-${var.env_name}-mock-${random_string.unique_string.result}-webapp"
+resource "azurerm_windows_web_app" "webapp_service" {
+  name                = var.name
   location            = var.location
   resource_group_name = var.resource_group_name
   service_plan_id     = var.service_plan_id
@@ -13,7 +7,7 @@ resource "azurerm_windows_web_app" "fm_mock_webapp" {
 
   site_config {
      application_stack {    
-     current_stack  = "dotnet"
+     current_stack = "dotnet"
      dotnet_version = "v6.0"
     }
     always_on  = true
@@ -28,5 +22,3 @@ resource "azurerm_windows_web_app" "fm_mock_webapp" {
 
   https_only = true
   }
-
-
