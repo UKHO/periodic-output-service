@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
+using UKHO.PeriodicOutputService.Fulfilment.Logging;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
@@ -26,15 +27,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<ExchangeSetGetBatchResponse> GetProductIdentifiersData(List<string> productIdentifiers)
         {
-            _logger.LogInformation("Started getting access token");
+            _logger.LogInformation(EventIds.AccessTokenForESSEndpointStarted.ToEventId(), "Getting access token to call ESS endpoint started");
 
             string accessToken = await _authTokenProvider.GetManagedIdentityAuthAsync(_exchangeSetApiConfiguration.Value.EssClientId);
 
-            _logger.LogInformation("Completed getting access token", accessToken);
+            _logger.LogInformation(EventIds.AccessTokenForESSEndpointCompleted.ToEventId(), "Getting access token  to call ESS endpoint completed");
 
             ExchangeSetGetBatchResponse exchangeSetGetBatchResponse = new();
 
-            _logger.LogInformation("Started getting product identifiers data");
+            _logger.LogInformation(EventIds.ExchangeSetRequestStarted.ToEventId(), "Request to get the exchange set details started");
 
             HttpResponseMessage httpResponse = await _exchangeSetApiClient.GetProductIdentifiersDataAsync(_exchangeSetApiConfiguration.Value.BaseUrl, productIdentifiers, accessToken);
 
@@ -45,11 +46,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             else
             {
-                _logger.LogInformation("Failed getting product identifiers data");
+                _logger.LogInformation(EventIds.ExceptionInExchangeSetRequest.ToEventId(), "Failed getting exchange set details");
 
             }
 
-            _logger.LogInformation("Completed getting product identifiers data");
+            _logger.LogInformation(EventIds.ExchangeSetRequestCompleted.ToEventId(), "Request to get the exchange set details completed");
+
+            _logger.LogInformation($"ExchangeSet Response - {JsonConvert.SerializeObject(exchangeSetGetBatchResponse)} ");
 
             return exchangeSetGetBatchResponse;
         }
