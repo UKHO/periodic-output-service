@@ -201,7 +201,7 @@ stages:
             displayName: "Publish Dev terraform Artifacts"
             inputs:
               PathtoPublish: '$(Build.SourcesDirectory)\DevDeployment'
-              ArtifactName: devterraformartifact
+              ArtifactName: devterraformartifact              
 
           - task: PublishBuildArtifacts@1
             displayName: "Publish QA and Live terraform Artifacts"
@@ -247,10 +247,10 @@ stages:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\UKHO.PeriodicOutputService.API.FunctionalTests'
               ArtifactName: functionaltests
         
-      - job: BuildAndPublishMockAPIAndTerraform
+      - job: BuildAndPublishMockAPI
         workspace:
           clean: all
-        displayName: "Build and Publish Mock API And Terraform"
+        displayName: "Build and Publish Mock API"
         steps:
           - task: PowerShell@2
             displayName: "Set assembly version numbers based on build ID"
@@ -300,12 +300,6 @@ stages:
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\MockWebAPI'
               ArtifactName: MockWebAPI 
-
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish Mock terraform Artifacts"
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\DevDeployment'
-              ArtifactName: mockapiterraformartifact              
      
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
@@ -329,6 +323,7 @@ stages:
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+
       - job: FunctionalTests
         dependsOn:
         - DevDeployApp
