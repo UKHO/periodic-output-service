@@ -314,7 +314,7 @@ stages:
       - group: "ESS-Deployment-Variables-DEV"
       - group: "POS-Dev-Variables"
     jobs:
-      - deployment: DevDeploy
+      - deployment: DevDeployApp
         displayName: "Dev - Deploy Terraform and Dotnet App"
         environment: "Ess-Dev"
         pool: $(DeploymentPool)
