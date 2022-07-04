@@ -344,7 +344,7 @@ stages:
                   displayName: 'Read Dev keyvault variables'
                   inputs:
                     azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                    KeyVaultName: "$[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.key_vault_name']  ]"
+                    KeyVaultName: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.key_vault_name']  ]
                     SecretsFilter: '*'
                     RunAsPreJob: false
 
