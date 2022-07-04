@@ -31,6 +31,12 @@ steps:
       fileType: 'json'
       targetFiles: '**/appsettings.json'
 
+  - task: PowerShell@2
+    inputs:
+      targetType: 'inline'
+      script: |
+        Write-Host $(mockWebAppName) 
+
   - task: AzureCLI@2
     displayName: "Mock API WebApp deployment"
     inputs:
