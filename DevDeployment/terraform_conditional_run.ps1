@@ -53,7 +53,7 @@ $terraformOutput = terraform output -json | ConvertFrom-Json
 
 write-output "Set JSON output into pipeline variables"
 Write-Host "##vso[task.setvariable variable=Website_Url;isOutput=true]$($terraformOutput.Website_Url.value)"
-Write-Host "##vso[task.setvariable variable=WEB_APP_NAME;isOutput=true]$($terraformOutput.web_app_name.value)"
+Write-Host "##vso[task.setvariable variable=WEB_APP_NAME]$($terraformOutput.web_app_name.value)"
 Write-Host "##vso[task.setvariable variable=mockWebAppName]$($terraformOutput.mock_webappname.value)"
 Write-Host "##vso[task.setvariable variable=FleetManagerB2BApiConfiguration.baseUrl;isOutput=true]$($terraformOutput.fm_mock_web_app_url.value)"
 Write-Host "##vso[task.setvariable variable=mockWebAppResourceGroup]$($terraformOutput.mock_webapp_rg.value)"
