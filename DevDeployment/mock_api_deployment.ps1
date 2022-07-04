@@ -8,13 +8,13 @@ echo "mockApipackagePath : $mockApipackagePath"
 echo "mockWebAppName : $mockWebAppName"
 echo "ResourceGroup : $mockWebAppResourceGroup"
 
-function DeployWebApp($mockWebAppName, $mockApipackagePath, $mockWebAppResourceGroup){
+function DeployWebApp($webAppName, $package, $webAppRGroup){
     
-    echo "Function DeployWebApp called with params $mockWebAppName, $mockApipackagePath, $mockWebAppResourceGroup ..."
+    echo "Function DeployWebApp called with params $webAppName, $package, $webAppRGroup ..."
 
-    az webapp deployment source config-zip -g $mockWebAppResourceGroup -n $mockWebAppName --src $mockApipackagePath
+    az webapp deployment source config-zip -g $webAppRGroup -n $webAppName --src $package
 
-    if ( !$? ) { echo "Error while deplying webapp $mockWebAppName" ; throw $_ }
+    if ( !$? ) { echo "Error while deplying webapp $webAppName" ; throw $_ }
 }
 
 echo "Deploying mock api ..."
