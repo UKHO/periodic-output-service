@@ -329,8 +329,6 @@ stages:
         - DevDeployApp
         pool: $(DeploymentPool)
         displayName: "Dev Functional Automated Tests"
-        variables: 
-          FleetManagerB2BApiConfiguration.baseUrl: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.FleetManagerB2BApiConfiguration.baseUrl']  ]
         workspace:
          clean: all
         steps:
@@ -341,6 +339,14 @@ stages:
                     downloadType: 'single'
                     artifactName: 'functionaltests'
                     downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: AzureKeyVault@1
+                  displayName: 'Read Dev keyvault variables'
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                    KeyVaultName: "$[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.key_vault_name']  ]"
+                    SecretsFilter: '*'
+                    RunAsPreJob: false
 
                 - task: FileTransform@1
                   displayName: "File Transform: functionaltests"

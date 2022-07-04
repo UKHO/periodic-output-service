@@ -26,3 +26,6 @@ output "Website_Url" {
   value = "https://${module.webapp_service.default_site_hostname}/"
 }
 
+output "kv_name" {
+  value = local.key_vault_name
+}
