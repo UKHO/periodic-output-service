@@ -7,7 +7,7 @@ output "env_name" {
 }
 
 output "webapp_rg" {
-  value = azurerm_resource_group.rg.name
+  value = azurerm_resource_group.webapp_rg.name
 }
 
 output "Website_Url" {
