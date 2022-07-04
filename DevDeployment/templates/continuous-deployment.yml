@@ -35,8 +35,8 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        Write-Host $(TerraformDeploy.mockWebAppName)
-        Write-Host $(TerraformDeploy.mockWebAppResourceGroup)
+        Write-Host $(mockWebAppName)
+        Write-Host $(mockWebAppResourceGroup)
 
   - task: AzureCLI@2
     displayName: "Mock API WebApp deployment"
