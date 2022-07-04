@@ -74,7 +74,6 @@ module "key_vault" {
   secrets = {
       "EventHubLoggingConfiguration--ConnectionString"       = module.eventhub.log_primary_connection_string
       "EventHubLoggingConfiguration--EntityPath"             = module.eventhub.entity_path
-      "FleetManagerB2BApiConfiguration--baseUrl"             = module.mock_webapp_service.default_site_hostname
  }
   tags                                                       = local.tags
 }
