@@ -376,7 +376,7 @@ stages:
       - group: "POS-QA-Variables"
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     jobs:
-      - deployment: QADeployTerraform
+      - deployment: QADeployApp
         displayName: "QA - Deploy Terraform and Dotnet App"
         environment: "Ess-Qa"
         pool: $(DeploymentPool)
