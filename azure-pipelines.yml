@@ -60,7 +60,7 @@ stages:
             CovUser: "$(CovUser)"
             CovPwd: "$(CovPwd)"
             StreamName: "periodic-output-service"
-            BuildCommand: "$(Build.Repository.LocalPath)/periodic-output-service/UKHO.PeriodicOutputService/UKHO.PeriodicOutputService.Fulfilment/UUKHO.PeriodicOutputService.Fulfilment.csproj"
+            BuildCommand: "$(Build.Repository.LocalPath)/periodic-output-service/UKHO.PeriodicOutputService/UKHO.PeriodicOutputService.Fulfilment/UKHO.PeriodicOutputService.Fulfilment.csproj"
             StripPath: $(Build.Repository.LocalPath)/periodic-output-service
             CoverityScanPath: $(Build.Repository.LocalPath)/coverityscan-buildtemplates
 
