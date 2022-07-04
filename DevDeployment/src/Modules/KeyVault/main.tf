@@ -22,11 +22,13 @@ resource "azurerm_key_vault_access_policy" "kv_access_terraform" {
   key_permissions = [
     "Create",
     "Get",
+    "List"
   ]
 
   secret_permissions = [
     "Set",
     "Get",
+    "List",
     "Delete",
     "Recover",
     "Purge"
