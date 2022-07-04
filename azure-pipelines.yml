@@ -329,8 +329,8 @@ stages:
         - DevDeployApp
         pool: $(DeploymentPool)
         displayName: "Dev Functional Automated Tests"
-        #variables: 
-         #FleetManagerB2BApiConfiguration.baseUrl: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.FleetManagerB2BApiConfiguration.baseUrl']  ]
+        variables: 
+          FleetManagerB2BApiConfiguration.baseUrl: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.FleetManagerB2BApiConfiguration.baseUrl']  ]
         workspace:
          clean: all
         steps:
