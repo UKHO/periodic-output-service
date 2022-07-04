@@ -1,15 +1,15 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using UKHO.PeriodicOutputService.Common.Factories;
+using UKHO.PeriodicOutputService.Common.Providers;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
-    [ExcludeFromCodeCoverage] ////Excluded from code coverage as it has actual http calls 
     public class FleetManagerClient : IFleetManagerClient
     {
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFacade _httpClient;
 
-        public FleetManagerClient(HttpClient httpClient)
+        public FleetManagerClient(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClientFactory.CreateClient(true);
         }
 
         public async Task<HttpResponseMessage> GetJwtAuthUnpToken(HttpMethod method, string baseUrl, string base64Credentials, string subscriptionKey)
@@ -26,6 +26,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
             }
+
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 

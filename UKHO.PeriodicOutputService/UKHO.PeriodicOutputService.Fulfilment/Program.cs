@@ -1,21 +1,21 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
-using UKHO.PeriodicOutputService.Fulfilment.Services;
-using UKHO.PeriodicOutputService.Common.Helpers;
 using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
-using System.Reflection;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using UKHO.PeriodicOutputService.Common.Factories;
+using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Providers;
+using UKHO.PeriodicOutputService.Fulfilment.Configuration;
+using UKHO.PeriodicOutputService.Fulfilment.Services;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
@@ -165,13 +165,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IAuthTokenProvider, AuthTokenProvider>();
 
             serviceCollection.AddScoped<IExchangeSetApiService, ExchangeSetApiService>();
-            serviceCollection.AddHttpClient<IExchangeSetApiClient, ExchangeSetApiClient>();
+            serviceCollection.AddScoped<IExchangeSetApiClient, ExchangeSetApiClient>();
+            serviceCollection.AddScoped<IFleetManagerClient, FleetManagerClient>();
 
-            serviceCollection.AddHttpClient<IFleetManagerClient, FleetManagerClient>(client =>
-            {
-                client.MaxResponseContentBufferSize = 2147483647;
-                client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
-            });
+            serviceCollection.AddScoped<Common.Factories.IHttpClientFactory, HttpClientFactory>();
+            serviceCollection.AddScoped<IHttpClientFacade, HttpClientFacade>();
+
         }
     }
 }

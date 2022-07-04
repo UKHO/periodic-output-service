@@ -1,24 +1,24 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text;
 using Newtonsoft.Json;
+using UKHO.PeriodicOutputService.Common.Factories;
+using UKHO.PeriodicOutputService.Common.Providers;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
-    [ExcludeFromCodeCoverage] ////Excluded from code coverage as it has actual http calls 
     public class ExchangeSetApiClient : IExchangeSetApiClient
     {
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFacade _httpClient;
 
-        public ExchangeSetApiClient(HttpClient httpClient)
+        public ExchangeSetApiClient(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClientFactory.CreateClient(false);
         }
 
         public async Task<HttpResponseMessage> GetProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken)
         {
             string uri = $"{baseUrl}/productData/productIdentifiers";
-         
+
             string payloadJson = JsonConvert.SerializeObject(productIdentifierModel);
 
             using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
