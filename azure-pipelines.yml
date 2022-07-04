@@ -329,6 +329,9 @@ stages:
         - DevDeployApp
         pool: $(DeploymentPool)
         displayName: "Dev Functional Automated Tests"
+        variables:
+          - name: keyVaultName
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.key_vault_name']  ]
         workspace:
          clean: all
         steps:
@@ -344,7 +347,7 @@ stages:
                   displayName: 'Read Dev keyvault variables'
                   inputs:
                     azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                    KeyVaultName: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.key_vault_name']  ]
+                    KeyVaultName: "$(keyVaultName)"
                     SecretsFilter: '*'
                     RunAsPreJob: false
 
