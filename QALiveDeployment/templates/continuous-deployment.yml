@@ -36,5 +36,5 @@ steps:
     inputs:
       azureSubscription: "${{ parameters.AzureSubscription }}"
       appType: webApp
-      appName: "$(TerraformDeploy.WEB_APP_NAME)"
+      appName: "$(WEB_APP_NAME)"
       package: "$(Pipeline.Workspace)/PeriodicOutputService/PeriodicOutputFulfilmentService.zip"
