@@ -187,6 +187,59 @@ stages:
             inputs:
               PathtoPublish: '$(Build.SourcesDirectory)\Deployment'
               ArtifactName: terraformartifact
+
+      - job: BuildAndPublishMockAPIAndTerraform
+        workspace:
+          clean: all
+        displayName: "Build and Publish Mock API And Terraform"
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core 6.0.x sdk'
+            inputs:
+              packageType: sdk
+              useGlobalJson: true
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FleetManagerMock.API'
+
+          - task: DotNetCoreCLI@2
+            displayName: ".Net Core - NuGet restore"
+            inputs:
+              command: restore
+              projects: |
+                **/*.csproj
+              feedsToUse: config
+              noCache: true
+              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FleetManagerMock.API'
+
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet build task"
+            inputs:
+              command: "build"
+              projects: "**/*UKHO.FleetManagerMock.API.csproj"
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FleetManagerMock.API'
+
+          - task: DotNetCoreCLI@2
+            displayName: "Publish MockWebAPI"
+            inputs:
+              command: "publish"
+              publishWebProjects: false
+              projects: '**/*UKHO.FleetManagerMock.API.csproj'
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\MockWebAPI'
+              zipAfterPublish: true
+              modifyOutputPath: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish WebAPI Artifact"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)\MockWebAPI'
+              ArtifactName: MockWebAPI 
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Mock terraform Artifacts"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\MockApiDeployment'
+              ArtifactName: mockapiterraformartifact              
      
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
@@ -211,7 +264,37 @@ stages:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
 
+  - stage: QCdeploy
+    dependsOn:
+    - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+    displayName: "QCdeploy (inc terraform, mock webapp deploy)"
+    jobs:
+      - deployment: QCDeployApp
+        displayName: "QC - deploy terraform and WebApps"
+        environment: "Ess-Dev"
+        pool: $(DeploymentPool)
+        container: ${{variables.Container}}
+        workspace:
+          clean: all
+        variables:
+          - group: "ESS-Deployment-Variables-DEV"
+          - group: "ESS-Dev-Variables"
+          - group: "POS-Dev-Variables"
+          - name: "Environment"
+            value: "qc"
+
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: MockApiDeployment/templates/mock-api-continuous-deployment.yml
+                  parameters:
+                    AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+
   - stage: QAdeploy
+    dependsOn:
+    - Devdeploy
+    - QCdeploy
     displayName: "QAdeploy (inc terraform, webapp deploy)"
     variables:
       - group: "ESS-QA-Variables"
