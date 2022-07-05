@@ -1,11 +1,9 @@
 ﻿using System.Net;
-using System.Text;
 using FakeItEasy;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Common.Providers;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
-using IHttpClientFactory = UKHO.PeriodicOutputService.Common.Factories.IHttpClientFactory;
+using UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 {
@@ -14,17 +12,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     {
         private IExchangeSetApiClient _exchangeSetApiClient;
         private IHttpClientFactory _fakeHttpClientFactory;
-        private IHttpClientFacade _fakeHttpClientFacade;
 
         [SetUp]
         public void Setup()
         {
             _fakeHttpClientFactory = A.Fake<IHttpClientFactory>();
-            _fakeHttpClientFacade = A.Fake<IHttpClientFacade>();
-
-            A.CallTo(() => _fakeHttpClientFactory.CreateClient(false)).Returns(_fakeHttpClientFacade);
-
-            _exchangeSetApiClient = new ExchangeSetApiClient(_fakeHttpClientFactory);
         }
 
         [Test]
@@ -32,10 +24,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         {
             var serializedProductIdentifierData = JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse());
 
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()), Encoding.UTF8, "application/json");
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                                JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()), HttpStatusCode.OK);
 
-            A.CallTo(() => _fakeHttpClientFacade.SendAsync(A<HttpRequestMessage>.Ignored, A<CancellationToken>.Ignored)).Returns(response);
+            var httpClient = new HttpClient(messageHandler);
+            httpClient.BaseAddress = new Uri("http://test.com");
+
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _exchangeSetApiClient = new ExchangeSetApiClient(_fakeHttpClientFactory);
 
             var result = _exchangeSetApiClient.GetProductIdentifiersDataAsync("http://test.com", GetProductIdentifiers(), "asdfsa");
 
@@ -80,5 +77,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             }
         };
     }
+
 }
 

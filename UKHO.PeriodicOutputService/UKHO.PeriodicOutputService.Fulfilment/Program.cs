@@ -11,9 +11,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
-using UKHO.PeriodicOutputService.Common.Factories;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Common.Providers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
@@ -165,12 +163,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IAuthTokenProvider, AuthTokenProvider>();
 
             serviceCollection.AddScoped<IExchangeSetApiService, ExchangeSetApiService>();
-            serviceCollection.AddScoped<IExchangeSetApiClient, ExchangeSetApiClient>();
-            serviceCollection.AddScoped<IFleetManagerClient, FleetManagerClient>();
 
-            serviceCollection.AddScoped<Common.Factories.IHttpClientFactory, HttpClientFactory>();
-            serviceCollection.AddScoped<IHttpClientFacade, HttpClientFacade>();
-
+            serviceCollection.AddHttpClient();
+            serviceCollection.AddTransient<IExchangeSetApiClient, ExchangeSetApiClient>();
+            serviceCollection.AddTransient<IFleetManagerClient, FleetManagerClient>();
         }
     }
 }

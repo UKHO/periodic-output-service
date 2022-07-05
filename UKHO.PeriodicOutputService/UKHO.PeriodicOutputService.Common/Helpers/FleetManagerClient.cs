@@ -1,15 +1,16 @@
-﻿using UKHO.PeriodicOutputService.Common.Factories;
-using UKHO.PeriodicOutputService.Common.Providers;
+﻿
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public class FleetManagerClient : IFleetManagerClient
     {
-        private readonly IHttpClientFacade _httpClient;
+        private readonly HttpClient _httpClient;
 
         public FleetManagerClient(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient(true);
+            _httpClient = httpClientFactory.CreateClient();
+            _httpClient.MaxResponseContentBufferSize = 2147483647;
+            _httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
 
         public async Task<HttpResponseMessage> GetJwtAuthUnpToken(HttpMethod method, string baseUrl, string base64Credentials, string subscriptionKey)

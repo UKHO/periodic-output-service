@@ -3,10 +3,8 @@ using System.Text;
 using FakeItEasy;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Common.Providers;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
-using IHttpClientFactory = UKHO.PeriodicOutputService.Common.Factories.IHttpClientFactory;
-
+using UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 {
@@ -15,16 +13,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     {
         private IFleetManagerClient _fleetManagerClient;
         private IHttpClientFactory _fakeHttpClientFactory;
-        private IHttpClientFacade _fakeHttpClientFacade;
+
         [SetUp]
         public void Setup()
         {
             _fakeHttpClientFactory = A.Fake<IHttpClientFactory>();
-            _fakeHttpClientFacade = A.Fake<IHttpClientFacade>();
-
-            A.CallTo(() => _fakeHttpClientFactory.CreateClient(true)).Returns(_fakeHttpClientFacade);
-
-            _fleetManagerClient = new FleetManagerClient(_fakeHttpClientFactory);
         }
 
         [Test]
@@ -32,14 +25,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         {
             string AuthToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVh";
 
-            var response = new HttpResponseMessage()
-            {
-                StatusCode = HttpStatusCode.OK,
-                Content = new StringContent(AuthToken)
-            };
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                               AuthToken, HttpStatusCode.OK);
 
-            A.CallTo(() => _fakeHttpClientFacade.SendAsync(A<HttpRequestMessage>.Ignored, A<CancellationToken>.Ignored)).Returns(response);
+            var httpClient = new HttpClient(messageHandler);
+            httpClient.BaseAddress = new Uri("http://test.com");
 
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _fleetManagerClient = new FleetManagerClient(_fakeHttpClientFactory);
 
             var result = _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
 
@@ -56,10 +50,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         {
             var serializedProductIdentifier = JsonConvert.SerializeObject(GetProductIdentifiers());
 
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
-            response.Content = new StringContent(JsonConvert.SerializeObject(GetProductIdentifiers()));
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                               JsonConvert.SerializeObject(GetProductIdentifiers()), HttpStatusCode.OK);
 
-            A.CallTo(() => _fakeHttpClientFacade.SendAsync(A<HttpRequestMessage>.Ignored, A<CancellationToken>.Ignored)).Returns(response);
+            var httpClient = new HttpClient(messageHandler);
+            httpClient.BaseAddress = new Uri("http://test.com");
+
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _fleetManagerClient = new FleetManagerClient(_fakeHttpClientFactory);
 
             var result = _fleetManagerClient.GetCatalogue(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
 
@@ -83,4 +82,5 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             };
         }
     }
+
 }
