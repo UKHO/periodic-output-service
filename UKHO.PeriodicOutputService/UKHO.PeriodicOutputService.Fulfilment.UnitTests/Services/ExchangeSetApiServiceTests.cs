@@ -57,6 +57,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
                .ParamName
                .Should().Be("authTokenProvider");
+
         }
 
         [Test]
