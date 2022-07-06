@@ -23,7 +23,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
                 {
-                    var response = await _exchangeSetApiService.GetProductIdentifiersData(catalogueResponse.ProductIdentifiers);
+                    ExchangeSetGetBatchResponse? exchangeSetGetBatchResponse = await _exchangeSetApiService.GetProductIdentifiersData(catalogueResponse.ProductIdentifiers);
                     return "Fleet Manager full AVCS ProductIdentifiers received";
                 }
             }
