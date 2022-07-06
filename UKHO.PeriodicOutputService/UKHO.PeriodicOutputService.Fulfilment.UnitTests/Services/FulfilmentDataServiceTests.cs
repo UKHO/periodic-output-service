@@ -10,6 +10,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     {
         public IFulfilmentDataService fulfilmentDataService;
         public IFleetManagerService fakeFleetManagerService;
+        public IExchangeSetApiService fakeExchangeSetApiService;
+
         public FleetMangerGetAuthTokenResponse jwtauthUnpToken = new();
         public FleetMangerGetAuthTokenResponse jwtAuthJwtToken = new();
 
@@ -17,7 +19,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         public void Setup()
         {
             fakeFleetManagerService = A.Fake<IFleetManagerService>();
-            fulfilmentDataService = new FulfilmentDataService(fakeFleetManagerService);
+            fakeExchangeSetApiService = A.Fake<IExchangeSetApiService>();
+            fulfilmentDataService = new FulfilmentDataService(fakeFleetManagerService, fakeExchangeSetApiService);
         }
 
         [Test]
