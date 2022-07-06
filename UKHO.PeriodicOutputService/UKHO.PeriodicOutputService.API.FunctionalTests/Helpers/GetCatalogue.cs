@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
@@ -24,6 +25,33 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
             }
            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+        }
+        public async Task<List<string>> GetProductList(HttpResponseMessage httpResponse)
+        {
+            List<string> productIdentifiers = new();
+            
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                using (Stream stream = httpResponse.Content.ReadAsStream())
+                {
+                    XmlReaderSettings settings = new();
+                    settings.Async = true;
+                    settings.IgnoreWhitespace = true;
+
+                    using (XmlReader reader = XmlReader.Create(stream, settings))
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            if (reader.Name == "ShortName")
+                            {
+                                reader.Read();
+                                if (reader.HasValue) productIdentifiers.Add(reader.Value);
+                            }
+                        }
+                    }
+                }
+            }
+            return productIdentifiers;
         }
     }
 }
