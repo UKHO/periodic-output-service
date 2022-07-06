@@ -1,19 +1,19 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
-using UKHO.PeriodicOutputService.Fulfilment.Services;
-using UKHO.PeriodicOutputService.Common.Helpers;
 using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
-using System.Reflection;
-using Microsoft.ApplicationInsights.Extensibility;
+using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Fulfilment.Configuration;
+using UKHO.PeriodicOutputService.Fulfilment.Services;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
@@ -146,19 +146,27 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             );
 
             if (configuration != null)
+            {
                 serviceCollection.Configure<FleetManagerB2BApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
+                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentity"));
+                serviceCollection.Configure<ExchangeSetApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+            }
+
+            var essAzureADConfiguration = new ExchangeSetApiConfiguration();
+            configuration.Bind("ESSAzureADConfiguration", essAzureADConfiguration);
 
             serviceCollection.AddTransient<PosFulfilmentJob>();
 
             serviceCollection.AddScoped<IFleetManagerB2BApiConfiguration, FleetManagerB2BApiConfiguration>();
             serviceCollection.AddScoped<IFleetManagerService, FleetManagerService>();
             serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
+            serviceCollection.AddScoped<IAuthTokenProvider, AuthTokenProvider>();
 
-            serviceCollection.AddHttpClient<IFleetManagerClient, FleetManagerClient>(client =>
-            {
-                client.MaxResponseContentBufferSize = 2147483647;
-                client.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
-            });
+            serviceCollection.AddScoped<IExchangeSetApiService, ExchangeSetApiService>();
+
+            serviceCollection.AddHttpClient();
+            serviceCollection.AddTransient<IExchangeSetApiClient, ExchangeSetApiClient>();
+            serviceCollection.AddTransient<IFleetManagerClient, FleetManagerClient>();
         }
     }
 }
