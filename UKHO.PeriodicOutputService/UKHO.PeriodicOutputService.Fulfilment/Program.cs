@@ -148,7 +148,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             if (configuration != null)
             {
                 serviceCollection.Configure<FleetManagerB2BApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
-                serviceCollection.Configure<ExchangeSetApiConfiguration>(configuration.GetSection("ESSManagedIdentity"));
+                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentity"));
                 serviceCollection.Configure<ExchangeSetApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
             }
 
