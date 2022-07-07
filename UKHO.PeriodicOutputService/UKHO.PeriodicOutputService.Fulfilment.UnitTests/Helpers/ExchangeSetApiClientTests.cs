@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     [TestFixture]
     public class ExchangeSetApiClientTests
     {
-        private IExchangeSetApiClient _exchangeSetApiClient;
+        private IExchangeSetApiClient? _exchangeSetApiClient;
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]
