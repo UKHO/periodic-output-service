@@ -1,6 +1,4 @@
-﻿using UKHO.PeriodicOutputService.Fulfilment.Models;
-
-namespace UKHO.PeriodicOutputService.Fulfilment.Services
+﻿namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public class FulfilmentDataService : IFulfilmentDataService
     {
@@ -15,19 +13,22 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<string> CreatePosExchangeSet()
         {
-            FleetMangerGetAuthTokenResponse tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
+            var tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
 
-            if (!string.IsNullOrEmpty(tokenResponse.AuthToken))
+            if (string.IsNullOrEmpty(tokenResponse.AuthToken))
             {
-                FleetManagerGetCatalogueResponse catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
-
-                if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
-                {
-                    ExchangeSetGetBatchResponse? exchangeSetGetBatchResponse = await _exchangeSetApiService.GetProductIdentifiersData(catalogueResponse.ProductIdentifiers);
-                    return "Fleet Manager full AVCS ProductIdentifiers received";
-                }
+                return "Fleet Manager full AVCS ProductIdentifiers not received";
             }
-            return "Fleet Manager full AVCS ProductIdentifiers not received";
+
+            var catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
+
+            if (catalogueResponse.ProductIdentifiers == null || catalogueResponse.ProductIdentifiers.Count <= 0)
+            {
+                return "Fleet Manager full AVCS ProductIdentifiers not received";
+            }
+
+            var exchangeSetGetBatchResponse = await _exchangeSetApiService.GetProductIdentifiersData(catalogueResponse.ProductIdentifiers);
+            return "Fleet Manager full AVCS ProductIdentifiers received";
         }
     }
 }
