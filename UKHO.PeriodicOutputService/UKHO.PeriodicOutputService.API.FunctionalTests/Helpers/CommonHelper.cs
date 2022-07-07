@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
@@ -23,7 +24,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
             dynamic response = JsonConvert.DeserializeObject<dynamic>(bodyJson);
             return response.message;
-
+        }
+        public static async Task<dynamic> DeserializeAsyncResponse(this HttpResponseMessage httpResponseMessage)
+        {
+            string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
+            dynamic response = JsonConvert.DeserializeObject<dynamic>(bodyJson);
+            return response;
         }
 
         public static async Task<string> ReadAsStringAsync(this HttpResponseMessage httpResponseMessage)
@@ -45,6 +51,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         {
             var userCredentialsBytes = System.Text.Encoding.UTF8.GetBytes(username + ":" + password);
             return Convert.ToBase64String(userCredentialsBytes);
+        }
+
+        public static void SetBearerToken(this HttpRequestMessage requestMessage, string accessToken)
+        {
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
         }
     }
 }
