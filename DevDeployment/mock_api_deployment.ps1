@@ -1,12 +1,12 @@
 param (
     [Parameter(Mandatory = $true)] [string] $mockWebAppName,
     [Parameter(Mandatory = $true)] [string] $mockApipackagePath,
-    [Parameter(Mandatory = $true)] [string] $webAppResourceGroup
+    [Parameter(Mandatory = $true)] [string] $mockWebAppResourceGroup
 )
 
 echo "mockApipackagePath : $mockApipackagePath"
 echo "mockWebAppName : $mockWebAppName"
-echo "ResourceGroup : $webAppResourceGroup"
+echo "ResourceGroup : $mockWebAppResourceGroup"
 
 function DeployWebApp($webAppName, $package, $webAppRGroup){
     
@@ -17,9 +17,8 @@ function DeployWebApp($webAppName, $package, $webAppRGroup){
     if ( !$? ) { echo "Error while deplying webapp $webAppName" ; throw $_ }
 }
 
-
 echo "Deploying mock api ..."
-DeployWebApp $mockWebAppName $mockApipackagePath $webAppResourceGroup
+DeployWebApp $mockWebAppName $mockApipackagePath $mockWebAppResourceGroup
 
 if ( !$? ) { echo "Error while deploying mock api webapp" ; throw $_ }
 

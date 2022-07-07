@@ -2,7 +2,6 @@ variable "location" {
   type    = string
   default = "uksouth"
 }
-
 variable "resource_group_name" {
   type    = string
   default = "pos"
@@ -11,7 +10,8 @@ variable "resource_group_name" {
 locals {
   env_name           = lower(terraform.workspace)
   service_name       = "pos"
-  web_app_name       = "${local.service_name}-${local.env_name}-webapp"
+  web_app_name       = "${local.service_name}-${local.env_name}-lxs-webapp"
+  mock_web_app_name  = "${local.service_name}-${local.env_name}-mock-webapp"
   key_vault_name     = "${local.service_name}-ukho-${local.env_name}-kv"
 
   tags = {

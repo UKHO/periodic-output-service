@@ -19,6 +19,14 @@ variables:
     value: "any cpu"
   - name: BuildCounter
     value: $[counter(format('{0:yyyyMMdd}', pipeline.startTime), 1)]
+  - name: UKHOAssemblyCompany
+    value: "UK Hydrographic Office"
+  - name: UKHOAssemblyVersionPrefix
+    value: "1.0."
+  - name: UKHOAssemblyProduct
+    value: "Periodic Output Service"
+  - name: UKHOAssemblyCopyright
+    value: "Copyright © UK Hydrographic Office"
   - name: DeploymentPool
     value: "UKHO Ubuntu 1804"
   - name: Container
@@ -126,6 +134,13 @@ stages:
           clean: all
         displayName: "Dotnet Build publish WebJob"
         steps:
+          - task: PowerShell@2
+            displayName: "Set assembly version numbers based on build ID"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
+              arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"'
+
           - task: UseDotNet@2
             displayName: 'Use .NET Core 6.0.x sdk'
             inputs:
@@ -183,16 +198,67 @@ stages:
         steps:
 
           - task: PublishBuildArtifacts@1
-            displayName: "Publish terraform Artifacts"
+            displayName: "Publish Dev terraform Artifacts"
             inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\Deployment'
-              ArtifactName: terraformartifact
+              PathtoPublish: '$(Build.SourcesDirectory)\DevDeployment'
+              ArtifactName: devterraformartifact              
 
-      - job: BuildAndPublishMockAPIAndTerraform
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish QA and Live terraform Artifacts"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\QALiveDeployment'
+              ArtifactName: qaliveterraformartifact
+
+      - job: PublishFunctionalTests
         workspace:
           clean: all
-        displayName: "Build and Publish Mock API And Terraform"
+        displayName: "Publish Functional Tests"
         steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET Core 6.0.x sdk'
+            inputs:
+              packageType: sdk
+              useGlobalJson: true
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+
+          - task: DotNetCoreCLI@2
+            displayName: ".Net Core - NuGet restore"
+            inputs:
+              command: restore
+              projects: |
+                **/*.csproj
+              feedsToUse: config
+              noCache: true
+              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+
+          - task: DotNetCoreCLI@2
+            displayName: "Publish functional test"
+            inputs:
+              command: "publish"
+              publishWebProjects: false
+              projects: "**/*UKHO.PeriodicOutputService.API.FunctionalTests.csproj"
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\UKHO.PeriodicOutputService.API.FunctionalTests'
+              zipAfterPublish: false
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish Functional test Artifact"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)\UKHO.PeriodicOutputService.API.FunctionalTests'
+              ArtifactName: functionaltests
+        
+      - job: BuildAndPublishMockAPI
+        workspace:
+          clean: all
+        displayName: "Build and Publish Mock API"
+        steps:
+          - task: PowerShell@2
+            displayName: "Set assembly version numbers based on build ID"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
+              arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.FleetManagerMock.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
+
           - task: UseDotNet@2
             displayName: 'Use .NET Core 6.0.x sdk'
             inputs:
@@ -234,12 +300,6 @@ stages:
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\MockWebAPI'
               ArtifactName: MockWebAPI 
-
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish Mock terraform Artifacts"
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\MockApiDeployment'
-              ArtifactName: mockapiterraformartifact              
      
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
@@ -247,8 +307,17 @@ stages:
       - group: "ESS-Dev-Variables"
       - group: "ESS-Deployment-Variables-DEV"
       - group: "POS-Dev-Variables"
+      - name: "EssAuthorizationConfiguration.TenantId"
+        value: $(TenantId)
+      - name: "EssAuthorizationConfiguration.AutoTestClientId"
+        value: $(AutoTestClientId_Authed)
+      - name: "EssAuthorizationConfiguration.AutoTestClientSecret"
+        value: $(AutoTestClientSecret_Authed)
+      - name: "EssAuthorizationConfiguration.EssClientId"
+        value: $(ESSClientId)
+
     jobs:
-      - deployment: DevDeployTerraform
+      - deployment: DevDeployApp
         displayName: "Dev - Deploy Terraform and Dotnet App"
         environment: "Ess-Dev"
         pool: $(DeploymentPool)
@@ -259,42 +328,54 @@ stages:
           runOnce:
             deploy:
               steps:
-                - template: Deployment/templates/continuous-deployment.yml
+                - template: DevDeployment/templates/continuous-deployment.yml
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
 
-  - stage: QCdeploy
-    dependsOn:
-    - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
-    displayName: "QCdeploy (inc terraform, mock webapp deploy)"
-    jobs:
-      - deployment: QCDeployApp
-        displayName: "QC - deploy terraform and WebApps"
-        environment: "Ess-Dev"
+      - job: FunctionalTests
+        dependsOn:
+        - DevDeployApp
         pool: $(DeploymentPool)
-        container: ${{variables.Container}}
+        displayName: "Dev Functional Automated Tests"
         workspace:
-          clean: all
-        variables:
-          - group: "ESS-Deployment-Variables-DEV"
-          - group: "ESS-Dev-Variables"
-          - group: "POS-Dev-Variables"
-          - name: "Environment"
-            value: "qc"
+         clean: all
+        steps:
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download Functional test Artifact"
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'functionaltests'
+                    downloadPath: '$(Build.SourcesDirectory)'
 
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - template: MockApiDeployment/templates/mock-api-continuous-deployment.yml
-                  parameters:
-                    AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                - task: FileTransform@1
+                  displayName: "File Transform: functionaltests"
+                  inputs:
+                    folderPath: '$(Build.SourcesDirectory)/functionaltests/'
+                    fileType: json
+                    targetFiles: '**/appsettings.json'
+
+                - task: UseDotNet@2
+                  displayName: 'Use .NET Core sdk'
+                  inputs:
+                    packageType: sdk
+                    version: 6.0.x
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run Functional tests"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    testRunTitle: "Dev-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
 
   - stage: QAdeploy
     dependsOn:
     - Devdeploy
-    - QCdeploy
     displayName: "QAdeploy (inc terraform, webapp deploy)"
     variables:
       - group: "ESS-QA-Variables"
@@ -302,7 +383,7 @@ stages:
       - group: "POS-QA-Variables"
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     jobs:
-      - deployment: QADeployTerraform
+      - deployment: QADeployApp
         displayName: "QA - Deploy Terraform and Dotnet App"
         environment: "Ess-Qa"
         pool: $(DeploymentPool)
@@ -313,7 +394,7 @@ stages:
           runOnce:
             deploy:
               steps:
-                - template: Deployment/templates/continuous-deployment.yml
+                - template: QALiveDeployment/templates/continuous-deployment.yml
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-QA-A-008-02"

@@ -12,8 +12,8 @@ steps:
     name: TerraformDeploy
     inputs:
       targetType: filePath
-      filePath: '$(Pipeline.Workspace)/terraformartifact/terraform_conditional_run.ps1'
-      arguments: '-deploymentResourceGroupName $(DeploymentResourceGroupName) -deploymentStorageAccountName $(DeploymentStorageAccountName) -workSpace $(Environment) -continueEvenIfResourcesAreGettingDestroyed $${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }} -terraformJsonOutputFile $(Pipeline.Workspace)/terraformartifact/terraform_output.json'
+      filePath: '$(Pipeline.Workspace)/qaliveterraformartifact/terraform_conditional_run.ps1'
+      arguments: '-deploymentResourceGroupName $(DeploymentResourceGroupName) -deploymentStorageAccountName $(DeploymentStorageAccountName) -workSpace $(Environment) -continueEvenIfResourcesAreGettingDestroyed $${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }} -terraformJsonOutputFile $(Pipeline.Workspace)/qaliveterraformartifact/terraform_output.json'
     env:
       ARM_CLIENT_ID: $(TERRAFORM-CLIENT-ID)
       ARM_CLIENT_SECRET: $(TERRAFORM-CLIENT-SECRET)
@@ -32,9 +32,9 @@ steps:
       targetFiles: '**/appsettings.json'
 
   - task: AzureWebApp@1
-    displayName: "Azure App Deploy: pos-$(Environment)-webapp"
+    displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp"
     inputs:
       azureSubscription: "${{ parameters.AzureSubscription }}"
       appType: webApp
-      appName: "$(TerraformDeploy.WEB_APP_NAME)"
+      appName: "$(WEB_APP_NAME)"
       package: "$(Pipeline.Workspace)/PeriodicOutputService/PeriodicOutputFulfilmentService.zip"

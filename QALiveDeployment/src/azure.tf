@@ -9,7 +9,7 @@ terraform {
   required_version = "=1.1.9"
   backend "azurerm" {
     container_name = "tfstate"
-    key            = "posmockapiterraform.deployment.tfplan"
+    key            = "posterraform.deployment.tfplan"
   }
 }
 
@@ -17,3 +17,8 @@ provider "azurerm" {
   features {}
 }
 
+provider "azurerm" {
+  features {}
+  alias = "build_agent"
+  subscription_id = var.agent_subscription_id
+}
