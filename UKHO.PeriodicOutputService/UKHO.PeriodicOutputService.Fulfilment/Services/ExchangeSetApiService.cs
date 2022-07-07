@@ -15,9 +15,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private readonly IAuthTokenProvider _authTokenProvider;
         private readonly ILogger<ExchangeSetApiService> _logger;
 
-        public ExchangeSetApiService(ILogger<ExchangeSetApiService>? logger,
-                                     IOptions<ExchangeSetApiConfiguration>? exchangeSetApiConfiguration,
-                                     IExchangeSetApiClient? exchangeSetApiClient, IAuthTokenProvider? authTokenProvider)
+        public ExchangeSetApiService(ILogger<ExchangeSetApiService> logger,
+                                     IOptions<ExchangeSetApiConfiguration> exchangeSetApiConfiguration,
+                                     IExchangeSetApiClient exchangeSetApiClient, IAuthTokenProvider authTokenProvider)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _exchangeSetApiConfiguration = exchangeSetApiConfiguration ?? throw new ArgumentNullException(nameof(exchangeSetApiConfiguration));
