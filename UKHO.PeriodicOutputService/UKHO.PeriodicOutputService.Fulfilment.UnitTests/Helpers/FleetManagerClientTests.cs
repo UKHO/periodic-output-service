@@ -11,7 +11,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     [TestFixture]
     public class FleetManagerClientTests
     {
-        private IFleetManagerClient _fleetManagerClient;
+        private IFleetManagerClient? _fleetManagerClient;
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]

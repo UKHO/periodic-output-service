@@ -57,6 +57,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
                .ParamName
                .Should().Be("authTokenProvider");
+
         }
 
         [Test]
@@ -80,8 +81,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
-                Assert.That(!string.IsNullOrEmpty(response.Links.ExchangeSetFileUri.Href), Is.True);
-                Assert.That(response.RequestedProductsNotInExchangeSet, Is.Null);
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
             });
         }
 
