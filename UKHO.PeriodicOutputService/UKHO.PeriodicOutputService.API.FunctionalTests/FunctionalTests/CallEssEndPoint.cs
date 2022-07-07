@@ -18,7 +18,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         static FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
 
         List<string> productIdentifiers = new();
-        dynamic unpResponse;
+        HttpResponseMessage unpResponse;
 
         [OneTimeSetUp]
         public async Task Setup()
