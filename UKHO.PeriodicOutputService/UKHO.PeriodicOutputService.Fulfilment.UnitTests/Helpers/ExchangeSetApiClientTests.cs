@@ -41,7 +41,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             Assert.Multiple(() =>
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(deSerializedResult.ExchangeSetCellCount, Is.EqualTo(GetValidExchangeSetGetBatchResponse().ExchangeSetCellCount));
+                Assert.That(deSerializedResult, Has.Count.EqualTo(GetValidExchangeSetGetBatchResponse().ExchangeSetCellCount));
 
             });
         }
