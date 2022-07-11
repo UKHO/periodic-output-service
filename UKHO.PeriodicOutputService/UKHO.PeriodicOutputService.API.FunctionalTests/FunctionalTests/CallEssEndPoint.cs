@@ -1,5 +1,6 @@
 ﻿using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
+using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
@@ -41,17 +42,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        public async Task WhenICallTheExchangeSetApiWithValidProductIdentifiers_ThenValidrequestedProductCountAndexchangeSetCellCountIsReturned()
+        public async Task WhenICallTheExchangeSetApiWithValidProductIdentifiers_ThenANonZerorequestedProductCountAndexchangeSetCellCountIsReturned()
         {
-            var productIdenResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
-            Assert.That((int)productIdenResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 401.");
+            var apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
-            dynamic prodId_message = await CommonHelper.DeserializeAsyncResponse(productIdenResponse);
-            Assert.That(prodId_message._links.exchangeSetBatchStatusUri.href, Is.Not.Null,"Exchange Set Batch Status Uri is null");
-            Assert.That(prodId_message._links.exchangeSetBatchDetailsUri.href, Is.Not.Null,"Exchange Set Batch Deatils Uri is null");
-            Assert.That(prodId_message._links.exchangeSetFileUri.href, Is.Not.Null,"Exchange Set File Uri is null");
-            Assert.That((int)prodId_message.requestedProductCount, Is.EqualTo(3155), $"Incorrect Requested Product Count is returned {prodId_message.requestedProductCount}, instead of the expected status 3155.");
-            Assert.That((int)prodId_message.exchangeSetCellCount, Is.EqualTo(3155), $"Incorrect Exchange Set Cell Count is returned {prodId_message.exchangeSetCellCount}, instead of the expected status 3155.");
+            //verify model structure
+            await apiResponse.CheckModelStructureForSuccessResponse();
         }
 
         [Test]
@@ -59,20 +56,17 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             productIdentifiers.Add("ABCDEFGH"); //Adding invalid product identifier in the list
 
-            var productIdenResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
-            Assert.That((int)productIdenResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 401.");
+            var apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
-            dynamic prodId_message = await CommonHelper.DeserializeAsyncResponse(productIdenResponse);
-            string requestedProductCount = prodId_message.requestedProductCount;
-            Assert.That((int)prodId_message.requestedProductCount, Is.EqualTo(3156), $"Incorrect Requested Product Count is returned {prodId_message.requestedProductCount}, instead of the expected status 3156.");
-            Assert.That((int)prodId_message.exchangeSetCellCount, Is.EqualTo(3155), $"Incorrect Exchange Set Cell Count is returned {prodId_message.exchangeSetCellCount}, instead of the expected status 3155.");
+            //verify model structure
+            await apiResponse.CheckModelStructureForSuccessResponse();
 
-            string InvalidProductName = prodId_message.requestedProductsNotInExchangeSet[0].productName;
-            string InvalidProductReason = prodId_message.requestedProductsNotInExchangeSet[0].reason;
-            Assert.That(InvalidProductName, Is.EqualTo("ABCDEFGH"), $"Incorrect Product Name is returned {InvalidProductName}, instead of the expected Product Name ABCDEFGH.");
-            Assert.That(InvalidProductReason, Is.EqualTo("invalidProduct"), $"Incorrect reason is returned {InvalidProductReason}, instead of the expected reason as invalidProduct.");
+            var apiResponseData = await apiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
 
-            productIdentifiers.Remove("ABCDEFGH"); //Removing invalid product identifier from list so that other test won't get affected.
+            //Check RequestedProductsNotInExchangeSet is not empty
+            Assert.IsNotEmpty(apiResponseData.RequestedProductsNotInExchangeSet, "Response body returns Empty for RequestedProductsNotInExchangeSet, instead of Not Empty");
+            Assert.That(apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault(p => p.ProductName.Equals("ABCDEFGH")).Reason, Is.EqualTo("invalidProduct"), $"Exchange set returned Reason {apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault().Reason}, instead of expected Reason 'invalidProduct'");
         }
     }
 }
