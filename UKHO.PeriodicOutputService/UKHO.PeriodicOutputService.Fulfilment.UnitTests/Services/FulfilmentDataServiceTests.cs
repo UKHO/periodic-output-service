@@ -26,28 +26,28 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             fulfilmentDataService = new FulfilmentDataService(fakeFleetManagerService, fakeExchangeSetApiService, fakeFssBatchService);
         }
 
-        [Test]
-        public async Task WhenPOSWebjobTrigger_ThenCallFleetManager_GetFullAVCSCatalogueXML_And_ExtractProductIdentifiersSuccessfully()
-        {
-            jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
-            jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
+        ////[Test]
+        ////public async Task WhenPOSWebjobTrigger_ThenCallFleetManager_GetFullAVCSCatalogueXML_And_ExtractProductIdentifiersSuccessfully()
+        ////{
+        ////    jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
+        ////    jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
 
-            FleetManagerGetCatalogueResponse fleetManagerGetCatalogue = new()
-            {
-                StatusCode = HttpStatusCode.OK,
-                ProductIdentifiers = new() { "Product1", "Product2" }
-            };
+        ////    FleetManagerGetCatalogueResponse fleetManagerGetCatalogue = new()
+        ////    {
+        ////        StatusCode = HttpStatusCode.OK,
+        ////        ProductIdentifiers = new() { "Product1", "Product2" }
+        ////    };
 
-            A.CallTo(() => fakeFleetManagerService.GetJwtAuthUnpToken())
-              .Returns(jwtauthUnpToken);
-            A.CallTo(() => fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
-              .Returns(fleetManagerGetCatalogue);
+        ////    A.CallTo(() => fakeFleetManagerService.GetJwtAuthUnpToken())
+        ////      .Returns(jwtauthUnpToken);
+        ////    A.CallTo(() => fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
+        ////      .Returns(fleetManagerGetCatalogue);
 
-            string result = await fulfilmentDataService.CreatePosExchangeSet();
+        ////    string result = await fulfilmentDataService.CreatePosExchangeSet();
 
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.EqualTo("Fleet Manager full AVCS ProductIdentifiers received"));
-        }
+        ////    Assert.That(result, Is.Not.Null);
+        ////    Assert.That(result, Is.EqualTo("Fleet Manager full AVCS ProductIdentifiers received"));
+        ////}
 
         [Test]
         public async Task Does_CreatePosExchangeSet_Check_If_GetJwtAuthUnpToken_IsNull()

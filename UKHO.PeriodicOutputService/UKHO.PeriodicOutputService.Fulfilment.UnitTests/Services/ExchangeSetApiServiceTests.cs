@@ -34,29 +34,29 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeExchangeSetApiService = new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider);
         }
 
-        [Test]
-        public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
-        {
-            Assert.Throws<ArgumentNullException>(
-                () => new ExchangeSetApiService(null, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
-                .ParamName
-                .Should().Be("logger");
+        ////[Test]
+        ////public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
+        ////{
+        ////    Assert.Throws<ArgumentNullException>(
+        ////        () => new ExchangeSetApiService(null, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
+        ////        .ParamName
+        ////        .Should().Be("logger");
 
-            Assert.Throws<ArgumentNullException>(
-                () => new ExchangeSetApiService(_fakeLogger, null, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
-                .ParamName
-                .Should().Be("exchangeSetApiConfiguration");
+        ////    Assert.Throws<ArgumentNullException>(
+        ////        () => new ExchangeSetApiService(_fakeLogger, null, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
+        ////        .ParamName
+        ////        .Should().Be("exchangeSetApiConfiguration");
 
-            Assert.Throws<ArgumentNullException>(
-               () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, null, _fakeAuthTokenProvider))
-               .ParamName
-               .Should().Be("exchangeSetApiClient");
+        ////    Assert.Throws<ArgumentNullException>(
+        ////       () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, null, _fakeAuthTokenProvider))
+        ////       .ParamName
+        ////       .Should().Be("exchangeSetApiClient");
 
-            Assert.Throws<ArgumentNullException>(
-               () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
-               .ParamName
-               .Should().Be("authTokenProvider");
-        }
+        ////    Assert.Throws<ArgumentNullException>(
+        ////       () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
+        ////       .ParamName
+        ////       .Should().Be("authTokenProvider");
+        ////}
 
         [Test]
         public async Task DoesGetProductIdentifiersData_Returns_ValidData_WhenValidProductIdentifiersArePassed()
