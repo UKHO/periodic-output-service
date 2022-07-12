@@ -14,7 +14,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _httpClient = httpClientFactory.CreateClient();
         }
 
-        public async Task<HttpResponseMessage> GetProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken)
+        public async Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken)
         {
             string uri = $"{baseUrl}/productData/productIdentifiers";
 
@@ -27,7 +27,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 if (accessToken != null)
                 {
-                    httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                    httpRequestMessage.SetBearerToken(accessToken);
                 }
 
                 return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);

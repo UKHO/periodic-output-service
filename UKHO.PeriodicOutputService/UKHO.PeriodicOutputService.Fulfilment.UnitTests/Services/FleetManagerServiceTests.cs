@@ -13,7 +13,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     public class FleetManagerServiceTests
     {
         private IOptions<FleetManagerB2BApiConfiguration> _fakeFleetManagerB2BApiConfig;
-        private IFleetManagerClient _fakeFleetManagerClient;
+        private IFleetManagerApiClient _fakeFleetManagerClient;
         private IFleetManagerService _fakeFleetManagerService;
 
 
@@ -21,7 +21,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         public void Setup()
         {
             _fakeFleetManagerB2BApiConfig = Options.Create(new FleetManagerB2BApiConfiguration() { BaseUrl = "https://test/api", UserName = "TestUser", Password = "TestPassword", SubscriptionKey = "TestSubscriptionKey" });
-            _fakeFleetManagerClient = A.Fake<IFleetManagerClient>();
+            _fakeFleetManagerClient = A.Fake<IFleetManagerApiClient>();
 
             _fakeFleetManagerService = new FleetManagerService(_fakeFleetManagerB2BApiConfig, _fakeFleetManagerClient);
         }

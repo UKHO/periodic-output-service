@@ -2,6 +2,7 @@
 using UKHO.PeriodicOutputService.Fulfilment.Logging;
 using System.Diagnostics.CodeAnalysis;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
+using UKHO.PeriodicOutputService.Common.Helpers;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
@@ -19,20 +20,18 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
         public async Task ProcessFulfilmentJob()
         {
-            Guid tempCorrelationId = Guid.NewGuid();
             try
             {
-                _logger.LogInformation(EventIds.POSRequestStarted.ToEventId(), "Periodic Output Service Web job started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), tempCorrelationId);
+                _logger.LogInformation(EventIds.POSRequestStarted.ToEventId(), "Periodic Output Service Web job started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
                 string result = await _fulfilmentDataService.CreatePosExchangeSet();
 
-                _logger.LogInformation(EventIds.POSRequestCompleted.ToEventId(), "Periodic Output Service Web job completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), tempCorrelationId);
+                _logger.LogInformation(EventIds.POSRequestCompleted.ToEventId(), "Periodic Output Service Web job completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message, ex.StackTrace);
-                _logger.LogError(EventIds.UnhandledException.ToEventId(), ex.Message, ex.StackTrace);
-                //_logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service web job set at {DateTime} | Exception:{Message} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, tempCorrelationId);
+                _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service web job set at {DateTime} | Exception:{Message} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
             }
         }
     }

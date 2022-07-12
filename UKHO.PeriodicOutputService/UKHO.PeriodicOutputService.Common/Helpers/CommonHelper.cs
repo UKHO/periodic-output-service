@@ -2,6 +2,8 @@
 {
     public static class CommonHelper
     {
+        public static Guid CorrelationID { get; set; } = Guid.NewGuid();
+
         public static string GetBase64EncodedCredentials(string userName, string password)
         {
             var userCredentialsBytes = System.Text.Encoding.UTF8.GetBytes(userName + ":" + password);

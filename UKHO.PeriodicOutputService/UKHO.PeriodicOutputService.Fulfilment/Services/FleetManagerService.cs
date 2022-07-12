@@ -9,10 +9,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
     public class FleetManagerService : IFleetManagerService
     {
         private readonly IOptions<FleetManagerB2BApiConfiguration> _fleetManagerB2BApiConfig;
-        private readonly IFleetManagerClient _fleetManagerClient;
+        private readonly IFleetManagerApiClient _fleetManagerClient;
 
         public FleetManagerService(IOptions<FleetManagerB2BApiConfiguration> fleetManagerB2BApiConfig,
-                                   IFleetManagerClient fleetManagerClient)
+                                   IFleetManagerApiClient fleetManagerClient)
         {
             _fleetManagerB2BApiConfig = fleetManagerB2BApiConfig;
             _fleetManagerClient = fleetManagerClient;

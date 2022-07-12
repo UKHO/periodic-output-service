@@ -2,6 +2,6 @@
 {
     public interface IExchangeSetApiClient
     {
-        Task<HttpResponseMessage> GetProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken);
+        Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken);
     }
 }

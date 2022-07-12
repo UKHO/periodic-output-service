@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace UKHO.PeriodicOutputService.Common.Helpers
+namespace UKHO.PeriodicOutputService.Common.Configuration
 {
     public class EssManagedIdentityConfiguration
     {
         [ExcludeFromCodeCoverage]
-        public string ClientId { get; set; }
+        public double DeductTokenExpiryMinutes { get; set; }
     }
 }

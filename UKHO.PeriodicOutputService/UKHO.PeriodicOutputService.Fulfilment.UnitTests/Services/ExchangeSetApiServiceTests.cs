@@ -17,9 +17,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IOptions<ExchangeSetApiConfiguration> _fakeExchangeSetApiConfiguration;
         private IExchangeSetApiClient _fakeExchangeSetApiClient;
         private IExchangeSetApiService _fakeExchangeSetApiService;
-        private IAuthTokenProvider _fakeAuthTokenProvider;
+        private IAuthEssTokenProvider _fakeAuthTokenProvider;
         private ILogger<ExchangeSetApiService> _fakeLogger;
-
 
         [SetUp]
         public void Setup()
@@ -28,7 +27,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             _fakeExchangeSetApiClient = A.Fake<IExchangeSetApiClient>();
 
-            _fakeAuthTokenProvider = A.Fake<IAuthTokenProvider>();
+            _fakeAuthTokenProvider = A.Fake<IAuthEssTokenProvider>();
 
             _fakeLogger = A.Fake<ILogger<ExchangeSetApiService>>();
 
@@ -62,7 +61,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public async Task DoesGetProductIdentifiersData_Returns_ValidData_WhenValidProductIdentifiersArePassed()
         {
-            A.CallTo(() => _fakeExchangeSetApiClient.GetProductIdentifiersDataAsync
+            A.CallTo(() => _fakeExchangeSetApiClient.PostProductIdentifiersDataAsync
             (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
                   {
@@ -76,7 +75,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored));
 
-            ExchangeSetGetBatchResponse response = await _fakeExchangeSetApiService.GetProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _fakeExchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
@@ -88,7 +87,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public async Task DoesGetProductIdentifiersData_Returns_ValidData_WhenInvalidProductIdentifiersArePassed()
         {
-            A.CallTo(() => _fakeExchangeSetApiClient.GetProductIdentifiersDataAsync
+            A.CallTo(() => _fakeExchangeSetApiClient.PostProductIdentifiersDataAsync
             (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
                   {
@@ -102,7 +101,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored));
 
-            ExchangeSetGetBatchResponse response = await _fakeExchangeSetApiService.GetProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _fakeExchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
@@ -110,7 +109,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             });
         }
 
-        private ExchangeSetGetBatchResponse GetValidExchangeSetGetBatchResponse() => new ExchangeSetGetBatchResponse
+        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
         {
             ExchangeSetCellCount = GetProductIdentifiers().Count,
             RequestedProductCount = GetProductIdentifiers().Count,
@@ -131,7 +130,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             }
         };
 
-        private ExchangeSetGetBatchResponse GetInValidExchangeSetGetBatchResponse() => new ExchangeSetGetBatchResponse
+        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
         {
             ExchangeSetCellCount = 0,
             RequestedProductCount = GetProductIdentifiers().Count,

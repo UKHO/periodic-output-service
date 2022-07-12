@@ -34,9 +34,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _exchangeSetApiClient = new ExchangeSetApiClient(_fakeHttpClientFactory);
 
-            var result = _exchangeSetApiClient.GetProductIdentifiersDataAsync("http://test.com", GetProductIdentifiers(), "asdfsa");
+            var result = _exchangeSetApiClient.PostProductIdentifiersDataAsync("http://test.com", GetProductIdentifiers(), "asdfsa");
 
-            var deSerializedResult = JsonConvert.DeserializeObject<ExchangeSetGetBatchResponse>(result.Result.Content.ReadAsStringAsync().Result);
+            var deSerializedResult = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(result.Result.Content.ReadAsStringAsync().Result);
 
             Assert.Multiple(() =>
             {
@@ -56,7 +56,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             };
         }
 
-        private ExchangeSetGetBatchResponse GetValidExchangeSetGetBatchResponse() => new ExchangeSetGetBatchResponse
+        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
         {
             ExchangeSetCellCount = GetProductIdentifiers().Count,
             RequestedProductCount = GetProductIdentifiers().Count,

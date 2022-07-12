@@ -11,7 +11,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     [TestFixture]
     public class FleetManagerClientTests
     {
-        private IFleetManagerClient _fleetManagerClient;
+        private IFleetManagerApiClient _fleetManagerClient;
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]
@@ -33,7 +33,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
 
-            _fleetManagerClient = new FleetManagerClient(_fakeHttpClientFactory);
+            _fleetManagerClient = new FleetManagerApiClient(_fakeHttpClientFactory);
 
             var result = _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
 
@@ -58,7 +58,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
 
-            _fleetManagerClient = new FleetManagerClient(_fakeHttpClientFactory);
+            _fleetManagerClient = new FleetManagerApiClient(_fakeHttpClientFactory);
 
             var result = _fleetManagerClient.GetCatalogue(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
 

@@ -1,12 +1,11 @@
 ﻿
-
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
-    public class FleetManagerClient : IFleetManagerClient
+    public class FleetManagerApiClient : IFleetManagerApiClient
     {
         private readonly HttpClient _httpClient;
 
-        public FleetManagerClient(IHttpClientFactory httpClientFactory)
+        public FleetManagerApiClient(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
             _httpClient.MaxResponseContentBufferSize = 2147483647;
@@ -21,11 +20,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             if (!string.IsNullOrEmpty(base64Credentials))
             {
-                httpRequestMessage.Headers.Add("userPass", base64Credentials);
+                httpRequestMessage.AddHeader("userPass", base64Credentials);
             }
             if (!string.IsNullOrEmpty(subscriptionKey))
             {
-                httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                httpRequestMessage.AddHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
             }
 
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
@@ -39,11 +38,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             if (!string.IsNullOrEmpty(accessToken))
             {
-                httpRequestMessage.Headers.Add("token", accessToken);
+                httpRequestMessage.AddHeader("token", accessToken);
             }
             if (!string.IsNullOrEmpty(subscriptionKey))
             {
-                httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                httpRequestMessage.AddHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
             }
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
