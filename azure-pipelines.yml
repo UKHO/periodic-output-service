@@ -419,7 +419,16 @@ stages:
       - group: "ESS-QA-Variables"
       - group: "ESS-Deployment-Variables-QA"
       - group: "POS-QA-Variables"
+      - name: "EssAuthorizationConfiguration.TenantId"
+        value: $(TenantId)
+      - name: "EssAuthorizationConfiguration.AutoTestClientId"
+        value: $(AutoTestClientId_Authed)
+      - name: "EssAuthorizationConfiguration.AutoTestClientSecret"
+        value: $(AutoTestClientSecret_Authed)
+      - name: "EssAuthorizationConfiguration.EssClientId"
+        value: $(ESSClientId)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+
     jobs:
       - deployment: QADeployApp
         displayName: "QA - Deploy Terraform and Dotnet App"
@@ -436,3 +445,44 @@ stages:
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
+
+      - job: FunctionalTests
+        dependsOn:
+        - QADeployApp
+        pool: $(DeploymentPool)
+        displayName: "QA Functional Automated Tests"
+        workspace:
+         clean: all
+        steps:
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download Functional test Artifact"
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'functionaltests'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: FileTransform@1
+                  displayName: "File Transform: functionaltests"
+                  inputs:
+                    folderPath: '$(Build.SourcesDirectory)/functionaltests/'
+                    fileType: json
+                    targetFiles: '**/appsettings.json'
+
+                - task: UseDotNet@2
+                  displayName: 'Use .NET Core sdk'
+                  inputs:
+                    packageType: sdk
+                    version: 6.0.x
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run Functional tests"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    testRunTitle: "QA-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+
