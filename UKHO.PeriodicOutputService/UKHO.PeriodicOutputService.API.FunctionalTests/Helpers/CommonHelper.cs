@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
+﻿using System.Xml;
 using Newtonsoft.Json;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
@@ -23,7 +18,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
             dynamic response = JsonConvert.DeserializeObject<dynamic>(bodyJson);
             return response.message;
-
+        }
+        public static async Task<dynamic> DeserializeAsyncResponse(this HttpResponseMessage httpResponseMessage)
+        {
+            string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
+            dynamic response = JsonConvert.DeserializeObject<dynamic>(bodyJson);
+            return response;
         }
 
         public static async Task<string> ReadAsStringAsync(this HttpResponseMessage httpResponseMessage)

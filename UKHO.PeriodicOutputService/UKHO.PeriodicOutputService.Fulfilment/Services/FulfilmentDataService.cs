@@ -1,6 +1,4 @@
-﻿using UKHO.PeriodicOutputService.Fulfilment.Models;
-
-namespace UKHO.PeriodicOutputService.Fulfilment.Services
+﻿namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public class FulfilmentDataService : IFulfilmentDataService
     {
@@ -17,23 +15,24 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<string> CreatePosExchangeSet()
         {
-            FleetMangerGetAuthTokenResponse tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
+            var tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
 
-            if (!string.IsNullOrEmpty(tokenResponse.AuthToken))
+            if (string.IsNullOrEmpty(tokenResponse.AuthToken))
             {
-                FleetManagerGetCatalogueResponse catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
+                return "Fleet Manager full AVCS ProductIdentifiers not received";
+            }
 
-                if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
+            var catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
+
+            if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
+            {
+                var response = await _exchangeSetApiService.PostProductIdentifiersData(catalogueResponse.ProductIdentifiers);
+
+                if (response != null)
                 {
-                    var response = await _exchangeSetApiService.PostProductIdentifiersData(catalogueResponse.ProductIdentifiers);
-
-                    if (response != null)
-                    {
-                        string batchStatus = await _fssBatchService.CheckIfBatchCommitted(response.Links.ExchangeSetBatchStatusUri.Href);
-                    }
-
-                    return "Fleet Manager full AVCS ProductIdentifiers received";
+                    string batchStatus = await _fssBatchService.CheckIfBatchCommitted(response.Links.ExchangeSetBatchStatusUri.Href);
                 }
+                return "Fleet Manager full AVCS ProductIdentifiers received";
             }
             return "Fleet Manager full AVCS ProductIdentifiers not received";
         }

@@ -34,29 +34,31 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeExchangeSetApiService = new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider);
         }
 
-        ////[Test]
-        ////public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
-        ////{
-        ////    Assert.Throws<ArgumentNullException>(
-        ////        () => new ExchangeSetApiService(null, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
-        ////        .ParamName
-        ////        .Should().Be("logger");
+////        [Test]
+////        public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
+////        {
+////#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+////            Assert.Throws<ArgumentNullException>(
+////                () => new ExchangeSetApiService(null, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
+////                .ParamName
+////                .Should().Be("logger");
 
-        ////    Assert.Throws<ArgumentNullException>(
-        ////        () => new ExchangeSetApiService(_fakeLogger, null, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
-        ////        .ParamName
-        ////        .Should().Be("exchangeSetApiConfiguration");
+////        ////    Assert.Throws<ArgumentNullException>(
+////        ////        () => new ExchangeSetApiService(_fakeLogger, null, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
+////        ////        .ParamName
+////        ////        .Should().Be("exchangeSetApiConfiguration");
 
-        ////    Assert.Throws<ArgumentNullException>(
-        ////       () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, null, _fakeAuthTokenProvider))
-        ////       .ParamName
-        ////       .Should().Be("exchangeSetApiClient");
+////        ////    Assert.Throws<ArgumentNullException>(
+////        ////       () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, null, _fakeAuthTokenProvider))
+////        ////       .ParamName
+////        ////       .Should().Be("exchangeSetApiClient");
 
-        ////    Assert.Throws<ArgumentNullException>(
-        ////       () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
-        ////       .ParamName
-        ////       .Should().Be("authTokenProvider");
-        ////}
+////            Assert.Throws<ArgumentNullException>(
+////               () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
+////               .ParamName
+////               .Should().Be("authTokenProvider");
+////#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+////        }
 
         [Test]
         public async Task DoesGetProductIdentifiersData_Returns_ValidData_WhenValidProductIdentifiersArePassed()
@@ -79,8 +81,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
-                Assert.That(!string.IsNullOrEmpty(response.Links.ExchangeSetFileUri.Href), Is.True);
-                Assert.That(response.RequestedProductsNotInExchangeSet, Is.Null);
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
             });
         }
 
