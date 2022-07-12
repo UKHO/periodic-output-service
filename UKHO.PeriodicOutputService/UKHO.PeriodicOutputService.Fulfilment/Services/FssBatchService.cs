@@ -30,11 +30,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string batchStatus = "";
             var startTime = DateTime.UtcNow;
 
-            _logger.LogInformation("Getting access token to call FSS Batch Status endpoint started");
+            _logger.LogInformation("Getting access token to call FSS Batch Status endpoint started - {0}", _fssApiConfiguration.Value.FssClientId);
 
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            _logger.LogInformation("Getting access token to call FSS Batch Status endpoint completed");
+            _logger.LogInformation("Getting access token to call FSS Batch Status endpoint completed - {0}", accessToken);
 
             while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(1))
             {
