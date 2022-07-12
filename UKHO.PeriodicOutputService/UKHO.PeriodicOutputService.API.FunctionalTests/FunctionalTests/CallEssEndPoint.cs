@@ -42,7 +42,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        public async Task WhenICallTheExchangeSetApiWithValidProductIdentifiers_ThenANonZerorequestedProductCountAndexchangeSetCellCountIsReturned()
+        public async Task WhenICallTheExchangeSetApiWithValidProductIdentifiers_ThenANonZeroRequestedProductCountAndExchangeSetCellCountIsReturned()
         {
             var apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
@@ -52,7 +52,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        public async Task WhenICallTheExchangeSetApiWithInValidProductIdentifiers_ThenValidrequestedProductCountAndlessexchangeSetCellCountIsReturned()
+        public async Task WhenICallTheExchangeSetApiWithInValidProductIdentifiers_ThenValidRequestedProductCountAndLessExchangeSetCellCountIsReturned()
         {
             productIdentifiers.Add("ABCDEFGH"); //Adding invalid product identifier in the list
 

@@ -21,15 +21,15 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             Assert.IsNotNull(apiResponseData.ExchangeSetUrlExpiryDateTime, $"Response body returns null, Instead of valid datetime {apiResponseData.ExchangeSetUrlExpiryDateTime}.");
 
             //Check data type of RequestedProductCount and value should not be less than zero
-            Assert.IsTrue(apiResponseData.RequestedProductCount.GetType().Equals(typeof(int)), "Responsebody returns other datatype, instead of expected Int");
+            Assert.IsTrue(apiResponseData.RequestedProductCount.GetType().Equals(typeof(int)), "Response body returns other datatype, instead of expected Int");
             Assert.IsTrue(apiResponseData.RequestedProductCount >= 0, "Response body returns RequestedProductCount less than zero, instead of expected count should not be less than zero.");
 
             //Check data type of ExchangeSetCellCount and value should not be less than zero
-            Assert.IsTrue(apiResponseData.ExchangeSetCellCount.GetType().Equals(typeof(int)), "Responsebody returns other datatype, instead of expected Int");
+            Assert.IsTrue(apiResponseData.ExchangeSetCellCount.GetType().Equals(typeof(int)), "Response body returns other datatype, instead of expected Int");
             Assert.IsTrue(apiResponseData.ExchangeSetCellCount >= 0, "Response body returns ExchangeSetCellCount less than zero, instead of expected count should not be less than zero.");
 
             //Check data type of RequestedProductsAlreadyUpToDateCount and value should not be less than zero
-            Assert.IsTrue(apiResponseData.RequestedProductsAlreadyUpToDateCount.GetType().Equals(typeof(int)), "Responsebody returns other datatype, instead of expected Int");
+            Assert.IsTrue(apiResponseData.RequestedProductsAlreadyUpToDateCount.GetType().Equals(typeof(int)), "Response body returns other datatype, instead of expected Int");
             Assert.IsTrue(apiResponseData.RequestedProductsAlreadyUpToDateCount >= 0, "Response body returns RequestedProductsAlreadyUpToDateCount less than zero, instead of expected count should not be less than zero.");
 
         }
