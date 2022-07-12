@@ -36,9 +36,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             ////_logger.LogInformation(EventIds.AccessTokenForESSEndpointCompleted.ToEventId(), "Getting access token  to call ESS endpoint completed");
 
-            while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(90))
+            while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(1))
             {
-                await Task.Delay(1000);
+                await Task.Delay(5000);
 
                 Console.WriteLine("Polling fss to get batch status...");
 
