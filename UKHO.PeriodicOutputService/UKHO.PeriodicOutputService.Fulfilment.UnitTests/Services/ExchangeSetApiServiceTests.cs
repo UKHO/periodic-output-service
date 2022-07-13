@@ -55,7 +55,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.Throws<ArgumentNullException>(
                () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
                .ParamName
-               .Should().Be("authTokenProvider");
+               .Should().Be("authEssTokenProvider");
         }
 
         [Test]

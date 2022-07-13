@@ -40,13 +40,20 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => fakeFleetManagerService.GetJwtAuthUnpToken())
               .Returns(jwtauthUnpToken);
+
             A.CallTo(() => fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
+            A.CallTo(() => fakeExchangeSetApiService.PostProductIdentifiersData(A<List<string>>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+            
             string result = await fulfilmentDataService.CreatePosExchangeSet();
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.EqualTo("Fleet Manager full AVCS ProductIdentifiers received"));
+
+            A.CallTo(() => fakeFssBatchService.CheckIfBatchCommitted(A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -64,5 +71,26 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.EqualTo("Fleet Manager full AVCS ProductIdentifiers not received"));
         }
+
+        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
+        {
+            ExchangeSetCellCount = 3,
+            RequestedProductCount = 3,
+            Links = new Links
+            {
+                ExchangeSetBatchDetailsUri = new LinkSetBatchDetailsUri
+                {
+                    Href = "http://test1.com"
+                },
+                ExchangeSetBatchStatusUri = new LinkSetBatchStatusUri
+                {
+                    Href = "http://test2.com"
+                },
+                ExchangeSetFileUri = new LinkSetFileUri
+                {
+                    Href = "http://test3.com"
+                }
+            }
+        };
     }
 }
