@@ -1,9 +1,7 @@
 ﻿using System.Net;
-using System.Text;
 using FakeItEasy;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Fulfilment.Models;
 using UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
@@ -11,7 +9,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     [TestFixture]
     public class FleetManagerClientTests
     {
-        private IFleetManagerApiClient _fleetManagerClient;
+        private IFleetManagerApiClient? _fleetManagerClient;
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]
@@ -67,7 +65,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             Assert.Multiple(() =>
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(deSerializedResult.Count, Is.EqualTo(GetProductIdentifiers().Count));
+                Assert.That(deSerializedResult, Has.Count.EqualTo(GetProductIdentifiers().Count));
 
             });
         }

@@ -6,6 +6,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     {
         protected IConfigurationRoot ConfigurationRoot;
         public FleetManagerB2BApiConfiguration fleetManagerB2BConfig = new FleetManagerB2BApiConfiguration();
+        public EssAuthorizationConfiguration EssAuthorizationConfig = new EssAuthorizationConfiguration();
+
         public class FleetManagerB2BApiConfiguration
         {
             public string userName { get; set; }
@@ -16,7 +18,17 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string subscriptionKey { get; set; }
 
         }
-
+        
+        public class EssAuthorizationConfiguration
+        {
+            public string EssApiUrl { get; set; }
+            public string MicrosoftOnlineLoginUrl { get; set; }
+            public string TenantId { get; set; }
+            public string AutoTestClientId { get; set; }
+            public string AutoTestClientSecret { get; set; }
+            public string EssClientId { get; set; }
+            public bool IsRunningOnLocalMachine { get; set; }
+        }
         public TestConfiguration()
         {
             ConfigurationRoot = new ConfigurationBuilder()
@@ -24,6 +36,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                                .Build();
 
             ConfigurationRoot.Bind("FleetManagerB2BApiConfiguration", fleetManagerB2BConfig);
+            ConfigurationRoot.Bind("EssAuthorizationConfiguration", EssAuthorizationConfig);
         }
 
     }
