@@ -2,9 +2,9 @@
 
 namespace UKHO.PeriodicOutputService.Common.Configuration
 {
+    [ExcludeFromCodeCoverage]
     public class EssManagedIdentityConfiguration
     {
-        [ExcludeFromCodeCoverage]
         public double DeductTokenExpiryMinutes { get; set; }
     }
 }
