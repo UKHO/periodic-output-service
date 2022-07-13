@@ -32,6 +32,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             _logger.LogInformation("Getting access token to call FSS Batch Status endpoint started - {0}", _fssApiConfiguration.Value.FssClientId);
 
+            var responseUri = new UriBuilder(url);
+
+            var batchId= responseUri.Uri.Segments.FirstOrDefault(d => Guid.TryParse(d.Replace("/",""), out var _));
+
+            string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}status";
+
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
             _logger.LogInformation("Getting access token to call FSS Batch Status endpoint completed - {0}", accessToken);
@@ -42,7 +48,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 _logger.LogInformation("Polling FSS to get batch status...");
 
-                var batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(url, accessToken);
+                var batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
 
                 FssBatchStatusResponseModel responseObj = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                 batchStatus = responseObj.Status;
