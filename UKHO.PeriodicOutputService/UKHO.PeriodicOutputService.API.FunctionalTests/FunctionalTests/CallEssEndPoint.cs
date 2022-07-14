@@ -13,9 +13,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private TestConfiguration config { get; set; }
         private GetCatalogue getcat { get; set; }
         private string EssJwtToken { get; set; }
+
+        private string FssJwtToken { get; set; }
         private GetProductIdentifiers getproductIdentifier { get; set; }
+        private GetBatchStatus getBatchStatus { get; set; }
 
         static EssAuthorizationConfiguration ESSAuth = new TestConfiguration().EssAuthorizationConfig;
+        static FileShareService FSSAuth = new TestConfiguration().FssConfig;
         static FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
 
         List<string> productIdentifiers = new();
@@ -28,10 +32,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
             getproductIdentifier = new GetProductIdentifiers();
+            getBatchStatus = new GetBatchStatus();
 
             userCredentialsBytes = CommonHelper.getbase64encodedcredentials(fleet.userName, fleet.password);
             AuthTokenProvider authTokenProvider = new AuthTokenProvider();
             EssJwtToken = await authTokenProvider.GetEssToken();
+            FssJwtToken = await authTokenProvider.GetFssToken();
 
             unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
             string unp_token = await CommonHelper.DeserializeAsyncToken(unpResponse);
@@ -49,6 +55,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //verify model structure
             await apiResponse.CheckModelStructureForSuccessResponse();
+
         }
 
         [Test]
@@ -67,6 +74,23 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             //Check RequestedProductsNotInExchangeSet is not empty
             Assert.IsNotEmpty(apiResponseData.RequestedProductsNotInExchangeSet, "Response body returns Empty for RequestedProductsNotInExchangeSet, instead of Not Empty");
             Assert.That(apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault(p => p.ProductName.Equals("ABCDEFGH")).Reason, Is.EqualTo("invalidProduct"), $"Exchange set returned Reason {apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault().Reason}, instead of expected Reason 'invalidProduct'");
+        }
+
+        [Test]
+        public async Task WhenICallTheFSSApiWithValidBatchId_ThenABatchStatusIsReturned()
+        {
+            var essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
+            Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
+
+            //verify model structure
+            await essApiResponse.CheckModelStructureForSuccessResponse();
+            var essApiResponseData = await essApiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
+
+            var fssApiResponse = await getBatchStatus.GetBatchStatusAsync(FSSAuth.BaseUrl, essApiResponseData.Links.ExchangeSetBatchStatusUri.Href, FssJwtToken);
+            var fssApiResponseData = await fssApiResponse.ReadAsTypeAsync<FssBatchStatusResponseModel>();
+
+            Assert.That(fssApiResponseData, Is.Not.Null);
+            Assert.That(fssApiResponseData.Status, Is.Not.Empty);
         }
     }
 }

@@ -5,8 +5,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     public class TestConfiguration
     {
         protected IConfigurationRoot ConfigurationRoot;
-        public FleetManagerB2BApiConfiguration fleetManagerB2BConfig = new FleetManagerB2BApiConfiguration();
-        public EssAuthorizationConfiguration EssAuthorizationConfig = new EssAuthorizationConfiguration();
+        public FleetManagerB2BApiConfiguration fleetManagerB2BConfig = new();
+        public EssAuthorizationConfiguration EssAuthorizationConfig = new();
+        public FileShareService FssConfig = new();
 
         public class FleetManagerB2BApiConfiguration
         {
@@ -18,7 +19,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string subscriptionKey { get; set; }
 
         }
-        
+
         public class EssAuthorizationConfiguration
         {
             public string EssApiUrl { get; set; }
@@ -29,6 +30,14 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string EssClientId { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
         }
+
+        public class FileShareService
+        {
+            public string BaseUrl { get; set; }
+            public string ResourceId { get; set; }
+            public bool IsRunningOnLocalMachine { get; set; }
+        }
+
         public TestConfiguration()
         {
             ConfigurationRoot = new ConfigurationBuilder()
@@ -37,6 +46,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
             ConfigurationRoot.Bind("FleetManagerB2BApiConfiguration", fleetManagerB2BConfig);
             ConfigurationRoot.Bind("EssAuthorizationConfiguration", EssAuthorizationConfig);
+            ConfigurationRoot.Bind("FileShareService", FssConfig);
         }
 
     }
