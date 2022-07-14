@@ -16,6 +16,7 @@
                 if (accessToken != null)
                 {
                     httpRequestMessage.SetBearerToken(accessToken);
+                    httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
                 }
 
                 return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);

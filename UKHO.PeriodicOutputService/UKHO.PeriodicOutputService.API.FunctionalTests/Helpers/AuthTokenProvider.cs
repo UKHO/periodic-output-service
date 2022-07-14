@@ -1,5 +1,6 @@
 ﻿using Microsoft.Identity.Client;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
+
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
     public class AuthTokenProvider

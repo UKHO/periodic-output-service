@@ -18,6 +18,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             var httpRequestMessage = new HttpRequestMessage(method, uri);
 
+            httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
+
             if (!string.IsNullOrEmpty(base64Credentials))
             {
                 httpRequestMessage.AddHeader("userPass", base64Credentials);
@@ -35,6 +37,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             string uri = $"{baseUrl}/catalogues/1";
 
             var httpRequestMessage = new HttpRequestMessage(method, uri);
+
+            httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
 
             if (!string.IsNullOrEmpty(accessToken))
             {

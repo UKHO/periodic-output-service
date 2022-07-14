@@ -1,6 +1,4 @@
-﻿using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
+﻿using System.Text;
 using Newtonsoft.Json;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
@@ -28,6 +26,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 if (accessToken != null)
                 {
                     httpRequestMessage.SetBearerToken(accessToken);
+                    httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
                 }
 
                 return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
