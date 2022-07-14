@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     public class AuthEssTokenProvider : AuthTokenProvider, IAuthEssTokenProvider
     {
         public AuthEssTokenProvider(IOptions<EssManagedIdentityConfiguration> essManagedIdentityConfiguration, IDistributedCache _cache, ILogger<AuthEssTokenProvider> logger) :
-            base(essManagedIdentityConfiguration, _cache, logger)
+            base(essManagedIdentityConfiguration, _cache)
         {
         }
     }

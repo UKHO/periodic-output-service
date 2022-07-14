@@ -28,31 +28,30 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers)
         {
-            _logger.LogInformation(EventIds.AccessTokenForESSEndpointStarted.ToEventId(), "Getting access token to call ESS endpoint started");
+            _logger.LogInformation(EventIds.GetAccessTokenForESSEndPointStarted.ToEventId(), "Getting access token to call ESS endpoint started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_exchangeSetApiConfiguration.Value.EssClientId);
 
-            _logger.LogInformation(EventIds.AccessTokenForESSEndpointCompleted.ToEventId(), "Getting access token to call ESS endpoint completed");
+            _logger.LogInformation(EventIds.GetAccessTokenForESSEndPointCompleted.ToEventId(), "Getting access token to call ESS endpoint completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             ExchangeSetResponseModel? exchangeSetGetBatchResponse = new();
 
-            _logger.LogInformation(EventIds.ExchangeSetRequestStarted.ToEventId(), "Request to get the exchange set details started");
+            _logger.LogInformation(EventIds.ExchangeSetPostProductIdentifiersRequestStarted.ToEventId(), "Request to post productidentifiers to ESS started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             HttpResponseMessage httpResponse = await _exchangeSetApiClient.PostProductIdentifiersDataAsync(_exchangeSetApiConfiguration.Value.BaseUrl, productIdentifiers, accessToken);
 
             if (httpResponse.IsSuccessStatusCode)
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
+
                 exchangeSetGetBatchResponse = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
+
+                _logger.LogInformation(EventIds.ExchangeSetPostProductIdentifiersRequestCompleted.ToEventId(), "Request to post productidentifiers to ESS completed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
             }
             else
             {
-                _logger.LogError(EventIds.ExceptionInExchangeSetRequest.ToEventId(), "Failed getting exchange set details");
-
+                _logger.LogError(EventIds.ExchangeSetPostProductIdentifiersFailed.ToEventId(), "Failed to post productidentifiers to ESS at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
             }
-
-            _logger.LogInformation(EventIds.ExchangeSetRequestCompleted.ToEventId(), "Request to get the exchange set details completed");
-
             return exchangeSetGetBatchResponse;
         }
     }

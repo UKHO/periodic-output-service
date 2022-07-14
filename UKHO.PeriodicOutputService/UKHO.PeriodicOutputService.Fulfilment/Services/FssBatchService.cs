@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
+using UKHO.PeriodicOutputService.Fulfilment.Logging;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
@@ -27,36 +28,35 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<string> CheckIfBatchCommitted(string url)
         {
-            string batchStatus = "";
-            var startTime = DateTime.UtcNow;
+            string batchStatus = string.Empty;
+            DateTime startTime = DateTime.UtcNow;
 
-            _logger.LogInformation("Getting access token to call FSS Batch Status endpoint started - {0}", _fssApiConfiguration.Value.FssClientId);
-
-            var responseUri = new UriBuilder(url);
-
-            var batchId= responseUri.Uri.Segments.FirstOrDefault(d => Guid.TryParse(d.Replace("/",""), out var _));
-
+            string batchId = CommonHelper.ExtractBatchId(url);
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}status";
+
+            _logger.LogInformation(EventIds.GetFssAuthTokenRequestStarted.ToEventId(), "Getting access token to call FSS Batch Status endpoint started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            _logger.LogInformation("Getting access token to call FSS Batch Status endpoint completed - {0}", accessToken);
+            _logger.LogInformation(EventIds.GetFssAuthTokenRequestCompleted.ToEventId(), "Getting access token to call FSS Batch Status endpoint completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(1))
+            while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime)))
             {
-                await Task.Delay(5000);
+                await Task.Delay(int.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime));
 
-                _logger.LogInformation("Polling FSS to get batch status...");
+                _logger.LogInformation(EventIds.BatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchId} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-                var batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
+                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
 
+                if (!batchStatusResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError(EventIds.BatchStatusRequestFailed.ToEventId(), "Request to get batch status for BatchID - {BatchId} failed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", batchId, batchStatusResponse.StatusCode.ToString(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    break;
+                }
                 FssBatchStatusResponseModel responseObj = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                 batchStatus = responseObj.Status;
 
-                _logger.LogInformation("Batch status is - {0}", batchStatus);
-
-                if (string.IsNullOrEmpty(batchStatus) || batchStatus.Equals("Committed"))
-                    break;
+                _logger.LogInformation(EventIds.BatchStatusRequestCompleted.ToEventId(), "Request to get batch status for BatchID - {BatchId} completed. Batch Status is {BatchStatus} at {DateTime} | _X-Correlation-ID:{CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             }
             return batchStatus;
         }

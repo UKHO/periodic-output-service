@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using FakeItEasy;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
@@ -15,15 +16,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IOptions<FleetManagerB2BApiConfiguration> _fakeFleetManagerB2BApiConfig;
         private IFleetManagerApiClient _fakeFleetManagerClient;
         private IFleetManagerService _fakeFleetManagerService;
-
+        private ILogger<FleetManagerService> _fakeLogger;
 
         [SetUp]
         public void Setup()
         {
             _fakeFleetManagerB2BApiConfig = Options.Create(new FleetManagerB2BApiConfiguration() { BaseUrl = "https://test/api", UserName = "TestUser", Password = "TestPassword", SubscriptionKey = "TestSubscriptionKey" });
             _fakeFleetManagerClient = A.Fake<IFleetManagerApiClient>();
+            _fakeLogger = A.Fake<ILogger<FleetManagerService>>();
 
-            _fakeFleetManagerService = new FleetManagerService(_fakeFleetManagerB2BApiConfig, _fakeFleetManagerClient);
+            _fakeFleetManagerService = new FleetManagerService(_fakeFleetManagerB2BApiConfig, _fakeFleetManagerClient, _fakeLogger);
         }
 
         [Test]

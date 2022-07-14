@@ -14,5 +14,10 @@
         {
             return response.Split(",")[0].Split(":")[1].Remove(0, 1).Replace("\"", "");
         }
+
+        public static string ExtractBatchId(string url)
+        {
+            return new UriBuilder(url).Uri.Segments.FirstOrDefault(d => Guid.TryParse(d.Replace("/", ""), out Guid _));
+        }
     }
 }
