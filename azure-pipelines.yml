@@ -486,3 +486,27 @@ stages:
                     testRunTitle: "QA-AutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
 
+  - stage: Livedeploy
+    displayName: "Livedeploy (inc terraform, webapp deploy)"
+    variables:
+      - group: "ESS-Live-Variables"
+      - group: "ESS-Deployment-Variables-LIVE"
+      - group: "POS-Live-Variables"
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+
+    jobs:
+      - deployment: LiveDeployApp
+        displayName: "Live - Deploy Terraform and Dotnet App"
+        environment: "Ess-Live"
+        pool: $(DeploymentPool)
+        container: ${{variables.Container}}
+        workspace:
+          clean: all
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: QALiveDeployment/templates/continuous-deployment.yml
+                  parameters:
+                    ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+                    AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
