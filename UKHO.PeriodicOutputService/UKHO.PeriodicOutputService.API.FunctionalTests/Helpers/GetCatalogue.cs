@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
+﻿using System.Xml;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
     public class GetCatalogue
     {
-        static HttpClient httpClient = new HttpClient();
+        private static readonly HttpClient httpClient = new();
         public async Task<HttpResponseMessage> GetCatalogueEndpoint(string baseUrl, string accessToken, string subscriptionKey)
         {
             string uri = $"{baseUrl}/catalogues/1";
@@ -24,19 +19,21 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             {
                 httpRequestMessage.Headers.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
             }
-           return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
         public async Task<List<string>> GetProductList(HttpResponseMessage httpResponse)
         {
             List<string> productIdentifiers = new();
-            
+
             if (httpResponse.IsSuccessStatusCode)
             {
                 using (Stream stream = httpResponse.Content.ReadAsStream())
                 {
-                    XmlReaderSettings settings = new();
-                    settings.Async = true;
-                    settings.IgnoreWhitespace = true;
+                    XmlReaderSettings settings = new()
+                    {
+                        Async = true,
+                        IgnoreWhitespace = true
+                    };
 
                     using (XmlReader reader = XmlReader.Create(stream, settings))
                     {
@@ -44,8 +41,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                         {
                             if (reader.Name == "ShortName")
                             {
-                                reader.Read();
-                                if (reader.HasValue) productIdentifiers.Add(reader.Value);
+                                _ = reader.Read();
+                                if (reader.HasValue)
+                                {
+                                    productIdentifiers.Add(reader.Value);
+                                }
                             }
                         }
                     }

@@ -1,8 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
-using UKHO.PeriodicOutputService.Fulfilment.Logging;
-using System.Diagnostics.CodeAnalysis;
-using UKHO.PeriodicOutputService.Fulfilment.Services;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Fulfilment.Logging;
+using UKHO.PeriodicOutputService.Fulfilment.Services;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
