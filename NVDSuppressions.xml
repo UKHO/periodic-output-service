@@ -210,4 +210,13 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
     </notes>
     <cve>CVE-2019-0820</cve>
   </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+          file name: Azure.Storage.Blobs:12.10.0
+        ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Azure\.Storage\.Blobs@.*$</packageUrl>
+    <vulnerabilityName>CVE-2022-30187</vulnerabilityName>
+  </suppress>
 </suppressions>
