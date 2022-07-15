@@ -43,7 +43,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime)))
             {
-                await Task.Delay(int.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime));
+                await Task.Delay(int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime));
 
                 _logger.LogInformation(EventIds.BatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchId} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
