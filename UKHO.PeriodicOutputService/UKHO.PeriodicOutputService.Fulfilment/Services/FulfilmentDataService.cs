@@ -25,22 +25,17 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<string> CreatePosExchangeSet()
         {
-            FleetMangerGetAuthTokenResponse tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
+            var tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
 
-            if (tokenResponse.StatusCode == HttpStatusCode.OK)
+            if (!string.IsNullOrEmpty(tokenResponse.AuthToken))
             {
-                FleetManagerGetCatalogueResponse catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
+                var catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
 
                 if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
                 {
-                    ExchangeSetResponseModel? response = await _exchangeSetApiService.PostProductIdentifiersData(catalogueResponse.ProductIdentifiers);
-
-                    if (response != null)
-                    {
-                        FssBatchStatus fssBatchStatus = await _fssBatchService.CheckIfBatchCommitted(response.Links.ExchangeSetBatchStatusUri.Href);
-
-                        return "Success";
-                    }
+                    var response = await _exchangeSetApiService.PostProductIdentifiersData(catalogueResponse.ProductIdentifiers);
+                    FssBatchStatus fssBatchStatus = await _fssBatchService.CheckIfBatchCommitted(response.Links.ExchangeSetBatchStatusUri.Href);
+                    return "Success";
                 }
             }
             return "Fail";
