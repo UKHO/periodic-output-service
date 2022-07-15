@@ -59,21 +59,21 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
               .MustHaveHappenedOnceExactly();
         }
 
-        //[Test]
-        //public async Task Does_CreatePosExchangeSet_Check_If_GetJwtAuthUnpToken_IsNull()
-        //{
-        //    jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
-        //    jwtauthUnpToken.AuthToken = "";
+        [Test]
+        public async Task Does_CreatePosExchangeSet_Check_If_GetJwtAuthUnpToken_IsNull()
+        {
+            jwtauthUnpToken.StatusCode = HttpStatusCode.Unauthorized;
+            jwtauthUnpToken.AuthToken = "";
 
-        //    A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken()).Returns(jwtauthUnpToken);
+            A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken()).Returns(jwtauthUnpToken);
 
-        //    string result = await _fulfilmentDataService.CreatePosExchangeSet();
+            string result = await _fulfilmentDataService.CreatePosExchangeSet();
 
-        //    A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored)).MustNotHaveHappened();
 
-        //    Assert.That(result, Is.Not.Null);
-        //    Assert.That(result, Is.EqualTo("Fail"));
-        //}
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.EqualTo("Fail"));
+        }
 
         private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
         {

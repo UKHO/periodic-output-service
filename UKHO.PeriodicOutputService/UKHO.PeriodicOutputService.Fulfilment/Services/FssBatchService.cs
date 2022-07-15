@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Logging;
@@ -26,9 +27,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _authFssTokenProvider = authFssTokenProvider ?? throw new ArgumentNullException(nameof(authFssTokenProvider));
         }
 
-        public async Task<string> CheckIfBatchCommitted(string url)
+        public async Task<FssBatchStatus> CheckIfBatchCommitted(string url)
         {
-            string batchStatus = string.Empty;
+            FssBatchStatus batchStatus = FssBatchStatus.Incomplete;
             DateTime startTime = DateTime.UtcNow;
 
             string batchId = CommonHelper.ExtractBatchId(url);
@@ -54,7 +55,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     break;
                 }
                 FssBatchStatusResponseModel responseObj = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
-                batchStatus = responseObj.Status;
+
+                Enum.TryParse(responseObj?.Status, false, out batchStatus);
 
                 _logger.LogInformation(EventIds.BatchStatusRequestCompleted.ToEventId(), "Request to get batch status for BatchID - {BatchId} completed. Batch Status is {BatchStatus} at {DateTime} | _X-Correlation-ID:{CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             }

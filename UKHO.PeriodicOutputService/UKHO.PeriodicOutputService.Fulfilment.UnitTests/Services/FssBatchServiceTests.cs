@@ -1,4 +1,5 @@
-﻿using FakeItEasy;
+﻿using System.Text;
+using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,7 +21,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [SetUp]
         public void Setup()
         {
-            _fakeFssApiConfiguration = Options.Create(new FssApiConfiguration() { BaseUrl = "http://test.com", FssClientId = "8YFGEFI78TYIUGH78YGHR5" });
+            _fakeFssApiConfiguration = Options.Create(new FssApiConfiguration() { BaseUrl = "http://test.com",
+                                                                                  FssClientId = "8YFGEFI78TYIUGH78YGHR5",
+                                                                                  BatchStatusPollingCutoffTime = "1",
+                                                                                  BatchStatusPollingDelayTime = "20000"});
 
             _fakeLogger = A.Fake<ILogger<FssBatchService>>();
 
@@ -55,27 +59,28 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 .Should().Be("authFssTokenProvider");
         }
 
-        //[Test]
-        //public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus()
-        //{
-        //    A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
-        //        .Returns(new HttpResponseMessage()
-        //        {
-        //            StatusCode = System.Net.HttpStatusCode.OK,
-        //            RequestMessage = new HttpRequestMessage()
-        //            {
-        //                RequestUri = new Uri("http://test.com")
-        //            },
-        //            Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Incomplete\"}")))
-        //        });
+        [Test]
+        public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus()
+        {
+            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Incomplete\"}")))
+                });
 
-        //    var result = await _fakeBatchService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
+            var result = await _fakeBatchService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
 
-        //    Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.Not.Null);
 
-        //    A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
-        //        .MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
 
-        //}
+        }
     }
 }
