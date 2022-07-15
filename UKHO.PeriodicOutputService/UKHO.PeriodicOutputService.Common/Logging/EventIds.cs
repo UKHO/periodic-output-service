@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.Logging
+namespace UKHO.PeriodicOutputService.Common.Logging
 {
     public enum EventIds
     {
@@ -95,7 +95,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Logging
         /// <summary>
         /// 809022 - Request to get fss auth token failed
         /// </summary
-        GetFssAuthTokenRequestFailed = 809022
+        GetFssAuthTokenRequestFailed = 809022,
+        /// <summary>
+        /// 809023 - caching auth token
+        /// </summary
+        CachingExternalEndPointToken = 809023
     }
 
     public static class EventIdExtensions

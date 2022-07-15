@@ -1,8 +1,10 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Headers;
 
 namespace UKHO.PeriodicOutputService.Common
 {
-    public static class Extensions
+    [ExcludeFromCodeCoverage]
+    public static class HttpRequestMessageExtensions
     {
         public static void SetBearerToken(this HttpRequestMessage requestMessage, string accessToken)
         {

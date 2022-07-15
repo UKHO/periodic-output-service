@@ -2,7 +2,7 @@
 {
     public class GetBatchStatus
     {
-        static HttpClient httpClient = new HttpClient();
+        private static readonly HttpClient httpClient = new();
 
         public async Task<HttpResponseMessage> GetBatchStatusAsync(string baseURL, string batchStatusURI, string accessToken)
         {

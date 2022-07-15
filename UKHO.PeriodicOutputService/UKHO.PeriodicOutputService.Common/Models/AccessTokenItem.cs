@@ -5,7 +5,7 @@ namespace UKHO.PeriodicOutputService.Common.Models
     [ExcludeFromCodeCoverage]
     public class AccessTokenItem
     {
-        public string AccessToken { get; set; } = string.Empty;
+        public string? AccessToken { get; set; }
         public DateTime ExpiresIn { get; set; }
     }
 }

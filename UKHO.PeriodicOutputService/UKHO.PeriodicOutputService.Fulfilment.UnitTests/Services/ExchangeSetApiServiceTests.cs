@@ -16,7 +16,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     {
         private IOptions<ExchangeSetApiConfiguration> _fakeExchangeSetApiConfiguration;
         private IExchangeSetApiClient _fakeExchangeSetApiClient;
-        private IExchangeSetApiService _fakeExchangeSetApiService;
+        private IExchangeSetApiService _exchangeSetApiService;
         private IAuthEssTokenProvider _fakeAuthTokenProvider;
         private ILogger<ExchangeSetApiService> _fakeLogger;
 
@@ -28,7 +28,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeAuthTokenProvider = A.Fake<IAuthEssTokenProvider>();
             _fakeLogger = A.Fake<ILogger<ExchangeSetApiService>>();
 
-            _fakeExchangeSetApiService = new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider);
+            _exchangeSetApiService = new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider);
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                   });
 
 
-            ExchangeSetResponseModel response = await _fakeExchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _exchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
@@ -106,7 +106,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                   });
 
 
-            ExchangeSetResponseModel response = await _fakeExchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _exchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
@@ -140,7 +140,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                   });
 
 
-            ExchangeSetResponseModel response = await _fakeExchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _exchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"

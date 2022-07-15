@@ -17,23 +17,24 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private ILogger<FssBatchService> _fakeLogger;
         private IFssApiClient _fakeFssApiClient;
         private IAuthFssTokenProvider _fakeAuthFssTokenProvider;
-        private IFssBatchService _fakeBatchService;
+        private IFssBatchService _batchService;
 
         [SetUp]
         public void Setup()
         {
-            _fakeFssApiConfiguration = Options.Create(new FssApiConfiguration() { BaseUrl = "http://test.com",
-                                                                                  FssClientId = "8YFGEFI78TYIUGH78YGHR5",
-                                                                                  BatchStatusPollingCutoffTime = "1",
-                                                                                  BatchStatusPollingDelayTime = "20000"});
+            _fakeFssApiConfiguration = Options.Create(new FssApiConfiguration()
+            {
+                BaseUrl = "http://test.com",
+                FssClientId = "8YFGEFI78TYIUGH78YGHR5",
+                BatchStatusPollingCutoffTime = "1",
+                BatchStatusPollingDelayTime = "20000"
+            });
 
             _fakeLogger = A.Fake<ILogger<FssBatchService>>();
-
             _fakeFssApiClient = A.Fake<IFssApiClient>();
-
             _fakeAuthFssTokenProvider = A.Fake<IAuthFssTokenProvider>();
 
-            _fakeBatchService = new FssBatchService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider);
+            _batchService = new FssBatchService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider);
         }
 
         [Test]
@@ -61,7 +62,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus()
+        public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus_If_ValidRequest()
         {
             A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -74,13 +75,41 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Incomplete\"}")))
                 });
 
-            var result = await _fakeBatchService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
+            var result = await _batchService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
 
             Assert.That(result, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed));
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
+        }
+
+        [Test]
+        public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus_If_InvalidRequest()
+        {
+            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.Unauthorized,
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"statusCode\":\"401\",\"message\":\"Authorization token is missing or invalid\"}")))
+                });
+
+            var result = await _batchService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
+
+            Assert.That(result, Is.EqualTo(FssBatchStatus.Incomplete));
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch status for BatchID - {BatchId} failed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}"
+                ).MustHaveHappenedOnceExactly();
         }
     }
 }
