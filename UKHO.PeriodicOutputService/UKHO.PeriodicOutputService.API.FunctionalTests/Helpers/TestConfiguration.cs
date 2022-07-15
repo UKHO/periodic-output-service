@@ -33,8 +33,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string BaseUrl { get; set; }
             public string FssClientId { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
-            public bool BatchStatusPollingCutoffTime { get; set; }
-            public bool BatchStatusPollingDelayTime { get; set; }
+            public string BatchStatusPollingCutoffTime { get; set; }
+            public string BatchStatusPollingDelayTime { get; set; }
 
         }
 
