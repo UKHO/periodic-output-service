@@ -89,8 +89,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             var fssApiResponse = await getBatchStatus.GetBatchStatusAsync(FSSAuth.BaseUrl, essApiResponseData.Links.ExchangeSetBatchStatusUri.Href, FssJwtToken);
             var fssApiResponseData = await fssApiResponse.ReadAsTypeAsync<FssBatchStatusResponseModel>();
 
-            Assert.That(fssApiResponseData, Is.Not.Null);
-            Assert.That(fssApiResponseData.Status, Is.Not.Empty);
+            Assert.That(fssApiResponseData, Is.Not.Null, "The response data is blank");
+            Assert.That(fssApiResponseData.Status, Is.Not.Empty, "The response status is empty");
         }
     }
 }
