@@ -13,11 +13,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         {
             public string userName { get; set; }
             public string password { get; set; }
-
             public string baseUrl { get; set; }
-
             public string subscriptionKey { get; set; }
-
         }
 
         public class EssAuthorizationConfiguration
@@ -34,8 +31,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public class FileShareService
         {
             public string BaseUrl { get; set; }
-            public string ResourceId { get; set; }
+            public string FssClientId { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
+            public bool BatchStatusPollingCutoffTime { get; set; }
+            public bool BatchStatusPollingDelayTime { get; set; }
+
         }
 
         public TestConfiguration()
@@ -46,7 +46,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
             ConfigurationRoot.Bind("FleetManagerB2BApiConfiguration", fleetManagerB2BConfig);
             ConfigurationRoot.Bind("EssAuthorizationConfiguration", EssAuthorizationConfig);
-            ConfigurationRoot.Bind("FileShareService", FssConfig);
+            ConfigurationRoot.Bind("FunctionalTestFSSApiConfiguration", FssConfig);
         }
 
     }

@@ -56,12 +56,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         private static async Task<string> GenerateFssToken(string ClientId, string ClientSecret, string Token)
         {
-            string[] scopes = new string[] { $"{FssAuthConfig.ResourceId}/.default" };
+            string[] scopes = new string[] { $"{FssAuthConfig.FssClientId}/.default" };
             if (Token == null)
             {
                 if (FssAuthConfig.IsRunningOnLocalMachine)
                 {
-                    IPublicClientApplication debugApp = PublicClientApplicationBuilder.Create(FssAuthConfig.ResourceId).
+                    IPublicClientApplication debugApp = PublicClientApplicationBuilder.Create(FssAuthConfig.FssClientId).
                                                         WithRedirectUri("http://localhost").Build();
 
                     //Acquiring token through user interaction
