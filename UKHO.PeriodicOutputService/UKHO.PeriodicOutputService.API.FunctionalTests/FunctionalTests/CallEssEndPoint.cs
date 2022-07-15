@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using UKHO.PeriodicOutputService.API.FunctionalTests.Enums;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
@@ -86,11 +87,14 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             await essApiResponse.CheckModelStructureForSuccessResponse();
             var essApiResponseData = await essApiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
 
-            var fssApiResponse = await getBatchStatus.GetBatchStatusAsync(FSSAuth.BaseUrl, essApiResponseData.Links.ExchangeSetBatchStatusUri.Href, FssJwtToken);
-            var fssApiResponseData = await fssApiResponse.ReadAsTypeAsync<FssBatchStatusResponseModel>();
+            var fssBatchStatus = await getBatchStatus
+                .CheckIfBatchCommitted(FSSAuth.BaseUrl,
+                                       essApiResponseData.Links.ExchangeSetBatchStatusUri.Href,
+                                       FssJwtToken,
+                                       FSSAuth.BatchStatusPollingCutoffTime,
+                                       FSSAuth.BatchStatusPollingDelayTime);
 
-            Assert.That(fssApiResponseData, Is.Not.Null, "The response data is blank");
-            Assert.That(fssApiResponseData.Status, Is.Not.Empty, "The response status is empty");
+            Assert.That(fssBatchStatus, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed),"The response data is not empty");
         }
     }
 }
