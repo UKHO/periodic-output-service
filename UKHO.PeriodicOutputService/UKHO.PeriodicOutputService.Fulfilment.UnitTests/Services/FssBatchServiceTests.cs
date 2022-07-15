@@ -3,6 +3,7 @@ using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
@@ -75,7 +76,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             var result = await _fakeBatchService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
 
-            Assert.That(result, Is.Not.Empty);
+            Assert.That(result, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed));
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
