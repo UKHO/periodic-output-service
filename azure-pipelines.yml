@@ -412,8 +412,6 @@ stages:
                     workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
 
   - stage: QAdeploy
-    dependsOn:
-    - Devdeploy
     displayName: "QAdeploy (inc terraform, webapp deploy)"
     variables:
       - group: "ESS-QA-Variables"
