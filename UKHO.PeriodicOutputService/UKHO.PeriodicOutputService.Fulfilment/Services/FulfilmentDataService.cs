@@ -31,7 +31,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 FleetManagerGetCatalogueResponse catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
 
-                if (catalogueResponse != null || catalogueResponse.ProductIdentifiers != null || catalogueResponse.ProductIdentifiers.Count > 0)
+                if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
                 {
                     ExchangeSetResponseModel? response = await _exchangeSetApiService.PostProductIdentifiersData(catalogueResponse.ProductIdentifiers);
 
