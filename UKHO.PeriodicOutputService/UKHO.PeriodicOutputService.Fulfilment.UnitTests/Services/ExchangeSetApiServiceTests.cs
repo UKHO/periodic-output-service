@@ -1,13 +1,13 @@
 ﻿using System.Net;
 using FakeItEasy;
+using FluentAssertions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
-using FluentAssertions;
-using Microsoft.Extensions.Logging;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 {
@@ -16,29 +16,24 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     {
         private IOptions<ExchangeSetApiConfiguration> _fakeExchangeSetApiConfiguration;
         private IExchangeSetApiClient _fakeExchangeSetApiClient;
-        private IExchangeSetApiService _fakeExchangeSetApiService;
-        private IAuthTokenProvider _fakeAuthTokenProvider;
+        private IExchangeSetApiService _exchangeSetApiService;
+        private IAuthEssTokenProvider _fakeAuthTokenProvider;
         private ILogger<ExchangeSetApiService> _fakeLogger;
-
 
         [SetUp]
         public void Setup()
         {
             _fakeExchangeSetApiConfiguration = Options.Create(new ExchangeSetApiConfiguration() { EssClientId = "ClientId2" });
-
             _fakeExchangeSetApiClient = A.Fake<IExchangeSetApiClient>();
-
-            _fakeAuthTokenProvider = A.Fake<IAuthTokenProvider>();
-
+            _fakeAuthTokenProvider = A.Fake<IAuthEssTokenProvider>();
             _fakeLogger = A.Fake<ILogger<ExchangeSetApiService>>();
 
-            _fakeExchangeSetApiService = new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider);
+            _exchangeSetApiService = new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             Assert.Throws<ArgumentNullException>(
                 () => new ExchangeSetApiService(null, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
                 .ParamName
@@ -57,14 +52,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.Throws<ArgumentNullException>(
                () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
                .ParamName
-               .Should().Be("authTokenProvider");
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+               .Should().Be("authEssTokenProvider");
         }
 
         [Test]
         public async Task DoesGetProductIdentifiersData_Returns_ValidData_WhenValidProductIdentifiersArePassed()
         {
-            A.CallTo(() => _fakeExchangeSetApiClient.GetProductIdentifiersDataAsync
+            A.CallTo(() => _fakeExchangeSetApiClient.PostProductIdentifiersDataAsync
             (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
                   {
@@ -76,21 +70,30 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                       Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()))
                   });
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored));
 
-            ExchangeSetGetBatchResponse response = await _fakeExchangeSetApiService.GetProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _exchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
                 Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
                 Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
             });
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed getting exchange set details"
+            ).MustNotHaveHappened();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
         }
 
         [Test]
         public async Task DoesGetProductIdentifiersData_Returns_ValidData_WhenInvalidProductIdentifiersArePassed()
         {
-            A.CallTo(() => _fakeExchangeSetApiClient.GetProductIdentifiersDataAsync
+            A.CallTo(() => _fakeExchangeSetApiClient.PostProductIdentifiersDataAsync
             (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
                   {
@@ -102,17 +105,55 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                       Content = new StringContent(JsonConvert.SerializeObject(GetInValidExchangeSetGetBatchResponse()))
                   });
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored));
 
-            ExchangeSetGetBatchResponse response = await _fakeExchangeSetApiService.GetProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _exchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
                 Assert.That(response.RequestedProductsNotInExchangeSet, !Is.Null);
             });
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed getting exchange set details"
+            ).MustNotHaveHappened();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
         }
 
-        private ExchangeSetGetBatchResponse GetValidExchangeSetGetBatchResponse() => new ExchangeSetGetBatchResponse
+        [Test]
+        public async Task DoesGetProductIdentifiersData_LogsError_When_ResponseStatus_Is_Not_OK()
+        {
+            A.CallTo(() => _fakeExchangeSetApiClient.PostProductIdentifiersDataAsync
+            (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
+                  .Returns(new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.NotFound,
+                      RequestMessage = new HttpRequestMessage()
+                      {
+                          RequestUri = new Uri("http://test.com")
+                      },
+                      Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
+                  });
+
+
+            ExchangeSetResponseModel response = await _exchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Error
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+        }
+
+        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
         {
             ExchangeSetCellCount = GetProductIdentifiers().Count,
             RequestedProductCount = GetProductIdentifiers().Count,
@@ -133,7 +174,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             }
         };
 
-        private ExchangeSetGetBatchResponse GetInValidExchangeSetGetBatchResponse() => new ExchangeSetGetBatchResponse
+        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
         {
             ExchangeSetCellCount = 0,
             RequestedProductCount = GetProductIdentifiers().Count,

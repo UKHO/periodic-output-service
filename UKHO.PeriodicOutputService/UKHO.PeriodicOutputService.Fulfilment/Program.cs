@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
@@ -148,25 +149,34 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             if (configuration != null)
             {
                 serviceCollection.Configure<FleetManagerB2BApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
-                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentity"));
+                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
+                serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                 serviceCollection.Configure<ExchangeSetApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
             }
 
             var essAzureADConfiguration = new ExchangeSetApiConfiguration();
             configuration.Bind("ESSAzureADConfiguration", essAzureADConfiguration);
 
+            serviceCollection.AddDistributedMemoryCache();
+
             serviceCollection.AddTransient<PosFulfilmentJob>();
 
+            serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
+            serviceCollection.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
+
+            serviceCollection.AddScoped<IExchangeSetApiConfiguration, ExchangeSetApiConfiguration>();
             serviceCollection.AddScoped<IFleetManagerB2BApiConfiguration, FleetManagerB2BApiConfiguration>();
+
             serviceCollection.AddScoped<IFleetManagerService, FleetManagerService>();
             serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
-            serviceCollection.AddScoped<IAuthTokenProvider, AuthTokenProvider>();
-
             serviceCollection.AddScoped<IExchangeSetApiService, ExchangeSetApiService>();
+            serviceCollection.AddScoped<IFssBatchService, FssBatchService>();
 
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<IExchangeSetApiClient, ExchangeSetApiClient>();
-            serviceCollection.AddTransient<IFleetManagerClient, FleetManagerClient>();
+            serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
+            serviceCollection.AddTransient<IFssApiClient, FssApiClient>();
+
         }
     }
 }

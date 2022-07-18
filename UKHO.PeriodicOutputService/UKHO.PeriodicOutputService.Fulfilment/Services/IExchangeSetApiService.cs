@@ -4,6 +4,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public interface IExchangeSetApiService
     {
-        Task<ExchangeSetGetBatchResponse> GetProductIdentifiersData(List<string> productIdentifiers);
+        Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers);
     }
 }

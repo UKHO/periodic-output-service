@@ -85,7 +85,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That(orgName, Is.EqualTo("The United Kingdom Hydrographic Office"), $"Value is not matching, Actual value is : {orgName}");
 
             string product = apiReadXml.UKHOCatalogueFile.Products.Digital.ENC[0].ShortName;
-            Assert.That(product, Is.EqualTo("C1615454"), $"Value is not matching, Actual value is : {product}");
+            Assert.That(product, Is.EqualTo("AR201010"), $"Value is not matching, Actual value is : {product}");
         }
     }
 }

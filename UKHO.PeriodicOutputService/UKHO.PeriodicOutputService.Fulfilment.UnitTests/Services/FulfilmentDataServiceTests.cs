@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using FakeItEasy;
+using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
@@ -8,9 +9,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     [TestFixture]
     public class FulfilmentDataServiceTests
     {
-        public IFulfilmentDataService fulfilmentDataService;
-        public IFleetManagerService fakeFleetManagerService;
-        public IExchangeSetApiService fakeExchangeSetApiService;
+        public IFulfilmentDataService _fulfilmentDataService;
+        public IFleetManagerService _fakeFleetManagerService;
+        public IExchangeSetApiService _fakeExchangeSetApiService;
+        public IFssBatchService _fakeFssBatchService;
+        private ILogger<FulfilmentDataService> _fakeLogger;
 
         public FleetMangerGetAuthTokenResponse jwtauthUnpToken = new();
         public FleetMangerGetAuthTokenResponse jwtAuthJwtToken = new();
@@ -18,9 +21,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [SetUp]
         public void Setup()
         {
-            fakeFleetManagerService = A.Fake<IFleetManagerService>();
-            fakeExchangeSetApiService = A.Fake<IExchangeSetApiService>();
-            fulfilmentDataService = new FulfilmentDataService(fakeFleetManagerService, fakeExchangeSetApiService);
+            _fakeFleetManagerService = A.Fake<IFleetManagerService>();
+            _fakeExchangeSetApiService = A.Fake<IExchangeSetApiService>();
+            _fakeFssBatchService = A.Fake<IFssBatchService>();
+            _fakeLogger = A.Fake<ILogger<FulfilmentDataService>>();
+
+            _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeExchangeSetApiService, _fakeFssBatchService, _fakeLogger);
         }
 
         [Test]
@@ -35,31 +41,59 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 ProductIdentifiers = new() { "Product1", "Product2" }
             };
 
-            A.CallTo(() => fakeFleetManagerService.GetJwtAuthUnpToken())
+            A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken())
               .Returns(jwtauthUnpToken);
-            A.CallTo(() => fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
+
+            A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            string result = await fulfilmentDataService.CreatePosExchangeSet();
+            A.CallTo(() => _fakeExchangeSetApiService.PostProductIdentifiersData(A<List<string>>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+            string result = await _fulfilmentDataService.CreatePosExchangeSet();
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.EqualTo("Fleet Manager full AVCS ProductIdentifiers received"));
+            Assert.That(result, Is.EqualTo("Success"));
+
+            A.CallTo(() => _fakeFssBatchService.CheckIfBatchCommitted(A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public async Task Does_CreatePosExchangeSet_Check_If_GetJwtAuthUnpToken_IsNull()
         {
-            jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
+            jwtauthUnpToken.StatusCode = HttpStatusCode.Unauthorized;
             jwtauthUnpToken.AuthToken = "";
 
-            A.CallTo(() => fakeFleetManagerService.GetJwtAuthUnpToken()).Returns(jwtauthUnpToken);
+            A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken()).Returns(jwtauthUnpToken);
 
-            string result = await fulfilmentDataService.CreatePosExchangeSet();
+            string result = await _fulfilmentDataService.CreatePosExchangeSet();
 
-            A.CallTo(() => fakeFleetManagerService.GetCatalogue(A<string>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored)).MustNotHaveHappened();
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.EqualTo("Fleet Manager full AVCS ProductIdentifiers not received"));
+            Assert.That(result, Is.EqualTo("Fail"));
         }
+
+        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
+        {
+            ExchangeSetCellCount = 3,
+            RequestedProductCount = 3,
+            Links = new Links
+            {
+                ExchangeSetBatchDetailsUri = new LinkSetBatchDetailsUri
+                {
+                    Href = "http://test1.com"
+                },
+                ExchangeSetBatchStatusUri = new LinkSetBatchStatusUri
+                {
+                    Href = "http://test2.com"
+                },
+                ExchangeSetFileUri = new LinkSetFileUri
+                {
+                    Href = "http://test3.com"
+                }
+            }
+        };
     }
 }

@@ -1,34 +1,42 @@
-﻿namespace UKHO.PeriodicOutputService.Fulfilment.Services
+﻿using Microsoft.Extensions.Logging;
+using UKHO.PeriodicOutputService.Common.Enums;
+
+namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public class FulfilmentDataService : IFulfilmentDataService
     {
         private readonly IFleetManagerService _fleetManagerService;
         private readonly IExchangeSetApiService _exchangeSetApiService;
+        private readonly IFssBatchService _fssBatchService;
+        private readonly ILogger<FulfilmentDataService> _logger;
 
-        public FulfilmentDataService(IFleetManagerService fleetManagerService, IExchangeSetApiService exchangeSetApiService)
+        public FulfilmentDataService(IFleetManagerService fleetManagerService,
+                                     IExchangeSetApiService exchangeSetApiService,
+                                     IFssBatchService fssBatchService,
+                                     ILogger<FulfilmentDataService> logger)
         {
             _fleetManagerService = fleetManagerService;
             _exchangeSetApiService = exchangeSetApiService;
+            _fssBatchService = fssBatchService;
+            _logger = logger;
         }
 
         public async Task<string> CreatePosExchangeSet()
         {
             var tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
 
-            if (string.IsNullOrEmpty(tokenResponse.AuthToken))
+            if (!string.IsNullOrEmpty(tokenResponse.AuthToken))
             {
-                return "Fleet Manager full AVCS ProductIdentifiers not received";
+                var catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
+
+                if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
+                {
+                    var response = await _exchangeSetApiService.PostProductIdentifiersData(catalogueResponse.ProductIdentifiers);
+                    FssBatchStatus fssBatchStatus = await _fssBatchService.CheckIfBatchCommitted(response.Links.ExchangeSetBatchStatusUri.Href);
+                    return "Success";
+                }
             }
-
-            var catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
-
-            if (catalogueResponse.ProductIdentifiers == null || catalogueResponse.ProductIdentifiers.Count <= 0)
-            {
-                return "Fleet Manager full AVCS ProductIdentifiers not received";
-            }
-
-            var exchangeSetGetBatchResponse = await _exchangeSetApiService.GetProductIdentifiersData(catalogueResponse.ProductIdentifiers);
-            return "Fleet Manager full AVCS ProductIdentifiers received";
+            return "Fail";
         }
     }
 }
