@@ -7,7 +7,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         protected IConfigurationRoot ConfigurationRoot;
         public FleetManagerB2BApiConfiguration fleetManagerB2BConfig = new();
         public EssAuthorizationConfiguration EssAuthorizationConfig = new();
-        public FileShareService FssConfig = new();
+        public FunctionalTestFSSApiConfiguration FssConfig = new();
 
         public class FleetManagerB2BApiConfiguration
         {
@@ -28,7 +28,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public bool IsRunningOnLocalMachine { get; set; }
         }
 
-        public class FileShareService
+        public class FunctionalTestFSSApiConfiguration
         {
             public string BaseUrl { get; set; }
             public string FssClientId { get; set; }

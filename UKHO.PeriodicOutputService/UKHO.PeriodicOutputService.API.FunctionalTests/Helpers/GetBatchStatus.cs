@@ -34,7 +34,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             {
                 await Task.Delay(int.Parse(BatchStatusPollingDelayTime));
 
-                HttpResponseMessage? batchStatusResponse = await GetBatchStatusAsync(uri, accessToken);
+                HttpResponseMessage batchStatusResponse = await GetBatchStatusAsync(uri, accessToken);
 
                 if (!batchStatusResponse.IsSuccessStatusCode)
                 {
