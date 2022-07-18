@@ -6,6 +6,12 @@
     <Nullable>enable</Nullable>
     <UserSecretsId>e7d62839-3863-4038-b338-a37a0343e106</UserSecretsId>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;8618;8602;8604;8600</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;8618;8602;8604;8600</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Logs\**" />
     <EmbeddedResource Remove="Logs\**" />
