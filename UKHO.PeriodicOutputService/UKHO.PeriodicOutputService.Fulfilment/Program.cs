@@ -151,7 +151,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 serviceCollection.Configure<FleetManagerB2BApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
                 serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
-                serviceCollection.Configure<ExchangeSetApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));                
+                serviceCollection.Configure<ExchangeSetApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
             }
 
             var essAzureADConfiguration = new ExchangeSetApiConfiguration();
@@ -161,8 +161,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
             serviceCollection.AddTransient<PosFulfilmentJob>();
 
-            serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthFssTokenProvider>();
-            serviceCollection.AddSingleton<IAuthEssTokenProvider, AuthEssTokenProvider>();
+            serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
+            serviceCollection.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
 
             serviceCollection.AddScoped<IExchangeSetApiConfiguration, ExchangeSetApiConfiguration>();
             serviceCollection.AddScoped<IFleetManagerB2BApiConfiguration, FleetManagerB2BApiConfiguration>();

@@ -12,7 +12,7 @@ using UKHO.PeriodicOutputService.Common.Logging;
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     [ExcludeFromCodeCoverage] ////Excluded from code coverage as it has ADD interaction
-    public class AuthTokenProvider
+    public class AuthTokenProvider : IAuthEssTokenProvider, IAuthFssTokenProvider
     {
         private readonly IOptions<EssManagedIdentityConfiguration> _essManagedIdentityConfiguration;
         private static readonly object _lock = new();
