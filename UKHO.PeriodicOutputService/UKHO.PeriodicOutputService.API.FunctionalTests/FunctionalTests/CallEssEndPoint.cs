@@ -20,7 +20,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private GetBatchStatus getBatchStatus { get; set; }
 
         static EssAuthorizationConfiguration ESSAuth = new TestConfiguration().EssAuthorizationConfig;
-        static FileShareService FSSAuth = new TestConfiguration().FssConfig;
+        static FunctionalTestFSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
         static FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
 
         List<string> productIdentifiers = new();
