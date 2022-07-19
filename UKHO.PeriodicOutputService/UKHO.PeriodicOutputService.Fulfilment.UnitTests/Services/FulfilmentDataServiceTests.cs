@@ -11,8 +11,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     {
         public IFulfilmentDataService _fulfilmentDataService;
         public IFleetManagerService _fakeFleetManagerService;
-        public IExchangeSetApiService _fakeExchangeSetApiService;
-        public IFssBatchService _fakeFssBatchService;
+        public IEssService _fakeExchangeSetApiService;
+        public IFssService _fakeFssBatchService;
         private ILogger<FulfilmentDataService> _fakeLogger;
 
         public FleetMangerGetAuthTokenResponse jwtauthUnpToken = new();
@@ -22,8 +22,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         public void Setup()
         {
             _fakeFleetManagerService = A.Fake<IFleetManagerService>();
-            _fakeExchangeSetApiService = A.Fake<IExchangeSetApiService>();
-            _fakeFssBatchService = A.Fake<IFssBatchService>();
+            _fakeExchangeSetApiService = A.Fake<IEssService>();
+            _fakeFssBatchService = A.Fake<IFssService>();
             _fakeLogger = A.Fake<ILogger<FulfilmentDataService>>();
 
             _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeExchangeSetApiService, _fakeFssBatchService, _fakeLogger);

@@ -8,16 +8,16 @@ using UKHO.PeriodicOutputService.Fulfilment.Models;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
-    public class ExchangeSetApiService : IExchangeSetApiService
+    public class EssService : IEssService
     {
         private readonly IOptions<ExchangeSetApiConfiguration> _exchangeSetApiConfiguration;
-        private readonly IExchangeSetApiClient _exchangeSetApiClient;
+        private readonly IEssApiClient _exchangeSetApiClient;
         private readonly IAuthEssTokenProvider _authEssTokenProvider;
-        private readonly ILogger<ExchangeSetApiService> _logger;
+        private readonly ILogger<EssService> _logger;
 
-        public ExchangeSetApiService(ILogger<ExchangeSetApiService> logger,
+        public EssService(ILogger<EssService> logger,
                                      IOptions<ExchangeSetApiConfiguration> exchangeSetApiConfiguration,
-                                     IExchangeSetApiClient exchangeSetApiClient,
+                                     IEssApiClient exchangeSetApiClient,
                                      IAuthEssTokenProvider authEssTokenProvider)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));

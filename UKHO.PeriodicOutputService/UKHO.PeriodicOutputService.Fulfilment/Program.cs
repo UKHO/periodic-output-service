@@ -169,11 +169,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
             serviceCollection.AddScoped<IFleetManagerService, FleetManagerService>();
             serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
-            serviceCollection.AddScoped<IExchangeSetApiService, ExchangeSetApiService>();
-            serviceCollection.AddScoped<IFssBatchService, FssBatchService>();
+            serviceCollection.AddScoped<IEssService, EssService>();
+            serviceCollection.AddScoped<IFssService, FssService>();
 
             serviceCollection.AddHttpClient();
-            serviceCollection.AddTransient<IExchangeSetApiClient, ExchangeSetApiClient>();
+            serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
             serviceCollection.AddTransient<IFssApiClient, FssApiClient>();
 

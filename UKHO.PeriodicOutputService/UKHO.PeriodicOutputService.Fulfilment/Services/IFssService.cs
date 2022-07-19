@@ -3,7 +3,7 @@ using UKHO.PeriodicOutputService.Common.Enums;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
-    public interface IFssBatchService
+    public interface IFssService
     {
         public Task<FssBatchStatus> CheckIfBatchCommitted(string url);
     }

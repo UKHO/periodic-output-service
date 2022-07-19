@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     [TestFixture]
     public class ExchangeSetApiClientTests
     {
-        private IExchangeSetApiClient? _exchangeSetApiClient;
+        private IEssApiClient? _exchangeSetApiClient;
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]
@@ -32,7 +32,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
 
-            _exchangeSetApiClient = new ExchangeSetApiClient(_fakeHttpClientFactory);
+            _exchangeSetApiClient = new EssApiClient(_fakeHttpClientFactory);
 
             var result = _exchangeSetApiClient.PostProductIdentifiersDataAsync("http://test.com", GetProductIdentifiers(), "asdfsa");
 

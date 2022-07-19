@@ -15,42 +15,42 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     public class ExchangeSetApiServiceTests
     {
         private IOptions<ExchangeSetApiConfiguration> _fakeExchangeSetApiConfiguration;
-        private IExchangeSetApiClient _fakeExchangeSetApiClient;
-        private IExchangeSetApiService _exchangeSetApiService;
+        private IEssApiClient _fakeExchangeSetApiClient;
+        private IEssService _exchangeSetApiService;
         private IAuthEssTokenProvider _fakeAuthTokenProvider;
-        private ILogger<ExchangeSetApiService> _fakeLogger;
+        private ILogger<EssService> _fakeLogger;
 
         [SetUp]
         public void Setup()
         {
             _fakeExchangeSetApiConfiguration = Options.Create(new ExchangeSetApiConfiguration() { EssClientId = "ClientId2" });
-            _fakeExchangeSetApiClient = A.Fake<IExchangeSetApiClient>();
+            _fakeExchangeSetApiClient = A.Fake<IEssApiClient>();
             _fakeAuthTokenProvider = A.Fake<IAuthEssTokenProvider>();
-            _fakeLogger = A.Fake<ILogger<ExchangeSetApiService>>();
+            _fakeLogger = A.Fake<ILogger<EssService>>();
 
-            _exchangeSetApiService = new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider);
+            _exchangeSetApiService = new EssService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             Assert.Throws<ArgumentNullException>(
-                () => new ExchangeSetApiService(null, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
+                () => new EssService(null, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
                 .ParamName
                 .Should().Be("logger");
 
             Assert.Throws<ArgumentNullException>(
-                () => new ExchangeSetApiService(_fakeLogger, null, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
+                () => new EssService(_fakeLogger, null, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
                 .ParamName
                 .Should().Be("exchangeSetApiConfiguration");
 
             Assert.Throws<ArgumentNullException>(
-               () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, null, _fakeAuthTokenProvider))
+               () => new EssService(_fakeLogger, _fakeExchangeSetApiConfiguration, null, _fakeAuthTokenProvider))
                .ParamName
                .Should().Be("exchangeSetApiClient");
 
             Assert.Throws<ArgumentNullException>(
-               () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
+               () => new EssService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
                .ParamName
                .Should().Be("authEssTokenProvider");
         }

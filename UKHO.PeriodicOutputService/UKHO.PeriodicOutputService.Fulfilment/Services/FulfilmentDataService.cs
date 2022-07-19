@@ -6,13 +6,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
     public class FulfilmentDataService : IFulfilmentDataService
     {
         private readonly IFleetManagerService _fleetManagerService;
-        private readonly IExchangeSetApiService _exchangeSetApiService;
-        private readonly IFssBatchService _fssBatchService;
+        private readonly IEssService _exchangeSetApiService;
+        private readonly IFssService _fssBatchService;
         private readonly ILogger<FulfilmentDataService> _logger;
 
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
-                                     IExchangeSetApiService exchangeSetApiService,
-                                     IFssBatchService fssBatchService,
+                                     IEssService exchangeSetApiService,
+                                     IFssService fssBatchService,
                                      ILogger<FulfilmentDataService> logger)
         {
             _fleetManagerService = fleetManagerService;
