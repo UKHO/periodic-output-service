@@ -99,7 +99,15 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809023 - caching auth token
         /// </summary>
-        CachingExternalEndPointToken = 809023
+        CachingExternalEndPointToken = 809023,
+        /// <summary>
+        /// 809024 - getting batch details started
+        /// </summary>
+        GetBatchDetailRequestStarted = 809024,
+        /// <summary>
+        /// 809025 - getting batch details failed
+        /// </summary>
+        GetBatchDetailRequestFailed = 809025
     }
 
     public static class EventIdExtensions
