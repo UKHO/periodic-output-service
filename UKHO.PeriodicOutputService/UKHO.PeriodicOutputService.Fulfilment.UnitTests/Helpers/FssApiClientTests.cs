@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Text;
 using FakeItEasy;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler;
@@ -10,6 +11,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     {
         private IFssApiClient? _fakeFssApiClient;
         private IHttpClientFactory _fakeHttpClientFactory;
+        private readonly string _authToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVh";
 
         [SetUp]
         public void Setup() => _fakeHttpClientFactory = A.Fake<IHttpClientFactory>();
@@ -17,10 +19,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesGetBatchStatusAsync_Returns_OK()
         {
-            string authToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVh";
-
             HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
-                               authToken, HttpStatusCode.OK);
+                               _authToken, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
             {
@@ -31,12 +31,142 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage>? result = _fakeFssApiClient.GetBatchStatusAsync("http://test.com", authToken);
+            Task<HttpResponseMessage>? result = _fakeFssApiClient.GetBatchStatusAsync("http://test.com", _authToken);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(result.Result.Content.ReadAsStringAsync().Result, Is.EqualTo(authToken));
+                Assert.That(result.Result.Content.ReadAsStringAsync().Result, Is.EqualTo(_authToken));
+
+            });
+        }
+
+        [Test]
+        public void DoesCreateBatchAsync_Returns_OK()
+        {
+            string Content = "";
+
+            HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                               Content, HttpStatusCode.OK);
+
+            var httpClient = new HttpClient(messageHandler)
+            {
+                BaseAddress = new Uri("http://test.com")
+            };
+
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
+
+            Task<HttpResponseMessage>? result = _fakeFssApiClient.CreateBatchAsync("http://test.com", Content, _authToken);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+            });
+        }
+
+        [Test]
+        public void DoesAddFileInBatchAsync_Returns_OK()
+        {
+            string Content = "";
+
+            HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                               Content, HttpStatusCode.OK);
+
+            var httpClient = new HttpClient(messageHandler)
+            {
+                BaseAddress = new Uri("http://test.com")
+            };
+
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
+
+            Task<HttpResponseMessage>? result = _fakeFssApiClient.AddFileInBatchAsync("http://test.com", Content, _authToken, 1231231, "application/octet-stream");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+            });
+        }
+
+        [Test]
+        public void DoesUploadFileBlockAsync_Returns_OK()
+        {
+            string Content = "";
+
+            HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                               Content, HttpStatusCode.OK);
+
+            var httpClient = new HttpClient(messageHandler)
+            {
+                BaseAddress = new Uri("http://test.com")
+            };
+
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
+
+            Task<HttpResponseMessage>? result = _fakeFssApiClient.UploadFileBlockAsync("http://test.com", Encoding.UTF8.GetBytes("whatever"), Encoding.UTF8.GetBytes("whatever"), _authToken, "application/octet-stream");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+            });
+        }
+
+        [Test]
+        public void DoesWriteBlockInFileAsync_Returns_OK()
+        {
+            string Content = "";
+
+            HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                               Content, HttpStatusCode.OK);
+
+            var httpClient = new HttpClient(messageHandler)
+            {
+                BaseAddress = new Uri("http://test.com")
+            };
+
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
+
+            Task<HttpResponseMessage>? result = _fakeFssApiClient.WriteBlockInFileAsync("http://test.com", Content, _authToken, "application/octet-stream");
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+            });
+        }
+
+        [Test]
+        public void DoesCommitBatchAsync_Returns_OK()
+        {
+            string Content = "";
+
+            HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                               Content, HttpStatusCode.OK);
+
+            var httpClient = new HttpClient(messageHandler)
+            {
+                BaseAddress = new Uri("http://test.com")
+            };
+
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
+
+            Task<HttpResponseMessage>? result = _fakeFssApiClient.CommitBatchAsync("http://test.com", Content, _authToken);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             });
         }

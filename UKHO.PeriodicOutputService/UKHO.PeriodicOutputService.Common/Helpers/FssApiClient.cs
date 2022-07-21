@@ -7,17 +7,16 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         private readonly HttpClient _httpClient;
 
-        public FssApiClient(IHttpClientFactory httpClientFactory)
-        {
-            _httpClient = httpClientFactory.CreateClient();
-        }
+        public FssApiClient(IHttpClientFactory httpClientFactory) => _httpClient = httpClientFactory.CreateClient();
 
         public async Task<HttpResponseMessage> CreateBatchAsync(string uri, string requestBody, string authToken)
         {
             HttpContent content = null;
 
             if (requestBody != null)
+            {
                 content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+            }
 
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
             { Content = content };
@@ -25,7 +24,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             httpRequestMessage.SetBearerToken(authToken);
             httpRequestMessage.AddCorrelationId(CommonHelper.CorrelationID.ToString());
 
-            var response = await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            HttpResponseMessage? response = await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
 
             return response;
         }
