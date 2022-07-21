@@ -107,7 +107,23 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809025 - getting batch details failed
         /// </summary>
-        GetBatchDetailRequestFailed = 809025
+        GetBatchDetailRequestFailed = 809025,
+        /// <summary>
+        /// 809026 - getting batch details completed
+        /// </summary>
+        GetBatchDetailRequestCompleted = 809026,
+        /// <summary>
+        /// 809027 - Download file started
+        /// </summary>
+        DownloadFileStarted = 809027,
+        /// <summary>
+        /// 809028 - Download file failed
+        /// </summary>
+        DownloadFileFailed = 809028,
+        /// <summary>
+        /// 809029 - Download file completed
+        /// </summary>
+        DownloadFileCompleted = 809029,
     }
 
     public static class EventIdExtensions

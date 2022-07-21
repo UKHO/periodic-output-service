@@ -5,7 +5,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler
 {
     public class FakeHttpMessageHandler : HttpMessageHandler
     {
-        private HttpResponseMessage _response;
+        private readonly HttpResponseMessage _response;
 
         public static HttpMessageHandler GetHttpMessageHandler(string content, HttpStatusCode httpStatusCode)
         {
@@ -20,10 +20,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler
             return messageHandler;
         }
 
-        public FakeHttpMessageHandler(HttpResponseMessage response)
-        {
-            _response = response;
-        }
+        public FakeHttpMessageHandler(HttpResponseMessage response) => _response = response;
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {

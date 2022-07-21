@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using FakeItEasy;
 using Microsoft.Extensions.Logging;
+using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
@@ -13,6 +14,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         public IFleetManagerService _fakeFleetManagerService;
         public IEssService _fakeExchangeSetApiService;
         public IFssService _fakeFssBatchService;
+        public IFileSystemHelper _fakefileSystemHelper;
+
         private ILogger<FulfilmentDataService> _fakeLogger;
 
         public FleetMangerGetAuthTokenResponse jwtauthUnpToken = new();
@@ -25,8 +28,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeExchangeSetApiService = A.Fake<IEssService>();
             _fakeFssBatchService = A.Fake<IFssService>();
             _fakeLogger = A.Fake<ILogger<FulfilmentDataService>>();
+            _fakefileSystemHelper = A.Fake<IFileSystemHelper>();
 
-            _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeExchangeSetApiService, _fakeFssBatchService, _fakeLogger);
+            _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeExchangeSetApiService, _fakeFssBatchService, _fakefileSystemHelper, _fakeLogger);
         }
 
         [Test]
@@ -75,7 +79,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.That(result, Is.EqualTo("Fail"));
         }
 
-        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
+        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
         {
             ExchangeSetCellCount = 3,
             RequestedProductCount = 3,

@@ -8,6 +8,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
     {
         public Task<FssBatchStatus> CheckIfBatchCommitted(string batchId);
         public Task<BatchDetail> GetBatchDetails(string batchId);
-        public Task<string> DownloadFile(string downloadPath, string fileName, string fileLink);
+        public Task<Stream> DownloadFile(string downloadPath, string fileName, string fileLink);
     }
 }

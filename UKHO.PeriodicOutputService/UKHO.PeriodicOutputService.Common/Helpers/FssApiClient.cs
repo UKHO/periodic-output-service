@@ -113,27 +113,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken)
         {
-            try
-            {
-                HttpContent content = null;
-                string requestBody = string.Empty;
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
-                if (requestBody != null)
-                    content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+            httpRequestMessage.SetBearerToken(accessToken);
+            httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
 
-                using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri)
-                { Content = content };
-
-                httpRequestMessage.SetBearerToken(accessToken);
-                httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
-
-                return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
-            
+            return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
     }
 }

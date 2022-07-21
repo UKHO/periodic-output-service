@@ -14,29 +14,28 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]
-        public void Setup()
-        {
-            _fakeHttpClientFactory = A.Fake<IHttpClientFactory>();
-        }
+        public void Setup() => _fakeHttpClientFactory = A.Fake<IHttpClientFactory>();
 
         [Test]
         public void DoesProductIdentifiersData_Returns_OK()
         {
-            var serializedProductIdentifierData = JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse());
+            string? serializedProductIdentifierData = JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse());
 
-            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                 JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()), HttpStatusCode.OK);
 
-            var httpClient = new HttpClient(messageHandler);
-            httpClient.BaseAddress = new Uri("http://test.com");
+            var httpClient = new HttpClient(messageHandler)
+            {
+                BaseAddress = new Uri("http://test.com")
+            };
 
-            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+            _ = A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
 
             _exchangeSetApiClient = new EssApiClient(_fakeHttpClientFactory);
 
-            var result = _exchangeSetApiClient.PostProductIdentifiersDataAsync("http://test.com", GetProductIdentifiers(), "asdfsa");
+            Task<HttpResponseMessage>? result = _exchangeSetApiClient.PostProductIdentifiersDataAsync("http://test.com", GetProductIdentifiers(), "asdfsa");
 
-            var deSerializedResult = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(result.Result.Content.ReadAsStringAsync().Result);
+            ExchangeSetResponseModel? deSerializedResult = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(result.Result.Content.ReadAsStringAsync().Result);
 
             Assert.Multiple(() =>
             {
@@ -45,17 +44,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             });
         }
 
-        private List<string> GetProductIdentifiers()
+        private List<string> GetProductIdentifiers() => new()
         {
-            return new List<string>
-            {
                 "US2ARCGD",
                 "CA379151",
                 "DE110000"
             };
-        }
 
-        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
+        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
         {
             ExchangeSetCellCount = GetProductIdentifiers().Count,
             RequestedProductCount = GetProductIdentifiers().Count,

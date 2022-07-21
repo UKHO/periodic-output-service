@@ -13,27 +13,26 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]
-        public void Setup()
-        {
-            _fakeHttpClientFactory = A.Fake<IHttpClientFactory>();
-        }
+        public void Setup() => _fakeHttpClientFactory = A.Fake<IHttpClientFactory>();
 
         [Test]
         public void DoesGetJwtAuthUnpToken_Returns_OK()
         {
             string AuthToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVh";
 
-            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                AuthToken, HttpStatusCode.OK);
 
-            var httpClient = new HttpClient(messageHandler);
-            httpClient.BaseAddress = new Uri("http://test.com");
+            var httpClient = new HttpClient(messageHandler)
+            {
+                BaseAddress = new Uri("http://test.com")
+            };
 
             A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
 
             _fleetManagerClient = new FleetManagerApiClient(_fakeHttpClientFactory);
 
-            var result = _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
+            Task<HttpResponseMessage>? result = _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
 
             Assert.Multiple(() =>
             {
@@ -46,21 +45,23 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesGetCatalogue_Returns_OK()
         {
-            var serializedProductIdentifier = JsonConvert.SerializeObject(GetProductIdentifiers());
+            string? serializedProductIdentifier = JsonConvert.SerializeObject(GetProductIdentifiers());
 
-            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                JsonConvert.SerializeObject(GetProductIdentifiers()), HttpStatusCode.OK);
 
-            var httpClient = new HttpClient(messageHandler);
-            httpClient.BaseAddress = new Uri("http://test.com");
+            var httpClient = new HttpClient(messageHandler)
+            {
+                BaseAddress = new Uri("http://test.com")
+            };
 
             A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
 
             _fleetManagerClient = new FleetManagerApiClient(_fakeHttpClientFactory);
 
-            var result = _fleetManagerClient.GetCatalogue(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
+            Task<HttpResponseMessage>? result = _fleetManagerClient.GetCatalogue(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
 
-            var deSerializedResult = JsonConvert.DeserializeObject<List<string>>(result.Result.Content.ReadAsStringAsync().Result);
+            List<string>? deSerializedResult = JsonConvert.DeserializeObject<List<string>>(result.Result.Content.ReadAsStringAsync().Result);
 
             Assert.Multiple(() =>
             {
@@ -70,15 +71,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             });
         }
 
-        private List<string> GetProductIdentifiers()
+        private List<string> GetProductIdentifiers() => new()
         {
-            return new List<string>
-            {
                 "US2ARCGD",
                 "CA379151",
                 "DE110000"
             };
-        }
     }
 
 }

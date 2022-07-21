@@ -153,7 +153,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
         }
 
-        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
+        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
         {
             ExchangeSetCellCount = GetProductIdentifiers().Count,
             RequestedProductCount = GetProductIdentifiers().Count,
@@ -174,7 +174,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             }
         };
 
-        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
+        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponse() => new()
         {
             ExchangeSetCellCount = 0,
             RequestedProductCount = GetProductIdentifiers().Count,
@@ -206,14 +206,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             return requestedProductsNotInExchangeSet;
         }
 
-        private List<string> GetProductIdentifiers()
+        private List<string> GetProductIdentifiers() => new()
         {
-            return new List<string>
-            {
                 "US2ARCGD",
                 "CA379151",
                 "DE110000"
             };
-        }
     }
 }

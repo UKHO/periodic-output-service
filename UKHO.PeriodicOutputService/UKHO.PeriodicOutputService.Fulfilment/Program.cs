@@ -8,6 +8,7 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Web.CodeGeneration;
 using Serilog;
 using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
@@ -171,6 +172,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
             serviceCollection.AddScoped<IEssService, EssService>();
             serviceCollection.AddScoped<IFssService, FssService>();
+            serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
+            serviceCollection.AddScoped<IFileSystem, DefaultFileSystem>();
 
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
