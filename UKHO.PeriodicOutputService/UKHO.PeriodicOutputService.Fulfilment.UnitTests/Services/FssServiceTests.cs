@@ -126,7 +126,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\": \"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\": \"Committed\",\"allFilesZipSize\": 11323697,\"attributes\": [{\"key\": \"Product Type\",\"value\": \"AVCS\"}],\"businessUnit\": \"AVCSCustomExchangeSets\",\"batchPublishedDate\": \"2022-07-13T10:53:58.98Z\",\"expiryDate\": \"2022-08-12T10:53:06Z\",\"files\": [{\"filename\": \"M01X02.zip\",\"fileSize\": 5095731,\"mimeType\": \"application/zip\",\"hash\": \"TLwn4f5J36mvWvrTafkXYA==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip\"}}},{\"filename\": \"M02X02.zip\",\"fileSize\": 6267757,\"mimeType\": \"application/zip\",\"hash\": \"7tP0BwgbMdKZT8koKakR+w==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M02X02.zip\"}}}]}")))
                 });
 
-            Common.Models.Fss.Response.BatchDetail? result = await _fssService.GetBatchDetails("4c5397d5-8a05-43fa-9009-9c38b2007f81");
+            Common.Models.Fss.Response.GetBatchResponseModel? result = await _fssService.GetBatchDetails("4c5397d5-8a05-43fa-9009-9c38b2007f81");
 
             Assert.Multiple(() =>
             {
@@ -151,7 +151,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     },
                 });
 
-            Common.Models.Fss.Response.BatchDetail? result = await _fssService.GetBatchDetails("4c5397d5-8a05-43fa-9009-9c38b2007f81");
+            Common.Models.Fss.Response.GetBatchResponseModel? result = await _fssService.GetBatchDetails("4c5397d5-8a05-43fa-9009-9c38b2007f81");
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();

@@ -10,6 +10,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     {
         private FileSystemHelper _fileSystemHelper;
         private IFileSystem _fakefileSystem;
+        private IZipHelper _fakeZipHelper;
+        private IFileInfoHelper _fakeFileInfoHelper;
 
         private const string filePath = @"d:\Test";
 
@@ -17,13 +19,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         public void Setup()
         {
             _fakefileSystem = A.Fake<IFileSystem>();
-            _fileSystemHelper = new FileSystemHelper(_fakefileSystem);
+            _fakeZipHelper = A.Fake<IZipHelper>();
+            _fakeFileInfoHelper = A.Fake<IFileInfoHelper>();
+
+            _fileSystemHelper = new FileSystemHelper(_fakefileSystem, _fakeZipHelper, _fakeFileInfoHelper);
         }
 
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null() => Assert.Throws<ArgumentNullException>(
-               () => new FileSystemHelper(null))
+               () => new FileSystemHelper(null, _fakeZipHelper, _fakeFileInfoHelper))
                .ParamName
                .Should().Be("fileSystem");
 

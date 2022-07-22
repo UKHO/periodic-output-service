@@ -173,6 +173,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IEssService, EssService>();
             serviceCollection.AddScoped<IFssService, FssService>();
             serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
+            serviceCollection.AddScoped<IZipHelper, ZipHelper>();
+            serviceCollection.AddScoped<IFileInfoHelper, FileInfoHelper>();
             serviceCollection.AddScoped<IFileSystem, DefaultFileSystem>();
 
             serviceCollection.AddHttpClient();

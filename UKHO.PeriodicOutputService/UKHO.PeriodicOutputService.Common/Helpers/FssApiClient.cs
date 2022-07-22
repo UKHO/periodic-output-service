@@ -29,14 +29,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return response;
         }
 
-        public async Task<HttpResponseMessage> AddFileInBatchAsync(string uri, string requestBody, string authToken, long? fileContentSizeHeader, string mimeTypeHeader = "application/octet-stream")
+        public async Task<HttpResponseMessage> AddFileToBatchAsync(string uri, string requestBody, string authToken, long? fileContentSizeHeader, string mimeTypeHeader = "application/octet-stream")
         {
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
             { Content = new StringContent(requestBody, Encoding.UTF8, "application/json") };
 
             httpRequestMessage.AddCorrelationId(CommonHelper.CorrelationID.ToString());
             httpRequestMessage.AddHeader("X-MIME-Type", mimeTypeHeader);
-            httpRequestMessage.AddHeader("Bearer", authToken);
+            httpRequestMessage.SetBearerToken(authToken);  
 
             if (fileContentSizeHeader.HasValue)
             {

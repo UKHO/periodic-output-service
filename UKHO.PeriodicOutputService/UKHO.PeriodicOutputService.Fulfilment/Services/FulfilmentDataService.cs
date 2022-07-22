@@ -47,7 +47,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                     if (fssBatchStatus == FssBatchStatus.Committed)
                     {
-                        BatchDetail batchDetail = await _fssService.GetBatchDetails(batchId);
+                        GetBatchResponseModel batchDetail = await _fssService.GetBatchDetails(batchId);
 
                         if (batchDetail != null)
                         {
@@ -59,12 +59,27 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                             List<Task> ParallelDownloadFileTasks = new() { };
 
-                            Parallel.ForEach(fileDetails, link =>
+                            Parallel.ForEach(fileDetails, file =>
                             {
-                                ParallelDownloadFileTasks.Add(DownloadService(downloadPath, link.Filename, link.Href));
+                                ParallelDownloadFileTasks.Add(DownloadService(downloadPath, file.Filename, file.Href));
                             });
 
                             await Task.WhenAll(ParallelDownloadFileTasks);
+
+                            //ParallelDownloadFileTasks = new();
+
+                            //Parallel.ForEach(fileDetails, file =>
+                            //{
+                            //    ParallelDownloadFileTasks.Add(ExtractExchangeSetZip(file.Filename, downloadPath));
+                            //});
+
+                            //await Task.WhenAll(ParallelDownloadFileTasks);
+
+                            //await _fssService.CreateISOFiles();
+
+                            IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, "zip");
+
+                            bool result = await CreateBatchAndUpload(filePaths);
                         }
                     }
                     return "Success";
@@ -87,11 +102,59 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 return true;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", fileName, ex.Message, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 return false;
             }
+        }
+
+        private async Task<bool> ExtractExchangeSetZip(string filename, string downloadPath)
+        {
+            try
+            {
+                _fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, filename), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(filename)), false);
+
+                await Task.CompletedTask;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        private async Task<bool> CreateBatchAndUpload(IEnumerable<string> filePaths)
+        {
+            //Create Batch
+
+            string batchId = await _fssService.CreateBatch();
+
+            //Add files in batch created above
+            List<Task> ParallelUploadFileToBatchTasks = new() { };
+
+            Parallel.ForEach(filePaths, filePath =>
+            {
+                ParallelUploadFileToBatchTasks.Add(AddAndUploadFiles(batchId, filePath));
+            });
+
+            await Task.WhenAll(ParallelUploadFileToBatchTasks);
+
+            return true;
+        }
+
+        private async Task<bool> AddAndUploadFiles(string batchId, string filePath)
+        {
+            FileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
+
+            bool isFileAdded = await _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length);
+
+            if (isFileAdded)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

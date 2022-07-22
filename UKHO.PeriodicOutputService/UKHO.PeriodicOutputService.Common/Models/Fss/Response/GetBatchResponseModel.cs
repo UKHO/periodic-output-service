@@ -2,7 +2,7 @@
 
 namespace UKHO.PeriodicOutputService.Common.Models.Fss.Response
 {
-    public class BatchDetail
+    public class GetBatchResponseModel
     {
         public string BatchId { get; set; }
 
