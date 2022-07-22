@@ -1,6 +1,6 @@
 Param(
 	[Parameter(mandatory=$true)][string]$RGName,
-    [Parameter(mandatory=$true)][string]$WEB_APP_NAME,
+    [Parameter(mandatory=$true)][string]$webAppName,
     [Parameter(mandatory=$true)][string]$waitTimeInMinute
 )
 
@@ -16,7 +16,7 @@ $stopWatch.Start()
 do
 {
     Write-Host "Polling AZ ..."
-    $StateRequest  =  az webapp show --name $WEB_APP_NAME --resource-group $RGName --query "state"
+    $StateRequest  =  az webapp show --name $webAppName --resource-group $RGName --query "state"
     Write-Host "State of webjob is $StateRequest ..."
     
     If ($StateRequest -eq '"Running"') {
