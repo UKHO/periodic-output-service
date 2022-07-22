@@ -61,5 +61,5 @@ steps:
       azureSubscription: "${{ parameters.AzureSubscription }}"
       scriptType: ps
       scriptLocation: scriptPath
-      scriptPath: "$(Pipeline.Workspace)/terraformartifact/check_service_status_webjob.ps1"
+      scriptPath: "$(Pipeline.Workspace)/devterraformartifact/check_service_status_webjob.ps1"
       arguments: "-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)"
