@@ -15,5 +15,10 @@ namespace UKHO.PeriodicOutputService.Common
         {
             requestMessage.Headers.Add(name, value);
         }
+
+        public static void AddCorrelationId(this HttpRequestMessage requestMessage, string correlationId)
+        {
+            requestMessage.Headers.Add("X-Correlation-ID", correlationId);
+        }
     }
 }
