@@ -11,5 +11,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         public Task<GetBatchResponseModel> GetBatchDetails(string batchId);
         public Task<Stream> DownloadFile(string downloadPath, string fileName, string fileLink);
         public Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength);
+        public Task<List<string>> UploadBlocks(string batchId, FileInfo fileInfo);
+        public Task<bool> WriteBlockFile(string batchId, string fileName, IEnumerable<string> blockIds);
     }
 }

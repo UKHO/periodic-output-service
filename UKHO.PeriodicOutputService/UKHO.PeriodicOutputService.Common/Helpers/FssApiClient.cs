@@ -36,7 +36,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             httpRequestMessage.AddCorrelationId(CommonHelper.CorrelationID.ToString());
             httpRequestMessage.AddHeader("X-MIME-Type", mimeTypeHeader);
-            httpRequestMessage.SetBearerToken(authToken);  
+            httpRequestMessage.SetBearerToken(authToken);
 
             if (fileContentSizeHeader.HasValue)
             {
@@ -67,7 +67,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
-        public async Task<HttpResponseMessage> WriteBlockInFileAsync(string uri, string requestBody, string accessToken, string mimeTypeHeader = "application/octet-stream")
+        public async Task<HttpResponseMessage> WriteBlockInFileAsync(string uri, string requestBody, string accessToken, string? mimeTypeHeader = "application/octet-stream")
         {
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
             { Content = new StringContent(requestBody, Encoding.UTF8, "application/json") };

@@ -53,7 +53,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                         {
                             var fileDetails = batchDetail.Files.Select(a => new { a.Filename, a.Links.Get.Href }).ToList();
 
-                            string downloadPath = Path.Combine(@"D:\\HOME", batchId);
+                            string downloadPath = Path.Combine(@"D:\HOME", batchId);
 
                             _fileSystemHelper.CreateDirectory(downloadPath);
 
@@ -64,22 +64,37 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                                 ParallelDownloadFileTasks.Add(DownloadService(downloadPath, file.Filename, file.Href));
                             });
 
-                            await Task.WhenAll(ParallelDownloadFileTasks);
+                            Task.WaitAll(ParallelDownloadFileTasks.ToArray());
+                            ParallelDownloadFileTasks.Clear();
 
-                            //ParallelDownloadFileTasks = new();
+                            List<Task> ParallelExtractFileTasks = new();
 
-                            //Parallel.ForEach(fileDetails, file =>
-                            //{
-                            //    ParallelDownloadFileTasks.Add(ExtractExchangeSetZip(file.Filename, downloadPath));
-                            //});
+                            Parallel.ForEach(fileDetails, file =>
+                            {
+                                ParallelExtractFileTasks.Add(ExtractExchangeSetZip(file.Filename, downloadPath));
+                            });
 
-                            //await Task.WhenAll(ParallelDownloadFileTasks);
+                            Task.WaitAll(ParallelExtractFileTasks.ToArray());
+                            ParallelExtractFileTasks.Clear();
 
-                            //await _fssService.CreateISOFiles();
+                            List<Task> ParallelIsoAndSha1FileTasks = new();
 
-                            IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, "zip");
+                            Parallel.ForEach(fileDetails, file =>
+                            {
+                                ParallelIsoAndSha1FileTasks.Add(CreateIsoAndSha1ForExchangeSet(Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.Filename) + ".iso"), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.Filename))));
+                            });
+
+                            Task.WaitAll(ParallelIsoAndSha1FileTasks.ToArray());
+                            ParallelIsoAndSha1FileTasks.Clear();
+
+                            IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, "*.iso;*.sha1", SearchOption.TopDirectoryOnly);
 
                             bool result = await CreateBatchAndUpload(filePaths);
+
+                            if (result)
+                            {
+                                
+                            }
                         }
                     }
                     return "Success";
@@ -113,7 +128,23 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             try
             {
-                _fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, filename), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(filename)), false);
+                _fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, filename), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(filename)), true);
+
+                await Task.CompletedTask;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+
+        private async Task<bool> CreateIsoAndSha1ForExchangeSet(string directoryPath, string targetPath)
+        {
+            try
+            {
+                _fileSystemHelper.CreateIsoAndSha1(directoryPath, targetPath);
 
                 await Task.CompletedTask;
 
@@ -127,34 +158,54 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task<bool> CreateBatchAndUpload(IEnumerable<string> filePaths)
         {
-            //Create Batch
-
-            string batchId = await _fssService.CreateBatch();
-
-            //Add files in batch created above
-            List<Task> ParallelUploadFileToBatchTasks = new() { };
-
-            Parallel.ForEach(filePaths, filePath =>
+            try
             {
-                ParallelUploadFileToBatchTasks.Add(AddAndUploadFiles(batchId, filePath));
-            });
+                //Create Batch
 
-            await Task.WhenAll(ParallelUploadFileToBatchTasks);
+                string batchId = await _fssService.CreateBatch();
 
-            return true;
-        }
+                //Add files in batch created above
+                List<Task> ParallelUploadFileToBatchTasks = new() { };
 
-        private async Task<bool> AddAndUploadFiles(string batchId, string filePath)
-        {
-            FileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
+                Parallel.ForEach(filePaths, filePath =>
+                {
+                    ParallelUploadFileToBatchTasks.Add(AddAndUploadFiles(batchId, filePath));
+                });
 
-            bool isFileAdded = await _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length);
+                Task.WaitAll(ParallelUploadFileToBatchTasks.ToArray());
+                ParallelUploadFileToBatchTasks.Clear();
 
-            if (isFileAdded)
-            {
                 return true;
             }
-            return false;
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private async Task AddAndUploadFiles(string batchId, string filePath)
+        {
+            try
+            {
+                FileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
+
+                bool isFileAdded = await _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length);
+
+                if (isFileAdded)
+                {
+                    List<string> blockIds = await _fssService.UploadBlocks(batchId, fileInfo);
+
+                    if (blockIds.Count > 0)
+                    {
+                        await _fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 }
+

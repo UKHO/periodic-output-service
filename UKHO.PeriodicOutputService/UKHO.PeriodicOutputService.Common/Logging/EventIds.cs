@@ -124,6 +124,14 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809029 - Download file completed
         /// </summary>
         DownloadFileCompleted = 809029,
+        /// <summary>
+        /// 809030 - upload file block failed
+        /// </summary>
+        UploadFileBlockFailed = 809030,
+        /// <summary>
+        /// 809031 - write file block failed
+        /// </summary>
+        WriteBlockToFileFailed = 809031
     }
 
     public static class EventIdExtensions

@@ -1,5 +1,8 @@
 ﻿
+using System.Security.Cryptography;
+using DiscUtils.Iso9660;
 using Microsoft.VisualStudio.Web.CodeGeneration;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -67,9 +70,50 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return _fileInfoHelper.GetFileInfo(filePath);
         }
 
-        public IEnumerable<string> GetFiles(string directoryPath, string fileExtension)
+        public IEnumerable<string> GetFiles(string directoryPath, string fileExtension, SearchOption searchOption)
         {
-            return _fileSystem.EnumerateFiles(directoryPath, "*." + fileExtension, SearchOption.TopDirectoryOnly);
+            return _fileSystem.EnumerateFiles(directoryPath, fileExtension, searchOption);
+        }
+
+        public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
+        {
+            var fileInfo = new FileInfo(UploadBlockMetaData.FullFileName);
+            byte[] byteData = new Byte[UploadBlockMetaData.Length];
+
+            using (var fs = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
+            {
+                fs.Seek(UploadBlockMetaData.Offset, SeekOrigin.Begin);
+                fs.Read(byteData);
+            }
+            return byteData;
+        }
+
+        public void CreateIsoAndSha1(string targetPath, string directoryPath)
+        {            
+            var srcFiles = GetFiles(directoryPath, "*", SearchOption.AllDirectories);
+            var iso = new CDBuilder
+            {
+                UseJoliet = true,
+                VolumeIdentifier = "FullAVCSExchangeSet"
+            };
+
+            foreach (var file in srcFiles)
+            {
+                var fi = new FileInfo(file);
+                if (fi.Directory.Name == directoryPath)
+                {
+                    iso.AddFile($"{fi.Name}", fi.FullName);
+                    continue;
+                }
+                var srcDir = fi.Directory.FullName.Replace(directoryPath, "").TrimEnd('\\');
+                iso.AddDirectory(srcDir);
+                iso.AddFile($"{srcDir}\\{fi.Name}", fi.FullName);
+            }
+            iso.Build(targetPath);
+
+            byte[] isoFileBytes = System.Text.Encoding.UTF8.GetBytes(targetPath);
+            string hash = BitConverter.ToString(SHA1.Create().ComputeHash(isoFileBytes)).Replace("-", "");
+            File.WriteAllText(targetPath + ".sha1", hash);
         }
     }
 }

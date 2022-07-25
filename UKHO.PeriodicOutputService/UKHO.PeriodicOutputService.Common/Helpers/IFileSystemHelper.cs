@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -14,6 +10,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         void CreateZipFile(string sourcePath, string destinationFilePath, bool deleteSourceDirectory);
         void ExtractZipFile(string sourceArchiveFileName, string destinationDirectoryName, bool deleteSourceDirectory);
         FileInfo GetFileInfo(string filePath);
-        IEnumerable<string> GetFiles(string directoryPath, string fileExtension);
+        IEnumerable<string> GetFiles(string directoryPath, string fileExtension, SearchOption searchOption);
+        byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData);
+        void CreateIsoAndSha1(string targetPath, string directoryPath);
     }
 }
