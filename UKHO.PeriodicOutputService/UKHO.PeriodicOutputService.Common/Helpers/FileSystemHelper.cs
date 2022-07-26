@@ -65,27 +65,22 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
         }
 
-        public FileInfo GetFileInfo(string filePath)
+        public FileInfo GetFileInfo(string filePath) => _fileInfoHelper.GetFileInfo(filePath);
+
+        public IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption)
         {
-            return _fileInfoHelper.GetFileInfo(filePath);
+            string[] extensions = extensionsToSearch.Split(";");
+            return _fileSystem.EnumerateFiles(directoryPath, "*.*", searchOption).Where(e => extensions.Contains(Path.GetExtension(e).TrimStart('.').ToLowerInvariant()));
         }
 
-        public IEnumerable<string> GetFiles(string directoryPath, List<string> extensionsToSearch, SearchOption searchOption)
-        {
-            return _fileSystem.EnumerateFiles(directoryPath, "*.*", searchOption).Where(e => extensionsToSearch.Contains(Path.GetExtension(e).TrimStart('.').ToLowerInvariant()));
-        }
-
-        public IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption)
-        {
-            return _fileSystem.EnumerateFiles(directoryPath, "*.*", searchOption);
-        }
+        public IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption) => _fileSystem.EnumerateFiles(directoryPath, "*.*", searchOption);
 
         public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
         {
             var fileInfo = new FileInfo(UploadBlockMetaData.FullFileName);
             byte[] byteData = new Byte[UploadBlockMetaData.Length];
 
-            using (var fs = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (FileStream? fs = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 fs.Seek(UploadBlockMetaData.Offset, SeekOrigin.Begin);
                 fs.Read(byteData);
@@ -95,14 +90,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public void CreateIsoAndSha1(string targetPath, string directoryPath)
         {
-            var srcFiles = GetAllFiles(directoryPath, SearchOption.AllDirectories);
+            IEnumerable<string>? srcFiles = GetAllFiles(directoryPath, SearchOption.AllDirectories);
             var iso = new CDBuilder
             {
                 UseJoliet = true,
                 VolumeIdentifier = "FullAVCSExchangeSet"
             };
 
-            foreach (var file in srcFiles)
+            foreach (string? file in srcFiles)
             {
                 var fi = new FileInfo(file);
                 if (fi.Directory.Name == directoryPath)
@@ -110,7 +105,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                     iso.AddFile($"{fi.Name}", fi.FullName);
                     continue;
                 }
-                var srcDir = fi.Directory.FullName.Replace(directoryPath, "").TrimEnd('\\');
+                string? srcDir = fi.Directory.FullName.Replace(directoryPath, "").TrimEnd('\\');
                 iso.AddDirectory(srcDir);
                 iso.AddFile($"{srcDir}\\{fi.Name}", fi.FullName);
             }
@@ -125,13 +120,13 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             List<FileDetail> fileDetails = new();
 
-            foreach (var fileName in fileNames)
+            foreach (string? fileName in fileNames)
             {
-                FileInfo fileInfo = new FileInfo(fileName);
-                using var fs = fileInfo.OpenRead();
-                var fileMd5Hash = CommonHelper.CalculateMD5(fs);
+                FileInfo fileInfo = new(fileName);
+                using FileStream? fs = fileInfo.OpenRead();
+                byte[]? fileMd5Hash = CommonHelper.CalculateMD5(fs);
 
-                FileDetail fileDetail = new FileDetail()
+                FileDetail fileDetail = new()
                 {
                     FileName = fileInfo.Name,
                     Hash = Convert.ToBase64String(fileMd5Hash)

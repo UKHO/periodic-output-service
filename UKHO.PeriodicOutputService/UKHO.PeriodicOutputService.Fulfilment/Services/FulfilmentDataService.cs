@@ -45,7 +45,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     //Full AVCS Batch
                     Models.ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(catalogueResponse.ProductIdentifiers);
 
-                    string essBatchId = "cc4a0527-f82e-4355-affb-707e83293fe2";
+                    string essBatchId = "621E8D6F-9950-4BA6-BFB4-92415369AAEE";
+                    //string essBatchId = "cc4a0527-f82e-4355-affb-707e83293fe2";
 
                     //string essBatchId = CommonHelper.ExtractBatchId(url);
 
@@ -79,23 +80,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                             });
 
 
-                            //Upload ISO and SHA1 files in Batch 1
-                            List<string> batch1extensionsToSearch = new() { "iso", "sha1" };
-                            IEnumerable<string> batch1filePaths = _fileSystemHelper.GetFiles(downloadPath, batch1extensionsToSearch, SearchOption.TopDirectoryOnly);
+                            List<string> extensions = new() { "iso;sha1", "zip" };
 
-                            string batch1Id = await CreateBatchAndUpload(batch1filePaths);
+                            foreach (string? extension in extensions)
+                            {
+                                IEnumerable<string> batch1filePaths = _fileSystemHelper.GetFiles(downloadPath, extension, SearchOption.TopDirectoryOnly);
 
-                            bool isBatch1Committed = await _fssService.CommitBatch(batch1Id, batch1filePaths);
+                                string batch1Id = await CreateBatchAndUpload(batch1filePaths);
 
-
-                            //Upload zip files in Batch 2
-
-                            List<string> batch2extensionsToSearch = new() { "zip" };
-                            IEnumerable<string> batch2filePaths = _fileSystemHelper.GetFiles(downloadPath, batch2extensionsToSearch, SearchOption.TopDirectoryOnly);
-
-                            string batch2Id = await CreateBatchAndUpload(batch2filePaths);
-
-                            bool isBacth2Committed = await _fssService.CommitBatch(batch2Id, batch2filePaths);
+                                bool isBatch1Committed = await _fssService.CommitBatch(batch1Id, batch1filePaths);
+                            }
                         }
                     }
                     return "Success";
@@ -141,7 +135,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 _fileSystemHelper.CreateIsoAndSha1(directoryPath, targetPath);
 
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 _logger.LogError("Create ISO and SHA1 failed");
             }
@@ -163,7 +157,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 return batchId;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -187,7 +181,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }

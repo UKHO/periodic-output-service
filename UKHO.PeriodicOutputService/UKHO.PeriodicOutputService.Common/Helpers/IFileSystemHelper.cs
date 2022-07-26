@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         void CreateZipFile(string sourcePath, string destinationFilePath, bool deleteSourceDirectory);
         void ExtractZipFile(string sourceArchiveFileName, string destinationDirectoryName, bool deleteSourceDirectory);
         FileInfo GetFileInfo(string filePath);
-        IEnumerable<string> GetFiles(string directoryPath, List<string> extensionsToSearch, SearchOption searchOption);
+        IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption);
         IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption);
         byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData);
         void CreateIsoAndSha1(string targetPath, string directoryPath);
