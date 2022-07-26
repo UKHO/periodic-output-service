@@ -67,13 +67,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             }
         }
 
-        [Test]
-        public void Does_CreateFileCopy_Executes_Successful()
-        {
-            using (var test_Stream = new MemoryStream(Encoding.UTF8.GetBytes("whatever")))
-            {
-                _fileSystemHelper.CreateFileCopy(Path.Combine(filePath, "test.zip"), test_Stream);
-            }
-        }
+        //[Test]
+        //public void Does_CreateFileCopy_Executes_Successful()
+        //{
+        //    using (var test_Stream = new MemoryStream(Encoding.UTF8.GetBytes("whatever")))
+        //    {
+        //        _fileSystemHelper.CreateFileCopy(Path.Combine(filePath, "test.zip"), test_Stream);
+        //    }
+        //}
     }
 }
