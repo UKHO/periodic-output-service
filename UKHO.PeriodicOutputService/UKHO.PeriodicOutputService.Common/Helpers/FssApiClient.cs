@@ -7,7 +7,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         private readonly HttpClient _httpClient;
 
-        public FssApiClient(IHttpClientFactory httpClientFactory) => _httpClient = httpClientFactory.CreateClient();
+        public FssApiClient(IHttpClientFactory httpClientFactory)
+        {
+            _httpClient = httpClientFactory.CreateClient();
+            _httpClient.MaxResponseContentBufferSize = 2147483647;
+            _httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
+        }
 
         public async Task<HttpResponseMessage> CreateBatchAsync(string uri, string requestBody, string authToken)
         {

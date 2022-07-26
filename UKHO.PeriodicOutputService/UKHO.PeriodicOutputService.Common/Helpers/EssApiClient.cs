@@ -10,6 +10,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         public EssApiClient(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
+            _httpClient.MaxResponseContentBufferSize = 2147483647;
+            _httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
 
         public async Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken)
