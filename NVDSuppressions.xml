@@ -224,4 +224,12 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
     </notes>
     <cve>CVE-2022-30187</cve>
   </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+        file name: NuGet.Versioning.dll
+      ]]>
+    </notes>
+    <cve>CVE-2022-30184</cve>
+  </suppress>
 </suppressions>
