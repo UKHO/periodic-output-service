@@ -25,7 +25,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<FleetMangerGetAuthTokenResponse> GetJwtAuthUnpToken()
         {
-            _logger.LogInformation(EventIds.FleetMangerGetAuthTokenStarted.ToEventId(), "Getting auth token from fleet manager started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.FleetMangerGetAuthTokenStarted.ToEventId(), "Request to get auth token from fleet manager started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string jwtAuthUnpToken = string.Empty;
 
@@ -37,7 +37,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 jwtAuthUnpToken = CommonHelper.ExtractAccessToken(await httpResponse.Content.ReadAsStringAsync());
 
-                _logger.LogInformation(EventIds.FleetMangerGetAuthTokenCompleted.ToEventId(), "Getting auth token from fleet manager completed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.FleetMangerGetAuthTokenCompleted.ToEventId(), "Request to get auth token from fleet manager completed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
             }
             else
             {
@@ -49,7 +49,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<FleetManagerGetCatalogueResponse> GetCatalogue(string accessToken)
         {
-            _logger.LogInformation(EventIds.FleetMangerGetCatalogueStarted.ToEventId(), "Getting catalogue from fleet manager started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.FleetMangerGetCatalogueStarted.ToEventId(), "Request to get catalogue from fleet manager started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             List<string> productIdentifiers = new();
 
@@ -75,7 +75,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                         }
                     }
                 }
-                _logger.LogInformation(EventIds.FleetMangerGetCatalogueCompleted.ToEventId(), "Getting catalogue from fleet manager completed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.FleetMangerGetCatalogueCompleted.ToEventId(), "Request to get catalogue from fleet manager completed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
             }
             else
             {

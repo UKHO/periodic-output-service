@@ -160,6 +160,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
             serviceCollection.AddDistributedMemoryCache();
 
+            serviceCollection.AddSingleton<IConfiguration>(configuration);
             serviceCollection.AddTransient<PosFulfilmentJob>();
 
             serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();

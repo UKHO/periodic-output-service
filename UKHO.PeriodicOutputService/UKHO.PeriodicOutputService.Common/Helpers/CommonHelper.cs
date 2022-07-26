@@ -29,5 +29,13 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             return hash;
         }
+
+        public static byte[] CalculateMD5(Stream requestStream)
+        {
+            using var md5 = MD5.Create();
+            var hash = md5.ComputeHash(requestStream);
+
+            return hash;
+        }
     }
 }

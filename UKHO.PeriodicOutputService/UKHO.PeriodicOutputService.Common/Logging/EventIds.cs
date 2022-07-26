@@ -131,7 +131,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809031 - write file block failed
         /// </summary>
-        WriteBlockToFileFailed = 809031
+        WriteBlockToFileFailed = 809031,
+        /// <summary>
+        /// 809032 - commit batch failed
+        /// </summary>
+        CommitBatchFailed = 809032
     }
 
     public static class EventIdExtensions

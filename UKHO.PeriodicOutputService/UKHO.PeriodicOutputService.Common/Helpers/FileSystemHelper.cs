@@ -70,9 +70,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return _fileInfoHelper.GetFileInfo(filePath);
         }
 
-        public IEnumerable<string> GetFiles(string directoryPath, string fileExtension, SearchOption searchOption)
+        public IEnumerable<string> GetFiles(string directoryPath, List<string> extensionsToSearch, SearchOption searchOption)
         {
-            return _fileSystem.EnumerateFiles(directoryPath, fileExtension, searchOption);
+            return _fileSystem.EnumerateFiles(directoryPath, "*.*", searchOption).Where(e => extensionsToSearch.Contains(Path.GetExtension(e).TrimStart('.').ToLowerInvariant()));
+        }
+
+        public IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption)
+        {
+            return _fileSystem.EnumerateFiles(directoryPath, "*.*", searchOption);
         }
 
         public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
@@ -89,8 +94,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         }
 
         public void CreateIsoAndSha1(string targetPath, string directoryPath)
-        {            
-            var srcFiles = GetFiles(directoryPath, "*", SearchOption.AllDirectories);
+        {
+            var srcFiles = GetAllFiles(directoryPath, SearchOption.AllDirectories);
             var iso = new CDBuilder
             {
                 UseJoliet = true,
@@ -114,6 +119,26 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             byte[] isoFileBytes = System.Text.Encoding.UTF8.GetBytes(targetPath);
             string hash = BitConverter.ToString(SHA1.Create().ComputeHash(isoFileBytes)).Replace("-", "");
             File.WriteAllText(targetPath + ".sha1", hash);
+        }
+
+        public List<FileDetail> GetFileMD5(IEnumerable<string> fileNames)
+        {
+            List<FileDetail> fileDetails = new();
+
+            foreach (var fileName in fileNames)
+            {
+                FileInfo fileInfo = new FileInfo(fileName);
+                using var fs = fileInfo.OpenRead();
+                var fileMd5Hash = CommonHelper.CalculateMD5(fs);
+
+                FileDetail fileDetail = new FileDetail()
+                {
+                    FileName = fileInfo.Name,
+                    Hash = Convert.ToBase64String(fileMd5Hash)
+                };
+                fileDetails.Add(fileDetail);
+            }
+            return fileDetails;
         }
     }
 }
