@@ -11,7 +11,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public async Task<HttpResponseMessage> CreateBatchAsync(string uri, string requestBody, string authToken)
         {
-            HttpContent content = null;
+            HttpContent? content = null;
 
             if (requestBody != null)
             {
@@ -51,11 +51,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
             { Content = (blockBytes == null) ? null : new ByteArrayContent(blockBytes) };
 
-            httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            if (httpRequestMessage.Content != null) httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
             httpRequestMessage.AddCorrelationId(CommonHelper.CorrelationID.ToString());
             httpRequestMessage.SetBearerToken(accessToken);
 
-            if (md5Hash != null)
+            if (md5Hash != null && httpRequestMessage.Content != null)
             {
                 httpRequestMessage.Content.Headers.ContentMD5 = md5Hash;
             }
