@@ -92,25 +92,20 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public async Task<HttpResponseMessage> GetBatchDetailsAsync(string uri, string accessToken)
         {
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-
-            httpRequestMessage.SetBearerToken(accessToken);
-            httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
-
-            return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            return await CallFSSApi(uri, accessToken);
         }
 
         public async Task<HttpResponseMessage> GetBatchStatusAsync(string uri, string accessToken)
         {
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-
-            httpRequestMessage.SetBearerToken(accessToken);
-            httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
-
-            return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            return await CallFSSApi(uri, accessToken);
         }
 
         public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken)
+        {
+            return await CallFSSApi(uri, accessToken);
+        }
+
+        private async Task<HttpResponseMessage> CallFSSApi(string uri, string accessToken)
         {
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
