@@ -1,7 +1,6 @@
-﻿
+﻿using System.IO.Abstractions;
 using System.Security.Cryptography;
 using DiscUtils.Iso9660;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
@@ -21,9 +20,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public void CreateDirectory(string folderPath)
         {
-            if (!_fileSystem.DirectoryExists(folderPath))
+            if (!_fileSystem.Directory.Exists(folderPath))
             {
-                _fileSystem.CreateDirectory(folderPath);
+                _fileSystem.Directory.CreateDirectory(folderPath);
             }
         }
 
@@ -49,9 +48,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             _zipHelper.CreateZipFile(sourcePath, destinationFilePath);
 
-            if (deleteSourceDirectory && _fileSystem.DirectoryExists(sourcePath))
+            if (deleteSourceDirectory && _fileSystem.Directory.Exists(sourcePath))
             {
-                _fileSystem.RemoveDirectory(sourcePath, true);
+                _fileSystem.Directory.Delete(sourcePath, true);
             }
         }
 
@@ -59,9 +58,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             _zipHelper.ExtractZipFile(sourceArchiveFileName, destinationDirectoryName);
 
-            if (deleteSourceDirectory && _fileSystem.DirectoryExists(sourceArchiveFileName))
+            if (deleteSourceDirectory && _fileSystem.Directory.Exists(sourceArchiveFileName))
             {
-                _fileSystem.RemoveDirectory(sourceArchiveFileName, true);
+                _fileSystem.Directory.Delete(sourceArchiveFileName, true);
             }
         }
 
@@ -70,17 +69,20 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         public IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption)
         {
             string[] extensions = extensionsToSearch.Split(";");
-            return _fileSystem.EnumerateFiles(directoryPath, "*.*", searchOption).Where(e => extensions.Contains(Path.GetExtension(e).TrimStart('.').ToLowerInvariant()));
+
+            IEnumerable<string>? files = _fileSystem.Directory.EnumerateFiles(directoryPath, "*.*", searchOption);
+
+            return files.Where(e => extensions.Contains(Path.GetExtension(e).TrimStart('.').ToLowerInvariant()));
         }
 
-        public IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption) => _fileSystem.EnumerateFiles(directoryPath, "*.*", searchOption);
+        public IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption) => _fileSystem.Directory.EnumerateFiles(directoryPath, "*.*", searchOption);
 
         public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
         {
-            var fileInfo = new FileInfo(UploadBlockMetaData.FullFileName);
-            byte[] byteData = new Byte[UploadBlockMetaData.Length];
+            IFileInfo fileInfo = _fileSystem.FileInfo.FromFileName(UploadBlockMetaData.FullFileName);
+            byte[] byteData = new byte[UploadBlockMetaData.Length];
 
-            using (FileStream? fs = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (Stream? fs = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 fs.Seek(UploadBlockMetaData.Offset, SeekOrigin.Begin);
                 fs.Read(byteData);
@@ -122,8 +124,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             foreach (string? fileName in fileNames)
             {
-                FileInfo fileInfo = new(fileName);
-                using FileStream? fs = fileInfo.OpenRead();
+                IFileInfo fileInfo = _fileSystem.FileInfo.FromFileName(fileName);
+                using Stream? fs = fileInfo.OpenRead();
                 byte[]? fileMd5Hash = CommonHelper.CalculateMD5(fs);
 
                 FileDetail fileDetail = new()
