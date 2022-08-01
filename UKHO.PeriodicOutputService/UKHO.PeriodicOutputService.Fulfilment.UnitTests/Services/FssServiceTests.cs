@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO.Abstractions;
+using System.Text;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IAuthFssTokenProvider _fakeAuthFssTokenProvider;
         private IFssService _fssService;
         private IFileSystemHelper _fileSystemHelper;
+        private IFileSystem _fakeFileSystem;
 
         [SetUp]
         public void Setup()
@@ -35,6 +37,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeFssApiClient = A.Fake<IFssApiClient>();
             _fakeAuthFssTokenProvider = A.Fake<IAuthFssTokenProvider>();
             _fileSystemHelper = A.Fake<IFileSystemHelper>();
+            _fakeFileSystem = A.Fake<IFileSystem>();
 
             _fssService = new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper);
         }
@@ -69,7 +72,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus_If_ValidRequest()
+        public async Task DoesCheckIfBatchInComplete_Returns_BatchStatus_If_ValidRequest()
         {
             A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -80,6 +83,35 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                         RequestUri = new Uri("http://test.com")
                     },
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Incomplete\"}")))
+                });
+
+            FssBatchStatus result = await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
+
+            Assert.That(result, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed));
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch status for BatchID - {BatchId} completed. Batch Status is {BatchStatus} at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+             ).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+        }
+
+        [Test]
+        public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus_If_ValidRequest()
+        {
+            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Committed\"}")))
                 });
 
             FssBatchStatus result = await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
@@ -414,6 +446,57 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in Upload Commit Batch with uri:{RequestUri} responded with {StatusCode} BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void DoesUploadBlocks_Returns_BlockIds_If_ValidRequest()
+        {
+            IFileInfo fileInfo = _fakeFileSystem.FileInfo.FromFileName("M01X01.zip");
+            A.CallTo(() => fileInfo.Name).Returns("M01X01.zip");
+            A.CallTo(() => fileInfo.Length).Returns(100);
+
+            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored))
+              .Returns(new HttpResponseMessage()
+              {
+                  StatusCode = System.Net.HttpStatusCode.OK,
+                  RequestMessage = new HttpRequestMessage()
+                  {
+                      RequestUri = new Uri("http://test.com")
+                  },
+              });
+
+            Task<List<string>>? result = _fssService.UploadBlocks("", fileInfo);
+
+            Assert.That(result.Result.Count, Is.GreaterThan(0));
+            Assert.That(result.Result.FirstOrDefault(), Does.Contain("Block"));
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void DoesUploadBlocks_Returns_BlockIds_If_InValidRequest()
+        {
+            IFileInfo fileInfo = _fakeFileSystem.FileInfo.FromFileName("M01X01.zip");
+            A.CallTo(() => fileInfo.Name).Returns("M01X01.zip");
+            A.CallTo(() => fileInfo.Length).Returns(100);
+
+            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored))
+              .Returns(new HttpResponseMessage()
+              {
+                  StatusCode = System.Net.HttpStatusCode.Unauthorized,
+                  RequestMessage = new HttpRequestMessage()
+                  {
+                      RequestUri = new Uri("http://test.com")
+                  },
+              });
+
+            Task<List<string>>? result = _fssService.UploadBlocks("", fileInfo);
+
+            Assert.That(result.Status, Is.EqualTo(TaskStatus.Faulted));
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
         }
     }
 }

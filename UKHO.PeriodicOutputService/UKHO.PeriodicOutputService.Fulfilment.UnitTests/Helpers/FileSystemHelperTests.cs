@@ -118,11 +118,44 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_GetFiles_Executes_Successful()
         {
-            IEnumerable<string>? result = _fileSystemHelper.GetFiles(filePath, "*.zip", SearchOption.TopDirectoryOnly);
+            _fileSystemHelper.GetFiles(filePath, "*.zip", SearchOption.TopDirectoryOnly);
 
             A.CallTo(() => _fakefileSystem.Directory.EnumerateFiles(filePath, "*.*", SearchOption.TopDirectoryOnly)).MustHaveHappenedOnceExactly();
 
         }
+
+        //[Test]
+        //public void Does_GetFileInBytes_Returns_Bytes()
+        //{
+        //    UploadFileBlockRequestModel uploadFileBlockRequestModel = new()
+        //    {
+        //        BatchId = Guid.NewGuid().ToString(),
+        //        BlockId = "Block_00001",
+        //        FileName = "M01X01",
+        //        FullFileName = filePath,
+        //        Length = 100,
+        //        Offset = 1
+        //    };
+
+        //    IEnumerable<string> fileNames = new List<string> { fileName };
+
+        //    IFileInfo fileInfo = _fakefileSystem.FileInfo.FromFileName(fileName);
+        //    A.CallTo(() => fileInfo.Name).Returns(fileName);
+
+        //    A.CallTo(() => _fakefileSystem.FileInfo.FromFileName(A<string>.Ignored)).Returns(fileInfo);
+
+        //    byte[]? result = _fileSystemHelper.GetFileInBytes(uploadFileBlockRequestModel);
+        //}
+
+        //public void Does_GetAllFiles_Returns_Files()
+        //{
+
+        //}
+
+        //public void Does_CreateIsoAndSha1_Executes_Successfully()
+        //{
+
+        //}
 
         //[Test]
         //public void Does_CreateFileCopy_Executes_Successful()
