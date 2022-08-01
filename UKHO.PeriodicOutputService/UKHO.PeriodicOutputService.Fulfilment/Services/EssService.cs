@@ -1,12 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
-using UKHO.PeriodicOutputService.Fulfilment.Models;
-
-namespace UKHO.PeriodicOutputService.Fulfilment.Services
+﻿namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public class EssService : IEssService
     {
