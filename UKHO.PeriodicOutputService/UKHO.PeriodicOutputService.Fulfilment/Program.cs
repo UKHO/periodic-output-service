@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -8,7 +9,6 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using Serilog;
 using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
@@ -44,9 +44,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
                 try
                 {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     await serviceProvider.GetService<PosFulfilmentJob>().ProcessFulfilmentJob();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }
                 finally
                 {
@@ -176,7 +174,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
             serviceCollection.AddScoped<IZipHelper, ZipHelper>();
             serviceCollection.AddScoped<IFileInfoHelper, FileInfoHelper>();
-            serviceCollection.AddScoped<IFileSystem, DefaultFileSystem>();
+            serviceCollection.AddScoped<IFileSystem, FileSystem>();
 
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();

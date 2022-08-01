@@ -1,7 +1,7 @@
-﻿using System.Text;
+﻿using System.IO.Abstractions;
+using System.Text;
 using FakeItEasy;
 using FluentAssertions;
-using Microsoft.VisualStudio.Web.CodeGeneration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
@@ -12,14 +12,17 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         private IFileSystem _fakefileSystem;
         private IZipHelper _fakeZipHelper;
         private IFileInfoHelper _fakeFileInfoHelper;
+        private IFileInfo _fakeFileInfo;
 
         private const string filePath = @"d:\Test";
+        private const string fileName = "M01X01.zip";
 
         [SetUp]
         public void Setup()
         {
             _fakefileSystem = A.Fake<IFileSystem>();
             _fakeZipHelper = A.Fake<IZipHelper>();
+            _fakeFileInfo = A.Fake<IFileInfo>();
             _fakeFileInfoHelper = A.Fake<IFileInfoHelper>();
 
             _fileSystemHelper = new FileSystemHelper(_fakefileSystem, _fakeZipHelper, _fakeFileInfoHelper);
@@ -36,11 +39,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         public void Does_CreateFolder_Completed_When_Directory_Exists()
         {
 
-            A.CallTo(() => _fakefileSystem.DirectoryExists(filePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
 
             _fileSystemHelper.CreateDirectory(filePath);
 
-            A.CallTo(() => _fakefileSystem.CreateDirectory(filePath))
+            A.CallTo(() => _fakefileSystem.Directory.CreateDirectory(filePath))
                             .MustNotHaveHappened();
 
         }
@@ -48,11 +51,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_CreateFolder_Completed_When_Directory_Doesnot_Exists()
         {
-            A.CallTo(() => _fakefileSystem.DirectoryExists(filePath)).Returns(false);
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(false);
 
             _fileSystemHelper.CreateDirectory(filePath);
 
-            A.CallTo(() => _fakefileSystem.CreateDirectory(filePath))
+            A.CallTo(() => _fakefileSystem.Directory.CreateDirectory(filePath))
                             .MustHaveHappenedOnceExactly();
         }
 
@@ -65,6 +68,60 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
                 Assert.That(result, Is.Not.Null);
             }
+        }
+
+        [Test]
+        public void Does_CreateZipFile_Completed_When_DirectoryExists()
+        {
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+
+            _fileSystemHelper.CreateZipFile(filePath, filePath, true);
+
+            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath, true))
+                            .MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void Does_ExtractZipFile_Completed_When_DirectoryExists()
+        {
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+
+            _fileSystemHelper.ExtractZipFile(filePath, filePath, true);
+
+            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath, true))
+                            .MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void Does_GetFileMD5_Returns_FileDetails_With_Hash()
+        {
+            List<Common.Models.Fss.Request.FileDetail> fileDetails = new();
+
+            IEnumerable<string> fileNames = new List<string> { fileName };
+
+            IFileInfo fileInfo = _fakefileSystem.FileInfo.FromFileName(fileName);
+            A.CallTo(() => fileInfo.Name).Returns(fileName);
+
+            A.CallTo(() => _fakefileSystem.FileInfo.FromFileName(A<string>.Ignored)).Returns(fileInfo);
+
+            List<Common.Models.Fss.Request.FileDetail>? result = _fileSystemHelper.GetFileMD5(fileNames);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Count, Is.EqualTo(1));
+                Assert.That(result.FirstOrDefault().FileName, Is.EqualTo(fileName));
+                Assert.That(result.FirstOrDefault().Hash, Is.Not.Null);
+            });
+
+        }
+
+        [Test]
+        public void Does_GetFiles_Executes_Successful()
+        {
+            IEnumerable<string>? result = _fileSystemHelper.GetFiles(filePath, "*.zip", SearchOption.TopDirectoryOnly);
+
+            A.CallTo(() => _fakefileSystem.Directory.EnumerateFiles(filePath, "*.*", SearchOption.TopDirectoryOnly)).MustHaveHappenedOnceExactly();
+
         }
 
         //[Test]
