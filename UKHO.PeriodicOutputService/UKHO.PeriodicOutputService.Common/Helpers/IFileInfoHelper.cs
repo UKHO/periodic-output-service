@@ -1,7 +1,9 @@
-﻿namespace UKHO.PeriodicOutputService.Common.Helpers
+﻿using System.IO.Abstractions;
+
+namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public interface IFileInfoHelper
     {
-        FileInfo GetFileInfo(string filePath);        
+        IFileInfo GetFileInfo(string filePath);
     }
 }

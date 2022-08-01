@@ -1,4 +1,5 @@
-﻿using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
+﻿using System.IO.Abstractions;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -9,7 +10,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         void CreateFileCopy(string filePath, Stream stream);
         void CreateZipFile(string sourcePath, string destinationFilePath, bool deleteSourceDirectory);
         void ExtractZipFile(string sourceArchiveFileName, string destinationDirectoryName, bool deleteSourceDirectory);
-        FileInfo GetFileInfo(string filePath);
+        IFileInfo GetFileInfo(string filePath);
         IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption);
         IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption);
         byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData);

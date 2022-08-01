@@ -64,7 +64,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
         }
 
-        public FileInfo GetFileInfo(string filePath) => _fileInfoHelper.GetFileInfo(filePath);
+        public IFileInfo GetFileInfo(string filePath) => _fileInfoHelper.GetFileInfo(filePath);
 
         public IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption)
         {
@@ -80,6 +80,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
         {
             IFileInfo fileInfo = _fileSystem.FileInfo.FromFileName(UploadBlockMetaData.FullFileName);
+
             byte[] byteData = new byte[UploadBlockMetaData.Length];
 
             using (Stream? fs = fileInfo.Open(FileMode.Open, FileAccess.Read, FileShare.Read))

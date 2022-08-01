@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.IO.Abstractions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -167,7 +168,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             try
             {
-                FileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
+                IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
 
                 bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length).Result;
 
