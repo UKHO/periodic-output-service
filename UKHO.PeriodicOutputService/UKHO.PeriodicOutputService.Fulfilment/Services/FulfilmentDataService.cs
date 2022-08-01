@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Fss;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
@@ -31,8 +32,107 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _configuration = configuration;
         }
 
-        public async Task<string> CreatePosExchangeSet()
+        public async Task<string> CreatePosExchangeSets()
         {
+            try
+            {
+                var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
+                var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet());
+
+                await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
+
+                //var catalogFileResult = UploadCatalog();
+
+                return "success";
+            }
+            catch (Exception)
+            {
+                return "fail";
+                throw;
+            }
+        }
+
+        private async Task CreateFullAVCSExchangeSet()
+        {
+            try
+            {
+                List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
+
+                if (productIdentifiers.Count <= 0)
+                {
+                    _logger.LogError("Product identifiers not found");
+                }
+                else
+                {
+                    string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
+
+                    if (!string.IsNullOrEmpty(essBatchId))
+                    {
+                        FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
+
+                        if (fssBatchStatus == FssBatchStatus.Committed)
+                        {
+                            var files = await GetBatchFiles(essBatchId);
+                            string downloadPath = Path.Combine(@"D:\HOME", essBatchId);
+                            _fileSystemHelper.CreateDirectory(downloadPath);
+
+                            DownloadFiles(files, downloadPath);
+
+                            ExtractExchangeSetZip(files, downloadPath);
+
+                            CreateIsoAndSha1ForExchangeSet(files, downloadPath);
+
+                            List<string> extensions = new() { "iso;sha1", "zip" };
+
+                            foreach (string? extension in extensions)
+                            {
+                                IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, extension, SearchOption.TopDirectoryOnly);
+                                string batchId = await CreateBatchAndUpload(filePaths);
+                                bool isBatch1Committed = await _fssService.CommitBatch(batchId, filePaths);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogError("FSS polling cut off time completed");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        private async Task CreateUpdateExchangeSet()
+        {
+            await Task.CompletedTask;
+        }
+
+
+        private async Task<List<FssBatchFile>> GetBatchFiles(string essBatchId)
+        {
+            List<FssBatchFile> batchFiles = null;
+            GetBatchResponseModel batchDetail = await _fssService.GetBatchDetails(essBatchId);
+
+            if (batchDetail != null)
+            {
+                batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href }).ToList();
+
+                if (batchFiles.Any(f => f.FileName.Contains("error")))
+                {
+                    _logger.LogError("ESS exchange set creation failed.");
+                    return null;
+                }
+            }
+            return batchFiles;
+        }
+
+        private async Task<List<string>> GetFleetManagerProductIdentifiers()
+        {
+            List<string> productIdentifiers = new();
+
             Models.FleetMangerGetAuthTokenResponse tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
 
             if (!string.IsNullOrEmpty(tokenResponse.AuthToken))
@@ -41,104 +141,74 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
                 {
-
-                    //Full AVCS Batch
-                    Models.ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(catalogueResponse.ProductIdentifiers);
-
-                    string essBatchId = "621E8D6F-9950-4BA6-BFB4-92415369AAEE";
-                    //string essBatchId = "cc4a0527-f82e-4355-affb-707e83293fe2";
-
-                    //string essBatchId = CommonHelper.ExtractBatchId(url);
-
-                    FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
-
-                    if (fssBatchStatus == FssBatchStatus.Committed)
-                    {
-                        GetBatchResponseModel batchDetail = await _fssService.GetBatchDetails(essBatchId);
-
-                        if (batchDetail != null)
-                        {
-                            var fileDetails = batchDetail.Files.Select(a => new { a.Filename, a.Links.Get.Href }).ToList();
-
-                            string downloadPath = Path.Combine(@"D:\HOME", essBatchId);
-
-                            _fileSystemHelper.CreateDirectory(downloadPath);
-
-                            Parallel.ForEach(fileDetails, file =>
-                            {
-                                DownloadService(downloadPath, file.Filename, file.Href);
-                            });
-
-                            Parallel.ForEach(fileDetails, file =>
-                            {
-                                ExtractExchangeSetZip(file.Filename, downloadPath);
-                            });
-
-                            Parallel.ForEach(fileDetails, file =>
-                            {
-                                CreateIsoAndSha1ForExchangeSet(Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.Filename) + ".iso"), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.Filename)));
-                            });
-
-
-                            List<string> extensions = new() { "iso;sha1", "zip" };
-
-                            foreach (string? extension in extensions)
-                            {
-                                IEnumerable<string> batch1filePaths = _fileSystemHelper.GetFiles(downloadPath, extension, SearchOption.TopDirectoryOnly);
-
-                                string batch1Id = await CreateBatchAndUpload(batch1filePaths);
-
-                                bool isBatch1Committed = await _fssService.CommitBatch(batch1Id, batch1filePaths);
-                            }
-                        }
-                    }
-                    return "Success";
+                    productIdentifiers = catalogueResponse.ProductIdentifiers;
                 }
             }
-            return "Fail";
+            return productIdentifiers;
         }
 
-        private void DownloadService(string downloadPath, string fileName, string href)
+        private async Task<string> PostProductIdentifiersToESS(List<string> productIdentifiers)
         {
-            try
-            {
-                string filePath = Path.Combine(downloadPath, fileName);
+            Models.ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(productIdentifiers);
 
-                Stream stream = _fssService.DownloadFile(downloadPath, fileName, href).Result;
+            //string essBatchId = "621E8D6F-9950-4BA6-BFB4-92415369AAEE";
+            //string essBatchId = "cc4a0527-f82e-4355-affb-707e83293fe2";
 
-                byte[] bytes = _fileSystemHelper.ConvertStreamToByteArray(stream);
-
-                _fileSystemHelper.CreateFileCopy(filePath, new MemoryStream(bytes));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", fileName, ex.Message, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            }
+            return "cc4a0527-f82e-4355-affb-707e83293fe2";
+            //return CommonHelper.ExtractBatchId(response.Links.ExchangeSetBatchDetailsUri.ToString());
         }
 
-        private void ExtractExchangeSetZip(string fileName, string downloadPath)
+        private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
         {
-            try
-            {
-                _fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, fileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(fileName)), true);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", fileName, ex.Message, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            }
+            Parallel.ForEach(fileDetails, file =>
+              {
+                  try
+                  {
+
+                      string filePath = Path.Combine(downloadPath, file.FileName);
+                      Stream stream = _fssService.DownloadFile(downloadPath, file.FileName, file.FileLink).Result;
+                      byte[] bytes = _fileSystemHelper.ConvertStreamToByteArray(stream);
+                      _fileSystemHelper.CreateFileCopy(filePath, new MemoryStream(bytes));
+                  }
+                  catch (Exception ex)
+                  {
+                      _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, ex.Message, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                      throw;
+                  }
+              });
         }
 
-        private void CreateIsoAndSha1ForExchangeSet(string directoryPath, string targetPath)
+        private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
         {
-            try
+            Parallel.ForEach(fileDetails, file =>
             {
-                _fileSystemHelper.CreateIsoAndSha1(directoryPath, targetPath);
+                try
+                {
+                    _fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, ex.Message, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    throw;
+                }
+            });
+        }
 
-            }
-            catch (Exception)
-            {
-                _logger.LogError("Create ISO and SHA1 failed");
-            }
+        private void CreateIsoAndSha1ForExchangeSet(List<FssBatchFile> fileDetails, string downloadPath)
+        {
+            Parallel.ForEach(fileDetails, file =>
+              {
+                  try
+                  {
+                      string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+                      _fileSystemHelper.CreateIsoAndSha1(Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension));
+                  }
+                  catch (Exception)
+                  {
+                      _logger.LogError("Create ISO and SHA1 failed");
+                      throw;
+                  }
+              });
         }
 
         private async Task<string> CreateBatchAndUpload(IEnumerable<string> filePaths)
@@ -149,7 +219,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 string batchId = await _fssService.CreateBatch();
 
                 //Add files in batch created above
-
                 Parallel.ForEach(filePaths, filePath =>
                 {
                     AddAndUploadFiles(batchId, filePath);
@@ -159,6 +228,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             catch (Exception)
             {
+                _logger.LogError("Create Batch and Upload files failed");
                 throw;
             }
         }
@@ -183,6 +253,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             catch (Exception)
             {
+                _logger.LogError("Add and upload file failed");
                 throw;
             }
         }
