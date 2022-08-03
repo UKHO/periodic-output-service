@@ -16,7 +16,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public async Task<HttpResponseMessage> CreateBatchAsync(string uri, string requestBody, string authToken)
         {
-            HttpContent content = null;
+            HttpContent? content = null;
 
             if (requestBody != null)
             {
@@ -56,11 +56,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
             { Content = (blockBytes == null) ? null : new ByteArrayContent(blockBytes) };
 
-            httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            if (httpRequestMessage.Content != null) httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
             httpRequestMessage.AddCorrelationId(CommonHelper.CorrelationID.ToString());
             httpRequestMessage.SetBearerToken(accessToken);
 
-            if (md5Hash != null)
+            if (md5Hash != null && httpRequestMessage.Content != null)
             {
                 httpRequestMessage.Content.Headers.ContentMD5 = md5Hash;
             }
@@ -72,7 +72,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
-        public async Task<HttpResponseMessage> WriteBlockInFileAsync(string uri, string requestBody, string accessToken, string? mimeTypeHeader = "application/octet-stream")
+        public async Task<HttpResponseMessage> WriteBlockInFileAsync(string uri, string requestBody, string accessToken, string mimeTypeHeader = "application/octet-stream")
         {
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
             { Content = new StringContent(requestBody, Encoding.UTF8, "application/json") };
@@ -97,25 +97,20 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public async Task<HttpResponseMessage> GetBatchDetailsAsync(string uri, string accessToken)
         {
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-
-            httpRequestMessage.SetBearerToken(accessToken);
-            httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
-
-            return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            return await CallFSSApi(uri, accessToken);
         }
 
         public async Task<HttpResponseMessage> GetBatchStatusAsync(string uri, string accessToken)
         {
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-
-            httpRequestMessage.SetBearerToken(accessToken);
-            httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
-
-            return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            return await CallFSSApi(uri, accessToken);
         }
 
         public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken)
+        {
+            return await CallFSSApi(uri, accessToken);
+        }
+
+        private async Task<HttpResponseMessage> CallFSSApi(string uri, string accessToken)
         {
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 

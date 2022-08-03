@@ -83,7 +83,7 @@
 //        {
 //            ExchangeSetCellCount = 3,
 //            RequestedProductCount = 3,
-//            Links = new Links
+//            ////Links = new Links
 //            {
 //                ExchangeSetBatchDetailsUri = new LinkSetBatchDetailsUri
 //                {
