@@ -172,15 +172,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IEssService, EssService>();
             serviceCollection.AddScoped<IFssService, FssService>();
             serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
-            serviceCollection.AddScoped<IZipHelper, ZipHelper>();
-            serviceCollection.AddScoped<IFileInfoHelper, FileInfoHelper>();
             serviceCollection.AddScoped<IFileSystem, FileSystem>();
 
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
             serviceCollection.AddTransient<IFssApiClient, FssApiClient>();
-
         }
     }
 }

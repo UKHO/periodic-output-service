@@ -10,8 +10,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     {
         private FileSystemHelper _fileSystemHelper;
         private IFileSystem _fakefileSystem;
-        private IZipHelper _fakeZipHelper;
-        private IFileInfoHelper _fakeFileInfoHelper;
         private IFileInfo _fakeFileInfo;
 
         private const string filePath = @"d:\Test";
@@ -21,17 +19,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         public void Setup()
         {
             _fakefileSystem = A.Fake<IFileSystem>();
-            _fakeZipHelper = A.Fake<IZipHelper>();
             _fakeFileInfo = A.Fake<IFileInfo>();
-            _fakeFileInfoHelper = A.Fake<IFileInfoHelper>();
-
-            _fileSystemHelper = new FileSystemHelper(_fakefileSystem, _fakeZipHelper, _fakeFileInfoHelper);
+            
+            _fileSystemHelper = new FileSystemHelper(_fakefileSystem);
         }
 
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null() => Assert.Throws<ArgumentNullException>(
-               () => new FileSystemHelper(null, _fakeZipHelper, _fakeFileInfoHelper))
+               () => new FileSystemHelper(null))
                .ParamName
                .Should().Be("fileSystem");
 
@@ -56,39 +52,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             _fileSystemHelper.CreateDirectory(filePath);
 
             A.CallTo(() => _fakefileSystem.Directory.CreateDirectory(filePath))
-                            .MustHaveHappenedOnceExactly();
-        }
-
-        [Test]
-        public void Does_ConvertStreamToByteArray_Returns_NotNull()
-        {
-            using (var test_Stream = new MemoryStream(Encoding.UTF8.GetBytes("whatever")))
-            {
-                byte[]? result = _fileSystemHelper.ConvertStreamToByteArray(test_Stream);
-
-                Assert.That(result, Is.Not.Null);
-            }
-        }
-
-        [Test]
-        public void Does_CreateZipFile_Completed_When_DirectoryExists()
-        {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
-
-            _fileSystemHelper.CreateZipFile(filePath, filePath, true);
-
-            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath, true))
-                            .MustHaveHappenedOnceExactly();
-        }
-
-        [Test]
-        public void Does_ExtractZipFile_Completed_When_DirectoryExists()
-        {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
-
-            _fileSystemHelper.ExtractZipFile(filePath, filePath, true);
-
-            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath, true))
                             .MustHaveHappenedOnceExactly();
         }
 
