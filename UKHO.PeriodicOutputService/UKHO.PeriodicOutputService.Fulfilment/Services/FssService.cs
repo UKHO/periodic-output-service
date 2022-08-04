@@ -9,14 +9,14 @@ using UKHO.PeriodicOutputService.Fulfilment.Models;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
-    public class FssBatchService : IFssBatchService
+    public class FssService : IFssService
     {
         private readonly IOptions<FssApiConfiguration> _fssApiConfiguration;
-        private readonly ILogger<FssBatchService> _logger;
+        private readonly ILogger<FssService> _logger;
         private readonly IFssApiClient _fssApiClient;
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
 
-        public FssBatchService(ILogger<FssBatchService> logger,
+        public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
                                IAuthFssTokenProvider authFssTokenProvider)

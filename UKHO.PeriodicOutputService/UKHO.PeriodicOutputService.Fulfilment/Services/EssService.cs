@@ -8,21 +8,21 @@ using UKHO.PeriodicOutputService.Fulfilment.Models;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
-    public class ExchangeSetApiService : IExchangeSetApiService
+    public class EssService : IEssService
     {
-        private readonly IOptions<ExchangeSetApiConfiguration> _exchangeSetApiConfiguration;
-        private readonly IExchangeSetApiClient _exchangeSetApiClient;
+        private readonly IOptions<EssApiConfiguration> _essApiConfiguration;
+        private readonly IEssApiClient _essApiClient;
         private readonly IAuthEssTokenProvider _authEssTokenProvider;
-        private readonly ILogger<ExchangeSetApiService> _logger;
+        private readonly ILogger<EssService> _logger;
 
-        public ExchangeSetApiService(ILogger<ExchangeSetApiService> logger,
-                                     IOptions<ExchangeSetApiConfiguration> exchangeSetApiConfiguration,
-                                     IExchangeSetApiClient exchangeSetApiClient,
+        public EssService(ILogger<EssService> logger,
+                                     IOptions<EssApiConfiguration> essApiConfiguration,
+                                     IEssApiClient essApiClient,
                                      IAuthEssTokenProvider authEssTokenProvider)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _exchangeSetApiConfiguration = exchangeSetApiConfiguration ?? throw new ArgumentNullException(nameof(exchangeSetApiConfiguration));
-            _exchangeSetApiClient = exchangeSetApiClient ?? throw new ArgumentNullException(nameof(exchangeSetApiClient));
+            _essApiConfiguration = essApiConfiguration ?? throw new ArgumentNullException(nameof(essApiConfiguration));
+            _essApiClient = essApiClient ?? throw new ArgumentNullException(nameof(essApiClient));
             _authEssTokenProvider = authEssTokenProvider ?? throw new ArgumentNullException(nameof(authEssTokenProvider));
         }
 
@@ -30,7 +30,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             _logger.LogInformation(EventIds.GetAccessTokenForESSEndPointStarted.ToEventId(), "Getting access token to call ESS endpoint started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_exchangeSetApiConfiguration.Value.EssClientId);
+            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
 
             _logger.LogInformation(EventIds.GetAccessTokenForESSEndPointCompleted.ToEventId(), "Getting access token to call ESS endpoint completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
@@ -38,7 +38,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             _logger.LogInformation(EventIds.ExchangeSetPostProductIdentifiersRequestStarted.ToEventId(), "Request to post productidentifiers to ESS started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            HttpResponseMessage httpResponse = await _exchangeSetApiClient.PostProductIdentifiersDataAsync(_exchangeSetApiConfiguration.Value.BaseUrl, productIdentifiers, accessToken);
+            HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(_essApiConfiguration.Value.BaseUrl, productIdentifiers, accessToken);
 
             if (httpResponse.IsSuccessStatusCode)
             {
