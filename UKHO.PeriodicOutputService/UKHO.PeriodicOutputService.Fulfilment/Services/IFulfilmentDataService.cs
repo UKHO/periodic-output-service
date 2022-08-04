@@ -2,6 +2,6 @@
 {
     public interface IFulfilmentDataService
     {
-        Task<string> CreatePosExchangeSet();
+        Task<string> CreatePosExchangeSets();
     }
 }

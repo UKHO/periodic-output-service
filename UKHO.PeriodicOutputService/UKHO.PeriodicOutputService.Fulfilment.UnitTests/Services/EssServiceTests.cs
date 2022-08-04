@@ -12,45 +12,46 @@ using UKHO.PeriodicOutputService.Fulfilment.Services;
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 {
     [TestFixture]
-    public class ExchangeSetApiServiceTests
+    public class EssServiceTests
     {
-        private IOptions<ExchangeSetApiConfiguration> _fakeExchangeSetApiConfiguration;
-        private IExchangeSetApiClient _fakeExchangeSetApiClient;
-        private IExchangeSetApiService _exchangeSetApiService;
+        private IOptions<EssApiConfiguration> _fakeEssApiConfiguration;
+        private IEssApiClient _fakeEssApiClient;
         private IAuthEssTokenProvider _fakeAuthTokenProvider;
-        private ILogger<ExchangeSetApiService> _fakeLogger;
+        private ILogger<EssService> _fakeLogger;
+
+        private IEssService _essService;
 
         [SetUp]
         public void Setup()
         {
-            _fakeExchangeSetApiConfiguration = Options.Create(new ExchangeSetApiConfiguration() { EssClientId = "ClientId2" });
-            _fakeExchangeSetApiClient = A.Fake<IExchangeSetApiClient>();
+            _fakeEssApiConfiguration = Options.Create(new EssApiConfiguration() { EssClientId = "ClientId2" });
+            _fakeEssApiClient = A.Fake<IEssApiClient>();
             _fakeAuthTokenProvider = A.Fake<IAuthEssTokenProvider>();
-            _fakeLogger = A.Fake<ILogger<ExchangeSetApiService>>();
+            _fakeLogger = A.Fake<ILogger<EssService>>();
 
-            _exchangeSetApiService = new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider);
+            _essService = new EssService(_fakeLogger, _fakeEssApiConfiguration, _fakeEssApiClient, _fakeAuthTokenProvider);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             Assert.Throws<ArgumentNullException>(
-                () => new ExchangeSetApiService(null, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
+                () => new EssService(null, _fakeEssApiConfiguration, _fakeEssApiClient, _fakeAuthTokenProvider))
                 .ParamName
                 .Should().Be("logger");
 
             Assert.Throws<ArgumentNullException>(
-                () => new ExchangeSetApiService(_fakeLogger, null, _fakeExchangeSetApiClient, _fakeAuthTokenProvider))
+                () => new EssService(_fakeLogger, null, _fakeEssApiClient, _fakeAuthTokenProvider))
                 .ParamName
-                .Should().Be("exchangeSetApiConfiguration");
+                .Should().Be("essApiConfiguration");
 
             Assert.Throws<ArgumentNullException>(
-               () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, null, _fakeAuthTokenProvider))
+               () => new EssService(_fakeLogger, _fakeEssApiConfiguration, null, _fakeAuthTokenProvider))
                .ParamName
-               .Should().Be("exchangeSetApiClient");
+               .Should().Be("essApiClient");
 
             Assert.Throws<ArgumentNullException>(
-               () => new ExchangeSetApiService(_fakeLogger, _fakeExchangeSetApiConfiguration, _fakeExchangeSetApiClient, null))
+               () => new EssService(_fakeLogger, _fakeEssApiConfiguration, _fakeEssApiClient, null))
                .ParamName
                .Should().Be("authEssTokenProvider");
         }
@@ -58,7 +59,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public async Task DoesGetProductIdentifiersData_Returns_ValidData_WhenValidProductIdentifiersArePassed()
         {
-            A.CallTo(() => _fakeExchangeSetApiClient.PostProductIdentifiersDataAsync
+            A.CallTo(() => _fakeEssApiClient.PostProductIdentifiersDataAsync
             (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
                   {
@@ -71,7 +72,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                   });
 
 
-            ExchangeSetResponseModel response = await _exchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
@@ -93,7 +94,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public async Task DoesGetProductIdentifiersData_Returns_ValidData_WhenInvalidProductIdentifiersArePassed()
         {
-            A.CallTo(() => _fakeExchangeSetApiClient.PostProductIdentifiersDataAsync
+            A.CallTo(() => _fakeEssApiClient.PostProductIdentifiersDataAsync
             (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
                   {
@@ -106,7 +107,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                   });
 
 
-            ExchangeSetResponseModel response = await _exchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
@@ -127,7 +128,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public async Task DoesGetProductIdentifiersData_LogsError_When_ResponseStatus_Is_Not_OK()
         {
-            A.CallTo(() => _fakeExchangeSetApiClient.PostProductIdentifiersDataAsync
+            A.CallTo(() => _fakeEssApiClient.PostProductIdentifiersDataAsync
             (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
                   {
@@ -140,7 +141,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                   });
 
 
-            ExchangeSetResponseModel response = await _exchangeSetApiService.PostProductIdentifiersData(GetProductIdentifiers());
+            ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"

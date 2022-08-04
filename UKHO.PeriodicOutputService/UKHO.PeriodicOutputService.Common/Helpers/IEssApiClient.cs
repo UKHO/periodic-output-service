@@ -1,6 +1,6 @@
 ﻿namespace UKHO.PeriodicOutputService.Common.Helpers
 {
-    public interface IExchangeSetApiClient
+    public interface IEssApiClient
     {
         Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken);
     }

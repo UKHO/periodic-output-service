@@ -11,13 +11,14 @@ using UKHO.PeriodicOutputService.Fulfilment.Services;
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 {
     [TestFixture]
-    public class FssBatchServiceTests
+    public class FssServiceTests
     {
         private IOptions<FssApiConfiguration> _fakeFssApiConfiguration;
-        private ILogger<FssBatchService> _fakeLogger;
+        private ILogger<FssService> _fakeLogger;
         private IFssApiClient _fakeFssApiClient;
         private IAuthFssTokenProvider _fakeAuthFssTokenProvider;
-        private IFssBatchService _batchService;
+
+        private IFssService _fssService;
 
         [SetUp]
         public void Setup()
@@ -30,33 +31,33 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 BatchStatusPollingDelayTime = "20000"
             });
 
-            _fakeLogger = A.Fake<ILogger<FssBatchService>>();
+            _fakeLogger = A.Fake<ILogger<FssService>>();
             _fakeFssApiClient = A.Fake<IFssApiClient>();
             _fakeAuthFssTokenProvider = A.Fake<IAuthFssTokenProvider>();
 
-            _batchService = new FssBatchService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider);
+            _fssService = new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             Assert.Throws<ArgumentNullException>(
-                () => new FssBatchService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider))
+                () => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider))
                 .ParamName
                 .Should().Be("logger");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssBatchService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider))
+                () => new FssService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider))
                 .ParamName
                 .Should().Be("fssApiConfiguration");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssBatchService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider))
+                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider))
                 .ParamName
                 .Should().Be("fssApiClient");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssBatchService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null))
+                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null))
                 .ParamName
                 .Should().Be("authFssTokenProvider");
         }
@@ -75,7 +76,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Incomplete\"}")))
                 });
 
-            var result = await _batchService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
+            var result = await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
 
             Assert.That(result, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed));
 
@@ -98,7 +99,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"statusCode\":\"401\",\"message\":\"Authorization token is missing or invalid\"}")))
                 });
 
-            var result = await _batchService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
+            var result = await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
 
             Assert.That(result, Is.EqualTo(FssBatchStatus.Incomplete));
 

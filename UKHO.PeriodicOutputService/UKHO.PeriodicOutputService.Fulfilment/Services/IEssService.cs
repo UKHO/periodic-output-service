@@ -2,7 +2,7 @@
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
-    public interface IExchangeSetApiService
+    public interface IEssService
     {
         Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers);
     }
