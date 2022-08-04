@@ -3,11 +3,11 @@ using Newtonsoft.Json;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
-    public class ExchangeSetApiClient : IExchangeSetApiClient
+    public class EssApiClient : IEssApiClient
     {
         private readonly HttpClient _httpClient;
 
-        public ExchangeSetApiClient(IHttpClientFactory httpClientFactory)
+        public EssApiClient(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
         }

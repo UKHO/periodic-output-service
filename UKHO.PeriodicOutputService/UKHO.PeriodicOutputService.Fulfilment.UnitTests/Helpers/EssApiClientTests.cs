@@ -8,9 +8,9 @@ using UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler;
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 {
     [TestFixture]
-    public class ExchangeSetApiClientTests
+    public class EssApiClientTests
     {
-        private IExchangeSetApiClient? _exchangeSetApiClient;
+        private IEssApiClient? _essApiClient;
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]
@@ -32,9 +32,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
 
-            _exchangeSetApiClient = new ExchangeSetApiClient(_fakeHttpClientFactory);
+            _essApiClient = new EssApiClient(_fakeHttpClientFactory);
 
-            var result = _exchangeSetApiClient.PostProductIdentifiersDataAsync("http://test.com", GetProductIdentifiers(), "asdfsa");
+            var result = _essApiClient.PostProductIdentifiersDataAsync("http://test.com", GetProductIdentifiers(), "asdfsa");
 
             var deSerializedResult = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(result.Result.Content.ReadAsStringAsync().Result);
 

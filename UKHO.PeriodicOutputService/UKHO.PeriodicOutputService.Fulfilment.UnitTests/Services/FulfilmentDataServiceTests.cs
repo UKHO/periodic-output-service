@@ -11,22 +11,22 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     {
         public IFulfilmentDataService _fulfilmentDataService;
         public IFleetManagerService _fakeFleetManagerService;
-        public IExchangeSetApiService _fakeExchangeSetApiService;
-        public IFssBatchService _fakeFssBatchService;
+        public IEssService _fakeEssService;
+        public IFssService _fakeFssService;
         private ILogger<FulfilmentDataService> _fakeLogger;
 
-        public FleetMangerGetAuthTokenResponse jwtauthUnpToken = new();
-        public FleetMangerGetAuthTokenResponse jwtAuthJwtToken = new();
+        public FleetMangerGetAuthTokenResponseModel jwtauthUnpToken = new();
+        public FleetMangerGetAuthTokenResponseModel jwtAuthJwtToken = new();
 
         [SetUp]
         public void Setup()
         {
             _fakeFleetManagerService = A.Fake<IFleetManagerService>();
-            _fakeExchangeSetApiService = A.Fake<IExchangeSetApiService>();
-            _fakeFssBatchService = A.Fake<IFssBatchService>();
+            _fakeEssService = A.Fake<IEssService>();
+            _fakeFssService = A.Fake<IFssService>();
             _fakeLogger = A.Fake<ILogger<FulfilmentDataService>>();
 
-            _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeExchangeSetApiService, _fakeFssBatchService, _fakeLogger);
+            _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeEssService, _fakeFssService, _fakeLogger);
         }
 
         [Test]
@@ -35,7 +35,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
             jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
 
-            FleetManagerGetCatalogueResponse fleetManagerGetCatalogue = new()
+            FleetManagerGetCatalogueResponseModel fleetManagerGetCatalogue = new()
             {
                 StatusCode = HttpStatusCode.OK,
                 ProductIdentifiers = new() { "Product1", "Product2" }
@@ -47,15 +47,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeExchangeSetApiService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            string result = await _fulfilmentDataService.CreatePosExchangeSet();
+            string result = await _fulfilmentDataService.CreatePosExchangeSets();
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result, Is.EqualTo("Success"));
 
-            A.CallTo(() => _fakeFssBatchService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
         }
 
@@ -67,7 +67,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken()).Returns(jwtauthUnpToken);
 
-            string result = await _fulfilmentDataService.CreatePosExchangeSet();
+            string result = await _fulfilmentDataService.CreatePosExchangeSets();
 
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored)).MustNotHaveHappened();
 
