@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace UKHO.PeriodicOutputService.Common.Configuration
 {
