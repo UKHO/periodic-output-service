@@ -1,4 +1,6 @@
-﻿namespace UKHO.PeriodicOutputService.Common.Helpers
+﻿using System.Security.Cryptography;
+
+namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public static class CommonHelper
     {
@@ -13,5 +15,27 @@
         public static string ExtractAccessToken(string response) => response.Split(",")[0].Split(":")[1].Remove(0, 1).Replace("\"", "");
 
         public static string ExtractBatchId(string url) => new UriBuilder(url).Uri.Segments.FirstOrDefault(d => Guid.TryParse(d.Replace("/", ""), out Guid _));
+
+        public static string GetBlockIds(int blockNum)
+        {
+            string blockId = $"Block_{blockNum:00000}";
+            return blockId;
+        }
+
+        public static byte[] CalculateMD5(byte[] requestBytes)
+        {
+            using var md5 = MD5.Create();
+            var hash = md5.ComputeHash(requestBytes);
+
+            return hash;
+        }
+
+        public static byte[] CalculateMD5(Stream requestStream)
+        {
+            using var md5 = MD5.Create();
+            var hash = md5.ComputeHash(requestStream);
+
+            return hash;
+        }
     }
 }

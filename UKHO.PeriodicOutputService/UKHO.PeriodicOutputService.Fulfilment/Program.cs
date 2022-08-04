@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -159,6 +160,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
             serviceCollection.AddDistributedMemoryCache();
 
+            serviceCollection.AddSingleton<IConfiguration>(configuration);
             serviceCollection.AddTransient<PosFulfilmentJob>();
 
             serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
@@ -171,6 +173,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
             serviceCollection.AddScoped<IEssService, EssService>();
             serviceCollection.AddScoped<IFssService, FssService>();
+            serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
+            serviceCollection.AddScoped<IFileSystem, FileSystem>();
 
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
