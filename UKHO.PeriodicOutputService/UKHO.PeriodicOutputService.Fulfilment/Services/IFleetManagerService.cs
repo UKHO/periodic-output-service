@@ -4,7 +4,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public interface IFleetManagerService
     {
-        Task<FleetMangerGetAuthTokenResponse> GetJwtAuthUnpToken();
-        Task<FleetManagerGetCatalogueResponse> GetCatalogue(string accessToken);
+        Task<FleetMangerGetAuthTokenResponseModel> GetJwtAuthUnpToken();
+        Task<FleetManagerGetCatalogueResponseModel> GetCatalogue(string accessToken);
     }
 }

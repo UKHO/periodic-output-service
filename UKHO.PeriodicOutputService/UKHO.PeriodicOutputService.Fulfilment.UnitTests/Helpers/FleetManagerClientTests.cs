@@ -9,7 +9,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
     [TestFixture]
     public class FleetManagerClientTests
     {
-        private IFleetManagerApiClient? _fleetManagerClient;
+        private IFleetManagerApiClient? _fleetManagerApiClient;
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]
@@ -31,9 +31,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
 
-            _fleetManagerClient = new FleetManagerApiClient(_fakeHttpClientFactory);
+            _fleetManagerApiClient = new FleetManagerApiClient(_fakeHttpClientFactory);
 
-            var result = _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
+            var result = _fleetManagerApiClient.GetJwtAuthUnpToken(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
 
             Assert.Multiple(() =>
             {
@@ -56,9 +56,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
 
-            _fleetManagerClient = new FleetManagerApiClient(_fakeHttpClientFactory);
+            _fleetManagerApiClient = new FleetManagerApiClient(_fakeHttpClientFactory);
 
-            var result = _fleetManagerClient.GetCatalogue(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
+            var result = _fleetManagerApiClient.GetCatalogue(HttpMethod.Get, "http://test.com", "credentials", "asdfsa");
 
             var deSerializedResult = JsonConvert.DeserializeObject<List<string>>(result.Result.Content.ReadAsStringAsync().Result);
 

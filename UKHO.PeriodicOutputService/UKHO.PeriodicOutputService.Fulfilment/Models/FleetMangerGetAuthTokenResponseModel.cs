@@ -2,7 +2,7 @@
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Models
 {
-    public class FleetMangerGetAuthTokenResponse
+    public class FleetMangerGetAuthTokenResponseModel
     {
         public string? AuthToken { get; set; }
         public HttpStatusCode StatusCode { get; set; }

@@ -10,28 +10,28 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
     public class FleetManagerService : IFleetManagerService
     {
-        private readonly IOptions<FleetManagerB2BApiConfiguration> _fleetManagerB2BApiConfig;
+        private readonly IOptions<FleetManagerApiConfiguration> _fleetManagerApiConfiguration;
         private readonly IFleetManagerApiClient _fleetManagerClient;
         private readonly ILogger<FleetManagerService> _logger;
 
-        public FleetManagerService(IOptions<FleetManagerB2BApiConfiguration> fleetManagerB2BApiConfig,
+        public FleetManagerService(IOptions<FleetManagerApiConfiguration> fleetManagerApiConfiguration,
                                    IFleetManagerApiClient fleetManagerClient,
                                    ILogger<FleetManagerService> logger)
         {
-            _fleetManagerB2BApiConfig = fleetManagerB2BApiConfig;
+            _fleetManagerApiConfiguration = fleetManagerApiConfiguration;
             _fleetManagerClient = fleetManagerClient;
             _logger = logger;
         }
 
-        public async Task<FleetMangerGetAuthTokenResponse> GetJwtAuthUnpToken()
+        public async Task<FleetMangerGetAuthTokenResponseModel> GetJwtAuthUnpToken()
         {
             _logger.LogInformation(EventIds.FleetMangerGetAuthTokenStarted.ToEventId(), "Getting auth token from fleet manager started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string jwtAuthUnpToken = string.Empty;
 
-            string base64Credentials = CommonHelper.GetBase64EncodedCredentials(_fleetManagerB2BApiConfig.Value.UserName, _fleetManagerB2BApiConfig.Value.Password);
+            string base64Credentials = CommonHelper.GetBase64EncodedCredentials(_fleetManagerApiConfiguration.Value.UserName, _fleetManagerApiConfiguration.Value.Password);
 
-            HttpResponseMessage httpResponse = await _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, base64Credentials, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
+            HttpResponseMessage httpResponse = await _fleetManagerClient.GetJwtAuthUnpToken(HttpMethod.Get, _fleetManagerApiConfiguration.Value.BaseUrl, base64Credentials, _fleetManagerApiConfiguration.Value.SubscriptionKey);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -44,16 +44,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 _logger.LogError(EventIds.FleetMangerGetAuthTokenFailed.ToEventId(), "Failed to get auth token from fleet manager at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
             }
 
-            return new FleetMangerGetAuthTokenResponse() { StatusCode = httpResponse.StatusCode, AuthToken = jwtAuthUnpToken };
+            return new FleetMangerGetAuthTokenResponseModel() { StatusCode = httpResponse.StatusCode, AuthToken = jwtAuthUnpToken };
         }
 
-        public async Task<FleetManagerGetCatalogueResponse> GetCatalogue(string accessToken)
+        public async Task<FleetManagerGetCatalogueResponseModel> GetCatalogue(string accessToken)
         {
             _logger.LogInformation(EventIds.FleetMangerGetCatalogueStarted.ToEventId(), "Getting catalogue from fleet manager started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             List<string> productIdentifiers = new();
 
-            HttpResponseMessage httpResponse = await _fleetManagerClient.GetCatalogue(HttpMethod.Get, _fleetManagerB2BApiConfig.Value.BaseUrl, accessToken, _fleetManagerB2BApiConfig.Value.SubscriptionKey);
+            HttpResponseMessage httpResponse = await _fleetManagerClient.GetCatalogue(HttpMethod.Get, _fleetManagerApiConfiguration.Value.BaseUrl, accessToken, _fleetManagerApiConfiguration.Value.SubscriptionKey);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -81,7 +81,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 _logger.LogError(EventIds.FleetMangerGetCatalogueFailed.ToEventId(), "Failed to get catalogue from fleet manager at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
             }
-            return new FleetManagerGetCatalogueResponse() { StatusCode = httpResponse.StatusCode, ProductIdentifiers = productIdentifiers };
+            return new FleetManagerGetCatalogueResponseModel() { StatusCode = httpResponse.StatusCode, ProductIdentifiers = productIdentifiers };
         }
     }
 }
