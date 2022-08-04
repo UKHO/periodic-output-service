@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
@@ -51,6 +52,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             else
             {
                 _logger.LogError(EventIds.ExchangeSetPostProductIdentifiersFailed.ToEventId(), "Failed to post productidentifiers to ESS at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.ExchangeSetPostProductIdentifiersFailed.ToEventId());
             }
             return exchangeSetGetBatchResponse;
         }

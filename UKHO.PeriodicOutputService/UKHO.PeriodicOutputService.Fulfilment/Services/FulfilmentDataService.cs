@@ -34,68 +34,50 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<string> CreatePosExchangeSets()
         {
-            try
-            {
-                var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-                var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet());
+            var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
+            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet());
 
-                await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
-
-                //var catalogFileResult = UploadCatalog();
-
-                return "success";
-            }
-            catch (Exception)
-            {
-                return "fail";
-                throw;
-            }
+            await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
+            return "success";
         }
 
         private async Task CreateFullAVCSExchangeSet()
         {
-            try
+            List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
+
+            if (productIdentifiers.Count <= 0)
             {
-                List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
+                _logger.LogError("Product identifiers not found");
+            }
+            else
+            {
+                string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
 
-                if (productIdentifiers.Count <= 0)
+                if (!string.IsNullOrEmpty(essBatchId))
                 {
-                    _logger.LogError("Product identifiers not found");
-                }
-                else
-                {
-                    string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
+                    FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
 
-                    if (!string.IsNullOrEmpty(essBatchId))
+                    if (fssBatchStatus == FssBatchStatus.Committed)
                     {
-                        FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
+                        List<FssBatchFile>? files = await GetBatchFiles(essBatchId);
 
-                        if (fssBatchStatus == FssBatchStatus.Committed)
+                        if (files != null)
                         {
-                            List<FssBatchFile>? files = await GetBatchFiles(essBatchId);
+                            string downloadPath = Path.Combine(@"D:\HOME", essBatchId);
+                            _fileSystemHelper.CreateDirectory(downloadPath);
 
-                            if (files != null)
-                            {
-                                string downloadPath = Path.Combine(@"D:\HOME", essBatchId);
-                                _fileSystemHelper.CreateDirectory(downloadPath);
-
-                                DownloadFiles(files, downloadPath);
-                            }
-                            else
-                            {
-                                _logger.LogError("ESS exchange set creation failed.");
-                            }
+                            DownloadFiles(files, downloadPath);
                         }
                         else
                         {
-                            _logger.LogError("FSS polling cut off time completed");
+                            _logger.LogError("ESS exchange set creation failed.");
                         }
                     }
+                    else
+                    {
+                        _logger.LogError("FSS polling cut off time completed");
+                    }
                 }
-            }
-            catch (Exception)
-            {
-                throw;
             }
         }
 
@@ -143,8 +125,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private async Task<string> PostProductIdentifiersToESS(List<string> productIdentifiers)
         {
             Models.ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(productIdentifiers);
-
-            //return "621E8D6F-9950-4BA6-BFB4-92415369AAEE";
             return CommonHelper.ExtractBatchId(response.Links.ExchangeSetBatchDetailsUri.Href);
         }
 
@@ -152,19 +132,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             Parallel.ForEach(fileDetails, file =>
             {
-                try
-                {
 
-                    string filePath = Path.Combine(downloadPath, file.FileName);
-                    Stream stream = _fssService.DownloadFile(downloadPath, file.FileName, file.FileLink).Result;
-                    byte[] bytes = _fileSystemHelper.ConvertStreamToByteArray(stream);
-                    _fileSystemHelper.CreateFileCopy(filePath, new MemoryStream(bytes));
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, ex.Message, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                    throw;
-                }
+                string filePath = Path.Combine(downloadPath, file.FileName);
+                Stream stream = _fssService.DownloadFile(downloadPath, file.FileName, file.FileLink).Result;
+                byte[] bytes = _fileSystemHelper.ConvertStreamToByteArray(stream);
+                _fileSystemHelper.CreateFileCopy(filePath, new MemoryStream(bytes));
+
             });
         }
     }

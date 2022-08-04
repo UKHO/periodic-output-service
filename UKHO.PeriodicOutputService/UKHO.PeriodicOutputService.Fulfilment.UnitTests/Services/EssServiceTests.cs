@@ -4,6 +4,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
@@ -20,6 +21,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private ILogger<EssService> _fakeLogger;
 
         private IEssService _essService;
+        public string fulfilmentExceptionMessage = "There has been a problem in creating your exchange set, so we are unable to fulfil your request at this time. Please contact UKHO Customer Services quoting error code : {0} and correlation ID : {1}";
 
         [SetUp]
         public void Setup()
@@ -126,7 +128,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public async Task DoesGetProductIdentifiersData_LogsError_When_ResponseStatus_Is_Not_OK()
+        public void DoesGetProductIdentifiersData_LogsError_When_ResponseStatus_Is_Not_OK()
         {
             A.CallTo(() => _fakeEssApiClient.PostProductIdentifiersDataAsync
             (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
@@ -140,8 +142,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                       Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
                   });
 
-
-            ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
+            Assert.ThrowsAsync<FulfilmentException>(
+                 () => _essService.PostProductIdentifiersData(GetProductIdentifiers()));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"

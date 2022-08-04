@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -49,8 +50,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 if (!batchStatusResponse.IsSuccessStatusCode)
                 {
-                    //_logger.LogError(EventIds.BatchStatusRequestFailed.ToEventId(), "Request to get batch status for BatchID - {BatchId} failed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                    break;
+                    _logger.LogError(EventIds.BatchStatusRequestFailed.ToEventId(), "Request to get batch status for BatchID - {BatchId} failed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.BatchStatusRequestFailed.ToEventId());
                 }
                 FssBatchStatusResponseModel responseObj = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
 
@@ -81,8 +82,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             if (!batchDetailResponse.IsSuccessStatusCode)
             {
-                //_logger.LogError(EventIds.GetBatchDetailRequestFailed.ToEventId(), "Request to get batch details for BatchID - {BatchId} failed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                return null;
+                _logger.LogError(EventIds.GetBatchDetailRequestFailed.ToEventId(), "Request to get batch details for BatchID - {BatchId} failed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.GetBatchDetailRequestFailed.ToEventId());
             }
 
             _logger.LogInformation(EventIds.GetBatchDetailRequestCompleted.ToEventId(), "Request to get batch details for BatchID - {BatchId} from FSS completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
@@ -102,8 +103,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             if (!fileDownloadResponse.IsSuccessStatusCode)
             {
-                //  _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading file {fileName} failed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                return null;
+                 _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading file {fileName} failed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
             }
 
             _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
