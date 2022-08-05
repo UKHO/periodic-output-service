@@ -184,6 +184,10 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809044 - Add file to batch completed
         /// </summary>
         AddFileToBatchRequestCompleted = 809044,
+        /// <summary>
+        /// 809045 - Error file found in batch
+        /// </summary>
+        ErrorFileFoundInBatch = 809045
 
     }
 

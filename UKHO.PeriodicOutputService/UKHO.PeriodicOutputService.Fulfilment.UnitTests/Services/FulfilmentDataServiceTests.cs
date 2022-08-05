@@ -2,6 +2,7 @@
 using FakeItEasy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
@@ -94,7 +95,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public async Task Does_CreatePosExchangeSet_Check_If_GetBatchFiles_Contains_FileName_Error()
+        public void Does_CreatePosExchangeSet_Check_If_GetBatchFiles_Contains_FileName_Error()
         {
             jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
             jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
@@ -120,14 +121,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithFileNameError());
 
-            string result = await _fulfilmentDataService.CreatePosExchangeSets();
+            Assert.ThrowsAsync<FulfilmentException>(
+                () => _fulfilmentDataService.CreatePosExchangeSets());
 
-            Assert.That(result, Is.Not.Null);
+
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "ESS exchange set creation failed."
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Either no files found or error file found in batch with BathcID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))

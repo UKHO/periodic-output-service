@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -63,7 +64,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                         if (files != null)
                         {
-                            string downloadPath = Path.Combine(@"D:\HOME", essBatchId);
+                            string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
                             _fileSystemHelper.CreateDirectory(downloadPath);
 
                             DownloadFiles(files, downloadPath);
@@ -91,15 +92,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             List<FssBatchFile> batchFiles = null;
             GetBatchResponseModel batchDetail = await _fssService.GetBatchDetails(essBatchId);
+            batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href }).ToList();
 
-            if (batchDetail != null)
+            if (!batchFiles.Any() || batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
             {
-                batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href }).ToList();
-
-                if (batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
-                {
-                    return null;
-                }
+                _logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found or error file found in batch with BathcID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.ErrorFileFoundInBatch.ToEventId());
             }
             return batchFiles;
         }

@@ -17,14 +17,15 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
         private string FssJwtToken { get; set; }
         private GetProductIdentifiers getproductIdentifier { get; set; }
-        private GetBatchStatus getBatchStatus { get; set; }
+        private GetBatchElements getBatchElements { get; set; }
 
-        static EssAuthorizationConfiguration ESSAuth = new TestConfiguration().EssAuthorizationConfig;
-        static FunctionalTestFSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
-        static FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
+        private GetDownloadsAndProcessFile _downloadsAndProcessFile { get; set; }
 
-        List<string> productIdentifiers = new();
-        HttpResponseMessage unpResponse;
+        private static readonly EssAuthorizationConfiguration s_ESSAuth = new TestConfiguration().EssAuthorizationConfig;
+        private static readonly FunctionalTestFSSApiConfiguration s_FSSAuth = new TestConfiguration().FssConfig;
+        private static readonly FleetManagerB2BApiConfiguration s_fleet = new TestConfiguration().fleetManagerB2BConfig;
+        private List<string> _productIdentifiers = new();
+        private HttpResponseMessage _unpResponse;
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -33,26 +34,27 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
             getproductIdentifier = new GetProductIdentifiers();
-            getBatchStatus = new GetBatchStatus();
+            getBatchElements = new();
+            _downloadsAndProcessFile = new();
 
-            userCredentialsBytes = CommonHelper.getbase64encodedcredentials(fleet.userName, fleet.password);
-            AuthTokenProvider authTokenProvider = new AuthTokenProvider();
+            userCredentialsBytes = CommonHelper.getbase64encodedcredentials(s_fleet.userName, s_fleet.password);
+            AuthTokenProvider authTokenProvider = new();
             EssJwtToken = await authTokenProvider.GetEssToken();
             FssJwtToken = await authTokenProvider.GetFssToken();
 
-            unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
-            string unp_token = await CommonHelper.DeserializeAsyncToken(unpResponse);
+            _unpResponse = await getunp.GetJwtAuthUnpToken(s_fleet.baseUrl, userCredentialsBytes, s_fleet.subscriptionKey);
+            string unp_token = await CommonHelper.DeserializeAsyncToken(_unpResponse);
 
-            HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unp_token, fleet.subscriptionKey);
+            HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(s_fleet.baseUrl, unp_token, s_fleet.subscriptionKey);
 
-            productIdentifiers = await getcat.GetProductList(httpResponse);
+            _productIdentifiers = await getcat.GetProductList(httpResponse);
         }
 
         [Test]
         public async Task WhenICallTheExchangeSetApiWithValidProductIdentifiers_ThenANonZeroRequestedProductCountAndExchangeSetCellCountIsReturned()
         {
-            var apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
-            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(s_ESSAuth.EssApiUrl, _productIdentifiers, EssJwtToken);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
 
             //verify model structure
             await apiResponse.CheckModelStructureForSuccessResponse();
@@ -62,15 +64,15 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallTheExchangeSetApiWithInValidProductIdentifiers_ThenValidRequestedProductCountAndLessExchangeSetCellCountIsReturned()
         {
-            productIdentifiers.Add("ABCDEFGH"); //Adding invalid product identifier in the list
+            _productIdentifiers.Add("ABCDEFGH"); //Adding invalid product identifier in the list
 
-            var apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
-            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(s_ESSAuth.EssApiUrl, _productIdentifiers, EssJwtToken);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
 
             //verify model structure
             await apiResponse.CheckModelStructureForSuccessResponse();
 
-            var apiResponseData = await apiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
+            ExchangeSetResponseModel apiResponseData = await apiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
 
             //Check RequestedProductsNotInExchangeSet is not empty
             Assert.IsNotEmpty(apiResponseData.RequestedProductsNotInExchangeSet, "Response body returns Empty for RequestedProductsNotInExchangeSet, instead of Not Empty");
@@ -80,21 +82,59 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallTheFSSApiWithValidBatchId_ThenABatchStatusIsReturned()
         {
-            var essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
-            Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
+            HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(s_ESSAuth.EssApiUrl, _productIdentifiers, EssJwtToken);
+            Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
 
             //verify model structure
             await essApiResponse.CheckModelStructureForSuccessResponse();
-            var essApiResponseData = await essApiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
+            ExchangeSetResponseModel essApiResponseData = await essApiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
 
-            var fssBatchStatus = await getBatchStatus
-                .CheckIfBatchCommitted(FSSAuth.BaseUrl,
+            FssBatchStatus fssBatchStatus = await getBatchElements
+                .CheckIfBatchCommitted(s_FSSAuth.BaseUrl,
                                        essApiResponseData.Links.ExchangeSetBatchStatusUri.Href,
                                        FssJwtToken,
-                                       FSSAuth.BatchStatusPollingCutoffTime,
-                                       FSSAuth.BatchStatusPollingDelayTime);
+                                       s_FSSAuth.BatchStatusPollingCutoffTime,
+                                       s_FSSAuth.BatchStatusPollingDelayTime);
 
-            Assert.That(fssBatchStatus, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed),"The response data is not empty");
+            Assert.That(fssBatchStatus, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed), "The response data is not empty");
+        }
+
+        [Test]
+        public async Task WhenICallTheFSSApiWithValidBatchId_ThenDownloadExchangeSet()
+        {
+            HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(s_ESSAuth.EssApiUrl, _productIdentifiers, EssJwtToken);
+            Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
+
+            //verify model structure
+            await essApiResponse.CheckModelStructureForSuccessResponse();
+            ExchangeSetResponseModel essApiResponseData = await essApiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
+
+            string batchId = CommonHelper.ExtractBatchId(essApiResponseData.Links.ExchangeSetBatchStatusUri.Href);
+
+            FssBatchStatus fssBatchStatus = await getBatchElements
+                .CheckIfBatchCommitted(s_FSSAuth.BaseUrl,
+                                       batchId,
+                                       FssJwtToken,
+                                       s_FSSAuth.BatchStatusPollingCutoffTime,
+                                       s_FSSAuth.BatchStatusPollingDelayTime);
+
+            Assert.That(fssBatchStatus, Is.EqualTo(FssBatchStatus.Committed), "The Fss batch status is not committed");
+
+            List<FssBatchFile> fileDetails = await getBatchElements.GetBatchFiles(s_FSSAuth.BaseUrl, batchId, FssJwtToken);
+
+            string downloadPath = Path.Combine(@"D:\HOME", batchId);
+            Directory.CreateDirectory(downloadPath);
+
+            Parallel.ForEach(fileDetails, file =>
+            {
+                string filePath = Path.Combine(downloadPath, file.FileName);
+                Stream stream = _downloadsAndProcessFile.DownloadFile(s_FSSAuth.BaseUrl, file.FileLink, FssJwtToken).Result;
+                byte[] bytes = _downloadsAndProcessFile.ConvertStreamToByteArray(stream);
+                _downloadsAndProcessFile.CreateFileCopy(filePath, new MemoryStream(bytes));
+
+                Assert.That(File.Exists(filePath), Is.True, "File Downloaded failed");
+            });
+
         }
     }
 }
