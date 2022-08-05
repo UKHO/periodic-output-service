@@ -5,6 +5,10 @@ namespace UKHO.PeriodicOutputService.Common.Logging
     public enum EventIds
     {
         /// <summary>
+        /// 809002 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// </summary>
+        UnhandledException = 809002,
+        /// <summary>
         /// 809000 - Periodic Output Service webjob request started 
         /// </summary>
         PosFulfilmentJobStarted = 809000,
@@ -13,93 +17,109 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         PosFulfilmentJobCompleted = 809001,
         /// <summary>
-        /// 809002 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809015 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        UnhandledException = 809002,
+        FullAvcsExchangeSetCreationStarted = 809002,
         /// <summary>
-        /// 809003 - Getting access token for ess endpoint started
+        /// 809016 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        GetAccessTokenForESSEndPointStarted = 809003,
+        FullAvcsExchangeSetCreationCompleted = 809002,
         /// <summary>
-        /// 809004 - Getting access token for ess endpoint completed
+        /// 809003 - Getting fleet manager access token started
         /// </summary>
-        GetAccessTokenForESSEndPointCompleted = 809004,
-        /// <summary>
-        /// 809005 - Request for exchange set details started
-        /// </summary>
-        ExchangeSetPostProductIdentifiersRequestStarted = 809005,
-        /// <summary>
-        /// 809006 - Request for exchange set details completed
-        /// </summary>
-        ExchangeSetPostProductIdentifiersRequestCompleted = 809006,
-        /// <summary>
-        /// 809007 - An exception occured while requesting exchange set
-        /// </summary>
-        ExchangeSetPostProductIdentifiersFailed = 809007,
-        /// <summary>
-        /// 809008 - Getting fleet manager access token started
-        /// </summary>
-        FleetMangerGetAuthTokenStarted = 809008,
+        GetFleetMangerAuthTokenStarted = 809003,
         /// <summary>
         /// 809009 - Getting fleet manager access token failed
         /// </summary>
-        FleetMangerGetAuthTokenFailed = 809009,
+        GetFleetMangerAuthTokenFailed = 809009,
         /// <summary>
         /// 809010 - Getting fleet manager access token completed
         /// </summary>
-        FleetMangerGetAuthTokenCompleted = 809010,
+        GetFleetMangerAuthTokenCompleted = 809010,
         /// <summary>
         /// 809011 - Getting fleet manager catalogue started
         /// </summary>
-        FleetMangerGetCatalogueStarted = 809011,
+        GetFleetMangerCatalogueStarted = 809011,
         /// <summary>
         /// 809012 - Getting fleet manager catalogue failed
         /// </summary>
-        FleetMangerGetCatalogueFailed = 809012,
+        GetFleetMangerCatalogueFailed = 809012,
         /// <summary>
         /// 809013 - Getting fleet manager catalogue completed
         /// </summary>
-        FleetMangerGetCatalogueCompleted = 809013,
+        GetFleetMangerCatalogueCompleted = 809013,
         /// <summary>
-        /// 809014 - Posting productidentifiers to ESS started
+        /// 809006 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        PostProductIdentifiersStarted = 809014,
+        GetAccessTokenStarted = 809002,
         /// <summary>
-        /// 809015 - Posting productidentifiers to ESS failed
+        /// 809007 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        PostProductIdentifiersFailed = 809015,
+        CachedAccessTokenFound = 809002,
         /// <summary>
-        /// 809016 - Posting productidentifiers to ESS completed
+        /// 809008 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        PostProductIdentifiersCompleted = 809016,
+        GetNewAccessTokenStarted = 809002,
         /// <summary>
-        /// 809017 - Request to get batch status started
+        /// 809009 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        BatchStatusRequestStarted = 809017,
+        GetNewAccessTokenCompleted = 809002,
         /// <summary>
-        /// 809018 - Request to get batch status completed
+        /// 809010 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        BatchStatusRequestCompleted = 809018,
+        CachingExternalEndPointTokenStarted = 809002,
         /// <summary>
-        /// 809019 - Request to get batch status failed
+        /// 809011 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        BatchStatusRequestFailed = 809019,
+        CachingExternalEndPointTokenCompleted = 809002,
         /// <summary>
-        /// 809020 - Request to get fss auth token started
+        /// 809012 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        GetFssAuthTokenRequestStarted = 809020,
+        GetAccessTokenCompleted = 809002,
         /// <summary>
-        /// 809021 - Request to get fss auth token completed
+        /// 809003 - Creation of full AVCS exchange set started
         /// </summary>
-        GetFssAuthTokenRequestCompleted = 809021,
+        PostProductIdentifiersToEssStarted = 809003,
         /// <summary>
-        /// 809022 - Request to get fss auth token failed
+        /// 809004 - Full AVCS exchange set created successfully
         /// </summary>
-        GetFssAuthTokenRequestFailed = 809022,
+        PostProductIdentifiersToEssFailed = 809004,
         /// <summary>
-        /// 809023 - caching auth token
+        /// 809005 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        CachingExternalEndPointToken = 809023,
+        PostProductIdentifiersToEssCompleted = 809002,
+        /// <summary>
+        /// 809014 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// </summary>
+        BatchCreatedInESS = 809002,
+        /// <summary>
+        /// 809014 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// </summary>
+        FssBatchDetailUrlNotFound = 809002,
+        /// <summary>
+        /// 809017 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// </summary>
+        FssBatchStatusPollingStarted = 809002,
+        /// <summary>
+        /// 809018 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// </summary>
+        GetBatchStatusRequestStarted = 809002,
+        /// <summary>
+        /// 809018 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// </summary>
+        GetBatchStatusRequestCompleted = 809002,
+        /// <summary>
+        /// 809018 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// </summary>
+        GetBatchStatusRequestFailed = 809002,
+        /// <summary>
+        /// 809019 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// </summary>
+        FssBatchStatusPollingStopped = 809002,
+        /// <summary>
+        /// 809020 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// </summary>
+        FssBatchStatusPollingCompleted = 809002,
         /// <summary>
         /// 809024 - getting batch details started
         /// </summary>
@@ -113,53 +133,9 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         GetBatchDetailRequestCompleted = 809026,
         /// <summary>
-        /// 809027 - Download file started
+        /// 809020 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        DownloadFileStarted = 809027,
-        /// <summary>
-        /// 809028 - Download file failed
-        /// </summary>
-        DownloadFileFailed = 809028,
-        /// <summary>
-        /// 809029 - Download file completed
-        /// </summary>
-        DownloadFileCompleted = 809029,
-        /// <summary>
-        /// 809030 - upload file block started
-        /// </summary>
-        UploadFileBlockStarted = 809030,
-        /// <summary>
-        /// 809031 - upload file block failed
-        /// </summary>
-        UploadFileBlockFailed = 809031,
-        /// <summary>
-        /// 809032 - upload file block completed
-        /// </summary>
-        UploadFileBlockCompleted = 809032,
-        /// <summary>
-        /// 809033 - write file block started
-        /// </summary>
-        WriteBlockToFileStarted = 809033,
-        /// <summary>
-        /// 809034 - write file block failed
-        /// </summary>
-        WriteBlockToFileFailed = 809034,
-        /// <summary>
-        /// 809035 - write file block completed
-        /// </summary>
-        WriteBlockToFileCompleted = 809035,
-        /// <summary>
-        /// 809036 - commit batch started
-        /// </summary>
-        CommitBatchStarted = 809036,
-        /// <summary>
-        /// 809037 - commit batch failed
-        /// </summary>
-        CommitBatchFailed = 809037,
-        /// <summary>
-        /// 809038 - commit batch completed
-        /// </summary>
-        CommitBatchCompleted = 809038,
+        ErrorFileFoundInBatch = 809002,
         /// <summary>
         /// 809039 - Create batch started
         /// </summary>
@@ -173,7 +149,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         CreateBatchCompleted = 809041,
         /// <summary>
-        /// 809042 - Add file to batch started
+        /// 809020 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
         AddFileToBatchRequestStarted = 809042,
         /// <summary>
@@ -184,7 +160,50 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809044 - Add file to batch completed
         /// </summary>
         AddFileToBatchRequestCompleted = 809044,
-
+        /// <summary>
+        /// 809033 - write file block started
+        /// </summary>
+        WriteBlockToFileStarted = 809033,
+        /// <summary>
+        /// 809034 - write file block failed
+        /// </summary>
+        WriteBlockToFileFailed = 809034,
+        /// <summary>
+        /// 809035 - write file block completed
+        /// </summary>
+        WriteBlockToFileCompleted = 809035,
+        /// <summary>
+        /// 809030 - upload file block started
+        /// </summary>
+        UploadFileBlockStarted = 809030,
+        /// <summary>
+        /// 809031 - upload file block failed
+        /// </summary>
+        UploadFileBlockFailed = 809031,
+        /// <summary>
+        /// 809032 - upload file block completed
+        /// </summary>
+        UploadFileBlockCompleted = 809032,
+        /// <summary>
+        /// 809036 - commit batch started
+        /// </summary>
+        CommitBatchStarted = 809036,
+        /// <summary>
+        /// 809037 - commit batch failed
+        /// </summary>
+        CommitBatchFailed = 809037,
+        /// <summary>
+        /// 809038 - commit batch completed
+        /// </summary>
+        CommitBatchCompleted = 809038,
+        /// <summary>
+        /// 809038 - commit batch completed
+        /// </summary>
+        FssPollingCutOffTimeout = 809038,
+        /// <summary>
+        /// 809037 - commit batch failed
+        /// </summary>
+        EmptyBatchIdFound = 809037,
     }
 
     public static class EventIdExtensions

@@ -1,11 +1,10 @@
 ﻿using System.IO.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using UKHO.ExchangeSetService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.Fss;
-using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
@@ -36,164 +35,107 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<string> CreatePosExchangeSets()
         {
-            try
-            {
-                var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-                var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet());
+            var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
+            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet());
 
-                await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
+            await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
 
-                return "success";
-            }
-            catch (Exception)
-            {
-                return "fail";
-                throw;
-            }
+            return "success";
         }
 
         private async Task CreateFullAVCSExchangeSet()
         {
-            _logger.LogInformation(EventIds.PosFulfilmentJobStarted.ToEventId(), "Creation of full AVCS exchange set started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationStarted.ToEventId(), "Creation of full AVCS exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            try
+            List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
+            string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
+
+            if (!string.IsNullOrEmpty(essBatchId))
             {
-                List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
+                FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
 
-                if (productIdentifiers.Count <= 0)
+                if (fssBatchStatus == FssBatchStatus.Committed)
                 {
-                    _logger.LogError("Product identifiers not found");
-                }
-                else
-                {
-                    string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
+                    string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
 
-                    if (!string.IsNullOrEmpty(essBatchId))
+                    _fileSystemHelper.CreateDirectory(downloadPath);
+
+                    var extensions = new List<(string fileExtension, string mediaType)> { ("iso;sha1", "DVD"), ("zip", "zip") };
+
+                    foreach ((string fileExtension, string mediaType) extension in extensions)
                     {
-                        FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
-
-                        if (fssBatchStatus == FssBatchStatus.Committed)
+                        IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, extension.fileExtension, SearchOption.TopDirectoryOnly);
+                        string batchId = await CreateBatchAndUploadFiles(filePaths, extension.mediaType);
+                        bool isCommitted = await _fssService.CommitBatch(batchId, filePaths);
+                        if (isCommitted)
                         {
-                            var files = await GetBatchFiles(essBatchId);
-                            string downloadPath = Path.Combine(@"D:\HOME", essBatchId);
-                            _fileSystemHelper.CreateDirectory(downloadPath);
-
-                            List<string> extensions = new() { "iso;sha1", "zip" };
-
-                            foreach (string? extension in extensions)
-                            {
-                                IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, extension, SearchOption.TopDirectoryOnly);
-                                string batchId = await CreateBatchAndUpload(filePaths);
-                                bool isBatch1Committed = await _fssService.CommitBatch(batchId, filePaths);
-                            }
-                        }
-                        else
-                        {
-                            _logger.LogError("FSS polling cut off time completed");
+                            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                         }
                     }
                 }
+                else
+                {
+                    _logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), fssBatchStatus, CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
+                }
             }
-            catch (Exception ex)
+            else
             {
-                throw;
+                _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
             }
         }
 
         private async Task CreateUpdateExchangeSet()
         {
+            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Creation of update exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             await Task.CompletedTask;
-        }
-
-
-        private async Task<List<FssBatchFile>> GetBatchFiles(string essBatchId)
-        {
-            List<FssBatchFile> batchFiles = null;
-            GetBatchResponseModel batchDetail = await _fssService.GetBatchDetails(essBatchId);
-
-            if (batchDetail != null)
-            {
-                batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href }).ToList();
-
-                if (batchFiles.Any(f => f.FileName.Contains("error")))
-                {
-                    _logger.LogError("ESS exchange set creation failed.");
-                    return null;
-                }
-            }
-            return batchFiles;
+            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Update exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
 
         private async Task<List<string>> GetFleetManagerProductIdentifiers()
         {
-            List<string> productIdentifiers = new();
-
             FleetMangerGetAuthTokenResponseModel tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
-
-            if (!string.IsNullOrEmpty(tokenResponse.AuthToken))
-            {
-                FleetManagerGetCatalogueResponseModel catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
-
-                if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
-                {
-                    productIdentifiers = catalogueResponse.ProductIdentifiers;
-                }
-            }
-            return productIdentifiers;
+            FleetManagerGetCatalogueResponseModel catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
+            return catalogueResponse.ProductIdentifiers;
         }
 
         private async Task<string> PostProductIdentifiersToESS(List<string> productIdentifiers)
         {
-            Models.ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(productIdentifiers);
-            return "cc4a0527-f82e-4355-affb-707e83293fe2";
-            ////return CommonHelper.ExtractBatchId(response.Links.ExchangeSetBatchDetailsUri.ToString());
-        }
-
-        private async Task<string> CreateBatchAndUpload(IEnumerable<string> filePaths)
-        {
-            try
+            ExchangeSetResponseModel exchangeSetResponseModel = await _essService.PostProductIdentifiersData(productIdentifiers);
+            if (!string.IsNullOrEmpty(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href))
             {
-                //Create Batch
-                string batchId = await _fssService.CreateBatch();
+                string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
+                _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch is created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-                //Add files in batch created above
-                Parallel.ForEach(filePaths, filePath =>
-                {
-                    AddAndUploadFiles(batchId, filePath);
-                });
-
-                return batchId;
+                return "cc4a0527-f82e-4355-affb-707e83293fe2";
+                //return essBatchId;
             }
-            catch (Exception)
+            else
             {
-                _logger.LogError("Create Batch and Upload files failed");
-                throw;
+                _logger.LogError(EventIds.FssBatchDetailUrlNotFound.ToEventId(), "FSS batch detail URL not found in ESS response at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.FssBatchDetailUrlNotFound.ToEventId());
             }
         }
 
-        private void AddAndUploadFiles(string batchId, string filePath)
+        private async Task<string> CreateBatchAndUploadFiles(IEnumerable<string> filePaths, string mediaType)
         {
-            try
+            string batchId = await _fssService.CreateBatch(mediaType);
+
+            Parallel.ForEach(filePaths, filePath =>
             {
                 IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
-
                 bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length).Result;
-
                 if (isFileAdded)
                 {
                     List<string> blockIds = _fssService.UploadBlocks(batchId, fileInfo).Result;
-
                     if (blockIds.Count > 0)
                     {
                         bool fileWritten = _fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
                     }
                 }
-            }
-            catch (Exception)
-            {
-                _logger.LogError("Add and upload file failed");
-                throw;
-            }
+            });
+            return batchId;
         }
     }
 }

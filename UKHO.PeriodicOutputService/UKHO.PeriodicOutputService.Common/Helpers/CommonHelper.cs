@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Globalization;
+using System.Security.Cryptography;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -36,6 +37,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             var hash = md5.ComputeHash(requestStream);
 
             return hash;
+        }
+
+        public static int GetCurrentWeekNumber(DateTime date)
+        {
+            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
+            return cultureInfo.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
         }
     }
 }
