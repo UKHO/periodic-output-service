@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-using UKHO.PeriodicOutputService.API.FunctionalTests.Enums;
+using UKHO.ExchangeSetService.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
@@ -14,18 +14,15 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private TestConfiguration config { get; set; }
         private GetCatalogue getcat { get; set; }
         private string EssJwtToken { get; set; }
-
         private string FssJwtToken { get; set; }
         private GetProductIdentifiers getproductIdentifier { get; set; }
-        private GetBatchElements getBatchElements { get; set; }
-
-        private GetDownloadsAndProcessFile _downloadsAndProcessFile { get; set; }
 
         private static readonly EssAuthorizationConfiguration s_ESSAuth = new TestConfiguration().EssAuthorizationConfig;
-        private static readonly FunctionalTestFSSApiConfiguration s_FSSAuth = new TestConfiguration().FssConfig;
+        private static readonly FunctionalTestFSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
         private static readonly FleetManagerB2BApiConfiguration s_fleet = new TestConfiguration().fleetManagerB2BConfig;
         private List<string> _productIdentifiers = new();
         private HttpResponseMessage _unpResponse;
+        private List<string> DownloadedFolderPath;
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -34,9 +31,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
             getproductIdentifier = new GetProductIdentifiers();
-            getBatchElements = new();
-            _downloadsAndProcessFile = new();
-
+            
             userCredentialsBytes = CommonHelper.getbase64encodedcredentials(s_fleet.userName, s_fleet.password);
             AuthTokenProvider authTokenProvider = new();
             EssJwtToken = await authTokenProvider.GetEssToken();
@@ -80,61 +75,26 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        public async Task WhenICallTheFSSApiWithValidBatchId_ThenABatchStatusIsReturned()
+        public async Task WhenICallTheFSSApiWithValidBatchId_ThenALargeMediaStructureIsCreated()
         {
             HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(s_ESSAuth.EssApiUrl, _productIdentifiers, EssJwtToken);
             Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
 
-            //verify model structure
-            await essApiResponse.CheckModelStructureForSuccessResponse();
-            ExchangeSetResponseModel essApiResponseData = await essApiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
-
-            FssBatchStatus fssBatchStatus = await getBatchElements
-                .CheckIfBatchCommitted(s_FSSAuth.BaseUrl,
-                                       essApiResponseData.Links.ExchangeSetBatchStatusUri.Href,
-                                       FssJwtToken,
-                                       s_FSSAuth.BatchStatusPollingCutoffTime,
-                                       s_FSSAuth.BatchStatusPollingDelayTime);
-
-            Assert.That(fssBatchStatus, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed), "The response data is not empty");
+            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(essApiResponse, FssJwtToken);
+            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
         }
 
-        [Test]
-        public async Task WhenICallTheFSSApiWithValidBatchId_ThenDownloadExchangeSet()
+        [OneTimeTearDown]
+        public Task GlobalTeardown()
         {
-            HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(s_ESSAuth.EssApiUrl, _productIdentifiers, EssJwtToken);
-            Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
-
-            //verify model structure
-            await essApiResponse.CheckModelStructureForSuccessResponse();
-            ExchangeSetResponseModel essApiResponseData = await essApiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
-
-            string batchId = CommonHelper.ExtractBatchId(essApiResponseData.Links.ExchangeSetBatchStatusUri.Href);
-
-            FssBatchStatus fssBatchStatus = await getBatchElements
-                .CheckIfBatchCommitted(s_FSSAuth.BaseUrl,
-                                       batchId,
-                                       FssJwtToken,
-                                       s_FSSAuth.BatchStatusPollingCutoffTime,
-                                       s_FSSAuth.BatchStatusPollingDelayTime);
-
-            Assert.That(fssBatchStatus, Is.EqualTo(FssBatchStatus.Committed), "The Fss batch status is not committed");
-
-            List<FssBatchFile> fileDetails = await getBatchElements.GetBatchFiles(s_FSSAuth.BaseUrl, batchId, FssJwtToken);
-
-            string downloadPath = Path.Combine(@"D:\HOME", batchId);
-            Directory.CreateDirectory(downloadPath);
-
-            Parallel.ForEach(fileDetails, file =>
+            //Clean up downloaded files/folders
+            for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                string filePath = Path.Combine(downloadPath, file.FileName);
-                Stream stream = _downloadsAndProcessFile.DownloadFile(s_FSSAuth.BaseUrl, file.FileLink, FssJwtToken).Result;
-                byte[] bytes = _downloadsAndProcessFile.ConvertStreamToByteArray(stream);
-                _downloadsAndProcessFile.CreateFileCopy(filePath, new MemoryStream(bytes));
+                var FolderName = $"M0{mediaNumber}X02.zip";
+                FileContentHelper.DeleteDirectory(FolderName);
+            }
 
-                Assert.That(File.Exists(filePath), Is.True, "File Downloaded failed");
-            });
-
+            return Task.CompletedTask;
         }
     }
 }
