@@ -57,8 +57,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 {
                     List<FssBatchFile>? files = await GetBatchFiles(essBatchId);
 
-                    //string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
-                    string downloadPath = Path.Combine(@"D:\HOME", essBatchId);
+                    string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
 
                     _fileSystemHelper.CreateDirectory(downloadPath);
 
