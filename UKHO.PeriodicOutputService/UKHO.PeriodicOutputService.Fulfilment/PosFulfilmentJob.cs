@@ -22,15 +22,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment
         {
             try
             {
-                _logger.LogInformation(EventIds.PosFulfilmentJobStarted.ToEventId(), "Periodic Output Service webjob started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.PosFulfilmentJobStarted.ToEventId(), "Periodic Output Service webjob started at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
                 string result = await _fulfilmentDataService.CreatePosExchangeSets();
 
-                _logger.LogInformation(EventIds.PosFulfilmentJobCompleted.ToEventId(), "Periodic Output Service webjob completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.PosFulfilmentJobCompleted.ToEventId(), "Periodic Output Service webjob completed at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message:{Message} | StackTrace:{StackTrace} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message:{Message} | StackTrace:{StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
             }
         }
     }

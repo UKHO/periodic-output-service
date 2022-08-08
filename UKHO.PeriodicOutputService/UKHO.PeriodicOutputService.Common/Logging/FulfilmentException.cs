@@ -1,7 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using Microsoft.Extensions.Logging;
 
-namespace UKHO.PeriodicOutputService.Common.Configuration
+namespace UKHO.PeriodicOutputService.Common.Logging
 {
     [Serializable]
     public class FulfilmentException : Exception

@@ -2,6 +2,6 @@
 {
     public interface IEssApiClient
     {
-        Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken);
+        Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string uri, List<string> productIdentifierModel, string accessToken);
     }
 }

@@ -1,11 +1,11 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Fss;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Fulfilment.Models;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
@@ -44,41 +44,36 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task CreateFullAVCSExchangeSet()
         {
-            List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
+            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationStarted.ToEventId(), "Creation of full AVCS exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            if (productIdentifiers.Count <= 0)
+            List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
+            string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
+
+            if (!string.IsNullOrEmpty(essBatchId))
             {
-                _logger.LogError("Product identifiers not found");
+                FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
+
+                if (fssBatchStatus == FssBatchStatus.Committed)
+                {
+                    List<FssBatchFile>? files = await GetBatchFiles(essBatchId);
+
+                    //string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
+                    string downloadPath = Path.Combine(@"D:\HOME", essBatchId);
+
+                    _fileSystemHelper.CreateDirectory(downloadPath);
+
+                    DownloadFiles(files, downloadPath);
+                }
+                else
+                {
+                    _logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), fssBatchStatus, CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
+                }
             }
             else
             {
-                string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
-
-                if (!string.IsNullOrEmpty(essBatchId))
-                {
-                    FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
-
-                    if (fssBatchStatus == FssBatchStatus.Committed)
-                    {
-                        List<FssBatchFile>? files = await GetBatchFiles(essBatchId);
-
-                        if (files != null)
-                        {
-                            string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
-                            _fileSystemHelper.CreateDirectory(downloadPath);
-
-                            DownloadFiles(files, downloadPath);
-                        }
-                        else
-                        {
-                            _logger.LogError("ESS exchange set creation failed.");
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogError("FSS polling cut off time completed");
-                    }
-                }
+                _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
             }
         }
 
@@ -104,33 +99,32 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task<List<string>> GetFleetManagerProductIdentifiers()
         {
-            List<string> productIdentifiers = new();
-
-            Models.FleetMangerGetAuthTokenResponseModel tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
-
-            if (!string.IsNullOrEmpty(tokenResponse.AuthToken))
-            {
-                Models.FleetManagerGetCatalogueResponseModel catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
-
-                if (catalogueResponse != null && catalogueResponse.ProductIdentifiers != null && catalogueResponse.ProductIdentifiers.Count > 0)
-                {
-                    productIdentifiers = catalogueResponse.ProductIdentifiers;
-                }
-            }
-            return productIdentifiers;
+            FleetMangerGetAuthTokenResponseModel tokenResponse = await _fleetManagerService.GetJwtAuthUnpToken();
+            FleetManagerGetCatalogueResponseModel catalogueResponse = await _fleetManagerService.GetCatalogue(tokenResponse.AuthToken);
+            return catalogueResponse.ProductIdentifiers;
         }
 
         private async Task<string> PostProductIdentifiersToESS(List<string> productIdentifiers)
         {
-            Models.ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(productIdentifiers);
-            return CommonHelper.ExtractBatchId(response.Links.ExchangeSetBatchDetailsUri.Href);
+            ExchangeSetResponseModel exchangeSetResponseModel = await _essService.PostProductIdentifiersData(productIdentifiers);
+            if (!string.IsNullOrEmpty(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href))
+            {
+                string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
+                _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch is created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                return essBatchId;
+            }
+            else
+            {
+                _logger.LogError(EventIds.FssBatchDetailUrlNotFound.ToEventId(), "FSS batch detail URL not found in ESS response at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.FssBatchDetailUrlNotFound.ToEventId());
+            }
         }
 
         private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
             {
-
                 string filePath = Path.Combine(downloadPath, file.FileName);
                 Stream stream = _fssService.DownloadFile(downloadPath, file.FileName, file.FileLink).Result;
                 byte[] bytes = _fileSystemHelper.ConvertStreamToByteArray(stream);

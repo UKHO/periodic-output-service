@@ -31,7 +31,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
             getproductIdentifier = new GetProductIdentifiers();
-            
+
             userCredentialsBytes = CommonHelper.getbase64encodedcredentials(s_fleet.userName, s_fleet.password);
             AuthTokenProvider authTokenProvider = new();
             EssJwtToken = await authTokenProvider.GetEssToken();
@@ -81,7 +81,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
 
             DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(essApiResponse, FssJwtToken);
-            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
+            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(2), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
         }
 
         [OneTimeTearDown]
@@ -90,7 +90,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             //Clean up downloaded files/folders
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                var FolderName = $"M0{mediaNumber}X02.zip";
+                string FolderName = $"M0{mediaNumber}X02.zip";
                 FileContentHelper.DeleteDirectory(FolderName);
             }
 

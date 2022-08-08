@@ -2,8 +2,8 @@
 using FakeItEasy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
@@ -73,26 +73,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                .MustHaveHappenedOnceExactly();
         }
 
-        [Test]
-        public async Task Does_CreatePosExchangeSet_Check_If_GetJwtAuthUnpToken_IsNull()
-        {
-            jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
-            jwtauthUnpToken.AuthToken = "";
 
-            A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken()).Returns(jwtauthUnpToken);
-
-            string result = await _fulfilmentDataService.CreatePosExchangeSets();
-
-            A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored)).MustNotHaveHappened();
-
-            Assert.That(result, Is.Not.Null);
-
-            A.CallTo(_fakeLogger).Where(call =>
-            call.Method.Name == "Log"
-            && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Product identifiers not found"
-            ).MustHaveHappenedOnceExactly();
-        }
 
         [Test]
         public void Does_CreatePosExchangeSet_Check_If_GetBatchFiles_Contains_FileName_Error()

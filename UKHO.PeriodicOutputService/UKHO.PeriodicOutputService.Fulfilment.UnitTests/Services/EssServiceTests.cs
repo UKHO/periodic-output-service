@@ -4,8 +4,8 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
@@ -148,7 +148,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Error
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}"
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
@@ -156,7 +156,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
         }
 
-        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
+        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
         {
             ExchangeSetCellCount = GetProductIdentifiers().Count,
             RequestedProductCount = GetProductIdentifiers().Count,
@@ -177,7 +177,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             }
         };
 
-        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponse() => new ExchangeSetResponseModel
+        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponse() => new()
         {
             ExchangeSetCellCount = 0,
             RequestedProductCount = GetProductIdentifiers().Count,
