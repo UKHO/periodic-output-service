@@ -65,17 +65,5 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
                 Assert.That(result, Is.Not.Null);
             }
         }
-
-        [Test]
-        public void Does_CreateFileCopy_Executes_Successful()
-        {
-            Stream fakeStream = A.Fake<Stream>();
-
-            using (var test_Stream = new MemoryStream(Encoding.UTF8.GetBytes("whatever")))
-            {
-                _fileSystemHelper.CreateFileCopy(Path.Combine(filePath, "test.zip"), test_Stream);
-
-            }
-        }
     }
 }

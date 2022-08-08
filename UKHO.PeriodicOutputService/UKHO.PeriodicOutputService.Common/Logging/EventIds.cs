@@ -5,63 +5,63 @@ namespace UKHO.PeriodicOutputService.Common.Logging
     public enum EventIds
     {
         /// <summary>
-        /// 809002 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809000 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        UnhandledException = 809002,
+        UnhandledException = 809000,
         /// <summary>
-        /// 809000 - Periodic Output Service webjob request started 
+        /// 809001 - Periodic Output Service webjob request started 
         /// </summary>
-        PosFulfilmentJobStarted = 809000,
+        PosFulfilmentJobStarted = 809001,
         /// <summary>
-        /// 809001 - Periodic Output Service webjob request completed 
+        /// 809002 - Periodic Output Service webjob request completed 
         /// </summary>
-        PosFulfilmentJobCompleted = 809001,
+        PosFulfilmentJobCompleted = 809002,
         /// <summary>
-        /// 809015 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809003 - full avcs exchangeset creation started.
         /// </summary>
-        FullAvcsExchangeSetCreationStarted = 809002,
+        FullAvcsExchangeSetCreationStarted = 809003,
         /// <summary>
-        /// 809016 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809004 - full avcs exchangeset creation completed.
         /// </summary>
-        FullAvcsExchangeSetCreationCompleted = 809002,
+        FullAvcsExchangeSetCreationCompleted = 809004,
         /// <summary>
-        /// 809003 - Getting fleet manager access token started
+        /// 809005 - Getting fleet manager access token started
         /// </summary>
-        GetFleetMangerAuthTokenStarted = 809003,
+        GetFleetMangerAuthTokenStarted = 809005,
         /// <summary>
-        /// 809009 - Getting fleet manager access token failed
+        /// 809006 - Getting fleet manager access token failed
         /// </summary>
-        GetFleetMangerAuthTokenFailed = 809009,
+        GetFleetMangerAuthTokenFailed = 809006,
         /// <summary>
-        /// 809010 - Getting fleet manager access token completed
+        /// 809007 - Getting fleet manager access token completed
         /// </summary>
-        GetFleetMangerAuthTokenCompleted = 809010,
+        GetFleetMangerAuthTokenCompleted = 809007,
         /// <summary>
-        /// 809011 - Getting fleet manager catalogue started
+        /// 809008 - Getting fleet manager catalogue started
         /// </summary>
-        GetFleetMangerCatalogueStarted = 809011,
+        GetFleetMangerCatalogueStarted = 809008,
         /// <summary>
-        /// 809012 - Getting fleet manager catalogue failed
+        /// 809009 - Getting fleet manager catalogue failed
         /// </summary>
-        GetFleetMangerCatalogueFailed = 809012,
+        GetFleetMangerCatalogueFailed = 809009,
         /// <summary>
-        /// 809013 - Getting fleet manager catalogue completed
+        /// 809010 - Getting fleet manager catalogue completed
         /// </summary>
-        GetFleetMangerCatalogueCompleted = 809013,
+        GetFleetMangerCatalogueCompleted = 809010,
         /// <summary>
-        /// 809006 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809011 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        GetAccessTokenStarted = 809002,
+        GetAccessTokenStarted = 809011,
         /// <summary>
-        /// 809007 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809012 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        CachedAccessTokenFound = 809002,
+        CachedAccessTokenFound = 809012,
         /// <summary>
-        /// 809008 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809013 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
-        GetNewAccessTokenStarted = 809002,
+        GetNewAccessTokenStarted = 809013,
         /// <summary>
-        /// 809009 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809011 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
         /// </summary>
         GetNewAccessTokenCompleted = 809002,
         /// <summary>
@@ -133,15 +133,15 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         GetBatchDetailRequestCompleted = 809026,
         /// <summary>
-        /// 809024 - getting batch details started
+        /// 809024 - downloading file started
         /// </summary>
         DownloadFileStarted = 809024,
         /// <summary>
-        /// 809025 - getting batch details failed
+        /// 809025 - downloading file failed
         /// </summary>
         DownloadFileFailed = 809025,
         /// <summary>
-        /// 809026 - getting batch details completed
+        /// 809026 - downloading file completed
         /// </summary>
         DownloadFileCompleted = 809026,
         /// <summary>
