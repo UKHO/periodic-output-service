@@ -26,10 +26,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         {
             string batchStatus = "";
             var startTime = DateTime.UtcNow;
-            Console.WriteLine(startTime);
-            var abc = DateTime.UtcNow - startTime;
-            Console.WriteLine(abc);
-            while (abc  < TimeSpan.FromMinutes(FSSAuth.BatchCommitWaitTime))
+
+            while (DateTime.UtcNow - startTime   < TimeSpan.FromMinutes(FSSAuth.BatchCommitWaitTime))
             {
                 await Task.Delay(5000);
                 var batchStatusResponse = await FssApiClient.GetBatchStatusAsync(batchStatusUri, jwtToken);
