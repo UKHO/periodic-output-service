@@ -7,7 +7,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static readonly HttpClient httpClient = new();
         public async Task<HttpResponseMessage> GetCatalogueEndpoint(string baseUrl, string accessToken, string subscriptionKey)
         {
-            string uri = $"{baseUrl}/catalogues/1";
+            string uri = $"{baseUrl}/ft/catalogues/1";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
