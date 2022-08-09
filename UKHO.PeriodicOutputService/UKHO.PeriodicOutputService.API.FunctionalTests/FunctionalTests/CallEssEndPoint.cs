@@ -17,11 +17,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private string FssJwtToken { get; set; }
         private GetProductIdentifiers getproductIdentifier { get; set; }
 
-        private static readonly EssAuthorizationConfiguration s_ESSAuth = new TestConfiguration().EssAuthorizationConfig;
+        private static readonly EssAuthorizationConfiguration ESSAuth = new TestConfiguration().EssAuthorizationConfig;
         private static readonly FunctionalTestFSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
-        private static readonly FleetManagerB2BApiConfiguration s_fleet = new TestConfiguration().fleetManagerB2BConfig;
-        private List<string> _productIdentifiers = new();
-        private HttpResponseMessage _unpResponse;
+        private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
+        private List<string> productIdentifiers = new();
+        private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
 
         [OneTimeSetUp]
@@ -32,24 +32,24 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             getcat = new GetCatalogue();
             getproductIdentifier = new GetProductIdentifiers();
 
-            userCredentialsBytes = CommonHelper.getbase64encodedcredentials(s_fleet.userName, s_fleet.password);
+            userCredentialsBytes = CommonHelper.getbase64encodedcredentials(fleet.userName, fleet.password);
             AuthTokenProvider authTokenProvider = new();
             EssJwtToken = await authTokenProvider.GetEssToken();
             FssJwtToken = await authTokenProvider.GetFssToken();
 
-            _unpResponse = await getunp.GetJwtAuthUnpToken(s_fleet.baseUrl, userCredentialsBytes, s_fleet.subscriptionKey);
-            string unp_token = await CommonHelper.DeserializeAsyncToken(_unpResponse);
+            unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
+            string unp_token = await CommonHelper.DeserializeAsyncToken(unpResponse);
 
-            HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(s_fleet.baseUrl, unp_token, s_fleet.subscriptionKey);
+            HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unp_token, fleet.subscriptionKey);
 
-            _productIdentifiers = await getcat.GetProductList(httpResponse);
+            productIdentifiers = await getcat.GetProductList(httpResponse);
         }
 
         [Test]
         public async Task WhenICallTheExchangeSetApiWithValidProductIdentifiers_ThenANonZeroRequestedProductCountAndExchangeSetCellCountIsReturned()
         {
-            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(s_ESSAuth.EssApiUrl, _productIdentifiers, EssJwtToken);
-            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             //verify model structure
             await apiResponse.CheckModelStructureForSuccessResponse();
@@ -59,10 +59,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallTheExchangeSetApiWithInValidProductIdentifiers_ThenValidRequestedProductCountAndLessExchangeSetCellCountIsReturned()
         {
-            _productIdentifiers.Add("ABCDEFGH"); //Adding invalid product identifier in the list
+            productIdentifiers.Add("ABCDEFGH"); //Adding invalid product identifier in the list
 
-            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(s_ESSAuth.EssApiUrl, _productIdentifiers, EssJwtToken);
-            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             //verify model structure
             await apiResponse.CheckModelStructureForSuccessResponse();
@@ -72,29 +72,24 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             //Check RequestedProductsNotInExchangeSet is not empty
             Assert.IsNotEmpty(apiResponseData.RequestedProductsNotInExchangeSet, "Response body returns Empty for RequestedProductsNotInExchangeSet, instead of Not Empty");
             Assert.That(apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault(p => p.ProductName.Equals("ABCDEFGH")).Reason, Is.EqualTo("invalidProduct"), $"Exchange set returned Reason {apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault().Reason}, instead of expected Reason 'invalidProduct'");
+
+            ////productIdentifiers.Remove("ABCDEFGH"); //Removing invalid product identifier from the list
         }
 
         [Test]
         public async Task WhenICallTheFSSApiWithValidBatchId_ThenALargeMediaStructureIsCreated()
         {
-            HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(s_ESSAuth.EssApiUrl, _productIdentifiers, EssJwtToken);
-            Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
+            HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
+            Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(essApiResponse, FssJwtToken);
-            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(2), $"Incorrect status code is returned {_unpResponse.StatusCode}, instead of the expected status 200.");
-        }
+            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
-        [OneTimeTearDown]
-        public Task GlobalTeardown()
-        {
             //Clean up downloaded files/folders
-            for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
+            foreach (string FolderName in DownloadedFolderPath)
             {
-                string FolderName = $"M0{mediaNumber}X02.zip";
                 FileContentHelper.DeleteDirectory(FolderName);
             }
-
-            return Task.CompletedTask;
         }
     }
 }

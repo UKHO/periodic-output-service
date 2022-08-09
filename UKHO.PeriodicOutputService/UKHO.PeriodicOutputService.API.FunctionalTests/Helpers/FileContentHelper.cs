@@ -47,23 +47,18 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 
         public static void DeleteDirectory(string fileName)
         {
-            string path = Path.GetTempPath();
-
-            if (Directory.Exists(path) && File.Exists(Path.Combine(path, fileName)))
+            if (File.Exists(fileName))
             {
-                string folder = Path.GetFileName(Path.Combine(path, fileName));
+                string folder = Path.GetFileName(fileName);
                 if (folder.Contains(".zip"))
                 {
                     folder = folder.Replace(".zip", "");
                 }
 
-                //Delete V01XO1/M01XO2/M02XO2 Directory and sub directories from temp Directory
-                Directory.Delete(Path.Combine(path, folder), true);
-
                 //Delete V01X01.zip/M01XO2.zip/M02XO2.zip file from temp Directory
-                if (File.Exists(Path.Combine(path, fileName)))
+                if (File.Exists(fileName))
                 {
-                    File.Delete(Path.Combine(path, fileName));
+                    File.Delete(fileName);
                 }
             }
 
