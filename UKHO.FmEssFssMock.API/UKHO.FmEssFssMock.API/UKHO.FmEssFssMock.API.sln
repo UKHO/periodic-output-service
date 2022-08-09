@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32526.322
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.FleetManagerMock.API", "UKHO.FleetManagerMock.API.csproj", "{7A1BB5D1-43F9-4B49-A004-6454CE625A58}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.FmEssFssMock.API", "UKHO.FmEssFssMock.API.csproj", "{7A1BB5D1-43F9-4B49-A004-6454CE625A58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

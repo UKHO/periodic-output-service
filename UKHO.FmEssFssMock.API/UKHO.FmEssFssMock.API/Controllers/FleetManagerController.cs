@@ -5,9 +5,9 @@ using System.Xml.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using UKHO.FleetManagerMock.API.Common;
+using UKHO.FmEssFssMock.API.Common;
 
-namespace UKHO.FleetManagerMock.API.Controllers
+namespace UKHO.FmEssFssMock.API.Controllers
 {
     [ApiController]
     public class FleetManagerController : ControllerBase

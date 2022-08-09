@@ -1,6 +1,6 @@
-﻿using UKHO.FleetManagerMock.API.Common;
+﻿using UKHO.FmEssFssMock.API.Common;
 
-namespace UKHO.FleetManagerMock.API
+namespace UKHO.FmEssFssMock.API
 {
     public class Startup
     {

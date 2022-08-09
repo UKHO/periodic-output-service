@@ -1,4 +1,4 @@
-﻿namespace UKHO.FleetManagerMock.API.Common
+﻿namespace UKHO.FmEssFssMock.API.Common
 {
     public class InvalidSubscriptionKeyResponse
     {
