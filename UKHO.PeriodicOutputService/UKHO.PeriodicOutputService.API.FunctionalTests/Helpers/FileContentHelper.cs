@@ -28,7 +28,9 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
             var batchStatusUrl = apiResponseData.Links.ExchangeSetBatchStatusUri.Href;
             var batchId = batchStatusUrl.Split('/')[5];
 
-            var finalBatchStatusUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/status"; 
+            var finalBatchStatusUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/status";
+
+            Thread.Sleep(5000);
 
             var batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl, FssJwtToken);
             Assert.That(batchStatus, Is.EqualTo("Committed"), $"Incorrect batch status is returned {batchStatus} for url {finalBatchStatusUrl}, instead of the expected status Committed.");
