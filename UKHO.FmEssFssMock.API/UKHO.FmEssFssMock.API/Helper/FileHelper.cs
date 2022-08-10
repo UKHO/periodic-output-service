@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace UKHO.FmEssFssMock.API.Helper
 {
@@ -6,14 +7,8 @@ namespace UKHO.FmEssFssMock.API.Helper
     {
         public static T ReadJsonFile<T>(string filePathWithFileName)
         {
-            JsonSerializerOptions Options = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            };
-            var folderDetails = Path.Combine(Directory.GetCurrentDirectory(), filePathWithFileName);
-            var myJsonString = File.ReadAllText(folderDetails);
-            return JsonSerializer.Deserialize<T>(myJsonString, Options);
+            T? response = JsonConvert.DeserializeObject<T>(File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), filePathWithFileName)));
+            return response;
         }
     }
 }

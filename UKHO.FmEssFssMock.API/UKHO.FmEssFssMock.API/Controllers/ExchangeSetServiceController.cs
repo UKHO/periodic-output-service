@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
 
 namespace UKHO.FmEssFssMock.API.Controllers
@@ -17,7 +17,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (productIdentifiers != null && productIdentifiers.Any())
             {
-                Models.Response.ExchangeSetServiceResponse? response = _exchangeSetService.GetProductIdentifier();
+                ExchangeSetServiceResponse? response = _exchangeSetService.GetProductIdentifier();
                 if (response != null)
                 {
                     return Ok(response);

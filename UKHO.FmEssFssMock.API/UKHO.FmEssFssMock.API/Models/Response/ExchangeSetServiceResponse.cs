@@ -4,71 +4,71 @@ namespace UKHO.FmEssFssMock.API.Models.Response
 {
     public class ExchangeSetServiceResponse
     {
-        ////[JsonProperty("_links")]
+        [JsonProperty("_links")]
         public Links Links { get; set; }
 
-        ////[JsonProperty("exchangeSetUrlExpiryDateTime")]
+        [JsonProperty("exchangeSetUrlExpiryDateTime")]
         public DateTime? ExchangeSetUrlExpiryDateTime { get; set; }
 
-        ////[JsonProperty("requestedProductCount")]
+        [JsonProperty("requestedProductCount")]
         public int RequestedProductCount { get; set; }
 
-        ////[JsonProperty("exchangeSetCellCount")]
+        [JsonProperty("exchangeSetCellCount")]
         public int ExchangeSetCellCount { get; set; }
 
-        ////[JsonProperty("requestedProductsAlreadyUpToDateCount")]
+        [JsonProperty("requestedProductsAlreadyUpToDateCount")]
         public int RequestedProductsAlreadyUpToDateCount { get; set; }
 
-        ////[JsonProperty("requestedProductsNotInExchangeSet")]
+        [JsonProperty("requestedProductsNotInExchangeSet")]
         public IEnumerable<RequestedProductsNotInExchangeSet> RequestedProductsNotInExchangeSet { get; set; }
     }
 
     public class RequestedProductsNotInExchangeSet
     {
-        ////[JsonProperty("productName")]
+        [JsonProperty("productName")]
         public string ProductName { get; set; }
 
-        ////[JsonProperty("reason")]
+        [JsonProperty("reason")]
         public string Reason { get; set; }
     }
 
     public class Links
     {
-        ////[JsonProperty("exchangeSetBatchStatusUri")]
+        [JsonProperty("exchangeSetBatchStatusUri")]
         public LinkSetBatchStatusUri ExchangeSetBatchStatusUri { get; set; }
 
-        ////[JsonProperty("exchangeSetBatchDetailsUri")]
+        [JsonProperty("exchangeSetBatchDetailsUri")]
         public LinkSetBatchDetailsUri ExchangeSetBatchDetailsUri { get; set; }
 
-        ////[JsonProperty("exchangeSetFileUri")]
+        [JsonProperty("exchangeSetFileUri")]
         public LinkSetFileUri ExchangeSetFileUri { get; set; }
 
-        ////[JsonProperty("errorFileUri", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("errorFileUri", NullValueHandling = NullValueHandling.Ignore)]
         [System.Text.Json.Serialization.JsonIgnore]
         public LinkSetErrorFileUri ExchangeSetErrorFileUri { get; set; }
     }
 
     public class LinkSetBatchStatusUri
     {
-        ////[JsonProperty("href")]
+        [JsonProperty("href")]
         public string Href { get; set; }
     }
 
     public class LinkSetBatchDetailsUri
     {
-        ////[JsonProperty("href")]
+        [JsonProperty("href")]
         public string Href { get; set; }
     }
 
     public class LinkSetFileUri
     {
-        ////[JsonProperty("href")]
+        [JsonProperty("href")]
         public string Href { get; set; }
     }
 
     public class LinkSetErrorFileUri
     {
-        ////[JsonProperty("href")]
+        [JsonProperty("href")]
         public string Href { get; set; }
     }
 }

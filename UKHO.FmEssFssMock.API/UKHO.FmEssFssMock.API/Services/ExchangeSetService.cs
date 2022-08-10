@@ -16,8 +16,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
         public ExchangeSetServiceResponse GetProductIdentifier()
         {
-            var responseData = FileHelper.ReadJsonFile<ExchangeSetServiceResponse>(_exchangeSetConfiguration.Value.FileDirectoryPath + _exchangeSetConfiguration.Value.EssResponseFile);
-            ////var selectedProductIdentifier = responseData?.FirstOrDefault(a => a.Id.ToLowerInvariant() == productIdentifiers.ToLowerInvariant());
+            ExchangeSetServiceResponse? responseData = FileHelper.ReadJsonFile<ExchangeSetServiceResponse>(_exchangeSetConfiguration.Value.FileDirectoryPath + _exchangeSetConfiguration.Value.EssResponseFile);
             return responseData;
         }
     }
