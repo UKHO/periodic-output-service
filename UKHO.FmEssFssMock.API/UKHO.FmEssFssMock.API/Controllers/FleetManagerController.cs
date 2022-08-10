@@ -24,7 +24,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
         [HttpGet]
         [Produces("application/json")]
-        [Route("/auth/unp")]
+        [Route("/fm/auth/unp")]
         public IActionResult GetJwtAuthUnpToken([FromHeader(Name = "userPass")] string userPass, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             string? userName = _fleetManagerApiConfiguration.Value.UserName;
@@ -76,7 +76,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpGet]
-        [Route("/catalogues/{catalogueId}")]
+        [Route("/fm/catalogues/{catalogueId}")]
         public IActionResult GetCatalogue([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             string? fleetManagerStubSubscriptionKey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
@@ -128,7 +128,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
         [HttpGet]
         [Produces("application/json")]
-        [Route("/ft/auth/unp")]
+        [Route("/fm/ft/auth/unp")]
         public IActionResult GetJwtAuthUnpTokenForFT([FromHeader(Name = "userPass")] string userPass, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             string? userName = _fleetManagerApiConfiguration.Value.UserName;
@@ -180,7 +180,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpGet]
-        [Route("/ft/catalogues/{catalogueId}")]
+        [Route("/fm/ft/catalogues/{catalogueId}")]
         public IActionResult GetCatalogueForFT([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             string? fleetManagerStubSubscriptionKey = _fleetManagerApiConfiguration.Value.SubscriptionKey;

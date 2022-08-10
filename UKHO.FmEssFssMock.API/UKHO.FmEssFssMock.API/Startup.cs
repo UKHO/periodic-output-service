@@ -1,4 +1,6 @@
 ﻿using UKHO.FmEssFssMock.API.Common;
+using UKHO.FmEssFssMock.API.Filters;
+using UKHO.FmEssFssMock.API.Services;
 
 namespace UKHO.FmEssFssMock.API
 {
@@ -16,6 +18,12 @@ namespace UKHO.FmEssFssMock.API
         {
             services.AddControllers();
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddHeaderPropagation(options =>
+            {
+                options.Headers.Add(CorrelationIdMiddleware.XCorrelationIdHeaderKey);
+            });
+            services.AddControllers(o => o.InputFormatters.Insert(0, new BinaryRequestBodyFormatter()));
+            services.AddScoped<FileShareService>();
             services.Configure<FleetManagerApiConfiguration>(Configuration.GetSection("FleetManagerB2BApiConfiguration"));
             services.Configure<FileDirectoryPathConfiguration>(Configuration.GetSection("FileDirectoryPath"));
         }
@@ -35,9 +43,9 @@ namespace UKHO.FmEssFssMock.API
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
- {
-     endpoints.MapControllers();
- });
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }
