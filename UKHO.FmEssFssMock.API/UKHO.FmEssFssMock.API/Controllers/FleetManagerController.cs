@@ -12,14 +12,12 @@ namespace UKHO.FmEssFssMock.API.Controllers
     [ApiController]
     public class FleetManagerController : ControllerBase
     {
-        private readonly IOptions<FleetManagerApiConfiguration> _fleetManagerApiConfiguration;
-        private readonly IOptions<FileDirectoryPathConfiguration> _fileDirectoryPathConfiguration;
+        private readonly IOptions<FleetManagerConfiguration> _fmConfiguration;
         private const string _jwtUnpAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
 
-        public FleetManagerController(IOptions<FleetManagerApiConfiguration> fleetManagerApiConfiguration, IOptions<FileDirectoryPathConfiguration> fileDirectoryPathConfiguration)
+        public FleetManagerController(IOptions<FleetManagerConfiguration> fmConfiguration)
         {
-            _fleetManagerApiConfiguration = fleetManagerApiConfiguration;
-            _fileDirectoryPathConfiguration = fileDirectoryPathConfiguration;
+            _fmConfiguration = fmConfiguration;
         }
 
         [HttpGet]
@@ -27,9 +25,9 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/fm/auth/unp")]
         public IActionResult GetJwtAuthUnpToken([FromHeader(Name = "userPass")] string userPass, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
-            string? userName = _fleetManagerApiConfiguration.Value.UserName;
-            string? password = _fleetManagerApiConfiguration.Value.Password;
-            string? fleetManagerStubSubscriptionKey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
+            string? userName = _fmConfiguration.Value.UserName;
+            string? password = _fmConfiguration.Value.Password;
+            string? fleetManagerStubSubscriptionKey = _fmConfiguration.Value.SubscriptionKey;
             string base64Credentials = GetBase64EncodedCredentials(userName, password);
             HttpResponseMessage httpResponse = new();
             string AuthToken = string.Empty;
@@ -79,8 +77,8 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/fm/catalogues/{catalogueId}")]
         public IActionResult GetCatalogue([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
-            string? fleetManagerStubSubscriptionKey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
-            string? path = _fileDirectoryPathConfiguration.Value.AVCSCatalogDataFilePath;
+            string? fleetManagerStubSubscriptionKey = _fmConfiguration.Value.SubscriptionKey;
+            string? path = _fmConfiguration.Value.WebJobAVCSCatalogDataFilePath;
             HttpResponseMessage httpResponse = new();
 
             if (string.IsNullOrEmpty(subscriptionKey))
@@ -131,9 +129,9 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/fm/ft/auth/unp")]
         public IActionResult GetJwtAuthUnpTokenForFT([FromHeader(Name = "userPass")] string userPass, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
-            string? userName = _fleetManagerApiConfiguration.Value.UserName;
-            string? password = _fleetManagerApiConfiguration.Value.Password;
-            string? fleetManagerStubSubscriptionKey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
+            string? userName = _fmConfiguration.Value.UserName;
+            string? password = _fmConfiguration.Value.Password;
+            string? fleetManagerStubSubscriptionKey = _fmConfiguration.Value.SubscriptionKey;
             string base64Credentials = GetBase64EncodedCredentials(userName, password);
             HttpResponseMessage httpResponse = new();
             string AuthToken = string.Empty;
@@ -183,8 +181,8 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/fm/ft/catalogues/{catalogueId}")]
         public IActionResult GetCatalogueForFT([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
-            string? fleetManagerStubSubscriptionKey = _fleetManagerApiConfiguration.Value.SubscriptionKey;
-            string? path = _fileDirectoryPathConfiguration.Value.FunctionalTestAVCSCatalogDataFilePath;
+            string? fleetManagerStubSubscriptionKey = _fmConfiguration.Value.SubscriptionKey;
+            string? path = _fmConfiguration.Value.FunctionalTestAVCSCatalogDataFilePath;
             HttpResponseMessage httpResponse = new();
 
             if (string.IsNullOrEmpty(subscriptionKey))

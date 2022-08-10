@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
+﻿
 namespace UKHO.FmEssFssMock.API.Models.Response
 {
     public class BatchDetail

@@ -8,5 +8,6 @@
         public string ScsResponseFile { get; set; }
         public string FolderDirectoryName { get; set; }
         public string DownloadENCFiles307ResponseUri { get; set; }
+        public string FssStubBaseUrl { get; set; }
     }
 }

@@ -1,8 +1,7 @@
 [
     {
-        "id": "productIdentifier-FR570300-SE6IIFE1-NO3B2020-GB20486A-RU3P0ZM0-US5CN13M-CA172005-NZ300661-DE521900-KR676D03",
-        "responseBody":
-        {
+        "id": "productIdentifier-FR570300-SE6IIFE1-NO3B2020-GB20486A-RU3P0ZM0-US5CN13M-CA172005-DE521900-NZ300661-KR676D03",
+        "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
                     "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/status"

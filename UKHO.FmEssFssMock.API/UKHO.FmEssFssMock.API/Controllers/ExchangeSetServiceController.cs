@@ -8,12 +8,10 @@ namespace UKHO.FmEssFssMock.API.Controllers
     public class ExchangeSetServiceController : ControllerBase
     {
         private readonly ExchangeSetService _exchangeSetService;
-        readonly FleetManagerController _fleetManagerController;
 
-        public ExchangeSetServiceController(ExchangeSetService exchangeSetService, FleetManagerController fleetManagerController)
+        public ExchangeSetServiceController(ExchangeSetService exchangeSetService)
         {
             _exchangeSetService = exchangeSetService;
-            _fleetManagerController = fleetManagerController;
         }
 
         [HttpPost]
@@ -22,13 +20,13 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (productIdentifiers != null && productIdentifiers.Any())
             {
-                ExchangeSetServiceResponse? response = _exchangeSetService.GetProductIdentifier("productIdentifier-" + string.Join("-", productIdentifiers));
-                if (response != null)
+                ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSet(productIdentifiers);
+                if (response == null)
                 {
-                    return Ok(response.ResponseBody);
+                    return BadRequest();
                 }
+                return Ok(response.ResponseBody);
             }
-            
             return BadRequest();
         }
     }

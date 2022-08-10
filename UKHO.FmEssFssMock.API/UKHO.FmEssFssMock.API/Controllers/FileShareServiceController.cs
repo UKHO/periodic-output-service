@@ -51,7 +51,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
         [HttpPost]
         [Route("/fss/batch")]
-        public IActionResult CreateBatch([FromBody] BatchRequest batchRequest)
+        public IActionResult CreateBatch([FromBody] CreateBatchRequest batchRequest)
         {
             if (batchRequest != null && !string.IsNullOrEmpty(batchRequest.BusinessUnit))
             {
@@ -65,12 +65,12 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpGet]
-        [Route("/fss/batch")]
-        public IActionResult GetBatches([FromQuery] int? limit, [FromQuery] int start = 0, [FromQuery(Name = "$filter")] string filter = "")
+        [Route("/fss/batch/{batchId}")]
+        public IActionResult GetBatchDetails([FromRoute] string batchId)
         {
-            if (!string.IsNullOrEmpty(filter))
+            if (!string.IsNullOrEmpty(batchId))
             {
-                var response = fileShareService.GetBatches(filter);
+                BatchDetail response = fileShareService.GetBatchDetails(batchId);
                 if (response != null)
                 {
                     return Ok(response);
@@ -81,15 +81,10 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
         [HttpGet]
         [Route("/fss/batch/{batchId}/files/{fileName}")]
-        public ActionResult DownloadFile(string batchId, string fileName)
+        public ActionResult DownloadFile([FromRoute] string batchId, [FromRoute] string fileName)
         {
             byte[] bytes = null;
 
-            if (fileName == "DE260001.000")
-            {
-                HttpContext.Response.Headers.Add("Location", fileShareServiceConfiguration.Value.DownloadENCFiles307ResponseUri);
-                return StatusCode(StatusCodes.Status307TemporaryRedirect);
-            }
             if (!string.IsNullOrEmpty(fileName))
             {
                 bytes = fileShareService.GetFileData(configuration["HOME"], batchId, fileName);
@@ -169,7 +164,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId))
             {
-                var response = fileShareService.CheckBatchFolderExists(batchId, configuration["HOME"]);
+                var response = fileShareService.AddFile(batchId, fileName, configuration["HOME"]);
                 if (response)
                 {
                     return StatusCode(StatusCodes.Status201Created);
