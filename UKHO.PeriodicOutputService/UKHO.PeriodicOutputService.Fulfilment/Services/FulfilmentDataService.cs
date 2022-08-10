@@ -74,7 +74,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                         if (fssBatchStatus == FssBatchStatus.Committed)
                         {
                             var files = await GetBatchFiles(essBatchId);
-                            string downloadPath = Path.Combine(@"D:\HOME", essBatchId);
+                            string downloadPath = Path.Combine(@"D:\HOME1", essBatchId);
                             _fileSystemHelper.CreateDirectory(downloadPath);
 
                             DownloadFiles(files, downloadPath);
@@ -83,12 +83,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                             CreateIsoAndSha1ForExchangeSet(files, downloadPath);
 
-                            List<string> extensions = new() { "iso;sha1", "zip" };
+                            var extensions = new List<(string fileExtension, string mediaType)> { ("iso;sha1", "DVD"), ("zip", "zip") };
 
-                            foreach (string? extension in extensions)
+                            foreach ((string fileExtension, string mediaType) extension in extensions)
                             {
-                                IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, extension, SearchOption.TopDirectoryOnly);
-                                string batchId = await CreateBatchAndUpload(filePaths);
+                                IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, extension.fileExtension, SearchOption.TopDirectoryOnly);
+                                string batchId = await CreateBatchAndUpload(filePaths, extension.mediaType);
                                 bool isBatch1Committed = await _fssService.CommitBatch(batchId, filePaths);
                             }
                         }
@@ -152,11 +152,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             Models.ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(productIdentifiers);
 
-            //string essBatchId = "621E8D6F-9950-4BA6-BFB4-92415369AAEE";
-            //string essBatchId = "cc4a0527-f82e-4355-affb-707e83293fe2";
-
-            return "cc4a0527-f82e-4355-affb-707e83293fe2";
-            //return CommonHelper.ExtractBatchId(response.Links.ExchangeSetBatchDetailsUri.ToString());
+            return CommonHelper.ExtractBatchId(response.Links.ExchangeSetBatchDetailsUri.Href.ToString());
         }
 
         private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
@@ -212,12 +208,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
               });
         }
 
-        private async Task<string> CreateBatchAndUpload(IEnumerable<string> filePaths)
+        private async Task<string> CreateBatchAndUpload(IEnumerable<string> filePaths, string mediaType)
         {
             try
             {
                 //Create Batch
-                string batchId = await _fssService.CreateBatch();
+                string batchId = await _fssService.CreateBatch(mediaType);
 
                 //Add files in batch created above
                 Parallel.ForEach(filePaths, filePath =>
