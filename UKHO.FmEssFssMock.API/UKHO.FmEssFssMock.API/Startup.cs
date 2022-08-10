@@ -1,6 +1,7 @@
 ﻿using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Filters;
 using UKHO.FmEssFssMock.API.Services;
+using UKHO.FmEssFssMock.API.Controllers;
 
 namespace UKHO.FmEssFssMock.API
 {
@@ -26,6 +27,9 @@ namespace UKHO.FmEssFssMock.API
             services.AddScoped<FileShareService>();
             services.Configure<FleetManagerApiConfiguration>(Configuration.GetSection("FleetManagerB2BApiConfiguration"));
             services.Configure<FileDirectoryPathConfiguration>(Configuration.GetSection("FileDirectoryPath"));
+            services.AddScoped<ExchangeSetService>();
+            services.AddScoped<FleetManagerController>();
+            services.Configure<ExchangeSetConfiguration>(Configuration.GetSection("ExchangeSetService"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

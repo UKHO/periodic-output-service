@@ -15,6 +15,7 @@ namespace UKHO.FmEssFssMock.API.Helpers
             var myJsonString = File.ReadAllText(folderDetails);
             return JsonSerializer.Deserialize<T>(myJsonString, Options);
         }
+
         public static void CheckAndCreateFolder(string folderPath)
         {
             if (!Directory.Exists(folderPath))
@@ -22,6 +23,7 @@ namespace UKHO.FmEssFssMock.API.Helpers
                 Directory.CreateDirectory(folderPath);
             }
         }
+
         public static void CreateFileContentWithBytes(string uploadBlockFilePath, byte[] content)
         {
             if (ValidateFilePath(uploadBlockFilePath))
