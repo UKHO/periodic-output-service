@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System.Globalization;
+using Microsoft.Extensions.Options;
 using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Helper;
 using UKHO.FmEssFssMock.API.Models.Response;
@@ -14,10 +15,12 @@ namespace UKHO.FmEssFssMock.API.Services
             _exchangeSetConfiguration = exchangeSetConfiguration;
         }
 
-        public ExchangeSetServiceResponse GetProductIdentifier()
+        public ExchangeSetServiceResponse GetProductIdentifier(string productIdentifiers)
         {
-            ExchangeSetServiceResponse? responseData = FileHelper.ReadJsonFile<ExchangeSetServiceResponse>(_exchangeSetConfiguration.Value.FileDirectoryPath + _exchangeSetConfiguration.Value.EssResponseFile);
-            return responseData;
+            List<ExchangeSetServiceResponse>? responseData = FileHelper.ReadJsonFile<List<ExchangeSetServiceResponse>>(_exchangeSetConfiguration.Value.FileDirectoryPath + _exchangeSetConfiguration.Value.EssResponseFile);
+            ExchangeSetServiceResponse? selectedProductIdentifier = responseData?.FirstOrDefault(a => a.Id.ToLowerInvariant() == productIdentifiers.ToLowerInvariant());
+            selectedProductIdentifier.ResponseBody.ExchangeSetUrlExpiryDateTime = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
+            return selectedProductIdentifier;
         }
     }
 }

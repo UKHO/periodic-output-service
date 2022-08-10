@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace UKHO.FmEssFssMock.API.Helper
 {

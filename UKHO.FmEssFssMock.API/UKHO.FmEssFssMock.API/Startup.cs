@@ -1,4 +1,5 @@
 ﻿using UKHO.FmEssFssMock.API.Common;
+using UKHO.FmEssFssMock.API.Controllers;
 using UKHO.FmEssFssMock.API.Services;
 
 namespace UKHO.FmEssFssMock.API
@@ -20,6 +21,7 @@ namespace UKHO.FmEssFssMock.API
             services.Configure<FleetManagerApiConfiguration>(Configuration.GetSection("FleetManagerB2BApiConfiguration"));
             services.Configure<FileDirectoryPathConfiguration>(Configuration.GetSection("FileDirectoryPath"));
             services.AddScoped<ExchangeSetService>();
+            services.AddScoped<FleetManagerController>();
             services.Configure<ExchangeSetConfiguration>(Configuration.GetSection("ExchangeSetService"));
         }
 
