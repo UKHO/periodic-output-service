@@ -23,7 +23,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
-
+        
         [OneTimeSetUp]
         public async Task Setup()
         {
@@ -72,8 +72,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             //Check RequestedProductsNotInExchangeSet is not empty
             Assert.IsNotEmpty(apiResponseData.RequestedProductsNotInExchangeSet, "Response body returns Empty for RequestedProductsNotInExchangeSet, instead of Not Empty");
             Assert.That(apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault(p => p.ProductName.Equals("ABCDEFGH")).Reason, Is.EqualTo("invalidProduct"), $"Exchange set returned Reason {apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault().Reason}, instead of expected Reason 'invalidProduct'");
-
-            ////productIdentifiers.Remove("ABCDEFGH"); //Removing invalid product identifier from the list
         }
 
         [Test]
