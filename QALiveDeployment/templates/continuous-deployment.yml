@@ -38,3 +38,12 @@ steps:
       appType: webApp
       appName: "$(WEB_APP_NAME)"
       package: "$(Pipeline.Workspace)/PeriodicOutputService/PeriodicOutputFulfilmentService.zip"
+
+  - task: AzureCLI@2
+    displayName: "Check Service is running"
+    inputs:
+      azureSubscription: "${{ parameters.AzureSubscription }}"
+      scriptType: 'pscore'
+      scriptLocation: 'scriptPath'
+      scriptPath: '$(Pipeline.Workspace)/qaliveterraformartifact/check_service_status_webjob.ps1'
+      arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
