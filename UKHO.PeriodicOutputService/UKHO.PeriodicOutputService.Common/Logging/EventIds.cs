@@ -49,173 +49,173 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         GetFleetMangerCatalogueCompleted = 809010,
         /// <summary>
-        /// 809011 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809011 - Get access token started.
         /// </summary>
         GetAccessTokenStarted = 809011,
         /// <summary>
-        /// 809012 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809012 - Cached access toeken found.
         /// </summary>
         CachedAccessTokenFound = 809012,
         /// <summary>
-        /// 809013 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809013 - Get new access token started.
         /// </summary>
         GetNewAccessTokenStarted = 809013,
         /// <summary>
-        /// 809011 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809014 - Get new access token completed.
         /// </summary>
-        GetNewAccessTokenCompleted = 809002,
+        GetNewAccessTokenCompleted = 809014,
         /// <summary>
-        /// 809010 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809015 - Cashing external endpoint token started .
         /// </summary>
-        CachingExternalEndPointTokenStarted = 809002,
+        CachingExternalEndPointTokenStarted = 809015,
         /// <summary>
-        /// 809011 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809016 - Caching external endpoint token completed.
         /// </summary>
-        CachingExternalEndPointTokenCompleted = 809002,
+        CachingExternalEndPointTokenCompleted = 809016,
         /// <summary>
-        /// 809012 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809017 - Get access token completed.
         /// </summary>
-        GetAccessTokenCompleted = 809002,
+        GetAccessTokenCompleted = 809017,
         /// <summary>
-        /// 809003 - Creation of full AVCS exchange set started
+        /// 809018 - Post product identifiers to Ess started
         /// </summary>
-        PostProductIdentifiersToEssStarted = 809003,
+        PostProductIdentifiersToEssStarted = 809018,
         /// <summary>
-        /// 809004 - Full AVCS exchange set created successfully
+        /// 809019 - Post product identifiers to Ess failed
         /// </summary>
-        PostProductIdentifiersToEssFailed = 809004,
+        PostProductIdentifiersToEssFailed = 809019,
         /// <summary>
-        /// 809005 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809020 - Post product identifiers to Ess completed
         /// </summary>
-        PostProductIdentifiersToEssCompleted = 809002,
+        PostProductIdentifiersToEssCompleted = 809020,
         /// <summary>
-        /// 809014 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809021 - Batch created in ESS.
         /// </summary>
-        BatchCreatedInESS = 809002,
+        BatchCreatedInESS = 809021,
         /// <summary>
-        /// 809014 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809022 - Fss batch details url not found.
         /// </summary>
-        FssBatchDetailUrlNotFound = 809002,
+        FssBatchDetailUrlNotFound = 809022,
         /// <summary>
-        /// 809017 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809023 - Fss batch status polling started.
         /// </summary>
-        FssBatchStatusPollingStarted = 809002,
+        FssBatchStatusPollingStarted = 809023,
         /// <summary>
-        /// 809018 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809024 - Get batch status request started.
         /// </summary>
-        GetBatchStatusRequestStarted = 809002,
+        GetBatchStatusRequestStarted = 809024,
         /// <summary>
-        /// 809018 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809025 - Get batch status request completed.
         /// </summary>
-        GetBatchStatusRequestCompleted = 809002,
+        GetBatchStatusRequestCompleted = 809025,
         /// <summary>
-        /// 809018 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809026 - Get batch status request failed.
         /// </summary>
-        GetBatchStatusRequestFailed = 809002,
+        GetBatchStatusRequestFailed = 809026,
         /// <summary>
-        /// 809019 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809027 - Fss batch status polling stopped.
         /// </summary>
-        FssBatchStatusPollingStopped = 809002,
+        FssBatchStatusPollingStopped = 809027,
         /// <summary>
-        /// 809020 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809028 -  Fss batch status polling completed.
         /// </summary>
-        FssBatchStatusPollingCompleted = 809002,
+        FssBatchStatusPollingCompleted = 809028,
         /// <summary>
-        /// 809024 - getting batch details started
+        /// 809029 - getting batch details started
         /// </summary>
-        GetBatchDetailRequestStarted = 809024,
+        GetBatchDetailRequestStarted = 809029,
         /// <summary>
-        /// 809025 - getting batch details failed
+        /// 809030 - getting batch details request failed
         /// </summary>
-        GetBatchDetailRequestFailed = 809025,
+        GetBatchDetailRequestFailed = 809030,
         /// <summary>
-        /// 809026 - getting batch details completed
+        /// 809031 - getting batch details request completed
         /// </summary>
-        GetBatchDetailRequestCompleted = 809026,
+        GetBatchDetailRequestCompleted = 809031,
         /// <summary>
-        /// 809024 - downloading file started
+        /// 809032 - downloading file started
         /// </summary>
-        DownloadFileStarted = 809024,
+        DownloadFileStarted = 809032,
         /// <summary>
-        /// 809025 - downloading file failed
+        /// 809033 - downloading file failed
         /// </summary>
-        DownloadFileFailed = 809025,
+        DownloadFileFailed = 809033,
         /// <summary>
-        /// 809026 - downloading file completed
+        /// 809034 - downloading file completed
         /// </summary>
-        DownloadFileCompleted = 809026,
+        DownloadFileCompleted = 809034,
         /// <summary>
-        /// 809020 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809035 - Error found in get batch file.
         /// </summary>
-        ErrorFileFoundInBatch = 809002,
+        ErrorFileFoundInBatch = 809035,
         /// <summary>
-        /// 809039 - Create batch started
+        /// 809036 - Create batch started
         /// </summary>
-        CreateBatchStarted = 809039,
+        CreateBatchStarted = 809036,
         /// <summary>
-        /// 809040 - Create batch failed
+        /// 809037 - Create batch failed
         /// </summary>
-        CreateBatchFailed = 809040,
+        CreateBatchFailed = 809037,
         /// <summary>
-        /// 809041 - Create batch completed
+        /// 809038 - Create batch completed
         /// </summary>
-        CreateBatchCompleted = 809041,
+        CreateBatchCompleted = 809038,
         /// <summary>
-        /// 809020 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809039 - Add file to batch request started.
         /// </summary>
-        AddFileToBatchRequestStarted = 809042,
+        AddFileToBatchRequestStarted = 809039,
         /// <summary>
-        /// 809043 - Add file to batch failed
+        /// 809040 - Add file to batch request failed
         /// </summary>
-        AddFileToBatchRequestFailed = 809043,
+        AddFileToBatchRequestFailed = 809040,
         /// <summary>
-        /// 809044 - Add file to batch completed
+        /// 809041 - Add file to batch request completed
         /// </summary>
-        AddFileToBatchRequestCompleted = 809044,
+        AddFileToBatchRequestCompleted = 809041,
         /// <summary>
-        /// 809033 - write file block started
+        /// 809042 - write file block started
         /// </summary>
-        WriteBlockToFileStarted = 809033,
+        WriteBlockToFileStarted = 809042,
         /// <summary>
-        /// 809034 - write file block failed
+        /// 809043 - write file block failed
         /// </summary>
-        WriteBlockToFileFailed = 809034,
+        WriteBlockToFileFailed = 809043,
         /// <summary>
-        /// 809035 - write file block completed
+        /// 809044 - write file block completed
         /// </summary>
-        WriteBlockToFileCompleted = 809035,
+        WriteBlockToFileCompleted = 809044,
         /// <summary>
-        /// 809030 - upload file block started
+        /// 809045 - upload file block started
         /// </summary>
-        UploadFileBlockStarted = 809030,
+        UploadFileBlockStarted = 809045,
         /// <summary>
-        /// 809031 - upload file block failed
+        /// 809046 - upload file block failed
         /// </summary>
-        UploadFileBlockFailed = 809031,
+        UploadFileBlockFailed = 809046,
         /// <summary>
-        /// 809032 - upload file block completed
+        /// 809047 - upload file block completed
         /// </summary>
-        UploadFileBlockCompleted = 809032,
+        UploadFileBlockCompleted = 809047,
         /// <summary>
-        /// 809036 - commit batch started
+        /// 809048 - commit batch started
         /// </summary>
-        CommitBatchStarted = 809036,
+        CommitBatchStarted = 809048,
         /// <summary>
-        /// 809037 - commit batch failed
+        /// 809049 - commit batch failed
         /// </summary>
-        CommitBatchFailed = 809037,
+        CommitBatchFailed = 809049,
         /// <summary>
-        /// 809038 - commit batch completed
+        /// 809050 - commit batch completed
         /// </summary>
-        CommitBatchCompleted = 809038,
+        CommitBatchCompleted = 809050,
         /// <summary>
-        /// 809038 - commit batch completed
+        /// 809051 - Fss polling cutoff timeout
         /// </summary>
-        FssPollingCutOffTimeout = 809038,
+        FssPollingCutOffTimeout = 809051,
         /// <summary>
-        /// 809037 - commit batch failed
+        /// 809052 - Empty BatchId found
         /// </summary>
-        EmptyBatchIdFound = 809037,
+        EmptyBatchIdFound = 809052,
     }
 
     public static class EventIdExtensions

@@ -126,9 +126,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
                 Stream stream = _fssService.DownloadFile(downloadPath, file.FileName, file.FileLink).Result;
-                byte[] bytes = _fileSystemHelper.ConvertStreamToByteArray(stream);
-                _fileSystemHelper.CreateFileCopy(filePath, new MemoryStream(bytes));
-
+                _fileSystemHelper.CreateFileCopy(filePath, stream);
             });
         }
     }
