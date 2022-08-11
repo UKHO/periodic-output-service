@@ -74,7 +74,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     {
                         RequestUri = new Uri("http://test.com")
                     },
-                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Incomplete\"}")))
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Committed\"}")))
                 });
 
             FssBatchStatus result = await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
@@ -147,7 +147,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 });
 
             Assert.ThrowsAsync<FulfilmentException>(
-               () =>  _fssService.GetBatchDetails("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+               () => _fssService.GetBatchDetails("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();

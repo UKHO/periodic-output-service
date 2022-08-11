@@ -1,5 +1,4 @@
 ﻿using System.IO.Abstractions;
-using System.Text;
 using FakeItEasy;
 using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -53,17 +52,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakefileSystem.Directory.CreateDirectory(filePath))
                             .MustHaveHappenedOnceExactly();
-        }
-
-        [Test]
-        public void Does_ConvertStreamToByteArray_Returns_NotNull()
-        {
-            using (var test_Stream = new MemoryStream(Encoding.UTF8.GetBytes("whatever")))
-            {
-                byte[]? result = _fileSystemHelper.ConvertStreamToByteArray(test_Stream);
-
-                Assert.That(result, Is.Not.Null);
-            }
         }
     }
 }

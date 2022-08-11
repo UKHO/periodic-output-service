@@ -19,13 +19,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
         }
 
-        public byte[] ConvertStreamToByteArray(Stream input)
-        {
-            var ms = new MemoryStream();
-            input.CopyTo(ms);
-            return ms.ToArray();
-        }
-
         public void CreateFileCopy(string filePath, Stream stream)
         {
             if (stream != null)
