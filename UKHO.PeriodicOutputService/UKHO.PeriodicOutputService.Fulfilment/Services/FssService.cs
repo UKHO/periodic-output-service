@@ -39,7 +39,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime)))
+            FssBatchStatus[] breakBatchStatus = { FssBatchStatus.Failed, FssBatchStatus.Rolledback, FssBatchStatus.Deleted };
+
+            while (batchStatus != FssBatchStatus.Committed &&
+                        DateTime.UtcNow - startTime < TimeSpan.FromMinutes(double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime)))
             {
                 _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
@@ -49,7 +52,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                     FssBatchStatusResponseModel fssBatchStatusResponseModel = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                     Enum.TryParse(fssBatchStatusResponseModel?.Status, false, out batchStatus);
-                    if (batchStatus == FssBatchStatus.Committed)
+
+                    if (breakBatchStatus.Contains(batchStatus))
                     {
                         _logger.LogInformation(EventIds.FssBatchStatusPollingStopped.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} stopped | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                         break;
@@ -62,6 +66,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     throw new FulfilmentException(EventIds.GetBatchStatusRequestFailed.ToEventId());
                 }
             }
+
+            if (batchStatus != FssBatchStatus.Committed)
+            {
+                _logger.LogError(EventIds.GetBatchDetailRequestFailed.ToEventId(), "Fss batch status polling timed out for BatchID - {BatchID} failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.GetBatchDetailRequestFailed.ToEventId());
+            }
+
             _logger.LogInformation(EventIds.FssBatchStatusPollingCompleted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             return batchStatus;
         }

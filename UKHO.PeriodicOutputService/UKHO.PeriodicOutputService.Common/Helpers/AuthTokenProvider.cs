@@ -38,6 +38,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 _logger.LogInformation(EventIds.CachedAccessTokenFound.ToEventId(), "Valid access token found in cache to call external endpoint | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 return accessToken.AccessToken;
             }
+
             AccessTokenItem? newAccessToken = await GetNewAuthToken(resource);
             AddAuthTokenToCache(resource, newAccessToken);
 
@@ -75,12 +76,18 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             lock (_lock)
             {
                 _cache.SetString(key, JsonConvert.SerializeObject(accessTokenItem), options);
-                _logger.LogInformation(EventIds.CachingExternalEndPointTokenCompleted.ToEventId(), "New token is added in cache to call external endpoint and it expires in {ExpiresIn} with sliding expiration duration {options}.", Convert.ToString(accessTokenItem.ExpiresIn), JsonConvert.SerializeObject(options));
             }
+
+            _logger.LogInformation(EventIds.CachingExternalEndPointTokenCompleted.ToEventId(), "New token is added in cache to call external endpoint and it expires in {ExpiresIn} with sliding expiration duration {options}.", Convert.ToString(accessTokenItem.ExpiresIn), JsonConvert.SerializeObject(options));
         }
         private AccessTokenItem GetAuthTokenFromCache(string key)
         {
-            string? item = _cache.GetString(key);
+            string? item;
+
+            lock (_lock)
+            {
+                item = _cache.GetString(key);
+            }
             return item != null ? JsonConvert.DeserializeObject<AccessTokenItem>(item) : null;
         }
     }
