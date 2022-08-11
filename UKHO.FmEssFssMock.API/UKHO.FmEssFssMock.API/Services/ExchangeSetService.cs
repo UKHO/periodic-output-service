@@ -6,7 +6,6 @@ using UKHO.FmEssFssMock.API.Controllers;
 using UKHO.FmEssFssMock.API.Helpers;
 using UKHO.FmEssFssMock.API.Models.Request;
 using UKHO.FmEssFssMock.API.Models.Response;
-using UKHO.PeriodicOutputService.Common.Models.Request;
 
 namespace UKHO.FmEssFssMock.API.Services
 {
@@ -14,12 +13,18 @@ namespace UKHO.FmEssFssMock.API.Services
     {
         private readonly IOptions<ExchangeSetServiceConfiguration> _essConfiguration;
         private readonly FileShareServiceController _fssController;
+        private readonly FileShareService _fssService;
+        protected IConfiguration _configuration;
 
         public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,
-                                  FileShareServiceController fssController)
+                                  FileShareServiceController fssController,
+                                  FileShareService fssService,
+                                  IConfiguration configuration)
         {
             _essConfiguration = essConfiguration;
             _fssController = fssController;
+            _fssService = fssService;
+            _configuration = configuration;
         }
 
         public ExchangeSetServiceResponse CreateExchangeSet(string[] productIdentifiers)
@@ -27,18 +32,18 @@ namespace UKHO.FmEssFssMock.API.Services
             string productIdentifiersPattern = "productIdentifier-" + string.Join("-", productIdentifiers);
             CreateBatchRequest batchRequest = CreateBatchRequestModel();
 
-            var result = _fssController.CreateBatch(batchRequest);
+            BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _configuration["HOME"]);
 
-            if (true)
+            if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
             {
-                string path = Path.Combine(Environment.CurrentDirectory, @"Data", "2270F318-639C-4E64-A0C0-CADDD5F4EB05");
+                string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
                 foreach (var fileName in Directory.GetFiles(path))
                 {
                     FileInfo file = new FileInfo(fileName);
 
-                    var addFileResponse = _fssController.AddFileToBatch("2270F318-639C-4E64-A0C0-CADDD5F4EB05", file.Name, "application/octet-stream", file.Length, new FileRequest());
+                    bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _configuration["HOME"]);
 
-                    if (false)
+                    if (!isFileAdded)
                     {
                         return null;
                     }
@@ -75,20 +80,6 @@ namespace UKHO.FmEssFssMock.API.Services
             };
 
             return createBatchRequest;
-        }
-
-        private AddFileRequest CreateAddFileRequestModel()
-        {
-            AddFileRequest addFileToBatchRequestModel = new()
-            {
-                Attributes = new List<KeyValuePair<string, string>>()
-                {
-                    new KeyValuePair<string, string>("Exchange Set Type", "Base"),
-                    new KeyValuePair<string, string>("Media Type", "DVD"),
-                    new KeyValuePair<string, string>("Product Type", "AVCS")
-                }
-            };
-            return addFileToBatchRequestModel;
         }
     }
 }
