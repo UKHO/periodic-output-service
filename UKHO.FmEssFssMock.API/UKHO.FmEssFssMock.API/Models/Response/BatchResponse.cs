@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace UKHO.FmEssFssMock.API.Models.Response
+﻿namespace UKHO.FmEssFssMock.API.Models.Response
 {
     public class BatchResponse
     {

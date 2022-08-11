@@ -12,10 +12,10 @@ namespace UKHO.FmEssFssMock.API.Controllers
     [ApiController]
     public class FleetManagerController : ControllerBase
     {
-        private readonly IOptions<FleetManagerConfiguration> _fmConfiguration;
+        private readonly IOptions<FleetManagerB2BApiConfiguration> _fmConfiguration;
         private const string _jwtUnpAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
 
-        public FleetManagerController(IOptions<FleetManagerConfiguration> fmConfiguration)
+        public FleetManagerController(IOptions<FleetManagerB2BApiConfiguration> fmConfiguration)
         {
             _fmConfiguration = fmConfiguration;
         }
@@ -78,7 +78,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public IActionResult GetCatalogue([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             string? fleetManagerStubSubscriptionKey = _fmConfiguration.Value.SubscriptionKey;
-            string? path = _fmConfiguration.Value.WebJobAVCSCatalogDataFilePath;
+            string? path = _fmConfiguration.Value.GetCatalogueResponseFilePath;
             HttpResponseMessage httpResponse = new();
 
             if (string.IsNullOrEmpty(subscriptionKey))
@@ -182,7 +182,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public IActionResult GetCatalogueForFT([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             string? fleetManagerStubSubscriptionKey = _fmConfiguration.Value.SubscriptionKey;
-            string? path = _fmConfiguration.Value.FunctionalTestAVCSCatalogDataFilePath;
+            string? path = _fmConfiguration.Value.GetCatalogueResponseFilePath;
             HttpResponseMessage httpResponse = new();
 
             if (string.IsNullOrEmpty(subscriptionKey))
@@ -226,6 +226,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
             return Unauthorized();
         }
+
         [NonAction]
         public static string GetBase64EncodedCredentials(string? userName, string? password)
         {

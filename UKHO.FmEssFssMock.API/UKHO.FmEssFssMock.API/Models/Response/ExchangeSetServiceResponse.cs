@@ -2,7 +2,6 @@
 
 namespace UKHO.FmEssFssMock.API.Models.Response
 {
-
     public class ExchangeSetServiceResponse
     {
         public string? Id { get; set; }

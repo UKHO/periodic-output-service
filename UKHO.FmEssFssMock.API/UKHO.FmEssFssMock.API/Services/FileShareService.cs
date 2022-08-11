@@ -1,19 +1,10 @@
-﻿using Microsoft.Extensions.Options;
-using UKHO.FmEssFssMock.API.Common;
-using UKHO.FmEssFssMock.API.Helpers;
+﻿using UKHO.FmEssFssMock.API.Helpers;
 using UKHO.FmEssFssMock.API.Models.Response;
 
 namespace UKHO.FmEssFssMock.API.Services
 {
     public class FileShareService
     {
-        private readonly IOptions<FileShareServiceConfiguration> _fssConfiguration;
-
-        public FileShareService(IOptions<FileShareServiceConfiguration> fssConfiguration)
-        {
-            _fssConfiguration = fssConfiguration;
-        }
-
         public BatchResponse CreateBatch(IEnumerable<KeyValuePair<string, string>> attributes, string homeDirectoryPath)
         {
             string batchId = string.Empty;

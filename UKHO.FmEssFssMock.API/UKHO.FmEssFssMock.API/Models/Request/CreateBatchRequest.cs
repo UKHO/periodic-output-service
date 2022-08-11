@@ -3,11 +3,8 @@
     public class CreateBatchRequest
     {
         public string BusinessUnit { get; set; }
-
         public Acl Acl { get; set; }
-
         public IEnumerable<KeyValuePair<string, string>> Attributes { get; set; }
-
         public string ExpiryDate { get; set; }
     }
 

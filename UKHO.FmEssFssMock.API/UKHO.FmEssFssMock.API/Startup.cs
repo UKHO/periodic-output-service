@@ -1,8 +1,6 @@
 ﻿using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Filters;
 using UKHO.FmEssFssMock.API.Services;
-using UKHO.FmEssFssMock.API.Controllers;
-using UKHO.FmEssFssMock.API.Helpers;
 
 namespace UKHO.FmEssFssMock.API
 {
@@ -26,16 +24,11 @@ namespace UKHO.FmEssFssMock.API
             });
             services.AddControllers(o => o.InputFormatters.Insert(0, new BinaryRequestBodyFormatter()));
 
-            services.Configure<FleetManagerConfiguration>(Configuration.GetSection("FleetManagerConfiguration"));
-            services.Configure<FileShareServiceConfiguration>(Configuration.GetSection("FileShareServiceConfiguration"));
+            services.Configure<FleetManagerB2BApiConfiguration>(Configuration.GetSection("FleetManagerB2BApiConfiguration"));            
             services.Configure<ExchangeSetServiceConfiguration>(Configuration.GetSection("ExchangeSetServiceConfiguration"));
 
             services.AddScoped<FileShareService>();
             services.AddScoped<ExchangeSetService>();
-
-            services.AddScoped<FssApiClient>();
-
-            services.AddScoped<FileShareServiceController>();
 
             services.AddHttpClient();
         }

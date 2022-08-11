@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
-using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Models.Request;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
@@ -12,19 +10,21 @@ using UKHO.FmEssFssMock.API.Services;
 namespace UKHO.FmEssFssMock.API.Controllers
 {
     [ApiController]
-    public class FileShareServiceController : BaseController
+    public class _fileShareServiceController : BaseController
     {
-        private readonly FileShareService fileShareService;
+        private readonly FileShareService _fileShareService;
+
+        private readonly IConfiguration _configuration;
         public Dictionary<string, string> ErrorsCreateBatch { get; set; }
         public Dictionary<string, string> ErrorsPutBlocksInFile { get; set; }
         public Dictionary<string, string> ErrorsCommitBatch { get; set; }
         public Dictionary<string, string> ErrorsAddFileinBatch { get; set; }
-        protected IConfiguration configuration;
-        private readonly IOptions<FileShareServiceConfiguration> fileShareServiceConfiguration;
 
-        public FileShareServiceController(IHttpContextAccessor httpContextAccessor, FileShareService fileShareService, IConfiguration configuration, IOptions<FileShareServiceConfiguration> fileShareServiceConfiguration) : base(httpContextAccessor)
+
+        public _fileShareServiceController(IHttpContextAccessor httpContextAccessor, FileShareService fileShareService, IConfiguration configuration) : base(httpContextAccessor)
         {
-            this.fileShareService = fileShareService;
+            _fileShareService = fileShareService;
+
             ErrorsCreateBatch = new Dictionary<string, string>
             {
                 { "source", "RequestBody" },
@@ -45,8 +45,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 { "source","FileError" },
                 { "description","Error while creating file" }
             };
-            this.configuration = configuration;
-            this.fileShareServiceConfiguration = fileShareServiceConfiguration;
+            _configuration = configuration;            
         }
 
         [HttpPost]
@@ -55,7 +54,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (batchRequest != null && !string.IsNullOrEmpty(batchRequest.BusinessUnit))
             {
-                var response = fileShareService.CreateBatch(batchRequest.Attributes, configuration["HOME"]);
+                var response = _fileShareService.CreateBatch(batchRequest.Attributes, _configuration["HOME"]);
                 if (response != null)
                 {
                     return Created(string.Empty, response);
@@ -70,7 +69,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId))
             {
-                BatchDetail response = fileShareService.GetBatchDetails(batchId);
+                BatchDetail response = _fileShareService.GetBatchDetails(batchId);
                 if (response != null)
                 {
                     return Ok(response);
@@ -87,7 +86,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                bytes = fileShareService.GetFileData(configuration["HOME"], batchId, fileName);
+                bytes = _fileShareService.GetFileData(_configuration["HOME"], batchId, fileName);
             }
 
             return File(bytes, "application/octet-stream", fileName);
@@ -106,7 +105,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId) && data != null && !string.IsNullOrEmpty(blockId))
             {
-                var response = fileShareService.UploadBlockOfFile(batchId, configuration["HOME"], fileName);
+                var response = _fileShareService.UploadBlockOfFile(batchId, _configuration["HOME"], fileName);
                 if (response)
                 {
                     return StatusCode((int)HttpStatusCode.Created);
@@ -125,7 +124,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(fileName) && payload != null)
             {
-                var response = fileShareService.CheckBatchWithFileExist(batchId, fileName, configuration["HOME"]);
+                var response = _fileShareService.CheckBatchWithFileExist(batchId, fileName, _configuration["HOME"]);
                 if (response)
                 {
                     return StatusCode((int)HttpStatusCode.NoContent);
@@ -142,7 +141,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId) && body != null)
             {
-                var response = fileShareService.CheckBatchWithFileExist(batchId, body.Select(a => a.FileName).FirstOrDefault(), configuration["HOME"]);
+                var response = _fileShareService.CheckBatchWithFileExist(batchId, body.Select(a => a.FileName).FirstOrDefault(), _configuration["HOME"]);
                 if (response)
                 {
                     return Accepted(new BatchCommitResponse() { Status = new Status { URI = $"/batch/{batchId}/status" } });
@@ -164,7 +163,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId))
             {
-                var response = fileShareService.AddFile(batchId, fileName, configuration["HOME"]);
+                var response = _fileShareService.AddFile(batchId, fileName, _configuration["HOME"]);
                 if (response)
                 {
                     return StatusCode(StatusCodes.Status201Created);
@@ -180,7 +179,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId))
             {
-                BatchStatusResponse batchStatusResponse = fileShareService.GetBatchStatus(batchId, configuration["HOME"]);
+                BatchStatusResponse batchStatusResponse = _fileShareService.GetBatchStatus(batchId, _configuration["HOME"]);
                 if (batchStatusResponse.Status == "Committed")
                 {
                     return new OkObjectResult(batchStatusResponse);
@@ -195,7 +194,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (batchId != null && batchId.Count > 0)
             {
-                var response = fileShareService.CleanUp(batchId, configuration["HOME"]);
+                var response = _fileShareService.CleanUp(batchId, _configuration["HOME"]);
                 if (response)
                 {
                     return Ok();

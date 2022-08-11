@@ -2,12 +2,12 @@
 {
     public class InvalidUsernamePasswordResponse
     {
-        public string? correlationId { get; set; }
-        public IEnumerable<InvalidUsernamePasswordErrors>? errors { get; set; }
+        public string? CorrelationId { get; set; }
+        public IEnumerable<InvalidUsernamePasswordErrors>? Errors { get; set; }
     }
     public class InvalidUsernamePasswordErrors
     {
-        public string? source { get; set; }
-        public string? description { get; set; }
+        public string? Source { get; set; }
+        public string? Description { get; set; }
     }
 }

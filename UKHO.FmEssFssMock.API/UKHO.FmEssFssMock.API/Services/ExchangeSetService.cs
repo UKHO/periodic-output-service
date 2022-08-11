@@ -1,8 +1,6 @@
 ﻿using System.Globalization;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using UKHO.FmEssFssMock.API.Common;
-using UKHO.FmEssFssMock.API.Controllers;
 using UKHO.FmEssFssMock.API.Helpers;
 using UKHO.FmEssFssMock.API.Models.Request;
 using UKHO.FmEssFssMock.API.Models.Response;
@@ -11,18 +9,15 @@ namespace UKHO.FmEssFssMock.API.Services
 {
     public class ExchangeSetService
     {
-        private readonly IOptions<ExchangeSetServiceConfiguration> _essConfiguration;
-        private readonly FileShareServiceController _fssController;
+        private readonly IOptions<ExchangeSetServiceConfiguration> _essConfiguration;        
         private readonly FileShareService _fssService;
         protected IConfiguration _configuration;
 
-        public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,
-                                  FileShareServiceController fssController,
+        public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,                                  
                                   FileShareService fssService,
                                   IConfiguration configuration)
         {
-            _essConfiguration = essConfiguration;
-            _fssController = fssController;
+            _essConfiguration = essConfiguration;            
             _fssService = fssService;
             _configuration = configuration;
         }
@@ -55,7 +50,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private ExchangeSetServiceResponse GetProductIdentifier(string productIdentifiers)
         {
-            List<ExchangeSetServiceResponse>? responseData = FileHelper.ReadJsonFile<List<ExchangeSetServiceResponse>>(_essConfiguration.Value.FileDirectoryPath + _essConfiguration.Value.EssResponseFile);
+            List<ExchangeSetServiceResponse>? responseData = FileHelper.ReadJsonFile<List<ExchangeSetServiceResponse>>(_essConfiguration.Value.EssDataDirectoryPath + _essConfiguration.Value.PostProductIdentifiersResponseFileName);
             ExchangeSetServiceResponse? selectedProductIdentifier = responseData?.FirstOrDefault(a => a.Id.ToLowerInvariant() == productIdentifiers.ToLowerInvariant());
             selectedProductIdentifier.ResponseBody.ExchangeSetUrlExpiryDateTime = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
             return selectedProductIdentifier;

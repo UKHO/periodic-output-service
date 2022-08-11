@@ -2,7 +2,7 @@
 {
     public class ExchangeSetServiceConfiguration
     {
-        public string? FileDirectoryPath { get; set; }
-        public string? EssResponseFile { get; set; }
+        public string? EssDataDirectoryPath { get; set; }
+        public string? PostProductIdentifiersResponseFileName { get; set; }
     }
 }
