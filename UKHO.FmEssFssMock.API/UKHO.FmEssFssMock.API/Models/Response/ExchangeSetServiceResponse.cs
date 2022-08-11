@@ -11,7 +11,7 @@ namespace UKHO.FmEssFssMock.API.Models.Response
     public class ExchangeSetResponse
     {
         [JsonProperty("_links")]
-        public BatchLinks? Links { get; set; }
+        public BatchLinks? _links { get; set; }
 
         [JsonProperty("exchangeSetUrlExpiryDateTime")]
         public string? ExchangeSetUrlExpiryDateTime { get; set; }
