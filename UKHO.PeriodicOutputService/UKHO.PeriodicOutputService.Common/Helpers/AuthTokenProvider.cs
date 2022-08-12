@@ -70,8 +70,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             double tokenExpiryMinutes = accessTokenItem.ExpiresIn.Subtract(DateTime.UtcNow).TotalMinutes;
             double deductTokenExpiryMinutes = _essManagedIdentityConfiguration.Value.DeductTokenExpiryMinutes < tokenExpiryMinutes ? _essManagedIdentityConfiguration.Value.DeductTokenExpiryMinutes : 1;
-            DistributedCacheEntryOptions? options = new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(tokenExpiryMinutes - deductTokenExpiryMinutes));
-            options.SetAbsoluteExpiration(accessTokenItem.ExpiresIn);
+            DistributedCacheEntryOptions? options = new DistributedCacheEntryOptions();
+            options.SetAbsoluteExpiration(accessTokenItem.ExpiresIn.Subtract(TimeSpan.FromMinutes(deductTokenExpiryMinutes)));
 
             lock (_lock)
             {
