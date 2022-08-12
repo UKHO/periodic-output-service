@@ -62,6 +62,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     _fileSystemHelper.CreateDirectory(downloadPath);
 
                     DownloadFiles(files, downloadPath);
+
+                    ExtractExchangeSetZip(files, downloadPath);
+
+                    CreateIsoAndSha1ForExchangeSet(files, downloadPath);
+
                 }
                 else
                 {
@@ -127,6 +132,39 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 string filePath = Path.Combine(downloadPath, file.FileName);
                 Stream stream = _fssService.DownloadFile(downloadPath, file.FileName, file.FileLink).Result;
                 _fileSystemHelper.CreateFileCopy(filePath, stream);
+            });
+        }
+
+        private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
+        {
+            Parallel.ForEach(fileDetails, file =>
+            {
+                try
+                {
+                    _fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, ex.Message, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    throw;
+                }
+            });
+        }
+
+        private void CreateIsoAndSha1ForExchangeSet(List<FssBatchFile> fileDetails, string downloadPath)
+        {
+            Parallel.ForEach(fileDetails, file =>
+            {
+                try
+                {
+                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+                    _fileSystemHelper.CreateIsoAndSha1(Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension));
+                }
+                catch (Exception)
+                {
+                    _logger.LogError("Create ISO and SHA1 failed");
+                    throw;
+                }
             });
         }
     }
