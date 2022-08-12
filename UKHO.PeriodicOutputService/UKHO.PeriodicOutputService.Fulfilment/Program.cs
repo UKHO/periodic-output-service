@@ -151,6 +151,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                 serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+                serviceCollection.AddSingleton<IConfiguration>(configuration);
             }
 
             var essAzureADConfiguration = new EssApiConfiguration();
@@ -158,7 +159,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
             serviceCollection.AddDistributedMemoryCache();
 
-            serviceCollection.AddSingleton<IConfiguration>(configuration);
             serviceCollection.AddTransient<PosFulfilmentJob>();
 
             serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
