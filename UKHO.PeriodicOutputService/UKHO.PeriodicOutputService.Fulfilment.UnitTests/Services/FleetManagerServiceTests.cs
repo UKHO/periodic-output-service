@@ -4,6 +4,7 @@ using FakeItEasy;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
@@ -54,7 +55,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public async Task DoesGetJwtAuthUnpToken_Returns_403_WhenInvalidCredentialsPassed()
+        public void DoesGetJwtAuthUnpToken_Returns_403_WhenInvalidCredentialsPassed()
         {
             A.CallTo(() => _fakeFleetManagerClient.GetJwtAuthUnpToken(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -67,12 +68,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("Forbidden")))
                 });
 
-            FleetMangerGetAuthTokenResponseModel result = await _fleetManagerService.GetJwtAuthUnpToken();
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
-                Assert.That(result.AuthToken, Is.Empty);
-            });
+
+            Assert.ThrowsAsync<FulfilmentException>(
+            () => _fleetManagerService.GetJwtAuthUnpToken());
+
+
+            A.CallTo(_fakeLogger).Where(call =>
+          call.Method.Name == "Log"
+          && call.GetArgument<LogLevel>(0) == LogLevel.Error
+          && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to get auth token from fleet manager at {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+          ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -99,7 +104,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public async Task DoesGetCatalogue_Returns_403_WhenInvalidAccessTokenPassed()
+        public void DoesGetCatalogue_Returns_403_WhenInvalidAccessTokenPassed()
         {
             A.CallTo(() => _fakeFleetManagerClient.GetCatalogue(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -112,12 +117,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("Forbidden")))
                 });
 
-            FleetManagerGetCatalogueResponseModel result = await _fleetManagerService.GetCatalogue("InvalidJwtAuthJwtAccessToken");
-            Assert.Multiple(() =>
-            {
-                Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
-                Assert.That(result.ProductIdentifiers, Is.Empty);
-            });
+            Assert.ThrowsAsync<FulfilmentException>(
+              () => _fleetManagerService.GetCatalogue("InvalidJwtAuthJwtAccessToken"));
+
+            A.CallTo(_fakeLogger).Where(call =>
+          call.Method.Name == "Log"
+          && call.GetArgument<LogLevel>(0) == LogLevel.Error
+          && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to get catalogue from fleet manager | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+          ).MustHaveHappenedOnceExactly();
+
         }
     }
 }

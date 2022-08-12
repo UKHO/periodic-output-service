@@ -35,6 +35,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public bool IsRunningOnLocalMachine { get; set; }
             public string BatchStatusPollingCutoffTime { get; set; }
             public string BatchStatusPollingDelayTime { get; set; }
+            public int BatchCommitWaitTime { get; set; }
 
         }
 
