@@ -219,7 +219,31 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809053 -  Fss batch status polling completed.
         /// </summary>
-        FssBatchStatusPollingTimedOut = 809053
+        FssBatchStatusPollingTimedOut = 809053,
+        /// <summary>
+        /// 809054 - extracting zip file started
+        /// </summary>
+        ExtractZipFileStarted = 809054,
+        /// <summary>
+        /// 809055 - extracting zip file failed
+        /// </summary>
+        ExtractZipFileFailed = 809055,
+        /// <summary>
+        /// 809056 - extracting zip file completed
+        /// </summary>
+        ExtractZipFileCompleted = 809056,
+        /// <summary>
+        /// 809057 - creating iso and sha1 file started
+        /// </summary>
+        CreateIsoAndSha1Started = 809057,
+        /// <summary>
+        /// 809058 - creating iso and sha1 file failed
+        /// </summary>
+        CreateIsoAndSha1Failed = 809058,
+        /// <summary>
+        /// 809059 - creating iso and sha1 file completed
+        /// </summary>
+        CreateIsoAndSha1Completed = 809059,
     }
 
     public static class EventIdExtensions
