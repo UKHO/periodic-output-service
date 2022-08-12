@@ -42,7 +42,7 @@ namespace UKHO.FmEssFssMock.API.Services
         public BatchDetail GetBatchDetails(string batchId)
         {
             string path = Path.Combine(Environment.CurrentDirectory, @"Data", batchId);
-            List<BatchFile> files = new List<BatchFile>();
+            List<BatchFile> files = new();
 
             foreach (var filePath in Directory.GetFiles(path))
             {
@@ -56,7 +56,7 @@ namespace UKHO.FmEssFssMock.API.Services
             };
         }
 
-        public byte[] GetFileData(string homeDirectoryPath, string batchId, string fileName)
+        public byte[]? GetFileData(string homeDirectoryPath, string batchId, string fileName)
         {
             byte[] bytes = null;
             var filePath = Path.Combine(homeDirectoryPath, batchId, fileName);
@@ -65,6 +65,7 @@ namespace UKHO.FmEssFssMock.API.Services
             {
                 bytes = File.ReadAllBytes(filePath);
             }
+
             return bytes;
         }
 
@@ -97,7 +98,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
         public BatchStatusResponse GetBatchStatus(string batchId, string homeDirectoryPath)
         {
-            BatchStatusResponse batchStatusResponse = new BatchStatusResponse();
+            BatchStatusResponse batchStatusResponse = new();
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
 
             if (FileHelper.ValidateFilePath(batchFolderPath) && FileHelper.CheckFolderExists(batchFolderPath))

@@ -13,7 +13,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
     public class FleetManagerController : ControllerBase
     {
         private readonly IOptions<FleetManagerB2BApiConfiguration> _fmConfiguration;
-        private const string _jwtUnpAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+        private const string JwtUnpAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
 
         public FleetManagerController(IOptions<FleetManagerB2BApiConfiguration> fmConfiguration)
         {
@@ -92,7 +92,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
             }
             if (subscriptionKey == fleetManagerStubSubscriptionKey)
             {
-                if (token == _jwtUnpAuthToken && !string.IsNullOrEmpty(path))
+                if (token == JwtUnpAuthToken && !string.IsNullOrEmpty(path))
                 {
                     XDocument doc = XDocument.Load(path);
                     Encoding encoding = Encoding.UTF8;
@@ -196,7 +196,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
             }
             if (subscriptionKey == fleetManagerStubSubscriptionKey)
             {
-                if (token == _jwtUnpAuthToken && !string.IsNullOrEmpty(path))
+                if (token == JwtUnpAuthToken && !string.IsNullOrEmpty(path))
                 {
                     XDocument doc = XDocument.Load(path);
                     Encoding encoding = Encoding.UTF8;
