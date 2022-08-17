@@ -295,14 +295,14 @@ stages:
             inputs:
               targetType: filePath
               filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
-              arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.FleetManagerMock.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
+              arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
 
           - task: UseDotNet@2
             displayName: 'Use .NET Core 6.0.x sdk'
             inputs:
               packageType: sdk
               useGlobalJson: true
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FleetManagerMock.API'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API'
 
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore"
@@ -313,22 +313,22 @@ stages:
               feedsToUse: config
               noCache: true
               nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FleetManagerMock.API'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API'
 
           - task: DotNetCoreCLI@2
             displayName: "dotnet build task"
             inputs:
               command: "build"
-              projects: "**/*UKHO.FleetManagerMock.API.csproj"
+              projects: "**/*UKHO.FmEssFssMock.API.csproj"
               arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FleetManagerMock.API'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API'
 
           - task: DotNetCoreCLI@2
             displayName: "Publish MockWebAPI"
             inputs:
               command: "publish"
               publishWebProjects: false
-              projects: '**/*UKHO.FleetManagerMock.API.csproj'
+              projects: '**/*UKHO.FmEssFssMock.API.csproj'
               arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\MockWebAPI'
               zipAfterPublish: true
               modifyOutputPath: true
