@@ -7,7 +7,7 @@
         public IEnumerable<Attribute> Attributes { get; set; }
         public string BusinessUnit { get; set; }
         public DateTime? BatchPublishedDate { get; set; }
-        public DateTime? ExpiryDate { get; set; }
+        public string ExpiryDate { get; set; }
         public IEnumerable<BatchFile> Files { get; set; }
     }
 }

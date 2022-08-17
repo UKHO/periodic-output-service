@@ -19,5 +19,26 @@
             "requestedProductsAlreadyUpToDateCount": 0,
             "requestedProductsNotInExchangeSet": []
         }
+    },
+    {
+        "id": "sincedatetime",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90FCDFA0-8229-43D5-B059-172491E5402B/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90FCDFA0-8229-43D5-B059-172491E5402B"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90FCDFA0-8229-43D5-B059-172491E5402B/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 10,
+            "exchangeSetCellCount": 10,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
     }
 ]

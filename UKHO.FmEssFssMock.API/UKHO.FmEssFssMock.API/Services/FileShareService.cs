@@ -1,5 +1,7 @@
-﻿using UKHO.FmEssFssMock.API.Helpers;
+﻿using System.Globalization;
+using UKHO.FmEssFssMock.API.Helpers;
 using UKHO.FmEssFssMock.API.Models.Response;
+using UKHO.FmEssFssMock.Enums;
 
 namespace UKHO.FmEssFssMock.API.Services
 {
@@ -13,23 +15,32 @@ namespace UKHO.FmEssFssMock.API.Services
             {
                 case true when attributes.Any(a => a.Key.ToLower() == "exchange set type" && a.Value.ToLower() == "base") &&
                                attributes.Any(a => a.Key.ToLower() == "media type" && a.Value.ToLower() == "dvd"):
-                    batchId = "F9523D33-EF12-4CC1-969D-8A95F094A48B";
+                    batchId = EnumHelper.GetEnumDescription(BatchId.PosFullAvcsIsoSha1Batch);
                     break;
                 case true when attributes.Any(a => a.Key.ToLower() == "exchange set type" && a.Value.ToLower() == "base") &&
                                attributes.Any(a => a.Key.ToLower() == "media type" && a.Value.ToLower() == "zip"):
-                    batchId = "483AA1B9-8A3B-49F2-BAE9-759BB93B04D1";
+                    batchId = EnumHelper.GetEnumDescription(BatchId.PosFullAvcsZipBatch);
                     break;
                 case true when attributes.Any(a => a.Key.ToLower() == "exchange set type" && a.Value.ToLower() == "update") &&
                                attributes.Any(a => a.Key.ToLower() == "media type" && a.Value.ToLower() == "zip") &&
-                               attributes.Any(a => a.Key.ToLower() == "test" && a.Value.ToLower() == "test"):
-                    batchId = "90FCDFA0-8229-43D5-B059-172491E5402B";
+                               attributes.Any(a => a.Key.ToLower() == "product type" && a.Value.ToLower() == "updateavcs"):
+                    batchId = EnumHelper.GetEnumDescription(BatchId.EssUpdateBatch);
+                    break;
+                case true when attributes.Any(a => a.Key.ToLower() == "exchange set type" && a.Value.ToLower() == "update") &&
+                               attributes.Any(a => a.Key.ToLower() == "media type" && a.Value.ToLower() == "zip") &&
+                               attributes.Any(a => a.Key.ToLower() == "product type" && a.Value.ToLower() == "fullavcs"):
+                    batchId = EnumHelper.GetEnumDescription(BatchId.EssFullAvcsBatch);
+                    break;
+                case true when attributes.Any(a => a.Key.ToLower() == "catalogue type" && a.Value.ToLower() == "enc updates") &&
+                               attributes.Any(a => a.Key.ToLower() == "content" && a.Value.ToLower() == "catalogue"):
+                    batchId = EnumHelper.GetEnumDescription(BatchId.PosEncUpdatesFileBatch);
                     break;
                 case true when attributes.Any(a => a.Key.ToLower() == "catalogue type" && a.Value.ToLower() == "xml") &&
                                attributes.Any(a => a.Key.ToLower() == "content" && a.Value.ToLower() == "catalogue"):
-                    batchId = "BECE0A26-867C-4EA6-8ECE-98AFA246A00E";
+                    batchId = EnumHelper.GetEnumDescription(BatchId.PosFmCatalogueFileBatch);
                     break;
                 default:
-                    batchId = "2270F318-639C-4E64-A0C0-CADDD5F4EB05";
+                    batchId = EnumHelper.GetEnumDescription(BatchId.PosUpdateZipBatch);
                     break;
             }
 
@@ -41,7 +52,11 @@ namespace UKHO.FmEssFssMock.API.Services
 
         public BatchDetail GetBatchDetails(string batchId)
         {
+            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
+            int currentWeek = cultureInfo.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
+            string currentYear = DateTime.UtcNow.Year.ToString();
             string path = Path.Combine(Environment.CurrentDirectory, @"Data", batchId);
+
             List<BatchFile> files = new();
 
             foreach (var filePath in Directory.GetFiles(path))
@@ -49,11 +64,35 @@ namespace UKHO.FmEssFssMock.API.Services
                 string fileName = Path.GetFileName(filePath);
                 files.Add(new BatchFile() { Filename = fileName, Links = new Links() { Get = new Link() { Href = "/batch/" + batchId + "/files/" + fileName } } });
             }
+
+            List<Models.Response.Attribute> attributes = new();
+
+            attributes.Add(new Models.Response.Attribute { Key = "Exchange Set Type", Value = "Base" });
+            attributes.Add(new Models.Response.Attribute { Key = "Media Type", Value = GetMediaType(batchId) });
+            attributes.Add(new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" });
+            attributes.Add(new Models.Response.Attribute { Key = "S63 Version", Value = "1.2" });
+            attributes.Add(new Models.Response.Attribute { Key = "Week Number", Value = currentWeek.ToString() });
+            attributes.Add(new Models.Response.Attribute { Key = "Year", Value = currentYear });
+            attributes.Add(new Models.Response.Attribute { Key = "Year / Week", Value = currentYear + " / " + currentWeek.ToString() });
+
             return new BatchDetail
             {
                 BatchId = batchId,
+                Status = "Committed",
+                BusinessUnit = (batchId.ToLower() == EnumHelper.GetEnumDescription(BatchId.EssFullAvcsBatch) || batchId.ToLower() == EnumHelper.GetEnumDescription(BatchId.EssUpdateBatch)) ? "AVCSCustomExchangeSets" : "AVCSData",
+                ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Attributes = attributes,
                 Files = files
             };
+        }
+
+        private string GetMediaType(string batchId)
+        {
+            if (batchId.ToLower() == EnumHelper.GetEnumDescription(BatchId.EssFullAvcsBatch) ||
+               batchId.ToLower() == EnumHelper.GetEnumDescription(BatchId.PosFullAvcsZipBatch))
+                return "Zip";
+            else
+                return "DVD";
         }
 
         public byte[]? GetFileData(string homeDirectoryPath, string batchId, string fileName)

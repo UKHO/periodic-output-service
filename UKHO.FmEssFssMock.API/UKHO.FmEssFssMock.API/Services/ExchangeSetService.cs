@@ -22,10 +22,9 @@ namespace UKHO.FmEssFssMock.API.Services
             _configuration = configuration;
         }
 
-        public ExchangeSetServiceResponse CreateExchangeSet(string[] productIdentifiers)
+        public ExchangeSetServiceResponse CreateExchangeSetForGetProductDataSinceDateTime(string sinceDateTime)
         {
-            string productIdentifiersPattern = "productIdentifier-" + string.Join("-", productIdentifiers);
-            CreateBatchRequest batchRequest = CreateBatchRequestModel();
+            CreateBatchRequest batchRequest = CreateBatchRequestModel(false);
 
             BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _configuration["HOME"]);
 
@@ -43,20 +42,48 @@ namespace UKHO.FmEssFssMock.API.Services
                         return null;
                     }
                 }
-                return GetProductIdentifier(productIdentifiersPattern);
+                return GetEssResponse("sincedatetime");
             }
             return null;
         }
 
-        private ExchangeSetServiceResponse GetProductIdentifier(string productIdentifiers)
+
+        public ExchangeSetServiceResponse CreateExchangeSetForPostProductIdentifier(string[] productIdentifiers)
+        {
+            string productIdentifiersPattern = "productIdentifier-" + string.Join("-", productIdentifiers);
+            CreateBatchRequest batchRequest = CreateBatchRequestModel(true);
+
+            BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _configuration["HOME"]);
+
+            if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
+            {
+                string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
+                foreach (var fileName in Directory.GetFiles(path))
+                {
+                    FileInfo file = new FileInfo(fileName);
+
+                    bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _configuration["HOME"]);
+
+                    if (!isFileAdded)
+                    {
+                        return null;
+                    }
+                }
+                return GetEssResponse(productIdentifiersPattern);
+            }
+            return null;
+        }
+
+        
+        private ExchangeSetServiceResponse GetEssResponse(string responseId)
         {
             List<ExchangeSetServiceResponse>? responseData = FileHelper.ReadJsonFile<List<ExchangeSetServiceResponse>>(_essConfiguration.Value.EssDataDirectoryPath + _essConfiguration.Value.PostProductIdentifiersResponseFileName);
-            ExchangeSetServiceResponse? selectedProductIdentifier = responseData?.FirstOrDefault(a => a.Id.ToLowerInvariant() == productIdentifiers.ToLowerInvariant());
+            ExchangeSetServiceResponse? selectedProductIdentifier = responseData?.FirstOrDefault(a => a.Id.ToLowerInvariant() == responseId.ToLowerInvariant());
             selectedProductIdentifier.ResponseBody.ExchangeSetUrlExpiryDateTime = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
             return selectedProductIdentifier;
         }
 
-        private CreateBatchRequest CreateBatchRequestModel()
+        private CreateBatchRequest CreateBatchRequestModel(bool isPostProductIdentifiersRequest)
         {
             CreateBatchRequest createBatchRequest = new()
             {
@@ -65,7 +92,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 {
                     new KeyValuePair<string, string>("Exchange Set Type", "Update"),
                     new KeyValuePair<string, string>("Media Type", "Zip"),
-                    new KeyValuePair<string, string>("Product Type", "AVCS")
+                    new KeyValuePair<string, string>("Product Type", isPostProductIdentifiersRequest == true ? "FullAVCS" : "UpdateAVCS")
                 },
                 ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl()

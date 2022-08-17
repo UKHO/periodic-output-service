@@ -24,6 +24,9 @@
     <None Update="Data\2270F318-639C-4E64-A0C0-CADDD5F4EB05\M02X02.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\D3871589-C0EA-4967-8537-63089E2398AF\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\FM\avcs_catalog_ft.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

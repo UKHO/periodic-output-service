@@ -13,6 +13,21 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             _exchangeSetService = exchangeSetService;
         }
+        [HttpPost]
+        [Route("/ess/productData")]
+        public IActionResult GetProductDataSinceDateTime([FromQuery] string sinceDateTime)
+        {
+            if (!string.IsNullOrEmpty(sinceDateTime))
+            {
+                ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForGetProductDataSinceDateTime(sinceDateTime);
+                if (response == null)
+                {
+                    return BadRequest();
+                }
+                return Ok(response.ResponseBody);
+            }
+            return BadRequest();
+        }
 
         [HttpPost]
         [Route("/ess/productData/productIdentifiers")]
@@ -20,7 +35,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (productIdentifiers != null && productIdentifiers.Any())
             {
-                ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSet(productIdentifiers);
+                ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductIdentifier(productIdentifiers);
                 if (response == null)
                 {
                     return BadRequest();
