@@ -35,8 +35,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<string> CreatePosExchangeSets()
         {
+            string sinceDateTime = DateTime.UtcNow.AddDays(-7).ToString("R");
+
             var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet());
+            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
 
             await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
             return "success";
@@ -76,11 +78,38 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
         }
 
-        private async Task CreateUpdateExchangeSet()
+        private async Task CreateUpdateExchangeSet(string sinceDateTime)
         {
-            await Task.CompletedTask;
-        }
+            _logger.LogInformation(EventIds.UpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange for SinceDateTime - {SinceDateTime} set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
+            string essBatchId = await GetProductDataSinceDateTimeFromEss(sinceDateTime);
+
+            if (!string.IsNullOrEmpty(essBatchId))
+            {
+                FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
+
+                if (fssBatchStatus == FssBatchStatus.Committed)
+                {
+                    List<FssBatchFile>? files = await GetBatchFiles(essBatchId);
+
+                    string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
+
+                    _fileSystemHelper.CreateDirectory(downloadPath);
+
+                    DownloadFiles(files, downloadPath);
+                }
+                else
+                {
+                    _logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), fssBatchStatus, CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
+                }
+            }
+            else
+            {
+                _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
+            }
+        }
 
         private async Task<List<FssBatchFile>> GetBatchFiles(string essBatchId)
         {
@@ -106,6 +135,23 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private async Task<string> PostProductIdentifiersToESS(List<string> productIdentifiers)
         {
             ExchangeSetResponseModel exchangeSetResponseModel = await _essService.PostProductIdentifiersData(productIdentifiers);
+            if (!string.IsNullOrEmpty(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href))
+            {
+                string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
+                _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch is created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                return essBatchId;
+            }
+            else
+            {
+                _logger.LogError(EventIds.FssBatchDetailUrlNotFound.ToEventId(), "FSS batch detail URL not found in ESS response at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.FssBatchDetailUrlNotFound.ToEventId());
+            }
+        }
+
+        private async Task<string> GetProductDataSinceDateTimeFromEss(string sinceDateTime)
+        {
+            ExchangeSetResponseModel exchangeSetResponseModel = await _essService.GetProductDataSinceDateTime(sinceDateTime);
             if (!string.IsNullOrEmpty(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href))
             {
                 string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);

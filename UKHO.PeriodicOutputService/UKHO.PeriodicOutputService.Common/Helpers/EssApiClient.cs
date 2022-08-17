@@ -30,5 +30,24 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
             }
         }
+
+        public async Task<HttpResponseMessage> GetProductDataSinceDateTime(string uri, string sinceDateTime, string accessToken)
+        {
+            string payloadJson = JsonConvert.SerializeObject(sinceDateTime);
+
+            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
+            {
+                Content = new StringContent(payloadJson, Encoding.UTF8, "application/json")
+            })
+            {
+                if (accessToken != null)
+                {
+                    httpRequestMessage.SetBearerToken(accessToken);
+                    httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
+                }
+
+                return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            }
+        }
     }
 }

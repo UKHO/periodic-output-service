@@ -219,7 +219,24 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809053 -  Fss batch status polling completed.
         /// </summary>
-        FssBatchStatusPollingTimedOut = 809053
+        FssBatchStatusPollingTimedOut = 809053,
+
+        /// <summary>
+        /// 809003 - full avcs exchangeset creation started.
+        /// </summary>
+        UpdateExchangeSetCreationStarted = 809003,
+        /// <summary>
+        /// 809053 - Get product data since given datetime started.
+        /// </summary>
+        GetProductDataSinceDateTimeStarted = 809053,
+        /// <summary>
+        /// 809053 -  Get product data since given datetime completed.
+        /// </summary>
+        GetProductDataSinceDateTimeCompleted = 809053,
+        /// <summary>
+        /// 809053 -  Get product data since given datetime failed.
+        /// </summary>
+        GetProductDataSinceDateTimeFailed = 809053
     }
 
     public static class EventIdExtensions

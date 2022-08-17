@@ -3,5 +3,6 @@
     public interface IEssApiClient
     {
         Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string uri, List<string> productIdentifierModel, string accessToken);
+        Task<HttpResponseMessage> GetProductDataSinceDateTime(string uri, string sinceDateTime, string accessToken);
     }
 }
