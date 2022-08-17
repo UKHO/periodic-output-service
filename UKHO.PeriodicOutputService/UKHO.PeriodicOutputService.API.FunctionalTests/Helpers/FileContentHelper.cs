@@ -23,20 +23,10 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
             List<string> downloadFolderPath = new List<string>();
             Assert.That((int)apiEssResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiEssResponse.StatusCode}, instead of the expected status 200.");
 
-            var apiResponseData = await apiEssResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
-
-            var batchStatusUrl = apiResponseData.Links.ExchangeSetBatchStatusUri.Href;
-            var batchId = batchStatusUrl.Split('/')[5];
-
-            var finalBatchStatusUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/status";
-
-            var batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl, FssJwtToken);
-            Assert.That(batchStatus, Is.EqualTo("Committed"), $"Incorrect batch status is returned {batchStatus} for url {finalBatchStatusUrl}, instead of the expected status Committed.");
-
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
                 var FolderName = $"M0{mediaNumber}X02";
-                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{FolderName}.zip";
+                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/files/{FolderName}.zip";
 
                 var DownloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, FolderName);
 
@@ -62,6 +52,16 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
                 }
             }
 
+        }
+
+        public static bool CheckforFileExist(string filePath, string fileName)
+        {
+            return (Directory.Exists(filePath) && File.Exists(Path.Combine(filePath, fileName)));
+        }
+
+        public static bool CheckforFolderExist(string filePath, string folderName)
+        {
+            return Directory.Exists(Path.Combine(filePath, folderName));
         }
 
     }

@@ -13,34 +13,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     public static class FssBatchHelper
     {
         private static FssApiClient FssApiClient { get; set; }
-        static FunctionalTestFSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
+        static FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
         static TestConfiguration EssConfig { get; set; }
 
         static FssBatchHelper()
         {
             FssApiClient = new FssApiClient();
             EssConfig = new TestConfiguration();
-        }
-
-        public static async Task<string> CheckBatchIsCommitted(string batchStatusUri, string jwtToken)
-        {
-            string batchStatus = "";
-            var startTime = DateTime.UtcNow;
-
-            while (DateTime.UtcNow - startTime   < TimeSpan.FromMinutes(FSSAuth.BatchCommitWaitTime))
-            {
-                await Task.Delay(5000);
-                var batchStatusResponse = await FssApiClient.GetBatchStatusAsync(batchStatusUri, jwtToken);
-                Assert.That((int)batchStatusResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {batchStatusResponse.StatusCode}, instead of the expected status 200 for url {batchStatusUri}.");
-
-                var batchStatusResponseObj = JsonConvert.DeserializeObject<ResponseBatchStatusModel>(await batchStatusResponse.Content.ReadAsStringAsync());
-                batchStatus = batchStatusResponseObj.Status;
-
-                if (batchStatus.Equals("Committed"))
-                    break;
-            }
-
-            return batchStatus;
         }
 
         public static async Task<string> DownloadedFolderForLargeFiles(string downloadFileUrl, string jwtToken, string folderName)

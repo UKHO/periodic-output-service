@@ -5,9 +5,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     public class TestConfiguration
     {
         protected IConfigurationRoot ConfigurationRoot;
+        private readonly IConfiguration configuration;
         public FleetManagerB2BApiConfiguration fleetManagerB2BConfig = new();
-        public EssAuthorizationConfiguration EssAuthorizationConfig = new();
-        public FunctionalTestFSSApiConfiguration FssConfig = new();
+        public ESSApiConfiguration EssAuthorizationConfig = new();
+        public FSSApiConfiguration FssConfig = new();
+        public POSWebjobApiConfiguration POSWebJobConfig = new();
+        public string HomeDirectory;
 
         public class FleetManagerB2BApiConfiguration
         {
@@ -17,9 +20,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string subscriptionKey { get; set; }
         }
 
-        public class EssAuthorizationConfiguration
+        public class ESSApiConfiguration
         {
-            public string EssApiUrl { get; set; }
+            public string BaseUrl { get; set; }
             public string MicrosoftOnlineLoginUrl { get; set; }
             public string TenantId { get; set; }
             public string AutoTestClientId { get; set; }
@@ -28,15 +31,19 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public bool IsRunningOnLocalMachine { get; set; }
         }
 
-        public class FunctionalTestFSSApiConfiguration
+        public class FSSApiConfiguration
         {
             public string BaseUrl { get; set; }
             public string FssClientId { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
-            public string BatchStatusPollingCutoffTime { get; set; }
-            public string BatchStatusPollingDelayTime { get; set; }
-            public int BatchCommitWaitTime { get; set; }
+        }
 
+        public class POSWebjobApiConfiguration
+        {
+            public string userName { get; set; }
+            public string password { get; set; }
+            public string baseUrl { get; set; }
+            public string invalidPOSWebJobuserCredentialsBytes { get; set; }
         }
 
         public TestConfiguration()
@@ -45,9 +52,16 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                                .AddJsonFile("appsettings.json", false)
                                .Build();
 
+
+            configuration = new ConfigurationBuilder()
+                               .AddJsonFile("appsettings.json", false)
+                               .Build();
+
             ConfigurationRoot.Bind("FleetManagerB2BApiConfiguration", fleetManagerB2BConfig);
-            ConfigurationRoot.Bind("EssAuthorizationConfiguration", EssAuthorizationConfig);
-            ConfigurationRoot.Bind("FunctionalTestFSSApiConfiguration", FssConfig);
+            ConfigurationRoot.Bind("ESSApiConfiguration", EssAuthorizationConfig);
+            ConfigurationRoot.Bind("FSSApiConfiguration", FssConfig);
+            ConfigurationRoot.Bind("POSWebjobApiConfiguration", POSWebJobConfig);
+            HomeDirectory = configuration["HOME"];
         }
 
     }
