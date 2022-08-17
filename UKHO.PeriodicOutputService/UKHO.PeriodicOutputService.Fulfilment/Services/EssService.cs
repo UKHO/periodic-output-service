@@ -2,8 +2,8 @@
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
@@ -25,34 +25,27 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _essApiClient = essApiClient ?? throw new ArgumentNullException(nameof(essApiClient));
             _authEssTokenProvider = authEssTokenProvider ?? throw new ArgumentNullException(nameof(authEssTokenProvider));
         }
-
         public async Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers)
         {
-            _logger.LogInformation(EventIds.GetAccessTokenForESSEndPointStarted.ToEventId(), "Getting access token to call ESS endpoint started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.PostProductIdentifiersToEssStarted.ToEventId(), "Request to post {ProductIdentifiersCount} productidentifiers to ESS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productIdentifiers.Count.ToString(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productIdentifiers";
 
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
 
-            _logger.LogInformation(EventIds.GetAccessTokenForESSEndPointCompleted.ToEventId(), "Getting access token to call ESS endpoint completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-            ExchangeSetResponseModel? exchangeSetGetBatchResponse = new();
-
-            _logger.LogInformation(EventIds.ExchangeSetPostProductIdentifiersRequestStarted.ToEventId(), "Request to post productidentifiers to ESS started at {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-            HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(_essApiConfiguration.Value.BaseUrl, productIdentifiers, accessToken);
+            HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(uri, productIdentifiers, accessToken);
 
             if (httpResponse.IsSuccessStatusCode)
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
-
-                exchangeSetGetBatchResponse = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
-
-                _logger.LogInformation(EventIds.ExchangeSetPostProductIdentifiersRequestCompleted.ToEventId(), "Request to post productidentifiers to ESS completed at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.PostProductIdentifiersToEssCompleted.ToEventId(), "Request to post productidentifiers to ESS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                return JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
             }
             else
             {
-                _logger.LogError(EventIds.ExchangeSetPostProductIdentifiersFailed.ToEventId(), "Failed to post productidentifiers to ESS at {DateTime} | StatusCode:{StatusCode} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.PostProductIdentifiersToEssFailed.ToEventId(), "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.PostProductIdentifiersToEssFailed.ToEventId());
             }
-            return exchangeSetGetBatchResponse;
         }
     }
 }

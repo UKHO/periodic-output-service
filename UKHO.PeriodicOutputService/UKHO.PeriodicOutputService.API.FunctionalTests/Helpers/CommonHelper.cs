@@ -19,13 +19,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             dynamic response = JsonConvert.DeserializeObject<dynamic>(bodyJson);
             return response.message;
         }
-        public static async Task<dynamic> DeserializeAsyncResponse(this HttpResponseMessage httpResponseMessage)
-        {
-            string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
-            dynamic response = JsonConvert.DeserializeObject<dynamic>(bodyJson);
-            return response;
-        }
-
         public static async Task<string> ReadAsStringAsync(this HttpResponseMessage httpResponseMessage)
         {
             string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -45,10 +38,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         {
             var userCredentialsBytes = System.Text.Encoding.UTF8.GetBytes(username + ":" + password);
             return Convert.ToBase64String(userCredentialsBytes);
-        }
-        public static string ExtractBatchId(string url)
-        {
-            return new UriBuilder(url).Uri.Segments.FirstOrDefault(d => Guid.TryParse(d.Replace("/", ""), out Guid _));
         }
     }
 }
