@@ -345,13 +345,13 @@ stages:
       - group: "ESS-Dev-Variables"
       - group: "ESS-Deployment-Variables-DEV"
       - group: "POS-Dev-Variables"
-      - name: "EssAuthorizationConfiguration.TenantId"
+      - name: "ESSApiConfiguration.TenantId"
         value: $(TenantId)
-      - name: "EssAuthorizationConfiguration.AutoTestClientId"
+      - name: "ESSApiConfiguration.AutoTestClientId"
         value: $(AutoTestClientId_Authed)
-      - name: "EssAuthorizationConfiguration.AutoTestClientSecret"
+      - name: "ESSApiConfiguration.AutoTestClientSecret"
         value: $(AutoTestClientSecret_Authed)
-      - name: "EssAuthorizationConfiguration.EssClientId"
+      - name: "ESSApiConfiguration.EssClientId"
         value: $(ESSClientId)
 
     jobs:
@@ -445,13 +445,13 @@ stages:
       - group: "ESS-QA-Variables"
       - group: "ESS-Deployment-Variables-QA"
       - group: "POS-QA-Variables"
-      - name: "EssAuthorizationConfiguration.TenantId"
+      - name: "ESSApiConfiguration.TenantId"
         value: $(TenantId)
-      - name: "EssAuthorizationConfiguration.AutoTestClientId"
+      - name: "ESSApiConfiguration.AutoTestClientId"
         value: $(AutoTestClientId_Authed)
-      - name: "EssAuthorizationConfiguration.AutoTestClientSecret"
+      - name: "ESSApiConfiguration.AutoTestClientSecret"
         value: $(AutoTestClientSecret_Authed)
-      - name: "EssAuthorizationConfiguration.EssClientId"
+      - name: "ESSApiConfiguration.EssClientId"
         value: $(ESSClientId)
 #    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
 
