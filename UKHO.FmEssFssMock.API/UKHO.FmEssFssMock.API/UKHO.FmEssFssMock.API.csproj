@@ -5,10 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;8618;8602;8604;8600</NoWarn>
+    <NoWarn>1701;1702;8618;8602;8604;8600;8603</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;8618;8602;8604;8600</NoWarn>
+    <NoWarn>1701;1702;8618;8602;8604;8600;8603</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="6.0.8" />
