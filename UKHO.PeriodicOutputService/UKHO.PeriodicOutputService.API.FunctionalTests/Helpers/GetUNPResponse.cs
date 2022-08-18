@@ -6,7 +6,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public async Task<HttpResponseMessage> GetJwtAuthUnpToken(string baseUrl, string base64Credentials, string subscriptionKey)
         {
-            string uri = $"{baseUrl}/ft/auth/unp";
+            string uri = $"{baseUrl}/auth/unp";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
