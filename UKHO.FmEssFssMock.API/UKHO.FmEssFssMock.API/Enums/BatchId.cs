@@ -23,6 +23,6 @@ namespace UKHO.FmEssFssMock.Enums
         PosFmCatalogueFileBatch = 6,
 
         [Description("472b599d-494d-4ac5-a281-91e3927b24d4")]
-        PosEncUpdatesFileBatch = 7,
+        PosEncUpdatesFileBatch = 7
     }
 }
