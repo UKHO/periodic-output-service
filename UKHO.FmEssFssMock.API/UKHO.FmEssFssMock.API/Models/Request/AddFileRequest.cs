@@ -3,6 +3,6 @@ namespace UKHO.PeriodicOutputService.Common.Models.Request
 {
     public class AddFileRequest
     {
-        public IEnumerable<KeyValuePair<String, string>> Attributes { get; set; }
+        public IEnumerable<KeyValuePair<string, string>> Attributes { get; set; }
     }
 }

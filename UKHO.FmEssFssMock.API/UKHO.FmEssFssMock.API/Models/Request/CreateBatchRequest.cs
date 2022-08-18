@@ -11,6 +11,5 @@
     public class Acl
     {
         public IEnumerable<string> ReadUsers { get; set; }
-
     }
 }
