@@ -20,17 +20,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
         }
 
-        public IFileInfo GetFileInfo(string filePath) => _fileSystem.FileInfo.FromFileName(filePath);
-
-        public IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption)
-        {
-            string[] extensions = extensionsToSearch.Split(";");
-
-            IEnumerable<string>? files = _fileSystem.Directory.EnumerateFiles(directoryPath, "*.*", searchOption);
-
-            return files.Where(e => extensions.Contains(Path.GetExtension(e).TrimStart('.').ToLowerInvariant()));
-        }
-
         public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
         {
             IFileInfo fileInfo = _fileSystem.FileInfo.FromFileName(UploadBlockMetaData.FullFileName);
@@ -43,6 +32,17 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 fs.Read(byteData);
             }
             return byteData;
+        }
+
+        public void CreateFileCopy(string filePath, Stream stream)
+        {
+            if (stream != null)
+            {
+                using (var outputFileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    stream.CopyTo(outputFileStream);
+                }
+            }
         }
 
         public List<FileDetail> GetFileMD5(IEnumerable<string> fileNames)
@@ -63,6 +63,17 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 fileDetails.Add(fileDetail);
             }
             return fileDetails;
+        }
+
+        public IFileInfo GetFileInfo(string filePath) => _fileSystem.FileInfo.FromFileName(filePath);
+
+        public IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption)
+        {
+            string[] extensions = extensionsToSearch.Split(";");
+
+            IEnumerable<string>? files = _fileSystem.Directory.EnumerateFiles(directoryPath, "*.*", searchOption);
+
+            return files.Where(e => extensions.Contains(Path.GetExtension(e).TrimStart('.').ToLowerInvariant()));
         }
     }
 }

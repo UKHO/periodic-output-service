@@ -4,12 +4,12 @@ using System.Net;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using UKHO.ExchangeSetService.Common.Logging;
-using UKHO.ExchangeSetService.Common.Models.FileShareService.Response;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.FileShareService.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Models.Request;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
@@ -37,13 +37,103 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
         }
 
+        public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId)
+        {
+            _logger.LogInformation(EventIds.FssBatchStatusPollingStarted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+           
+            FssBatchStatus batchStatus = FssBatchStatus.Incomplete;
+            DateTime startTime = DateTime.UtcNow;
+
+            string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/status";
+            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjYwODE1NjY5LCJuYmYiOjE2NjA4MTU2NjksImV4cCI6MTY2MDgyMTA0NCwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQUVrR3BmbVM3RGVjd3c0RHp0M0dha2NXamdvL2VtbkcvbHhmMit0TVBRdHdwSmFYZGRLamx1MGxGM1ZCVHNCd21USTZFV2hmTkFaWk9NcEJseGQvYmNueHliNHhyRnBuNE9ybjRUOUlaTFF3MXBUQk4xdlRXUHA0MkRNWkdiQW5LZ1UwVXBnNDlNcjVoVXpHekFRaEVTR3pjb0hCZ1Q2MXI2eHMyMDk5V1RUUT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOCIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicmgiOiIwLkFRSUFTTW8wa1QxbUJVcVdpakdrTHdydFBpVGdXNEFJb3Z0QXEyODVuQ1pIMHpRQ0FCOC4iLCJyb2xlcyI6WyJCYXRjaENyZWF0ZSJdLCJzY3AiOiJVc2VyLlJlYWQiLCJzdWIiOiI2VEhEZDlIaXU5bER2R0U2UTl6OUhOc2lUR1hBRnRuS05xNnpnVUlLNDVRIiwidGlkIjoiOTEzNGNhNDgtNjYzZC00YTA1LTk2OGEtMzFhNDJmMGFlZDNlIiwidW5pcXVlX25hbWUiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwidXRpIjoiTWx4Z1M2OHEwRU9YZUxuWjRsdGhBQSIsInZlciI6IjEuMCJ9.l2BHgsfEZsJzdX3a9yxkxE7eu8szC2H5dg-_Llp7gKSVdfZlLAMTUZE698wT-wNxfjbHOCLiZPtz2_t0XdTT8-PML_34GJvthhbqmvPpZHvo-jv0PiJTaf0tS99QU3UddNNYECrXQwSNj03_bbbhqercrEbGYEEqMum-yImKRkl5RoCnfqZN0HPJ7zt4linAbTUAj1bDFHxkHJriDN3TiwH8gzSD9ieIuB_LwFwg7VVdI9S3EFW1tLKbVA5e2b82F_bCssF1iASJ2xKjYQzr3l8XLLTKp-e33AQWERni4M425oAmoSKyFubrOCV-hw_5FpFiN_YfZRgrXMWwoBjcHA";
+
+            FssBatchStatus[] pollBatchStatus = { FssBatchStatus.CommitInProgress, FssBatchStatus.Incomplete };
+
+            while (pollBatchStatus.Contains(batchStatus) &&
+                        DateTime.UtcNow - startTime < TimeSpan.FromMinutes(double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime)))
+            {
+                _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
+
+                if (batchStatusResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation(EventIds.GetBatchStatusRequestCompleted.ToEventId(), "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+
+                    FssBatchStatusResponseModel fssBatchStatusResponseModel = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
+                    Enum.TryParse(fssBatchStatusResponseModel?.Status, false, out batchStatus);
+
+                    await Task.Delay(int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime));
+                }
+                else
+                {
+                    _logger.LogError(EventIds.GetBatchStatusRequestFailed.ToEventId(), "Request to get batch status for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.GetBatchStatusRequestFailed.ToEventId());
+                }
+            }
+
+            if (pollBatchStatus.Contains(batchStatus))
+            {
+                _logger.LogError(EventIds.FssBatchStatusPollingTimedOut.ToEventId(), "Fss batch status polling timed out for BatchID - {BatchID} failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.FssBatchStatusPollingTimedOut.ToEventId());
+            }
+
+            _logger.LogInformation(EventIds.FssBatchStatusPollingCompleted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            return batchStatus;
+        }
+
+        public async Task<GetBatchResponseModel> GetBatchDetails(string batchId)
+        {
+            _logger.LogInformation(EventIds.GetBatchDetailRequestStarted.ToEventId(), "Request to get batch details for BatchID - {BatchID} from FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}";
+            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjYwODE1NjY5LCJuYmYiOjE2NjA4MTU2NjksImV4cCI6MTY2MDgyMTA0NCwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQUVrR3BmbVM3RGVjd3c0RHp0M0dha2NXamdvL2VtbkcvbHhmMit0TVBRdHdwSmFYZGRLamx1MGxGM1ZCVHNCd21USTZFV2hmTkFaWk9NcEJseGQvYmNueHliNHhyRnBuNE9ybjRUOUlaTFF3MXBUQk4xdlRXUHA0MkRNWkdiQW5LZ1UwVXBnNDlNcjVoVXpHekFRaEVTR3pjb0hCZ1Q2MXI2eHMyMDk5V1RUUT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOCIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicmgiOiIwLkFRSUFTTW8wa1QxbUJVcVdpakdrTHdydFBpVGdXNEFJb3Z0QXEyODVuQ1pIMHpRQ0FCOC4iLCJyb2xlcyI6WyJCYXRjaENyZWF0ZSJdLCJzY3AiOiJVc2VyLlJlYWQiLCJzdWIiOiI2VEhEZDlIaXU5bER2R0U2UTl6OUhOc2lUR1hBRnRuS05xNnpnVUlLNDVRIiwidGlkIjoiOTEzNGNhNDgtNjYzZC00YTA1LTk2OGEtMzFhNDJmMGFlZDNlIiwidW5pcXVlX25hbWUiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwidXRpIjoiTWx4Z1M2OHEwRU9YZUxuWjRsdGhBQSIsInZlciI6IjEuMCJ9.l2BHgsfEZsJzdX3a9yxkxE7eu8szC2H5dg-_Llp7gKSVdfZlLAMTUZE698wT-wNxfjbHOCLiZPtz2_t0XdTT8-PML_34GJvthhbqmvPpZHvo-jv0PiJTaf0tS99QU3UddNNYECrXQwSNj03_bbbhqercrEbGYEEqMum-yImKRkl5RoCnfqZN0HPJ7zt4linAbTUAj1bDFHxkHJriDN3TiwH8gzSD9ieIuB_LwFwg7VVdI9S3EFW1tLKbVA5e2b82F_bCssF1iASJ2xKjYQzr3l8XLLTKp-e33AQWERni4M425oAmoSKyFubrOCV-hw_5FpFiN_YfZRgrXMWwoBjcHA";
+
+            HttpResponseMessage batchDetailResponse = await _fssApiClient.GetBatchDetailsAsync(uri, accessToken);
+
+            if (batchDetailResponse.IsSuccessStatusCode)
+            {
+                _logger.LogInformation(EventIds.GetBatchDetailRequestCompleted.ToEventId(), "Request to get batch details for BatchID - {BatchID} from FSS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                return JsonConvert.DeserializeObject<GetBatchResponseModel>(await batchDetailResponse.Content.ReadAsStringAsync());
+            }
+            else
+            {
+                _logger.LogError(EventIds.GetBatchDetailRequestFailed.ToEventId(), "Request to get batch details for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.GetBatchDetailRequestFailed.ToEventId());
+            }
+        }
+
+        public async Task<Stream> DownloadFile(string fileName, string fileLink)
+        {
+            _logger.LogInformation(EventIds.DownloadFileStarted.ToEventId(), "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            string uri = $"{_fssApiConfiguration.Value.BaseUrl}" + fileLink;
+            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjYwODE1NjY5LCJuYmYiOjE2NjA4MTU2NjksImV4cCI6MTY2MDgyMTA0NCwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQUVrR3BmbVM3RGVjd3c0RHp0M0dha2NXamdvL2VtbkcvbHhmMit0TVBRdHdwSmFYZGRLamx1MGxGM1ZCVHNCd21USTZFV2hmTkFaWk9NcEJseGQvYmNueHliNHhyRnBuNE9ybjRUOUlaTFF3MXBUQk4xdlRXUHA0MkRNWkdiQW5LZ1UwVXBnNDlNcjVoVXpHekFRaEVTR3pjb0hCZ1Q2MXI2eHMyMDk5V1RUUT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOCIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicmgiOiIwLkFRSUFTTW8wa1QxbUJVcVdpakdrTHdydFBpVGdXNEFJb3Z0QXEyODVuQ1pIMHpRQ0FCOC4iLCJyb2xlcyI6WyJCYXRjaENyZWF0ZSJdLCJzY3AiOiJVc2VyLlJlYWQiLCJzdWIiOiI2VEhEZDlIaXU5bER2R0U2UTl6OUhOc2lUR1hBRnRuS05xNnpnVUlLNDVRIiwidGlkIjoiOTEzNGNhNDgtNjYzZC00YTA1LTk2OGEtMzFhNDJmMGFlZDNlIiwidW5pcXVlX25hbWUiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwidXRpIjoiTWx4Z1M2OHEwRU9YZUxuWjRsdGhBQSIsInZlciI6IjEuMCJ9.l2BHgsfEZsJzdX3a9yxkxE7eu8szC2H5dg-_Llp7gKSVdfZlLAMTUZE698wT-wNxfjbHOCLiZPtz2_t0XdTT8-PML_34GJvthhbqmvPpZHvo-jv0PiJTaf0tS99QU3UddNNYECrXQwSNj03_bbbhqercrEbGYEEqMum-yImKRkl5RoCnfqZN0HPJ7zt4linAbTUAj1bDFHxkHJriDN3TiwH8gzSD9ieIuB_LwFwg7VVdI9S3EFW1tLKbVA5e2b82F_bCssF1iASJ2xKjYQzr3l8XLLTKp-e33AQWERni4M425oAmoSKyFubrOCV-hw_5FpFiN_YfZRgrXMWwoBjcHA";
+
+            HttpResponseMessage fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken);
+
+            if (fileDownloadResponse.IsSuccessStatusCode)
+            {
+                _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading of file {fileName} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                return await fileDownloadResponse.Content.ReadAsStreamAsync();
+            }
+            else
+            {
+                _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
+            }
+        }
+
         public async Task<string> CreateBatch(string mediaType)
         {
             _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {MediaType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", mediaType, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
-            //string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjU5NzA5NjI1LCJuYmYiOjE2NTk3MDk2MjUsImV4cCI6MTY1OTcxNDczNSwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQW9KK2Q1U251YVZUY0lDZXpBUUhRbGhvdkh5V1lNRUNtdXo5NzArV0kzZE9FZFFPTkNXRGhkMG8vb1dzcWVIelgvMTV4WW5EUm9PWGRkNmVNbm5CY1NaaW5WdXpYMUJkTzJrQ3dLMjVzZFM0N1RqQm9DL0tnTlFsMUU5VWhXUlE4SDgzREU3T3BrcXJrdG5nckdkNnA2NnNEWWsxZVVNWVNRWFhCMlNteDd0ST0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOSIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicHdkX2V4cCI6IjU2OTc4MCIsInB3ZF91cmwiOiJodHRwczovL3BvcnRhbC5taWNyb3NvZnRvbmxpbmUuY29tL0NoYW5nZVBhc3N3b3JkLmFzcHgiLCJyaCI6IjAuQVFJQVNNbzBrVDFtQlVxV2lqR2tMd3J0UGlUZ1c0QUlvdnRBcTI4NW5DWkgwelFDQUI4LiIsInJvbGVzIjpbIkJhdGNoQ3JlYXRlIl0sInNjcCI6IlVzZXIuUmVhZCIsInN1YiI6IjZUSERkOUhpdTlsRHZHRTZROXo5SE5zaVRHWEFGdG5LTnE2emdVSUs0NVEiLCJ0aWQiOiI5MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UiLCJ1bmlxdWVfbmFtZSI6IlZpc2hhbDE0NTgzQG1hc3Rlay5jb20iLCJ1dGkiOiI0Xzh6RmhqUXAwU0pua1RBdDlLTUFBIiwidmVyIjoiMS4wIn0.mPdzADmZObCofLxApkNlfffH_tqWiI6-O7xdEmwcKFHOJx26KLWbJlNluOZWrT2xM_0q3KXbwLMAfbxbK6d0arxdhxM-eUfvD4d92K47o68NxL4G9rp7pgXMjGm7RIWMUr9FhFho1IeY1T-4OVHiCsH7Pq9p9Pmukxj8MqZD2U28x72o26Vk-e8pvKpeWE1gEh9icBkir_Resv85EC3ryWkkiCZOTXpuiQsUnQp5moSaHr5aeYXWQH6o78gAc0c2oTOonnXswgWFRvq1hSde6SXByDOb_ljU8KbbdNN8WMpw44rAD2TZ9nXZi6Log7rSSONqFtLvNEferp7rGfKDSA";
+            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjYwODE1NjY5LCJuYmYiOjE2NjA4MTU2NjksImV4cCI6MTY2MDgyMTA0NCwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQUVrR3BmbVM3RGVjd3c0RHp0M0dha2NXamdvL2VtbkcvbHhmMit0TVBRdHdwSmFYZGRLamx1MGxGM1ZCVHNCd21USTZFV2hmTkFaWk9NcEJseGQvYmNueHliNHhyRnBuNE9ybjRUOUlaTFF3MXBUQk4xdlRXUHA0MkRNWkdiQW5LZ1UwVXBnNDlNcjVoVXpHekFRaEVTR3pjb0hCZ1Q2MXI2eHMyMDk5V1RUUT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOCIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicmgiOiIwLkFRSUFTTW8wa1QxbUJVcVdpakdrTHdydFBpVGdXNEFJb3Z0QXEyODVuQ1pIMHpRQ0FCOC4iLCJyb2xlcyI6WyJCYXRjaENyZWF0ZSJdLCJzY3AiOiJVc2VyLlJlYWQiLCJzdWIiOiI2VEhEZDlIaXU5bER2R0U2UTl6OUhOc2lUR1hBRnRuS05xNnpnVUlLNDVRIiwidGlkIjoiOTEzNGNhNDgtNjYzZC00YTA1LTk2OGEtMzFhNDJmMGFlZDNlIiwidW5pcXVlX25hbWUiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwidXRpIjoiTWx4Z1M2OHEwRU9YZUxuWjRsdGhBQSIsInZlciI6IjEuMCJ9.l2BHgsfEZsJzdX3a9yxkxE7eu8szC2H5dg-_Llp7gKSVdfZlLAMTUZE698wT-wNxfjbHOCLiZPtz2_t0XdTT8-PML_34GJvthhbqmvPpZHvo-jv0PiJTaf0tS99QU3UddNNYECrXQwSNj03_bbbhqercrEbGYEEqMum-yImKRkl5RoCnfqZN0HPJ7zt4linAbTUAj1bDFHxkHJriDN3TiwH8gzSD9ieIuB_LwFwg7VVdI9S3EFW1tLKbVA5e2b82F_bCssF1iASJ2xKjYQzr3l8XLLTKp-e33AQWERni4M425oAmoSKyFubrOCV-hw_5FpFiN_YfZRgrXMWwoBjcHA";
 
             CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(mediaType);
             string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
@@ -67,8 +157,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _logger.LogInformation(EventIds.AddFileToBatchRequestStarted.ToEventId(), "Adding file {FileName} in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
-            //string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjU5NzA5NjI1LCJuYmYiOjE2NTk3MDk2MjUsImV4cCI6MTY1OTcxNDczNSwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQW9KK2Q1U251YVZUY0lDZXpBUUhRbGhvdkh5V1lNRUNtdXo5NzArV0kzZE9FZFFPTkNXRGhkMG8vb1dzcWVIelgvMTV4WW5EUm9PWGRkNmVNbm5CY1NaaW5WdXpYMUJkTzJrQ3dLMjVzZFM0N1RqQm9DL0tnTlFsMUU5VWhXUlE4SDgzREU3T3BrcXJrdG5nckdkNnA2NnNEWWsxZVVNWVNRWFhCMlNteDd0ST0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOSIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicHdkX2V4cCI6IjU2OTc4MCIsInB3ZF91cmwiOiJodHRwczovL3BvcnRhbC5taWNyb3NvZnRvbmxpbmUuY29tL0NoYW5nZVBhc3N3b3JkLmFzcHgiLCJyaCI6IjAuQVFJQVNNbzBrVDFtQlVxV2lqR2tMd3J0UGlUZ1c0QUlvdnRBcTI4NW5DWkgwelFDQUI4LiIsInJvbGVzIjpbIkJhdGNoQ3JlYXRlIl0sInNjcCI6IlVzZXIuUmVhZCIsInN1YiI6IjZUSERkOUhpdTlsRHZHRTZROXo5SE5zaVRHWEFGdG5LTnE2emdVSUs0NVEiLCJ0aWQiOiI5MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UiLCJ1bmlxdWVfbmFtZSI6IlZpc2hhbDE0NTgzQG1hc3Rlay5jb20iLCJ1dGkiOiI0Xzh6RmhqUXAwU0pua1RBdDlLTUFBIiwidmVyIjoiMS4wIn0.mPdzADmZObCofLxApkNlfffH_tqWiI6-O7xdEmwcKFHOJx26KLWbJlNluOZWrT2xM_0q3KXbwLMAfbxbK6d0arxdhxM-eUfvD4d92K47o68NxL4G9rp7pgXMjGm7RIWMUr9FhFho1IeY1T-4OVHiCsH7Pq9p9Pmukxj8MqZD2U28x72o26Vk-e8pvKpeWE1gEh9icBkir_Resv85EC3ryWkkiCZOTXpuiQsUnQp5moSaHr5aeYXWQH6o78gAc0c2oTOonnXswgWFRvq1hSde6SXByDOb_ljU8KbbdNN8WMpw44rAD2TZ9nXZi6Log7rSSONqFtLvNEferp7rGfKDSA";
+            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjYwODE1NjY5LCJuYmYiOjE2NjA4MTU2NjksImV4cCI6MTY2MDgyMTA0NCwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQUVrR3BmbVM3RGVjd3c0RHp0M0dha2NXamdvL2VtbkcvbHhmMit0TVBRdHdwSmFYZGRLamx1MGxGM1ZCVHNCd21USTZFV2hmTkFaWk9NcEJseGQvYmNueHliNHhyRnBuNE9ybjRUOUlaTFF3MXBUQk4xdlRXUHA0MkRNWkdiQW5LZ1UwVXBnNDlNcjVoVXpHekFRaEVTR3pjb0hCZ1Q2MXI2eHMyMDk5V1RUUT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOCIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicmgiOiIwLkFRSUFTTW8wa1QxbUJVcVdpakdrTHdydFBpVGdXNEFJb3Z0QXEyODVuQ1pIMHpRQ0FCOC4iLCJyb2xlcyI6WyJCYXRjaENyZWF0ZSJdLCJzY3AiOiJVc2VyLlJlYWQiLCJzdWIiOiI2VEhEZDlIaXU5bER2R0U2UTl6OUhOc2lUR1hBRnRuS05xNnpnVUlLNDVRIiwidGlkIjoiOTEzNGNhNDgtNjYzZC00YTA1LTk2OGEtMzFhNDJmMGFlZDNlIiwidW5pcXVlX25hbWUiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwidXRpIjoiTWx4Z1M2OHEwRU9YZUxuWjRsdGhBQSIsInZlciI6IjEuMCJ9.l2BHgsfEZsJzdX3a9yxkxE7eu8szC2H5dg-_Llp7gKSVdfZlLAMTUZE698wT-wNxfjbHOCLiZPtz2_t0XdTT8-PML_34GJvthhbqmvPpZHvo-jv0PiJTaf0tS99QU3UddNNYECrXQwSNj03_bbbhqercrEbGYEEqMum-yImKRkl5RoCnfqZN0HPJ7zt4linAbTUAj1bDFHxkHJriDN3TiwH8gzSD9ieIuB_LwFwg7VVdI9S3EFW1tLKbVA5e2b82F_bCssF1iASJ2xKjYQzr3l8XLLTKp-e33AQWERni4M425oAmoSKyFubrOCV-hw_5FpFiN_YfZRgrXMWwoBjcHA";
 
             AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel();
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
@@ -142,8 +232,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _logger.LogInformation(EventIds.WriteBlockToFileStarted.ToEventId(), "Writing blocks in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
-            //string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjU5NzA5NjI1LCJuYmYiOjE2NTk3MDk2MjUsImV4cCI6MTY1OTcxNDczNSwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQW9KK2Q1U251YVZUY0lDZXpBUUhRbGhvdkh5V1lNRUNtdXo5NzArV0kzZE9FZFFPTkNXRGhkMG8vb1dzcWVIelgvMTV4WW5EUm9PWGRkNmVNbm5CY1NaaW5WdXpYMUJkTzJrQ3dLMjVzZFM0N1RqQm9DL0tnTlFsMUU5VWhXUlE4SDgzREU3T3BrcXJrdG5nckdkNnA2NnNEWWsxZVVNWVNRWFhCMlNteDd0ST0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOSIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicHdkX2V4cCI6IjU2OTc4MCIsInB3ZF91cmwiOiJodHRwczovL3BvcnRhbC5taWNyb3NvZnRvbmxpbmUuY29tL0NoYW5nZVBhc3N3b3JkLmFzcHgiLCJyaCI6IjAuQVFJQVNNbzBrVDFtQlVxV2lqR2tMd3J0UGlUZ1c0QUlvdnRBcTI4NW5DWkgwelFDQUI4LiIsInJvbGVzIjpbIkJhdGNoQ3JlYXRlIl0sInNjcCI6IlVzZXIuUmVhZCIsInN1YiI6IjZUSERkOUhpdTlsRHZHRTZROXo5SE5zaVRHWEFGdG5LTnE2emdVSUs0NVEiLCJ0aWQiOiI5MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UiLCJ1bmlxdWVfbmFtZSI6IlZpc2hhbDE0NTgzQG1hc3Rlay5jb20iLCJ1dGkiOiI0Xzh6RmhqUXAwU0pua1RBdDlLTUFBIiwidmVyIjoiMS4wIn0.mPdzADmZObCofLxApkNlfffH_tqWiI6-O7xdEmwcKFHOJx26KLWbJlNluOZWrT2xM_0q3KXbwLMAfbxbK6d0arxdhxM-eUfvD4d92K47o68NxL4G9rp7pgXMjGm7RIWMUr9FhFho1IeY1T-4OVHiCsH7Pq9p9Pmukxj8MqZD2U28x72o26Vk-e8pvKpeWE1gEh9icBkir_Resv85EC3ryWkkiCZOTXpuiQsUnQp5moSaHr5aeYXWQH6o78gAc0c2oTOonnXswgWFRvq1hSde6SXByDOb_ljU8KbbdNN8WMpw44rAD2TZ9nXZi6Log7rSSONqFtLvNEferp7rGfKDSA";
+            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjYwODE1NjY5LCJuYmYiOjE2NjA4MTU2NjksImV4cCI6MTY2MDgyMTA0NCwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQUVrR3BmbVM3RGVjd3c0RHp0M0dha2NXamdvL2VtbkcvbHhmMit0TVBRdHdwSmFYZGRLamx1MGxGM1ZCVHNCd21USTZFV2hmTkFaWk9NcEJseGQvYmNueHliNHhyRnBuNE9ybjRUOUlaTFF3MXBUQk4xdlRXUHA0MkRNWkdiQW5LZ1UwVXBnNDlNcjVoVXpHekFRaEVTR3pjb0hCZ1Q2MXI2eHMyMDk5V1RUUT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOCIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicmgiOiIwLkFRSUFTTW8wa1QxbUJVcVdpakdrTHdydFBpVGdXNEFJb3Z0QXEyODVuQ1pIMHpRQ0FCOC4iLCJyb2xlcyI6WyJCYXRjaENyZWF0ZSJdLCJzY3AiOiJVc2VyLlJlYWQiLCJzdWIiOiI2VEhEZDlIaXU5bER2R0U2UTl6OUhOc2lUR1hBRnRuS05xNnpnVUlLNDVRIiwidGlkIjoiOTEzNGNhNDgtNjYzZC00YTA1LTk2OGEtMzFhNDJmMGFlZDNlIiwidW5pcXVlX25hbWUiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwidXRpIjoiTWx4Z1M2OHEwRU9YZUxuWjRsdGhBQSIsInZlciI6IjEuMCJ9.l2BHgsfEZsJzdX3a9yxkxE7eu8szC2H5dg-_Llp7gKSVdfZlLAMTUZE698wT-wNxfjbHOCLiZPtz2_t0XdTT8-PML_34GJvthhbqmvPpZHvo-jv0PiJTaf0tS99QU3UddNNYECrXQwSNj03_bbbhqercrEbGYEEqMum-yImKRkl5RoCnfqZN0HPJ7zt4linAbTUAj1bDFHxkHJriDN3TiwH8gzSD9ieIuB_LwFwg7VVdI9S3EFW1tLKbVA5e2b82F_bCssF1iASJ2xKjYQzr3l8XLLTKp-e33AQWERni4M425oAmoSKyFubrOCV-hw_5FpFiN_YfZRgrXMWwoBjcHA";
 
             WriteBlockFileRequestModel writeBlockfileRequestModel = new()
             {
@@ -170,8 +260,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _logger.LogInformation(EventIds.CommitBatchStarted.ToEventId(), "Batch commit for batch with BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID.ToString());
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
-            //string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjU5NzA5NjI1LCJuYmYiOjE2NTk3MDk2MjUsImV4cCI6MTY1OTcxNDczNSwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQW9KK2Q1U251YVZUY0lDZXpBUUhRbGhvdkh5V1lNRUNtdXo5NzArV0kzZE9FZFFPTkNXRGhkMG8vb1dzcWVIelgvMTV4WW5EUm9PWGRkNmVNbm5CY1NaaW5WdXpYMUJkTzJrQ3dLMjVzZFM0N1RqQm9DL0tnTlFsMUU5VWhXUlE4SDgzREU3T3BrcXJrdG5nckdkNnA2NnNEWWsxZVVNWVNRWFhCMlNteDd0ST0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOSIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicHdkX2V4cCI6IjU2OTc4MCIsInB3ZF91cmwiOiJodHRwczovL3BvcnRhbC5taWNyb3NvZnRvbmxpbmUuY29tL0NoYW5nZVBhc3N3b3JkLmFzcHgiLCJyaCI6IjAuQVFJQVNNbzBrVDFtQlVxV2lqR2tMd3J0UGlUZ1c0QUlvdnRBcTI4NW5DWkgwelFDQUI4LiIsInJvbGVzIjpbIkJhdGNoQ3JlYXRlIl0sInNjcCI6IlVzZXIuUmVhZCIsInN1YiI6IjZUSERkOUhpdTlsRHZHRTZROXo5SE5zaVRHWEFGdG5LTnE2emdVSUs0NVEiLCJ0aWQiOiI5MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UiLCJ1bmlxdWVfbmFtZSI6IlZpc2hhbDE0NTgzQG1hc3Rlay5jb20iLCJ1dGkiOiI0Xzh6RmhqUXAwU0pua1RBdDlLTUFBIiwidmVyIjoiMS4wIn0.mPdzADmZObCofLxApkNlfffH_tqWiI6-O7xdEmwcKFHOJx26KLWbJlNluOZWrT2xM_0q3KXbwLMAfbxbK6d0arxdhxM-eUfvD4d92K47o68NxL4G9rp7pgXMjGm7RIWMUr9FhFho1IeY1T-4OVHiCsH7Pq9p9Pmukxj8MqZD2U28x72o26Vk-e8pvKpeWE1gEh9icBkir_Resv85EC3ryWkkiCZOTXpuiQsUnQp5moSaHr5aeYXWQH6o78gAc0c2oTOonnXswgWFRvq1hSde6SXByDOb_ljU8KbbdNN8WMpw44rAD2TZ9nXZi6Log7rSSONqFtLvNEferp7rGfKDSA";
+            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjYwODE1NjY5LCJuYmYiOjE2NjA4MTU2NjksImV4cCI6MTY2MDgyMTA0NCwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQUVrR3BmbVM3RGVjd3c0RHp0M0dha2NXamdvL2VtbkcvbHhmMit0TVBRdHdwSmFYZGRLamx1MGxGM1ZCVHNCd21USTZFV2hmTkFaWk9NcEJseGQvYmNueHliNHhyRnBuNE9ybjRUOUlaTFF3MXBUQk4xdlRXUHA0MkRNWkdiQW5LZ1UwVXBnNDlNcjVoVXpHekFRaEVTR3pjb0hCZ1Q2MXI2eHMyMDk5V1RUUT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOCIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicmgiOiIwLkFRSUFTTW8wa1QxbUJVcVdpakdrTHdydFBpVGdXNEFJb3Z0QXEyODVuQ1pIMHpRQ0FCOC4iLCJyb2xlcyI6WyJCYXRjaENyZWF0ZSJdLCJzY3AiOiJVc2VyLlJlYWQiLCJzdWIiOiI2VEhEZDlIaXU5bER2R0U2UTl6OUhOc2lUR1hBRnRuS05xNnpnVUlLNDVRIiwidGlkIjoiOTEzNGNhNDgtNjYzZC00YTA1LTk2OGEtMzFhNDJmMGFlZDNlIiwidW5pcXVlX25hbWUiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwidXRpIjoiTWx4Z1M2OHEwRU9YZUxuWjRsdGhBQSIsInZlciI6IjEuMCJ9.l2BHgsfEZsJzdX3a9yxkxE7eu8szC2H5dg-_Llp7gKSVdfZlLAMTUZE698wT-wNxfjbHOCLiZPtz2_t0XdTT8-PML_34GJvthhbqmvPpZHvo-jv0PiJTaf0tS99QU3UddNNYECrXQwSNj03_bbbhqercrEbGYEEqMum-yImKRkl5RoCnfqZN0HPJ7zt4linAbTUAj1bDFHxkHJriDN3TiwH8gzSD9ieIuB_LwFwg7VVdI9S3EFW1tLKbVA5e2b82F_bCssF1iASJ2xKjYQzr3l8XLLTKp-e33AQWERni4M425oAmoSKyFubrOCV-hw_5FpFiN_YfZRgrXMWwoBjcHA";
 
             List<FileDetail> fileDetails = _fileSystemHelper.GetFileMD5(fileNames);
             BatchCommitRequestModel batchCommitRequestModel = new()
@@ -192,44 +282,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
                 throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
             }
-        }
-
-        public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId)
-        {
-            _logger.LogInformation(EventIds.FssBatchStatusPollingStarted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-            FssBatchStatus batchStatus = FssBatchStatus.Incomplete;
-            DateTime startTime = DateTime.UtcNow;
-
-            string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/status";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
-            //string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjU5NzA5NjI1LCJuYmYiOjE2NTk3MDk2MjUsImV4cCI6MTY1OTcxNDczNSwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQW9KK2Q1U251YVZUY0lDZXpBUUhRbGhvdkh5V1lNRUNtdXo5NzArV0kzZE9FZFFPTkNXRGhkMG8vb1dzcWVIelgvMTV4WW5EUm9PWGRkNmVNbm5CY1NaaW5WdXpYMUJkTzJrQ3dLMjVzZFM0N1RqQm9DL0tnTlFsMUU5VWhXUlE4SDgzREU3T3BrcXJrdG5nckdkNnA2NnNEWWsxZVVNWVNRWFhCMlNteDd0ST0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOSIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicHdkX2V4cCI6IjU2OTc4MCIsInB3ZF91cmwiOiJodHRwczovL3BvcnRhbC5taWNyb3NvZnRvbmxpbmUuY29tL0NoYW5nZVBhc3N3b3JkLmFzcHgiLCJyaCI6IjAuQVFJQVNNbzBrVDFtQlVxV2lqR2tMd3J0UGlUZ1c0QUlvdnRBcTI4NW5DWkgwelFDQUI4LiIsInJvbGVzIjpbIkJhdGNoQ3JlYXRlIl0sInNjcCI6IlVzZXIuUmVhZCIsInN1YiI6IjZUSERkOUhpdTlsRHZHRTZROXo5SE5zaVRHWEFGdG5LTnE2emdVSUs0NVEiLCJ0aWQiOiI5MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UiLCJ1bmlxdWVfbmFtZSI6IlZpc2hhbDE0NTgzQG1hc3Rlay5jb20iLCJ1dGkiOiI0Xzh6RmhqUXAwU0pua1RBdDlLTUFBIiwidmVyIjoiMS4wIn0.mPdzADmZObCofLxApkNlfffH_tqWiI6-O7xdEmwcKFHOJx26KLWbJlNluOZWrT2xM_0q3KXbwLMAfbxbK6d0arxdhxM-eUfvD4d92K47o68NxL4G9rp7pgXMjGm7RIWMUr9FhFho1IeY1T-4OVHiCsH7Pq9p9Pmukxj8MqZD2U28x72o26Vk-e8pvKpeWE1gEh9icBkir_Resv85EC3ryWkkiCZOTXpuiQsUnQp5moSaHr5aeYXWQH6o78gAc0c2oTOonnXswgWFRvq1hSde6SXByDOb_ljU8KbbdNN8WMpw44rAD2TZ9nXZi6Log7rSSONqFtLvNEferp7rGfKDSA";
-
-            while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime)))
-            {
-                _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
-                if (batchStatusResponse.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation(EventIds.GetBatchStatusRequestCompleted.ToEventId(), "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-
-                    FssBatchStatusResponseModel fssBatchStatusResponseModel = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
-                    Enum.TryParse(fssBatchStatusResponseModel?.Status, false, out batchStatus);
-                    if (batchStatus == FssBatchStatus.Committed)
-                    {
-                        _logger.LogInformation(EventIds.FssBatchStatusPollingStopped.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} stopped | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                        break;
-                    }
-                    await Task.Delay(int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime));
-                }
-                else
-                {
-                    _logger.LogError(EventIds.GetBatchStatusRequestFailed.ToEventId(), "Request to get batch status for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                    throw new FulfilmentException(EventIds.GetBatchStatusRequestFailed.ToEventId());
-                }
-            }
-            _logger.LogInformation(EventIds.FssBatchStatusPollingCompleted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            return batchStatus;
         }
 
         //Private Methods
@@ -257,7 +309,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     ReadUsers = new List<string>() { "public" }
                 }
             };
-
             return createBatchRequest;
         }
 
@@ -278,8 +329,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private async Task UploadFileBlock(UploadFileBlockRequestModel uploadBlockMetaData)
         {
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{uploadBlockMetaData.BatchId}/files/{uploadBlockMetaData.FileName}/{uploadBlockMetaData.BlockId}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
-            //string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjU5NzA5NjI1LCJuYmYiOjE2NTk3MDk2MjUsImV4cCI6MTY1OTcxNDczNSwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQW9KK2Q1U251YVZUY0lDZXpBUUhRbGhvdkh5V1lNRUNtdXo5NzArV0kzZE9FZFFPTkNXRGhkMG8vb1dzcWVIelgvMTV4WW5EUm9PWGRkNmVNbm5CY1NaaW5WdXpYMUJkTzJrQ3dLMjVzZFM0N1RqQm9DL0tnTlFsMUU5VWhXUlE4SDgzREU3T3BrcXJrdG5nckdkNnA2NnNEWWsxZVVNWVNRWFhCMlNteDd0ST0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOSIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicHdkX2V4cCI6IjU2OTc4MCIsInB3ZF91cmwiOiJodHRwczovL3BvcnRhbC5taWNyb3NvZnRvbmxpbmUuY29tL0NoYW5nZVBhc3N3b3JkLmFzcHgiLCJyaCI6IjAuQVFJQVNNbzBrVDFtQlVxV2lqR2tMd3J0UGlUZ1c0QUlvdnRBcTI4NW5DWkgwelFDQUI4LiIsInJvbGVzIjpbIkJhdGNoQ3JlYXRlIl0sInNjcCI6IlVzZXIuUmVhZCIsInN1YiI6IjZUSERkOUhpdTlsRHZHRTZROXo5SE5zaVRHWEFGdG5LTnE2emdVSUs0NVEiLCJ0aWQiOiI5MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UiLCJ1bmlxdWVfbmFtZSI6IlZpc2hhbDE0NTgzQG1hc3Rlay5jb20iLCJ1dGkiOiI0Xzh6RmhqUXAwU0pua1RBdDlLTUFBIiwidmVyIjoiMS4wIn0.mPdzADmZObCofLxApkNlfffH_tqWiI6-O7xdEmwcKFHOJx26KLWbJlNluOZWrT2xM_0q3KXbwLMAfbxbK6d0arxdhxM-eUfvD4d92K47o68NxL4G9rp7pgXMjGm7RIWMUr9FhFho1IeY1T-4OVHiCsH7Pq9p9Pmukxj8MqZD2U28x72o26Vk-e8pvKpeWE1gEh9icBkir_Resv85EC3ryWkkiCZOTXpuiQsUnQp5moSaHr5aeYXWQH6o78gAc0c2oTOonnXswgWFRvq1hSde6SXByDOb_ljU8KbbdNN8WMpw44rAD2TZ9nXZi6Log7rSSONqFtLvNEferp7rGfKDSA";
+            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSIsImtpZCI6IjJaUXBKM1VwYmpBWVhZR2FYRUpsOGxWMFRPSSJ9.eyJhdWQiOiI4MDViZTAyNC1hMjA4LTQwZmItYWI2Zi0zOTljMjY0N2QzMzQiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC85MTM0Y2E0OC02NjNkLTRhMDUtOTY4YS0zMWE0MmYwYWVkM2UvIiwiaWF0IjoxNjYwODE1NjY5LCJuYmYiOjE2NjA4MTU2NjksImV4cCI6MTY2MDgyMTA0NCwiYWNyIjoiMSIsImFpbyI6IkFZUUFlLzhUQUFBQUVrR3BmbVM3RGVjd3c0RHp0M0dha2NXamdvL2VtbkcvbHhmMit0TVBRdHdwSmFYZGRLamx1MGxGM1ZCVHNCd21USTZFV2hmTkFaWk9NcEJseGQvYmNueHliNHhyRnBuNE9ybjRUOUlaTFF3MXBUQk4xdlRXUHA0MkRNWkdiQW5LZ1UwVXBnNDlNcjVoVXpHekFRaEVTR3pjb0hCZ1Q2MXI2eHMyMDk5V1RUUT0iLCJhbXIiOlsicHdkIiwibWZhIl0sImFwcGlkIjoiODA1YmUwMjQtYTIwOC00MGZiLWFiNmYtMzk5YzI2NDdkMzM0IiwiYXBwaWRhY3IiOiIwIiwiZW1haWwiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwiaWRwIjoiaHR0cHM6Ly9zdHMud2luZG93cy5uZXQvYWRkMWM1MDAtYTZkNy00ZGJkLWI4OTAtN2Y4Y2I2ZjdkODYxLyIsImlwYWRkciI6IjE2My4xMTYuMjA1LjExOCIsIm5hbWUiOiJWaXNoYWwgRHVrYXJlIiwib2lkIjoiODZjNWVlN2EtOTRlNi00OGM2LTlmOWMtYTRhYzU3MDRkZTFiIiwicmgiOiIwLkFRSUFTTW8wa1QxbUJVcVdpakdrTHdydFBpVGdXNEFJb3Z0QXEyODVuQ1pIMHpRQ0FCOC4iLCJyb2xlcyI6WyJCYXRjaENyZWF0ZSJdLCJzY3AiOiJVc2VyLlJlYWQiLCJzdWIiOiI2VEhEZDlIaXU5bER2R0U2UTl6OUhOc2lUR1hBRnRuS05xNnpnVUlLNDVRIiwidGlkIjoiOTEzNGNhNDgtNjYzZC00YTA1LTk2OGEtMzFhNDJmMGFlZDNlIiwidW5pcXVlX25hbWUiOiJWaXNoYWwxNDU4M0BtYXN0ZWsuY29tIiwidXRpIjoiTWx4Z1M2OHEwRU9YZUxuWjRsdGhBQSIsInZlciI6IjEuMCJ9.l2BHgsfEZsJzdX3a9yxkxE7eu8szC2H5dg-_Llp7gKSVdfZlLAMTUZE698wT-wNxfjbHOCLiZPtz2_t0XdTT8-PML_34GJvthhbqmvPpZHvo-jv0PiJTaf0tS99QU3UddNNYECrXQwSNj03_bbbhqercrEbGYEEqMum-yImKRkl5RoCnfqZN0HPJ7zt4linAbTUAj1bDFHxkHJriDN3TiwH8gzSD9ieIuB_LwFwg7VVdI9S3EFW1tLKbVA5e2b82F_bCssF1iASJ2xKjYQzr3l8XLLTKp-e33AQWERni4M425oAmoSKyFubrOCV-hw_5FpFiN_YfZRgrXMWwoBjcHA";
 
             byte[] blockBytes = _fileSystemHelper.GetFileInBytes(uploadBlockMetaData);
             byte[]? blockMd5Hash = CommonHelper.CalculateMD5(blockBytes);

@@ -12,10 +12,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _httpClient = httpClientFactory.CreateClient();
         }
 
-        public async Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken)
+        public async Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string uri, List<string> productIdentifierModel, string accessToken)
         {
-            string uri = $"{baseUrl}/productData/productIdentifiers";
-
             string payloadJson = JsonConvert.SerializeObject(productIdentifierModel);
 
             using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)

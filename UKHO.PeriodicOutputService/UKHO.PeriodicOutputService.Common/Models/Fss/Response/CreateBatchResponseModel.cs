@@ -1,5 +1,5 @@
 ﻿
-namespace UKHO.ExchangeSetService.Common.Models.FileShareService.Response
+namespace UKHO.PeriodicOutputService.Common.Models.FileShareService.Response
 {
     public class CreateBatchResponseModel
     {

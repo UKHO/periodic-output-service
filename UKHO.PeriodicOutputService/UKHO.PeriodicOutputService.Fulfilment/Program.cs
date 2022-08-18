@@ -44,9 +44,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
                 try
                 {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     await serviceProvider.GetService<PosFulfilmentJob>().ProcessFulfilmentJob();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }
                 finally
                 {
@@ -153,6 +151,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                 serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+                serviceCollection.AddSingleton<IConfiguration>(configuration);
             }
 
             var essAzureADConfiguration = new EssApiConfiguration();

@@ -2,10 +2,9 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
-using UKHO.ExchangeSetService.Common.Logging;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
@@ -68,7 +67,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                             if (reader.Name == "ShortName")
                             {
                                 reader.Read();
-                                if (reader.HasValue) productIdentifiers.Add(reader.Value);
+                                if (reader.HasValue)
+                                {
+                                    productIdentifiers.Add(reader.Value);
+                                }
                             }
                         }
                     }

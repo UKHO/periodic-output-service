@@ -6,9 +6,10 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     public interface IFileSystemHelper
     {
         void CreateDirectory(string folderPath);
-        IFileInfo GetFileInfo(string filePath);
-        IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption);
         byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData);
+        void CreateFileCopy(string filePath, Stream stream);
+        IFileInfo GetFileInfo(string filePath);
+        IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption);        
         List<FileDetail> GetFileMD5(IEnumerable<string> fileNames);
     }
 }

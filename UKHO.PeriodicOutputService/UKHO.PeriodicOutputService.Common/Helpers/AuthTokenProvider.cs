@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
-using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -38,7 +38,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 _logger.LogInformation(EventIds.CachedAccessTokenFound.ToEventId(), "Valid access token found in cache to call external endpoint | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 return accessToken.AccessToken;
             }
-            var newAccessToken = await GetNewAuthToken(resource);
+
+            AccessTokenItem? newAccessToken = await GetNewAuthToken(resource);
             AddAuthTokenToCache(resource, newAccessToken);
 
             _logger.LogInformation(EventIds.GetAccessTokenCompleted.ToEventId(), "Getting access token to call external endpoint completed | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
@@ -50,7 +51,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _logger.LogInformation(EventIds.GetNewAccessTokenStarted.ToEventId(), "Generating new access token to call external endpoint started | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             var tokenCredential = new DefaultAzureCredential();
-            var accessToken = await tokenCredential.GetTokenAsync(
+            AccessToken accessToken = await tokenCredential.GetTokenAsync(
                 new TokenRequestContext(scopes: new string[] { resource + "/.default" }) { }
             );
 
@@ -67,25 +68,25 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             _logger.LogInformation(EventIds.CachingExternalEndPointTokenStarted.ToEventId(), "Adding new access token in cache to call external endpoint | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            var tokenExpiryMinutes = accessTokenItem.ExpiresIn.Subtract(DateTime.UtcNow).TotalMinutes;
-            var deductTokenExpiryMinutes = _essManagedIdentityConfiguration.Value.DeductTokenExpiryMinutes < tokenExpiryMinutes ? _essManagedIdentityConfiguration.Value.DeductTokenExpiryMinutes : 1;
-            var options = new DistributedCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(tokenExpiryMinutes - deductTokenExpiryMinutes));
-            options.SetAbsoluteExpiration(accessTokenItem.ExpiresIn);
+            double tokenExpiryMinutes = accessTokenItem.ExpiresIn.Subtract(DateTime.UtcNow).TotalMinutes;
+            double deductTokenExpiryMinutes = _essManagedIdentityConfiguration.Value.DeductTokenExpiryMinutes < tokenExpiryMinutes ? _essManagedIdentityConfiguration.Value.DeductTokenExpiryMinutes : 1;
+            DistributedCacheEntryOptions? options = new DistributedCacheEntryOptions();
+            options.SetAbsoluteExpiration(accessTokenItem.ExpiresIn.Subtract(TimeSpan.FromMinutes(deductTokenExpiryMinutes)));
 
             lock (_lock)
             {
                 _cache.SetString(key, JsonConvert.SerializeObject(accessTokenItem), options);
-                _logger.LogInformation(EventIds.CachingExternalEndPointTokenCompleted.ToEventId(), "New token is added in cache to call external endpoint and it expires in {ExpiresIn} with sliding expiration duration {options}.", Convert.ToString(accessTokenItem.ExpiresIn), JsonConvert.SerializeObject(options));
             }
+            _logger.LogInformation(EventIds.CachingExternalEndPointTokenCompleted.ToEventId(), "New token is added in cache to call external endpoint and it expires in {ExpiresIn} with sliding expiration duration {options}.", Convert.ToString(accessTokenItem.ExpiresIn), JsonConvert.SerializeObject(options));
         }
         private AccessTokenItem GetAuthTokenFromCache(string key)
         {
-            var item = _cache.GetString(key);
-            if (item != null)
+            string? item;
+            lock (_lock)
             {
-                return JsonConvert.DeserializeObject<AccessTokenItem>(item);
+                item = _cache.GetString(key);
             }
-            return null;
+            return item != null ? JsonConvert.DeserializeObject<AccessTokenItem>(item) : null;
         }
     }
 }
