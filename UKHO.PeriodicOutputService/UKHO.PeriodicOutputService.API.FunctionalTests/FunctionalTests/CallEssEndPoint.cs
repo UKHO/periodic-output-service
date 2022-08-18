@@ -11,14 +11,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public string userCredentialsBytes;
 
         private GetUNPResponse getunp { get; set; }
-        private TestConfiguration config { get; set; }
         private GetCatalogue getcat { get; set; }
         private string EssJwtToken { get; set; }
         private string FssJwtToken { get; set; }
         private GetProductIdentifiers getproductIdentifier { get; set; }
 
-        private static readonly ESSApiConfiguration ESSAuth = new TestConfiguration().EssAuthorizationConfig;
-        private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
+        private static readonly ESSApiConfiguration ESSApiConfig = new TestConfiguration().EssConfig;
         private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
@@ -28,7 +26,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [OneTimeSetUp]
         public async Task Setup()
         {
-            config = new TestConfiguration();
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
             getproductIdentifier = new GetProductIdentifiers();
@@ -49,7 +46,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallTheExchangeSetApiWithValidProductIdentifiers_ThenANonZeroRequestedProductCountAndExchangeSetCellCountIsReturned()
         {
-            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSApiConfig.BaseUrl, productIdentifiers, EssJwtToken);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             //verify model structure
@@ -62,7 +59,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             productIdentifiers.Add("ABCDEFGH"); //Adding invalid product identifier in the list
 
-            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSApiConfig.BaseUrl, productIdentifiers, EssJwtToken);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             //verify model structure
@@ -78,10 +75,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallTheFSSApiWithValidBatchId_ThenALargeMediaStructureIsCreated()
         {
-            HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
+            HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSApiConfig.BaseUrl, productIdentifiers, EssJwtToken);
             Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
-            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(essApiResponse, FssJwtToken,ESSBatchId);
+            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(essApiResponse, FssJwtToken, ESSBatchId);
             Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             //Clean up downloaded files/folders
