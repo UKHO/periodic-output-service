@@ -37,8 +37,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/status";
 
-            string accessToken = "abc";
-            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
             FssBatchStatus[] pollBatchStatus = { FssBatchStatus.CommitInProgress, FssBatchStatus.Incomplete };
 
@@ -79,8 +78,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}";
 
-            string accessToken = "abc";
-            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
             HttpResponseMessage batchDetailResponse = await _fssApiClient.GetBatchDetailsAsync(uri, accessToken);
 
@@ -102,8 +100,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string fileUri = $"{_fssApiConfiguration.Value.BaseUrl}" + fileLink;
 
-            string accessToken = "abc";
-            //string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
             HttpResponseMessage fileDownloadResponse = await _fssApiClient.DownloadFile(fileUri, accessToken);
 
