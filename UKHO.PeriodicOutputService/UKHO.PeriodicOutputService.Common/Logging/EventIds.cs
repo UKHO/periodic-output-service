@@ -148,78 +148,81 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809035 - Error.txt found in batch.
         /// </summary>
         ErrorFileFoundInBatch = 809035,
+
+
         /// <summary>
-        /// 809036 - Create batch started
+        /// 809042 - Fss polling cutoff timeout
         /// </summary>
-        CreateBatchStarted = 809036,
+        FssPollingCutOffTimeout = 809042,
         /// <summary>
-        /// 809037 - Create batch failed
+        /// 809043 - Empty BatchId found
         /// </summary>
-        CreateBatchFailed = 809037,
+        EmptyBatchIdFound = 809043,
         /// <summary>
-        /// 809038 - Create batch completed
+        /// 809044 -  Fss batch status polling completed.
         /// </summary>
-        CreateBatchCompleted = 809038,
+        FssBatchStatusPollingTimedOut = 809044,
+        //////Create Batch events
         /// <summary>
-        /// 809039 - Add file to batch request started
+        /// 809045 - Create batch started
         /// </summary>
-        AddFileToBatchRequestStarted = 809039,
+        CreateBatchStarted = 809045,
         /// <summary>
-        /// 809040 - Add file to batch request failed
+        /// 809046 - Create batch failed
         /// </summary>
-        AddFileToBatchRequestFailed = 809040,
+        CreateBatchFailed = 809046,
         /// <summary>
-        /// 809041 - Add file to batch request completed
+        /// 809047 - Create batch completed
         /// </summary>
-        AddFileToBatchRequestCompleted = 809041,
+        CreateBatchCompleted = 809047,
         /// <summary>
-        /// 809042 - Write file block started
+        /// 809048 - Add file to batch request started
         /// </summary>
-        WriteBlockToFileStarted = 809042,
+        AddFileToBatchRequestStarted = 809048,
         /// <summary>
-        /// 809043 - Write file block failed
+        /// 809049 - Add file to batch request failed
         /// </summary>
-        WriteBlockToFileFailed = 809043,
+        AddFileToBatchRequestFailed = 809049,
         /// <summary>
-        /// 809044 - Write file block completed
+        /// 809050 - Add file to batch request completed
         /// </summary>
-        WriteBlockToFileCompleted = 809044,
+        AddFileToBatchRequestCompleted = 809050,
         /// <summary>
-        /// 809045 - Upload file block started
+        /// 809051 - Write file block started
         /// </summary>
-        UploadFileBlockStarted = 809045,
+        WriteBlockToFileStarted = 809051,
         /// <summary>
-        /// 809046 - Upload file block failed
+        /// 809052 - Write file block failed
         /// </summary>
-        UploadFileBlockFailed = 809046,
+        WriteBlockToFileFailed = 809052,
         /// <summary>
-        /// 809047 - Upload file block completed
+        /// 809053 - Write file block completed
         /// </summary>
-        UploadFileBlockCompleted = 809047,
+        WriteBlockToFileCompleted = 809053,
         /// <summary>
-        /// 809048 - Commit batch started
+        /// 809054 - Upload file block started
         /// </summary>
-        CommitBatchStarted = 809048,
+        UploadFileBlockStarted = 809054,
         /// <summary>
-        /// 809049 - Commit batch failed
+        /// 809055 - Upload file block failed
         /// </summary>
-        CommitBatchFailed = 809049,
+        UploadFileBlockFailed = 809055,
         /// <summary>
-        /// 809050 - Commit batch completed
+        /// 809056 - Upload file block completed
         /// </summary>
-        CommitBatchCompleted = 809050,
+        UploadFileBlockCompleted = 809056,
         /// <summary>
-        /// 809051 - Fss polling cutoff timeout
+        /// 809057 - Commit batch started
         /// </summary>
-        FssPollingCutOffTimeout = 809051,
+        CommitBatchStarted = 809057,
         /// <summary>
-        /// 809052 - Empty BatchId found
+        /// 809058 - Commit batch failed
         /// </summary>
-        EmptyBatchIdFound = 809052,
+        CommitBatchFailed = 809058,
         /// <summary>
-        /// 809053 -  Fss batch status polling completed.
+        /// 809059 - Commit batch completed
         /// </summary>
-        FssBatchStatusPollingTimedOut = 809053
+        CommitBatchCompleted = 809059
     }
 
     public static class EventIdExtensions
