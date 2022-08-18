@@ -161,6 +161,43 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
+        public void Does_CreatePosExchangeSet_Check_If_FulfilmentException_Thrown_When_BatchStatus_IsNot_Committed()
+        {
+            jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
+            jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
+
+            FleetManagerGetCatalogueResponseModel fleetManagerGetCatalogue = new()
+            {
+                StatusCode = HttpStatusCode.OK,
+                ProductIdentifiers = new() { "Product1", "Product2" }
+            };
+
+            A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken())
+              .Returns(jwtauthUnpToken);
+
+            A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
+              .Returns(fleetManagerGetCatalogue);
+
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+              .Returns(Common.Enums.FssBatchStatus.CommitInProgress);
+
+
+            Assert.ThrowsAsync<FulfilmentException>(
+                () => _fulfilmentDataService.CreatePosExchangeSets());
+
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+        }
+
+        [Test]
         public void Does_CreatePosExchangeSet_Check_If_CreateIsoAndSha1_Throws_Error()
         {
             jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
