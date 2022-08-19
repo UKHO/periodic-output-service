@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,8 +46,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<string> DownloadedFolderForLargeFiles(string downloadFileUrl, string jwtToken, string folderName)
         {
-            //Mock api fullfillment process takes more time to upload file for the cancellation product and tests are intermittently failing,therefore we have added delay 'Thread.Sleep()' to avoid intermittent failure in the pipe.
-            string LargeFolderName = folderName + ".zip";
+            string LargeFolderName = folderName;
             string tempFilePath = Path.Combine(Path.GetTempPath(), LargeFolderName);
 
             var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
@@ -60,5 +60,41 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
             return tempFilePath;
         }
+
+        public static async Task<string> ExtractDownloadedFolderForLargeFiles(string downloadFileUrl, string jwtToken, string folderName)
+        {
+            string LargeFolderName = folderName + ".zip";
+            string tempFilePath = Path.Combine(Path.GetTempPath(), LargeFolderName);
+
+            var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
+            Assert.That((int)response.StatusCode, Is.EqualTo(200), $"Incorrect status code File Download api returned {response.StatusCode} for the url {downloadFileUrl}, instead of the expected 200.");
+
+            Stream stream = await response.Content.ReadAsStreamAsync();
+
+            using (FileStream outputFileStream = new FileStream(tempFilePath, FileMode.Create))
+            {
+                stream.CopyTo(outputFileStream);
+            }
+
+            string zipPath = tempFilePath;
+            string extractPath = Path.GetTempPath() + RenameFolder(tempFilePath);
+
+            ZipFile.ExtractToDirectory(zipPath, extractPath);
+
+            return extractPath;
+
+        }
+
+        public static string RenameFolder(string pathInput)
+        {
+            string fileName = Path.GetFileName(pathInput);
+            if (fileName.Contains(".zip"))
+            {
+                fileName = fileName.Replace(".zip", "");
+            }
+
+            return fileName;
+        }
+
     }
 }

@@ -22,7 +22,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
-        
+        public string ZipFilesBatchId = "2270F318-639C-4E64-A0C0-CADDD5F4EB05";
+
         [OneTimeSetUp]
         public async Task Setup()
         {
@@ -79,8 +80,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
             Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
-            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(essApiResponse, FssJwtToken);
-            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
+            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(ZipFilesBatchId, FssJwtToken);
+            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {(int)DownloadedFolderPath.Count} is incorrect");
 
             //Clean up downloaded files/folders
             foreach (string FolderName in DownloadedFolderPath)
