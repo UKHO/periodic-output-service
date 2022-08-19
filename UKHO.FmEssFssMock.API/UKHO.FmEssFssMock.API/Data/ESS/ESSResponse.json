@@ -1,0 +1,70 @@
+[
+    {
+        "id": "productIdentifier-FR570300-SE6IIFE1-NO3B2020-GB20486A-RU3P0ZM0-US5CN13M-CA172005-DE521900-NZ300661-KR676D03",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 10,
+            "exchangeSetCellCount": 10,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
+    },
+    {
+        "id": "sincedatetime",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90FCDFA0-8229-43D5-B059-172491E5402B/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90FCDFA0-8229-43D5-B059-172491E5402B"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90FCDFA0-8229-43D5-B059-172491E5402B/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 10,
+            "exchangeSetCellCount": 10,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
+    },
+    {
+        "id": "productIdentifier-FR570300-SE6IIFE1-NO3B2020-GB20486A-RU3P0ZM0-US5CN13M-CA172005-DE521900-NZ300661-KR676D03-ABCDEFGH",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 11,
+            "exchangeSetCellCount": 10,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": [
+                {
+                    "productName": "ABCDEFGH",
+                    "reason": "invalidProduct"
+                }
+            ]
+        }
+    }
+]

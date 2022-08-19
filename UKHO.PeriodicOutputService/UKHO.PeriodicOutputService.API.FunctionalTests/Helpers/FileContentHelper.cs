@@ -5,19 +5,19 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 {
     public static class FileContentHelper
     {
-        private static TestConfiguration Config = new TestConfiguration();
+        private static readonly TestConfiguration Config = new();
 
-        public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(HttpResponseMessage apiEssResponse, string FssJwtToken)
+        public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(HttpResponseMessage apiEssResponse, string FssJwtToken, string BatchId)
         {
-            List<string> downloadFolderPath = new List<string>();
+            List<string> downloadFolderPath = new();
             Assert.That((int)apiEssResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiEssResponse.StatusCode}, instead of the expected status 200.");
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                var FolderName = $"M0{mediaNumber}X02";
-                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/files/{FolderName}.zip";
+                string FolderName = $"M0{mediaNumber}X02";
+                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{FolderName}.zip";
 
-                var DownloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, FolderName);
+                string DownloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, FolderName);
 
                 downloadFolderPath.Add(DownloadedFolder);
             }
