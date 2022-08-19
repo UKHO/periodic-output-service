@@ -373,9 +373,12 @@ stages:
 
       - job: CheckInfra
         displayName: "Check Infrastructure Health"
-        environment: "Ess-Dev"
-        pool: $(DeploymentPool)
         dependsOn: DevDeployApp
+        variables:
+          - name: WEB_APP_NAME
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.WEBAPP']  ]
+          - name: RGName
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
         steps:
           - task: AzureCLI@2
             displayName: "Check Infrastructure is healthy"
@@ -388,8 +391,6 @@ stages:
 
       - job: CheckFSS
         displayName: "Check FSS Health"
-        environment: "Ess-Dev"
-        pool: $(DeploymentPool)
         dependsOn: DevDeployApp
         steps:
           - task: AzureCLI@2
@@ -403,8 +404,6 @@ stages:
 
       - job: CheckESS
         displayName: "Check ESS Health"
-        environment: "Ess-Dev"
-        pool: $(DeploymentPool)
         dependsOn: DevDeployApp
         steps:
           - task: AzureCLI@2
@@ -418,8 +417,6 @@ stages:
 
       - job: CheckFM
         displayName: "Check Fleet Manager Health"
-        environment: "Ess-Dev"
-        pool: $(DeploymentPool)
         dependsOn: DevDeployApp
         steps:
           - task: AzureCLI@2
