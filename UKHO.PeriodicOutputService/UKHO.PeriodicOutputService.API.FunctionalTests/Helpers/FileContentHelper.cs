@@ -1,6 +1,4 @@
-﻿using NUnit.Framework;
-using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
-using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
+﻿using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
 namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 {
@@ -8,7 +6,6 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
     {
         private static TestConfiguration Config = new TestConfiguration();
         private static FssApiClient FssApiClient = new FssApiClient();
-       
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string BatchId, string FssJwtToken)
         {
@@ -42,7 +39,6 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
                     File.Delete(fileName);
                 }
             }
-
         }
 
         public static void DeleteDirectoryForIsoAndSha1Files(string fileName)
@@ -55,11 +51,11 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
                 if (folder.Contains(".zip"))
                 {
                     folder = folder.Replace(".zip", "");
-                   //Delete V01XO1/M01XO2/M02XO2 Directory and sub directories from temp Directory
-                   Directory.Delete(Path.Combine(path, folder), true);
-                   
+                    //Delete V01XO1/M01XO2/M02XO2 Directory and sub directories from temp Directory
+                    Directory.Delete(Path.Combine(path, folder), true);
+
                 }
-                else if(folder.Contains(".iso"))
+                else if (folder.Contains(".iso"))
                 {
                     folder = folder.Replace(".iso", "");
                 }
@@ -68,7 +64,6 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
                     folder = folder.Replace(".iso.sha1", "");
                 }
 
-             
                 //Delete V01X01.zip/M01XO2.zip/M02XO2.zip file from temp Directory
                 if (File.Exists(Path.Combine(path, fileName)))
                 {
@@ -103,7 +98,7 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
                 var FolderNameIso = $"M0{mediaNumber}X02.iso";
-               
+
                 var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{FolderNameIso}";
 
                 var DownloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, FolderNameIso);

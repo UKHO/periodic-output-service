@@ -4,6 +4,7 @@ using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
+
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     public class CallEssEndPoint
@@ -11,13 +12,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public string userCredentialsBytes;
 
         private GetUNPResponse getunp { get; set; }
-        private TestConfiguration config { get; set; }
         private GetCatalogue getcat { get; set; }
         private string EssJwtToken { get; set; }
         private string FssJwtToken { get; set; }
         private GetProductIdentifiers getproductIdentifier { get; set; }
 
-        private static readonly ESSApiConfiguration ESSAuth = new TestConfiguration().EssAuthorizationConfig;
+        private static readonly ESSApiConfiguration ESSAuth = new TestConfiguration().EssConfig;
+        private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
         private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
@@ -27,7 +28,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [OneTimeSetUp]
         public async Task Setup()
         {
-            config = new TestConfiguration();
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
             getproductIdentifier = new GetProductIdentifiers();

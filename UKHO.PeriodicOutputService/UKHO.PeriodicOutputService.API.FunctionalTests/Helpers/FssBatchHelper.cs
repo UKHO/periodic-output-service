@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Compression;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO.Compression;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using UKHO.ExchangeSetService.API.FunctionalTests.Models;
@@ -82,7 +77,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             ZipFile.ExtractToDirectory(zipPath, extractPath);
 
             return extractPath;
-
         }
 
         public static string RenameFolder(string pathInput)
@@ -95,6 +89,5 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
             return fileName;
         }
-
     }
 }

@@ -6,7 +6,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     {
         protected IConfigurationRoot ConfigurationRoot;
         public FleetManagerB2BApiConfiguration fleetManagerB2BConfig = new();
-        public ESSApiConfiguration EssAuthorizationConfig = new();
+        public ESSApiConfiguration EssConfig = new();
         public FSSApiConfiguration FssConfig = new();
         public POSWebjobApiConfiguration POSWebJobConfig = new();
 
@@ -53,7 +53,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                                .Build();
 
             ConfigurationRoot.Bind("FleetManagerB2BApiConfiguration", fleetManagerB2BConfig);
-            ConfigurationRoot.Bind("ESSApiConfiguration", EssAuthorizationConfig);
+            ConfigurationRoot.Bind("ESSApiConfiguration", EssConfig);
             ConfigurationRoot.Bind("FSSApiConfiguration", FssConfig);
             ConfigurationRoot.Bind("POSWebjobApiConfiguration", POSWebJobConfig);
         }

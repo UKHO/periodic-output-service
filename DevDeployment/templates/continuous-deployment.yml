@@ -38,7 +38,7 @@ steps:
       scriptType: 'pscore'
       scriptLocation: 'scriptPath'
       scriptPath: '$(Pipeline.Workspace)/devterraformartifact/mock_api_deployment.ps1'
-      arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FleetManagerMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
+      arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FmEssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
 
   - task: FileTransform@1
     displayName: "File Transform: POS Config"

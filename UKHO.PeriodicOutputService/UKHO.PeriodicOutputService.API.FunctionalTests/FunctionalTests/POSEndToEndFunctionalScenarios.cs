@@ -7,11 +7,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     public class POSEndToEndFunctionalScenarios
     {
+        private TestConfiguration config;
+        private string FssJwtToken;
         public string userCredentialsBytes;
-        private TestConfiguration config { get; set; }
-        private POSWebJob WebJob { get; set; }
-        private string FssJwtToken { get; set; }
-
+        private POSWebJob WebJob;
         private static readonly POSWebjobApiConfiguration POSWebJob = new TestConfiguration().POSWebJobConfig;
 
         static FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;

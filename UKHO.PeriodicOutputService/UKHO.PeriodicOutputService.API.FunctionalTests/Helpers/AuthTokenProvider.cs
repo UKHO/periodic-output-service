@@ -8,8 +8,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static string EssAccessToken = null;
         private static string FssAccessToken = null;
 
-        private static readonly ESSApiConfiguration EssauthConfig = new TestConfiguration().EssAuthorizationConfig;
-        private static readonly FSSApiConfiguration FssAuthConfig = new TestConfiguration().FssConfig;
+        private static readonly ESSApiConfiguration EssauthConfig = new TestConfiguration().EssConfig;
+        private static FSSApiConfiguration FssAuthConfig = new TestConfiguration().FssConfig;
 
         public async Task<string> GetEssToken()
         {
