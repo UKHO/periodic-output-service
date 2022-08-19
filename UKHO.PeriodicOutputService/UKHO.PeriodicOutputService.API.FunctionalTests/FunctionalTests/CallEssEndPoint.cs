@@ -11,23 +11,21 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public string userCredentialsBytes;
 
         private GetUNPResponse getunp { get; set; }
-        private TestConfiguration config { get; set; }
         private GetCatalogue getcat { get; set; }
         private string EssJwtToken { get; set; }
         private string FssJwtToken { get; set; }
         private GetProductIdentifiers getproductIdentifier { get; set; }
 
-        private static readonly EssAuthorizationConfiguration ESSAuth = new TestConfiguration().EssAuthorizationConfig;
-        private static readonly FunctionalTestFSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
+        private static readonly ESSApiConfiguration ESSApiConfig = new TestConfiguration().EssConfig;
         private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
-        
+        public string ESSBatchId = "2270F318-639C-4E64-A0C0-CADDD5F4EB05";
+
         [OneTimeSetUp]
         public async Task Setup()
         {
-            config = new TestConfiguration();
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
             getproductIdentifier = new GetProductIdentifiers();
@@ -48,7 +46,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallTheExchangeSetApiWithValidProductIdentifiers_ThenANonZeroRequestedProductCountAndExchangeSetCellCountIsReturned()
         {
-            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSApiConfig.BaseUrl, productIdentifiers, EssJwtToken);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             //verify model structure
@@ -61,7 +59,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             productIdentifiers.Add("ABCDEFGH"); //Adding invalid product identifier in the list
 
-            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSApiConfig.BaseUrl, productIdentifiers, EssJwtToken);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             //verify model structure
@@ -77,10 +75,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallTheFSSApiWithValidBatchId_ThenALargeMediaStructureIsCreated()
         {
-            HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.EssApiUrl, productIdentifiers, EssJwtToken);
+            HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSApiConfig.BaseUrl, productIdentifiers, EssJwtToken);
             Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
-            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(essApiResponse, FssJwtToken);
+            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(essApiResponse, FssJwtToken, ESSBatchId);
             Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             //Clean up downloaded files/folders

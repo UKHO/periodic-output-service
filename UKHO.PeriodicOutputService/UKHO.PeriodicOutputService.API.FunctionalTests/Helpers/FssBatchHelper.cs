@@ -13,7 +13,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     public static class FssBatchHelper
     {
         private static FssApiClient FssApiClient { get; set; }
-        static FunctionalTestFSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
+        static FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
         static TestConfiguration EssConfig { get; set; }
 
         static FssBatchHelper()
