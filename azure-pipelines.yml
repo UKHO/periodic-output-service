@@ -371,9 +371,74 @@ stages:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
 
+      - job: CheckInfra
+        displayName: "Check Infrastructure Health"
+        environment: "Ess-Dev"
+        pool: $(DeploymentPool)
+        dependsOn: DevDeployApp
+        steps:
+          - task: AzureCLI@2
+            displayName: "Check Infrastructure is healthy"
+            inputs:
+              azureSubscription: "${{ parameters.AzureSubscription }}"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_service_status_webjob.ps1'
+              arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
+
+      - job: CheckFSS
+        displayName: "Check FSS Health"
+        environment: "Ess-Dev"
+        pool: $(DeploymentPool)
+        dependsOn: DevDeployApp
+        steps:
+          - task: AzureCLI@2
+            displayName: "Check FSS Health endpoint is healthy"
+            inputs:
+              azureSubscription: "${{ parameters.AzureSubscription }}"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
+              arguments: "-healthEndPointUrl $(FSSHealthEndpoint) -waitTimeInMinute $(waitTimeInMinute)"
+
+      - job: CheckESS
+        displayName: "Check ESS Health"
+        environment: "Ess-Dev"
+        pool: $(DeploymentPool)
+        dependsOn: DevDeployApp
+        steps:
+          - task: AzureCLI@2
+            displayName: "Check ESS Health endpoint is healthy"
+            inputs:
+              azureSubscription: "${{ parameters.AzureSubscription }}"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
+              arguments: "-healthEndPointUrl $(FSSHealthEndpoint) -waitTimeInMinute $(waitTimeInMinute)"
+
+      - job: CheckFM
+        displayName: "Check Fleet Manager Health"
+        environment: "Ess-Dev"
+        pool: $(DeploymentPool)
+        dependsOn: DevDeployApp
+        steps:
+          - task: AzureCLI@2
+            displayName: "Check FM Health endpoint is healthy"
+            inputs:
+              azureSubscription: "${{ parameters.AzureSubscription }}"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
+              arguments: "-healthEndPointUrl $(FSSHealthEndpoint) -waitTimeInMinute $(waitTimeInMinute)"
+
+
       - job: FunctionalTests
         dependsOn:
         - DevDeployApp
+        - CheckInfra
+        - CheckFSS
+        - CheckESS
+        - CheckFM
         pool: NautilusBuild
         displayName: "Dev Functional Automated Tests"
         workspace:
