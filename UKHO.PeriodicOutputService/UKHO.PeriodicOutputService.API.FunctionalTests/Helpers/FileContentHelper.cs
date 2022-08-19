@@ -1,22 +1,11 @@
 ﻿using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using UKHO.ExchangeSetService.API.FunctionalTests.Models;
-using System.Net.Http;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
-using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 
 namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 {
     public static class FileContentHelper
     {
         private static TestConfiguration Config = new TestConfiguration();
-        private static FssApiClient FssApiClient = new FssApiClient();
-       
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(HttpResponseMessage apiEssResponse, string FssJwtToken)
         {

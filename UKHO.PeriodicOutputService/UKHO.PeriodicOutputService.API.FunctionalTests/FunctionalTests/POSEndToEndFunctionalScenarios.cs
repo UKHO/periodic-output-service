@@ -16,8 +16,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public string ESSBatchId = "2270F318-639C-4E64-A0C0-CADDD5F4EB05";
         bool checkfile;
 
-
-
         [OneTimeSetUp]
         public async Task Setup()
         {
