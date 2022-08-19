@@ -11,9 +11,9 @@ output "default_site_hostname" {
 }
 
 output "username" {
-  value = azurerm_windows_web_app.webapp_service.site_credential.name
+  value = azurerm_windows_web_app.webapp_service.site_credential[0].name
 }
 
 output "password" {
-  value = azurerm_windows_web_app.webapp_service.site_credential.password
+  value = azurerm_windows_web_app.webapp_service.site_credential[0].password
 }
