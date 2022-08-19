@@ -1,5 +1,6 @@
 ﻿using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Filters;
+using UKHO.FmEssFssMock.API.HealthChecks;
 using UKHO.FmEssFssMock.API.Services;
 
 namespace UKHO.FmEssFssMock.API
@@ -30,6 +31,9 @@ namespace UKHO.FmEssFssMock.API
             services.AddScoped<FileShareService>();
             services.AddScoped<ExchangeSetService>();
 
+            services.AddHealthChecks()
+                .AddCheck<FleetManagerStubHealthCheck>("FleetManagerStubHealthCheck");
+
             services.AddHttpClient();
         }
 
@@ -50,6 +54,7 @@ namespace UKHO.FmEssFssMock.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health-check");
             });
         }
     }
