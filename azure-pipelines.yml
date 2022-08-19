@@ -373,8 +373,6 @@ stages:
 
       - job: CheckInfra
         displayName: "Check Infrastructure Health"
-        environment: "Ess-Dev"
-        pool: $(DeploymentPool)
         dependsOn: DevDeployApp
         steps:
           - task: AzureCLI@2
@@ -388,8 +386,6 @@ stages:
 
       - job: CheckFSS
         displayName: "Check FSS Health"
-        environment: "Ess-Dev"
-        pool: $(DeploymentPool)
         dependsOn: DevDeployApp
         steps:
           - task: AzureCLI@2
@@ -403,8 +399,6 @@ stages:
 
       - job: CheckESS
         displayName: "Check ESS Health"
-        environment: "Ess-Dev"
-        pool: $(DeploymentPool)
         dependsOn: DevDeployApp
         steps:
           - task: AzureCLI@2
@@ -418,8 +412,6 @@ stages:
 
       - job: CheckFM
         displayName: "Check Fleet Manager Health"
-        environment: "Ess-Dev"
-        pool: $(DeploymentPool)
         dependsOn: DevDeployApp
         steps:
           - task: AzureCLI@2
