@@ -31,28 +31,20 @@ namespace UKHO.FmEssFssMock.API.HealthChecks
         private HealthCheckResult CheckFileContent()
         {
             string? avcsCatalogueResponseFilePath = _fleetManagerB2BApiConfiguration.Value.GetCatalogueResponseFilePath;
-            string? fleetManagerStubSubscriptionKey = _fleetManagerB2BApiConfiguration.Value.SubscriptionKey;
 
-            if (string.IsNullOrEmpty(fleetManagerStubSubscriptionKey))
+            if (!string.IsNullOrEmpty(avcsCatalogueResponseFilePath))
             {
-                const string invalidSubscriptionKeyResponse = "{\"statusCode\": 401, \"message\":\"Access denied due to missing subscription key. Make sure to include subscription key when making requests to an API.\"}";
-                HealthCheckResult.Unhealthy(invalidSubscriptionKeyResponse);
-            }
-            if (!string.IsNullOrEmpty(fleetManagerStubSubscriptionKey))
-            {
-                if (!string.IsNullOrEmpty(avcsCatalogueResponseFilePath))
+                Encoding encoding = Encoding.UTF8;
+
+                XDocument avcsCatalogDataFile = XDocument.Load(avcsCatalogueResponseFilePath);
+                byte[] avcsCatalogDataFileBytes = encoding.GetBytes(avcsCatalogDataFile.ToString());
+
+                if (avcsCatalogDataFileBytes != null)
                 {
-                    Encoding encoding = Encoding.UTF8;
-
-                    XDocument avcsCatalogDataFile = XDocument.Load(avcsCatalogueResponseFilePath);
-                    byte[] avcsCatalogDataFileBytes = encoding.GetBytes(avcsCatalogDataFile.ToString());
-
-                    if (avcsCatalogDataFileBytes != null)
-                    {
-                        return HealthCheckResult.Healthy();
-                    }
+                    return HealthCheckResult.Healthy();
                 }
             }
+
             return HealthCheckResult.Unhealthy();
         }
     }
