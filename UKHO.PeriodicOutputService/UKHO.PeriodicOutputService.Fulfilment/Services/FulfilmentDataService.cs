@@ -1,4 +1,7 @@
 ﻿using System.IO.Abstractions;
+using System.IO.Compression;
+using System.Security.Cryptography;
+using DiscUtils.Iso9660;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
@@ -64,6 +67,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     _fileSystemHelper.CreateDirectory(downloadPath);
 
                     DownloadFiles(files, downloadPath);
+
+                    //start - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
+                    foreach (var file in files)
+                    {
+                        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+                        ZipFile.ExtractToDirectory(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
+                        IEnumerable<string> srcFiles = Directory.EnumerateFiles(Path.Combine(downloadPath, fileNameWithoutExtension), "*.*", SearchOption.AllDirectories);
+                        CreateIsoAndSha1(srcFiles, Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension));
+                    }
+                    //end - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
 
                     var extensions = new List<(string fileExtension, string mediaType)> { ("iso;sha1", "DVD"), ("zip", "Zip") };
 
@@ -163,5 +176,34 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             });
             return batchId;
         }
+        //start - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
+
+        private void CreateIsoAndSha1(IEnumerable<string> srcFiles, string targetPath, string directoryPath)
+        {
+            var iso = new CDBuilder
+            {
+                UseJoliet = true,
+                VolumeIdentifier = "FullAVCSExchangeSet"
+            };
+
+            foreach (string? file in srcFiles)
+            {
+                var fi = new FileInfo(file);
+                if (fi.Directory.Name == directoryPath)
+                {
+                    iso.AddFile($"{fi.Name}", fi.FullName);
+                    continue;
+                }
+                string? srcDir = fi.Directory.FullName.Replace(directoryPath, "").TrimEnd('\\');
+                iso.AddDirectory(srcDir);
+                iso.AddFile($"{srcDir}\\{fi.Name}", fi.FullName);
+            }
+            iso.Build(targetPath);
+
+            byte[] isoFileBytes = System.Text.Encoding.UTF8.GetBytes(targetPath);
+            string hash = BitConverter.ToString(SHA1.Create().ComputeHash(isoFileBytes)).Replace("-", "");
+            File.WriteAllText(targetPath + ".sha1", hash);
+        }
+        //end - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
     }
 }
