@@ -161,19 +161,19 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             string batchId = await _fssService.CreateBatch(mediaType);
 
-            Parallel.ForEach(filePaths, filePath =>
-            {
-                IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
-                bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length).Result;
-                if (isFileAdded)
-                {
-                    List<string> blockIds = _fssService.UploadBlocks(batchId, fileInfo).Result;
-                    if (blockIds.Count > 0)
-                    {
-                        bool fileWritten = _fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
-                    }
-                }
-            });
+            Parallel.ForEach(filePaths, async filePath =>
+             {
+                 IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
+                 bool isFileAdded = await _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length);
+                 if (isFileAdded)
+                 {
+                     List<string> blockIds = await _fssService.UploadBlocks(batchId, fileInfo);
+                     if (blockIds.Count > 0)
+                     {
+                         bool fileWritten = await _fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds);
+                     }
+                 }
+             });
             return batchId;
         }
         //start - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
