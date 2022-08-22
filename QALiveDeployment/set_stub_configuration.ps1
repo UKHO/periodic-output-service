@@ -1,0 +1,11 @@
+param (
+    [Parameter(Mandatory = $true)] [string] $mockresourcegroup,  
+    [Parameter(Mandatory = $true)] [string] $mockwebappname,     
+    [Parameter(Mandatory = $true)] [string] $fleetmanagerfilepath
+)
+
+Write-Output "Set Stub Configuration in appsetting..."
+az webapp config appsettings set -g $mockresourcegroup -n $mockwebappname --settings FleetManagerB2BApiConfiguration:GetCatalogueResponseFilePath=$fleetmanagerfilepath
+az webapp restart --name $mockwebappname --resource-group $mockresourcegroup
+
+

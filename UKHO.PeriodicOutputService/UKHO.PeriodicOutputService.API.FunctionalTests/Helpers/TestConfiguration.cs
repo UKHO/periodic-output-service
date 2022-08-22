@@ -6,8 +6,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     {
         protected IConfigurationRoot ConfigurationRoot;
         public FleetManagerB2BApiConfiguration fleetManagerB2BConfig = new();
-        public EssAuthorizationConfiguration EssAuthorizationConfig = new();
-        public FunctionalTestFSSApiConfiguration FssConfig = new();
+        public ESSApiConfiguration EssConfig = new();
+        public FSSApiConfiguration FssConfig = new();
 
         public class FleetManagerB2BApiConfiguration
         {
@@ -17,9 +17,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string subscriptionKey { get; set; }
         }
 
-        public class EssAuthorizationConfiguration
+        public class ESSApiConfiguration
         {
-            public string EssApiUrl { get; set; }
+            public string BaseUrl { get; set; }
             public string MicrosoftOnlineLoginUrl { get; set; }
             public string TenantId { get; set; }
             public string AutoTestClientId { get; set; }
@@ -28,13 +28,14 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public bool IsRunningOnLocalMachine { get; set; }
         }
 
-        public class FunctionalTestFSSApiConfiguration
+        public class FSSApiConfiguration
         {
             public string BaseUrl { get; set; }
             public string FssClientId { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
             public string BatchStatusPollingCutoffTime { get; set; }
             public string BatchStatusPollingDelayTime { get; set; }
+            public int BatchCommitWaitTime { get; set; }
 
         }
 
@@ -45,8 +46,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                                .Build();
 
             ConfigurationRoot.Bind("FleetManagerB2BApiConfiguration", fleetManagerB2BConfig);
-            ConfigurationRoot.Bind("EssAuthorizationConfiguration", EssAuthorizationConfig);
-            ConfigurationRoot.Bind("FunctionalTestFSSApiConfiguration", FssConfig);
+            ConfigurationRoot.Bind("ESSApiConfiguration", EssConfig);
+            ConfigurationRoot.Bind("FSSApiConfiguration", FssConfig);
         }
 
     }

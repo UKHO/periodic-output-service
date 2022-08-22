@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -43,9 +44,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
                 try
                 {
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     await serviceProvider.GetService<PosFulfilmentJob>().ProcessFulfilmentJob();
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }
                 finally
                 {
@@ -152,6 +151,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                 serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+                serviceCollection.AddSingleton<IConfiguration>(configuration);
             }
 
             var essAzureADConfiguration = new EssApiConfiguration();
@@ -171,6 +171,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
             serviceCollection.AddScoped<IEssService, EssService>();
             serviceCollection.AddScoped<IFssService, FssService>();
+            serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
+            serviceCollection.AddScoped<IFileSystem, FileSystem>();
 
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
