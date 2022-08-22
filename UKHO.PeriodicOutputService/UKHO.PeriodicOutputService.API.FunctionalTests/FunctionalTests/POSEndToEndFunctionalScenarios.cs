@@ -28,7 +28,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             FssJwtToken = await authTokenProvider.GetFssToken();
             string POSWebJobuserCredentialsBytes = CommonHelper.getbase64encodedcredentials(POSWebJob.userName, POSWebJob.password);
             POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(POSWebJob.baseUrl, POSWebJobuserCredentialsBytes);
-            await Task.Delay(120000); //As this functionality is realated to a webjob not an endpoint , so this is required to complete the webjob execution and then proceed further.
+            await Task.Delay(120000); //As this functionality is related to a webjob not an endpoint , so this is required to complete the webjob execution and then proceed further.
         }
 
         [Test]
@@ -79,17 +79,17 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(4), $"DownloadFolderCount : {(int)DownloadedFolderPath.Count} is incorrect");
         }
 
-        ////[OneTimeTearDown]
-        ////public void GlobalTeardown()
-        ////{
-        ////    //Clean up downloaded files/folders
-        ////    for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
-        ////    {
-        ////        var FolderName = $"M0{mediaNumber}X02";
-        ////        FileContentHelper.DeleteDirectoryForIsoAndSha1Files(FolderName + ".zip");
-        ////        FileContentHelper.DeleteDirectoryForIsoAndSha1Files(FolderName + ".iso");
-        ////        FileContentHelper.DeleteDirectoryForIsoAndSha1Files(FolderName + ".iso.sha1");
-        ////    }
-        ////}
+        [OneTimeTearDown]
+        public void globalteardown()
+        {
+            //clean up downloaded files/folders
+            for (int medianumber = 1; medianumber <= 2; medianumber++)
+            {
+                var foldername = $"m0{medianumber}x02";
+                FileContentHelper.DeleteDirectoryForIsoAndSha1Files(foldername + ".zip");
+                FileContentHelper.DeleteDirectoryForIsoAndSha1Files(foldername + ".iso");
+                FileContentHelper.DeleteDirectoryForIsoAndSha1Files(foldername + ".iso.sha1");
+            }
+        }
     }
 }
