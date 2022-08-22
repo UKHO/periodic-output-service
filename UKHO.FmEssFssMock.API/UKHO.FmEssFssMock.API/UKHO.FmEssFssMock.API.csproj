@@ -16,6 +16,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.4.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="Data\ESS\ESSResponse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <None Update="Data\2270F318-639C-4E64-A0C0-CADDD5F4EB05\M01X02.zip">
@@ -24,7 +29,16 @@
     <None Update="Data\2270F318-639C-4E64-A0C0-CADDD5F4EB05\M02X02.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\472B599D-494D-4AC5-A281-91E3927B24D4\ENCUpdateList.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\D3871589-C0EA-4967-8537-63089E2398AF\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\M01X02.iso.sha1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\M02X02.iso.sha1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\FM\avcs_catalog_ft.xml">
