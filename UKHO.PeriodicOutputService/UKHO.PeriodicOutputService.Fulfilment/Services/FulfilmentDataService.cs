@@ -149,7 +149,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
         {
-            Parallel.ForEach(fileDetails, file =>
+            Parallel.ForEach(fileDetails, new ParallelOptions { MaxDegreeOfParallelism = 4 }, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
                 Stream stream = _fssService.DownloadFile(file.FileName, file.FileLink).Result;
@@ -161,7 +161,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             string batchId = await _fssService.CreateBatch(mediaType);
 
-            Parallel.ForEach(filePaths, filePath =>
+            Parallel.ForEach(filePaths, new ParallelOptions { MaxDegreeOfParallelism = 4 }, filePath =>
             {
                 IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
                 bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length).Result;
@@ -176,8 +176,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             });
             return batchId;
         }
-        //start - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
 
+
+        //start - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
         private void CreateIsoAndSha1(IEnumerable<string> srcFiles, string targetPath, string directoryPath)
         {
             var iso = new CDBuilder

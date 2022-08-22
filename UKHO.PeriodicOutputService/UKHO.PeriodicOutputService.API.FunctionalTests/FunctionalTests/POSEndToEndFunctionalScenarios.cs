@@ -79,17 +79,17 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(4), $"DownloadFolderCount : {(int)DownloadedFolderPath.Count} is incorrect");
         }
 
-        [OneTimeTearDown]
-        public void GlobalTeardown()
-        {
-            //Clean up downloaded files/folders
-            for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
-            {
-                var FolderName = $"M0{mediaNumber}X02";
-                FileContentHelper.DeleteDirectoryForIsoAndSha1Files(FolderName + ".zip");
-                FileContentHelper.DeleteDirectoryForIsoAndSha1Files(FolderName + ".iso");
-                FileContentHelper.DeleteDirectoryForIsoAndSha1Files(FolderName + ".iso.sha1");
-            }
-        }
+        ////[OneTimeTearDown]
+        ////public void GlobalTeardown()
+        ////{
+        ////    //Clean up downloaded files/folders
+        ////    for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
+        ////    {
+        ////        var FolderName = $"M0{mediaNumber}X02";
+        ////        FileContentHelper.DeleteDirectoryForIsoAndSha1Files(FolderName + ".zip");
+        ////        FileContentHelper.DeleteDirectoryForIsoAndSha1Files(FolderName + ".iso");
+        ////        FileContentHelper.DeleteDirectoryForIsoAndSha1Files(FolderName + ".iso.sha1");
+        ////    }
+        ////}
     }
 }
