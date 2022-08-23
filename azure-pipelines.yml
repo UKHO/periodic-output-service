@@ -399,7 +399,7 @@ stages:
               azureSubscription: "File-Share-Service-Dev-P4052"
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
-              scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
+              scriptPath: '$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckESS
