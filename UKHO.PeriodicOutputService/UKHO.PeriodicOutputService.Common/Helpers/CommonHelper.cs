@@ -17,11 +17,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public static string ExtractBatchId(string url) => new UriBuilder(url).Uri.Segments.FirstOrDefault(d => Guid.TryParse(d.Replace("/", ""), out Guid _));
 
-        public static string GetBlockIds(int blockNum)
-        {
-            string blockId = $"Block_{blockNum:00000}";
-            return blockId;
-        }
+        public static string GetBlockIds(int blockNum) => $"Block_{blockNum:00000}";
 
         public static byte[] CalculateMD5(byte[] requestBytes)
         {
@@ -39,10 +35,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return hash;
         }
 
-        public static int GetCurrentWeekNumber(DateTime date)
-        {
-            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
-            return cultureInfo.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
-        }
+        public static int GetCurrentWeekNumber(DateTime date) => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
     }
 }

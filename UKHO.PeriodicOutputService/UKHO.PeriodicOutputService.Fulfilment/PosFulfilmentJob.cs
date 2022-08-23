@@ -26,8 +26,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
                 string result = await _fulfilmentDataService.CreatePosExchangeSets();
 
-                _logger.LogInformation(EventIds.PosFulfilmentJobCompleted.ToEventId(), "Periodic Output Service webjob completed at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                Console.ReadLine();
+                _logger.LogInformation(EventIds.PosFulfilmentJobCompleted.ToEventId(), "Periodic Output Service webjob completed at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);                
             }
             catch (Exception ex)
             {
