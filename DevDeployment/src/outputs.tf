@@ -36,4 +36,5 @@ output "webjob_username" {
 
 output "webjob_password" {
   value = module.webapp_service.password
+  sensitive = true
 }
