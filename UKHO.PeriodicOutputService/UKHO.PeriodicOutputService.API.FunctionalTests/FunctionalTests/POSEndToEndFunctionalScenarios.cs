@@ -24,10 +24,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             WebJob = new POSWebJob();
             AuthTokenProvider authTokenProvider = new();
             FssJwtToken = await authTokenProvider.GetFssToken();
-            string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(POSWebJob.UserName, POSWebJob.Password);
-            POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(POSWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
-            await Task.Delay(120000); //As this functionality is related to a webjob not an endpoint , so this is required to complete the webjob execution and then proceed further.
-            Assert.That((int)POSWebJobApiResponse.StatusCode, Is.EqualTo(202), $"Incorrect status code is returned {POSWebJobApiResponse.StatusCode}, instead of the expected status 202.");
+            //string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(POSWebJob.UserName, POSWebJob.Password);
+            //POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(POSWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
+            //await Task.Delay(120000); //As this functionality is related to a webjob not an endpoint , so this is required to complete the webjob execution and then proceed further.
+            //Assert.That((int)POSWebJobApiResponse.StatusCode, Is.EqualTo(202), $"Incorrect status code is returned {POSWebJobApiResponse.StatusCode}, instead of the expected status 202.");
         }
 
         [Test]
@@ -71,15 +71,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [OneTimeTearDown]
-        public void globalteardown()
+        public void GlobalTearDown()
         {
             //clean up downloaded files/folders
-            for (int medianumber = 1; medianumber <= 2; medianumber++)
+            for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                var foldername = $"m0{medianumber}x02";
-                FileContentHelper.DeleteIsoAndSha1Files(foldername + ".zip");
-                FileContentHelper.DeleteIsoAndSha1Files(foldername + ".iso");
-                FileContentHelper.DeleteIsoAndSha1Files(foldername + ".iso.sha1");
+                var folderName = $"M0{mediaNumber}X02";
+                FileContentHelper.DeleteZipIsoSha1Files(folderName);
             }
         }
     }
