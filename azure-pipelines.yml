@@ -389,18 +389,18 @@ stages:
               scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_service_status_webjob.ps1'
               arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
 
-      - job: CheckFSS
-        displayName: "Check FSS Health"
-        dependsOn: DevDeployApp
-        steps:
-          - task: AzureCLI@2
-            displayName: "Check FSS Health endpoint is healthy"
-            inputs:
-              azureSubscription: "File Share Service Dev - P4052"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
+#      - job: CheckFSS
+#        displayName: "Check FSS Health"
+#        dependsOn: DevDeployApp
+#        steps:
+#          - task: AzureCLI@2
+#            displayName: "Check FSS Health endpoint is healthy"
+#            inputs:
+#              azureSubscription: "File Share Service Dev - P4052"
+#              scriptType: 'pscore'
+#              scriptLocation: 'scriptPath'
+#              scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
+#              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckESS
         displayName: "Check ESS Health"
