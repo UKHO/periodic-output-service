@@ -19,7 +19,7 @@ do
         $HttpStatus   = $HttpResponse.StatusCode
         Write-Host "Status code of web is $HttpStatus ..."
     
-        If ($HttpStatus -eq "Healthy" ) -or ($HttpStatus -eq "Alive" ) {
+        If ($HttpStatus -eq 200 ) {
             Write-Host "Service is up. Stopping Polling ..."
             $isServiceActive = 'true'
             break

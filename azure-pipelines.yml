@@ -400,7 +400,7 @@ stages:
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(FSSHealthEndpoint) -waitTimeInMinute $(waitTimeInMinute)"
+              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckESS
         displayName: "Check ESS Health"
@@ -413,7 +413,7 @@ stages:
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(FSSHealthEndpoint) -waitTimeInMinute $(waitTimeInMinute)"
+              arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckFM
         displayName: "Check Fleet Manager Health"
@@ -426,8 +426,7 @@ stages:
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(FSSHealthEndpoint) -waitTimeInMinute $(waitTimeInMinute)"
-
+              arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: FunctionalTests
         dependsOn:
