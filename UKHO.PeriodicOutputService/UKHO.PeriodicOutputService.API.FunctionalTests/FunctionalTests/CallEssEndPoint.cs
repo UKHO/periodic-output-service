@@ -83,9 +83,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
 
             //Clean up downloaded files/folders
-            foreach (string FolderName in DownloadedFolderPath)
+            foreach (string FileName in DownloadedFolderPath)
             {
-                FileContentHelper.DeleteDirectory(FolderName);
+                FileContentHelper.DeleteZipIsoSha1Files(FileName);
             }
         }
     }
