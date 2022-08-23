@@ -383,7 +383,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Check Infrastructure is healthy"
             inputs:
-              azureSubscription: "${{ parameters.AzureSubscription }}"
+              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_service_status_webjob.ps1'
@@ -396,7 +396,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Check FSS Health endpoint is healthy"
             inputs:
-              azureSubscription: "${{ parameters.AzureSubscription }}"
+              azureSubscription: "File Share Service Dev - P4052"
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
@@ -409,7 +409,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Check ESS Health endpoint is healthy"
             inputs:
-              azureSubscription: "${{ parameters.AzureSubscription }}"
+              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
@@ -422,7 +422,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Check FM Health endpoint is healthy"
             inputs:
-              azureSubscription: "${{ parameters.AzureSubscription }}"
+              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Pipeline.Workspace)/devterraformartifact/check_health_endpoint.ps1'
