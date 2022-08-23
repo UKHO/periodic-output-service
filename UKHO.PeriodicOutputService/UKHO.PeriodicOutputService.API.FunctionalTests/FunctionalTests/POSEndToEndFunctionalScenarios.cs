@@ -24,10 +24,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             WebJob = new POSWebJob();
             AuthTokenProvider authTokenProvider = new();
             FssJwtToken = await authTokenProvider.GetFssToken();
-            //string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(POSWebJob.UserName, POSWebJob.Password);
-            //POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(POSWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
-            //await Task.Delay(120000); //As this functionality is related to a webjob not an endpoint , so this is required to complete the webjob execution and then proceed further.
-            //Assert.That((int)POSWebJobApiResponse.StatusCode, Is.EqualTo(202), $"Incorrect status code is returned {POSWebJobApiResponse.StatusCode}, instead of the expected status 202.");
+            string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(POSWebJob.UserName, POSWebJob.Password);
+            POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(POSWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
+            await Task.Delay(120000); //As this functionality is related to a webjob not an endpoint , so this is required to complete the webjob execution and then proceed further.
+            Assert.That((int)POSWebJobApiResponse.StatusCode, Is.EqualTo(202), $"Incorrect status code is returned {POSWebJobApiResponse.StatusCode}, instead of the expected status 202.");
         }
 
         [Test]
