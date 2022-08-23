@@ -2,6 +2,7 @@
 using FakeItEasy;
 using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 {
@@ -59,7 +60,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakefileSystem.FileInfo.FromFileName(A<string>.Ignored)).Returns(fileInfo);
 
-            List<Common.Models.Fss.Request.FileDetail>? result = _fileSystemHelper.GetFileMD5(fileNames);
+            List<FileDetail>? result = _fileSystemHelper.GetFileMD5(fileNames);
 
             Assert.Multiple(() =>
             {
