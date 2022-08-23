@@ -5,7 +5,6 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
     public static class FileContentHelper
     {
         private static TestConfiguration Config = new TestConfiguration();
-        private static FssApiClient FssApiClient = new FssApiClient();
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string BatchId, string FssJwtToken)
         {
@@ -13,12 +12,12 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                var FolderName = $"M0{mediaNumber}X02.zip";
-                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{FolderName}";
+                var folderName = $"M0{mediaNumber}X02.zip";
+                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderName}";
 
-                var DownloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, FolderName);
+                var downloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderName);
 
-                downloadFolderPath.Add(DownloadedFolder);
+                downloadFolderPath.Add(downloadedFolder);
             }
             return downloadFolderPath;
         }
@@ -41,33 +40,33 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
             }
         }
 
-        public static void DeleteDirectoryForIsoAndSha1Files(string fileName)
+        public static void DeleteIsoAndSha1Files(string fullFileName)
         {
             string path = Path.GetTempPath();
 
-            if (Directory.Exists(path) && File.Exists(Path.Combine(path, fileName)))
+            if (Directory.Exists(path) && File.Exists(Path.Combine(path, fullFileName)))
             {
-                string folder = Path.GetFileName(Path.Combine(path, fileName));
-                if (folder.Contains(".zip"))
+                string fileName = Path.GetFileName(Path.Combine(path, fullFileName));
+                if (fileName.Contains(".zip"))
                 {
-                    folder = folder.Replace(".zip", "");
+                    fileName = fileName.Replace(".zip", "");
                     //Delete V01XO1/M01XO2/M02XO2 Directory and sub directories from temp Directory
-                    Directory.Delete(Path.Combine(path, folder), true);
+                    Directory.Delete(Path.Combine(path, fileName), true);
 
                 }
-                else if (folder.Contains(".iso"))
+                else if (fileName.Contains(".iso"))
                 {
-                    folder = folder.Replace(".iso", "");
+                    fileName = fileName.Replace(".iso", "");
                 }
                 else
                 {
-                    folder = folder.Replace(".iso.sha1", "");
+                    fileName = fileName.Replace(".iso.sha1", "");
                 }
 
                 //Delete V01X01.zip/M01XO2.zip/M02XO2.zip file from temp Directory
-                if (File.Exists(Path.Combine(path, fileName)))
+                if (File.Exists(Path.Combine(path, fullFileName)))
                 {
-                    File.Delete(Path.Combine(path, fileName));
+                    File.Delete(Path.Combine(path, fullFileName));
                 }
             }
 
@@ -85,8 +84,8 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
                 var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderName);
 
                 var downloadFolder = FssBatchHelper.RenameFolder(extractDownloadedFolder);
-                var downloadFolderPath1 = Path.Combine(Path.GetTempPath(), downloadFolder);
-                downloadFolderPath.Add(downloadFolderPath1);
+                var tmpDownloadFolderPath = Path.Combine(Path.GetTempPath(), downloadFolder);
+                downloadFolderPath.Add(tmpDownloadFolderPath);
             }
             return downloadFolderPath;
         }
@@ -97,19 +96,19 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                var FolderNameIso = $"M0{mediaNumber}X02.iso";
+                var folderNameIso = $"M0{mediaNumber}X02.iso";
 
-                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{FolderNameIso}";
+                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderNameIso}";
 
-                var DownloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, FolderNameIso);
+                var downloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderNameIso);
 
                 var FolderNameSha1 = $"M0{mediaNumber}X02.iso.sha1";
                 var downloadFileUrlSha1 = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{FolderNameSha1}";
 
-                var DownloadedFolderSha1 = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, FolderNameSha1);
+                var downloadedFolderSha1 = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrlSha1, FssJwtToken, FolderNameSha1);
 
-                downloadFolderPath.Add(DownloadedFolder);
-                downloadFolderPath.Add(DownloadedFolderSha1);
+                downloadFolderPath.Add(downloadedFolder);
+                downloadFolderPath.Add(downloadedFolderSha1);
             }
             return downloadFolderPath;
         }

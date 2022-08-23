@@ -18,7 +18,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private GetProductIdentifiers getproductIdentifier { get; set; }
 
         private static readonly ESSApiConfiguration ESSAuth = new TestConfiguration().EssConfig;
-        private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
         private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
@@ -32,7 +31,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             getcat = new GetCatalogue();
             getproductIdentifier = new GetProductIdentifiers();
 
-            userCredentialsBytes = CommonHelper.getbase64encodedcredentials(fleet.userName, fleet.password);
+            userCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(fleet.userName, fleet.password);
             AuthTokenProvider authTokenProvider = new();
             EssJwtToken = await authTokenProvider.GetEssToken();
             FssJwtToken = await authTokenProvider.GetFssToken();
@@ -81,7 +80,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(ZipFilesBatchId, FssJwtToken);
-            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {(int)DownloadedFolderPath.Count} is incorrect");
+            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
 
             //Clean up downloaded files/folders
             foreach (string FolderName in DownloadedFolderPath)

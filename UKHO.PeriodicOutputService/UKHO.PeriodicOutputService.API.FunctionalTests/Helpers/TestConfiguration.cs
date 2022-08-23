@@ -40,10 +40,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         }
         public class POSWebjobApiConfiguration
         {
-            public string userName { get; set; }
-            public string password { get; set; }
-            public string baseUrl { get; set; }
-            public string invalidPOSWebJobuserCredentialsBytes { get; set; }
+            public string UserName { get; set; }
+            public string Password { get; set; }
+            public string BaseUrl { get; set; }
+            public string InvalidPOSWebJobuserCredentialsBytes { get; set; }
         }
 
         public TestConfiguration()

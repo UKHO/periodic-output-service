@@ -58,20 +58,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<string> ExtractDownloadedFolderForLargeFiles(string downloadFileUrl, string jwtToken, string folderName)
         {
-            string LargeFolderName = folderName + ".zip";
-            string tempFilePath = Path.Combine(Path.GetTempPath(), LargeFolderName);
+            string largeFolderName = folderName + ".zip";
+            string tempFilePath = Path.Combine(Path.GetTempPath(), largeFolderName);
+            string zipPath = await DownloadedFolderForLargeFiles(downloadFileUrl, jwtToken, largeFolderName);
 
-            var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
-            Assert.That((int)response.StatusCode, Is.EqualTo(200), $"Incorrect status code File Download api returned {response.StatusCode} for the url {downloadFileUrl}, instead of the expected 200.");
-
-            Stream stream = await response.Content.ReadAsStreamAsync();
-
-            using (FileStream outputFileStream = new FileStream(tempFilePath, FileMode.Create))
-            {
-                stream.CopyTo(outputFileStream);
-            }
-
-            string zipPath = tempFilePath;
             string extractPath = Path.GetTempPath() + RenameFolder(tempFilePath);
 
             ZipFile.ExtractToDirectory(zipPath, extractPath);
