@@ -432,7 +432,7 @@ stages:
         dependsOn:
         - DevDeployApp
         - CheckInfra
-        - CheckFSS
+#        - CheckFSS
         - CheckESS
         - CheckFM
         pool: NautilusBuild
