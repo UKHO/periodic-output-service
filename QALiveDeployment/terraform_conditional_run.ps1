@@ -58,6 +58,6 @@ Write-Host "##vso[task.setvariable variable=RGName]$($terraformOutput.webapp_rg.
 Write-Host "##vso[task.setvariable variable=WEBAPP;isOutput=true]$($terraformOutput.web_app_name.value)"
 Write-Host "##vso[task.setvariable variable=ResourceGroup;isOutput=true]$($terraformOutput.webapp_rg.value)"
 Write-Host "##vso[task.setvariable variable=webJobUsername;isOutput=true]$($terraformOutput.webjob_username.value)"
-Write-Host "##vso[task.setvariable variable=webJobPassword;issecret=true;isOutput=true]$($terraformOutput.webjob_password.value)"
+Write-Host "##vso[task.setvariable variable=webJobPassword;issecret=true]$($terraformOutput.webjob_password.value)"
 
 $terraformOutput | ConvertTo-Json -Depth 5 > $terraformJsonOutputFile
