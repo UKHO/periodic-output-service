@@ -18,35 +18,35 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static void GetBatchDetailsResponseValidation(dynamic batchDetailsResponse)
         {
-            string ExpectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
+            string expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
             //to check status
-            string BatchStatus = batchDetailsResponse.status;
-            Assert.That(BatchStatus, Is.EqualTo("Committed"), $"Expected Batch Status of Committed, but actual value is {BatchStatus}");
+            string batchStatus = batchDetailsResponse.status;
+            Assert.That(batchStatus, Is.EqualTo("Committed"), $"Expected Batch Status of Committed, but actual value is {batchStatus}");
 
-            string BusinessUnit = batchDetailsResponse.businessUnit;
-            Assert.That(BusinessUnit, Is.EqualTo("AVCSData"), $"Expected Business Unit of AVCSData, but actual value is {BusinessUnit}");
+            string businessUnit = batchDetailsResponse.businessUnit;
+            Assert.That(businessUnit, Is.EqualTo("AVCSData"), $"Expected Business Unit of AVCSData, but actual value is {businessUnit}");
 
-            string ExpiryDate = batchDetailsResponse.expiryDate;
-            Assert.That(ExpiryDate.Contains(ExpectedExpiryDate), $"Expected Expiry Date to contain {ExpectedExpiryDate}, but actual value is {ExpiryDate}");
+            string expiryDate = batchDetailsResponse.expiryDate;
+            Assert.That(expiryDate.Contains(expectedExpiryDate), $"Expected Expiry Date to contain {expectedExpiryDate}, but actual value is {expiryDate}");
         }
 
         public static void GetBatchDetailsResponseValidationForIsoAndSha1Files(dynamic batchDetailsResponse)
         {
-            string MediaType = batchDetailsResponse.attributes[1].value;
-            Assert.That(MediaType, Is.EqualTo("DVD"), $"Expected Media Type of DVD, but actual value is {MediaType}");
+            string mediaType = batchDetailsResponse.attributes[1].value;
+            Assert.That(mediaType, Is.EqualTo("DVD"), $"Expected Media Type of DVD, but actual value is {mediaType}");
 
-            string[] ExpectedFileName = { "M01X02.iso", "M01X02.iso.sha1", "M02X02.iso", "M02X02.iso.sha1" };
-            for (int ResponseFileNameLocation = 0; ResponseFileNameLocation < ExpectedFileName.Length; ResponseFileNameLocation++)
+            string[] expectedFileName = { "M01X02.iso", "M01X02.iso.sha1", "M02X02.iso", "M02X02.iso.sha1" };
+            for (int responseFileNameLocation = 0; responseFileNameLocation < expectedFileName.Length; responseFileNameLocation++)
             {
-                string ResponseFileName = batchDetailsResponse.files[ResponseFileNameLocation].filename;
-                Assert.That(ResponseFileName, Is.EqualTo(ExpectedFileName[ResponseFileNameLocation]), $"Expected Response File Name of {ExpectedFileName[ResponseFileNameLocation]}, but actual value is {ResponseFileName}");
+                string responseFileName = batchDetailsResponse.files[responseFileNameLocation].filename;
+                Assert.That(responseFileName, Is.EqualTo(expectedFileName[responseFileNameLocation]), $"Expected Response File Name of {expectedFileName[responseFileNameLocation]}, but actual value is {responseFileName}");
             }
         }
 
         public static void GetBatchDetailsResponseValidationForZipFiles(dynamic batchDetailsResponse)
         {
-            string MediaType = batchDetailsResponse.attributes[1].value;
-            Assert.That(MediaType, Is.EqualTo("Zip"), $"Expected Media Type of Zip, but actual value is {MediaType}");
+            string mediaType = batchDetailsResponse.attributes[1].value;
+            Assert.That(mediaType, Is.EqualTo("Zip"), $"Expected Media Type of Zip, but actual value is {mediaType}");
             int responseFileNameContent = 0;
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
