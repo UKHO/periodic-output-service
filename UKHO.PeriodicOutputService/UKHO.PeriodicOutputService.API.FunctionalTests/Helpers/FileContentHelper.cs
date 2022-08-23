@@ -28,24 +28,13 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 
             if (Directory.Exists(Path.Combine(path, fullFileName)))
             {
-                Directory.Delete(Path.Combine(path, fullFileName),true);
+                Directory.Delete(Path.Combine(path, fullFileName), true);
             }
-            else if (File.Exists(Path.Combine(path, fullFileName + ".zip")))
-            {
-                File.Delete(Path.Combine(path, fullFileName + ".zip"));
-            }
-            else if (File.Exists(Path.Combine(path, fullFileName + ".iso")))
-            {
-                File.Delete(Path.Combine(path, fullFileName + ".iso"));
-            }
-            else if (File.Exists(Path.Combine(path, fullFileName + ".iso.sha1")))
-            {
-                File.Delete(Path.Combine(path, fullFileName + ".iso.sha1"));
-            }
-            else
-            {
-                File.Delete(Path.Combine(path, fullFileName));
-            }
+
+            File.Delete(Path.Combine(path, fullFileName + ".zip"));
+            File.Delete(Path.Combine(path, fullFileName + ".iso"));
+            File.Delete(Path.Combine(path, fullFileName + ".iso.sha1"));
+            File.Delete(Path.Combine(path, fullFileName));
         }
 
         public static async Task<List<string>> DownloadAndExtractExchangeSetZipFileForLargeMedia(string BatchId, string FssJwtToken)

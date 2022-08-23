@@ -80,7 +80,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
 
             DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(ZipFilesBatchId, FssJwtToken);
-            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
+            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
 
             //Clean up downloaded files/folders
             foreach (string FileName in DownloadedFolderPath)
