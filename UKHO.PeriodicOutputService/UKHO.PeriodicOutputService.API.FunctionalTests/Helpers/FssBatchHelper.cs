@@ -71,13 +71,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static string RenameFolder(string pathInput)
         {
-            string fileName = Path.GetFileName(pathInput);
-            if (fileName.Contains(".zip"))
-            {
-                fileName = fileName.Replace(".zip", "");
-            }
-
-            return fileName;
+            return Path.GetFileName(pathInput).Replace(".zip", "");
         }
     }
 }

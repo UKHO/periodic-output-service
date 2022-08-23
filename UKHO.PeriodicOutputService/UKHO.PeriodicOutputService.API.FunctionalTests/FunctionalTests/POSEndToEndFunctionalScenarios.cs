@@ -8,7 +8,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
     public class POSEndToEndFunctionalScenarios
     {
         private string FssJwtToken;
-        public string userCredentialsBytes;
         private POSWebJob WebJob;
         private static readonly POSWebjobApiConfiguration POSWebJob = new TestConfiguration().POSWebJobConfig;
 
@@ -35,11 +34,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, IsoSha1BatchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
-            var BatchDetailsResponse = await CommonHelper.DeserializeAsyncResponse(apiResponse);
+            var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-            GetBatchDetails.GetBatchDetailsResponseValidation(BatchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
 
-            GetBatchDetails.GetBatchDetailsResponseValidationForIsoAndSha1Files(BatchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidationForIsoAndSha1Files(batchDetailsResponse);
         }
 
         [Test]
@@ -48,25 +47,25 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, ZipFilesBatchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
-            var BatchDetailsResponse = await CommonHelper.DeserializeAsyncResponse(apiResponse);
+            var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-            GetBatchDetails.GetBatchDetailsResponseValidation(BatchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
 
-            GetBatchDetails.GetBatchDetailsResponseValidationForZipFiles(BatchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidationForZipFiles(batchDetailsResponse);
         }
 
         [Test]
         public async Task WhenICallFileDownloadEndpointWithValidBatchId_ThenALargeMediaZipFilesAreGenerated()
         {
             DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(ZipFilesBatchId, FssJwtToken);
-            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
+            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
         }
 
         [Test]
         public async Task WhenICallFileDownloadEndpointWithValidBatchId_ThenALargeMediaIsoAndSha1FilesAreGenerated()
         {
             DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForIsoAndSha1Files(IsoSha1BatchId, FssJwtToken);
-            Assert.That((int)DownloadedFolderPath.Count, Is.EqualTo(4), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
+            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(4), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
         }
 
         [OneTimeTearDown]

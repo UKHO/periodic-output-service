@@ -37,9 +37,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             FssJwtToken = await authTokenProvider.GetFssToken();
 
             unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
-            string unp_token = await CommonHelper.DeserializeAsyncToken(unpResponse);
+            string unpToken = await unpResponse.DeserializeAsyncToken();
 
-            HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unp_token, fleet.subscriptionKey);
+            HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
 
             productIdentifiers = await getcat.GetProductList(httpResponse);
         }
