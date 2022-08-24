@@ -71,7 +71,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     DownloadFiles(files, downloadPath);
 
                     //start - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
-                    foreach (var file in files)
+                    foreach (FssBatchFile? file in files)
                     {
                         string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
                         ZipFile.ExtractToDirectory(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
@@ -82,10 +82,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                     var extensions = new List<(string fileExtension, string mediaType)> { ("iso;sha1", "DVD"), ("zip", "Zip") };
 
-                    foreach ((string fileExtension, string mediaType) extension in extensions)
+                    foreach ((string fileExtension, string mediaType) in extensions)
                     {
-                        IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, extension.fileExtension, SearchOption.TopDirectoryOnly);
-                        string batchId = await CreateBatchAndUploadFiles(filePaths, extension.mediaType);
+                        IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                        string batchId = await CreateBatchAndUploadFiles(filePaths, mediaType);
                         bool isCommitted = await _fssService.CommitBatch(batchId, filePaths);
                         if (isCommitted)
                         {
@@ -125,6 +125,19 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     _fileSystemHelper.CreateDirectory(downloadPath);
 
                     DownloadFiles(files, downloadPath);
+
+                    var extensions = new List<(string fileExtension, string mediaType)> { ("zip", "update") };
+
+                    foreach ((string fileExtension, string mediaType) in extensions)
+                    {
+                        IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                        string batchId = await CreateBatchAndUploadFiles(filePaths, mediaType);
+                        bool isCommitted = await _fssService.CommitBatch(batchId, filePaths);
+                        if (isCommitted)
+                        {
+                            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                        }
+                    }
                 }
                 else
                 {
