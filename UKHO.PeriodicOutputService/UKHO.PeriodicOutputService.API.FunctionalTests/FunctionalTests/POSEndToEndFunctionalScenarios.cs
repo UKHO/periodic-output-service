@@ -10,12 +10,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private string FssJwtToken;
         private POSWebJob WebJob;
         private static readonly POSWebjobApiConfiguration POSWebJob = new TestConfiguration().POSWebJobConfig;
+        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
 
         static FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
         HttpResponseMessage POSWebJobApiResponse;
         private List<string> DownloadedFolderPath;
-        public string IsoSha1BatchId = "f9523d33-ef12-4cc1-969d-8a95f094a48b";
-        public string ZipFilesBatchId = "483aa1b9-8a3b-49f2-bae9-759bb93b04d1";
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -29,42 +28,31 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        public async Task WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatch1IsCreatedAndUploadedForISOAndSha1Files()
+        [TestCase("f9523d33-ef12-4cc1-969d-8a95f094a48b", TestName = "WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatch1IsCreatedAndUploadedForISOSha1Files")]
+        [TestCase("483aa1b9-8a3b-49f2-bae9-759bb93b04d1", TestName = "WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatch2IsCreatedAndUploadedForZipFiles")]
+        public async Task WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatchesAreCreatedAndUploadedForLargeMedia(string batchId)
         {
-            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, IsoSha1BatchId);
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, batchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
             var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
 
-            GetBatchDetails.GetBatchDetailsResponseValidationForIsoAndSha1Files(batchDetailsResponse);
-        }
-
-        [Test]
-        public async Task WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatch2IsCreatedAndUploadedForZipFiles()
-        {
-            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, ZipFilesBatchId);
-            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
-
-            var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
-
-            GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
-
-            GetBatchDetails.GetBatchDetailsResponseValidationForZipFiles(batchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidationForISOSha1AndZipFiles(batchDetailsResponse);
         }
 
         [Test]
         public async Task WhenICallFileDownloadEndpointWithValidBatchId_ThenALargeMediaZipFilesAreGenerated()
         {
-            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(ZipFilesBatchId, FssJwtToken);
+            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.ZipFilesBatchId, FssJwtToken);
             Assert.That(DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
         }
 
         [Test]
         public async Task WhenICallFileDownloadEndpointWithValidBatchId_ThenALargeMediaIsoAndSha1FilesAreGenerated()
         {
-            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForIsoAndSha1Files(IsoSha1BatchId, FssJwtToken);
+            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForIsoAndSha1Files(posDetails.IsoSha1BatchId, FssJwtToken);
             Assert.That(DownloadedFolderPath.Count, Is.EqualTo(4), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
         }
 

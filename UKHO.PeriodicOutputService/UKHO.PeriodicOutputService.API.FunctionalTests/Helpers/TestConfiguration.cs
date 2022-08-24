@@ -9,6 +9,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public ESSApiConfiguration EssConfig = new();
         public FSSApiConfiguration FssConfig = new();
         public POSWebjobApiConfiguration POSWebJobConfig = new();
+        public POSFileDetails posFileDetails = new();
 
         public class FleetManagerB2BApiConfiguration
         {
@@ -46,6 +47,18 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string InvalidPOSWebJobuserCredentialsBytes { get; set; }
         }
 
+        public class POSFileDetails
+        {
+            public string M01IsoFile { get; set; }
+            public string M02IsoFile { get; set; }
+            public string M01Sha1File { get; set; }
+            public string M02Sha1File { get; set; }
+            public string ZipFilesBatchId { get; set; }
+            public string IsoSha1BatchId { get; set; }
+            public string MediaTypeDVD { get; set; }
+            public string MediaTypeZip { get; set; }
+        }
+
         public TestConfiguration()
         {
             ConfigurationRoot = new ConfigurationBuilder()
@@ -56,6 +69,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             ConfigurationRoot.Bind("ESSApiConfiguration", EssConfig);
             ConfigurationRoot.Bind("FSSApiConfiguration", FssConfig);
             ConfigurationRoot.Bind("POSWebjobApiConfiguration", POSWebJobConfig);
+            ConfigurationRoot.Bind("POSFileDetails", posFileDetails);
         }
 
 
