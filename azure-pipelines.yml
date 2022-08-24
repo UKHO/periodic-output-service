@@ -513,7 +513,7 @@ stages:
         value: $(AutoTestClientSecret_Authed)
       - name: "ESSApiConfiguration.EssClientId"
         value: $(ESSClientId)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+#    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
 
     jobs:
       - deployment: QADeployApp
@@ -532,9 +532,64 @@ stages:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
 
+      - job: CheckInfra
+        displayName: "Check Infrastructure Health"
+        dependsOn: QADeployApp
+        variables:
+          - name: WEB_APP_NAME
+            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
+          - name: RGName
+            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
+        steps:
+          - task: AzureCLI@2
+            displayName: "Check Infrastructure is healthy"
+            inputs:
+              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: '$(Build.SourcesDirectory)/QALiveDeployment/check_service_status_webjob.ps1'
+              arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
+
+      - job: CheckFSS
+        displayName: "Check FSS Health"
+        dependsOn: QADeployApp
+        steps:
+          - task: PowerShell@2
+            displayName: "Check FSS Health endpoint is healthy"
+            inputs:
+              targetType: filePath
+              filePath: "$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1"
+              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
+
+      - job: CheckESS
+        displayName: "Check ESS Health"
+        dependsOn: QADeployApp
+        steps:
+          - task: PowerShell@2
+            displayName: "Check ESS Health endpoint is healthy"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
+              arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
+
+      - job: CheckFM
+        displayName: "Check Fleet Manager Health"
+        dependsOn: QADeployApp
+        steps:
+          - task: PowerShell@2
+            displayName: "Check FM Health endpoint is healthy"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
+              arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+
       - job: FunctionalTests
         dependsOn:
         - QADeployApp
+        - CheckInfra
+        - CheckFSS
+        - CheckESS
+        - CheckFM
         pool: NautilusBuild
         displayName: "QA Functional Automated Tests"
         workspace:
