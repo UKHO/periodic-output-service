@@ -9,3 +9,12 @@ output "web_app_tenant_id" {
 output "default_site_hostname" {
   value = azurerm_windows_web_app.webapp_service.default_hostname
 }
+
+output "username" {
+  value = azurerm_windows_web_app.webapp_service.site_credential[0].name
+}
+
+output "password" {
+  value = azurerm_windows_web_app.webapp_service.site_credential[0].password
+  sensitive = true
+}

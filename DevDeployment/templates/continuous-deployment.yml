@@ -23,6 +23,10 @@ steps:
       TF_VAR_agent_vnet_name: $(agentVnetName)
       TF_VAR_agent_subnet_name: $(agentSubnetName)
       TF_VAR_agent_subscription_id: $(agentSubscriptionId)
+      TF_VAR_spoke_rg: $(spokeRG)
+      TF_VAR_spoke_vnet_name: $(spokeVnetName)
+      TF_VAR_spoke_subnet_name: $(POSESSspokeSubnetName)
+      TF_VAR_allowed_ips: $(whiteListedIps)
 
   - task: FileTransform@1
     displayName: "File Transform: Mock API WebApp"
@@ -38,7 +42,7 @@ steps:
       scriptType: 'pscore'
       scriptLocation: 'scriptPath'
       scriptPath: '$(Pipeline.Workspace)/devterraformartifact/mock_api_deployment.ps1'
-      arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FleetManagerMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
+      arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FmEssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
 
   - task: FileTransform@1
     displayName: "File Transform: POS Config"
