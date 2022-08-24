@@ -13,13 +13,13 @@ resource "azurerm_windows_web_app" "mock_webapp_service" {
     always_on  = true
     ftps_state = "Disabled"
 
-   }
+  }
 
   app_settings = var.app_settings
 
   identity {
     type = "SystemAssigned"
-    }
+  }
 
   https_only = true
-  }
+} 

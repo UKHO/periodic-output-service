@@ -51,7 +51,7 @@ module "mock_webapp_service" {
     "WEBSITE_ENABLE_SYNC_UPDATE_SITE"                      = "true"
     "APPINSIGHTS_INSTRUMENTATIONKEY"                       = "NOT_CONFIGURED"
   }
-  tags                      = local.tags
+  tags                                                     = local.tags
 }
 
 module "webapp_service" {
