@@ -16,4 +16,5 @@ output "username" {
 
 output "password" {
   value = azurerm_windows_web_app.webapp_service.site_credential[0].password
+  sensitive = true
 }

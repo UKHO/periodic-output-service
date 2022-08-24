@@ -7,51 +7,63 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     public class POSEndToEndFunctionalScenarios
     {
-        public string userCredentialsBytes;
-        private TestConfiguration config { get; set; }
-        private POSWebJob WebJob { get; set; }
-
+        private string FssJwtToken;
+        private POSWebJob WebJob;
         private static readonly POSWebjobApiConfiguration POSWebJob = new TestConfiguration().POSWebJobConfig;
-        HttpResponseMessage POSWebJobApiResponse;
-        public string ESSBatchId = "2270F318-639C-4E64-A0C0-CADDD5F4EB05";
-        bool checkfile;
+        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
+        private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
+        private HttpResponseMessage POSWebJobApiResponse;
+        private List<string> DownloadedFolderPath;
 
         [OneTimeSetUp]
         public async Task Setup()
         {
-            config = new TestConfiguration();
-            string POSWebJobuserCredentialsBytes = CommonHelper.getbase64encodedcredentials(POSWebJob.userName, POSWebJob.password);
-            POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(POSWebJob.baseUrl, POSWebJobuserCredentialsBytes);
+            WebJob = new POSWebJob();
+            AuthTokenProvider authTokenProvider = new();
+            FssJwtToken = await authTokenProvider.GetFssToken();
+            string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(POSWebJob.UserName, POSWebJob.Password);
+            POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(POSWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
+            Assert.That((int)POSWebJobApiResponse.StatusCode, Is.EqualTo(202), $"Incorrect status code is returned {POSWebJobApiResponse.StatusCode}, instead of the expected status 202.");
         }
 
         [Test]
-        public async Task WhenMediaZipGetsDownloaded_ThenExtractZipAndGenerateISOAndSha1Files()
+        [TestCase("f9523d33-ef12-4cc1-969d-8a95f094a48b", TestName = "WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatch1IsCreatedAndUploadedForISOSha1Files")]
+        [TestCase("483aa1b9-8a3b-49f2-bae9-759bb93b04d1", TestName = "WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatch2IsCreatedAndUploadedForZipFiles")]
+        public async Task WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatchesAreCreatedAndUploadedForLargeMedia(string batchId)
         {
-            Assert.That((int)POSWebJobApiResponse.StatusCode, Is.EqualTo(202), $"Incorrect status code is returned {POSWebJobApiResponse.StatusCode}, instead of the expected status 202.");
-            await Task.Delay(120000); //As this functionality is realated to a webjob not an endpoint , so this is required to complete the webjob execution and then proceed further.
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, batchId);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
-            for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
-            {
-                var FolderName = $"M0{mediaNumber}X02";
-                checkfile = FileContentHelper.CheckforFolderExist(Path.Combine(config.HomeDirectory, ESSBatchId), FolderName);
-                Assert.IsTrue(checkfile, $"{FolderName} not Exist in the specified folder path : {Path.Combine(config.HomeDirectory, ESSBatchId)}");
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-                //validating iso files
-                var ISOFile = $"M0{mediaNumber}X02.iso";
-                checkfile = FileContentHelper.CheckforFileExist(Path.Combine(config.HomeDirectory, ESSBatchId), ISOFile);
-                Assert.IsTrue(checkfile, $"{ISOFile} not Exist in the specified folder path : {Path.Combine(config.HomeDirectory, ESSBatchId)}");
+            GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
 
-                //validating iso.sha1 files
-                var ShaFile = $"M0{mediaNumber}X02.iso.sha1";
-                checkfile = FileContentHelper.CheckforFileExist(Path.Combine(config.HomeDirectory, ESSBatchId), ShaFile);
-                Assert.IsTrue(checkfile, $"{ShaFile} not Exist in the specified folder path : {Path.Combine(config.HomeDirectory, ESSBatchId)}");
-            }
+            GetBatchDetails.GetBatchDetailsResponseValidationForISOSha1AndZipFiles(batchDetailsResponse);
+        }
+
+        [Test]
+        public async Task WhenICallFileDownloadEndpointWithValidBatchId_ThenALargeMediaZipFilesAreGenerated()
+        {
+            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.ZipFilesBatchId, FssJwtToken);
+            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
+        }
+
+        [Test]
+        public async Task WhenICallFileDownloadEndpointWithValidBatchId_ThenALargeMediaIsoAndSha1FilesAreGenerated()
+        {
+            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForIsoAndSha1Files(posDetails.IsoSha1BatchId, FssJwtToken);
+            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(4), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
         }
 
         [OneTimeTearDown]
-        public void DeleteDirectory()
+        public void GlobalTearDown()
         {
-            Directory.Delete(Path.Combine(config.HomeDirectory, ESSBatchId),true);
+            //clean up downloaded files/folders
+            for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
+            {
+                string folderName = $"M0{mediaNumber}X02";
+                FileContentHelper.DeleteZipIsoSha1Files(folderName);
+            }
         }
     }
 }

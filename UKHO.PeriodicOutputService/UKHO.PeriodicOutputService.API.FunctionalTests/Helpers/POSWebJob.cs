@@ -3,7 +3,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
     public class POSWebJob
     {
-        static HttpClient httpClient = new HttpClient();
+        static readonly HttpClient httpClient = new HttpClient();
 
         public async Task<HttpResponseMessage> POSWebJobEndPoint(string baseUrl, string base64Credentials)
         {

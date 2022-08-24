@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
+﻿using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
 namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 {
@@ -7,51 +6,76 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
     {
         private static readonly TestConfiguration Config = new();
 
-        public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(HttpResponseMessage apiEssResponse, string FssJwtToken, string BatchId)
+        public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string BatchId, string FssJwtToken)
         {
             List<string> downloadFolderPath = new();
-            Assert.That((int)apiEssResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiEssResponse.StatusCode}, instead of the expected status 200.");
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                string FolderName = $"M0{mediaNumber}X02";
-                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{FolderName}.zip";
+                string folderName = $"M0{mediaNumber}X02.zip";
+                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderName}";
 
-                string DownloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, FolderName);
+                string downloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderName);
 
-                downloadFolderPath.Add(DownloadedFolder);
+                downloadFolderPath.Add(downloadedFolder);
             }
             return downloadFolderPath;
         }
 
-        public static void DeleteDirectory(string fileName)
+        public static void DeleteZipIsoSha1Files(string fullFileName)
         {
-            if (File.Exists(fileName))
-            {
-                string folder = Path.GetFileName(fileName);
-                if (folder.Contains(".zip"))
-                {
-                    folder = folder.Replace(".zip", "");
-                }
+            string path = Path.GetTempPath();
 
-                //Delete V01X01.zip/M01XO2.zip/M02XO2.zip file from temp Directory
-                if (File.Exists(fileName))
-                {
-                    File.Delete(fileName);
-                }
+            if (Directory.Exists(Path.Combine(path, fullFileName)))
+            {
+                Directory.Delete(Path.Combine(path, fullFileName), true);
             }
 
+            File.Delete(Path.Combine(path, fullFileName + ".zip"));
+            File.Delete(Path.Combine(path, fullFileName + ".iso"));
+            File.Delete(Path.Combine(path, fullFileName + ".iso.sha1"));
+            File.Delete(Path.Combine(path, fullFileName));
         }
 
-        public static bool CheckforFileExist(string filePath, string fileName)
+        public static async Task<List<string>> DownloadAndExtractExchangeSetZipFileForLargeMedia(string BatchId, string FssJwtToken)
         {
-            return (Directory.Exists(filePath) && File.Exists(Path.Combine(filePath, fileName)));
+            List<string> downloadFolderPath = new();
+
+            for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
+            {
+                string folderName = $"M0{mediaNumber}X02";
+                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderName}.zip";
+
+                string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderName);
+
+                string downloadFolder = FssBatchHelper.RenameFolder(extractDownloadedFolder);
+                string tmpDownloadFolderPath = Path.Combine(Path.GetTempPath(), downloadFolder);
+                downloadFolderPath.Add(tmpDownloadFolderPath);
+            }
+            return downloadFolderPath;
         }
 
-        public static bool CheckforFolderExist(string filePath, string folderName)
+        public static async Task<List<string>> CreateExchangeSetFileForIsoAndSha1Files(string BatchId, string FssJwtToken)
         {
-            return Directory.Exists(Path.Combine(filePath, folderName));
-        }
+            List<string> downloadFolderPath = new();
 
+            for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
+            {
+                string folderNameIso = $"M0{mediaNumber}X02.iso";
+
+                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderNameIso}";
+
+                string downloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderNameIso);
+
+                string FolderNameSha1 = $"M0{mediaNumber}X02.iso.sha1";
+                string downloadFileUrlSha1 = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{FolderNameSha1}";
+
+                string downloadedFolderSha1 = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrlSha1, FssJwtToken, FolderNameSha1);
+
+                downloadFolderPath.Add(downloadedFolder);
+                downloadFolderPath.Add(downloadedFolderSha1);
+            }
+            return downloadFolderPath;
+        }
     }
 }

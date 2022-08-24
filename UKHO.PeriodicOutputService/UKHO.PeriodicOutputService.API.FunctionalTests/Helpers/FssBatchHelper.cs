@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO.Compression;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using UKHO.ExchangeSetService.API.FunctionalTests.Models;
@@ -24,8 +20,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<string> DownloadedFolderForLargeFiles(string downloadFileUrl, string jwtToken, string folderName)
         {
-            //Mock api fullfillment process takes more time to upload file for the cancellation product and tests are intermittently failing,therefore we have added delay 'Thread.Sleep()' to avoid intermittent failure in the pipe.
-            string LargeFolderName = folderName + ".zip";
+            string LargeFolderName = folderName;
             string tempFilePath = Path.Combine(Path.GetTempPath(), LargeFolderName);
 
             var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
@@ -38,6 +33,24 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 stream.CopyTo(outputFileStream);
             }
             return tempFilePath;
+        }
+
+        public static async Task<string> ExtractDownloadedFolderForLargeFiles(string downloadFileUrl, string jwtToken, string folderName)
+        {
+            string largeFolderName = folderName + ".zip";
+            string tempFilePath = Path.Combine(Path.GetTempPath(), largeFolderName);
+            string zipPath = await DownloadedFolderForLargeFiles(downloadFileUrl, jwtToken, largeFolderName);
+
+            string extractPath = Path.GetTempPath() + RenameFolder(tempFilePath);
+
+            ZipFile.ExtractToDirectory(zipPath, extractPath);
+
+            return extractPath;
+        }
+
+        public static string RenameFolder(string pathInput)
+        {
+            return Path.GetFileName(pathInput).Replace(".zip", "");
         }
     }
 }

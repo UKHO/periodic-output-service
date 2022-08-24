@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.IO.Abstractions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -39,6 +40,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet());
 
             await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
+
             return "success";
         }
 
@@ -67,6 +69,19 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                     CreateIsoAndSha1ForExchangeSet(files, downloadPath);
 
+                    var extensions = new List<(string fileExtension, string mediaType)> { ("iso;sha1", "DVD"), ("zip", "Zip") };
+
+                    foreach ((string fileExtension, string mediaType) in extensions)
+                    {
+                        IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                        string batchId = await CreateBatchAndUploadFiles(filePaths, mediaType);
+                        bool isCommitted = await _fssService.CommitBatch(batchId, filePaths);
+                        if (isCommitted)
+                        {
+                            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                        }
+                    }
+
                 }
                 else
                 {
@@ -85,7 +100,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             await Task.CompletedTask;
         }
-
 
         private async Task<List<FssBatchFile>> GetBatchFiles(string essBatchId)
         {
@@ -111,11 +125,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private async Task<string> PostProductIdentifiersToESS(List<string> productIdentifiers)
         {
             ExchangeSetResponseModel exchangeSetResponseModel = await _essService.PostProductIdentifiersData(productIdentifiers);
+
             if (!string.IsNullOrEmpty(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href))
             {
                 string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
                 _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch is created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
                 return essBatchId;
             }
             else
@@ -127,12 +141,32 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
         {
-            Parallel.ForEach(fileDetails, file =>
+            Parallel.ForEach(fileDetails, new ParallelOptions { MaxDegreeOfParallelism = 4 }, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                Stream stream = _fssService.DownloadFile(downloadPath, file.FileName, file.FileLink).Result;
+                Stream stream = _fssService.DownloadFile(file.FileName, file.FileLink).Result;
                 _fileSystemHelper.CreateFileCopy(filePath, stream);
             });
+        }
+
+        private async Task<string> CreateBatchAndUploadFiles(IEnumerable<string> filePaths, string mediaType)
+        {
+            string batchId = await _fssService.CreateBatch(mediaType);
+
+            Parallel.ForEach(filePaths, new ParallelOptions { MaxDegreeOfParallelism = 4 }, filePath =>
+            {
+                IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
+                bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length).Result;
+                if (isFileAdded)
+                {
+                    List<string> blockIds = _fssService.UploadBlocks(batchId, fileInfo).Result;
+                    if (blockIds.Count > 0)
+                    {
+                        bool fileWritten = _fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
+                    }
+                }
+            });
+            return batchId;
         }
 
         private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)

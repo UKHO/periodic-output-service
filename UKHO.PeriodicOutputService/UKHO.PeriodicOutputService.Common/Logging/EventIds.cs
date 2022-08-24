@@ -172,6 +172,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809041 - creating iso and sha1 file completed
         /// </summary>
         CreateIsoAndSha1Completed = 809041,
+
         /// <summary>
         /// 809042 - Fss polling cutoff timeout
         /// </summary>
@@ -183,7 +184,68 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809044 -  Fss batch status polling completed.
         /// </summary>
-        FssBatchStatusPollingTimedOut = 809044
+        FssBatchStatusPollingTimedOut = 809044,
+        //////Create Batch events
+        /// <summary>
+        /// 809045 - Create batch started
+        /// </summary>
+        CreateBatchStarted = 809045,
+        /// <summary>
+        /// 809046 - Create batch failed
+        /// </summary>
+        CreateBatchFailed = 809046,
+        /// <summary>
+        /// 809047 - Create batch completed
+        /// </summary>
+        CreateBatchCompleted = 809047,
+        /// <summary>
+        /// 809048 - Add file to batch request started
+        /// </summary>
+        AddFileToBatchRequestStarted = 809048,
+        /// <summary>
+        /// 809049 - Add file to batch request failed
+        /// </summary>
+        AddFileToBatchRequestFailed = 809049,
+        /// <summary>
+        /// 809050 - Add file to batch request completed
+        /// </summary>
+        AddFileToBatchRequestCompleted = 809050,
+        /// <summary>
+        /// 809051 - Write file block started
+        /// </summary>
+        WriteBlockToFileStarted = 809051,
+        /// <summary>
+        /// 809052 - Write file block failed
+        /// </summary>
+        WriteBlockToFileFailed = 809052,
+        /// <summary>
+        /// 809053 - Write file block completed
+        /// </summary>
+        WriteBlockToFileCompleted = 809053,
+        /// <summary>
+        /// 809054 - Upload file block started
+        /// </summary>
+        UploadFileBlockStarted = 809054,
+        /// <summary>
+        /// 809055 - Upload file block failed
+        /// </summary>
+        UploadFileBlockFailed = 809055,
+        /// <summary>
+        /// 809056 - Upload file block completed
+        /// </summary>
+        UploadFileBlockCompleted = 809056,
+        /// <summary>
+        /// 809057 - Commit batch started
+        /// </summary>
+        CommitBatchStarted = 809057,
+        /// <summary>
+        /// 809058 - Commit batch failed
+        /// </summary>
+        CommitBatchFailed = 809058,
+        /// <summary>
+        /// 809059 - Commit batch completed
+        /// </summary>
+        CommitBatchCompleted = 809059
     }
 
     public static class EventIdExtensions
