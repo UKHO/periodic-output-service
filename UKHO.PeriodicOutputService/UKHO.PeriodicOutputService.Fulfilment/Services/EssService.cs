@@ -25,12 +25,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _essApiClient = essApiClient ?? throw new ArgumentNullException(nameof(essApiClient));
             _authEssTokenProvider = authEssTokenProvider ?? throw new ArgumentNullException(nameof(authEssTokenProvider));
         }
+
         public async Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers)
         {
             _logger.LogInformation(EventIds.PostProductIdentifiersToEssStarted.ToEventId(), "Request to post {ProductIdentifiersCount} productidentifiers to ESS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productIdentifiers.Count.ToString(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productIdentifiers";
-
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
 
             HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(uri, productIdentifiers, accessToken);

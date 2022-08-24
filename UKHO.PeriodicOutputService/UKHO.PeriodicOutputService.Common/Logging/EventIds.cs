@@ -5,23 +5,23 @@ namespace UKHO.PeriodicOutputService.Common.Logging
     public enum EventIds
     {
         /// <summary>
-        /// 809000 - An unhandled Periodic Output Service webjob exception occurred while processing the request.
+        /// 809000 - An unhandled exception occurred while processing the request
         /// </summary>
         UnhandledException = 809000,
         /// <summary>
-        /// 809001 - Periodic Output Service webjob request started 
+        /// 809001 - Periodic output service webjob started 
         /// </summary>
         PosFulfilmentJobStarted = 809001,
         /// <summary>
-        /// 809002 - Periodic Output Service webjob request completed 
+        /// 809002 - Periodic output service webjob completed 
         /// </summary>
         PosFulfilmentJobCompleted = 809002,
         /// <summary>
-        /// 809003 - full avcs exchangeset creation started.
+        /// 809003 - Full AVCS exchangeset creation started
         /// </summary>
         FullAvcsExchangeSetCreationStarted = 809003,
         /// <summary>
-        /// 809004 - full avcs exchangeset creation completed.
+        /// 809004 - Full AVCS exchangeset creation completed
         /// </summary>
         FullAvcsExchangeSetCreationCompleted = 809004,
         /// <summary>
@@ -49,47 +49,47 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         GetFleetMangerCatalogueCompleted = 809010,
         /// <summary>
-        /// 809011 - Get access token started.
+        /// 809011 - Get access token to call external api started.
         /// </summary>
         GetAccessTokenStarted = 809011,
         /// <summary>
-        /// 809012 - Cached access toeken found.
+        /// 809012 - Cached access token to call external api found.
         /// </summary>
         CachedAccessTokenFound = 809012,
         /// <summary>
-        /// 809013 - Get new access token started.
+        /// 809013 - Get new access token to call external api started.
         /// </summary>
         GetNewAccessTokenStarted = 809013,
         /// <summary>
-        /// 809014 - Get new access token completed.
+        /// 809014 - Get new access token to call external api completed.
         /// </summary>
         GetNewAccessTokenCompleted = 809014,
         /// <summary>
-        /// 809015 - Cashing external endpoint token started .
+        /// 809015 - Caching access token to call external api started .
         /// </summary>
         CachingExternalEndPointTokenStarted = 809015,
         /// <summary>
-        /// 809016 - Caching external endpoint token completed.
+        /// 809016 - Caching access token to call external api completed.
         /// </summary>
         CachingExternalEndPointTokenCompleted = 809016,
         /// <summary>
-        /// 809017 - Get access token completed.
+        /// 809017 - Get access token to call external api completed.
         /// </summary>
         GetAccessTokenCompleted = 809017,
         /// <summary>
-        /// 809018 - Post product identifiers to Ess started
+        /// 809018 - Request to post product identifiers to Ess started
         /// </summary>
         PostProductIdentifiersToEssStarted = 809018,
         /// <summary>
-        /// 809019 - Post product identifiers to Ess failed
+        /// 809019 - Request to post product identifiers to Ess failed
         /// </summary>
         PostProductIdentifiersToEssFailed = 809019,
         /// <summary>
-        /// 809020 - Post product identifiers to Ess completed
+        /// 809020 - Request to post product identifiers to Ess completed
         /// </summary>
         PostProductIdentifiersToEssCompleted = 809020,
         /// <summary>
-        /// 809021 - Batch created in ESS.
+        /// 809021 - ESS Batch created in FSS.
         /// </summary>
         BatchCreatedInESS = 809021,
         /// <summary>
@@ -121,105 +121,108 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         FssBatchStatusPollingCompleted = 809028,
         /// <summary>
-        /// 809029 - getting batch details started
+        /// 809029 - Get batch details request started
         /// </summary>
         GetBatchDetailRequestStarted = 809029,
         /// <summary>
-        /// 809030 - getting batch details request failed
+        /// 809030 -  Get batch details request failed
         /// </summary>
         GetBatchDetailRequestFailed = 809030,
         /// <summary>
-        /// 809031 - getting batch details request completed
+        /// 809031 - Get batch details request completed
         /// </summary>
         GetBatchDetailRequestCompleted = 809031,
         /// <summary>
-        /// 809032 - downloading file started
+        /// 809032 - Download file started
         /// </summary>
         DownloadFileStarted = 809032,
         /// <summary>
-        /// 809033 - downloading file failed
+        /// 809033 - Download file failed        
         /// </summary>
         DownloadFileFailed = 809033,
         /// <summary>
-        /// 809034 - downloading file completed
+        /// 809034 - Download file completed
         /// </summary>
         DownloadFileCompleted = 809034,
         /// <summary>
-        /// 809035 - Error found in get batch file.
+        /// 809035 - Error.txt found in batch.
         /// </summary>
         ErrorFileFoundInBatch = 809035,
+
+
         /// <summary>
-        /// 809036 - Create batch started
+        /// 809042 - Fss polling cutoff timeout
         /// </summary>
-        CreateBatchStarted = 809036,
+        FssPollingCutOffTimeout = 809042,
         /// <summary>
-        /// 809037 - Create batch failed
+        /// 809043 - Empty BatchId found
         /// </summary>
-        CreateBatchFailed = 809037,
+        EmptyBatchIdFound = 809043,
         /// <summary>
-        /// 809038 - Create batch completed
+        /// 809044 -  Fss batch status polling completed.
         /// </summary>
-        CreateBatchCompleted = 809038,
+        FssBatchStatusPollingTimedOut = 809044,
+        //////Create Batch events
         /// <summary>
-        /// 809039 - Add file to batch request started.
+        /// 809045 - Create batch started
         /// </summary>
-        AddFileToBatchRequestStarted = 809039,
+        CreateBatchStarted = 809045,
         /// <summary>
-        /// 809040 - Add file to batch request failed
+        /// 809046 - Create batch failed
         /// </summary>
-        AddFileToBatchRequestFailed = 809040,
+        CreateBatchFailed = 809046,
         /// <summary>
-        /// 809041 - Add file to batch request completed
+        /// 809047 - Create batch completed
         /// </summary>
-        AddFileToBatchRequestCompleted = 809041,
+        CreateBatchCompleted = 809047,
         /// <summary>
-        /// 809042 - write file block started
+        /// 809048 - Add file to batch request started
         /// </summary>
-        WriteBlockToFileStarted = 809042,
+        AddFileToBatchRequestStarted = 809048,
         /// <summary>
-        /// 809043 - write file block failed
+        /// 809049 - Add file to batch request failed
         /// </summary>
-        WriteBlockToFileFailed = 809043,
+        AddFileToBatchRequestFailed = 809049,
         /// <summary>
-        /// 809044 - write file block completed
+        /// 809050 - Add file to batch request completed
         /// </summary>
-        WriteBlockToFileCompleted = 809044,
+        AddFileToBatchRequestCompleted = 809050,
         /// <summary>
-        /// 809045 - upload file block started
+        /// 809051 - Write file block started
         /// </summary>
-        UploadFileBlockStarted = 809045,
+        WriteBlockToFileStarted = 809051,
         /// <summary>
-        /// 809046 - upload file block failed
+        /// 809052 - Write file block failed
         /// </summary>
-        UploadFileBlockFailed = 809046,
+        WriteBlockToFileFailed = 809052,
         /// <summary>
-        /// 809047 - upload file block completed
+        /// 809053 - Write file block completed
         /// </summary>
-        UploadFileBlockCompleted = 809047,
+        WriteBlockToFileCompleted = 809053,
         /// <summary>
-        /// 809048 - commit batch started
+        /// 809054 - Upload file block started
         /// </summary>
-        CommitBatchStarted = 809048,
+        UploadFileBlockStarted = 809054,
         /// <summary>
-        /// 809049 - commit batch failed
+        /// 809055 - Upload file block failed
         /// </summary>
-        CommitBatchFailed = 809049,
+        UploadFileBlockFailed = 809055,
         /// <summary>
-        /// 809050 - commit batch completed
+        /// 809056 - Upload file block completed
         /// </summary>
-        CommitBatchCompleted = 809050,
+        UploadFileBlockCompleted = 809056,
         /// <summary>
-        /// 809051 - Fss polling cutoff timeout
+        /// 809057 - Commit batch started
         /// </summary>
-        FssPollingCutOffTimeout = 809051,
+        CommitBatchStarted = 809057,
         /// <summary>
-        /// 809052 - Empty BatchId found
+        /// 809058 - Commit batch failed
         /// </summary>
-        EmptyBatchIdFound = 809052,
+        CommitBatchFailed = 809058,
         /// <summary>
-        /// 809053 -  Fss batch status polling completed.
+        /// 809059 - Commit batch completed
         /// </summary>
-        FssBatchStatusPollingTimedOut = 809053
+        CommitBatchCompleted = 809059
     }
 
     public static class EventIdExtensions

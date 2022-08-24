@@ -1,3 +1,16 @@
+data "azurerm_subnet" "main_subnet" {
+  name                 = var.spoke_subnet_name
+  virtual_network_name = var.spoke_vnet_name
+  resource_group_name  = var.spoke_rg
+}
+
+data "azurerm_subnet" "agent_subnet" {
+  provider             = azurerm.build_agent
+  name                 = var.agent_subnet_name
+  virtual_network_name = var.agent_vnet_name
+  resource_group_name  = var.agent_rg
+}
+
 data "azurerm_app_service_plan" "essft_asp" {
   name                = "essft-qc-yh3r1-asp"
   resource_group_name = "essft-qc-webapp-rg"
@@ -26,7 +39,7 @@ module "eventhub" {
 }
 
 module "mock_webapp_service" {
-  source              = "./Modules/WebApp"
+  source              = "./Modules/MockWebApp"
   name                = local.mock_web_app_name
   env_name            = local.env_name
   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
@@ -38,7 +51,7 @@ module "mock_webapp_service" {
     "WEBSITE_ENABLE_SYNC_UPDATE_SITE"                      = "true"
     "APPINSIGHTS_INSTRUMENTATIONKEY"                       = "NOT_CONFIGURED"
   }
-  tags = local.tags
+  tags                                                     = local.tags
 }
 
 module "webapp_service" {
@@ -48,6 +61,7 @@ module "webapp_service" {
   service_plan_id           = data.azurerm_app_service_plan.ess_asp.id
   env_name                  = local.env_name
   location                  = azurerm_resource_group.webapp_rg.location
+  subnet_id                 = data.azurerm_subnet.main_subnet.id
   app_settings = {
     "KeyVaultSettings:ServiceUri"                              = "https://${local.key_vault_name}.vault.azure.net/"
     "EventHubLoggingConfiguration:Environment"                 = local.env_name
@@ -59,6 +73,7 @@ module "webapp_service" {
     "WEBSITE_ENABLE_SYNC_UPDATE_SITE"                          = "true"
   }
   tags                                                         = local.tags
+  allowed_ips                                                  = var.allowed_ips
 }
 
 module "key_vault" {
@@ -67,6 +82,8 @@ module "key_vault" {
   resource_group_name = azurerm_resource_group.webapp_rg.name
   env_name            = local.env_name
   tenant_id           = module.webapp_service.web_app_tenant_id
+  allowed_ips         = var.allowed_ips
+  allowed_subnet_ids  = [data.azurerm_subnet.main_subnet.id,data.azurerm_subnet.agent_subnet.id]
   location            = azurerm_resource_group.webapp_rg.location
   read_access_objects = {
      "webapp_service" = module.webapp_service.web_app_object_id

@@ -34,10 +34,17 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             return deserializeJsonText;
         }
 
-        public static string getbase64encodedcredentials(string username, string password)
+        public static string GetBase64EncodedCredentials(string username, string password)
         {
             var userCredentialsBytes = System.Text.Encoding.UTF8.GetBytes(username + ":" + password);
             return Convert.ToBase64String(userCredentialsBytes);
+        }
+
+        public static async Task<dynamic> DeserializeAsyncResponse(this HttpResponseMessage httpResponseMessage)
+        {
+            string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
+            dynamic response = JsonConvert.DeserializeObject<dynamic>(bodyJson);
+            return response;
         }
     }
 }
