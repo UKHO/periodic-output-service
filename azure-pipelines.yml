@@ -544,7 +544,7 @@ stages:
           - task: AzureCLI@2
             displayName: "Check Infrastructure is healthy"
             inputs:
-              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+              azureSubscription: "Exchange-Set-Service-QA-A-008-02"
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Build.SourcesDirectory)/QALiveDeployment/check_service_status_webjob.ps1'
