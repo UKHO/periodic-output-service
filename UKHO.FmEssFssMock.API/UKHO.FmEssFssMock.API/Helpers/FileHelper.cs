@@ -12,10 +12,11 @@ namespace UKHO.FmEssFssMock.API.Helpers
 
         public static void CheckAndCreateFolder(string folderPath)
         {
-            if (!Directory.Exists(folderPath))
+            if (Directory.Exists(folderPath))
             {
-                Directory.CreateDirectory(folderPath);
+                Directory.Delete(folderPath, true);
             }
+            Directory.CreateDirectory(folderPath);
         }
 
         public static void CreateFileContentWithBytes(string uploadBlockFilePath, byte[] content)

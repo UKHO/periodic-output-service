@@ -47,18 +47,20 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         }
 
         [Test]
-        public void Does_CreateFolder_Completed_When_Directory_Exists()
+        public void Does_CreateDirectory_DeleteAndCreate_Folder_When_Directory_Exists()
         {
             A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
 
             _fileSystemHelper.CreateDirectory(filePath);
 
+            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath, true))
+                            .MustHaveHappened();
             A.CallTo(() => _fakefileSystem.Directory.CreateDirectory(filePath))
-                            .MustNotHaveHappened();
+                            .MustHaveHappened();
         }
 
         [Test]
-        public void Does_CreateFolder_Completed_When_Directory_Doesnot_Exists()
+        public void Does_CreateFolder_Create_Folder_When_Directory_Doesnot_Exists()
         {
             A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(false);
 

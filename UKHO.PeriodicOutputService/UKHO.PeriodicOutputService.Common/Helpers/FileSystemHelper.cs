@@ -20,10 +20,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public void CreateDirectory(string folderPath)
         {
-            if (!_fileSystem.Directory.Exists(folderPath))
+            if (_fileSystem.Directory.Exists(folderPath))
             {
-                _fileSystem.Directory.CreateDirectory(folderPath);
+                _fileSystem.Directory.Delete(folderPath, true);
             }
+            _fileSystem.Directory.CreateDirectory(folderPath);
         }
 
         public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
