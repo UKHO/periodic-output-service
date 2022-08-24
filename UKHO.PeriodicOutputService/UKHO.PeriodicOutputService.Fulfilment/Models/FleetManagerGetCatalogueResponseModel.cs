@@ -4,7 +4,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Models
 {
     public class FleetManagerGetCatalogueResponseModel
     {
-        public List<string>? ProductIdentifiers { get; set; }
+        public List<string> ProductIdentifiers { get; set; }
         public HttpStatusCode StatusCode { get; set; }
     }
 }

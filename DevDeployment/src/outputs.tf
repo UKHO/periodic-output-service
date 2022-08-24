@@ -29,3 +29,12 @@ output "Website_Url" {
 output "kv_name" {
   value = local.key_vault_name
 }
+
+output "webjob_username" {
+  value = module.webapp_service.username
+}
+
+output "webjob_password" {
+  value = module.webapp_service.password
+  sensitive = true
+}

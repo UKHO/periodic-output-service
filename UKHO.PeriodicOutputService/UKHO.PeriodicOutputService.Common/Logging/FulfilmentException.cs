@@ -8,7 +8,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
     {
         public EventId EventId { get; set; }
 
-        public FulfilmentException(EventId eventId)
+        public FulfilmentException(EventId eventId) : base()
         {
             EventId = eventId;
         }

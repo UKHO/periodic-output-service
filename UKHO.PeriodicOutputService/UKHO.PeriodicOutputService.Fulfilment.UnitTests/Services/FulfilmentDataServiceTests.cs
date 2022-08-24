@@ -37,41 +37,41 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeEssService, _fakeFssService, _fakefileSystemHelper, _fakeLogger, _fakeconfiguration);
         }
 
-        [Test]
-        public async Task Does_CreatePosExchangeSets_Executes_Successfully()
-        {
-            jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
-            jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
+        //[Test]
+        //public async Task Does_CreatePosExchangeSets_Executes_Successfully()
+        //{
+        //    jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
+        //    jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
 
-            FleetManagerGetCatalogueResponseModel fleetManagerGetCatalogue = new()
-            {
-                StatusCode = HttpStatusCode.OK,
-                ProductIdentifiers = new() { "Product1", "Product2" }
-            };
+        //    FleetManagerGetCatalogueResponseModel fleetManagerGetCatalogue = new()
+        //    {
+        //        StatusCode = HttpStatusCode.OK,
+        //        ProductIdentifiers = new() { "Product1", "Product2" }
+        //    };
 
-            A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken())
-              .Returns(jwtauthUnpToken);
+        //    A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken())
+        //      .Returns(jwtauthUnpToken);
 
-            A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
-              .Returns(fleetManagerGetCatalogue);
+        //    A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
+        //      .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
-              .Returns(GetValidExchangeSetGetBatchResponse());
+        //    A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+        //      .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
-              .Returns(Common.Enums.FssBatchStatus.Committed);
+        //    A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+        //      .Returns(Common.Enums.FssBatchStatus.Committed);
 
-            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
-              .Returns(GetValidBatchResponseModel());
+        //    A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
+        //      .Returns(GetValidBatchResponseModel());
 
-            string result = await _fulfilmentDataService.CreatePosExchangeSets();
+        //    string result = await _fulfilmentDataService.CreatePosExchangeSets();
 
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.EqualTo("success"));
+        //    Assert.That(result, Is.Not.Null);
+        //    Assert.That(result, Is.EqualTo("success"));
 
-            A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
-               .MustHaveHappenedOnceExactly();
-        }
+        //    A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
+        //       .MustHaveHappenedOnceExactly();
+        //}
 
 
 
@@ -138,7 +138,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             }
         };
 
-
         private static GetBatchResponseModel GetValidBatchResponseModel() => new()
         {
             BatchId = Guid.NewGuid().ToString(),
@@ -175,7 +174,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                    }
                }
             }
-
         };
     }
 }
