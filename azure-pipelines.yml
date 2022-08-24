@@ -387,6 +387,10 @@ stages:
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
           - name: RGName
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
+          - name: POSWebjobApiConfiguration.UserName
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.webJobUsername']  ]
+          - name: POSWebjobApiConfiguration.Password
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.webJobPassword']  ]
         steps:
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download Functional test Artifact"
@@ -489,6 +493,10 @@ stages:
             value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
           - name: RGName
             value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
+          - name: POSWebjobApiConfiguration.UserName
+            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobUsername']  ]
+          - name: POSWebjobApiConfiguration.Password
+            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobPassword']  ]
         steps:
 
                 - task: AzureCLI@2

@@ -21,7 +21,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
 
-            userCredentialsBytes = CommonHelper.getbase64encodedcredentials(fleet.userName, fleet.password);
+            userCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(fleet.userName, fleet.password);
             return Task.CompletedTask;
         }
 
