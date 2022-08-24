@@ -393,39 +393,33 @@ stages:
         displayName: "Check FSS Health"
         dependsOn: DevDeployApp
         steps:
-          - task: AzureCLI@2
+          - task: PowerShell@2
             displayName: "Check FSS Health endpoint is healthy"
             inputs:
-              azureSubscription: "File-Share-Service-Dev-P4052"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1'
+              targetType: filePath
+              filePath: "$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1"
               arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckESS
         displayName: "Check ESS Health"
         dependsOn: DevDeployApp
         steps:
-          - task: AzureCLI@2
+          - task: PowerShell@2
             displayName: "Check ESS Health endpoint is healthy"
             inputs:
-              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1'
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckFM
         displayName: "Check Fleet Manager Health"
         dependsOn: DevDeployApp
         steps:
-          - task: AzureCLI@2
+          - task: PowerShell@2
             displayName: "Check FM Health endpoint is healthy"
             inputs:
-              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1'
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: FunctionalTests
