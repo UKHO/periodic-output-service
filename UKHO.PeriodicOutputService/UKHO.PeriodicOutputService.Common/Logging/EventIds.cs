@@ -224,9 +224,13 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         CommitBatchCompleted = 809059,
         /// <summary>
-        /// 809003 - full avcs exchangeset creation started.
+        /// 809003 - Update exchangeset creation started.
         /// </summary>
         UpdateExchangeSetCreationStarted = 809003,
+        /// <summary>
+        /// 809003 - Update exchangeset creation completed.
+        /// </summary>
+        UpdateExchangeSetCreationCompleted = 809003,
         /// <summary>
         /// 809053 - Get product data since given datetime started.
         /// </summary>

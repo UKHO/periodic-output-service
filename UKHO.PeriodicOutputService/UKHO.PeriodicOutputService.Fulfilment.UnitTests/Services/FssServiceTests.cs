@@ -299,7 +299,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     },
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CreateBatch("zip"));
+            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CreateBatch("zip",Batch.PosFullAvcsIsoSha1Batch));
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -326,7 +326,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\"}")))
                 });
 
-            var result = await _fssService.CreateBatch("DVD");
+            var result = await _fssService.CreateBatch("dvd", Batch.PosFullAvcsIsoSha1Batch);
 
             Assert.That(result, Is.EqualTo("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
 
