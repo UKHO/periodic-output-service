@@ -14,7 +14,7 @@ namespace UKHO.FmEssFssMock.API.Services
             string attributeValue = attributes.Where(a => a.Key.ToLower() == "batch type").FirstOrDefault().Value.ToLower();
             Enum.TryParse(attributeValue, true, out Batch batchType);
             batchId = EnumHelper.GetEnumDescription(batchType);
-                    
+
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
 
             FileHelper.CheckAndCreateFolder(batchFolderPath);
@@ -38,7 +38,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
             List<Models.Response.Attribute> attributes = new();
 
-            attributes.Add(new Models.Response.Attribute { Key = "Exchange Set Type", Value = "Base" });
+            attributes.Add(new Models.Response.Attribute { Key = "Exchange Set Type", Value = GetExchangeSetType(batchId) });
             attributes.Add(new Models.Response.Attribute { Key = "Media Type", Value = GetMediaType(batchId) });
             attributes.Add(new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" });
             attributes.Add(new Models.Response.Attribute { Key = "S63 Version", Value = "1.2" });
@@ -61,9 +61,18 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             if (batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.EssFullAvcsZipBatch) ||
                 batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsZipBatch))
-                return "zip";
+                return "Zip";
             else
-                return "dvd";
+                return "DVD";
+        }
+
+        private string GetExchangeSetType(string batchId)
+        {
+            if (batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsIsoSha1Batch) ||
+                batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsZipBatch))
+                return "Base";
+            else
+                return "Update";
         }
 
         public byte[]? GetFileData(string homeDirectoryPath, string batchId, string fileName)
@@ -92,14 +101,14 @@ namespace UKHO.FmEssFssMock.API.Services
             return FileHelper.ValidateFilePath(batchFolderPath) && FileHelper.CheckBatchWithFileExist(batchFolderPath);
         }
 
-        public bool AddFile(string batchid, string fileName, string homeDirectoryPath)
+        public bool AddFile(string batchId, string fileName, string homeDirectoryPath)
         {
-            string batchFolderPath = Path.Combine(homeDirectoryPath, batchid);
+            string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
 
             if (FileHelper.CheckFolderExists(batchFolderPath))
             {
-                string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchid, fileName);
-                string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchid), fileName);
+                string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, fileName);
+                string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), fileName);
                 File.Copy(srcFile, destFile, true);
                 return true;
             }
