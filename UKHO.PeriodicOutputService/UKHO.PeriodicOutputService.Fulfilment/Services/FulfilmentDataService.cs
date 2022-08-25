@@ -81,8 +81,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 }
                 //end - temporary code to extract and create iso sha1 files. Actual refined code is in another branch.
 
-                bool isFullAvcsDvdBatchCreated = await CreatePosBatch(essExchangeChangeDetails.Item1, FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION, FULLAVCSISOSHA1EXCHANGESETMEDIATYPE, Batch.PosFullAvcsIsoSha1Batch);
-                bool isFullAvcsZipBatchCreated = await CreatePosBatch(essExchangeChangeDetails.Item1, FULLAVCSZIPEXCHANGESETFILEEXTENSION, FULLAVCSZIPEXCHANGESETMEDIATYPE, Batch.PosFullAvcsZipBatch);
+                bool isFullAvcsDvdBatchCreated = await CreatePosBatch(essExchangeChangeDetails.essFileDownloadPath, FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION, FULLAVCSISOSHA1EXCHANGESETMEDIATYPE, Batch.PosFullAvcsIsoSha1Batch);
+                bool isFullAvcsZipBatchCreated = await CreatePosBatch(essExchangeChangeDetails.essFileDownloadPath, FULLAVCSZIPEXCHANGESETFILEEXTENSION, FULLAVCSZIPEXCHANGESETMEDIATYPE, Batch.PosFullAvcsZipBatch);
 
                 if (isFullAvcsDvdBatchCreated && isFullAvcsZipBatchCreated)
                 {
@@ -98,7 +98,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task CreateUpdateExchangeSet(string sinceDateTime)
         {
-            _logger.LogInformation(EventIds.UpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange for SinceDateTime - {SinceDateTime} set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.UpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for SinceDateTime - {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string essBatchId = await GetProductDataSinceDateTimeFromEss(sinceDateTime);
 
