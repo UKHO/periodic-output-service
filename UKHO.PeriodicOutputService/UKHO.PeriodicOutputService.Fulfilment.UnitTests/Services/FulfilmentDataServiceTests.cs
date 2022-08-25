@@ -114,7 +114,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
-                .MustNotHaveHappened();
+                .MustHaveHappened();
         }
 
         private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
