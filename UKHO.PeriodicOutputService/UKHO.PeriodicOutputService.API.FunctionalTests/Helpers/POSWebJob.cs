@@ -16,4 +16,3 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         }
     }
 }
-

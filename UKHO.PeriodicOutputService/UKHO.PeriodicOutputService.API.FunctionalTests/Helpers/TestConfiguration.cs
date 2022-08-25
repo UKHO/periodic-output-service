@@ -5,7 +5,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     public class TestConfiguration
     {
         protected IConfigurationRoot ConfigurationRoot;
-        private readonly IConfiguration configuration;
         public FleetManagerB2BApiConfiguration fleetManagerB2BConfig = new();
         public ESSApiConfiguration EssConfig = new();
         public FSSApiConfiguration FssConfig = new();
@@ -66,19 +65,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                                .AddJsonFile("appsettings.json", false)
                                .Build();
 
-
-            configuration = new ConfigurationBuilder()
-                               .AddJsonFile("appsettings.json", false)
-                               .Build();
-
             ConfigurationRoot.Bind("FleetManagerB2BApiConfiguration", fleetManagerB2BConfig);
             ConfigurationRoot.Bind("ESSApiConfiguration", EssConfig);
             ConfigurationRoot.Bind("FSSApiConfiguration", FssConfig);
             ConfigurationRoot.Bind("POSWebjobApiConfiguration", POSWebJobConfig);
             ConfigurationRoot.Bind("POSFileDetails", posFileDetails);
         }
-
-
     }
 }
-

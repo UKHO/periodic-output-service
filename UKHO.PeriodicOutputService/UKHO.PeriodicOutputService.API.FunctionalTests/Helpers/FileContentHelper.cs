@@ -5,17 +5,16 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
     public static class FileContentHelper
     {
         private static readonly TestConfiguration Config = new();
-
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string BatchId, string FssJwtToken)
         {
             List<string> downloadFolderPath = new();
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                string folderName = $"M0{mediaNumber}X02.zip";
-                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderName}";
+                var folderName = $"M0{mediaNumber}X02.zip";
+                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderName}";
 
-                string downloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderName);
+                var downloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderName);
 
                 downloadFolderPath.Add(downloadedFolder);
             }
@@ -37,40 +36,39 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
             File.Delete(Path.Combine(path, fullFileName));
         }
 
-        public static async Task<List<string>> DownloadAndExtractExchangeSetZipFileForLargeMedia(string BatchId, string FssJwtToken)
+        public static async Task<List<string>> DownloadAndExtractExchangeSetZipFileForLargeMedia(string batchId, string fssJwtToken)
         {
             List<string> downloadFolderPath = new();
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                string folderName = $"M0{mediaNumber}X02";
-                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderName}.zip";
+                var folderName = $"M0{mediaNumber}X02";
+                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{folderName}.zip";
 
-                string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderName);
+                var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolderForLargeFiles(downloadFileUrl, fssJwtToken, folderName);
 
-                string downloadFolder = FssBatchHelper.RenameFolder(extractDownloadedFolder);
-                string tmpDownloadFolderPath = Path.Combine(Path.GetTempPath(), downloadFolder);
+                var downloadFolder = FssBatchHelper.RenameFolder(extractDownloadedFolder);
+                var tmpDownloadFolderPath = Path.Combine(Path.GetTempPath(), downloadFolder);
                 downloadFolderPath.Add(tmpDownloadFolderPath);
             }
             return downloadFolderPath;
         }
-
-        public static async Task<List<string>> CreateExchangeSetFileForIsoAndSha1Files(string BatchId, string FssJwtToken)
+        public static async Task<List<string>> CreateExchangeSetFileForIsoAndSha1Files(string batchId, string fssJwtToken)
         {
             List<string> downloadFolderPath = new();
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                string folderNameIso = $"M0{mediaNumber}X02.iso";
+                var folderNameIso = $"M0{mediaNumber}X02.iso";
 
-                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderNameIso}";
+                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{folderNameIso}";
 
-                string downloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, FssJwtToken, folderNameIso);
+                var downloadedFolder = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrl, fssJwtToken, folderNameIso);
 
-                string FolderNameSha1 = $"M0{mediaNumber}X02.iso.sha1";
-                string downloadFileUrlSha1 = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{FolderNameSha1}";
+                var FolderNameSha1 = $"M0{mediaNumber}X02.iso.sha1";
+                var downloadFileUrlSha1 = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{FolderNameSha1}";
 
-                string downloadedFolderSha1 = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrlSha1, FssJwtToken, FolderNameSha1);
+                var downloadedFolderSha1 = await FssBatchHelper.DownloadedFolderForLargeFiles(downloadFileUrlSha1, fssJwtToken, FolderNameSha1);
 
                 downloadFolderPath.Add(downloadedFolder);
                 downloadFolderPath.Add(downloadedFolderSha1);

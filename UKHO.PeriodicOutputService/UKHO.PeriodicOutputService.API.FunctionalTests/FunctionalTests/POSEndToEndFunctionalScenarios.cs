@@ -34,7 +34,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, batchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
-            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+            var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
 
@@ -61,7 +61,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             //clean up downloaded files/folders
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
-                string folderName = $"M0{mediaNumber}X02";
+                var folderName = $"M0{mediaNumber}X02";
                 FileContentHelper.DeleteZipIsoSha1Files(folderName);
             }
         }
