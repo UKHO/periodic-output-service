@@ -59,10 +59,11 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private string GetMediaType(string batchId)
         {
-            if (batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsIsoSha1Batch))
-                return "DVD";
-            else
+            if (batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.EssFullAvcsZipBatch) ||
+                batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsZipBatch))
                 return "Zip";
+            else
+                return "DVD";
         }
 
         private string GetExchangeSetType(string batchId)
