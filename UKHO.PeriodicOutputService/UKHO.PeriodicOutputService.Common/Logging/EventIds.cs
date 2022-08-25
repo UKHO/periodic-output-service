@@ -172,7 +172,6 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809041 - creating iso and sha1 file completed
         /// </summary>
         CreateIsoAndSha1Completed = 809041,
-
         /// <summary>
         /// 809042 - Fss polling cutoff timeout
         /// </summary>
