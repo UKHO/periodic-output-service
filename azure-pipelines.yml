@@ -704,3 +704,54 @@ stages:
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
+
+      - job: CheckInfra
+        displayName: "Check Infrastructure Health"
+        dependsOn: LiveDeployApp
+        variables:
+          - name: WEB_APP_NAME
+            value: $[ dependencies.LiveDeployApp.outputs['LiveDeployApp.TerraformDeploy.WEBAPP']  ]
+          - name: RGName
+            value: $[ dependencies.LiveDeployApp.outputs['LiveDeployApp.TerraformDeploy.ResourceGroup']  ]
+        steps:
+          - task: AzureCLI@2
+            displayName: "Check Infrastructure is healthy"
+            inputs:
+              azureSubscription: "Exchange-Set-Service-Live-A-008-02"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: '$(Build.SourcesDirectory)/QALiveDeployment/check_service_status_webjob.ps1'
+              arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
+
+      - job: CheckFSS
+        displayName: "Check FSS Health"
+        dependsOn: LiveDeployApp
+        steps:
+          - task: PowerShell@2
+            displayName: "Check FSS Health endpoint is healthy"
+            inputs:
+              targetType: filePath
+              filePath: "$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1"
+              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
+
+      - job: CheckESS
+        displayName: "Check ESS Health"
+        dependsOn: LiveDeployApp
+        steps:
+          - task: PowerShell@2
+            displayName: "Check ESS Health endpoint is healthy"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
+              arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
+
+      - job: CheckFM
+        displayName: "Check Fleet Manager Health"
+        dependsOn: LiveDeployApp
+        steps:
+          - task: PowerShell@2
+            displayName: "Check FM Health endpoint is healthy"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint_fm_live.ps1'
+              arguments: "-healthEndPointUrl $(FMHealthEndpoint)/live/echo/health-check -waitTimeInMinute $(waitTimeInMinute) -ocpapimsubscriptionkey $(FM_Ocp_Apim_Subscription_Key)"
