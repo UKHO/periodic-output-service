@@ -4,20 +4,21 @@ using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Helpers;
 using UKHO.FmEssFssMock.API.Models.Request;
 using UKHO.FmEssFssMock.API.Models.Response;
+using UKHO.FmEssFssMock.Enums;
 
 namespace UKHO.FmEssFssMock.API.Services
 {
     public class ExchangeSetService
     {
-        private readonly IOptions<ExchangeSetServiceConfiguration> _essConfiguration;        
+        private readonly IOptions<ExchangeSetServiceConfiguration> _essConfiguration;
         private readonly FileShareService _fssService;
         protected IConfiguration _configuration;
 
-        public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,                                  
+        public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,
                                   FileShareService fssService,
                                   IConfiguration configuration)
         {
-            _essConfiguration = essConfiguration;            
+            _essConfiguration = essConfiguration;
             _fssService = fssService;
             _configuration = configuration;
         }
@@ -74,7 +75,7 @@ namespace UKHO.FmEssFssMock.API.Services
             return null;
         }
 
-        
+
         private ExchangeSetServiceResponse GetEssResponse(string responseId)
         {
             List<ExchangeSetServiceResponse>? responseData = FileHelper.ReadJsonFile<List<ExchangeSetServiceResponse>>(_essConfiguration.Value.EssDataDirectoryPath + _essConfiguration.Value.PostProductIdentifiersResponseFileName);
@@ -92,7 +93,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 {
                     new KeyValuePair<string, string>("Exchange Set Type", "Update"),
                     new KeyValuePair<string, string>("Media Type", "Zip"),
-                    new KeyValuePair<string, string>("Product Type", isPostProductIdentifiersRequest == true ? "FullAVCS" : "UpdateAVCS")
+                    new KeyValuePair<string, string>("Batch Type", isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString())
                 },
                 ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl()

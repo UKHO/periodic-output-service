@@ -11,39 +11,10 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             string batchId = string.Empty;
 
-            switch (attributes.Any())
-            {
-                case true when attributes.Any(a => a.Key.ToLower() == "exchange set type" && a.Value.ToLower() == "base") &&
-                               attributes.Any(a => a.Key.ToLower() == "media type" && a.Value.ToLower() == "dvd"):
-                    batchId = EnumHelper.GetEnumDescription(BatchId.PosFullAvcsIsoSha1Batch);
-                    break;
-                case true when attributes.Any(a => a.Key.ToLower() == "exchange set type" && a.Value.ToLower() == "base") &&
-                               attributes.Any(a => a.Key.ToLower() == "media type" && a.Value.ToLower() == "zip"):
-                    batchId = EnumHelper.GetEnumDescription(BatchId.PosFullAvcsZipBatch);
-                    break;
-                case true when attributes.Any(a => a.Key.ToLower() == "exchange set type" && a.Value.ToLower() == "update") &&
-                               attributes.Any(a => a.Key.ToLower() == "media type" && a.Value.ToLower() == "zip") &&
-                               attributes.Any(a => a.Key.ToLower() == "product type" && a.Value.ToLower() == "updateavcs"):
-                    batchId = EnumHelper.GetEnumDescription(BatchId.EssUpdateBatch);
-                    break;
-                case true when attributes.Any(a => a.Key.ToLower() == "exchange set type" && a.Value.ToLower() == "update") &&
-                               attributes.Any(a => a.Key.ToLower() == "media type" && a.Value.ToLower() == "zip") &&
-                               attributes.Any(a => a.Key.ToLower() == "product type" && a.Value.ToLower() == "fullavcs"):
-                    batchId = EnumHelper.GetEnumDescription(BatchId.EssFullAvcsBatch);
-                    break;
-                case true when attributes.Any(a => a.Key.ToLower() == "catalogue type" && a.Value.ToLower() == "enc updates") &&
-                               attributes.Any(a => a.Key.ToLower() == "content" && a.Value.ToLower() == "catalogue"):
-                    batchId = EnumHelper.GetEnumDescription(BatchId.PosEncUpdatesFileBatch);
-                    break;
-                case true when attributes.Any(a => a.Key.ToLower() == "catalogue type" && a.Value.ToLower() == "xml") &&
-                               attributes.Any(a => a.Key.ToLower() == "content" && a.Value.ToLower() == "catalogue"):
-                    batchId = EnumHelper.GetEnumDescription(BatchId.PosFmCatalogueFileBatch);
-                    break;
-                default:
-                    batchId = EnumHelper.GetEnumDescription(BatchId.PosUpdateZipBatch);
-                    break;
-            }
-
+            string attributeValue = attributes.Where(a => a.Key.ToLower() == "batch type").FirstOrDefault().Value.ToLower();
+            Enum.TryParse(attributeValue, true, out Batch batchType);
+            batchId = EnumHelper.GetEnumDescription(batchType);
+                    
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
 
             FileHelper.CheckAndCreateFolder(batchFolderPath);
@@ -79,7 +50,7 @@ namespace UKHO.FmEssFssMock.API.Services
             {
                 BatchId = batchId,
                 Status = "Committed",
-                BusinessUnit = (batchId.ToLower() == EnumHelper.GetEnumDescription(BatchId.EssFullAvcsBatch) || batchId.ToLower() == EnumHelper.GetEnumDescription(BatchId.EssUpdateBatch)) ? "AVCSCustomExchangeSets" : "AVCSData",
+                BusinessUnit = (batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.EssFullAvcsZipBatch) || batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.EssUpdateZipBatch)) ? "AVCSCustomExchangeSets" : "AVCSData",
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Attributes = attributes,
                 Files = files
@@ -88,11 +59,11 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private string GetMediaType(string batchId)
         {
-            if (batchId.ToLower() == EnumHelper.GetEnumDescription(BatchId.EssFullAvcsBatch) ||
-               batchId.ToLower() == EnumHelper.GetEnumDescription(BatchId.PosFullAvcsZipBatch))
-                return "Zip";
+            if (batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.EssFullAvcsZipBatch) ||
+                batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsZipBatch))
+                return "zip";
             else
-                return "DVD";
+                return "dvd";
         }
 
         public byte[]? GetFileData(string homeDirectoryPath, string batchId, string fileName)
