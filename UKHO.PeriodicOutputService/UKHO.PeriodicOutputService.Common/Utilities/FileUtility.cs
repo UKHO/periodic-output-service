@@ -16,15 +16,15 @@ namespace UKHO.PeriodicOutputService.Common.Utility
 
             foreach (string? file in srcFiles)
             {
-                var fileInfo1 = new FileInfo(file);
-                if (fileInfo1.Directory.Name == directoryPath)
+                var fileInfo = new FileInfo(file);
+                if (fileInfo.Directory.Name == directoryPath)
                 {
-                    iso.AddFile($"{fileInfo1.Name}", fileInfo1.FullName);
+                    iso.AddFile($"{fileInfo.Name}", fileInfo.FullName);
                     continue;
                 }
-                string? srcDir = fileInfo1.Directory.FullName.Replace(directoryPath, "").TrimEnd('\\');
+                string? srcDir = fileInfo.Directory.FullName.Replace(directoryPath, "").TrimEnd('\\');
                 iso.AddDirectory(srcDir);
-                iso.AddFile($"{srcDir}\\{fileInfo1.Name}", fileInfo1.FullName);
+                iso.AddFile($"{srcDir}\\{fileInfo.Name}", fileInfo.FullName);
             }
             iso.Build(targetPath);
         }
