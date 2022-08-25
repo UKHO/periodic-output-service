@@ -32,22 +32,32 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             Assert.That(expiryDate.Contains(expectedExpiryDate), $"Expected Expiry Date to contain {expectedExpiryDate}, but actual value is {expiryDate}");
         }
 
-        public static void GetBatchDetailsResponseValidationForISOSha1AndZipFiles(dynamic batchDetailsResponse)
+        public static void GetBatchDetailsResponseValidationForFullAVCSExchangeSet(dynamic batchDetailsResponse)
         {
             string mediaType = batchDetailsResponse.attributes[1].value;
 
             if (mediaType.Equals("Zip"))
             {
-                int responseFileNameContent = 0;
-
-                for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
+                string fileName = batchDetailsResponse.files[0].filename;
+                if (fileName.Equals($"{posDetails.UpdateExchangeSet}"))
                 {
-                    var folderName = $"M0{mediaNumber}X02.zip";
-                    string responseFileNameZip = batchDetailsResponse.files[responseFileNameContent].filename;
-                    Assert.That(responseFileNameZip, Is.EqualTo(folderName), $"Expected Response File Name Zip of {folderName}, but actual value is {responseFileNameZip}");
-
-                    responseFileNameContent++;
+                    Assert.That(fileName, Is.EqualTo($"{posDetails.UpdateExchangeSet}"), $"Expected Response File Name Zip of {posDetails.UpdateExchangeSet}, but actual value is {fileName}");
                 }
+                else
+                {
+                    int responseFileNameContent = 0;
+
+                    for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
+                    {
+                        var folderName = $"M0{mediaNumber}X02.zip";
+                        string responseFileNameZip = batchDetailsResponse.files[responseFileNameContent].filename;
+                        Assert.That(responseFileNameZip, Is.EqualTo(folderName), $"Expected Response File Name Zip of {folderName}, but actual value is {responseFileNameZip}");
+
+                        responseFileNameContent++;
+                    }
+
+                }
+               
             }
             else if (mediaType.Equals("DVD"))
             {
@@ -62,6 +72,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             {
                 Assert.Fail($"{mediaType} is different then Zip & DVD");
             }
+        }
+
+
+        public static void GetBatchDetailsResponseValidationForUpdateExchangeSet(dynamic batchDetailsResponse)
+        {
+            string mediaType = batchDetailsResponse.attributes[1].value;
         }
     }
 }

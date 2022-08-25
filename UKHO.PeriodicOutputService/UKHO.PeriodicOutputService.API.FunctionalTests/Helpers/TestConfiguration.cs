@@ -55,8 +55,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string M02Sha1File { get; set; }
             public string ZipFilesBatchId { get; set; }
             public string IsoSha1BatchId { get; set; }
+            public string UpdateSetBatchId { get; set; }
             public string MediaTypeDVD { get; set; }
             public string MediaTypeZip { get; set; }
+            public string TempFolderName { get; set; }
+            public bool IsRunningOnLocalMachine { get; set; }
+            public string UpdateExchangeSet { get; set; }
         }
 
         public TestConfiguration()
