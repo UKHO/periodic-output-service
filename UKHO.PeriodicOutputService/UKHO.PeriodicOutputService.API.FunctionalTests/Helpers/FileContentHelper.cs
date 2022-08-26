@@ -10,7 +10,7 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string BatchId, string FssJwtToken)
         {
-            List<string> downloadFolderPath = new List<string>();
+            List<string> downloadFolderPath = new();
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
@@ -68,23 +68,22 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
               
             return downloadFolderPath;
         }
-
-        public static async Task<List<string>> CreateExchangeSetFileForIsoAndSha1Files(string BatchId, string FssJwtToken)
+        public static async Task<List<string>> CreateExchangeSetFileForIsoAndSha1Files(string batchId, string fssJwtToken)
         {
-            List<string> downloadFolderPath = new List<string>();
+            List<string> downloadFolderPath = new();
 
             for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
             {
                 var folderNameIso = $"M0{mediaNumber}X02.iso";
 
-                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{folderNameIso}";
+                var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{folderNameIso}";
 
-                var downloadedFolder = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, FssJwtToken);
+                var downloadedFolder = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
 
                 var FolderNameSha1 = $"M0{mediaNumber}X02.iso.sha1";
-                var downloadFileUrlSha1 = $"{Config.FssConfig.BaseUrl}/batch/{BatchId}/files/{FolderNameSha1}";
+                var downloadFileUrlSha1 = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{FolderNameSha1}";
 
-                var downloadedFolderSha1 = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrlSha1, FssJwtToken);
+                var downloadedFolderSha1 = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrlSha1, fssJwtToken);
 
                 downloadFolderPath.Add(downloadedFolder);
                 downloadFolderPath.Add(downloadedFolderSha1);

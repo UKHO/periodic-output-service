@@ -74,8 +74,5 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             ConfigurationRoot.Bind("POSWebjobApiConfiguration", POSWebJobConfig);
             ConfigurationRoot.Bind("POSFileDetails", posFileDetails);
         }
-
-
     }
 }
-
