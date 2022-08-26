@@ -3,6 +3,7 @@ using System.Net;
 using FakeItEasy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
@@ -60,6 +61,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
+
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
@@ -69,7 +75,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.GetFiles(A<string>.Ignored, A<string>.Ignored, A<SearchOption>.Ignored))
                            .Returns(new List<string> { @"D:\Test" });
 
-            A.CallTo(() => _fakeFssService.CreateBatch(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CreateBatch(A<string>.Ignored, A<Batch>.Ignored))
                            .Returns(Guid.NewGuid().ToString());
 
             A.CallTo(() => _fakeFileInfo.Name).Returns("M01X01.zip");
@@ -93,7 +99,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.That(result, Is.EqualTo("success"));
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
-               .MustHaveHappenedOnceExactly();
+               .MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored))
                 .MustHaveHappenedOnceOrMore();
@@ -140,7 +146,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
-                .MustNotHaveHappened();
+                .MustHaveHappened();
         }
 
         [Test]

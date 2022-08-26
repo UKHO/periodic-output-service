@@ -45,6 +45,32 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             });
         }
 
+        [Test]
+        public void DoesGetProductDataSinceDateTime_Returns_OK()
+        {
+            var serializedProductDataSinceDateTimeData = JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse());
+
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                                JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()), HttpStatusCode.OK);
+
+            var httpClient = new HttpClient(messageHandler);
+            httpClient.BaseAddress = new Uri("http://test.com");
+
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _essApiClient = new EssApiClient(_fakeHttpClientFactory);
+
+            var result = _essApiClient.GetProductDataSinceDateTime("http://test.com", DateTime.UtcNow.AddDays(-7).ToString("R"), "asdfsa");
+
+            var deSerializedResult = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(result.Result.Content.ReadAsStringAsync().Result);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(deSerializedResult, Is.Not.Null);
+            });
+        }
+
         private List<string> GetProductIdentifiers()
         {
             return new List<string>

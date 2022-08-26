@@ -244,7 +244,27 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809059 - Commit batch completed
         /// </summary>
-        CommitBatchCompleted = 809059
+        CommitBatchCompleted = 809059,
+        /// <summary>
+        /// 809060 - Update exchangeset creation started.
+        /// </summary>
+        UpdateExchangeSetCreationStarted = 809060,
+        /// <summary>
+        /// 809061 - Update exchangeset creation completed.
+        /// </summary>
+        UpdateExchangeSetCreationCompleted = 809061,
+        /// <summary>
+        /// 809062 - Get product data since given datetime started.
+        /// </summary>
+        GetProductDataSinceDateTimeStarted = 809062,
+        /// <summary>
+        /// 809063 -  Get product data since given datetime completed.
+        /// </summary>
+        GetProductDataSinceDateTimeCompleted = 809063,
+        /// <summary>
+        /// 809064 -  Get product data since given datetime failed.
+        /// </summary>
+        GetProductDataSinceDateTimeFailed = 809064
     }
 
     public static class EventIdExtensions

@@ -84,9 +84,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
-            && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed getting exchange set details"
-            ).MustNotHaveHappened();
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to post productidentifiers to ESS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
@@ -110,6 +110,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
 
             ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
+
             Assert.Multiple(() =>
             {
                 Assert.That(response.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
@@ -119,7 +120,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed getting exchange set details"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustNotHaveHappened();
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
@@ -149,6 +150,104 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Error
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+        }
+
+
+        [Test]
+        public async Task DoesGetProductDataSinceDateTime_Returns_ValidData_WhenValidProductIdentifiersArePassed()
+        {
+            A.CallTo(() => _fakeEssApiClient.GetProductDataSinceDateTime
+            (A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                  .Returns(new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.OK,
+                      RequestMessage = new HttpRequestMessage()
+                      {
+                          RequestUri = new Uri("http://test.com")
+                      },
+                      Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()))
+                  });
+
+
+            ExchangeSetResponseModel response = await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
+            });
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+            ).MustNotHaveHappened();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+        }
+
+        [Test]
+        public async Task DoesGetProductDataSinceDateTime_Returns_ValidData_WhenInvalidProductIdentifiersArePassed()
+        {
+            A.CallTo(() => _fakeEssApiClient.GetProductDataSinceDateTime
+            (A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                  .Returns(new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.OK,
+                      RequestMessage = new HttpRequestMessage()
+                      {
+                          RequestUri = new Uri("http://test.com")
+                      },
+                      Content = new StringContent(JsonConvert.SerializeObject(GetInValidExchangeSetGetBatchResponse()))
+                  });
+
+
+            ExchangeSetResponseModel response = await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(response.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
+                Assert.That(response.RequestedProductsNotInExchangeSet, !Is.Null);
+            });
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "ESS request to create exhchange set for data since {SinceDateTime} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+        }
+
+        [Test]
+        public void DoesGetProductDataSinceDateTime_LogsError_When_ResponseStatus_Is_Not_OK()
+        {
+            A.CallTo(() => _fakeEssApiClient.GetProductDataSinceDateTime
+            (A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                  .Returns(new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.NotFound,
+                      RequestMessage = new HttpRequestMessage()
+                      {
+                          RequestUri = new Uri("http://test.com")
+                      },
+                      Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
+                  });
+
+            Assert.ThrowsAsync<FulfilmentException>(() => _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R")));
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Error
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to create exchange set for data since {SinceDateTime} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))

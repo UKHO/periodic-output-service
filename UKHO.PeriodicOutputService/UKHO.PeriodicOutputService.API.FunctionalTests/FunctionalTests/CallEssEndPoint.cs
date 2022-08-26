@@ -18,6 +18,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
         private static readonly ESSApiConfiguration ESSAuth = new TestConfiguration().EssConfig;
         private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
+        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
@@ -80,12 +81,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(ZipFilesBatchId, FssJwtToken);
             Assert.That(DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
+        }
 
-            //Clean up downloaded files/folders
-            foreach (string FileName in DownloadedFolderPath)
-            {
-                FileContentHelper.DeleteZipIsoSha1Files(FileName);
-            }
+        [TearDown]
+        public void GlobalTearDown()
+        {
+            FileContentHelper.DeleteTempDirectory(posDetails.TempFolderName);
         }
     }
 }
