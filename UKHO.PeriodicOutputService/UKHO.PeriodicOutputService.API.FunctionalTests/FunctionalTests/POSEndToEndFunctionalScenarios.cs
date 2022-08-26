@@ -22,7 +22,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             AuthTokenProvider authTokenProvider = new();
             fssJwtToken = await authTokenProvider.GetFssToken();
             WebJob = new POSWebJob();
-            if (!posDetails.IsRunningOnLocalMachine)
+            if (!posWebJob.IsRunningOnLocalMachine)
             {
                 string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
