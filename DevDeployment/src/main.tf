@@ -45,6 +45,7 @@ module "mock_webapp_service" {
   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
   service_plan_id     = data.azurerm_app_service_plan.essft_asp.id
   location            = azurerm_resource_group.mock_webapp_rg.location
+  subnet_id           = data.azurerm_subnet.main_subnet.id
   app_settings = {
     "ASPNETCORE_ENVIRONMENT"                               = local.env_name
     "WEBSITE_RUN_FROM_PACKAGE"                             = "1"
@@ -52,6 +53,7 @@ module "mock_webapp_service" {
     "APPINSIGHTS_INSTRUMENTATIONKEY"                       = "NOT_CONFIGURED"
   }
   tags                                                     = local.tags
+  allowed_ips                                              = var.allowed_ips
 }
 
 module "webapp_service" {
