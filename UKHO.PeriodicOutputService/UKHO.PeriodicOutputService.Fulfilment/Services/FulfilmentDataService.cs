@@ -176,7 +176,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 }
             });
         }
-        //end - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
 
         private async Task<string> GetProductDataSinceDateTimeFromEss(string sinceDateTime)
         {

@@ -61,6 +61,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
+
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
@@ -94,7 +99,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.That(result, Is.EqualTo("success"));
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
-               .MustHaveHappenedOnceExactly();
+               .MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored))
                 .MustHaveHappenedOnceOrMore();
