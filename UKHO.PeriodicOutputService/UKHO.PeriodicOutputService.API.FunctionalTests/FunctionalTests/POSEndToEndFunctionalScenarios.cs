@@ -11,9 +11,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private POSWebJob WebJob;
         private static readonly POSWebjobApiConfiguration POSWebJob = new TestConfiguration().POSWebJobConfig;
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-
-        static FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
-        HttpResponseMessage POSWebJobApiResponse;
+        private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
+        private HttpResponseMessage POSWebJobApiResponse;
         private List<string> DownloadedFolderPath;
 
         [OneTimeSetUp]

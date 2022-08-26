@@ -1,7 +1,4 @@
 ﻿using System.IO.Abstractions;
-using System.IO.Compression;
-using System.Security.Cryptography;
-using DiscUtils.Iso9660;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
@@ -68,28 +65,23 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                     DownloadFiles(files, downloadPath);
 
-                    //start - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
-                    foreach (var file in files)
-                    {
-                        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
-                        ZipFile.ExtractToDirectory(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
-                        IEnumerable<string> srcFiles = Directory.EnumerateFiles(Path.Combine(downloadPath, fileNameWithoutExtension), "*.*", SearchOption.AllDirectories);
-                        CreateIsoAndSha1(srcFiles, Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension));
-                    }
-                    //end - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
+                    ExtractExchangeSetZip(files, downloadPath);
+
+                    CreateIsoAndSha1ForExchangeSet(files, downloadPath);
 
                     var extensions = new List<(string fileExtension, string mediaType)> { ("iso;sha1", "DVD"), ("zip", "Zip") };
 
-                    foreach ((string fileExtension, string mediaType) extension in extensions)
+                    foreach ((string fileExtension, string mediaType) in extensions)
                     {
-                        IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, extension.fileExtension, SearchOption.TopDirectoryOnly);
-                        string batchId = await CreateBatchAndUploadFiles(filePaths, extension.mediaType);
+                        IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                        string batchId = await CreateBatchAndUploadFiles(filePaths, mediaType);
                         bool isCommitted = await _fssService.CommitBatch(batchId, filePaths);
                         if (isCommitted)
                         {
                             _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                         }
                     }
+
                 }
                 else
                 {
@@ -177,34 +169,47 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             return batchId;
         }
 
-
-        //start - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
-        private void CreateIsoAndSha1(IEnumerable<string> srcFiles, string targetPath, string directoryPath)
+        private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
         {
-            var iso = new CDBuilder
+            Parallel.ForEach(fileDetails, file =>
             {
-                UseJoliet = true,
-                VolumeIdentifier = "FullAVCSExchangeSet"
-            };
-
-            foreach (string? file in srcFiles)
-            {
-                var fi = new FileInfo(file);
-                if (fi.Directory.Name == directoryPath)
+                try
                 {
-                    iso.AddFile($"{fi.Name}", fi.FullName);
-                    continue;
-                }
-                string? srcDir = fi.Directory.FullName.Replace(directoryPath, "").TrimEnd('\\');
-                iso.AddDirectory(srcDir);
-                iso.AddFile($"{srcDir}\\{fi.Name}", fi.FullName);
-            }
-            iso.Build(targetPath);
+                    _logger.LogInformation(EventIds.ExtractZipFileStarted.ToEventId(), "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            byte[] isoFileBytes = System.Text.Encoding.UTF8.GetBytes(targetPath);
-            string hash = BitConverter.ToString(SHA1.Create().ComputeHash(isoFileBytes)).Replace("-", "");
-            File.WriteAllText(targetPath + ".sha1", hash);
+                    _fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
+
+                    _logger.LogInformation(EventIds.ExtractZipFileCompleted.ToEventId(), "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(EventIds.ExtractZipFileFailed.ToEventId(), "Extracting zip file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                    throw;
+                }
+            });
         }
-        //end - temporary code to extract and create iso sha1 files. Actula refined code is in another branch.
+
+        private void CreateIsoAndSha1ForExchangeSet(List<FssBatchFile> fileDetails, string downloadPath)
+        {
+            Parallel.ForEach(fileDetails, file =>
+            {
+                try
+                {
+                    _logger.LogInformation(EventIds.CreateIsoAndSha1Started.ToEventId(), "Creating ISO and Sha1 file of {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+                    _fileSystemHelper.CreateIsoAndSha1(Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension));
+
+                    _logger.LogInformation(EventIds.CreateIsoAndSha1Completed.ToEventId(), "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(EventIds.CreateIsoAndSha1Failed.ToEventId(), "Creating ISO and Sha1 file of {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                    throw;
+                }
+            });
+        }
     }
 }

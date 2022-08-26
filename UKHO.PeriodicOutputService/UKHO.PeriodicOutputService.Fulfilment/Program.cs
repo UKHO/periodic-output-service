@@ -14,6 +14,7 @@ using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Utilities;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
@@ -173,6 +174,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IFssService, FssService>();
             serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
             serviceCollection.AddScoped<IFileSystem, FileSystem>();
+            serviceCollection.AddScoped<IZipHelper, ZipHelper>();
+            serviceCollection.AddScoped<IFileUtility, FileUtility>();
 
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
