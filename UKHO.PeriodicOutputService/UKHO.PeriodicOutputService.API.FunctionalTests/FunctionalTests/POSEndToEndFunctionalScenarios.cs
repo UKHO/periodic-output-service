@@ -72,7 +72,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenDownloadedZipOfUpdateExchangeSetFromFss_ThenNewBatchIsCreatedAndUploadedWithUpdatedBU()
         {
-            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdateSetBatchId);
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdateExchangeSetBatchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
             var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
@@ -85,12 +85,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallFileDownloadEndpointForUpdateExchangeSetWithBatchId_ThenAZipFileIsDownloaded()
         {
-            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdateSetBatchId);
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdateExchangeSetBatchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
             var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.UpdateSetBatchId, fssJwtToken, batchDetailsResponse);
+            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.UpdateExchangeSetBatchId, fssJwtToken, batchDetailsResponse);
             Assert.That(DownloadedFolderPath.Count, Is.EqualTo(1), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
         }
 
