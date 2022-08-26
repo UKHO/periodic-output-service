@@ -1,7 +1,7 @@
 ﻿
 using System.IO.Abstractions;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
-using UKHO.PeriodicOutputService.Common.Utility;
+using UKHO.PeriodicOutputService.Common.Utilities;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {

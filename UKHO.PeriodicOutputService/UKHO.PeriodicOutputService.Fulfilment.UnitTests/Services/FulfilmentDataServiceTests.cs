@@ -24,7 +24,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IFileInfo _fakeFileInfo;
 
         public FleetMangerGetAuthTokenResponseModel jwtauthUnpToken = new();
-        public FleetMangerGetAuthTokenResponseModel jwtAuthJwtToken = new();
 
         [SetUp]
         public void Setup()

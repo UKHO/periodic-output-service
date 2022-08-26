@@ -3,7 +3,7 @@ using FakeItEasy;
 using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
-using UKHO.PeriodicOutputService.Common.Utility;
+using UKHO.PeriodicOutputService.Common.Utilities;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 {

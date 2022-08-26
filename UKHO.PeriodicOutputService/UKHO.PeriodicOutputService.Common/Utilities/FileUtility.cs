@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using DiscUtils.Iso9660;
-namespace UKHO.PeriodicOutputService.Common.Utility
+
+namespace UKHO.PeriodicOutputService.Common.Utilities
 {
     [ExcludeFromCodeCoverage]
     public class FileUtility : IFileUtility
@@ -22,7 +23,7 @@ namespace UKHO.PeriodicOutputService.Common.Utility
                     iso.AddFile($"{fileInfo.Name}", fileInfo.FullName);
                     continue;
                 }
-                string? srcDir = fileInfo.Directory.FullName.Replace(directoryPath, "").TrimEnd('\\');
+                string srcDir = fileInfo.Directory.FullName.Replace(directoryPath, "").TrimEnd('\\');
                 iso.AddDirectory(srcDir);
                 iso.AddFile($"{srcDir}\\{fileInfo.Name}", fileInfo.FullName);
             }

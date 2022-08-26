@@ -1,4 +1,4 @@
-﻿namespace UKHO.PeriodicOutputService.Common.Utility
+﻿namespace UKHO.PeriodicOutputService.Common.Utilities
 {
     public interface IFileUtility
     {
