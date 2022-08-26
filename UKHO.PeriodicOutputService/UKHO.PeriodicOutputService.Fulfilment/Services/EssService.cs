@@ -33,6 +33,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productIdentifiers";
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
 
+
             HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(uri, productIdentifiers, accessToken);
 
             if (httpResponse.IsSuccessStatusCode)
