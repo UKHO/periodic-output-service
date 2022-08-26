@@ -7,10 +7,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     public static class FssBatchHelper
     {
         private static FssApiClient FssApiClient { get; set; }
-        static FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        static TestConfiguration EssConfig { get; set; }
-
         static FssBatchHelper()
         {
             FssApiClient = new FssApiClient();
@@ -18,9 +15,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<string> DownloadFileForLargeMedia(string downloadFileUrl, string jwtToken)
         {
-            var batchId = downloadFileUrl.Split('/')[5];
-            var fileName = downloadFileUrl.Split('/')[7];
-            
+            string batchId = downloadFileUrl.Split('/')[5];
+            string fileName = downloadFileUrl.Split('/')[7];
+
             string posFolderPath = Path.Combine(Path.GetTempPath(), posDetails.TempFolderName);
             if (!Directory.Exists(posFolderPath))
             {
@@ -33,12 +30,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 Directory.CreateDirectory(batchFolderPath);
             }
 
-            var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
+            HttpResponseMessage response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
             Assert.That((int)response.StatusCode, Is.EqualTo(200), $"Incorrect status code File Download api returned {response.StatusCode} for the url {downloadFileUrl}, instead of the expected 200.");
 
             Stream stream = await response.Content.ReadAsStreamAsync();
 
-            using (FileStream outputFileStream = new FileStream(Path.Combine(batchFolderPath, fileName), FileMode.Create))
+            using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, fileName), FileMode.Create))
             {
                 stream.CopyTo(outputFileStream);
             }
@@ -48,7 +45,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public static string ExtractDownloadedFileForLargeMedia(string downloadPath, string fileName)
         {
             string tempFilePath = Path.Combine(downloadPath, fileName);
-            string extractPath = Path.Combine(downloadPath,RenameFolder(tempFilePath));
+            string extractPath = Path.Combine(downloadPath, RenameFolder(tempFilePath));
             ZipFile.ExtractToDirectory(tempFilePath, extractPath);
             return extractPath;
         }

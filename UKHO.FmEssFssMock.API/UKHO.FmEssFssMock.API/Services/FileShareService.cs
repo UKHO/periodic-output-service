@@ -9,11 +9,9 @@ namespace UKHO.FmEssFssMock.API.Services
     {
         public BatchResponse CreateBatch(IEnumerable<KeyValuePair<string, string>> attributes, string homeDirectoryPath)
         {
-            string batchId = string.Empty;
-
-            string attributeValue = attributes.Where(a => a.Key.ToLower() == "batch type").FirstOrDefault().Value.ToLower();
+            string attributeValue = attributes.FirstOrDefault(a => a.Key.ToLower() == "batch type").Value.ToLower();
             Enum.TryParse(attributeValue, true, out Batch batchType);
-            batchId = EnumHelper.GetEnumDescription(batchType);
+            string batchId = EnumHelper.GetEnumDescription(batchType);
 
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
 
@@ -36,15 +34,17 @@ namespace UKHO.FmEssFssMock.API.Services
                 files.Add(new BatchFile() { Filename = fileName, Links = new Links() { Get = new Link() { Href = "/batch/" + batchId + "/files/" + fileName } } });
             }
 
-            List<Models.Response.Attribute> attributes = new();
+            List<Models.Response.Attribute> attributes = new()
+            {
+                new Models.Response.Attribute{ Key = "Exchange Set Type", Value = GetExchangeSetType(batchId) },
+                new Models.Response.Attribute { Key = "Media Type", Value = GetMediaType(batchId) },
+                new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" },
+                new Models.Response.Attribute { Key = "S63 Version", Value = "1.2" },
+                new Models.Response.Attribute { Key = "Week Number", Value = currentWeek.ToString() },
+                new Models.Response.Attribute { Key = "Year", Value = currentYear },
+                new Models.Response.Attribute { Key = "Year / Week", Value = currentYear + " / " + currentWeek.ToString() }
+            };
 
-            attributes.Add(new Models.Response.Attribute { Key = "Exchange Set Type", Value = GetExchangeSetType(batchId) });
-            attributes.Add(new Models.Response.Attribute { Key = "Media Type", Value = GetMediaType(batchId) });
-            attributes.Add(new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" });
-            attributes.Add(new Models.Response.Attribute { Key = "S63 Version", Value = "1.2" });
-            attributes.Add(new Models.Response.Attribute { Key = "Week Number", Value = currentWeek.ToString() });
-            attributes.Add(new Models.Response.Attribute { Key = "Year", Value = currentYear });
-            attributes.Add(new Models.Response.Attribute { Key = "Year / Week", Value = currentYear + " / " + currentWeek.ToString() });
 
             return new BatchDetail
             {
@@ -59,19 +59,15 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private string GetMediaType(string batchId)
         {
-            if (batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsIsoSha1Batch))
-                return "DVD";
-            else
-                return "Zip";
+            return batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsIsoSha1Batch) ? "DVD" : "Zip";
         }
 
         private string GetExchangeSetType(string batchId)
         {
-            if (batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsIsoSha1Batch) ||
-                batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsZipBatch))
-                return "Base";
-            else
-                return "Update";
+            return batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsIsoSha1Batch) ||
+                batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsZipBatch)
+                ? "Base"
+                : "Update";
         }
 
         public byte[]? GetFileData(string homeDirectoryPath, string batchId, string fileName)
@@ -130,10 +126,10 @@ namespace UKHO.FmEssFssMock.API.Services
         public bool CleanUp(List<string> batchId, string homeDirectoryPath)
         {
             bool deleteFlag = false;
-            foreach (var item in batchId)
+            foreach (string item in batchId)
             {
                 string exchangeSetZipFolderPath = Path.Combine(homeDirectoryPath, item);
-                var response = FileHelper.CleanUp(exchangeSetZipFolderPath);
+                bool response = FileHelper.CleanUp(exchangeSetZipFolderPath);
                 if (response)
                 {
                     deleteFlag = true;

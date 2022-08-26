@@ -37,7 +37,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, batchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
-            var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
 
@@ -50,7 +50,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.ZipFilesBatchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
-            var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.ZipFilesBatchId, fssJwtToken, batchDetailsResponse);
             Assert.That(DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
@@ -62,7 +62,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.IsoSha1BatchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
-            var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+            await apiResponse.DeserializeAsyncResponse();
 
             DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForIsoAndSha1Files(posDetails.IsoSha1BatchId, fssJwtToken);
             Assert.That(DownloadedFolderPath.Count, Is.EqualTo(4), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
@@ -74,7 +74,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdateExchangeSetBatchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
-            var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
 
@@ -87,7 +87,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdateExchangeSetBatchId);
             Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
 
-            var batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.UpdateExchangeSetBatchId, fssJwtToken, batchDetailsResponse);
             Assert.That(DownloadedFolderPath.Count, Is.EqualTo(1), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
