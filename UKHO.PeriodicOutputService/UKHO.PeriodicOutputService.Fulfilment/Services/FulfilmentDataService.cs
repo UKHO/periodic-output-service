@@ -28,6 +28,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string UPDATEZIPEXCHANGESETMEDIATYPE = "zip";
 
+        private const string CATALOGUEFILEEXTENSION = "xml";
+        private const string CATALOGUEMEDIATYPE = "XML";
+
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
                                      IEssService exchangeSetApiService,
                                      IFssService fssService,
@@ -77,6 +80,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 if (isFullAvcsDvdBatchCreated && isFullAvcsZipBatchCreated)
                 {
                     _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                    bool isCatalogueFileBatchCreated = await CreatePosBatch(_configuration["HOME"], CATALOGUEFILEEXTENSION, CATALOGUEMEDIATYPE, Batch.PosCatalogueBatch);
                 }
             }
             else
