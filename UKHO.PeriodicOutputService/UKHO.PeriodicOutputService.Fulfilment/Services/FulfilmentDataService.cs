@@ -233,9 +233,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             Parallel.ForEach(fileDetails, file =>
             {
-                string filePath = Path.Combine(downloadPath, file.FileName);
-                Stream stream = _fssService.DownloadFile(file.FileName, file.FileLink).Result;
-                _fileSystemHelper.CreateFileCopy(filePath, stream);
+                try
+                {
+                    string filePath = Path.Combine(downloadPath, file.FileName);
+                    Stream stream = _fssService.DownloadFile(file.FileName, file.FileLink).Result;
+                    _fileSystemHelper.CreateFileCopy(filePath, stream);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("POS Webjob - Memory out of range exception:" + ex.Message + ex.StackTrace);
+                }
             });
         }
 
