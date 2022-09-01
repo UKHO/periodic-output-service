@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text;
 using FakeItEasy;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -17,6 +18,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IOptions<FleetManagerApiConfiguration> _fakeFleetManagerApiConfig;
         private IFleetManagerApiClient _fakeFleetManagerClient;
         private ILogger<FleetManagerService> _fakeLogger;
+        private IFileSystemHelper _fakefileSystemHelper;
+        private IConfiguration _fakeconfiguration;
 
         private IFleetManagerService _fleetManagerService;
 
@@ -26,8 +29,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeFleetManagerApiConfig = Options.Create(new FleetManagerApiConfiguration() { BaseUrl = "https://test/api", UserName = "TestUser", Password = "TestPassword", SubscriptionKey = "TestSubscriptionKey" });
             _fakeFleetManagerClient = A.Fake<IFleetManagerApiClient>();
             _fakeLogger = A.Fake<ILogger<FleetManagerService>>();
+            _fakefileSystemHelper = A.Fake<IFileSystemHelper>();
+            _fakeconfiguration = A.Fake<IConfiguration>();
 
-            _fleetManagerService = new FleetManagerService(_fakeFleetManagerApiConfig, _fakeFleetManagerClient, _fakeLogger);
+            _fleetManagerService = new FleetManagerService(_fakeFleetManagerApiConfig, _fakeFleetManagerClient, _fakeLogger, _fakeconfiguration, _fakefileSystemHelper);
         }
 
         [Test]

@@ -14,6 +14,7 @@ namespace UKHO.PeriodicOutputService.Common.Models.Request
     public class Acl
     {
         public IEnumerable<string> ReadUsers { get; set; }
-       
+        public IEnumerable<string> ReadGroups { get; set; }
+
     }
 }
