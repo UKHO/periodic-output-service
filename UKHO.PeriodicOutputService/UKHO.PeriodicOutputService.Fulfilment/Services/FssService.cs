@@ -109,7 +109,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}" + fileLink;
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
-            
+
             HttpResponseMessage fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken);
 
             if (fileDownloadResponse.IsSuccessStatusCode)
@@ -124,14 +124,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
         }
 
-        public async Task<string> CreateBatch(string mediaType)
+        public async Task<string> CreateBatch(string mediaType, Batch batchType)
         {
             _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {MediaType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", mediaType, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
-            
-            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(mediaType);
+
+            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(mediaType, batchType);
             string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
             HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
 
@@ -154,7 +154,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
-            
+
             AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel();
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
             HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, "application/octet-stream");
@@ -278,7 +278,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         }
 
         //Private Methods
-        private CreateBatchRequestModel CreateBatchRequestModel(string mediaType)
+        private CreateBatchRequestModel CreateBatchRequestModel(string mediaType, Batch batchType)
         {
             string currentYear = DateTime.UtcNow.Year.ToString();
             string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
@@ -294,7 +294,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     new KeyValuePair<string, string>("S63 Version", "1.2"),
                     new KeyValuePair<string, string>("Week Number", currentWeek),
                     new KeyValuePair<string, string>("Year", currentYear),
-                    new KeyValuePair<string, string>("Year / Week", currentYear + " / " + currentWeek)
+                    new KeyValuePair<string, string>("Year / Week", currentYear + " / " + currentWeek),
+                    new KeyValuePair<string, string>("Batch Type", batchType.ToString())
                 },
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl()

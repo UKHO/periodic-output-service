@@ -1,23 +1,30 @@
-﻿using System.IO.Abstractions;
+﻿
+using System.IO.Abstractions;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
+using UKHO.PeriodicOutputService.Common.Utilities;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public class FileSystemHelper : IFileSystemHelper
     {
         private readonly IFileSystem _fileSystem;
+        private readonly IZipHelper _zipHelper;
+        private readonly IFileUtility _fileUtility;
 
-        public FileSystemHelper(IFileSystem fileSystem)
+        public FileSystemHelper(IFileSystem fileSystem, IZipHelper zipHelper, IFileUtility fileUtility)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            _zipHelper = zipHelper ?? throw new ArgumentNullException(nameof(zipHelper));
+            _fileUtility = fileUtility ?? throw new ArgumentNullException(nameof(fileUtility));
         }
 
         public void CreateDirectory(string folderPath)
         {
-            if (!_fileSystem.Directory.Exists(folderPath))
+            if (_fileSystem.Directory.Exists(folderPath))
             {
-                _fileSystem.Directory.CreateDirectory(folderPath);
+                _fileSystem.Directory.Delete(folderPath, true);
             }
+            _fileSystem.Directory.CreateDirectory(folderPath);
         }
 
         public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
@@ -74,6 +81,28 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             IEnumerable<string>? files = _fileSystem.Directory.EnumerateFiles(directoryPath, "*.*", searchOption);
 
             return files.Where(e => extensions.Contains(Path.GetExtension(e).TrimStart('.').ToLowerInvariant()));
+        }
+
+        public IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption) => _fileSystem.Directory.EnumerateFiles(directoryPath, "*.*", searchOption);
+
+        public void ExtractZipFile(string sourceArchiveFileName, string destinationDirectoryName, bool deleteSourceDirectory = false)
+        {
+            _zipHelper.ExtractZipFile(sourceArchiveFileName, destinationDirectoryName);
+
+            if (deleteSourceDirectory && _fileSystem.Directory.Exists(sourceArchiveFileName))
+            {
+                _fileSystem.Directory.Delete(sourceArchiveFileName, true);
+            }
+        }
+
+
+        public void CreateIsoAndSha1(string targetPath, string directoryPath)
+        {
+            IEnumerable<string>? srcFiles = GetAllFiles(directoryPath, SearchOption.AllDirectories);
+
+            _fileUtility.CreateISOImage(srcFiles, targetPath, directoryPath);
+
+            _fileUtility.CreateSha1File(targetPath);
         }
     }
 }

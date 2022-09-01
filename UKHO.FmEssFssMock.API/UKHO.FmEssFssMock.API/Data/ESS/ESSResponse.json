@@ -4,13 +4,13 @@
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/status"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270f318-639c-4e64-a0c0-caddd5f4eb05/status"
                 },
                 "exchangeSetBatchDetailsUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270f318-639c-4e64-a0c0-caddd5f4eb05"
                 },
                 "exchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/files/V01X01.zip"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270f318-639c-4e64-a0c0-caddd5f4eb05/files/V01X01.zip"
                 }
             },
             "exchangeSetUrlExpiryDateTime": "",
@@ -25,13 +25,13 @@
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90FCDFA0-8229-43D5-B059-172491E5402B/status"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90fcdfa0-8229-43d5-b059-172491e5402b/status"
                 },
                 "exchangeSetBatchDetailsUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90FCDFA0-8229-43D5-B059-172491E5402B"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90fcdfa0-8229-43d5-b059-172491e5402b"
                 },
                 "exchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90FCDFA0-8229-43D5-B059-172491E5402B/files/V01X01.zip"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/90fcdfa0-8229-43d5-b059-172491e5402b/files/V01X01.zip"
                 }
             },
             "exchangeSetUrlExpiryDateTime": "",
@@ -46,13 +46,13 @@
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/status"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270f318-639c-4e64-a0c0-caddd5f4eb05/status"
                 },
                 "exchangeSetBatchDetailsUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270f318-639c-4e64-a0c0-caddd5f4eb05"
                 },
                 "exchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270F318-639C-4E64-A0C0-CADDD5F4EB05/files/V01X01.zip"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/2270f318-639c-4e64-a0c0-caddd5f4eb05/files/V01X01.zip"
                 }
             },
             "exchangeSetUrlExpiryDateTime": "",

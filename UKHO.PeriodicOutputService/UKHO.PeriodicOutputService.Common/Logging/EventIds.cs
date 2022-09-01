@@ -148,8 +148,30 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809035 - Error.txt found in batch.
         /// </summary>
         ErrorFileFoundInBatch = 809035,
-
-
+        /// <summary>
+        /// 809036 - extracting zip file started
+        /// </summary>
+        ExtractZipFileStarted = 809036,
+        /// <summary>
+        /// 809037 - extracting zip file failed
+        /// </summary>
+        ExtractZipFileFailed = 809037,
+        /// <summary>
+        /// 809038 - extracting zip file completed
+        /// </summary>
+        ExtractZipFileCompleted = 809038,
+        /// <summary>
+        /// 809039 - creating iso and sha1 file started
+        /// </summary>
+        CreateIsoAndSha1Started = 809039,
+        /// <summary>
+        /// 809040 - creating iso and sha1 file failed
+        /// </summary>
+        CreateIsoAndSha1Failed = 809040,
+        /// <summary>
+        /// 809041 - creating iso and sha1 file completed
+        /// </summary>
+        CreateIsoAndSha1Completed = 809041,
         /// <summary>
         /// 809042 - Fss polling cutoff timeout
         /// </summary>
@@ -222,7 +244,27 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809059 - Commit batch completed
         /// </summary>
-        CommitBatchCompleted = 809059
+        CommitBatchCompleted = 809059,
+        /// <summary>
+        /// 809060 - Update exchangeset creation started.
+        /// </summary>
+        UpdateExchangeSetCreationStarted = 809060,
+        /// <summary>
+        /// 809061 - Update exchangeset creation completed.
+        /// </summary>
+        UpdateExchangeSetCreationCompleted = 809061,
+        /// <summary>
+        /// 809062 - Get product data since given datetime started.
+        /// </summary>
+        GetProductDataSinceDateTimeStarted = 809062,
+        /// <summary>
+        /// 809063 -  Get product data since given datetime completed.
+        /// </summary>
+        GetProductDataSinceDateTimeCompleted = 809063,
+        /// <summary>
+        /// 809064 -  Get product data since given datetime failed.
+        /// </summary>
+        GetProductDataSinceDateTimeFailed = 809064
     }
 
     public static class EventIdExtensions
