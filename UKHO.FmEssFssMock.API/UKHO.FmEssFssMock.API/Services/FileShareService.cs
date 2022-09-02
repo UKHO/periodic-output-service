@@ -29,7 +29,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
             List<BatchFile> files = new();
 
-            foreach (var filePath in Directory.GetFiles(path))
+            foreach (string? filePath in Directory.GetFiles(path))
             {
                 string fileName = Path.GetFileName(filePath);
                 files.Add(new BatchFile() { Filename = fileName, Links = new Links() { Get = new Link() { Href = "/batch/" + batchId + "/files/" + fileName } } });
@@ -62,8 +62,8 @@ namespace UKHO.FmEssFssMock.API.Services
                     break;
 
                 case Batch.PosCatalogueBatch:
-                    attributes.Add(new KeyValuePair<string, string>("Catalogue Type", "XML"));
                     attributes.Add(new KeyValuePair<string, string>("Content", "Catalogue"));
+                    attributes.Add(new KeyValuePair<string, string>("Catalogue Type", "XML"));
                     break;
 
                 case Batch.PosEncUpdateBatch:
@@ -89,7 +89,7 @@ namespace UKHO.FmEssFssMock.API.Services
         public byte[]? GetFileData(string homeDirectoryPath, string batchId, string fileName)
         {
             byte[] bytes = null;
-            var filePath = Path.Combine(homeDirectoryPath, batchId, fileName);
+            string? filePath = Path.Combine(homeDirectoryPath, batchId, fileName);
 
             if (File.Exists(filePath))
             {
