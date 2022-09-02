@@ -36,7 +36,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
             List<Models.Response.Attribute> attributes = new()
             {
-                new Models.Response.Attribute{ Key = "Exchange Set Type", Value = GetExchangeSetType(batchId) },
+                new Models.Response.Attribute { Key = "Exchange Set Type", Value = GetExchangeSetType(batchId) },
                 new Models.Response.Attribute { Key = "Media Type", Value = GetMediaType(batchId) },
                 new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" },
                 new Models.Response.Attribute { Key = "S63 Version", Value = "1.2" },
@@ -102,12 +102,20 @@ namespace UKHO.FmEssFssMock.API.Services
 
             if (FileHelper.CheckFolderExists(batchFolderPath))
             {
-                string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, fileName);
+                string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(fileName));
                 string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), fileName);
                 File.Copy(srcFile, destFile, true);
                 return true;
             }
             return false;
+        }
+
+        private string RenameFiles(string fileName)
+        {
+            if (fileName.IndexOf("WK") > -1)
+                return fileName.Replace(fileName.Substring(fileName.IndexOf("WK"), 7), "WK34_22");
+            else
+                return fileName;
         }
 
         public BatchStatusResponse GetBatchStatus(string batchId, string homeDirectoryPath)
