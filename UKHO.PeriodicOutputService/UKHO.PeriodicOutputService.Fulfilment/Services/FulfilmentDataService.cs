@@ -80,7 +80,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     {
                         _logger.LogInformation(EventIds.BatchCreationForCatalogueCompleted.ToEventId(), "Batch for catalougue created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                     }
-                    string encUpdateListFilePath = Path.Combine(essFileDownloadPath, "M01X02");
+                    string encUpdateListFilePath = Path.Combine(essFileDownloadPath, "M01X02", "INFO");
                     bool isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath, ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
                     if (isEncUpdateFileBatchCreated)
                     {
