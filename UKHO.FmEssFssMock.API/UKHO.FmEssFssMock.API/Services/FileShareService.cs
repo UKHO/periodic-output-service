@@ -114,8 +114,6 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             if (fileName.IndexOf("WK") > -1)
                 return fileName.Replace(fileName.Substring(fileName.IndexOf("WK"), 7), "WK34_22");
-            else if (fileName.IndexOf("Wk") > -1)
-                return fileName.Replace(fileName.Substring(fileName.IndexOf("Wk"), 7), "Wk34_22");
             else
                 return fileName;
         }
