@@ -152,6 +152,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                 serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
             }
 
@@ -176,6 +177,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IFileSystem, FileSystem>();
             serviceCollection.AddScoped<IZipHelper, ZipHelper>();
             serviceCollection.AddScoped<IFileUtility, FileUtility>();
+            serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
 
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();

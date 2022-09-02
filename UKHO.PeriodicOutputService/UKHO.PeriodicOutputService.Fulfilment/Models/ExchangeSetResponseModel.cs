@@ -19,6 +19,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Models
         public int RequestedProductsAlreadyUpToDateCount { get; set; }
 
         public IEnumerable<RequestedProductsNotInExchangeSet>? RequestedProductsNotInExchangeSet { get; set; }
+
+        public DateTime ResponseDateTime { get; set; }
     }
 
     public class Links

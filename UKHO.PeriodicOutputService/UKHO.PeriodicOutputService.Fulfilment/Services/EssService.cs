@@ -62,7 +62,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
                 _logger.LogInformation(EventIds.GetProductDataSinceDateTimeCompleted.ToEventId(), "ESS request to create exhchange set for data since {SinceDateTime} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                return JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
+                ExchangeSetResponseModel exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
+                exchangeSetResponseModel.ResponseDateTime = httpResponse.Headers.Date.Value.UtcDateTime;
+
+                return exchangeSetResponseModel;
             }
             else
             {

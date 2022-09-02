@@ -23,6 +23,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IFileSystemHelper _fakefileSystemHelper;
         private IConfiguration _fakeconfiguration;
         private IFileInfo _fakeFileInfo;
+        private IAzureTableStorageHelper _fakeAzureTableStorageHelper;
 
         public FleetMangerGetAuthTokenResponseModel jwtauthUnpToken = new();
 
@@ -36,8 +37,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakefileSystemHelper = A.Fake<IFileSystemHelper>();
             _fakeconfiguration = A.Fake<IConfiguration>();
             _fakeFileInfo = A.Fake<IFileInfo>();
+            _fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
 
-            _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeEssService, _fakeFssService, _fakefileSystemHelper, _fakeLogger, _fakeconfiguration);
+            _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeEssService, _fakeFssService, _fakefileSystemHelper, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
         }
 
         [Test]

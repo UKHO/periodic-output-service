@@ -17,6 +17,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private readonly IFssService _fssService;
         private readonly ILogger<FulfilmentDataService> _logger;
         private readonly IFileSystemHelper _fileSystemHelper;
+        private readonly IAzureTableStorageHelper _azureTableStorageHelper;
         private readonly IConfiguration _configuration;
 
         private const string FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION = "iso;sha1";
@@ -28,12 +29,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string UPDATEZIPEXCHANGESETMEDIATYPE = "zip";
 
+        private DateTime? _nextSchedule;
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
                                      IEssService exchangeSetApiService,
                                      IFssService fssService,
                                      IFileSystemHelper fileSystemHelper,
                                      ILogger<FulfilmentDataService> logger,
-                                     IConfiguration configuration)
+                                     IConfiguration configuration,
+                                     IAzureTableStorageHelper azureTableStorageHelper)
         {
             _fleetManagerService = fleetManagerService;
             _essService = exchangeSetApiService;
@@ -41,17 +44,31 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fileSystemHelper = fileSystemHelper;
             _logger = logger;
             _configuration = configuration;
+            _azureTableStorageHelper = azureTableStorageHelper;
         }
 
         public async Task<string> CreatePosExchangeSets()
         {
-            string sinceDateTime = DateTime.UtcNow.AddDays(-7).ToString("R");
+            Task[] tasks = null;
+            try
+            {
+                string sinceDateTime = _azureTableStorageHelper.GetSinceDateTime().ToString("R");
 
-            var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
+                Task fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
+                Task updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
+                tasks = new Task[] { fullAVCSExchangeSetTask, updateAVCSExchangeSetTask };
 
-            await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
 
+                await Task.WhenAll(tasks);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+            }
+            finally
+            {
+                LogToTable(tasks);
+            }
             return "success";
         }
 
@@ -183,6 +200,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
                 _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch is created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
+                _nextSchedule = exchangeSetResponseModel.ResponseDateTime.AddMinutes(-5);
+
                 return essBatchId;
             }
 
@@ -253,18 +272,26 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId)
         {
             Parallel.ForEach(filePaths, filePath =>
+           {
+               IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
+               bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length).Result;
+               if (isFileAdded)
+               {
+                   List<string> blockIds = _fssService.UploadBlocks(batchId, fileInfo).Result;
+                   if (blockIds.Count > 0)
+                   {
+                       bool fileWritten = _fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
+                   }
+               }
+           });
+        }
+
+        private void LogToTable(Task[] tasks)
+        {
+            if (_nextSchedule.HasValue && tasks != null)
             {
-                IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
-                bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length).Result;
-                if (isFileAdded)
-                {
-                    List<string> blockIds = _fssService.UploadBlocks(batchId, fileInfo).Result;
-                    if (blockIds.Count > 0)
-                    {
-                        bool fileWritten = _fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
-                    }
-                }
-            });
+                _azureTableStorageHelper.SaveEntity(tasks, _nextSchedule.Value);
+            }
         }
     }
 }
