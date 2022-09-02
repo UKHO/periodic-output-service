@@ -47,28 +47,27 @@ namespace UKHO.FmEssFssMock.API.Services
             switch (EnumHelper.GetValueFromDescription<Batch>(batchId))
             {
                 case Batch.PosFullAvcsIsoSha1Batch:
-                    attributes.Append(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
-                    attributes.Append(new KeyValuePair<string, string>("Media Type", "DVD"));
+                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
+                    attributes.Add(new KeyValuePair<string, string>("Media Type", "DVD"));
                     break;
 
                 case Batch.PosFullAvcsZipBatch:
-                    attributes.Append(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
-                    attributes.Append(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
+                    attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
 
                 case Batch.PosUpdateBatch:
-                    attributes.Append(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
-                    attributes.Append(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
+                    attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
 
                 case Batch.PosCatalogueBatch:
-                    attributes.Append(new KeyValuePair<string, string>("Catalogue Type", "XML"));
-                    attributes.Append(new KeyValuePair<string, string>("Content", "Catalogue"));
+                    attributes.Add(new KeyValuePair<string, string>("Catalogue Type", "XML"));
+                    attributes.Add(new KeyValuePair<string, string>("Content", "Catalogue"));
                     break;
 
                 case Batch.PosEncUpdateBatch:
-                    attributes.Append(new KeyValuePair<string, string>("Catalogue Type", "ENC Updates"));
-                    attributes.Append(new KeyValuePair<string, string>("Content", "Catalogue"));
+                    attributes.Add(new KeyValuePair<string, string>("Content", "ENC Updates"));
                     break;
 
                 default:
