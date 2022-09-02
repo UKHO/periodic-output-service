@@ -27,6 +27,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string UPDATEZIPEXCHANGESETMEDIATYPE = "zip";
+       private string homeDirectoryFolderPath = string.Empty;
 
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
                                      IEssService exchangeSetApiService,
@@ -41,18 +42,33 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fileSystemHelper = fileSystemHelper;
             _logger = logger;
             _configuration = configuration;
+            homeDirectoryFolderPath = Path.Combine(_configuration["HOME"], "POS");
         }
 
         public async Task<string> CreatePosExchangeSets()
         {
-            string sinceDateTime = DateTime.UtcNow.AddDays(-7).ToString("R");
+            try
+            {
+                string sinceDateTime = DateTime.UtcNow.AddDays(-7).ToString("R");
 
-            var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
+                var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
+                var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
 
-            await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
+                await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
 
-            return "success";
+                return "success";
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.UnhandledException.ToEventId());
+            }
+            finally
+            {
+                DirectoryInfo di = new DirectoryInfo(homeDirectoryFolderPath);
+                di.Delete(true);
+            }
+
         }
 
         private async Task CreateFullAVCSExchangeSet()
@@ -192,7 +208,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId)
         {
-            string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
+            string downloadPath = Path.Combine(homeDirectoryFolderPath, essBatchId);
             List<FssBatchFile> files = new();
 
             if (!string.IsNullOrEmpty(essBatchId))
