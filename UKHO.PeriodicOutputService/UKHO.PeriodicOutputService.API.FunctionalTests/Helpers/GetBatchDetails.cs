@@ -34,8 +34,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static void GetBatchDetailsResponseValidationForFullAVCSExchangeSet(dynamic batchDetailsResponse)
         {
-            string mediaType = batchDetailsResponse.attributes[1].value;
-
+            string mediaType = batchDetailsResponse.attributes[6].value;
             if (mediaType.Equals("Zip"))
             {
                 string fileName = batchDetailsResponse.files[0].filename;
@@ -57,7 +56,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     }
 
                 }
-               
             }
             else if (mediaType.Equals("DVD"))
             {
@@ -70,14 +68,27 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
             else
             {
-                Assert.Fail($"{mediaType} is different then Zip & DVD");
+                Assert.Fail($"{mediaType} is different than Zip & DVD");
             }
         }
 
-
-        public static void GetBatchDetailsResponseValidationForUpdateExchangeSet(dynamic batchDetailsResponse)
+        public static void GetBatchDetailsResponseValidationForCatalogueXmlOrEncUpdateListCsv(dynamic batchDetailsResponse)
         {
-            string mediaType = batchDetailsResponse.attributes[1].value;
+            string responseContent = batchDetailsResponse.attributes[5].value;
+            if (responseContent.Equals("Catalogue"))
+            {
+                string responseFileName = batchDetailsResponse.files[0].filename;
+                Assert.That(responseFileName, Is.EqualTo(posDetails.AVCSCatalogueFileName), $"Expected Response File Name of {posDetails.AVCSCatalogueFileName}, but actual value is {responseFileName}");
+            }
+            else if (responseContent.Equals("ENC Updates"))
+            {
+                string responseFileName = batchDetailsResponse.files[0].filename;
+                Assert.That(responseFileName, Is.EqualTo(posDetails.EncUpdateListFileName), $"Expected Response File Name of {posDetails.EncUpdateListFileName}, but actual value is {responseFileName}");
+            }
+            else
+            {
+                Assert.Fail($"{responseContent} is different than Catalogue.xml or Enc Updates list.csv");
+            }
         }
     }
 }

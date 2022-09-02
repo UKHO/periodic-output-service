@@ -38,7 +38,7 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
         {
             List<string> downloadFolderPath = new();
 
-            string mediaType = batchDetailsResponse.attributes[1].value;
+            string mediaType = batchDetailsResponse.attributes[6].value;
 
             if (mediaType.Equals("Zip"))
             {
@@ -86,6 +86,24 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
 
                 downloadFolderPath.Add(downloadedFolder);
                 downloadFolderPath.Add(downloadedFolderSha1);
+            }
+            return downloadFolderPath;
+        }
+        public static async Task<List<string>> DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(string batchId, string fssJwtToken, dynamic batchDetailsResponse)
+        {
+            List<string> downloadFolderPath = new();
+            string responseContent = batchDetailsResponse.attributes[5].value;
+            if (responseContent.Equals("Catalogue"))
+            {
+                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{posDetails.AVCSCatalogueFileName}";
+                string downloadFile = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
+                downloadFolderPath.Add(downloadFile);
+            }
+            else
+            {
+                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{posDetails.EncUpdateListFileName}";
+                string downloadFile = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
+                downloadFolderPath.Add(downloadFile);
             }
             return downloadFolderPath;
         }

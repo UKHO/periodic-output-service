@@ -93,6 +93,56 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That(DownloadedFolderPath.Count, Is.EqualTo(1), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
         }
 
+        [Test]
+        public async Task WhenDownloadedCatalogueXmlFromFss_ThenNewBatchIsCreatedAndUploadedWithUpdatedBU()
+        {
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.CatalogueBatchId);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
+
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+
+            GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
+
+            GetBatchDetails.GetBatchDetailsResponseValidationForCatalogueXmlOrEncUpdateListCsv(batchDetailsResponse);
+        }
+
+        [Test]
+        public async Task WhenDownloadedEncUpdatesListCsvFromFss_ThenNewBatchIsCreatedAndUploadedWithUpdatedBU()
+        {
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.EncUpdateListCsvBatchId);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
+
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+
+            GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
+
+            GetBatchDetails.GetBatchDetailsResponseValidationForCatalogueXmlOrEncUpdateListCsv(batchDetailsResponse);
+        }
+
+        [Test]
+        public async Task WhenICallFileDownloadEndpointForCatalogueXmlWithBatchId_ThenAXmlFileIsDownloaded()
+        {
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.CatalogueBatchId);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
+
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+
+            DownloadedFolderPath = await FileContentHelper.DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(posDetails.CatalogueBatchId, fssJwtToken, batchDetailsResponse);
+            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(1), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
+        }
+
+        [Test]
+        public async Task WhenICallFileDownloadEndpointForEncUpdatesListCsvWithBatchId_ThenACsvFileIsDownloaded()
+        {
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.EncUpdateListCsvBatchId);
+            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {apiResponse.StatusCode}, instead of the expected status 200.");
+
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+
+            DownloadedFolderPath = await FileContentHelper.DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(posDetails.EncUpdateListCsvBatchId, fssJwtToken, batchDetailsResponse);
+            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(1), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
+        }
+
         [TearDown]
         public void GlobalTearDown()
         {
