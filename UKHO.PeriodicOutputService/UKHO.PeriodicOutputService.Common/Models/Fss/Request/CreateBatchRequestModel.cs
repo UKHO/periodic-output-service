@@ -7,7 +7,7 @@ namespace UKHO.PeriodicOutputService.Common.Models.Request
 
         public Acl Acl { get; set; }
 
-        public IEnumerable<KeyValuePair<String, string>> Attributes { get; set; }
+        public IList<KeyValuePair<string, string>> Attributes { get; set; }
 
         public string ExpiryDate { get; set; }
     }

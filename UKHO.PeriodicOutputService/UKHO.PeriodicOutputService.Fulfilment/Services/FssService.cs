@@ -306,28 +306,27 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             switch (batchType)
             {
                 case Batch.PosFullAvcsIsoSha1Batch:
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Media Type", "DVD"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "DVD"));
                     break;
 
                 case Batch.PosFullAvcsZipBatch:
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
 
                 case Batch.PosUpdateBatch:
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     break;
 
                 case Batch.PosCatalogueBatch:
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Catalogue Type", "XML"));
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Content", "Catalogue"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Catalogue Type", "XML"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Content", "Catalogue"));
                     break;
 
                 case Batch.PosEncUpdateBatch:
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Catalogue Type", "ENC Updates"));
-                    createBatchRequest.Attributes.Append(new KeyValuePair<string, string>("Content", "Catalogue"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Content", "ENC Updates"));
                     break;
 
                 default:
