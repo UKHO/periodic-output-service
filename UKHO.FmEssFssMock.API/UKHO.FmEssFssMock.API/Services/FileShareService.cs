@@ -19,16 +19,16 @@ namespace UKHO.FmEssFssMock.API.Services
             return new BatchResponse() { BatchId = Guid.Parse(batchId) };
         }
 
-        public BatchDetail GetBatchDetails(string batchId)
+        public BatchDetail GetBatchDetails(string batchId, string homeDirectoryPath)
         {
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
             int currentWeek = cultureInfo.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
             string currentYear = DateTime.UtcNow.Year.ToString();
-            string path = Path.Combine(Environment.CurrentDirectory, @"Data", batchId);
+            string path = Path.Combine(homeDirectoryPath, batchId);
 
             List<BatchFile> files = new();
 
-            foreach (var filePath in Directory.GetFiles(path))
+            foreach (string? filePath in Directory.GetFiles(path))
             {
                 string fileName = Path.GetFileName(filePath);
                 files.Add(new BatchFile() { Filename = fileName, Links = new Links() { Get = new Link() { Href = "/batch/" + batchId + "/files/" + fileName } } });
@@ -73,7 +73,7 @@ namespace UKHO.FmEssFssMock.API.Services
         public byte[]? GetFileData(string homeDirectoryPath, string batchId, string fileName)
         {
             byte[] bytes = null;
-            var filePath = Path.Combine(homeDirectoryPath, batchId, fileName);
+            string? filePath = Path.Combine(homeDirectoryPath, batchId, fileName);
 
             if (File.Exists(filePath))
             {
@@ -112,12 +112,9 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private string RenameFiles(string fileName)
         {
-            if (fileName.IndexOf("WK") > -1)
-                return fileName.Replace(fileName.Substring(fileName.IndexOf("WK"), 7), "WK34_22");
-            else if (fileName.IndexOf("Wk") > -1)
-                return fileName.Replace(fileName.Substring(fileName.IndexOf("Wk"), 7), "Wk34_22");
-            else
-                return fileName;
+            return fileName.IndexOf("WK") > -1
+                ? fileName.Replace(fileName.Substring(fileName.IndexOf("WK"), 7), "WK34_22")
+                : fileName.IndexOf("Wk") > -1 ? fileName.Replace(fileName.Substring(fileName.IndexOf("Wk"), 7), "Wk34_22") : fileName;
         }
 
         public BatchStatusResponse GetBatchStatus(string batchId, string homeDirectoryPath)
