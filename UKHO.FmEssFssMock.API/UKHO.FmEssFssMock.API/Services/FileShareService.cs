@@ -1,4 +1,7 @@
 ﻿using System.Globalization;
+using UKHO.FmEssFssMock.API.Helpers;
+using UKHO.FmEssFssMock.API.Models.Response;
+using UKHO.FmEssFssMock.Enums;
 
 namespace UKHO.FmEssFssMock.API.Services
 {
@@ -109,10 +112,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private string RenameFiles(string fileName)
         {
-            if (fileName.IndexOf("WK") > -1)
-                return fileName.Replace(fileName.Substring(fileName.IndexOf("WK"), 7), "WK34_22");
-            else
-                return fileName;
+            return fileName.IndexOf("WK") > -1 ? fileName.Replace(fileName.Substring(fileName.IndexOf("WK"), 7), "WK34_22") : fileName;
         }
 
         public BatchStatusResponse GetBatchStatus(string batchId, string homeDirectoryPath)
