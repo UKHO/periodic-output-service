@@ -33,7 +33,7 @@ steps:
     inputs:
       folderPath: '$(Pipeline.Workspace)/MockWebAPI/*.zip'
       xmlTransformationRules:
-      jsonTargetFiles: '**/appconfig.json'
+      jsonTargetFiles: '**/appsettings.json'
 
   - task: AzureCLI@2
     displayName: "Mock API WebApp deployment"
@@ -49,7 +49,7 @@ steps:
     inputs:
       folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
       xmlTransformationRules:
-      jsonTargetFiles: '**/appconfig.json'
+      jsonTargetFiles: '**/appsettings.json'
 
   - task: AzureWebApp@1
     displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp"

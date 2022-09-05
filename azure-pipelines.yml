@@ -460,7 +460,7 @@ stages:
                   inputs:
                     folderPath: '$(Build.SourcesDirectory)/functionaltests/'
                     xmlTransformationRules:
-                    jsonTargetFiles: '**/appconfig.json'
+                    jsonTargetFiles: '**/appsettings.json'
 
                 - task: UseDotNet@2
                   displayName: 'Use .NET Core sdk'
@@ -632,7 +632,7 @@ stages:
                   inputs:
                     folderPath: '$(Build.SourcesDirectory)/functionaltests/'
                     xmlTransformationRules:
-                    jsonTargetFiles: '**/appconfig.json'
+                    jsonTargetFiles: '**/appsettings.json'
 
                 - task: UseDotNet@2
                   displayName: 'Use .NET Core sdk'

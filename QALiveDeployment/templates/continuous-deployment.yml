@@ -33,7 +33,7 @@ steps:
     inputs:
       folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
       xmlTransformationRules:
-      jsonTargetFiles: '**/appconfig.json'
+      jsonTargetFiles: '**/appsettings.json'
 
   - task: AzureWebApp@1
     displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp"
