@@ -28,12 +28,12 @@ steps:
       TF_VAR_spoke_subnet_name: $(POSESSspokeSubnetName)
       TF_VAR_allowed_ips: $(whiteListedIps)
 
-  - task: FileTransform@1
+  - task: FileTransform@2
     displayName: "File Transform: Mock API WebApp"
     inputs:
       folderPath: '$(Pipeline.Workspace)/MockWebAPI/*.zip'
-      fileType: 'json'
-      targetFiles: '**/appsettings.json'
+      xmlTransformationRules:
+      jsonTargetFiles: '**/appconfig.json'
 
   - task: AzureCLI@2
     displayName: "Mock API WebApp deployment"
@@ -44,12 +44,12 @@ steps:
       scriptPath: '$(Pipeline.Workspace)/devterraformartifact/mock_api_deployment.ps1'
       arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FmEssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
 
-  - task: FileTransform@1
+  - task: FileTransform@2
     displayName: "File Transform: POS Config"
     inputs:
       folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
-      fileType: 'json'
-      targetFiles: '**/appsettings.json'
+      xmlTransformationRules:
+      jsonTargetFiles: '**/appconfig.json'
 
   - task: AzureWebApp@1
     displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp"
