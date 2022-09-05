@@ -5,14 +5,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler
 {
     public class FakeHttpMessageHandler : HttpMessageHandler
     {
-        private HttpResponseMessage _response;
+        private readonly HttpResponseMessage _response;
 
         public static HttpMessageHandler GetHttpMessageHandler(string content, HttpStatusCode httpStatusCode)
         {
             var response = new HttpResponseMessage()
             {
                 StatusCode = httpStatusCode,
-                Content = new StringContent(content, Encoding.UTF8, "application/json")
+                Content = new StringContent(content, Encoding.UTF8, "application/json"),
             };
 
             var messageHandler = new FakeHttpMessageHandler(response);

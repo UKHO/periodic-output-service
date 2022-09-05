@@ -6,6 +6,7 @@ using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Fss;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
@@ -47,29 +48,29 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _azureTableStorageHelper = azureTableStorageHelper;
         }
 
-        public async Task<string> CreatePosExchangeSets()
+        public async Task<bool> CreatePosExchangeSets()
         {
-            Task[] tasks = null;
+            DateTime sinceDateTime = _azureTableStorageHelper.GetSinceDateTime();
+            bool isSuccess = false;
+
             try
             {
-                string sinceDateTime = _azureTableStorageHelper.GetSinceDateTime().ToString("R");
+                Task[] tasks = null;
 
                 Task fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-                Task updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
+                Task updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime.ToString("R")));
                 tasks = new Task[] { fullAVCSExchangeSetTask, updateAVCSExchangeSetTask };
 
-
                 await Task.WhenAll(tasks);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+
+                isSuccess = true;
+
+                return isSuccess;
             }
             finally
             {
-                LogToTable(tasks);
+                LogHistory(_nextSchedule ?? sinceDateTime, isSuccess);
             }
-            return "success";
         }
 
         private async Task CreateFullAVCSExchangeSet()
@@ -286,12 +287,18 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
            });
         }
 
-        private void LogToTable(Task[] tasks)
+        private void LogHistory(DateTime nextSchedule, bool isSuccess)
         {
-            if (_nextSchedule.HasValue && tasks != null)
+            long invertedTimeKey = DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks;
+
+            WebJobHistory webJobHistory = new()
             {
-                _azureTableStorageHelper.SaveEntity(tasks, _nextSchedule.Value);
-            }
+                PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
+                RowKey = invertedTimeKey.ToString(),
+                IsJobSuccess = isSuccess,
+                SinceDateTime = nextSchedule
+            };
+            _azureTableStorageHelper.SaveHistory(webJobHistory);
         }
     }
 }

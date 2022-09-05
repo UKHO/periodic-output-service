@@ -95,10 +95,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored))
               .Returns(true);
 
-            string result = await _fulfilmentDataService.CreatePosExchangeSets();
+            bool result = await _fulfilmentDataService.CreatePosExchangeSets();
 
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.EqualTo("success"));
+            Assert.That(result, Is.True);
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -294,7 +293,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 {
                     Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
                 }
-            }
+            },
+            ResponseDateTime = DateTime.UtcNow
         };
 
         private static GetBatchResponseModel GetValidBatchResponseModel() => new()

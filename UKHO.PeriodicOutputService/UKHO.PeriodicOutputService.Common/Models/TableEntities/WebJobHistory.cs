@@ -1,9 +1,11 @@
-﻿using Azure;
+﻿using System.Diagnostics.CodeAnalysis;
+using Azure;
 using Azure.Data.Tables;
 
 namespace UKHO.PeriodicOutputService.Common.Models.TableEntities
 {
-    public class WebjobEntity : ITableEntity
+    [ExcludeFromCodeCoverage]
+    public class WebJobHistory : ITableEntity
     {
         public string PartitionKey { get; set; }
         public string RowKey { get; set; }

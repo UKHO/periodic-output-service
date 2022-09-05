@@ -9,7 +9,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     [ExcludeFromCodeCoverage]
     public class AzureTableStorageHelper : IAzureTableStorageHelper
     {
-        private const string Webjob_Trigger_TABLE_NAME = "poswebjobtrigger";
+        private const string WEBJOB_HISTORY_TABLE_NAME = "poswebjobhistory";
 
         private readonly IOptions<AzureStorageConfiguration> _azureStorageConfig;
 
@@ -18,44 +18,25 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _azureStorageConfig = azureStorageConfig;
         }
 
-        public void SaveEntity(Task[] tasks, DateTime nextSchedule)
+        public void SaveHistory(WebJobHistory webJobHistory)
         {
-            long invertedTimeKey = DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks;
-            TableClient tableWebjobEntityClient = GetWebjobEntityClient(Webjob_Trigger_TABLE_NAME);
-            WebjobEntity webJobEntity = new()
-            {
-                PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
-                RowKey = invertedTimeKey.ToString(),
-                IsJobSuccess = tasks.All(p => p.IsCompletedSuccessfully),
-                SinceDateTime = nextSchedule
-            };
-
-            tableWebjobEntityClient.AddEntity(webJobEntity);
+            TableClient tableWebjobEntityClient = GetTableClient(WEBJOB_HISTORY_TABLE_NAME);
+            tableWebjobEntityClient.AddEntity(webJobHistory);
         }
 
         public DateTime GetSinceDateTime()
         {
-            TableClient tableWebjobEntityClient = GetWebjobEntityClient(Webjob_Trigger_TABLE_NAME);
-            WebjobEntity? latestrecord = tableWebjobEntityClient.Query<WebjobEntity>().OrderByDescending(p => p.Timestamp).FirstOrDefault();
+            TableClient tableWebjobEntityClient = GetTableClient(WEBJOB_HISTORY_TABLE_NAME);
+            WebJobHistory? latestrecord = tableWebjobEntityClient.Query<WebJobHistory>().OrderByDescending(p => p.Timestamp).FirstOrDefault();
             return latestrecord?.SinceDateTime ?? DateTime.UtcNow.AddDays(-7);
         }
 
-        private TableClient GetWebjobEntityClient(string tableName)
+        private TableClient GetTableClient(string tableName)
         {
             var serviceClient = new TableServiceClient(_azureStorageConfig.Value.ConnectionString);
             TableClient? tableClient = serviceClient.GetTableClient(tableName);
             tableClient.CreateIfNotExists();
             return tableClient;
-        }
-
-        private WebjobEntity GetWebjobEntity(TableClient tableClient)
-        {
-            WebjobEntity webJobEntity = new();
-            //Response<WebjobEntity>? response = tableClient.GetEntity<WebjobEntity>(partitionKey, rowKey);
-
-            webJobEntity.PartitionKey = DateTime.UtcNow.ToString("MM/yyyy");
-            webJobEntity.RowKey = Guid.NewGuid().ToString();
-            return webJobEntity;
         }
     }
 }

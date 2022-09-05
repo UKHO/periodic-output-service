@@ -1,8 +1,10 @@
-﻿namespace UKHO.PeriodicOutputService.Common.Helpers
+﻿using UKHO.PeriodicOutputService.Common.Models.TableEntities;
+
+namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public interface IAzureTableStorageHelper
     {
-        void SaveEntity(Task[] tasks, DateTime nextSchedule);
+        void SaveHistory(WebJobHistory webJobHistory);
         DateTime GetSinceDateTime();
     }
 }
