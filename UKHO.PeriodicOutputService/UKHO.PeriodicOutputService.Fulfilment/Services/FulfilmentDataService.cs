@@ -218,7 +218,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private List<FssBatchFile> RenameFiles(string downloadPath, List<FssBatchFile> files, Batch batchType)
         {
-            foreach (var file in files)
+            foreach (FssBatchFile? file in files)
             {
                 IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
                 string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
@@ -226,8 +226,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 if (batchType == Batch.EssFullAvcsZipBatch)
                 {
-                    int mediaNumber = int.Parse(file.FileName.Substring(1, 2));
-                    file.FileName = string.Format(_configuration["PosAvcsZipFileName"], mediaNumber, weekNumber, currentYear);
+                    int dvdNumber = int.Parse(file.FileName.Substring(1, 2));
+                    file.FileName = string.Format(_configuration["PosAvcsZipFileName"], dvdNumber, weekNumber, currentYear);
                 }
                 else
                 {
