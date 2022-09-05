@@ -29,6 +29,9 @@
     <None Update="Data\2270f318-639c-4e64-a0c0-caddd5f4eb05\M02X02.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\472B599D-494D-4AC5-A281-91E3927B24D4\ENC Update List.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\472B599D-494D-4AC5-A281-91E3927B24D4\ENCUpdateList.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
