@@ -14,6 +14,5 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption);
         void ExtractZipFile(string sourceArchiveFileName, string destinationDirectoryName, bool deleteSourceDirectory);
         void CreateIsoAndSha1(string targetPath, string directoryPath);
-        void CleanupHomeDirectory(string path);
     }
 }

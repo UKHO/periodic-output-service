@@ -65,7 +65,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             finally
             {
-                _fileSystemHelper.CleanupHomeDirectory(_homeDirectoryFolderPath);
+                //This will first delete directory then create same new directory 
+                _fileSystemHelper.CreateDirectory(_homeDirectoryFolderPath);
             }
         }
 
