@@ -50,8 +50,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         public async Task<bool> CreatePosExchangeSets()
         {
+            _logger.LogInformation(EventIds.GetLatestSinceDateTimeStarted.ToEventId(), "Getting latest since datetime started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
             DateTime sinceDateTime = _azureTableStorageHelper.GetSinceDateTime();
+
+            _logger.LogInformation(EventIds.GetLatestSinceDateTimeCompleted.ToEventId(), "Getting latest since datetime completed  | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
             bool isSuccess = false;
+
 
             try
             {
@@ -70,6 +76,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             finally
             {
                 LogHistory(_nextSchedule ?? sinceDateTime, isSuccess);
+
             }
         }
 
@@ -289,16 +296,31 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private void LogHistory(DateTime nextSchedule, bool isSuccess)
         {
-            long invertedTimeKey = DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks;
-
-            WebJobHistory webJobHistory = new()
+            try
             {
-                PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
-                RowKey = invertedTimeKey.ToString(),
-                IsJobSuccess = isSuccess,
-                SinceDateTime = nextSchedule
-            };
-            _azureTableStorageHelper.SaveHistory(webJobHistory);
+                _logger.LogInformation(EventIds.LoggingHistoryStarted.ToEventId(), "Logging history started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                long invertedTimeKey = DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks;
+
+                WebJobHistory webJobHistory = new()
+                {
+                    PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
+                    RowKey = invertedTimeKey.ToString(),
+                    IsJobSuccess = isSuccess,
+                    SinceDateTime = nextSchedule
+                };
+                _azureTableStorageHelper.SaveHistory(webJobHistory);
+                _logger.LogInformation(EventIds.LoggingHistoryCompleted.ToEventId(), "Logging history completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            }
+            catch (Exception)
+            {
+                _logger.LogInformation(EventIds.LoggingHistoryFailed.ToEventId(), "Logging history failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                throw;
+
+            }
+
         }
     }
 }
