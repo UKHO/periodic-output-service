@@ -219,7 +219,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             List<FssBatchFile> batchFiles = null;
 
             GetBatchResponseModel batchDetail = await _fssService.GetBatchDetails(essBatchId);
-            batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href }).ToList();
+            batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href, FileSize = a.FileSize }).ToList();
 
             if (!batchFiles.Any() || batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
             {
@@ -231,20 +231,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
         {
-            foreach(var file in fileDetails)
+            Parallel.ForEach(fileDetails, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                Stream stream = _fssService.DownloadFile(file.FileName, file.FileLink).Result;
-                _fileSystemHelper.CreateFileCopy(filePath, stream);
-            }
-
-            ////Parallel.ForEach(fileDetails, file =>
-            ////{
-            ////    string filePath = Path.Combine(downloadPath, file.FileName);
-            ////    Stream stream = _fssService.DownloadFile(file.FileName, file.FileLink).Result;
-            ////    byte[] bytes = _fileSystemHelper.ConvertStreamToByteArray(stream);
-            ////    _fileSystemHelper.CreateFileCopy(filePath, new MemoryStream(bytes));
-            ////});
+                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath);
+            });
         }
 
         private async Task<bool> CreatePosBatch(string downloadPath, string fileExtension, string mediaType, Batch batchType)

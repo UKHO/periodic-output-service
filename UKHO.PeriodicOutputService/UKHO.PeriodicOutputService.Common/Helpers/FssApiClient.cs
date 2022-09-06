@@ -100,18 +100,19 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return await CallFSSApi(uri, accessToken);
         }
 
-        public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken)
+        public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken, string rangeHeader)
         {
-            return await CallFSSApi(uri, accessToken);
+            return await CallFSSApi(uri, accessToken, rangeHeader);
         }
 
-        private async Task<HttpResponseMessage> CallFSSApi(string uri, string accessToken)
+        private async Task<HttpResponseMessage> CallFSSApi(string uri, string accessToken, string? rangeHeader = null)
         {
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
             httpRequestMessage.SetBearerToken(accessToken);
             httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
-
+            if (!string.IsNullOrEmpty(rangeHeader))
+                httpRequestMessage.Headers.Add("Range", rangeHeader);
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
     }

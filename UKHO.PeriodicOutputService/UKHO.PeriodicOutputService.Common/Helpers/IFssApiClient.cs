@@ -9,7 +9,7 @@
         public Task<HttpResponseMessage> CommitBatchAsync(string uri, string requestBody, string accessToken);
         public Task<HttpResponseMessage> GetBatchDetailsAsync(string uri, string accessToken);
         public Task<HttpResponseMessage> GetBatchStatusAsync(string uri, string accessToken);
-        public Task<HttpResponseMessage> DownloadFile(string uri, string accessToken);
+        public Task<HttpResponseMessage> DownloadFile(string uri, string accessToken, string rangeHeader);
 
     }
 }
