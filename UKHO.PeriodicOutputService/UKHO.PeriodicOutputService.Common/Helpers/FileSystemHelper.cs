@@ -47,7 +47,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 using (var outputFileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite))
                 {
-                    stream.CopyTo(outputFileStream);
+                    byte[] buffer = new byte[8 * 1024];
+                    int len;
+                    while ((len = stream.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        outputFileStream.Write(buffer, 0, len);
+                    }
                 }
             }
         }
