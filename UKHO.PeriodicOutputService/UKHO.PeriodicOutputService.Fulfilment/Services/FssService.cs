@@ -294,12 +294,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 },
                 Attributes = new List<KeyValuePair<string, string>>
                 {
-                    new KeyValuePair<string, string>("Product Type", "AVCS"),
-                    new KeyValuePair<string, string>("S63 Version", "1.2"),
-                    new KeyValuePair<string, string>("Week Number", currentWeek),
-                    new KeyValuePair<string, string>("Year", currentYear),
-                    new KeyValuePair<string, string>("Year / Week", currentYear + " / " + currentWeek),
-                    new KeyValuePair<string, string>("Batch Type", batchType.ToString())
+                    new("Product Type", "AVCS"),
+                    new("S63 Version", "1.2"),
+                    new("Week Number", currentWeek),
+                    new("Year", currentYear),
+                    new("Year / Week", currentYear + " / " + currentWeek),
+                    new("Batch Type", batchType.ToString())
                 }
             };
 
@@ -341,7 +341,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 Attributes = new List<KeyValuePair<string, string>>()
                 {
-                    new KeyValuePair<string, string>("Product Type", "AVCS")
+                    new("Product Type", "AVCS")
                 }
             };
             return addFileToBatchRequestModel;

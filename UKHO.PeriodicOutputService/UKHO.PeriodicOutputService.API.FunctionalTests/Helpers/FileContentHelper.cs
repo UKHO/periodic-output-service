@@ -1,7 +1,7 @@
 ﻿using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
-namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
+namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
     public static class FileContentHelper
     {

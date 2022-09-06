@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using UKHO.ExchangeSetService.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
