@@ -40,7 +40,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeEssService, _fakeFssService, _fakefileSystemHelper, _fakeLogger, _fakeconfiguration);
         }
 
-
         [Test]
         public async Task Does_CreatePosExchangeSets_Executes_Successfully()
         {
@@ -62,10 +61,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
-
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
@@ -130,6 +127,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
@@ -143,7 +143,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Either no files found or error file found in batch with BathcID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+            ).MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
                 .MustHaveHappened();
@@ -171,6 +171,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
               .Returns(fleetManagerGetCatalogue);
 
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
@@ -218,6 +221,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.CommitInProgress);
 
@@ -228,7 +234,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+            ).MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => _fakefileSystemHelper.CleanupHomeDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceExactly();
@@ -253,6 +259,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
               .Returns(fleetManagerGetCatalogue);
 
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
