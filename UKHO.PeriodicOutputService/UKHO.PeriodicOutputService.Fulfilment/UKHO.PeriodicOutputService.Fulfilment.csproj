@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish">
+<Project Sdk="Microsoft.NET.Sdk;Microsoft.NET.Sdk.Publish">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
@@ -43,7 +43,6 @@
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="System.IO.Abstractions" Version="17.0.24" />
-    <PackageReference Include="System.Net.Security" Version="4.3.2" />
     <PackageReference Include="System.Net.WebSockets.Client" Version="4.3.2" />
     <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.22047.3" />
   </ItemGroup>
