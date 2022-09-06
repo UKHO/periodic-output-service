@@ -30,6 +30,15 @@ output "kv_name" {
   value = local.key_vault_name
 }
 
+output "storage_account_name" {
+value = module.storage.storage_account_name
+}
+
+output "storage_connection_string"{
+  value = module.storage.storage_connection_string
+  sensitive = true
+}
+
 output "webjob_username" {
   value = module.webapp_service.username
 }
