@@ -109,5 +109,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             _fileUtility.CreateSha1File(targetPath);
         }
+
+        public byte[] ConvertStreamToByteArray(Stream input)
+        {
+            var memoryStream = new MemoryStream();
+            input.CopyTo(memoryStream);
+            return memoryStream.ToArray();
+        }
     }
 }
