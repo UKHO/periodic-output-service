@@ -105,7 +105,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _fileUtility.CreateSha1File(targetPath);
         }
 
-        public void CleanupHomedirectory(string path)
+        public void CleanupHomeDirectory(string path)
         {
             _fileSystem.Directory.Delete(path, true);
         }

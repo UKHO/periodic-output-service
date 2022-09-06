@@ -65,7 +65,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             finally
             {
-                _fileSystemHelper.CleanupHomedirectory(_homeDirectoryFolderPath);
+                _fileSystemHelper.CleanupHomeDirectory(_homeDirectoryFolderPath);
             }
         }
 
