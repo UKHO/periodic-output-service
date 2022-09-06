@@ -27,7 +27,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string UPDATEZIPEXCHANGESETMEDIATYPE = "zip";
-       private string homeDirectoryFolderPath = string.Empty;
+        private readonly string _homeDirectoryFolderPath = string.Empty;
 
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
                                      IEssService exchangeSetApiService,
@@ -42,7 +42,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fileSystemHelper = fileSystemHelper;
             _logger = logger;
             _configuration = configuration;
-            homeDirectoryFolderPath = Path.Combine(_configuration["HOME"], "POS");
+            _homeDirectoryFolderPath = Path.Combine(_configuration["HOME"], "POS");
         }
 
         public async Task<string> CreatePosExchangeSets()
@@ -58,14 +58,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 return "success";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 throw new FulfilmentException(EventIds.UnhandledException.ToEventId());
             }
             finally
             {
-                DirectoryInfo di = new DirectoryInfo(homeDirectoryFolderPath);
+                DirectoryInfo di = new(_homeDirectoryFolderPath);
                 di.Delete(true);
             }
 
@@ -208,7 +208,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId)
         {
-            string downloadPath = Path.Combine(homeDirectoryFolderPath, essBatchId);
+            string downloadPath = Path.Combine(_homeDirectoryFolderPath, essBatchId);
             List<FssBatchFile> files = new();
 
             if (!string.IsNullOrEmpty(essBatchId))
