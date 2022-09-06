@@ -65,10 +65,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             finally
             {
-                DirectoryInfo di = new(_homeDirectoryFolderPath);
-                di.Delete(true);
+                _fileSystemHelper.CleanupHomedirectory(_homeDirectoryFolderPath);
             }
-
         }
 
         private async Task CreateFullAVCSExchangeSet()

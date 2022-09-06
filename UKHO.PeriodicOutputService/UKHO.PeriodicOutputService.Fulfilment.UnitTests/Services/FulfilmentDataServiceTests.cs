@@ -103,9 +103,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored))
                 .MustHaveHappenedOnceOrMore();
+
+            A.CallTo(() => _fakefileSystemHelper.CleanupHomedirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceExactly();
         }
-
-
 
         [Test]
         public void Does_CreatePosExchangeSet_Check_If_GetBatchFiles_Contains_FileName_Error()
@@ -137,8 +138,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             Assert.ThrowsAsync<FulfilmentException>(
                 () => _fulfilmentDataService.CreatePosExchangeSets());
 
-
-
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -147,6 +146,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
                 .MustHaveHappened();
+
+            A.CallTo(() => _fakefileSystemHelper.CleanupHomedirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -178,9 +180,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            Assert.ThrowsAsync<AggregateException>(
-                () => _fulfilmentDataService.CreatePosExchangeSets());
-
+            Assert.ThrowsAsync<FulfilmentException>(
+                 () => _fulfilmentDataService.CreatePosExchangeSets());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -191,7 +192,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored))
                 .MustNotHaveHappened();
 
-
+            A.CallTo(() => _fakefileSystemHelper.CleanupHomedirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -218,10 +220,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.CommitInProgress);
 
-
             Assert.ThrowsAsync<FulfilmentException>(
                 () => _fulfilmentDataService.CreatePosExchangeSets());
-
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -229,6 +229,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
+            A.CallTo(() => _fakefileSystemHelper.CleanupHomedirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -260,9 +262,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored)).Throws<Exception>();
 
-            Assert.ThrowsAsync<AggregateException>(
+            Assert.ThrowsAsync<FulfilmentException>(
                 () => _fulfilmentDataService.CreatePosExchangeSets());
-
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -272,6 +273,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
                 .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakefileSystemHelper.CleanupHomedirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceExactly();
         }
 
         private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
