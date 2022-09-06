@@ -18,7 +18,7 @@ variable "service_name" {
   type = string
 }
 
-variable "subnet_id" {
+variable "m_spoke_subnet" {
   type = string
 }
 
