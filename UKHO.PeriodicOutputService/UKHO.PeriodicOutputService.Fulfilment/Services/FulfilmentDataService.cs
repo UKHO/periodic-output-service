@@ -234,13 +234,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             Parallel.ForEach(fileDetails, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath);
+                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
             });
         }
 
         private async Task<bool> CreatePosBatch(string downloadPath, string fileExtension, string mediaType, Batch batchType)
         {
-
             string batchId = await _fssService.CreateBatch(mediaType, batchType);
             IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
             UploadBatchFiles(filePaths, batchId);

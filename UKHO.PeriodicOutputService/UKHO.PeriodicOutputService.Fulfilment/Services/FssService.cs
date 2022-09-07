@@ -103,12 +103,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
         }
 
-        public async void DownloadFile(string fileName, string fileLink, long fileSize, string filePath)
+        public async Task<bool> DownloadFile(string fileName, string fileLink, long fileSize, string filePath)
         {
             long startByte = 0;
             long downloadSize = 10485760;
             long endByte = downloadSize;
-           
+
             _logger.LogInformation(EventIds.DownloadFileStarted.ToEventId(), "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}" + fileLink;
@@ -120,8 +120,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 HttpResponseMessage fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader);
 
-                Stream stream = await fileDownloadResponse.Content.ReadAsStreamAsync();
+                if (!fileDownloadResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
+                }
 
+                Stream stream = fileDownloadResponse.Content.ReadAsStream();
                 using (FileStream outputFileStream = new FileStream(filePath, FileMode.Append))
                 {
                     stream.CopyTo(outputFileStream);
@@ -134,18 +139,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 {
                     endByte = fileSize - 1;
                 }
-               
             }
-            ////if (fileDownloadResponse.IsSuccessStatusCode)
-            ////{
-            ////    _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading of file {fileName} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-            ////    return await fileDownloadResponse.Content.ReadAsStreamAsync();
-            ////}
-            ////else
-            ////{
-            ////    _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-            ////    throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
-            ////}
+            _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading of file {fileName} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            return true;
         }
 
         public async Task<string> CreateBatch(string mediaType, Batch batchType)

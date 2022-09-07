@@ -235,30 +235,30 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         ////    A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
         ////}
 
-        [Test]
-        public void DoesDownloadFile_Throws_Exception_If_InValidRequest()
-        {
-            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
-                .Returns(new HttpResponseMessage()
-                {
-                    StatusCode = System.Net.HttpStatusCode.Unauthorized,
-                    RequestMessage = new HttpRequestMessage()
-                    {
-                        RequestUri = new Uri("http://test.com")
-                    },
-                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\": \"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\": \"Committed\",\"allFilesZipSize\": 11323697,\"attributes\": [{\"key\": \"Product Type\",\"value\": \"AVCS\"}],\"businessUnit\": \"AVCSCustomExchangeSets\",\"batchPublishedDate\": \"2022-07-13T10:53:58.98Z\",\"expiryDate\": \"2022-08-12T10:53:06Z\",\"files\": [{\"filename\": \"M01X02.zip\",\"fileSize\": 5095731,\"mimeType\": \"application/zip\",\"hash\": \"TLwn4f5J36mvWvrTafkXYA==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip\"}}},{\"filename\": \"M02X02.zip\",\"fileSize\": 6267757,\"mimeType\": \"application/zip\",\"hash\": \"7tP0BwgbMdKZT8koKakR+w==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M02X02.zip\"}}}]}")))
-                });
+        ////[Test]
+        ////public void DoesDownloadFile_Throws_Exception_If_InValidRequest()
+        ////{
+        ////    A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+        ////        .Returns(new HttpResponseMessage()
+        ////        {
+        ////            StatusCode = System.Net.HttpStatusCode.Unauthorized,
+        ////            RequestMessage = new HttpRequestMessage()
+        ////            {
+        ////                RequestUri = new Uri("http://test.com")
+        ////            },
+        ////            Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\": \"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\": \"Committed\",\"allFilesZipSize\": 11323697,\"attributes\": [{\"key\": \"Product Type\",\"value\": \"AVCS\"}],\"businessUnit\": \"AVCSCustomExchangeSets\",\"batchPublishedDate\": \"2022-07-13T10:53:58.98Z\",\"expiryDate\": \"2022-08-12T10:53:06Z\",\"files\": [{\"filename\": \"M01X02.zip\",\"fileSize\": 5095731,\"mimeType\": \"application/zip\",\"hash\": \"TLwn4f5J36mvWvrTafkXYA==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip\"}}},{\"filename\": \"M02X02.zip\",\"fileSize\": 6267757,\"mimeType\": \"application/zip\",\"hash\": \"7tP0BwgbMdKZT8koKakR+w==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M02X02.zip\"}}}]}")))
+        ////        });
 
-            Assert.Throws<FulfilmentException>(() => _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 1024, ""));
+        ////    Assert.Throws<FulfilmentException>(() => _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 1024, ""));
 
-            A.CallTo(_fakeLogger).Where(call =>
-             call.Method.Name == "Log"
-             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
-             ).MustHaveHappenedOnceOrMore();
+        ////    A.CallTo(_fakeLogger).Where(call =>
+        ////     call.Method.Name == "Log"
+        ////     && call.GetArgument<LogLevel>(0) == LogLevel.Error
+        ////     && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+        ////     ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
-        }
+        ////    A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+        ////}
 
         [Test]
         public void DoesUploadBlocks_Returns_BlockIds_If_ValidRequest()
