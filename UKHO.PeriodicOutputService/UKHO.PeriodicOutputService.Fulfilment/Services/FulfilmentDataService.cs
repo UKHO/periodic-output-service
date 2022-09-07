@@ -63,7 +63,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
 
-            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId);
+            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet("c44ea7f5-91b9-49d3-9d0e-643f32314b98");
 
             if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
             {
