@@ -1,5 +1,6 @@
 ﻿
 using NUnit.Framework;
+using FluentAssertions;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
@@ -23,13 +24,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
             //to check status
             string batchStatus = batchDetailsResponse.status;
-            Assert.That(batchStatus, Is.EqualTo("Committed"), $"Expected Batch Status of Committed, but actual value is {batchStatus}");
+            batchStatus.Should().Be("Committed");
 
             string businessUnit = batchDetailsResponse.businessUnit;
-            Assert.That(businessUnit, Is.EqualTo("AVCSData"), $"Expected Business Unit of AVCSData, but actual value is {businessUnit}");
+            businessUnit.Should().Be("AVCSData");
 
             string expiryDate = batchDetailsResponse.expiryDate;
-            Assert.That(expiryDate.Contains(expectedExpiryDate), $"Expected Expiry Date to contain {expectedExpiryDate}, but actual value is {expiryDate}");
+            expiryDate.Should().Contain(expectedExpiryDate);
         }
 
         public static void GetBatchDetailsResponseValidationForFullAVCSExchangeSet(dynamic batchDetailsResponse)
@@ -40,7 +41,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 string fileName = batchDetailsResponse.files[0].filename;
                 if (fileName.Equals($"{posDetails.UpdateExchangeSet}"))
                 {
-                    Assert.That(fileName, Is.EqualTo($"{posDetails.UpdateExchangeSet}"), $"Expected Response File Name Zip of {posDetails.UpdateExchangeSet}, but actual value is {fileName}");
+                    fileName.Should().Be($"{posDetails.UpdateExchangeSet}");
                 }
                 else
                 {
@@ -50,8 +51,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     {
                         var folderName = $"M0{mediaNumber}X02.zip";
                         string responseFileNameZip = batchDetailsResponse.files[responseFileNameContent].filename;
-                        Assert.That(responseFileNameZip, Is.EqualTo(folderName), $"Expected Response File Name Zip of {folderName}, but actual value is {responseFileNameZip}");
-
+                        responseFileNameZip.Should().Be(folderName);
                         responseFileNameContent++;
                     }
 
@@ -63,7 +63,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 for (int responseFileNameLocation = 0; responseFileNameLocation < expectedFileName.Length; responseFileNameLocation++)
                 {
                     string responseFileName = batchDetailsResponse.files[responseFileNameLocation].filename;
-                    Assert.That(responseFileName, Is.EqualTo(expectedFileName[responseFileNameLocation]), $"Expected Response File Name of {expectedFileName[responseFileNameLocation]}, but actual value is {responseFileName}");
+                    responseFileName.Should().Be(expectedFileName[responseFileNameLocation]);
                 }
             }
             else
@@ -78,12 +78,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             if (responseContent.Equals("Catalogue"))
             {
                 string responseFileName = batchDetailsResponse.files[0].filename;
-                Assert.That(responseFileName, Is.EqualTo(posDetails.AVCSCatalogueFileName), $"Expected Response File Name of {posDetails.AVCSCatalogueFileName}, but actual value is {responseFileName}");
+                responseFileName.Should().Be(posDetails.AVCSCatalogueFileName);
             }
             else if (responseContent.Equals("ENC Updates"))
             {
                 string responseFileName = batchDetailsResponse.files[0].filename;
-                Assert.That(responseFileName, Is.EqualTo(posDetails.EncUpdateListFileName), $"Expected Response File Name of {posDetails.EncUpdateListFileName}, but actual value is {responseFileName}");
+                responseFileName.Should().Be(posDetails.EncUpdateListFileName);
             }
             else
             {
