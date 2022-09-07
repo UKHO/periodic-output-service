@@ -156,9 +156,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
             }
 
-            var essAzureADConfiguration = new EssApiConfiguration();
-            configuration.Bind("ESSAzureADConfiguration", essAzureADConfiguration);
-
             serviceCollection.AddDistributedMemoryCache();
 
             serviceCollection.AddTransient<PosFulfilmentJob>();
