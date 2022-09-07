@@ -115,7 +115,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
 
-                EventHubLoggingConfiguration eventHubConfig = null;
+                EventHubLoggingConfiguration eventHubConfig = new();
 
                 if (configuration != null)
                 {
