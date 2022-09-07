@@ -115,9 +115,21 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
 
-                EventHubLoggingConfiguration eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+                EventHubLoggingConfiguration eventHubConfig = null;
 
-                if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
+                if (configuration != null)
+                {
+                    eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+
+                    serviceCollection.Configure<FleetManagerApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
+                    serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
+                    serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
+                    serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+                    serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
+                    serviceCollection.AddSingleton<IConfiguration>(configuration);
+                }
+
+                if (!string.IsNullOrWhiteSpace(eventHubConfig?.ConnectionString))
                 {
                     loggingBuilder.AddEventHub(config =>
                     {
@@ -145,16 +157,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                     config.TelemetryChannel = s_aIChannel;
                 }
             );
-
-            if (configuration != null)
-            {
-                serviceCollection.Configure<FleetManagerApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
-                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
-                serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
-                serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
-                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
-                serviceCollection.AddSingleton<IConfiguration>(configuration);
-            }
 
             serviceCollection.AddDistributedMemoryCache();
 
