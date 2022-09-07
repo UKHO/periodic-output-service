@@ -48,9 +48,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string sinceDateTime = DateTime.UtcNow.AddDays(-7).ToString("R");
 
             var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
+            ////var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
 
-            await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
+            await Task.WhenAll(fullAVCSExchangeSetTask);
 
             return "success";
         }
