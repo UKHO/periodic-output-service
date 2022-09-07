@@ -36,6 +36,10 @@ variable "spoke_subnet_name" {
   type = string
 }
 
+variable "mock_spoke_subnet_name" {
+  type = string
+}
+
 variable "agent_rg" {
   type = string
 }
