@@ -122,7 +122,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             DownloadedFolderPath = await FileContentHelper.DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(batchId, fssJwtToken, batchDetailsResponse);
-            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(1), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
+            DownloadedFolderPath.Count.Should().Be(1);
         }
 
         [TearDown]
