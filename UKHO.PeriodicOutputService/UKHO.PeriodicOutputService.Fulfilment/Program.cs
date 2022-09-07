@@ -129,7 +129,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                     serviceCollection.AddSingleton<IConfiguration>(configuration);
                 }
 
-                if (!string.IsNullOrWhiteSpace(eventHubConfig?.ConnectionString))
+                if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
                 {
                     loggingBuilder.AddEventHub(config =>
                     {
