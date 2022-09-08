@@ -30,12 +30,12 @@ output "kv_name" {
   value = local.key_vault_name
 }
 
-output "storage_account_name" {
-value = module.storage.storage_account_name
+output "pos_storage_name" {
+value = module.storage.pos_storage_name
 }
 
-output "storage_connection_string"{
-  value = module.storage.storage_connection_string
+output "pos_storage_connection_string"{
+  value = module.storage.pos_storage_connection_string
   sensitive = true
 }
 
