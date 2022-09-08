@@ -27,6 +27,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
                 string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
                 POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
+
+                //As there is no way to check if webjob execution is completed, we have added below delay to wait to get webjob execution completes. 
+                await Task.Delay(120000);
             }
         }
 
