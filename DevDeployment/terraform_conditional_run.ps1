@@ -64,6 +64,6 @@ Write-Host "##vso[task.setvariable variable=mockWebAppResourceGroupName;isOutput
 Write-Host "##vso[task.setvariable variable=ResourceGroup;isOutput=true]$($terraformOutput.webapp_rg.value)"
 Write-Host "##vso[task.setvariable variable=webJobUsername;isOutput=true]$($terraformOutput.webjob_username.value)"
 Write-Host "##vso[task.setvariable variable=webJobPassword;issecret=true;isOutput=true]$($terraformOutput.webjob_password.value)"
-Write-Host "##vso[task.setvariable variable=storage_connection_string;isOutput=true]$($terraformOutput.storage_connection_string.value)"
+Write-Host "##vso[task.setvariable variable=AzureStorageConfiguration.ConnectionString;issecret=true]$($terraformOutput.storage_connection_string.value)"
 
 $terraformOutput | ConvertTo-Json -Depth 5 > $terraformJsonOutputFile

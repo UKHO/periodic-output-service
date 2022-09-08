@@ -362,9 +362,9 @@ stages:
         container: ${{variables.Container}}
         workspace:
           clean: all
-        variables:
-          - name: AzureStorageConfiguration.ConnectionString
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.storage_connection_string']  ]
+#        variables:
+#          - name: AzureStorageConfiguration.ConnectionString
+#            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.storage_connection_string']  ]
         strategy:
           runOnce:
             deploy:
