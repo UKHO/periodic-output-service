@@ -23,10 +23,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Data\2270F318-639C-4E64-A0C0-CADDD5F4EB05\M01X02.zip">
+    <None Update="Data\2270f318-639c-4e64-a0c0-caddd5f4eb05\M01X02.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\2270F318-639C-4E64-A0C0-CADDD5F4EB05\M02X02.zip">
+    <None Update="Data\2270f318-639c-4e64-a0c0-caddd5f4eb05\M02X02.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\472B599D-494D-4AC5-A281-91E3927B24D4\ENC Update List.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\472B599D-494D-4AC5-A281-91E3927B24D4\ENCUpdateList.csv">
@@ -62,10 +65,10 @@
     <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\M02X02.iso.sha1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\FM\avcs_catalog_ft.xml">
+    <None Update="Data\FM\avcs_catalogue_ft.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\FM\avcs_catalog.xml">
+    <None Update="Data\FM\avcs_catalogue.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\483AA1B9-8A3B-49F2-BAE9-759BB93B04D1\M01X02.zip">
@@ -77,7 +80,7 @@
     <None Update="Data\90FCDFA0-8229-43D5-B059-172491E5402B\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\BECE0A26-867C-4EA6-8ECE-98AFA246A00E\catalogue.xml">
+    <None Update="Data\BECE0A26-867C-4EA6-8ECE-98AFA246A00E\avcs_catalogue.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\M01X02.iso">

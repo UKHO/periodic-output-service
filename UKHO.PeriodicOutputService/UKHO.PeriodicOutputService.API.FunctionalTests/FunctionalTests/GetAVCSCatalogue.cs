@@ -1,4 +1,6 @@
-﻿using NUnit.Framework;
+﻿using System.Net;
+using FluentAssertions;
+using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
@@ -29,7 +31,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheUNPApiWithNullUserName_ThenABadRequestStatusIsReturned()
         {
             HttpResponseMessage unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, null, fleet.subscriptionKey);
-            Assert.That((int)unpResponse.StatusCode, Is.EqualTo(400), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 400.");
+            unpResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
 
         [Test]
@@ -38,10 +40,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheUNPApiWithInValidSubscriptionKey_ThenUnauthorizedStatusIsReturned(string subkey, string message)
         {
             HttpResponseMessage unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, subkey);
-            Assert.That((int)unpResponse.StatusCode, Is.EqualTo(401), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 401.");
+            unpResponse.StatusCode.Should().Be((HttpStatusCode)401);
 
             string unp_message = await CommonHelper.DeserializeAsyncMessage(unpResponse);
-            Assert.That(unp_message, Is.EqualTo(message));
+            unp_message.Should().Be(message);
         }
 
         [Test]
@@ -50,7 +52,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheCatalogueApiWithInValidUnpToken_ThenForbiddentatusIsReturned(string unpToken)
         {
             HttpResponseMessage Catalogue_Response = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
-            Assert.That((int)Catalogue_Response.StatusCode, Is.EqualTo(403), $"Incorrect status code is returned {Catalogue_Response.StatusCode}, instead of the expected status 403.");
+            Catalogue_Response.StatusCode.Should().Be((HttpStatusCode)403);
         }
 
         [Test]
@@ -59,14 +61,14 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheCatalogueApiWithInValidSubscriptionKey_ThenUnauthorizedStatusIsReturned(string subsKey, string message)
         {
             HttpResponseMessage unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
-            Assert.That((int)unpResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
+            unpResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
             string apiResponseToken = await CommonHelper.DeserializeAsyncToken(unpResponse);
             HttpResponseMessage Catalogue_Response = await getcat.GetCatalogueEndpoint(fleet.baseUrl, apiResponseToken, subsKey);
-            Assert.That((int)Catalogue_Response.StatusCode, Is.EqualTo(401), $"Incorrect status code is returned {Catalogue_Response.StatusCode}, instead of the expected status 401.");
+            Catalogue_Response.StatusCode.Should().Be((HttpStatusCode)401);
 
             string catalogue_message = await CommonHelper.DeserializeAsyncMessage(Catalogue_Response);
-            Assert.That(catalogue_message, Is.EqualTo(message));
+            catalogue_message.Should().Be(message);
         }
 
         [Test]
@@ -76,16 +78,16 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             string unp_token = await CommonHelper.DeserializeAsyncToken(unpResponse);
 
             HttpResponseMessage Catalogue_Response = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unp_token, fleet.subscriptionKey);
-            Assert.That((int)Catalogue_Response.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {Catalogue_Response.StatusCode}, instead of the expected status 200.");
+            Catalogue_Response.StatusCode.Should().Be((HttpStatusCode)200);
 
             string apiResponseDetails_catalogue = await Catalogue_Response.ReadAsStringAsync();
             dynamic apiReadXml = CommonHelper.XmlReadAsynch(apiResponseDetails_catalogue);
 
             string orgName = apiReadXml.UKHOCatalogueFile.BaseFileMetadata.MD_PointOfContact.ResponsibleParty.organisationName;
-            Assert.That(orgName, Is.EqualTo("The United Kingdom Hydrographic Office"), $"Value is not matching, Actual value is : {orgName}");
+            orgName.Should().Be("The United Kingdom Hydrographic Office");
 
             string product = apiReadXml.UKHOCatalogueFile.Products.Digital.ENC[0].ShortName;
-            Assert.That(product, Is.EqualTo("FR570300"), $"Value is not matching, Actual value is : {product}");
+            product.Should().Be("FR570300");
         }
     }
 }

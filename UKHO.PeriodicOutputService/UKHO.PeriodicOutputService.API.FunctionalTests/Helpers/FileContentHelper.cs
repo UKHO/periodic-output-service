@@ -2,7 +2,7 @@
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
-namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
+namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
     public static class FileContentHelper
     {
@@ -41,8 +41,8 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
         {
             List<string> downloadFolderPath = new();
 
-            string mediaType = batchDetailsResponse.attributes[1].value;
-            
+            string mediaType = batchDetailsResponse.attributes[6].value;
+
             if (mediaType.Equals("Zip"))
             {
                 string fileName = batchDetailsResponse.files[0].filename;
@@ -89,6 +89,24 @@ namespace UKHO.ExchangeSetService.API.FunctionalTests.Helpers
                 downloadFolderPath.Add(downloadedFolder);
                 downloadFolderPath.Add(downloadedFolderSha1);
             }
+            return downloadFolderPath;
+        }
+        public static async Task<List<string>> DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(string batchId, string fssJwtToken, dynamic batchDetailsResponse)
+        {
+            string responseContent = batchDetailsResponse.attributes[5].value;
+
+            string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/";
+            downloadFileUrl += responseContent.Equals("Catalogue")
+                ? posDetails.AVCSCatalogueFileName
+                : posDetails.EncUpdateListFileName;
+
+            string downloadFile = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
+
+            List<string> downloadFolderPath = new()
+            {
+                downloadFile
+            };
+
             return downloadFolderPath;
         }
     }

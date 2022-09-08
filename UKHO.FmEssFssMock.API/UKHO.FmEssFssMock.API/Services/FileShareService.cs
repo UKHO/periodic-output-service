@@ -25,7 +25,7 @@ namespace UKHO.FmEssFssMock.API.Services
             int currentWeek = cultureInfo.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
             string currentYear = DateTime.UtcNow.Year.ToString();
             string path = Path.Combine(homeDirectoryPath, batchId);
-
+            string businessUnit = "AVCSData";
             List<BatchFile> files = new();
 
             foreach (string? filePath in Directory.GetFiles(path))
@@ -34,40 +34,55 @@ namespace UKHO.FmEssFssMock.API.Services
                 files.Add(new BatchFile() { Filename = fileName, Links = new Links() { Get = new Link() { Href = "/batch/" + batchId + "/files/" + fileName } } });
             }
 
-            List<Models.Response.Attribute> attributes = new()
+            List<KeyValuePair<string, string>> attributes = new()
             {
-                new Models.Response.Attribute { Key = "Exchange Set Type", Value = GetExchangeSetType(batchId) },
-                new Models.Response.Attribute { Key = "Media Type", Value = GetMediaType(batchId) },
-                new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" },
-                new Models.Response.Attribute { Key = "S63 Version", Value = "1.2" },
-                new Models.Response.Attribute { Key = "Week Number", Value = currentWeek.ToString() },
-                new Models.Response.Attribute { Key = "Year", Value = currentYear },
-                new Models.Response.Attribute { Key = "Year / Week", Value = currentYear + " / " + currentWeek.ToString() }
+                new("Product Type", "AVCS"),
+                new("S63 Version", "1.2"),
+                new("Week Number", currentWeek.ToString()),
+                new("Year", currentYear),
+                new("Year / Week", currentYear + " / " + currentWeek.ToString()),
             };
 
+            switch (EnumHelper.GetValueFromDescription<Batch>(batchId))
+            {
+                case Batch.PosFullAvcsIsoSha1Batch:
+                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
+                    attributes.Add(new KeyValuePair<string, string>("Media Type", "DVD"));
+                    break;
+
+                case Batch.PosFullAvcsZipBatch:
+                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
+                    attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    break;
+
+                case Batch.PosUpdateBatch:
+                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
+                    attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    break;
+
+                case Batch.PosCatalogueBatch:
+                    attributes.Add(new KeyValuePair<string, string>("Content", "Catalogue"));
+                    attributes.Add(new KeyValuePair<string, string>("Catalogue Type", "XML"));
+                    break;
+
+                case Batch.PosEncUpdateBatch:
+                    attributes.Add(new KeyValuePair<string, string>("Content", "ENC Updates"));
+                    break;
+
+                default:
+                    businessUnit = "AVCSCustomExchangeSets";
+                    break;
+            };
 
             return new BatchDetail
             {
                 BatchId = batchId,
                 Status = "Committed",
-                BusinessUnit = (batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.EssFullAvcsZipBatch) || batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.EssUpdateZipBatch)) ? "AVCSCustomExchangeSets" : "AVCSData",
+                BusinessUnit = businessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Attributes = attributes,
                 Files = files
             };
-        }
-
-        private string GetMediaType(string batchId)
-        {
-            return batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsIsoSha1Batch) ? "DVD" : "Zip";
-        }
-
-        private string GetExchangeSetType(string batchId)
-        {
-            return batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsIsoSha1Batch) ||
-                batchId.ToLower() == EnumHelper.GetEnumDescription(Batch.PosFullAvcsZipBatch)
-                ? "Base"
-                : "Update";
         }
 
         public byte[]? GetFileData(string homeDirectoryPath, string batchId, string fileName)

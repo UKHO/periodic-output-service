@@ -51,6 +51,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         {
             public string ZipFilesBatchId { get; set; }
             public string IsoSha1BatchId { get; set; }
+            public string CatalogueBatchId { get; set; }
             public string UpdateExchangeSetBatchId { get; set; }
             public string TempFolderName { get; set; }
             public string UpdateExchangeSet { get; set; }
@@ -58,6 +59,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string PosAvcsIsoFileName { get; set; }
             public string PosAvcsIsoSha1FileName { get; set; }
             public string PosUpdateZipFileName { get; set; }
+            public string AVCSCatalogueFileName { get; set; }
+            public string EncUpdateListCsvBatchId { get; set; }
+            public string EncUpdateListFileName { get; set; }
         }
 
         public TestConfiguration()

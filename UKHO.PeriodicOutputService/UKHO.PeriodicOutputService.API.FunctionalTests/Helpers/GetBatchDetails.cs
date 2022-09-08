@@ -1,6 +1,7 @@
 ﻿
 using System.Globalization;
 using NUnit.Framework;
+using FluentAssertions;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
@@ -26,25 +27,24 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
             //to check status
             string batchStatus = batchDetailsResponse.status;
-            Assert.That(batchStatus, Is.EqualTo("Committed"), $"Expected Batch Status of Committed, but actual value is {batchStatus}");
+            batchStatus.Should().Be("Committed");
 
             string businessUnit = batchDetailsResponse.businessUnit;
-            Assert.That(businessUnit, Is.EqualTo("AVCSData"), $"Expected Business Unit of AVCSData, but actual value is {businessUnit}");
+            businessUnit.Should().Be("AVCSData");
 
             string expiryDate = batchDetailsResponse.expiryDate;
-            Assert.That(expiryDate.Contains(expectedExpiryDate), $"Expected Expiry Date to contain {expectedExpiryDate}, but actual value is {expiryDate}");
+            expiryDate.Should().Contain(expectedExpiryDate);
         }
 
         public static void GetBatchDetailsResponseValidationForFullAVCSExchangeSet(dynamic batchDetailsResponse)
         {
-            string mediaType = batchDetailsResponse.attributes[1].value;
-
+            string mediaType = batchDetailsResponse.attributes[6].value;
             if (mediaType.Equals("Zip"))
             {
                 string fileName = batchDetailsResponse.files[0].filename;
-                if (fileName.Equals(string.Format(posDetails.PosUpdateZipFileName, weekNumber, currentYear)))
+                if (fileName.Contains("UPDATE"))
                 {
-                    Assert.That(fileName, Is.EqualTo(string.Format(posDetails.PosUpdateZipFileName, weekNumber, currentYear)), $"Expected Response File Name Zip of {posDetails.UpdateExchangeSet}, but actual value is {fileName}");
+                    fileName.Should().Be(string.Format(posDetails.PosUpdateZipFileName, weekNumber, currentYear));
                 }
                 else
                 {
@@ -53,8 +53,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     {
                         var folderName = string.Format(posDetails.PosAvcsZipFileName, dvdNumber, weekNumber, currentYear);
                         string responseFileNameZip = batchDetailsResponse.files[responseFileNameContent].filename;
-                        Assert.That(responseFileNameZip, Is.EqualTo(folderName), $"Expected Response File Name Zip of {folderName}, but actual value is {responseFileNameZip}");
-
+                        responseFileNameZip.Should().Be(folderName);
                         responseFileNameContent++;
                     }
                 }
@@ -73,12 +72,31 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 for (int responseFileNameLocation = 0; responseFileNameLocation < expectedFileName.Count; responseFileNameLocation++)
                 {
                     string responseFileName = batchDetailsResponse.files[responseFileNameLocation].filename;
-                    Assert.That(responseFileName, Is.EqualTo(expectedFileName[responseFileNameLocation]), $"Expected Response File Name of {expectedFileName[responseFileNameLocation]}, but actual value is {responseFileName}");
+                    responseFileName.Should().Be(expectedFileName[responseFileNameLocation]);
                 }
             }
             else
             {
-                Assert.Fail($"{mediaType} is different then Zip & DVD");
+                mediaType.Should().ContainAny("Zip","DVD");
+            }
+        }
+
+        public static void GetBatchDetailsResponseValidationForCatalogueXmlOrEncUpdateListCsv(dynamic batchDetailsResponse)
+        {
+            string responseContent = batchDetailsResponse.attributes[5].value;
+            string responseFileName = batchDetailsResponse.files[0].filename;
+
+            switch (responseContent)
+            {
+                case "Catalogue":
+                    responseFileName.Should().Be(posDetails.AVCSCatalogueFileName);
+                    break;
+                case "ENC Updates":
+                    responseFileName.Should().Be(posDetails.EncUpdateListFileName);
+                    break;
+                default:
+                    responseContent.Should().ContainAny("Catalogue.xml", "Enc Update list.csv");
+                    break;
             }
         }
     }
