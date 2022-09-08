@@ -36,13 +36,11 @@ namespace UKHO.FmEssFssMock.API.Services
 
             List<KeyValuePair<string, string>> attributes = new()
             {
-                new Models.Response.Attribute { Key = "Exchange Set Type", Value = GetExchangeSetType(batchId) },
-                new Models.Response.Attribute { Key = "Media Type", Value = GetMediaType(batchId) },
-                new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" },
-                new Models.Response.Attribute { Key = "S63 Version", Value = "1.2" },
-                new Models.Response.Attribute { Key = "Week Number", Value = currentWeek.ToString() },
-                new Models.Response.Attribute { Key = "Year", Value = currentYear },
-                new Models.Response.Attribute { Key = "Year / Week", Value = currentYear + " / " + currentWeek.ToString() }
+                new("Product Type", "AVCS"),
+                new("S63 Version", "1.2"),
+                new("Week Number", currentWeek.ToString()),
+                new("Year", currentYear),
+                new("Year / Week", currentYear + " / " + currentWeek.ToString()),
             };
 
             switch (EnumHelper.GetValueFromDescription<Batch>(batchId))
