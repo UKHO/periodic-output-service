@@ -131,8 +131,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            _logger.LogInformation("Fss Access Token is {AccessToken}", accessToken);
-
             CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(batchType);
             string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
             HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
