@@ -42,9 +42,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             if (mediaType.Equals("Zip"))
             {
                 string fileName = batchDetailsResponse.files[0].filename;
-                if (fileName.Equals(string.Format(posDetails.PosUpdateZipFileName, weekNumber, currentYear)))
+                if (fileName.Contains("UPDATE"))
                 {
-                    fileName.Should().Be($"{posDetails.UpdateExchangeSet}");
+                    fileName.Should().Be(string.Format(posDetails.PosUpdateZipFileName, weekNumber, currentYear));
                 }
                 else
                 {
