@@ -27,7 +27,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
                 Assert.That((int)POSWebJobApiResponse.StatusCode, Is.EqualTo(202), $"Incorrect status code is returned {POSWebJobApiResponse.StatusCode}, instead of the expected status 202.");
 
-                await Task.Delay(180000);
+                //As there is no way to check if webjob execution is completed, we have added below delay to wait to get webjob execution completes. 
+                await Task.Delay(120000);
             }
         }
 
