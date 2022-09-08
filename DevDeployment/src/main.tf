@@ -80,9 +80,9 @@ module "storage" {
   source              = "./Modules/Storage"
   resource_group_name = azurerm_resource_group.webapp_rg.name
   location            = azurerm_resource_group.webapp_rg.location
-  allowed_ips         = var.allowed_ips
-  m_spoke_subnet      = data.azurerm_subnet.main_subnet.id
-  agent_subnet        = data.azurerm_subnet.agent_subnet.id
+#  allowed_ips         = var.allowed_ips
+#  m_spoke_subnet      = data.azurerm_subnet.main_subnet.id
+#  agent_subnet        = data.azurerm_subnet.agent_subnet.id
   env_name            = local.env_name
   service_name        = local.service_name
   tags                = local.tags

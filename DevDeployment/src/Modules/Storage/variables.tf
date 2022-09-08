@@ -18,13 +18,13 @@ variable "service_name" {
   type = string
 }
 
-variable "m_spoke_subnet" {
-  type = string
-}
+#variable "m_spoke_subnet" {
+#  type = string
+#}
 
-variable "allowed_ips" {
-}
+#variable "allowed_ips" {
+#}
 
-variable "agent_subnet" {
-  type = string
-}
+#variable "agent_subnet" {
+#  type = string
+#}
