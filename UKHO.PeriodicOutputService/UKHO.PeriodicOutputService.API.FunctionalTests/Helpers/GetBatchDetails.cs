@@ -1,4 +1,5 @@
 ﻿
+using System.Globalization;
 using NUnit.Framework;
 using FluentAssertions;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
@@ -9,7 +10,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     {
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
         static readonly HttpClient httpClient = new HttpClient();
-
+        private static string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+        private static string currentYear = DateTime.UtcNow.ToString("yy");
+        private static List<string> expectedFileName = new List<string>();
         public static async Task<HttpResponseMessage> GetBatchDetailsEndpoint(string baseUrl, string batchId)
         {
             string uri = $"{baseUrl}/batch/{batchId}";
@@ -39,28 +42,34 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             if (mediaType.Equals("Zip"))
             {
                 string fileName = batchDetailsResponse.files[0].filename;
-                if (fileName.Equals($"{posDetails.UpdateExchangeSet}"))
+                if (fileName.Equals(string.Format(posDetails.PosUpdateZipFileName, weekNumber, currentYear)))
                 {
                     fileName.Should().Be($"{posDetails.UpdateExchangeSet}");
                 }
                 else
                 {
                     int responseFileNameContent = 0;
-
-                    for (int mediaNumber = 1; mediaNumber <= 2; mediaNumber++)
+                    for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
                     {
-                        var folderName = $"M0{mediaNumber}X02.zip";
+                        var folderName = string.Format(posDetails.PosAvcsZipFileName, dvdNumber, weekNumber, currentYear);
                         string responseFileNameZip = batchDetailsResponse.files[responseFileNameContent].filename;
                         responseFileNameZip.Should().Be(folderName);
                         responseFileNameContent++;
                     }
-
                 }
             }
             else if (mediaType.Equals("DVD"))
             {
-                string[] expectedFileName = { posDetails.M01IsoFile, posDetails.M01Sha1File, posDetails.M02IsoFile, posDetails.M02Sha1File };
-                for (int responseFileNameLocation = 0; responseFileNameLocation < expectedFileName.Length; responseFileNameLocation++)
+                for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
+                {
+                    var folderNameIso = string.Format(posDetails.PosAvcsIsoFileName, dvdNumber, weekNumber, currentYear);
+                    var FolderNameSha1 = string.Format(posDetails.PosAvcsIsoSha1FileName, dvdNumber, weekNumber, currentYear);
+                    expectedFileName.Add(folderNameIso);
+                    expectedFileName.Add(FolderNameSha1);
+                }
+                 
+                
+                for (int responseFileNameLocation = 0; responseFileNameLocation < expectedFileName.Count; responseFileNameLocation++)
                 {
                     string responseFileName = batchDetailsResponse.files[responseFileNameLocation].filename;
                     responseFileName.Should().Be(expectedFileName[responseFileNameLocation]);

@@ -23,7 +23,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
-        public string ZipFilesBatchId = "2270F318-639C-4E64-A0C0-CADDD5F4EB05";
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -80,7 +79,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
             essApiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
-            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(ZipFilesBatchId, FssJwtToken);
+            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(posDetails.ZipFilesBatchId, FssJwtToken);
             DownloadedFolderPath.Count.Should().Be(2);
         }
 

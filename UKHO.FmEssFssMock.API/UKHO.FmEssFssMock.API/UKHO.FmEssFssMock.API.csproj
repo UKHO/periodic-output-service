@@ -35,7 +35,28 @@
     <None Update="Data\472B599D-494D-4AC5-A281-91E3927B24D4\ENCUpdateList.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\483AA1B9-8A3B-49F2-BAE9-759BB93B04D1\AVCS_DVD1_WK34_22.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\483AA1B9-8A3B-49F2-BAE9-759BB93B04D1\AVCS_DVD2_WK34_22.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\D3871589-C0EA-4967-8537-63089E2398AF\AVCS_UPDATE_WK34_22_Only.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\D3871589-C0EA-4967-8537-63089E2398AF\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\AVCS_DVD1_WK34_22.iso">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\AVCS_DVD1_WK34_22.iso.sha1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\AVCS_DVD2_WK34_22.iso">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\AVCS_DVD2_WK34_22.iso.sha1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\M01X02.iso.sha1">

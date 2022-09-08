@@ -19,14 +19,13 @@ namespace UKHO.FmEssFssMock.API.Services
             return new BatchResponse() { BatchId = Guid.Parse(batchId) };
         }
 
-        public BatchDetail GetBatchDetails(string batchId)
+        public BatchDetail GetBatchDetails(string batchId, string homeDirectoryPath)
         {
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
             int currentWeek = cultureInfo.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
             string currentYear = DateTime.UtcNow.Year.ToString();
-            string path = Path.Combine(Environment.CurrentDirectory, @"Data", batchId);
+            string path = Path.Combine(homeDirectoryPath, batchId);
             string businessUnit = "AVCSData";
-
             List<BatchFile> files = new();
 
             foreach (string? filePath in Directory.GetFiles(path))
@@ -37,11 +36,13 @@ namespace UKHO.FmEssFssMock.API.Services
 
             List<KeyValuePair<string, string>> attributes = new()
             {
-                new KeyValuePair<string, string>("Product Type", "AVCS"),
-                new KeyValuePair<string, string>("S63 Version", "1.2"),
-                new KeyValuePair<string, string>("Week Number", currentWeek.ToString()),
-                new KeyValuePair<string, string>("Year", currentYear),
-                new KeyValuePair<string, string>("Year / Week", currentYear + " / " + currentWeek.ToString()),
+                new Models.Response.Attribute { Key = "Exchange Set Type", Value = GetExchangeSetType(batchId) },
+                new Models.Response.Attribute { Key = "Media Type", Value = GetMediaType(batchId) },
+                new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" },
+                new Models.Response.Attribute { Key = "S63 Version", Value = "1.2" },
+                new Models.Response.Attribute { Key = "Week Number", Value = currentWeek.ToString() },
+                new Models.Response.Attribute { Key = "Year", Value = currentYear },
+                new Models.Response.Attribute { Key = "Year / Week", Value = currentYear + " / " + currentWeek.ToString() }
             };
 
             switch (EnumHelper.GetValueFromDescription<Batch>(batchId))
@@ -118,12 +119,17 @@ namespace UKHO.FmEssFssMock.API.Services
 
             if (FileHelper.CheckFolderExists(batchFolderPath))
             {
-                string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, fileName);
+                string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(fileName));
                 string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), fileName);
                 File.Copy(srcFile, destFile, true);
                 return true;
             }
             return false;
+        }
+
+        private string RenameFiles(string fileName)
+        {
+            return fileName.IndexOf("WK") > -1 ? fileName.Replace(fileName.Substring(fileName.IndexOf("WK"), 7), "WK34_22") : fileName;
         }
 
         public BatchStatusResponse GetBatchStatus(string batchId, string homeDirectoryPath)
