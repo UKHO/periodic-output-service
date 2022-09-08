@@ -264,7 +264,29 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809064 -  Get product data since given datetime failed.
         /// </summary>
-        GetProductDataSinceDateTimeFailed = 809064
+        GetProductDataSinceDateTimeFailed = 809064,
+        /// <summary>
+        /// 809065 -  Get latest since datetime started.
+        /// </summary>
+        GetLatestSinceDateTimeStarted = 809065,
+        /// <summary>
+        /// 809066 -  Get latest since datetime started.
+        /// </summary>
+        GetLatestSinceDateTimeCompleted = 809066,
+        /// <summary>
+        /// 809067 -  Logging History started.
+        /// </summary>
+        LoggingHistoryStarted = 809067,
+        /// <summary>
+        /// 809068 -  Logging History completed.
+        /// </summary>
+        LoggingHistoryCompleted = 809068,
+        /// <summary>
+        /// 809069 -  Logging History failed.
+        /// </summary>
+        LoggingHistoryFailed = 809069
+
+
     }
 
     public static class EventIdExtensions
