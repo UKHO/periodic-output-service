@@ -68,7 +68,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
             else
             {
-                Assert.Fail($"{mediaType} is different than Zip & DVD");
+                mediaType.Should().ContainAny("Zip","DVD");
             }
         }
 
@@ -87,7 +87,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
             else
             {
-                Assert.Fail($"{responseContent} is different than Catalogue.xml or Enc Updates list.csv");
+                responseContent.Should().ContainAny("Catalogue.xml", "Enc Update list.csv");
             }
         }
     }

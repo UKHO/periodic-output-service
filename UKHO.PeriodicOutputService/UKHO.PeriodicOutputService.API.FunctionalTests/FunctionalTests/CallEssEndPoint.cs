@@ -70,7 +70,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             ExchangeSetResponseModel apiResponseData = await apiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
 
             //Check RequestedProductsNotInExchangeSet is not empty
-            Assert.IsNotEmpty(apiResponseData.RequestedProductsNotInExchangeSet, "Response body returns Empty for RequestedProductsNotInExchangeSet, instead of Not Empty");
+            apiResponseData.RequestedProductsNotInExchangeSet.Should().NotBeEmpty();
             apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault(p => p.ProductName.Equals("ABCDEFGH")).Reason.Should().Be("invalidProduct");
         }
 
