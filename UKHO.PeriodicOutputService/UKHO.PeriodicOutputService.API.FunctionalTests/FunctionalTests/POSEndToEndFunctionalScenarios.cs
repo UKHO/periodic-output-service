@@ -26,6 +26,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
                 string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
                 Assert.That((int)POSWebJobApiResponse.StatusCode, Is.EqualTo(202), $"Incorrect status code is returned {POSWebJobApiResponse.StatusCode}, instead of the expected status 202.");
+
+                await Task.Delay(180000);
             }
         }
 
