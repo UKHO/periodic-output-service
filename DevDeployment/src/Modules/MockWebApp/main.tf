@@ -22,3 +22,8 @@ resource "azurerm_windows_web_app" "mock_webapp_service" {
 
   https_only = true
 } 
+
+resource "azurerm_app_service_virtual_network_swift_connection" "mock_webapp_vnet_integration" {
+  app_service_id = azurerm_windows_web_app.mock_webapp_service.id
+  subnet_id      = var.subnet_id
+}
