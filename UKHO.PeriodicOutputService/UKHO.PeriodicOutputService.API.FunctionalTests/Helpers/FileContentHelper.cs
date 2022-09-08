@@ -93,20 +93,20 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         }
         public static async Task<List<string>> DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(string batchId, string fssJwtToken, dynamic batchDetailsResponse)
         {
-            List<string> downloadFolderPath = new();
             string responseContent = batchDetailsResponse.attributes[5].value;
-            if (responseContent.Equals("Catalogue"))
+
+            string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/";
+            downloadFileUrl += responseContent.Equals("Catalogue")
+                ? posDetails.AVCSCatalogueFileName
+                : posDetails.EncUpdateListFileName;
+
+            string downloadFile = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
+
+            List<string> downloadFolderPath = new()
             {
-                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{posDetails.AVCSCatalogueFileName}";
-                string downloadFile = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
-                downloadFolderPath.Add(downloadFile);
-            }
-            else
-            {
-                string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{posDetails.EncUpdateListFileName}";
-                string downloadFile = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
-                downloadFolderPath.Add(downloadFile);
-            }
+                downloadFile
+            };
+
             return downloadFolderPath;
         }
     }

@@ -84,19 +84,19 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public static void GetBatchDetailsResponseValidationForCatalogueXmlOrEncUpdateListCsv(dynamic batchDetailsResponse)
         {
             string responseContent = batchDetailsResponse.attributes[5].value;
-            if (responseContent.Equals("Catalogue"))
+            string responseFileName = batchDetailsResponse.files[0].filename;
+
+            switch (responseContent)
             {
-                string responseFileName = batchDetailsResponse.files[0].filename;
-                responseFileName.Should().Be(posDetails.AVCSCatalogueFileName);
-            }
-            else if (responseContent.Equals("ENC Updates"))
-            {
-                string responseFileName = batchDetailsResponse.files[0].filename;
-                responseFileName.Should().Be(posDetails.EncUpdateListFileName);
-            }
-            else
-            {
-                responseContent.Should().ContainAny("Catalogue.xml", "Enc Update list.csv");
+                case "Catalogue":
+                    responseFileName.Should().Be(posDetails.AVCSCatalogueFileName);
+                    break;
+                case "ENC Updates":
+                    responseFileName.Should().Be(posDetails.EncUpdateListFileName);
+                    break;
+                default:
+                    responseContent.Should().ContainAny("Catalogue.xml", "Enc Update list.csv");
+                    break;
             }
         }
     }
