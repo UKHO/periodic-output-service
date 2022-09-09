@@ -124,7 +124,17 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakeFileUtility.CreateSha1File(filePath))
                            .MustHaveHappenedOnceExactly();
+        }
 
+        [Test]
+        public void Does_CreateXmlFile_Executes_Successfully()
+        {
+            byte[] byteContent = new byte[100];
+
+            _fileSystemHelper.CreateXmlFile(byteContent, filePath);
+
+            A.CallTo(() => _fakeFileUtility.CreateXmlFile(A<byte[]>.Ignored, A<string>.Ignored))
+                           .MustHaveHappenedOnceExactly();
         }
     }
 }
