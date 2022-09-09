@@ -59,6 +59,7 @@ module "mock_webapp_service" {
     "APPINSIGHTS_INSTRUMENTATIONKEY"                       = "NOT_CONFIGURED"
   }
   tags                                                     = local.tags
+  allowed_ips                                              = var.allowed_ips
 }
 
 module "webapp_service" {
