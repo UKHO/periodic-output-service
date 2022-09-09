@@ -72,8 +72,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 configBuilder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
             }
 
-            IConfigurationRoot tempConfig = configBuilder.Build();
-            string kvServiceUri = tempConfig["KeyVaultSettings:ServiceUri"];
+            //IConfigurationRoot tempConfig = configBuilder.Build();
+            string kvServiceUri = configBuilder.Build()["KeyVaultSettings:ServiceUri"];
             if (!string.IsNullOrWhiteSpace(kvServiceUri))
             {
                 var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
