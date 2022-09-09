@@ -132,6 +132,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public void GlobalTearDown()
         {
             FileContentHelper.DeleteTempDirectory(posDetails.TempFolderName);
+
+            HttpResponseMessage apiResponse = MockHelper.Cleanup(FSSAuth.BaseUrl);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }
 }
