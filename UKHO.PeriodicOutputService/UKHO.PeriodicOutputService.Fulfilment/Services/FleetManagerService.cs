@@ -5,6 +5,8 @@ using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
+using UKHO.PeriodicOutputService.Common.Utilities;
+using Microsoft.Extensions.Configuration;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
@@ -13,14 +15,20 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private readonly IOptions<FleetManagerApiConfiguration> _fleetManagerApiConfiguration;
         private readonly IFleetManagerApiClient _fleetManagerClient;
         private readonly ILogger<FleetManagerService> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly IFileSystemHelper _fileSystemHelper;
 
         public FleetManagerService(IOptions<FleetManagerApiConfiguration> fleetManagerApiConfiguration,
                                    IFleetManagerApiClient fleetManagerClient,
-                                   ILogger<FleetManagerService> logger)
+                                   ILogger<FleetManagerService> logger,
+                                   IConfiguration configuration,
+                                   IFileSystemHelper fileSystemHelper)
         {
             _fleetManagerApiConfiguration = fleetManagerApiConfiguration;
             _fleetManagerClient = fleetManagerClient;
             _logger = logger;
+            _configuration = configuration;
+            _fileSystemHelper = fileSystemHelper;
         }
 
         public async Task<FleetMangerGetAuthTokenResponseModel> GetJwtAuthUnpToken()
@@ -76,6 +84,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     }
                 }
                 _logger.LogInformation(EventIds.GetFleetMangerCatalogueCompleted.ToEventId(), "Getting catalogue from fleet manager completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+
+                byte[] catalogueByteData = httpResponse.Content.ReadAsByteArrayAsync().Result;
+                string filePath = Path.Combine(_configuration["HOME"], _configuration["AVCSCatalogFileName"]);
+                _fileSystemHelper.CreateXmlFile(catalogueByteData, filePath);
+
                 return new FleetManagerGetCatalogueResponseModel() { StatusCode = httpResponse.StatusCode, ProductIdentifiers = productIdentifiers };
             }
             else

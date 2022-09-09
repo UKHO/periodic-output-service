@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using FluentAssertions;
 using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
@@ -31,8 +32,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
 
             HttpResponseMessage response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
-            Assert.That((int)response.StatusCode, Is.EqualTo(200), $"Incorrect status code File Download api returned {response.StatusCode} for the url {downloadFileUrl}, instead of the expected 200.");
-
+            response.StatusCode.Should().Be((System.Net.HttpStatusCode)200);
             Stream stream = await response.Content.ReadAsStreamAsync();
 
             using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, fileName), FileMode.Create))

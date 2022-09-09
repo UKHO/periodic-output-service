@@ -104,5 +104,10 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             _fileUtility.CreateSha1File(targetPath);
         }
+
+        public void CreateXmlFile(byte[] fileContent, string targetPath)
+        {
+            _fileUtility.CreateXmlFile(fileContent, targetPath);
+        }
     }
 }

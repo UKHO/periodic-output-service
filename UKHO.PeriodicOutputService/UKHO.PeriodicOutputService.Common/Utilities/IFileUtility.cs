@@ -5,5 +5,6 @@
         void CreateISOImage(IEnumerable<string> srcFiles, string targetPath, string directoryPath);
 
         void CreateSha1File(string targetPath);
+        void CreateXmlFile(byte[] fileContent, string targetPath);
     }
 }

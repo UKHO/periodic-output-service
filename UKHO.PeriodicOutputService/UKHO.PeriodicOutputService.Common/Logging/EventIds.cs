@@ -246,47 +246,53 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         CommitBatchCompleted = 809059,
         /// <summary>
-        /// 809060 - Update exchangeset creation started.
+        /// 809060 - Update exchangeset creation started
         /// </summary>
         UpdateExchangeSetCreationStarted = 809060,
         /// <summary>
-        /// 809061 - Update exchangeset creation completed.
+        /// 809061 - Update exchangeset creation completed
         /// </summary>
         UpdateExchangeSetCreationCompleted = 809061,
         /// <summary>
-        /// 809062 - Get product data since given datetime started.
+        /// 809062 - Get product data since given datetime started
         /// </summary>
         GetProductDataSinceDateTimeStarted = 809062,
         /// <summary>
-        /// 809063 -  Get product data since given datetime completed.
+        /// 809063 -  Get product data since given datetime completed
         /// </summary>
         GetProductDataSinceDateTimeCompleted = 809063,
         /// <summary>
-        /// 809064 -  Get product data since given datetime failed.
+        /// 809064 -  Get product data since given datetime failed
         /// </summary>
         GetProductDataSinceDateTimeFailed = 809064,
         /// <summary>
-        /// 809065 -  Get latest since datetime started.
+        /// 809065 -  Batch creation for catalogue completed
         /// </summary>
-        GetLatestSinceDateTimeStarted = 809065,
+        BatchCreationForCatalogueCompleted = 809065,
         /// <summary>
-        /// 809066 -  Get latest since datetime started.
+        /// 809066 -  Batch creation for ENC update completed
         /// </summary>
-        GetLatestSinceDateTimeCompleted = 809066,
+        BatchCreationForENCUpdateCompleted = 809066,
         /// <summary>
-        /// 809067 -  Logging History started.
+        /// 809067 -  Get latest since datetime started.
         /// </summary>
-        LoggingHistoryStarted = 809067,
+        GetLatestSinceDateTimeStarted = 809067,
         /// <summary>
-        /// 809068 -  Logging History completed.
+        /// 809068 -  Get latest since datetime started.
         /// </summary>
-        LoggingHistoryCompleted = 809068,
+        GetLatestSinceDateTimeCompleted = 809068,
         /// <summary>
-        /// 809069 -  Logging History failed.
+        /// 809069 -  Logging History started.
         /// </summary>
-        LoggingHistoryFailed = 809069
-
-
+        LoggingHistoryStarted = 809069,
+        /// <summary>
+        /// 809070 -  Logging History completed.
+        /// </summary>
+        LoggingHistoryCompleted = 809070,
+        /// <summary>
+        /// 809071 -  Logging History failed.
+        /// </summary>
+        LoggingHistoryFailed = 809071
     }
 
     public static class EventIdExtensions

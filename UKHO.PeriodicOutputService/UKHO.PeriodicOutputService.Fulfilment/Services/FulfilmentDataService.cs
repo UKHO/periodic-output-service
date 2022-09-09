@@ -22,13 +22,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private readonly IConfiguration _configuration;
 
         private const string FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION = "iso;sha1";
-        private const string FULLAVCSISOSHA1EXCHANGESETMEDIATYPE = "dvd";
-
         private const string FULLAVCSZIPEXCHANGESETFILEEXTENSION = "zip";
-        private const string FULLAVCSZIPEXCHANGESETMEDIATYPE = "zip";
-
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
-        private const string UPDATEZIPEXCHANGESETMEDIATYPE = "zip";
+        private const string CATALOGUEFILEEXTENSION = "xml";
+        private const string ENCUPDATELISTFILEEXTENSION = "csv";
 
         private DateTime? _nextSchedule;
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
@@ -88,7 +85,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
 
-            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId);
+            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssFullAvcsZipBatch);
 
             if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
             {
@@ -96,12 +93,28 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
 
-                bool isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION, FULLAVCSISOSHA1EXCHANGESETMEDIATYPE, Batch.PosFullAvcsIsoSha1Batch);
-                bool isFullAvcsZipBatchCreated = await CreatePosBatch(essFileDownloadPath, FULLAVCSZIPEXCHANGESETFILEEXTENSION, FULLAVCSZIPEXCHANGESETMEDIATYPE, Batch.PosFullAvcsZipBatch);
+                bool isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION, Batch.PosFullAvcsIsoSha1Batch);
+                bool isFullAvcsZipBatchCreated = await CreatePosBatch(essFileDownloadPath, FULLAVCSZIPEXCHANGESETFILEEXTENSION, Batch.PosFullAvcsZipBatch);
 
                 if (isFullAvcsDvdBatchCreated && isFullAvcsZipBatchCreated)
                 {
                     _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                    bool isCatalogueFileBatchCreated = await CreatePosBatch(_configuration["HOME"], CATALOGUEFILEEXTENSION, Batch.PosCatalogueBatch);
+                    if (isCatalogueFileBatchCreated)
+                    {
+                        _logger.LogInformation(EventIds.BatchCreationForCatalogueCompleted.ToEventId(), "Batch for catalougue created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    }
+                    string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+                    string currentYear = DateTime.UtcNow.ToString("yy");
+                    
+                    string encUpdateListFilePath = Path.Combine(essFileDownloadPath, string.Format(_configuration["EncUpdateListFilePath"], weekNumber, currentYear));
+
+                    bool isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath, ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
+                    if (isEncUpdateFileBatchCreated)
+                    {
+                        _logger.LogInformation(EventIds.BatchCreationForENCUpdateCompleted.ToEventId(), "Batch for ENC updates created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    }
                 }
             }
             else
@@ -117,11 +130,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string essBatchId = await GetProductDataSinceDateTimeFromEss(sinceDateTime);
 
-            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId);
+            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssUpdateZipBatch);
 
             if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
             {
-                bool isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, UPDATEZIPEXCHANGESETMEDIATYPE, Batch.PosUpdateBatch);
+                bool isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.PosUpdateBatch);
 
                 if (isUpdateZipBatchCreated)
                 {
@@ -217,7 +230,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             throw new FulfilmentException(EventIds.FssBatchDetailUrlNotFound.ToEventId());
         }
 
-        private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId)
+        private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId, Batch batchType)
         {
             string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
             List<FssBatchFile> files = new();
@@ -231,6 +244,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     _fileSystemHelper.CreateDirectory(downloadPath);
                     files = await GetBatchFiles(essBatchId);
                     DownloadFiles(files, downloadPath);
+
+                    files = RenameFiles(downloadPath, files, batchType);
                 }
                 else
                 {
@@ -239,6 +254,28 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 }
             }
             return (downloadPath, files);
+        }
+
+        private List<FssBatchFile> RenameFiles(string downloadPath, List<FssBatchFile> files, Batch batchType)
+        {
+            foreach (FssBatchFile? file in files)
+            {
+                IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
+                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+                string currentYear = DateTime.UtcNow.ToString("yy");
+
+                if (batchType == Batch.EssFullAvcsZipBatch)
+                {
+                    int dvdNumber = int.Parse(file.FileName.Substring(1, 2));
+                    file.FileName = string.Format(_configuration["PosAvcsZipFileName"], dvdNumber, weekNumber, currentYear);
+                }
+                else
+                {
+                    file.FileName = string.Format(_configuration["PosUpdateZipFileName"], weekNumber, currentYear);
+                }
+                fileInfo.MoveTo(Path.Combine(downloadPath, file.FileName));
+            }
+            return files;
         }
 
         private async Task<List<FssBatchFile>> GetBatchFiles(string essBatchId)
@@ -266,10 +303,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             });
         }
 
-        private async Task<bool> CreatePosBatch(string downloadPath, string fileExtension, string mediaType, Batch batchType)
+        private async Task<bool> CreatePosBatch(string downloadPath, string fileExtension, Batch batchType)
         {
-
-            string batchId = await _fssService.CreateBatch(mediaType, batchType);
+            string batchId = await _fssService.CreateBatch(batchType);
             IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
             UploadBatchFiles(filePaths, batchId);
             bool isCommitted = await _fssService.CommitBatch(batchId, filePaths);
