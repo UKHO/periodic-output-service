@@ -72,7 +72,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             finally
             {
-                LogHistory(_nextSchedule ?? sinceDateTime, isSuccess);
+                LogHistory(_nextSchedule ?? sinceDateTime, true);
 
             }
         }
@@ -107,7 +107,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     }
                     string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
                     string currentYear = DateTime.UtcNow.ToString("yy");
-                    
+
                     string encUpdateListFilePath = Path.Combine(essFileDownloadPath, string.Format(_configuration["EncUpdateListFilePath"], weekNumber, currentYear));
 
                     bool isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath, ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
