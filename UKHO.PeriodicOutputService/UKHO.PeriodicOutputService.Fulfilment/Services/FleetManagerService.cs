@@ -1,12 +1,11 @@
 ﻿using System.Xml;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Models;
-using UKHO.PeriodicOutputService.Common.Utilities;
-using Microsoft.Extensions.Configuration;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {
@@ -86,7 +85,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 _logger.LogInformation(EventIds.GetFleetMangerCatalogueCompleted.ToEventId(), "Getting catalogue from fleet manager completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
 
                 byte[] catalogueByteData = httpResponse.Content.ReadAsByteArrayAsync().Result;
-                string filePath = Path.Combine(_configuration["HOME"], _configuration["AVCSCatalogFileName"]);
+                string filePath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"], _configuration["AVCSCatalogFileName"]);
                 _fileSystemHelper.CreateXmlFile(catalogueByteData, filePath);
 
                 return new FleetManagerGetCatalogueResponseModel() { StatusCode = httpResponse.StatusCode, ProductIdentifiers = productIdentifiers };

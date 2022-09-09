@@ -39,7 +39,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fileSystemHelper = fileSystemHelper;
             _logger = logger;
             _configuration = configuration;
-            _homeDirectoryPath = Path.Combine(_configuration["HOME"], "POS");
+            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
         }
 
         public async Task<string> CreatePosExchangeSets()
