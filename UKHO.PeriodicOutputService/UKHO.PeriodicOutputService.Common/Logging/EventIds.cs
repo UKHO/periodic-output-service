@@ -1,4 +1,6 @@
-﻿namespace UKHO.PeriodicOutputService.Common.Logging
+﻿using Microsoft.Extensions.Logging;
+
+namespace UKHO.PeriodicOutputService.Common.Logging
 {
     public enum EventIds
     {
@@ -270,31 +272,27 @@
         /// <summary>
         /// 809066 -  Batch creation for ENC update completed
         /// </summary>
-        BatchCreationForENCUpdateCompleted = 809066
+        BatchCreationForENCUpdateCompleted = 809066,
         /// <summary>
-        /// 809064 -  Get product data since given datetime failed.
+        /// 809067 -  Get latest since datetime started.
         /// </summary>
-        GetProductDataSinceDateTimeFailed = 809064,
+        GetLatestSinceDateTimeStarted = 809067,
         /// <summary>
-        /// 809065 -  Get latest since datetime started.
+        /// 809068 -  Get latest since datetime started.
         /// </summary>
-        GetLatestSinceDateTimeStarted = 809065,
+        GetLatestSinceDateTimeCompleted = 809068,
         /// <summary>
-        /// 809066 -  Get latest since datetime started.
+        /// 809069 -  Logging History started.
         /// </summary>
-        GetLatestSinceDateTimeCompleted = 809066,
+        LoggingHistoryStarted = 809069,
         /// <summary>
-        /// 809067 -  Logging History started.
+        /// 809070 -  Logging History completed.
         /// </summary>
-        LoggingHistoryStarted = 809067,
+        LoggingHistoryCompleted = 809070,
         /// <summary>
-        /// 809068 -  Logging History completed.
+        /// 809071 -  Logging History failed.
         /// </summary>
-        LoggingHistoryCompleted = 809068,
-        /// <summary>
-        /// 809069 -  Logging History failed.
-        /// </summary>
-        LoggingHistoryFailed = 809069
+        LoggingHistoryFailed = 809071
     }
 
     public static class EventIdExtensions
