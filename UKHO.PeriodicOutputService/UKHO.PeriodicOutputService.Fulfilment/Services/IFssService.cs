@@ -9,7 +9,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         public Task<FssBatchStatus> CheckIfBatchCommitted(string batchId);
         public Task<GetBatchResponseModel> GetBatchDetails(string batchId);
         public Task<Stream> DownloadFile(string fileName, string fileLink);
-        public Task<string> CreateBatch(string mediaType, Batch batchType);
+        public Task<string> CreateBatch(Batch batchType);
         public Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength);
         public Task<List<string>> UploadBlocks(string batchId, IFileInfo fileInfo);
         public Task<bool> WriteBlockFile(string batchId, string fileName, IEnumerable<string> blockIds);

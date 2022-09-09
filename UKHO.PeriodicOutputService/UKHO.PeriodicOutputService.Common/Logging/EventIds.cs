@@ -246,25 +246,33 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         CommitBatchCompleted = 809059,
         /// <summary>
-        /// 809060 - Update exchangeset creation started.
+        /// 809060 - Update exchangeset creation started
         /// </summary>
         UpdateExchangeSetCreationStarted = 809060,
         /// <summary>
-        /// 809061 - Update exchangeset creation completed.
+        /// 809061 - Update exchangeset creation completed
         /// </summary>
         UpdateExchangeSetCreationCompleted = 809061,
         /// <summary>
-        /// 809062 - Get product data since given datetime started.
+        /// 809062 - Get product data since given datetime started
         /// </summary>
         GetProductDataSinceDateTimeStarted = 809062,
         /// <summary>
-        /// 809063 -  Get product data since given datetime completed.
+        /// 809063 -  Get product data since given datetime completed
         /// </summary>
         GetProductDataSinceDateTimeCompleted = 809063,
         /// <summary>
-        /// 809064 -  Get product data since given datetime failed.
+        /// 809064 -  Get product data since given datetime failed
         /// </summary>
-        GetProductDataSinceDateTimeFailed = 809064
+        GetProductDataSinceDateTimeFailed = 809064,
+        /// <summary>
+        /// 809065 -  Batch creation for catalogue completed
+        /// </summary>
+        BatchCreationForCatalogueCompleted = 809065,
+        /// <summary>
+        /// 809066 -  Batch creation for ENC update completed
+        /// </summary>
+        BatchCreationForENCUpdateCompleted = 809066
     }
 
     public static class EventIdExtensions

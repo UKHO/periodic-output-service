@@ -73,7 +73,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.GetFiles(A<string>.Ignored, A<string>.Ignored, A<SearchOption>.Ignored))
                            .Returns(new List<string> { @"D:\Test" });
 
-            A.CallTo(() => _fakeFssService.CreateBatch(A<string>.Ignored, A<Batch>.Ignored))
+            A.CallTo(() => _fakeFssService.CreateBatch(A<Batch>.Ignored))
                            .Returns(Guid.NewGuid().ToString());
 
             A.CallTo(() => _fakeFileInfo.Name).Returns("M01X01.zip");

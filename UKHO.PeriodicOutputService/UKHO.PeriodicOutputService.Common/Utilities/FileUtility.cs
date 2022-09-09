@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using DiscUtils.Iso9660;
+using System.Text;
+using System.Xml;
 
 namespace UKHO.PeriodicOutputService.Common.Utilities
 {
@@ -35,6 +37,22 @@ namespace UKHO.PeriodicOutputService.Common.Utilities
             byte[] isoFileBytes = System.Text.Encoding.UTF8.GetBytes(targetPath);
             string hash = BitConverter.ToString(SHA1.Create().ComputeHash(isoFileBytes)).Replace("-", "");
             File.WriteAllText(targetPath + ".sha1", hash);
+        }
+
+        public void CreateXmlFile(byte[] fileContent, string targetPath)
+        {
+            XmlDocument doc = new();
+            string xml = Encoding.UTF8.GetString(fileContent);
+            doc.LoadXml(xml);
+
+            //Create an XML declaration.
+            XmlDeclaration xmlDecl = doc.CreateXmlDeclaration("1.0", "utf-8", null);
+
+            //Add the new node to the document.
+            XmlElement root = doc.DocumentElement;
+            doc.InsertBefore(xmlDecl, root);
+
+            doc.Save(targetPath);
         }
     }
 }

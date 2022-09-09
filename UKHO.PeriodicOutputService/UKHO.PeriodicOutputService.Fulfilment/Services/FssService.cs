@@ -124,26 +124,26 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
         }
 
-        public async Task<string> CreateBatch(string mediaType, Batch batchType)
+        public async Task<string> CreateBatch(Batch batchType)
         {
-            _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {MediaType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", mediaType, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(mediaType, batchType);
+            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(batchType);
             string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
             HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
 
             if (httpResponse.IsSuccessStatusCode)
             {
                 CreateBatchResponseModel createBatchResponse = JsonConvert.DeserializeObject<CreateBatchResponseModel>(await httpResponse.Content.ReadAsStringAsync());
-                _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {MediaType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", mediaType, createBatchResponse.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 return createBatchResponse.BatchId;
             }
             else
             {
-                _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {MediaType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", mediaType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
             }
         }
@@ -278,7 +278,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         }
 
         //Private Methods
-        private CreateBatchRequestModel CreateBatchRequestModel(string mediaType, Batch batchType)
+        private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
         {
             string currentYear = DateTime.UtcNow.Year.ToString();
             string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
@@ -286,22 +286,51 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             CreateBatchRequestModel createBatchRequest = new()
             {
                 BusinessUnit = "AVCSData",
-                Attributes = new List<KeyValuePair<string, string>>()
-                {
-                    new KeyValuePair<string, string>("Exchange Set Type", "Base"),
-                    new KeyValuePair<string, string>("Media Type", mediaType),
-                    new KeyValuePair<string, string>("Product Type", "AVCS"),
-                    new KeyValuePair<string, string>("S63 Version", "1.2"),
-                    new KeyValuePair<string, string>("Week Number", currentWeek),
-                    new KeyValuePair<string, string>("Year", currentYear),
-                    new KeyValuePair<string, string>("Year / Week", currentYear + " / " + currentWeek),
-                    new KeyValuePair<string, string>("Batch Type", batchType.ToString())
-                },
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl()
                 {
-                    ReadUsers = new List<string>() { "public" }
+                    ReadUsers = new List<string>() { "public" },
+                    ReadGroups = new List<string>() { "public" }
+                },
+                Attributes = new List<KeyValuePair<string, string>>
+                {
+                    new("Product Type", "AVCS"),
+                    new("S63 Version", "1.2"),
+                    new("Week Number", currentWeek),
+                    new("Year", currentYear),
+                    new("Year / Week", currentYear + " / " + currentWeek),
+                    new("Batch Type", batchType.ToString())
                 }
+            };
+
+            switch (batchType)
+            {
+                case Batch.PosFullAvcsIsoSha1Batch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "DVD"));
+                    break;
+
+                case Batch.PosFullAvcsZipBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    break;
+
+                case Batch.PosUpdateBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
+                    break;
+
+                case Batch.PosCatalogueBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Catalogue Type", "XML"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Content", "Catalogue"));
+                    break;
+
+                case Batch.PosEncUpdateBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Content", "ENC Updates"));
+                    break;
+
+                default:
+                    break;
             };
             return createBatchRequest;
         }
@@ -312,9 +341,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 Attributes = new List<KeyValuePair<string, string>>()
                 {
-                    new KeyValuePair<string, string>("Exchange Set Type", "Base"),
-                    new KeyValuePair<string, string>("Media Type", "DVD"),
-                    new KeyValuePair<string, string>("Product Type", "AVCS")
+                    new("Product Type", "AVCS")
                 }
             };
             return addFileToBatchRequestModel;

@@ -1,5 +1,6 @@
-﻿using NUnit.Framework;
-using UKHO.ExchangeSetService.API.FunctionalTests.Helpers;
+﻿using System.Net;
+using FluentAssertions;
+using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
@@ -22,7 +23,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
-        public string ZipFilesBatchId = "2270F318-639C-4E64-A0C0-CADDD5F4EB05";
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -48,7 +48,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheExchangeSetApiWithValidProductIdentifiers_ThenANonZeroRequestedProductCountAndExchangeSetCellCountIsReturned()
         {
             HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
-            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
             //verify model structure
             await apiResponse.CheckModelStructureForSuccessResponse();
@@ -61,7 +61,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             productIdentifiers.Add("ABCDEFGH"); //Adding invalid product identifier in the list
 
             HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
-            Assert.That((int)apiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
             //verify model structure
             await apiResponse.CheckModelStructureForSuccessResponse();
@@ -69,18 +69,18 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             ExchangeSetResponseModel apiResponseData = await apiResponse.ReadAsTypeAsync<ExchangeSetResponseModel>();
 
             //Check RequestedProductsNotInExchangeSet is not empty
-            Assert.IsNotEmpty(apiResponseData.RequestedProductsNotInExchangeSet, "Response body returns Empty for RequestedProductsNotInExchangeSet, instead of Not Empty");
-            Assert.That(apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault(p => p.ProductName.Equals("ABCDEFGH")).Reason, Is.EqualTo("invalidProduct"), $"Exchange set returned Reason {apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault().Reason}, instead of expected Reason 'invalidProduct'");
+            apiResponseData.RequestedProductsNotInExchangeSet.Should().NotBeEmpty();
+            apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault(p => p.ProductName.Equals("ABCDEFGH")).Reason.Should().Be("invalidProduct");
         }
 
         [Test]
         public async Task WhenICallTheFSSApiWithValidBatchId_ThenALargeMediaStructureIsCreated()
         {
             HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
-            Assert.That((int)essApiResponse.StatusCode, Is.EqualTo(200), $"Incorrect status code is returned {unpResponse.StatusCode}, instead of the expected status 200.");
+            essApiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
-            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(ZipFilesBatchId, FssJwtToken);
-            Assert.That(DownloadedFolderPath.Count, Is.EqualTo(2), $"DownloadFolderCount : {DownloadedFolderPath.Count} is incorrect");
+            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(posDetails.ZipFilesBatchId, FssJwtToken);
+            DownloadedFolderPath.Count.Should().Be(2);
         }
 
         [TearDown]
