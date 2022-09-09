@@ -292,7 +292,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809071 -  Logging History failed.
         /// </summary>
-        LoggingHistoryFailed = 809071
+        LoggingHistoryFailed = 809071,
+        /// <summary>
+        /// 809072 - Exchange set not modified
+        /// </summary>
+        ExchangeSetNotModified = 809072
     }
 
     public static class EventIdExtensions

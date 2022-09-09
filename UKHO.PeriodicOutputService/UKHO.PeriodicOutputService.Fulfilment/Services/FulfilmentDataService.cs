@@ -72,7 +72,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             finally
             {
-                LogHistory(_nextSchedule ?? sinceDateTime, true);
+                LogHistory(_nextSchedule ?? sinceDateTime, isSuccess);
 
             }
         }
