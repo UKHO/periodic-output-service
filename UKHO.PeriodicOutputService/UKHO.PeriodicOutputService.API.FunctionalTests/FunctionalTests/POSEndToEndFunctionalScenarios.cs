@@ -128,11 +128,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             DownloadedFolderPath.Count.Should().Be(1);
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void GlobalTearDown()
         {
+            //cleaning up the downloaded files from temp folder
             FileContentHelper.DeleteTempDirectory(posDetails.TempFolderName);
 
+            //cleaning up the stub home directory
             HttpResponseMessage apiResponse = MockHelper.Cleanup(FSSAuth.BaseUrl);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }

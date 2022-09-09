@@ -7,7 +7,7 @@
         {
             string uri = $"{baseUrl}/cleanUp";
 
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
 
             return httpClient.Send(httpRequestMessage, CancellationToken.None);
         }
