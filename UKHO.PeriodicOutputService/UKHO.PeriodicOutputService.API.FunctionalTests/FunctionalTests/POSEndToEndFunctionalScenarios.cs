@@ -9,11 +9,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
     public class POSEndToEndFunctionalScenarios
     {
         private string fssJwtToken;
-        private POSWebJob WebJob;
-        private static readonly POSWebjobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
+        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
         private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
-        private HttpResponseMessage POSWebJobApiResponse;
         private List<string> DownloadedFolderPath;
 
         [OneTimeSetUp]
@@ -21,16 +19,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             AuthTokenProvider authTokenProvider = new();
             fssJwtToken = await authTokenProvider.GetFssToken();
-            WebJob = new POSWebJob();
-            if (!posWebJob.IsRunningOnLocalMachine)
-            {
-                string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
-                POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
-                POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
-
-                //As there is no way to check if webjob execution is completed, we have added below delay to wait to get webjob execution completes. 
-                await Task.Delay(120000);
-            }
+            await CommonHelper.RunWebJob();
         }
 
         [Test]
@@ -128,10 +117,15 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             DownloadedFolderPath.Count.Should().Be(1);
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void GlobalTearDown()
         {
+            //cleaning up the downloaded files from temp folder
             FileContentHelper.DeleteTempDirectory(posDetails.TempFolderName);
+
+            //cleaning up the stub home directory
+            HttpResponseMessage apiResponse = MockHelper.Cleanup(FSSAuth.BaseUrl);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }
 }

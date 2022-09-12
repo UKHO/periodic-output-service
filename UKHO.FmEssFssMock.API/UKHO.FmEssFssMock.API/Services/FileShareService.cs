@@ -143,19 +143,9 @@ namespace UKHO.FmEssFssMock.API.Services
             return batchStatusResponse;
         }
 
-        public bool CleanUp(List<string> batchId, string homeDirectoryPath)
+        public bool CleanUp(string homeDirectoryPath)
         {
-            bool deleteFlag = false;
-            foreach (string item in batchId)
-            {
-                string exchangeSetZipFolderPath = Path.Combine(homeDirectoryPath, item);
-                bool response = FileHelper.CleanUp(exchangeSetZipFolderPath);
-                if (response)
-                {
-                    deleteFlag = true;
-                }
-            }
-            return deleteFlag;
+            return FileHelper.CleanUp(homeDirectoryPath);
         }
     }
 }

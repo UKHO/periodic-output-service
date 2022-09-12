@@ -26,6 +26,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string CATALOGUEFILEEXTENSION = "xml";
         private const string ENCUPDATELISTFILEEXTENSION = "csv";
+        private readonly string _homeDirectoryPath = string.Empty;
 
         private DateTime? _nextSchedule;
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
@@ -43,10 +44,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _logger = logger;
             _configuration = configuration;
             _azureTableStorageHelper = azureTableStorageHelper;
+            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
         }
 
         public async Task<bool> CreatePosExchangeSets()
         {
+            _fileSystemHelper.CreateDirectory(_homeDirectoryPath);
+
             _logger.LogInformation(EventIds.GetLatestSinceDateTimeStarted.ToEventId(), "Getting latest since datetime started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             DateTime sinceDateTime = _azureTableStorageHelper.GetSinceDateTime();
@@ -100,7 +104,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 {
                     _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-                    bool isCatalogueFileBatchCreated = await CreatePosBatch(_configuration["HOME"], CATALOGUEFILEEXTENSION, Batch.PosCatalogueBatch);
+                    bool isCatalogueFileBatchCreated = await CreatePosBatch(_homeDirectoryPath, CATALOGUEFILEEXTENSION, Batch.PosCatalogueBatch);
                     if (isCatalogueFileBatchCreated)
                     {
                         _logger.LogInformation(EventIds.BatchCreationForCatalogueCompleted.ToEventId(), "Batch for catalougue created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
@@ -232,7 +236,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId, Batch batchType)
         {
-            string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
+            string downloadPath = Path.Combine(_homeDirectoryPath, essBatchId);
             List<FssBatchFile> files = new();
 
             if (!string.IsNullOrEmpty(essBatchId))
