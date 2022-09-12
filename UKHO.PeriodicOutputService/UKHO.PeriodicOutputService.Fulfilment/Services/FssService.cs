@@ -45,6 +45,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             DateTime startTime = DateTime.UtcNow;
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/status";
+
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
             FssBatchStatus[] pollBatchStatus = { FssBatchStatus.CommitInProgress, FssBatchStatus.Incomplete };
@@ -112,17 +113,21 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _logger.LogInformation(EventIds.DownloadFileStarted.ToEventId(), "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}" + fileLink;
+
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+
             HttpResponseMessage fileDownloadResponse = await _fssApiClient.DownloadFile(fileLink, accessToken);
+
+            string rangeHeader = String.Empty;
 
             if (fileDownloadResponse.StatusCode == HttpStatusCode.TemporaryRedirect)
             {
                 uri = fileDownloadResponse.Headers.GetValues("Location").FirstOrDefault();
+                rangeHeader = $"bytes={startByte}-{endByte}";
             }
 
             while (startByte <= endByte)
             {
-                string rangeHeader = $"bytes={startByte}-{endByte}";
 
                 fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader);
 
@@ -145,6 +150,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 {
                     endByte = fileSize - 1;
                 }
+
+                rangeHeader = $"bytes={startByte}-{endByte}";
             }
             _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading of file {fileName} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             return true;

@@ -146,6 +146,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 }
             );
 
+            var fssApiConfiguration = new FssApiConfiguration();
+
             if (configuration != null)
             {
                 serviceCollection.Configure<FleetManagerApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
@@ -153,10 +155,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                 serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
+
+                configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
+
             }
 
-            var essAzureADConfiguration = new EssApiConfiguration();
-            configuration.Bind("ESSAzureADConfiguration", essAzureADConfiguration);
 
             serviceCollection.AddDistributedMemoryCache();
 
@@ -177,8 +180,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IZipHelper, ZipHelper>();
             serviceCollection.AddScoped<IFileUtility, FileUtility>();
 
-            serviceCollection.AddHttpClient("DownloadClient", httpClient =>
-                httpClient.BaseAddress = new Uri("https://filesqa.admiralty.co.uk")
+            serviceCollection.AddHttpClient("DownloadClient",
+                httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl)
             ).ConfigurePrimaryHttpMessageHandler(() =>
             {
                 return new HttpClientHandler()
@@ -186,6 +189,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                     AllowAutoRedirect = false
                 };
             }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
+
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
             serviceCollection.AddTransient<IFssApiClient, FssApiClient>();

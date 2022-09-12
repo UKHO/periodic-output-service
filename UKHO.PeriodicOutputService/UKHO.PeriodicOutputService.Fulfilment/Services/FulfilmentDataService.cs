@@ -45,24 +45,24 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string sinceDateTime = DateTime.UtcNow.AddDays(-7).ToString("R");
 
             var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-            //var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
+            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
 
-            await Task.WhenAll(fullAVCSExchangeSetTask);
+            await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
 
             return "success";
         }
 
         private async Task CreateFullAVCSExchangeSet()
         {
-            //_logger.LogInformation(EventIds.FullAvcsExchangeSetCreationStarted.ToEventId(), "Creation of full AVCS exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationStarted.ToEventId(), "creation of full avcs exchange set started | {datetime} | _x-correlation-id : {correlationid}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            //List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
+            //List<string> productidentifiers = await GetFleetManagerProductIdentifiers();
 
-            //string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
+            //string essbatchId = await PostProductIdentifiersToESS(productidentifiers);
 
-            string essBatchId = "f1e0cd4a-e9e4-4e97-af65-367043fb5ea5";
+            string essbatchId = "f1e0cd4a-e9e4-4e97-af65-367043fb5ea5";
 
-            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssFullAvcsZipBatch);
+            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essbatchId, Batch.EssFullAvcsZipBatch);
 
             if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
             {
@@ -105,7 +105,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             _logger.LogInformation(EventIds.UpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for SinceDateTime - {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            string essBatchId = await GetProductDataSinceDateTimeFromEss(sinceDateTime);
+            //string essBatchId = await GetProductDataSinceDateTimeFromEss(sinceDateTime);
+            string essBatchId = "d22492fd-31f9-42a0-9c71-b51cc305f3e7";
 
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssUpdateZipBatch);
 
@@ -271,7 +272,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             Parallel.ForEach(fileDetails, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
+                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath).Wait(CancellationToken.None);
             });
         }
 

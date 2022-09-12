@@ -121,26 +121,25 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             _httpClient = _httpClientFactory.CreateClient("DownloadClient");
 
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, Path.Combine(_httpClient.BaseAddress.ToString(), uri));
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, Path.Combine(_httpClient.BaseAddress.AbsoluteUri.ToString(), uri));
             httpRequestMessage.SetBearerToken(accessToken);
 
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
-
         private async Task<HttpResponseMessage> CallFSSApi(string uri, string accessToken, string? rangeHeader = null)
         {
-
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
             httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
-            if (!string.IsNullOrEmpty(rangeHeader))
+
+            if (string.IsNullOrEmpty(rangeHeader))
             {
-                httpRequestMessage.Headers.Add("Range", rangeHeader);
+                httpRequestMessage.SetBearerToken(accessToken);
             }
             else
             {
-                httpRequestMessage.SetBearerToken(accessToken);
+                httpRequestMessage.Headers.Add("Range", rangeHeader);
             }
 
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
