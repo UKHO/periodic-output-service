@@ -13,6 +13,7 @@ namespace UKHO.FmEssFssMock.API.Services
         private readonly IOptions<ExchangeSetServiceConfiguration> _essConfiguration;
         private readonly FileShareService _fssService;
         protected IConfiguration _configuration;
+        private readonly string _homeDirectoryPath = string.Empty;
 
         public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,
                                   FileShareService fssService,
@@ -21,22 +22,23 @@ namespace UKHO.FmEssFssMock.API.Services
             _essConfiguration = essConfiguration;
             _fssService = fssService;
             _configuration = configuration;
+            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
         }
 
         public ExchangeSetServiceResponse CreateExchangeSetForGetProductDataSinceDateTime(string sinceDateTime)
         {
             CreateBatchRequest batchRequest = CreateBatchRequestModel(false);
 
-            BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _configuration["HOME"]);
+            BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
 
             if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
             {
                 string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
-                foreach (var fileName in Directory.GetFiles(path))
+                foreach (string fileName in Directory.GetFiles(path))
                 {
-                    FileInfo file = new FileInfo(fileName);
+                    FileInfo file = new(fileName);
 
-                    bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _configuration["HOME"]);
+                    bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _homeDirectoryPath);
 
                     if (!isFileAdded)
                     {
@@ -54,16 +56,16 @@ namespace UKHO.FmEssFssMock.API.Services
             string productIdentifiersPattern = "productIdentifier-" + string.Join("-", productIdentifiers);
             CreateBatchRequest batchRequest = CreateBatchRequestModel(true);
 
-            BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _configuration["HOME"]);
+            BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
 
             if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
             {
                 string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
-                foreach (var fileName in Directory.GetFiles(path))
+                foreach (string fileName in Directory.GetFiles(path))
                 {
-                    FileInfo file = new FileInfo(fileName);
+                    FileInfo file = new(fileName);
 
-                    bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _configuration["HOME"]);
+                    bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _homeDirectoryPath);
 
                     if (!isFileAdded)
                     {

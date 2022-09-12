@@ -19,7 +19,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public Dictionary<string, string> ErrorsPutBlocksInFile { get; set; }
         public Dictionary<string, string> ErrorsCommitBatch { get; set; }
         public Dictionary<string, string> ErrorsAddFileinBatch { get; set; }
-
+        private readonly string _homeDirectoryPath;
 
         public _fileShareServiceController(IHttpContextAccessor httpContextAccessor, FileShareService fileShareService, IConfiguration configuration) : base(httpContextAccessor)
         {
@@ -46,6 +46,8 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 { "description","Error while creating file" }
             };
             _configuration = configuration;
+            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
+
         }
 
         [HttpPost]
@@ -54,7 +56,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (batchRequest != null && !string.IsNullOrEmpty(batchRequest.BusinessUnit))
             {
-                BatchResponse? response = _fileShareService.CreateBatch(batchRequest.Attributes, _configuration["HOME"]);
+                BatchResponse? response = _fileShareService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
                 if (response != null)
                 {
                     return Created(string.Empty, response);
@@ -69,7 +71,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId))
             {
-                BatchDetail response = _fileShareService.GetBatchDetails(batchId, _configuration["HOME"]);
+                BatchDetail response = _fileShareService.GetBatchDetails(batchId, _homeDirectoryPath);
                 if (response != null)
                 {
                     return Ok(response);
@@ -86,7 +88,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
             if (!string.IsNullOrEmpty(fileName))
             {
-                bytes = _fileShareService.GetFileData(_configuration["HOME"], batchId, fileName);
+                bytes = _fileShareService.GetFileData(_homeDirectoryPath, batchId, fileName);
             }
 
             return File(bytes, "application/octet-stream", fileName);
@@ -105,7 +107,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId) && data != null && !string.IsNullOrEmpty(blockId))
             {
-                bool response = _fileShareService.UploadBlockOfFile(batchId, _configuration["HOME"], fileName);
+                bool response = _fileShareService.UploadBlockOfFile(batchId, _homeDirectoryPath, fileName);
                 if (response)
                 {
                     return StatusCode((int)HttpStatusCode.Created);
@@ -124,7 +126,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(fileName) && payload != null)
             {
-                bool response = _fileShareService.CheckBatchWithFileExist(batchId, fileName, _configuration["HOME"]);
+                bool response = _fileShareService.CheckBatchWithFileExist(batchId, fileName, _homeDirectoryPath);
                 if (response)
                 {
                     return StatusCode((int)HttpStatusCode.NoContent);
@@ -141,7 +143,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId) && body != null)
             {
-                bool response = _fileShareService.CheckBatchWithFileExist(batchId, body.Select(a => a.FileName).FirstOrDefault(), _configuration["HOME"]);
+                bool response = _fileShareService.CheckBatchWithFileExist(batchId, body.Select(a => a.FileName).FirstOrDefault(), _homeDirectoryPath);
                 if (response)
                 {
                     return Accepted(new BatchCommitResponse() { Status = new Status { URI = $"/batch/{batchId}/status" } });
@@ -163,7 +165,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId))
             {
-                bool response = _fileShareService.AddFile(batchId, fileName, _configuration["HOME"]);
+                bool response = _fileShareService.AddFile(batchId, fileName, _homeDirectoryPath);
                 if (response)
                 {
                     return StatusCode(StatusCodes.Status201Created);
@@ -179,7 +181,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId))
             {
-                BatchStatusResponse batchStatusResponse = _fileShareService.GetBatchStatus(batchId, _configuration["HOME"]);
+                BatchStatusResponse batchStatusResponse = _fileShareService.GetBatchStatus(batchId, _homeDirectoryPath);
                 if (batchStatusResponse.Status == "Committed")
                 {
                     return new OkObjectResult(batchStatusResponse);
@@ -190,17 +192,10 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
         [HttpPost]
         [Route("/fss/cleanUp")]
-        public IActionResult CleanUp([FromBody] List<string> batchId)
+        public IActionResult CleanUp()
         {
-            if (batchId != null && batchId.Count > 0)
-            {
-                bool response = _fileShareService.CleanUp(batchId, _configuration["HOME"]);
-                if (response)
-                {
-                    return Ok();
-                }
-            }
-            return BadRequest();
+            bool response = _fileShareService.CleanUp(_homeDirectoryPath);
+            return response ? Ok() : BadRequest();
         }
     }
 }

@@ -23,6 +23,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
+     
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -38,10 +39,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
             string unpToken = await unpResponse.DeserializeAsyncToken();
-
             HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
-
             productIdentifiers = await getcat.GetProductList(httpResponse);
+
+            await CommonHelper.RunWebJob();
         }
 
         [Test]
