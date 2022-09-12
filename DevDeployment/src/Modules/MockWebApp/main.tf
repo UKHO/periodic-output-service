@@ -17,6 +17,10 @@ resource "azurerm_windows_web_app" "mock_webapp_service" {
       virtual_network_subnet_id = var.subnet_id
     }
 
+    ip_restriction {
+      virtual_network_subnet_id = var.main_subnet_id
+    }
+
     dynamic "ip_restriction" {
       for_each = var.allowed_ips
       content {
