@@ -177,7 +177,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IZipHelper, ZipHelper>();
             serviceCollection.AddScoped<IFileUtility, FileUtility>();
 
-            serviceCollection.AddHttpClient();
+            serviceCollection.AddHttpClient("DownloadClient", httpClient =>
+                httpClient.BaseAddress = new Uri("https://filesqa.admiralty.co.uk")
+            ).ConfigurePrimaryHttpMessageHandler(() =>
+            {
+                return new HttpClientHandler()
+                {
+                    AllowAutoRedirect = false
+                };
+            });
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
             serviceCollection.AddTransient<IFssApiClient, FssApiClient>();

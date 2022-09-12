@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.FileShareService.Response;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
@@ -212,7 +211,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public async Task DoesDownloadFile_Returns_DownloadPath_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -222,10 +221,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     },
                 });
 
-            Stream? result = await _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip");
+            bool result = await _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\");
 
-            Assert.That(result, Is.Not.Null);
-
+            Assert.That(result, Is.True);
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
@@ -238,7 +236,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public void DoesDownloadFile_Throws_Exception_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -249,7 +247,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\": \"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\": \"Committed\",\"allFilesZipSize\": 11323697,\"attributes\": [{\"key\": \"Product Type\",\"value\": \"AVCS\"}],\"businessUnit\": \"AVCSCustomExchangeSets\",\"batchPublishedDate\": \"2022-07-13T10:53:58.98Z\",\"expiryDate\": \"2022-08-12T10:53:06Z\",\"files\": [{\"filename\": \"M01X02.zip\",\"fileSize\": 5095731,\"mimeType\": \"application/zip\",\"hash\": \"TLwn4f5J36mvWvrTafkXYA==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip\"}}},{\"filename\": \"M02X02.zip\",\"fileSize\": 6267757,\"mimeType\": \"application/zip\",\"hash\": \"7tP0BwgbMdKZT8koKakR+w==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M02X02.zip\"}}}]}")))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip"));
+            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\"));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -354,7 +352,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\"}")))
                 });
 
-            var result = await _fssService.CreateBatch(Batch.PosFullAvcsIsoSha1Batch);
+            string result = await _fssService.CreateBatch(Batch.PosFullAvcsIsoSha1Batch);
 
             Assert.That(result, Is.EqualTo("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
 

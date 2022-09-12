@@ -45,20 +45,22 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string sinceDateTime = DateTime.UtcNow.AddDays(-7).ToString("R");
 
             var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
+            //var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
 
-            await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
+            await Task.WhenAll(fullAVCSExchangeSetTask);
 
             return "success";
         }
 
         private async Task CreateFullAVCSExchangeSet()
         {
-            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationStarted.ToEventId(), "Creation of full AVCS exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            //_logger.LogInformation(EventIds.FullAvcsExchangeSetCreationStarted.ToEventId(), "Creation of full AVCS exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
+            //List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
 
-            string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
+            //string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
+
+            string essBatchId = "f1e0cd4a-e9e4-4e97-af65-367043fb5ea5";
 
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssFullAvcsZipBatch);
 
@@ -82,7 +84,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     }
                     string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
                     string currentYear = DateTime.UtcNow.ToString("yy");
-                    
+
                     string encUpdateListFilePath = Path.Combine(essFileDownloadPath, string.Format(_configuration["EncUpdateListFilePath"], weekNumber, currentYear));
 
                     bool isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath, ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
@@ -256,7 +258,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             List<FssBatchFile> batchFiles = null;
 
             GetBatchResponseModel batchDetail = await _fssService.GetBatchDetails(essBatchId);
-            batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href }).ToList();
+            batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href, FileSize = a.FileSize }).ToList();
 
             if (!batchFiles.Any() || batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
             {
@@ -271,8 +273,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             Parallel.ForEach(fileDetails, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                Stream stream = _fssService.DownloadFile(file.FileName, file.FileLink).Result;
-                _fileSystemHelper.CreateFileCopy(filePath, stream);
+                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath).Wait(CancellationToken.None);
+
             });
         }
 

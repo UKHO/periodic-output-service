@@ -5,9 +5,17 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public class FssApiClient : IFssApiClient
     {
-        private readonly HttpClient _httpClient;
+        private HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public FssApiClient(IHttpClientFactory httpClientFactory) => _httpClient = httpClientFactory.CreateClient();
+
+        public FssApiClient(IHttpClientFactory httpClientFactory)
+        {
+            _httpClient = httpClientFactory.CreateClient();
+            _httpClientFactory = httpClientFactory;
+            _httpClient.MaxResponseContentBufferSize = 2147483647;
+            _httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
+        }
 
         public async Task<HttpResponseMessage> CreateBatchAsync(string uri, string requestBody, string authToken)
         {
@@ -51,7 +59,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Put, uri)
             { Content = (blockBytes == null) ? null : new ByteArrayContent(blockBytes) };
 
-            if (httpRequestMessage.Content != null) httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            if (httpRequestMessage.Content != null)
+            {
+                httpRequestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+            }
+
             httpRequestMessage.AddCorrelationId(CommonHelper.CorrelationID.ToString());
             httpRequestMessage.SetBearerToken(accessToken);
 
@@ -100,17 +112,36 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return await CallFSSApi(uri, accessToken);
         }
 
-        public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken)
+        public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken, string rangeHeader)
         {
-            return await CallFSSApi(uri, accessToken);
+            return await CallFSSApi(uri, accessToken, rangeHeader);
         }
 
-        private async Task<HttpResponseMessage> CallFSSApi(string uri, string accessToken)
+        public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken)
         {
+            _httpClient = _httpClientFactory.CreateClient("DownloadClient");
+
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, Path.Combine(_httpClient.BaseAddress.ToString(), uri));
+            httpRequestMessage.SetBearerToken(accessToken);
+
+            return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+        }
+
+
+        private async Task<HttpResponseMessage> CallFSSApi(string uri, string accessToken, string? rangeHeader = null)
+        {
+
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
-            httpRequestMessage.SetBearerToken(accessToken);
             httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
+            if (!string.IsNullOrEmpty(rangeHeader))
+            {
+                httpRequestMessage.Headers.Add("Range", rangeHeader);
+            }
+            else
+            {
+                httpRequestMessage.SetBearerToken(accessToken);
+            }
 
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
