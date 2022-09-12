@@ -60,8 +60,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             string essbatchId = await PostProductIdentifiersToESS(productidentifiers);
 
-            essbatchId = "f1e0cd4a-e9e4-4e97-af65-367043fb5ea5";
-
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essbatchId, Batch.EssFullAvcsZipBatch);
 
             if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
@@ -106,7 +104,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _logger.LogInformation(EventIds.UpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for SinceDateTime - {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string essBatchId = await GetProductDataSinceDateTimeFromEss(sinceDateTime);
-            essBatchId = "d22492fd-31f9-42a0-9c71-b51cc305f3e7";
 
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssUpdateZipBatch);
 
