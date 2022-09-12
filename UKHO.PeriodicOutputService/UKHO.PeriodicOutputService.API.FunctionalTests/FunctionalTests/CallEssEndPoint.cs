@@ -20,9 +20,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private static readonly ESSApiConfiguration ESSAuth = new TestConfiguration().EssConfig;
         private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
+        private static readonly POSWebjobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
+        private POSWebJob WebJob;
+        private HttpResponseMessage POSWebJobApiResponse;
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -42,6 +45,16 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
 
             productIdentifiers = await getcat.GetProductList(httpResponse);
+            WebJob = new POSWebJob();
+            if (!posWebJob.IsRunningOnLocalMachine)
+            {
+                string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
+                POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
+                POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
+
+                //As there is no way to check if webjob execution is completed or not, we have added below delay to wait till the execution completes and files get downloaded.
+                await CommonHelper.CallDelay();
+            }
         }
 
         [Test]
@@ -76,8 +89,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallTheFSSApiWithValidBatchId_ThenALargeMediaStructureIsCreated()
         {
-            //As there is no other way to verify the files are downloaded or not in mock, so the below delay is used to wait till the files get downloaded.
-            await CommonHelper.CallDelay();
             HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
             essApiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
