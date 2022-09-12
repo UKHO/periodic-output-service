@@ -24,6 +24,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string CATALOGUEFILEEXTENSION = "xml";
         private const string ENCUPDATELISTFILEEXTENSION = "csv";
+        private readonly string _homeDirectoryPath = string.Empty;
 
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
                                      IEssService exchangeSetApiService,
@@ -38,18 +39,29 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fileSystemHelper = fileSystemHelper;
             _logger = logger;
             _configuration = configuration;
+            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
         }
 
         public async Task<string> CreatePosExchangeSets()
         {
-            string sinceDateTime = DateTime.UtcNow.AddDays(-7).ToString("R");
+            try
+            {
+                _fileSystemHelper.CreateDirectory(_homeDirectoryPath);
 
-            var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-            var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
+                string sinceDateTime = DateTime.UtcNow.AddDays(-7).ToString("R");
 
-            await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
+                var fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
+                var updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime));
 
-            return "success";
+                await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
+
+                return "success";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.UnhandledException.ToEventId());
+            }
         }
 
         private async Task CreateFullAVCSExchangeSet()
@@ -75,14 +87,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 {
                     _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-                    bool isCatalogueFileBatchCreated = await CreatePosBatch(_configuration["HOME"], CATALOGUEFILEEXTENSION, Batch.PosCatalogueBatch);
+                    bool isCatalogueFileBatchCreated = await CreatePosBatch(_homeDirectoryPath, CATALOGUEFILEEXTENSION, Batch.PosCatalogueBatch);
                     if (isCatalogueFileBatchCreated)
                     {
                         _logger.LogInformation(EventIds.BatchCreationForCatalogueCompleted.ToEventId(), "Batch for catalougue created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                     }
                     string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
                     string currentYear = DateTime.UtcNow.ToString("yy");
-                    
+
                     string encUpdateListFilePath = Path.Combine(essFileDownloadPath, string.Format(_configuration["EncUpdateListFilePath"], weekNumber, currentYear));
 
                     bool isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath, ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
@@ -205,7 +217,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId, Batch batchType)
         {
-            string downloadPath = Path.Combine(_configuration["HOME"], essBatchId);
+            string downloadPath = Path.Combine(_homeDirectoryPath, essBatchId);
             List<FssBatchFile> files = new();
 
             if (!string.IsNullOrEmpty(essBatchId))
