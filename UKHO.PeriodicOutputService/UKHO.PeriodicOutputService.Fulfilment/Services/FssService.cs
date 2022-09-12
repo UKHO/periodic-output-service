@@ -107,7 +107,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             long startByte = 0;
             long downloadSize = fileSize < 10485760 ? fileSize : 10485760;
-            long endByte = fileSize < downloadSize ? fileSize : downloadSize;
+            long endByte = downloadSize;
 
             _logger.LogInformation(EventIds.DownloadFileStarted.ToEventId(), "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 

@@ -185,7 +185,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 {
                     AllowAutoRedirect = false
                 };
-            });
+            }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
             serviceCollection.AddTransient<IFssApiClient, FssApiClient>();
