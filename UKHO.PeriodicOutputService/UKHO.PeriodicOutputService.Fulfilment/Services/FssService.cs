@@ -138,10 +138,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 }
 
                 Stream stream = fileDownloadResponse.Content.ReadAsStream();
-                using (FileStream outputFileStream = new(filePath, FileMode.Append))
-                {
-                    stream.CopyTo(outputFileStream);
-                }
+
+                _fileSystemHelper.CreateFileCopy(filePath, stream);
 
                 startByte = endByte + 1;
                 endByte = endByte + downloadSize;
