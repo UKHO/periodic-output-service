@@ -9,11 +9,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
     public class POSEndToEndFunctionalScenarios
     {
         private string fssJwtToken;
-        private POSWebJob WebJob;
-        private static readonly POSWebjobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
+        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
         private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
-        private HttpResponseMessage POSWebJobApiResponse;
         private List<string> DownloadedFolderPath;
 
         [OneTimeSetUp]
@@ -21,16 +19,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             AuthTokenProvider authTokenProvider = new();
             fssJwtToken = await authTokenProvider.GetFssToken();
-            WebJob = new POSWebJob();
-            if (!posWebJob.IsRunningOnLocalMachine)
-            {
-                string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
-                POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
-                POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
-
-                //As there is no way to check if webjob execution is completed or not, we have added below delay to wait till the execution completes and files get downloaded.
-                await CommonHelper.CallDelay();
-            }
+            await CommonHelper.RunWebJob();
         }
 
         [Test]

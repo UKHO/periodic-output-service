@@ -1,10 +1,17 @@
-﻿using System.Xml;
+﻿using System.Net;
+using System.Xml;
+using FluentAssertions;
 using Newtonsoft.Json;
+using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
+    
     public static class CommonHelper
     {
+        private static POSWebJob WebJob;
+        private static HttpResponseMessage POSWebJobApiResponse;
+        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
         public static async Task<string> DeserializeAsyncToken(this HttpResponseMessage httpResponseMessage)
         {
             string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
@@ -47,9 +54,19 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             return response;
         }
 
-        public static async Task CallDelay()
+        public static async Task RunWebJob()
         {
-            await Task.Delay(120000);
+            WebJob = new POSWebJob();
+            if (!posWebJob.IsRunningOnLocalMachine)
+            {
+                string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
+                POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
+                POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
+
+                //As there is no way to check if webjob execution is completed or not, we have added below delay to wait till the execution completes and files get downloaded.
+                await Task.Delay(120000);
+            }
         }
     }
 }
+

@@ -8,7 +8,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public FleetManagerB2BApiConfiguration fleetManagerB2BConfig = new();
         public ESSApiConfiguration EssConfig = new();
         public FSSApiConfiguration FssConfig = new();
-        public POSWebjobApiConfiguration POSWebJobConfig = new();
+        public POSWebJobApiConfiguration POSWebJobConfig = new();
         public POSFileDetails posFileDetails = new();
 
         public class FleetManagerB2BApiConfiguration
@@ -39,7 +39,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string BatchStatusPollingDelayTime { get; set; }
             public int BatchCommitWaitTime { get; set; }
         }
-        public class POSWebjobApiConfiguration
+        public class POSWebJobApiConfiguration
         {
             public string UserName { get; set; }
             public string Password { get; set; }
