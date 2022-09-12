@@ -179,7 +179,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            Assert.ThrowsAsync<FulfilmentException>(
+            Assert.ThrowsAsync<AggregateException>(
                  () => _fulfilmentDataService.CreatePosExchangeSets());
 
             A.CallTo(_fakeLogger).Where(call =>
@@ -261,7 +261,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored)).Throws<Exception>();
 
-            Assert.ThrowsAsync<FulfilmentException>(
+            Assert.ThrowsAsync<AggregateException>(
                 () => _fulfilmentDataService.CreatePosExchangeSets());
 
             A.CallTo(_fakeLogger).Where(call =>
