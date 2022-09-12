@@ -20,8 +20,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public void SaveHistory(WebJobHistory webJobHistory)
         {
-            TableClient tableWebjobEntityClient = GetTableClient(WEBJOB_HISTORY_TABLE_NAME);
-            tableWebjobEntityClient.AddEntity(webJobHistory);
+            TableClient tableWebJobEntityClient = GetTableClient(WEBJOB_HISTORY_TABLE_NAME);
+            tableWebJobEntityClient.AddEntity(webJobHistory);
         }
 
         public DateTime GetSinceDateTime()

@@ -12,7 +12,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler
             var response = new HttpResponseMessage()
             {
                 StatusCode = httpStatusCode,
-                Content = new StringContent(content, Encoding.UTF8, "application/json"),
+                Content = new StringContent(content, Encoding.UTF8, "application/json")
             };
 
             var messageHandler = new FakeHttpMessageHandler(response);
