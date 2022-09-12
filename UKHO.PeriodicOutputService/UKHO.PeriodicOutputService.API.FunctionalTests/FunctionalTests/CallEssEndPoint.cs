@@ -76,6 +76,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenICallTheFSSApiWithValidBatchId_ThenALargeMediaStructureIsCreated()
         {
+            //As there is no other way to verify the files are downloaded or not in mock, so the below delay is used to wait till the files get downloaded.
+            await CommonHelper.CallDelay();
             HttpResponseMessage essApiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiers, EssJwtToken);
             essApiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 

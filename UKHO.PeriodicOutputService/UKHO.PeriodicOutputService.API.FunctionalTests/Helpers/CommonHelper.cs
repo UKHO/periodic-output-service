@@ -46,5 +46,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             dynamic response = JsonConvert.DeserializeObject<dynamic>(bodyJson);
             return response;
         }
+
+        public static async Task CallDelay()
+        {
+            await Task.Delay(120000);
+        }
     }
 }

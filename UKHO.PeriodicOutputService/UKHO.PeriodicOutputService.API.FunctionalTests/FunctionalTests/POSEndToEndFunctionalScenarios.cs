@@ -28,8 +28,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
                 POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
 
-                //As there is no way to check if webjob execution is completed, we have added below delay to wait to get webjob execution completes. 
-                await Task.Delay(120000);
+                //As there is no way to check if webjob execution is completed or not, we have added below delay to wait till the execution completes and files get downloaded.
+                await CommonHelper.CallDelay();
             }
         }
 
