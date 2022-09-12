@@ -9,7 +9,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
     {
         private string fssJwtToken;
         private POSWebJob WebJob;
-        private static readonly POSWebjobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
+        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
         private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
         private HttpResponseMessage POSWebJobApiResponse;
@@ -20,13 +20,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             AuthTokenProvider authTokenProvider = new();
             fssJwtToken = await authTokenProvider.GetFssToken();
-            WebJob = new POSWebJob();
-            if (!posWebJob.IsRunningOnLocalMachine)
-            {
-                string POSWebJobuserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
-                POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobuserCredentialsBytes);
-                Assert.That((int)POSWebJobApiResponse.StatusCode, Is.EqualTo(202), $"Incorrect status code is returned {POSWebJobApiResponse.StatusCode}, instead of the expected status 202.");
-            }
+            await CommonHelper.RunWebJob();
         }
 
         [Test]

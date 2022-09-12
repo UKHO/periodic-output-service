@@ -42,6 +42,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
 
             productIdentifiers = await getcat.GetProductList(httpResponse);
+
+            await CommonHelper.RunWebJob();
         }
 
         [Test]
