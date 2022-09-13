@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.IO.Abstractions;
 using System.Net;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -23,18 +24,21 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private readonly IFssApiClient _fssApiClient;
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
+        private readonly IConfiguration _configuration;
 
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
                                IAuthFssTokenProvider authFssTokenProvider,
-                               IFileSystemHelper fileSystemHelper)
+                               IFileSystemHelper fileSystemHelper,
+                               IConfiguration configuration)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _fssApiConfiguration = fssApiConfiguration ?? throw new ArgumentNullException(nameof(fssApiConfiguration));
             _fssApiClient = fssApiClient ?? throw new ArgumentNullException(nameof(fssApiClient));
             _authFssTokenProvider = authFssTokenProvider ?? throw new ArgumentNullException(nameof(authFssTokenProvider));
             _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
+            _configuration = configuration;
         }
 
         public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId)
@@ -285,12 +289,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             CreateBatchRequestModel createBatchRequest = new()
             {
-                BusinessUnit = "AVCSData",
+                BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl()
                 {
-                    ReadUsers = new List<string>() { "public" },
-                    ReadGroups = new List<string>() { "public" }
+                    ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
+                    ReadGroups = _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
                 },
                 Attributes = new List<KeyValuePair<string, string>>
                 {
