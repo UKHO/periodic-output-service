@@ -12,6 +12,21 @@ resource "azurerm_windows_web_app" "mock_webapp_service" {
     }
     always_on  = true
     ftps_state = "Disabled"
+
+    ip_restriction {
+      virtual_network_subnet_id = var.subnet_id
+    }
+
+    ip_restriction {
+      virtual_network_subnet_id = var.main_subnet_id
+    }
+
+    dynamic "ip_restriction" {
+      for_each = var.allowed_ips
+      content {
+          ip_address  = length(split("/",ip_restriction.value)) > 1 ? ip_restriction.value : "${ip_restriction.value}/32"
+      }
+    }
   }
 
   app_settings = var.app_settings
@@ -22,3 +37,8 @@ resource "azurerm_windows_web_app" "mock_webapp_service" {
 
   https_only = true
 } 
+
+resource "azurerm_app_service_virtual_network_swift_connection" "mock_webapp_vnet_integration" {
+  app_service_id = azurerm_windows_web_app.mock_webapp_service.id
+  subnet_id      = var.subnet_id
+}
