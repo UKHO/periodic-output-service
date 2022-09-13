@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Security.Cryptography;
+using Newtonsoft.Json;
 
 namespace UKHO.FmEssFssMock.API.Helpers
 {
@@ -62,6 +63,14 @@ namespace UKHO.FmEssFssMock.API.Helpers
                 return true;
             }
             return false;
+        }
+
+        public static string GetFileMD5(FileInfo fileInfo)
+        {
+            using Stream? fs = fileInfo.OpenRead();
+            using var md5 = MD5.Create();
+            byte[]? fileMd5Hash = md5.ComputeHash(fs);
+            return Convert.ToBase64String(fileMd5Hash);
         }
     }
 }

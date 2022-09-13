@@ -159,7 +159,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel();
+            AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName);
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
             HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, "application/octet-stream");
 
@@ -343,13 +343,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             return createBatchRequest;
         }
 
-        private AddFileToBatchRequestModel CreateAddFileRequestModel()
+        private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName)
         {
             AddFileToBatchRequestModel addFileToBatchRequestModel = new()
             {
                 Attributes = new List<KeyValuePair<string, string>>()
                 {
-                    new("Product Type", "AVCS")
+                    new("Product Type", "AVCS"),
+                    new("File Name", fileName)
                 }
             };
             return addFileToBatchRequestModel;
