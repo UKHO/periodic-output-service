@@ -65,7 +65,6 @@ namespace UKHO.FmEssFssMock.API.Services
             List<KeyValuePair<string, string>> attributes = new()
             {
                 new("Product Type", "AVCS"),
-                new("S63 Version", "1.2"),
                 new("Week Number", currentWeek.ToString()),
                 new("Year", currentYear),
                 new("Year / Week", currentYear + " / " + currentWeek.ToString()),
@@ -76,16 +75,19 @@ namespace UKHO.FmEssFssMock.API.Services
                 case Batch.PosFullAvcsIsoSha1Batch:
                     attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
                     attributes.Add(new KeyValuePair<string, string>("Media Type", "DVD"));
+                    attributes.Add(new KeyValuePair<string, string>("S63 Version", "1.2"));
                     break;
 
                 case Batch.PosFullAvcsZipBatch:
                     attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
                     attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    attributes.Add(new KeyValuePair<string, string>("S63 Version", "1.2"));
                     break;
 
                 case Batch.PosUpdateBatch:
                     attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    attributes.Add(new KeyValuePair<string, string>("S63 Version", "1.2"));
                     break;
 
                 case Batch.PosCatalogueBatch:
