@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using System.IO.Abstractions;
 using System.Net;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -23,22 +22,20 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private readonly ILogger<FssService> _logger;
         private readonly IFssApiClient _fssApiClient;
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
-        private readonly IFileSystemHelper _fileSystemHelper;
-        private readonly IConfiguration _configuration;
+        private readonly IFileSystemHelper _fileSystemHelper;        
 
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
                                IAuthFssTokenProvider authFssTokenProvider,
-                               IFileSystemHelper fileSystemHelper,
-                               IConfiguration configuration)
+                               IFileSystemHelper fileSystemHelper
+                               )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _fssApiConfiguration = fssApiConfiguration ?? throw new ArgumentNullException(nameof(fssApiConfiguration));
             _fssApiClient = fssApiClient ?? throw new ArgumentNullException(nameof(fssApiClient));
             _authFssTokenProvider = authFssTokenProvider ?? throw new ArgumentNullException(nameof(authFssTokenProvider));
-            _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
-            _configuration = configuration;
+            _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));            
         }
 
         public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId)
