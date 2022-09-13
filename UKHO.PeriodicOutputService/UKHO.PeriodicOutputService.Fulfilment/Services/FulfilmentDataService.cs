@@ -66,13 +66,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task CreateFullAVCSExchangeSet()
         {
-            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationStarted.ToEventId(), "creation of full avcs exchange set started | {datetime} | _x-correlation-id : {correlationid}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationStarted.ToEventId(), "Creation of full AVCS exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            List<string> productidentifiers = await GetFleetManagerProductIdentifiers();
+            List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
 
-            string essbatchId = await PostProductIdentifiersToESS(productidentifiers);
+            string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
 
-            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essbatchId, Batch.EssFullAvcsZipBatch);
+            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssFullAvcsZipBatch);
 
             if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
             {
@@ -281,7 +281,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             Parallel.ForEach(fileDetails, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath).Wait(CancellationToken.None);
+                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
             });
         }
 
