@@ -30,6 +30,15 @@ output "kv_name" {
   value = local.key_vault_name
 }
 
+output "pos_storage_name" {
+value = module.storage.pos_storage_name
+}
+
+output "pos_storage_connection_string"{
+  value = module.storage.pos_storage_connection_string
+  sensitive = true
+}
+
 output "webjob_username" {
   value = module.webapp_service.username
 }

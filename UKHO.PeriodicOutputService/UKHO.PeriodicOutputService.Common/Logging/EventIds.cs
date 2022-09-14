@@ -272,7 +272,31 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809066 -  Batch creation for ENC update completed
         /// </summary>
-        BatchCreationForENCUpdateCompleted = 809066
+        BatchCreationForENCUpdateCompleted = 809066,
+        /// <summary>
+        /// 809067 -  Get latest since datetime started.
+        /// </summary>
+        GetLatestSinceDateTimeStarted = 809067,
+        /// <summary>
+        /// 809068 -  Get latest since datetime started.
+        /// </summary>
+        GetLatestSinceDateTimeCompleted = 809068,
+        /// <summary>
+        /// 809069 -  Logging History started.
+        /// </summary>
+        LoggingHistoryStarted = 809069,
+        /// <summary>
+        /// 809070 -  Logging History completed.
+        /// </summary>
+        LoggingHistoryCompleted = 809070,
+        /// <summary>
+        /// 809071 -  Logging History failed.
+        /// </summary>
+        LoggingHistoryFailed = 809071,
+        /// <summary>
+        /// 809072 - Exchange set not modified
+        /// </summary>
+        ExchangeSetNotModified = 809072
     }
 
     public static class EventIdExtensions
