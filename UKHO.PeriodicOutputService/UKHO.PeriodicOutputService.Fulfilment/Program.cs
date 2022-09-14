@@ -33,7 +33,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 int delayTime = 5000;
 
                 //Build configuration
-                IConfigurationRoot? configuration = BuildConfiguration();
+                IConfigurationRoot configuration = BuildConfiguration();
 
                 var serviceCollection = new ServiceCollection();
 
@@ -41,7 +41,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 ConfigureServices(serviceCollection, configuration);
 
                 //Create service provider. This will be used in logging.
-                ServiceProvider? serviceProvider = serviceCollection.BuildServiceProvider();
+                ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
 
                 try
                 {
@@ -72,8 +72,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 configBuilder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
             }
 
-            IConfigurationRoot tempConfig = configBuilder.Build();
-            string kvServiceUri = tempConfig["KeyVaultSettings:ServiceUri"];
+            //IConfigurationRoot tempConfig = configBuilder.Build();
+            string kvServiceUri = configBuilder.Build()["KeyVaultSettings:ServiceUri"];
             if (!string.IsNullOrWhiteSpace(kvServiceUri))
             {
                 var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
@@ -116,7 +116,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 loggingBuilder.AddDebug();
 
                 EventHubLoggingConfiguration eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
-
+                
                 if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
                 {
                     loggingBuilder.AddEventHub(config =>
@@ -146,17 +146,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 }
             );
 
-            if (configuration != null)
-            {
-                serviceCollection.Configure<FleetManagerApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
-                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
-                serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
-                serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
-                serviceCollection.AddSingleton<IConfiguration>(configuration);
-            }
-
-            var essAzureADConfiguration = new EssApiConfiguration();
-            configuration.Bind("ESSAzureADConfiguration", essAzureADConfiguration);
+            serviceCollection.Configure<FleetManagerApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
+            serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
+            serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
+            serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+            serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
+            serviceCollection.AddSingleton(configuration);
 
             serviceCollection.AddDistributedMemoryCache();
 
@@ -176,12 +171,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IFileSystem, FileSystem>();
             serviceCollection.AddScoped<IZipHelper, ZipHelper>();
             serviceCollection.AddScoped<IFileUtility, FileUtility>();
+            serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
 
             serviceCollection.AddHttpClient();
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
             serviceCollection.AddTransient<IFssApiClient, FssApiClient>();
-
         }
     }
 }

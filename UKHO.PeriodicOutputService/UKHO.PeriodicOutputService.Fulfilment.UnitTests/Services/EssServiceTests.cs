@@ -170,7 +170,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                       {
                           RequestUri = new Uri("http://test.com")
                       },
-                      Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()))
+                      Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
+                      Headers = { Date = DateTime.UtcNow }
                   });
 
 
@@ -205,7 +206,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                       {
                           RequestUri = new Uri("http://test.com")
                       },
-                      Content = new StringContent(JsonConvert.SerializeObject(GetInValidExchangeSetGetBatchResponse()))
+                      Content = new StringContent(JsonConvert.SerializeObject(GetInValidExchangeSetGetBatchResponse())),
+                      Headers = { Date = DateTime.UtcNow }
                   });
 
 
