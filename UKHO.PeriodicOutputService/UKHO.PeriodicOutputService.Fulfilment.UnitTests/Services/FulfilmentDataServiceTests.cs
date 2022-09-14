@@ -23,6 +23,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IFileSystemHelper _fakefileSystemHelper;
         private IConfiguration _fakeconfiguration;
         private IFileInfo _fakeFileInfo;
+        private IAzureTableStorageHelper _fakeAzureTableStorageHelper;
 
         public FleetMangerGetAuthTokenResponseModel jwtauthUnpToken = new();
 
@@ -36,8 +37,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakefileSystemHelper = A.Fake<IFileSystemHelper>();
             _fakeconfiguration = A.Fake<IConfiguration>();
             _fakeFileInfo = A.Fake<IFileInfo>();
+            _fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
 
-            _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeEssService, _fakeFssService, _fakefileSystemHelper, _fakeLogger, _fakeconfiguration);
+            _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeEssService, _fakeFssService, _fakefileSystemHelper, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
         }
 
         [Test]
@@ -91,10 +93,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored))
               .Returns(true);
 
-            string result = await _fulfilmentDataService.CreatePosExchangeSets();
+            bool result = await _fulfilmentDataService.CreatePosExchangeSets();
 
-            Assert.That(result, Is.Not.Null);
-            Assert.That(result, Is.EqualTo("success"));
+            Assert.That(result, Is.True);
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -178,7 +179,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            Assert.ThrowsAsync<FulfilmentException>(
+            Assert.ThrowsAsync<AggregateException>(
                  () => _fulfilmentDataService.CreatePosExchangeSets());
 
             A.CallTo(_fakeLogger).Where(call =>
@@ -260,7 +261,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored)).Throws<Exception>();
 
-            Assert.ThrowsAsync<FulfilmentException>(
+            Assert.ThrowsAsync<AggregateException>(
                 () => _fulfilmentDataService.CreatePosExchangeSets());
 
             A.CallTo(_fakeLogger).Where(call =>
@@ -291,7 +292,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 {
                     Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
                 }
-            }
+            },
+            ResponseDateTime = DateTime.UtcNow
         };
 
         private static GetBatchResponseModel GetValidBatchResponseModel() => new()

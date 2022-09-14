@@ -44,7 +44,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             else
             {
-                _logger.LogError(EventIds.PostProductIdentifiersToEssFailed.ToEventId(), "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                if (httpResponse.StatusCode == System.Net.HttpStatusCode.NotModified)
+                {
+                    _logger.LogError(EventIds.ExchangeSetNotModified.ToEventId(), "Exchange set not modified | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                }
+                else
+                {
+                    _logger.LogError(EventIds.PostProductIdentifiersToEssFailed.ToEventId(), "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                }
+
                 throw new FulfilmentException(EventIds.PostProductIdentifiersToEssFailed.ToEventId());
             }
         }
@@ -62,7 +70,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
                 _logger.LogInformation(EventIds.GetProductDataSinceDateTimeCompleted.ToEventId(), "ESS request to create exhchange set for data since {SinceDateTime} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                return JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
+                ExchangeSetResponseModel exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
+                exchangeSetResponseModel.ResponseDateTime = httpResponse.Headers.Date.Value.UtcDateTime;
+
+                return exchangeSetResponseModel;
             }
             else
             {
