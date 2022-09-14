@@ -41,7 +41,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         {
             List<string> downloadFolderPath = new();
 
-            string mediaType = batchDetailsResponse.attributes[6].value;
+            string mediaType = batchDetailsResponse.attributes[5].value;
 
             if (mediaType.Equals("Zip"))
             {
@@ -93,7 +93,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         }
         public static async Task<List<string>> DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(string batchId, string fssJwtToken, dynamic batchDetailsResponse)
         {
-            string responseContent = batchDetailsResponse.attributes[5].value;
+            string responseContent = batchDetailsResponse.attributes[4].value;
 
             string downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/";
             downloadFileUrl += responseContent.Equals("Catalogue")
