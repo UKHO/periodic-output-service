@@ -124,7 +124,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             FileContentHelper.DeleteTempDirectory(posDetails.TempFolderName);
 
             //cleaning up the stub home directory
-            HttpResponseMessage apiResponse = MockHelper.Cleanup(FSSAuth.BaseUrl);
+            HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }

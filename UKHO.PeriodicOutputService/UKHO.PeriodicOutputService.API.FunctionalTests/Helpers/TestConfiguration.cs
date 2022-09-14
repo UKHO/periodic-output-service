@@ -39,11 +39,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string BatchStatusPollingDelayTime { get; set; }
             public int BatchCommitWaitTime { get; set; }
         }
+
         public class POSWebJobApiConfiguration
         {
             public string UserName { get; set; }
             public string Password { get; set; }
             public string BaseUrl { get; set; }
+            public string MockApiBaseUrl { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
         }
 

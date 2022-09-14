@@ -19,6 +19,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public Dictionary<string, string> ErrorsPutBlocksInFile { get; set; }
         public Dictionary<string, string> ErrorsCommitBatch { get; set; }
         public Dictionary<string, string> ErrorsAddFileinBatch { get; set; }
+
         private readonly string _homeDirectoryPath;
 
         public _fileShareServiceController(IHttpContextAccessor httpContextAccessor, FileShareService fileShareService, IConfiguration configuration) : base(httpContextAccessor)
@@ -75,6 +76,10 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 if (response != null)
                 {
                     return Ok(response);
+                }
+                else
+                {
+                    return NotFound();
                 }
             }
             return BadRequest();
@@ -188,14 +193,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 }
             }
             return Unauthorized();
-        }
-
-        [HttpPost]
-        [Route("/fss/cleanUp")]
-        public IActionResult CleanUp()
-        {
-            bool response = _fileShareService.CleanUp(_homeDirectoryPath);
-            return response ? Ok() : BadRequest();
         }
     }
 }

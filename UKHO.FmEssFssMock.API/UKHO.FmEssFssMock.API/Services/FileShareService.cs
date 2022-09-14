@@ -137,15 +137,18 @@ namespace UKHO.FmEssFssMock.API.Services
 
             if (FileHelper.ValidateFilePath(batchFolderPath) && FileHelper.CheckFolderExists(batchFolderPath))
             {
-                batchStatusResponse.BatchId = batchId;
-                batchStatusResponse.Status = "Committed";
+                if (File.Exists(Path.Combine(batchFolderPath, "CommitInProgress.txt")))
+                {
+                    batchStatusResponse.BatchId = batchId;
+                    batchStatusResponse.Status = "CommitInProgress";
+                }
+                else
+                {
+                    batchStatusResponse.BatchId = batchId;
+                    batchStatusResponse.Status = "Committed";
+                }
             }
             return batchStatusResponse;
-        }
-
-        public bool CleanUp(string homeDirectoryPath)
-        {
-            return FileHelper.CleanUp(homeDirectoryPath);
         }
     }
 }

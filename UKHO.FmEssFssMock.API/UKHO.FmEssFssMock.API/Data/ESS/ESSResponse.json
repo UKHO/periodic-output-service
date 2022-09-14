@@ -21,6 +21,48 @@
         }
     },
     {
+        "id": "productIdentifier-FR570300",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/D2B46C4F-415A-4CA3-B844-6577254F39E5/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/D2B46C4F-415A-4CA3-B844-6577254F39E5"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/D2B46C4F-415A-4CA3-B844-6577254F39E5/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 10,
+            "exchangeSetCellCount": 10,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
+    },
+    {
+        "id": "productIdentifier-SE6IIFE1",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/38EBEB5C-2FAA-47F5-B3AC-B196D411FA75/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/38EBEB5C-2FAA-47F5-B3AC-B196D411FA75"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/38EBEB5C-2FAA-47F5-B3AC-B196D411FA75/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 10,
+            "exchangeSetCellCount": 10,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
+    },
+    {
         "id": "sincedatetime",
         "responseBody": {
             "_links": {
@@ -62,6 +104,32 @@
             "requestedProductsNotInExchangeSet": [
                 {
                     "productName": "ABCDEFGH",
+                    "reason": "invalidProduct"
+                }
+            ]
+        }
+    },
+    {
+        "id": "productIdentifier-ABCD1234",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/A1C65857-1E51-4B91-B74E-66B9BEBAF4E8/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/A1C65857-1E51-4B91-B74E-66B9BEBAF4E8"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/A1C65857-1E51-4B91-B74E-66B9BEBAF4E8/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "2022-08-19T15:32:34.631Z",
+            "requestedProductCount": 1,
+            "exchangeSetCellCount": 0,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": [
+                {
+                    "productName": "ABCD1234",
                     "reason": "invalidProduct"
                 }
             ]
