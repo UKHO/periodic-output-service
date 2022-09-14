@@ -181,14 +181,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IFileUtility, FileUtility>();
 
             serviceCollection.AddHttpClient("DownloadClient",
-                httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl)
-            ).ConfigurePrimaryHttpMessageHandler(() =>
+                httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
             {
-                return new HttpClientHandler()
-                {
-                    AllowAutoRedirect = false
-                };
+                AllowAutoRedirect = false
             }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
+
 
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
