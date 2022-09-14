@@ -324,6 +324,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public void DoesCreateBatch_Throws_Exception_If_InValidRequest()
         {
+            _fakeconfiguration["IsFTRunning"] = "true";
+
             A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
@@ -349,6 +351,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public async Task DoesCreateBatch_Returns_BatchId_If_ValidRequest()
         {
+            _fakeconfiguration["IsFTRunning"] = "true";
+
             A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
