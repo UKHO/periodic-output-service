@@ -55,6 +55,15 @@ module "webapp_service" {
   allowed_ips                                                  = var.allowed_ips
 }
 
+module "storage" {
+  source              = "./Modules/Storage"
+  resource_group_name = azurerm_resource_group.webapp_rg.name
+  location            = azurerm_resource_group.webapp_rg.location
+  env_name            = local.env_name
+  service_name        = local.service_name
+  tags                = local.tags
+}
+
 module "key_vault" {
   source              = "./Modules/KeyVault"
   name                = local.key_vault_name

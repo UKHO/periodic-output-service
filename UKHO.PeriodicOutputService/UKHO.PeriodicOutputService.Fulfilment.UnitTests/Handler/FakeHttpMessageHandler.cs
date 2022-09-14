@@ -5,7 +5,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler
 {
     public class FakeHttpMessageHandler : HttpMessageHandler
     {
-        private HttpResponseMessage _response;
+        private readonly HttpResponseMessage _response;
 
         public static HttpMessageHandler GetHttpMessageHandler(string content, HttpStatusCode httpStatusCode)
         {
