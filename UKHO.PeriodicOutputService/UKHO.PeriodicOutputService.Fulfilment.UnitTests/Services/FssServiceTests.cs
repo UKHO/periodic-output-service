@@ -7,7 +7,6 @@ using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.FileShareService.Response;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
@@ -32,7 +31,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 BaseUrl = "http://test.com",
                 FssClientId = "8YFGEFI78TYIUGH78YGHR5",
                 BatchStatusPollingCutoffTime = "1",
-                BatchStatusPollingDelayTime = "20000"
+                BatchStatusPollingDelayTime = "20000",
+                PosReadUsers = "",
+                PosReadGroups = "public"
             });
 
             _fakeLogger = A.Fake<ILogger<FssService>>();
