@@ -74,7 +74,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             if (pollBatchStatus.Contains(batchStatus))
             {
-                _logger.LogError(EventIds.FssBatchStatusPollingTimedOut.ToEventId(), "Fss batch status polling timed out for BatchID - {BatchID} failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.FssBatchStatusPollingTimedOut.ToEventId(), "Fss batch status polling timed out for BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 throw new FulfilmentException(EventIds.FssBatchStatusPollingTimedOut.ToEventId());
             }
 

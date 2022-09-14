@@ -28,6 +28,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
             if (System.IO.File.Exists(sourcePath) && Directory.Exists(destPath))
             {
                 System.IO.File.Copy(sourcePath, Path.Combine(destPath, "avcs_catalogue_ft.xml"), true);
+                _mockService.UpdatePOSTestCase(posTestCase);
                 return Ok();
             }
             return BadRequest();

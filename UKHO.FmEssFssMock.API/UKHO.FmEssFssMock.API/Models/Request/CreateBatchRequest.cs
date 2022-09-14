@@ -4,7 +4,7 @@
     {
         public string BusinessUnit { get; set; }
         public Acl Acl { get; set; }
-        public IEnumerable<KeyValuePair<string, string>> Attributes { get; set; }
+        public IList<KeyValuePair<string, string>> Attributes { get; set; }
         public string ExpiryDate { get; set; }
     }
 

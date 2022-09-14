@@ -187,12 +187,12 @@ namespace UKHO.FmEssFssMock.API.Controllers
             if (!string.IsNullOrEmpty(batchId))
             {
                 BatchStatusResponse batchStatusResponse = _fileShareService.GetBatchStatus(batchId, _homeDirectoryPath);
-                if (batchStatusResponse.Status == "Committed")
+                if (batchStatusResponse.Status == "Committed" || batchStatusResponse.Status == "CommitInProgress")
                 {
                     return new OkObjectResult(batchStatusResponse);
                 }
             }
-            return Unauthorized();
+            return NotFound();
         }
     }
 }

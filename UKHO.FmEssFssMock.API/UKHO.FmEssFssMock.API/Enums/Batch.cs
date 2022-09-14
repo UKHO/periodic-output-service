@@ -23,6 +23,17 @@ namespace UKHO.FmEssFssMock.Enums
         PosCatalogueBatch = 6,
 
         [Description("472b599d-494d-4ac5-a281-91e3927b24d4")]
-        PosEncUpdateBatch = 7
+        PosEncUpdateBatch = 7,
+
+        [Description("a1c65857-1e51-4b91-b74e-66b9bebaf4e8")]
+        InvalidProductIdentifier = 8,
+
+        [Description("d2b46c4f-415a-4ca3-b844-6577254f39e5")]
+        FullAvcsPollingTimeOut = 9,
+
+        [Description("38ebeb5c-2faa-47f5-b3ac-b196d411fa75")]
+        UpdatePollingTimeout = 10
+
+
     }
 }

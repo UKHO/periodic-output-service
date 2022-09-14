@@ -53,7 +53,7 @@
     <None Update="Data\472B599D-494D-4AC5-A281-91E3927B24D4\ENCUpdateList.csv">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\InvalidProductIdentifier\avcs_catalog_ft.xml">
+    <None Update="Data\InvalidProductIdentifier\avcs_catalogue_ft.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\483AA1B9-8A3B-49F2-BAE9-759BB93B04D1\AVCS_DVD1_WK34_22.zip">
