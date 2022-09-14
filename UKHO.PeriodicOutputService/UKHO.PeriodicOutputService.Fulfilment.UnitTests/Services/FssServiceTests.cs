@@ -2,12 +2,12 @@
 using System.Text;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.FileShareService.Response;
 using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
@@ -23,6 +23,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IFssService _fssService;
         private IFileSystemHelper _fileSystemHelper;
         private IFileSystem _fakeFileSystem;
+        private IConfiguration _fakeconfiguration;
 
         [SetUp]
         public void Setup()
@@ -40,37 +41,43 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeAuthFssTokenProvider = A.Fake<IAuthFssTokenProvider>();
             _fileSystemHelper = A.Fake<IFileSystemHelper>();
             _fakeFileSystem = A.Fake<IFileSystem>();
+            _fakeconfiguration = A.Fake<IConfiguration>();
 
-            _fssService = new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper);
+            _fssService = new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper))
+                () => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
                 .ParamName
                 .Should().Be("logger");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper))
+                () => new FssService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
                 .ParamName
                 .Should().Be("fssApiConfiguration");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider, _fileSystemHelper))
+                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
                 .ParamName
                 .Should().Be("fssApiClient");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null, _fileSystemHelper))
+                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null, _fileSystemHelper, _fakeconfiguration))
                 .ParamName
                 .Should().Be("authFssTokenProvider");
 
             Assert.Throws<ArgumentNullException>(
-                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, null))
+                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, null, _fakeconfiguration))
                  .ParamName
                  .Should().Be("fileSystemHelper");
+
+            Assert.Throws<ArgumentNullException>(
+                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, null))
+                 .ParamName
+                 .Should().Be("configuration");
         }
 
         [Test]
