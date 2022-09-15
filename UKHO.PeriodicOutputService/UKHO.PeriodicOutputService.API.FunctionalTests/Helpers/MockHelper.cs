@@ -15,7 +15,7 @@
 
         public static HttpResponseMessage ConfigureFM(string baseUrl, string configurationOption)
         {
-            string uri = $"{baseUrl}/mock/configurefm/{configurationOption}";
+            string uri = $"{baseUrl}/configurefm/{configurationOption}";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
 
