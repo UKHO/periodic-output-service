@@ -44,7 +44,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             productIdentifiers = await getcat.GetProductList(httpResponse);
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200, apiResponse.ReasonPhrase);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200, apiResponse.Content.ToString());
             await CommonHelper.RunWebJob();
         }
 
