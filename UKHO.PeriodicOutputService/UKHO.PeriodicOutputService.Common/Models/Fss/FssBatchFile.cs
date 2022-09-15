@@ -4,5 +4,6 @@
     {
         public string FileName { get; set; }
         public string FileLink { get; set; }
+        public long FileSize { get; set; }
     }
 }
