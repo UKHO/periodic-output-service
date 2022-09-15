@@ -50,8 +50,8 @@ namespace UKHO.FmEssFssMock.API.Helpers
         {
             if (CheckFolderExists(filePath))
             {
-                DirectoryInfo di = new(filePath);
-                di.Delete(true);
+                DirectoryInfo directoryInfo = new(filePath);
+                directoryInfo.Delete(true);
                 return true;
             }
             return false;
