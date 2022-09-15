@@ -24,7 +24,7 @@ namespace UKHO.FmEssFssMock.API.Helpers
         {
             if (ValidateFilePath(uploadBlockFilePath))
             {
-                using (var output = File.OpenWrite(uploadBlockFilePath))
+                using (FileStream output = File.OpenWrite(uploadBlockFilePath))
                 {
                     output.Write(content, 0, content.Length);
                 }
@@ -33,20 +33,12 @@ namespace UKHO.FmEssFssMock.API.Helpers
 
         public static bool CheckBatchWithFileExist(string filePathWithFileName)
         {
-            if (ValidateFilePath(filePathWithFileName))
-            {
-                return File.Exists(filePathWithFileName);
-            }
-            return false;
+            return ValidateFilePath(filePathWithFileName) && File.Exists(filePathWithFileName);
         }
 
         public static bool CheckFolderExists(string filePath)
         {
-            if (ValidateFilePath(filePath))
-            {
-                return Directory.Exists(filePath);
-            }
-            return false;
+            return ValidateFilePath(filePath) && Directory.Exists(filePath);
         }
 
         public static bool ValidateFilePath(string filePath)
@@ -58,7 +50,7 @@ namespace UKHO.FmEssFssMock.API.Helpers
         {
             if (CheckFolderExists(filePath))
             {
-                DirectoryInfo di = new DirectoryInfo(filePath);
+                DirectoryInfo di = new(filePath);
                 di.Delete(true);
                 return true;
             }
@@ -67,9 +59,9 @@ namespace UKHO.FmEssFssMock.API.Helpers
 
         public static string GetFileMD5(FileInfo fileInfo)
         {
-            using Stream? fs = fileInfo.OpenRead();
+            using Stream? fileStream = fileInfo.OpenRead();
             using var md5 = MD5.Create();
-            byte[]? fileMd5Hash = md5.ComputeHash(fs);
+            byte[]? fileMd5Hash = md5.ComputeHash(fileStream);
             return Convert.ToBase64String(fileMd5Hash);
         }
     }

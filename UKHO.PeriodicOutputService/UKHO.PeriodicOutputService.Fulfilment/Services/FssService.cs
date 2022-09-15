@@ -38,7 +38,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fssApiClient = fssApiClient ?? throw new ArgumentNullException(nameof(fssApiClient));
             _authFssTokenProvider = authFssTokenProvider ?? throw new ArgumentNullException(nameof(authFssTokenProvider));
             _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration)); ;
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId)
@@ -306,7 +306,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             };
 
             //This batch attribute is added for fss stub.
-            if (bool.Parse(_configuration["IsFTRunning"])) createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", batchType.ToString()));
+            if (bool.Parse(_configuration["IsFTRunning"]))
+            {
+                createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", batchType.ToString()));
+            }
 
             switch (batchType)
             {

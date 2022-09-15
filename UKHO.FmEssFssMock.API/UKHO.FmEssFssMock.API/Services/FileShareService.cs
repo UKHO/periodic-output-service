@@ -7,7 +7,7 @@ namespace UKHO.FmEssFssMock.API.Services
 {
     public class FileShareService
     {
-        private Dictionary<string, string> mimeTypes = new()
+        private readonly Dictionary<string, string> mimeTypes = new()
         {
             { ".zip", "application/zip" },
             { ".xml", "text/xml" },
@@ -39,7 +39,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
             foreach (string? filePath in Directory.GetFiles(path))
             {
-                FileInfo fileInfo = new FileInfo(filePath);
+                FileInfo fileInfo = new(filePath);
 
                 files.Add(new BatchFile()
                 {
@@ -48,7 +48,7 @@ namespace UKHO.FmEssFssMock.API.Services
                         new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" },
                         new Models.Response.Attribute { Key = "File Name", Value = fileInfo.Name }
                     },
-                    MimeType = mimeTypes[fileInfo.Extension],
+                    MimeType = mimeTypes[fileInfo.Extension.ToLower()],
                     FileSize = fileInfo.Length,
                     Hash = FileHelper.GetFileMD5(fileInfo),
                     Filename = fileInfo.Name,

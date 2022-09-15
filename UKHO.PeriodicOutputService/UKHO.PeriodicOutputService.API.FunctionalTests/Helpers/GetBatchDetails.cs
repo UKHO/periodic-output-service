@@ -1,6 +1,5 @@
 ﻿
 using System.Globalization;
-using NUnit.Framework;
 using FluentAssertions;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
@@ -9,10 +8,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     public static class GetBatchDetails
     {
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        static readonly HttpClient httpClient = new HttpClient();
-        private static string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-        private static string currentYear = DateTime.UtcNow.ToString("yy");
-        private static List<string> expectedFileName = new List<string>();
+        private static readonly HttpClient httpClient = new();
+        private static readonly string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+        private static readonly string currentYear = DateTime.UtcNow.ToString("yy");
+        private static readonly List<string> expectedFileName = new();
         public static async Task<HttpResponseMessage> GetBatchDetailsEndpoint(string baseUrl, string batchId)
         {
             string uri = $"{baseUrl}/batch/{batchId}";
@@ -45,7 +44,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public static void GetBatchDetailsResponseValidationForFullAVCSExchangeSet(dynamic batchDetailsResponse)
         {
             string mediaType = batchDetailsResponse.attributes[5].value;
-            if (mediaType.Equals("Zip"))
+            if (mediaType.ToLower().Equals("zip"))
             {
                 string fileName = batchDetailsResponse.files[0].filename;
                 if (fileName.Contains("UPDATE"))
@@ -60,7 +59,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     int responseFileNameContent = 0;
                     for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
                     {
-                        var folderName = string.Format(posDetails.PosAvcsZipFileName, dvdNumber, weekNumber, currentYear);
+                        string folderName = string.Format(posDetails.PosAvcsZipFileName, dvdNumber, weekNumber, currentYear);
                         string responseFileNameZip = batchDetailsResponse.files[responseFileNameContent].filename;
                         responseFileNameZip.Should().Be(folderName);
 
@@ -81,12 +80,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             {
                 for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
                 {
-                    var folderNameIso = string.Format(posDetails.PosAvcsIsoFileName, dvdNumber, weekNumber, currentYear);
-                    var FolderNameSha1 = string.Format(posDetails.PosAvcsIsoSha1FileName, dvdNumber, weekNumber, currentYear);
+                    string folderNameIso = string.Format(posDetails.PosAvcsIsoFileName, dvdNumber, weekNumber, currentYear);
+                    string FolderNameSha1 = string.Format(posDetails.PosAvcsIsoSha1FileName, dvdNumber, weekNumber, currentYear);
                     expectedFileName.Add(folderNameIso);
                     expectedFileName.Add(FolderNameSha1);
                 }
-                
+
                 for (int responseFileNameLocation = 0; responseFileNameLocation < expectedFileName.Count; responseFileNameLocation++)
                 {
                     string responseFileName = batchDetailsResponse.files[responseFileNameLocation].filename;
@@ -104,7 +103,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
             else
             {
-                mediaType.Should().ContainAny("Zip","DVD");
+                mediaType.Should().ContainAny("Zip", "DVD");
             }
         }
 
