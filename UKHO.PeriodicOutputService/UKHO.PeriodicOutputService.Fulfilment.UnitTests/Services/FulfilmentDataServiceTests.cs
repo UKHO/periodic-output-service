@@ -293,6 +293,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
                 }
             },
+            RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>(),
             ResponseDateTime = DateTime.UtcNow
         };
 

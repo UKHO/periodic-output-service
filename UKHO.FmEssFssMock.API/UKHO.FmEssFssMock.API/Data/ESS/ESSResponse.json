@@ -35,8 +35,8 @@
                 }
             },
             "exchangeSetUrlExpiryDateTime": "",
-            "requestedProductCount": 10,
-            "exchangeSetCellCount": 10,
+            "requestedProductCount": 1,
+            "exchangeSetCellCount": 1,
             "requestedProductsAlreadyUpToDateCount": 0,
             "requestedProductsNotInExchangeSet": []
         }
@@ -56,8 +56,8 @@
                 }
             },
             "exchangeSetUrlExpiryDateTime": "",
-            "requestedProductCount": 10,
-            "exchangeSetCellCount": 10,
+            "requestedProductCount": 1,
+            "exchangeSetCellCount": 1,
             "requestedProductsAlreadyUpToDateCount": 0,
             "requestedProductsNotInExchangeSet": []
         }

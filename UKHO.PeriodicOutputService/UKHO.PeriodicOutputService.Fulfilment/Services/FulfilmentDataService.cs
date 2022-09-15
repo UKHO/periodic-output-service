@@ -163,15 +163,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             ExchangeSetResponseModel exchangeSetResponseModel = await _essService.PostProductIdentifiersData(productIdentifiers);
 
-            if (!string.IsNullOrEmpty(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href))
+            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count() == 0)
             {
                 string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
-                _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch is created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch for Full AVCS exchange set created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 return essBatchId;
             }
 
-            _logger.LogError(EventIds.FssBatchDetailUrlNotFound.ToEventId(), "FSS batch detail URL not found in ESS response at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            throw new FulfilmentException(EventIds.FssBatchDetailUrlNotFound.ToEventId());
+            _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed while creating full avcs excahnge set {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
         }
 
         private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
@@ -220,18 +220,19 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private async Task<string> GetProductDataSinceDateTimeFromEss(string sinceDateTime)
         {
             ExchangeSetResponseModel exchangeSetResponseModel = await _essService.GetProductDataSinceDateTime(sinceDateTime);
-            if (!string.IsNullOrEmpty(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href))
+
+            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count() == 0)
             {
                 string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
-                _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch is created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch for Update exchange set created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
                 _nextSchedule = exchangeSetResponseModel.ResponseDateTime.AddMinutes(-5);
 
                 return essBatchId;
             }
 
-            _logger.LogError(EventIds.FssBatchDetailUrlNotFound.ToEventId(), "FSS batch detail URL not found in ESS response at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            throw new FulfilmentException(EventIds.FssBatchDetailUrlNotFound.ToEventId());
+            _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed while creating update excahnge set { DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
         }
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId, Batch batchType)
