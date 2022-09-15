@@ -72,10 +72,14 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId))
             {
-                BatchDetail response = _fileShareService.GetBatchDetails(batchId, _homeDirectoryPath);
-                if (response != null)
+                string path = Path.Combine(_homeDirectoryPath, batchId);
+                if (Directory.Exists(path))
                 {
-                    return Ok(response);
+                    BatchDetail response = _fileShareService.GetBatchDetails(batchId, _homeDirectoryPath);
+                    if (response != null)
+                    {
+                        return Ok(response);
+                    }
                 }
                 else
                 {
