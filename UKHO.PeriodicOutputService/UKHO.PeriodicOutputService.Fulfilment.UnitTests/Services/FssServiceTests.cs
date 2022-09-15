@@ -31,7 +31,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 BaseUrl = "http://test.com",
                 FssClientId = "8YFGEFI78TYIUGH78YGHR5",
                 BatchStatusPollingCutoffTime = "1",
-                BatchStatusPollingDelayTime = "20000"
+                BatchStatusPollingDelayTime = "20000",
+                PosReadUsers = "",
+                PosReadGroups = "public"
             });
 
             _fakeLogger = A.Fake<ILogger<FssService>>();
@@ -489,14 +491,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             IEnumerable<string> fileNames = new List<string> { "MX0101.zip", "MX0201.zip" };
 
-            bool result = await _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames);
+            bool result = await _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames, Batch.EssFullAvcsZipBatch);
 
             Assert.That(result, Is.True);
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch {BatchType} with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
@@ -518,12 +520,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             IEnumerable<string> fileNames = new List<string> { "MX0101.zip", "MX0201.zip" };
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames));
+            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames, Batch.EssFullAvcsZipBatch));
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch commit failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
