@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UKHO.FmEssFssMock.API.Services;
 using UKHO.FmEssFssMock.Enums;
+using SystemFile = System.IO;
 
 namespace UKHO.FmEssFssMock.API.Controllers
 {
@@ -25,9 +26,9 @@ namespace UKHO.FmEssFssMock.API.Controllers
             string sourcePath = Path.Combine(Environment.CurrentDirectory, @"Data", posTestCase.ToString(), "avcs_catalogue_ft.xml");
             string destPath = Path.Combine(Environment.CurrentDirectory, @"Data\FM");
 
-            if (System.IO.File.Exists(sourcePath) && Directory.Exists(destPath))
+            if (SystemFile.File.Exists(sourcePath) && Directory.Exists(destPath))
             {
-                System.IO.File.Copy(sourcePath, Path.Combine(destPath, "avcs_catalogue_ft.xml"), true);
+                SystemFile.File.Copy(sourcePath, Path.Combine(destPath, "avcs_catalogue_ft.xml"), true);
                 _mockService.UpdatePOSTestCase(posTestCase);
                 return Ok();
             }
