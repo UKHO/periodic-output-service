@@ -22,7 +22,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private readonly ILogger<FssService> _logger;
         private readonly IFssApiClient _fssApiClient;
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
-        private readonly IFileSystemHelper _fileSystemHelper;        
+        private readonly IFileSystemHelper _fileSystemHelper;
 
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
@@ -35,7 +35,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _fssApiConfiguration = fssApiConfiguration ?? throw new ArgumentNullException(nameof(fssApiConfiguration));
             _fssApiClient = fssApiClient ?? throw new ArgumentNullException(nameof(fssApiClient));
             _authFssTokenProvider = authFssTokenProvider ?? throw new ArgumentNullException(nameof(authFssTokenProvider));
-            _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));            
+            _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
         }
 
         public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId)
@@ -291,7 +291,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 Acl = new Acl()
                 {
                     ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
-                    ReadGroups = _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
+                    ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
                 },
                 Attributes = new List<KeyValuePair<string, string>>
                 {
