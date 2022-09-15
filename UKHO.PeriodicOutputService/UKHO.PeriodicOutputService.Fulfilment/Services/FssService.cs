@@ -28,8 +28,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
                                IAuthFssTokenProvider authFssTokenProvider,
-                               IFileSystemHelper fileSystemHelper
-                               )
+                               IFileSystemHelper fileSystemHelper)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _fssApiConfiguration = fssApiConfiguration ?? throw new ArgumentNullException(nameof(fssApiConfiguration));

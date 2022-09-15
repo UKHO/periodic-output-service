@@ -20,7 +20,7 @@ namespace UKHO.PeriodicOutputService.Common.Utilities
             foreach (string? file in srcFiles)
             {
                 var fileInfo = new FileInfo(file);
-                if (fileInfo.Directory.Name == directoryPath)
+                if (fileInfo!.Directory!.Name == directoryPath)
                 {
                     iso.AddFile($"{fileInfo.Name}", fileInfo.FullName);
                     continue;
@@ -49,7 +49,7 @@ namespace UKHO.PeriodicOutputService.Common.Utilities
             XmlDeclaration xmlDecl = doc.CreateXmlDeclaration("1.0", "utf-8", null);
 
             //Add the new node to the document.
-            XmlElement root = doc.DocumentElement;
+            XmlElement root = doc.DocumentElement!;
             doc.InsertBefore(xmlDecl, root);
 
             doc.Save(targetPath);
