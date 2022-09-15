@@ -29,6 +29,9 @@
     <None Update="Data\A1C65857-1E51-4B91-B74E-66B9BEBAF4E8\error.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\CurrentTestCase.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\D2B46C4F-415A-4CA3-B844-6577254F39E5\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
