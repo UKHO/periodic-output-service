@@ -5,7 +5,7 @@ namespace UKHO.FmEssFssMock.API.Services
 {
     public class MockService
     {
-        private readonly string destPath = Path.Combine(Environment.CurrentDirectory, @"Data\", "CurrentTestCase.txt");
+        private readonly string destPath = Path.Combine(Environment.CurrentDirectory, @"Data", "CurrentTestCase.txt");
         public void UpdatePOSTestCase(PosTestCase posTestCase)
         {
             File.WriteAllText(destPath, "");
