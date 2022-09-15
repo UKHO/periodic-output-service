@@ -77,7 +77,7 @@ namespace UKHO.FmEssFssMock.API.Services
             return new BatchDetail
             {
                 BatchId = batchId,
-                Status = "Committed",
+                Status = File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed",
                 BusinessUnit = businessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Attributes = attributes,
