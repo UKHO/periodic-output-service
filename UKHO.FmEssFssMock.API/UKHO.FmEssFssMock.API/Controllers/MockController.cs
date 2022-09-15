@@ -24,7 +24,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public IActionResult ConfigureFleetManager(PosTestCase posTestCase)
         {
             string sourcePath = Path.Combine(Environment.CurrentDirectory, @"Data", posTestCase.ToString(), "avcs_catalogue_ft.xml");
-            string destPath = Path.Combine(Environment.CurrentDirectory, @"Data\FM");
+            string destPath = Path.Combine(Environment.CurrentDirectory, @"Data", "FM");
 
             if (SystemFile.File.Exists(sourcePath) && Directory.Exists(destPath))
             {
