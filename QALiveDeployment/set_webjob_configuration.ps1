@@ -9,5 +9,5 @@ param (
 )
 
 Write-Output "Set Webjob Configuration in appsetting..."
-az webapp config appsettings set -g $resourcegroup -n $webappname --settings ESSApiConfiguration:BaseUrl=$essapibaseurl FSSApiConfiguration:BaseUrl=$fssapibaseurl FleetManagerB2BApiConfiguration:BaseUrl=$fleetmanagerbaseurl FSSApiConfiguration:BatchStatusPollingCutoffTime=$fssapipollingcutoffime FSSApiConfiguration:BatchStatusPollingDelayTime_PostFT=$fssapipollingdelaytime
+az webapp config appsettings set -g $resourcegroup -n $webappname --settings ESSApiConfiguration:BaseUrl=$essapibaseurl FSSApiConfiguration:BaseUrl=$fssapibaseurl FleetManagerB2BApiConfiguration:BaseUrl=$fleetmanagerbaseurl FSSApiConfiguration:BatchStatusPollingCutoffTime=$fssapipollingcutoffime FSSApiConfiguration:BatchStatusPollingDelayTime=$fssapipollingdelaytime
 az webapp restart --name $webappname --resource-group $resourcegroup
