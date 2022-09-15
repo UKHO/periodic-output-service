@@ -185,7 +185,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     _fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
 
                     _logger.LogInformation(EventIds.ExtractZipFileCompleted.ToEventId(), "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
                 }
                 catch (Exception ex)
                 {
@@ -207,7 +206,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     _fileSystemHelper.CreateIsoAndSha1(Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension));
 
                     _logger.LogInformation(EventIds.CreateIsoAndSha1Completed.ToEventId(), "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
                 }
                 catch (Exception ex)
                 {
@@ -287,7 +285,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             List<FssBatchFile> batchFiles = null;
 
             GetBatchResponseModel batchDetail = await _fssService.GetBatchDetails(essBatchId);
-            batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href }).ToList();
+            batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href, FileSize = a.FileSize }).ToList();
 
             if (!batchFiles.Any() || batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
             {
@@ -302,8 +300,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             Parallel.ForEach(fileDetails, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                Stream stream = _fssService.DownloadFile(file.FileName, file.FileLink).Result;
-                _fileSystemHelper.CreateFileCopy(filePath, stream);
+                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
             });
         }
 
@@ -312,7 +309,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string batchId = await _fssService.CreateBatch(batchType);
             IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
             UploadBatchFiles(filePaths, batchId);
-            bool isCommitted = await _fssService.CommitBatch(batchId, filePaths);
+            bool isCommitted = await _fssService.CommitBatch(batchId, filePaths, batchType);
 
             return isCommitted;
         }

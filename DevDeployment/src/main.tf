@@ -80,6 +80,9 @@ module "webapp_service" {
     "ASPNETCORE_ENVIRONMENT"                                   = local.env_name
     "WEBSITE_RUN_FROM_PACKAGE"                                 = "1"
     "WEBSITE_ENABLE_SYNC_UPDATE_SITE"                          = "true"
+    "FSSApiConfiguration:BusinessUnit"                         = "AVCSData"
+    "FSSApiConfiguration:PosReadGroups"                        = "public"
+    "FSSApiConfiguration:PosReadUsers"                         = ""
   }
   tags                                                         = local.tags
   allowed_ips                                                  = var.allowed_ips

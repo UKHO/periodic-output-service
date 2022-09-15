@@ -146,12 +146,21 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 }
             );
 
-            serviceCollection.Configure<FleetManagerApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
-            serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
-            serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
-            serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
-            serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
-            serviceCollection.AddSingleton(configuration);
+            var fssApiConfiguration = new FssApiConfiguration();
+
+            if (configuration != null)
+            {
+                serviceCollection.Configure<FleetManagerApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
+                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
+                serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
+                serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
+                serviceCollection.AddSingleton<IConfiguration>(configuration);
+
+                configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
+
+            }
+
 
             serviceCollection.AddDistributedMemoryCache();
 
@@ -173,7 +182,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             serviceCollection.AddScoped<IFileUtility, FileUtility>();
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
 
-            serviceCollection.AddHttpClient();
+            serviceCollection.AddHttpClient("DownloadClient",
+                httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+            {
+                AllowAutoRedirect = false
+            }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
+
+
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
             serviceCollection.AddTransient<IFssApiClient, FssApiClient>();

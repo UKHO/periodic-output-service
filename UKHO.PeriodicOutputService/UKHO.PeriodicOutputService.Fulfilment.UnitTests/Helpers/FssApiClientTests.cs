@@ -188,7 +188,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage>? result = _fakeFssApiClient.DownloadFile("http://test.com", _authToken);
+            Task<HttpResponseMessage>? result = _fakeFssApiClient.DownloadFile("http://test.com", _authToken, "bytes=1-1024");
 
             Assert.Multiple(() =>
             {
