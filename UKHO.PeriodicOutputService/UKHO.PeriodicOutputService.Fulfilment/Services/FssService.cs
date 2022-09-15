@@ -250,9 +250,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
         }
 
-        public async Task<bool> CommitBatch(string batchId, IEnumerable<string> fileNames)
+        public async Task<bool> CommitBatch(string batchId, IEnumerable<string> fileNames, Batch batchType)
         {
-            _logger.LogInformation(EventIds.CommitBatchStarted.ToEventId(), "Batch commit for batch with BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID.ToString());
+            _logger.LogInformation(EventIds.CommitBatchStarted.ToEventId(), "Batch commit for {BatchType} with BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID.ToString());
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
@@ -268,12 +268,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                _logger.LogInformation(EventIds.CommitBatchCompleted.ToEventId(), "Batch with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
+                _logger.LogInformation(EventIds.CommitBatchCompleted.ToEventId(), "Batch {BatchType} with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
                 return true;
             }
             else
             {
-                _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
+                _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
                 throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
             }
         }
