@@ -24,7 +24,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
-     
+
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -44,7 +44,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             productIdentifiers = await getcat.GetProductList(httpResponse);
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200, posWebJob.MockApiBaseUrl + posWebJob.FMConfigurationValidProductIdentifier);
             await CommonHelper.RunWebJob();
         }
 
