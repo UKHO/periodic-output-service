@@ -20,6 +20,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private static readonly ESSApiConfiguration ESSAuth = new TestConfiguration().EssConfig;
         private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
+        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
@@ -42,6 +43,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
             productIdentifiers = await getcat.GetProductList(httpResponse);
 
+            HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
             await CommonHelper.RunWebJob();
         }
 

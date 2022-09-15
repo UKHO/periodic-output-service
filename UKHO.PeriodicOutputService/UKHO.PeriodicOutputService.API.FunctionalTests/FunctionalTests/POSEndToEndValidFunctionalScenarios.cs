@@ -6,7 +6,7 @@ using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfigur
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
-    public class POSEndToEndFunctionalScenarios
+    public class POSEndToEndValidFunctionalScenarios
     {
         private string fssJwtToken;
         private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
@@ -19,6 +19,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             AuthTokenProvider authTokenProvider = new();
             fssJwtToken = await authTokenProvider.GetFssToken();
+
+            HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
             await CommonHelper.RunWebJob();
         }
 

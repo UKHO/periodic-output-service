@@ -9,6 +9,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     {
         private static FssApiClient FssApiClient { get; set; }
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
+        private static readonly TestConfiguration config = new();
         static FssBatchHelper()
         {
             FssApiClient = new FssApiClient();
@@ -54,5 +55,19 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         {
             return Path.GetFileName(pathInput).Replace(".zip", "");
         }
+
+        public static async Task<HttpResponseMessage> VerifyErrorTxtExist(string jwtToken)
+        {
+            string downloadFileUrl = $"{config.FssConfig.BaseUrl}/batch/{posDetails.InvalidProductIdentifierBatchId}/files/error.txt";
+            HttpResponseMessage response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
+            return response;
+        }
+
+        public static async Task<HttpResponseMessage> PosBatchesVerification(string jwtToken, string batchId)
+        {
+            string downloadFileUrl = $"{config.FssConfig.BaseUrl}/batch/{batchId}";
+            HttpResponseMessage response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
+            return response;
+          }
     }
-}
+ }

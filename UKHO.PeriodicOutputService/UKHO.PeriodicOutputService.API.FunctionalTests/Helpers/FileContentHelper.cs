@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using FluentAssertions;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
@@ -108,6 +109,17 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             };
 
             return downloadFolderPath;
+        }
+
+        public static async Task VerifyPosBatches(string fssJwtToken)
+        {
+            string[] posBatchId = { posDetails.IsoSha1BatchId, posDetails.ZipFilesBatchId ,posDetails.CatalogueBatchId, posDetails.UpdateExchangeSetBatchId , posDetails.EncUpdateListCsvBatchId };
+
+            foreach(string posBatchIdNumber in posBatchId)
+            {
+                HttpResponseMessage responseMessage = await FssBatchHelper.PosBatchesVerification(fssJwtToken, posBatchIdNumber);
+                responseMessage.StatusCode.Should().Be((System.Net.HttpStatusCode)404);
+            }
         }
     }
 }
