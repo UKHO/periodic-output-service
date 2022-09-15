@@ -43,8 +43,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
             productIdentifiers = await getcat.GetProductList(httpResponse);
 
-            HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200, apiResponse.Content.ToString());
+            //HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
+            //apiResponse.StatusCode.Should().Be((HttpStatusCode)200, apiResponse.Content.ToString());
             await CommonHelper.RunWebJob();
         }
 

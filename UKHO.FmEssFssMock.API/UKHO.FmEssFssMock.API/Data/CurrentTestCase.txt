@@ -1,1 +1,1 @@
-UpdatePollingTimeout
+ValidProductIdentifiers
