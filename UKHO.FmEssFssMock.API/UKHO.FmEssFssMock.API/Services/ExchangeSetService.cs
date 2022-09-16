@@ -91,7 +91,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private CreateBatchRequest CreateBatchRequestModel(bool isPostProductIdentifiersRequest)
         {
-            PosTestCase currentTestCase = _mockService.GetCurrentPOSTestCase();
+            PosTestCase currentTestCase = _mockService.GetCurrentPOSTestCase(_homeDirectoryPath);
 
             CreateBatchRequest createBatchRequest = new()
             {

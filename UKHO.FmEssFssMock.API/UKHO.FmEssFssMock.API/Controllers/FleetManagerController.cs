@@ -14,10 +14,15 @@ namespace UKHO.FmEssFssMock.API.Controllers
     {
         private readonly IOptions<FleetManagerB2BApiConfiguration> _fmConfiguration;
         private const string JwtUnpAuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9";
+        private readonly string _homeDirectoryPath;
+        private readonly IConfiguration _configuration;
 
-        public FleetManagerController(IOptions<FleetManagerB2BApiConfiguration> fmConfiguration)
+        public FleetManagerController(IOptions<FleetManagerB2BApiConfiguration> fmConfiguration, IConfiguration configuration)
         {
             _fmConfiguration = fmConfiguration;
+            _configuration = configuration;
+
+            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
         }
 
         [HttpGet]
@@ -78,7 +83,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public IActionResult GetCatalogue([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             string? fleetManagerStubSubscriptionKey = _fmConfiguration.Value.SubscriptionKey;
-            string? path = _fmConfiguration.Value.GetCatalogueResponseFilePath;
+            string? path = Path.Combine(_homeDirectoryPath, _fmConfiguration.Value.GetCatalogueResponseFilePath);
             HttpResponseMessage httpResponse = new();
 
             if (string.IsNullOrEmpty(subscriptionKey))
@@ -182,7 +187,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public IActionResult GetCatalogueForFT([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             string? fleetManagerStubSubscriptionKey = _fmConfiguration.Value.SubscriptionKey;
-            string? path = _fmConfiguration.Value.GetCatalogueResponseFilePath;
+            string? path = Path.Combine(_homeDirectoryPath, _fmConfiguration.Value.GetCatalogueResponseFilePath);
             HttpResponseMessage httpResponse = new();
 
             if (string.IsNullOrEmpty(subscriptionKey))
