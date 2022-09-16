@@ -30,7 +30,7 @@ namespace UKHO.FmEssFssMock.API.HealthChecks
 
         private HealthCheckResult CheckFileContent()
         {
-            string? avcsCatalogueResponseFilePath = _fleetManagerB2BApiConfiguration.Value.GetCatalogueResponseFilePath;
+            string? avcsCatalogueResponseFilePath = Path.Combine(@"Data", _fleetManagerB2BApiConfiguration.Value.GetCatalogueResponseFilePath);
 
             if (!string.IsNullOrEmpty(avcsCatalogueResponseFilePath))
             {
