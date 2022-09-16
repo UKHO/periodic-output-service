@@ -6,6 +6,7 @@ using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfigur
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
+    [NonParallelizable]
     public class POSEndToEndScenarioUpdatePollingTimeOut
     {
         private string fssJwtToken;
@@ -45,7 +46,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }
 }

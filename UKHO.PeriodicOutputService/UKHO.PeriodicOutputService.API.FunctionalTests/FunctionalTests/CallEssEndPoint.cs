@@ -7,6 +7,7 @@ using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfigur
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
+    [NonParallelizable]
     public class CallEssEndPoint
     {
         public string userCredentialsBytes;
