@@ -6,7 +6,7 @@ using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfigur
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
-    [TestFixture, Order(2)]
+    [Category("GetAVCSCatalogue")]
     public class GetAVCSCatalogue
     {
         public string userCredentialsBytes;
