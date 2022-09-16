@@ -42,12 +42,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
             string unpToken = await unpResponse.DeserializeAsyncToken();
             HttpResponseMessage httpResponse = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
-            productIdentifiers = await getcat.GetProductList(httpResponse);
-
-            unpResponse.StatusCode.Should().Be((HttpStatusCode)200, "Catalogue endpoint");
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+
+            productIdentifiers = await getcat.GetProductList(httpResponse);
+
+            unpResponse.StatusCode.Should().Be((HttpStatusCode)200, "Catalogue endpoint");
 
             await CommonHelper.RunWebJob();
         }
