@@ -91,7 +91,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [TearDown]
         public void GlobalTearDown()
         {
+            //cleaning up the downloaded files from temp folder
             FileContentHelper.DeleteTempDirectory(posDetails.TempFolderName);
+
+            //cleaning up the stub home directory
+            HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }
 }

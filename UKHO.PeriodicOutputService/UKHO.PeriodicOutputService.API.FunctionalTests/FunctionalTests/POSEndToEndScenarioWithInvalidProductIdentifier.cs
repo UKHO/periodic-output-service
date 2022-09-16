@@ -10,6 +10,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
     {
         private string fssJwtToken;
         private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
+        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -34,9 +35,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [OneTimeTearDown]
         public void GlobalTearDown()
         {
+            //cleaning up the downloaded files from temp folder
+            FileContentHelper.DeleteTempDirectory(posDetails.TempFolderName);
+
             //cleaning up the stub home directory
-            // HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
-            //apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }
 }
