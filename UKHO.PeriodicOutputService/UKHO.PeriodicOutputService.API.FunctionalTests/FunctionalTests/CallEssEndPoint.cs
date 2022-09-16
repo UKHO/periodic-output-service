@@ -88,7 +88,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             DownloadedFolderPath.Count.Should().Be(2);
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void GlobalTearDown()
         {
             //cleaning up the downloaded files from temp folder
