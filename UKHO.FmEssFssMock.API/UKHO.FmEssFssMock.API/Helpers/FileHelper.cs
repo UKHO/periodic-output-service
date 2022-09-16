@@ -50,7 +50,7 @@ namespace UKHO.FmEssFssMock.API.Helpers
 
         public static bool ValidateFilePath(string filePath)
         {
-            return !string.IsNullOrEmpty(filePath) && filePath.IndexOfAny(Path.GetInvalidPathChars()) == -1;
+            return !string.IsNullOrEmpty(filePath);
         }
 
         public static bool CleanUp(string filePath)
