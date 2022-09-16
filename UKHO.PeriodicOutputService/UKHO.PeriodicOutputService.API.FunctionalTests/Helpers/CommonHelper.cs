@@ -64,7 +64,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
 
                 //As there is no way to check if webjob execution is completed or not, we have added below delay to wait till the execution completes and files get downloaded.
-                await Task.Delay(120000);
+                await Task.Delay(70000);
             }
         }
     }
