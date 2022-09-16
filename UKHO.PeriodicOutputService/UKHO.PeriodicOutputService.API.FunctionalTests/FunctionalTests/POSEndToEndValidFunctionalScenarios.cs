@@ -19,7 +19,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             AuthTokenProvider authTokenProvider = new();
             fssJwtToken = await authTokenProvider.GetFssToken();
-
+            HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
             await CommonHelper.RunWebJob();
         }
 
@@ -28,9 +29,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [TestCase("483aa1b9-8a3b-49f2-bae9-759bb93b04d1", TestName = "WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatch2IsCreatedAndUploadedForZipFiles")]
         public async Task WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatchesAreCreatedAndUploadedForLargeMedia(string batchId)
         {
-            HttpResponseMessage apiResponse1 = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
-            apiResponse1.StatusCode.Should().Be((HttpStatusCode)200);
-
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, batchId);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
