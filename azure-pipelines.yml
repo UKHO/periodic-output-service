@@ -469,7 +469,7 @@ stages:
                     version: 6.0.x
 
                 - task: DotNetCoreCLI@2
-                  displayName: "Run Functional tests"
+                  displayName: "Run Functional tests GetAVCSCatalogue"
                   inputs:
                     command: "test"
                     projects: |
@@ -477,6 +477,18 @@ stages:
                       !**/*TestAdapter.dll
                       !**/obj/**
                     arguments: '--filter Category~GetAVCSCatalogue'
+                    testRunTitle: "Dev-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run Functional tests POSEndToEndValidFunctionalScenarios"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    arguments: '--filter Category~POSEndToEndValidFunctionalScenarios'
                     testRunTitle: "Dev-AutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
 

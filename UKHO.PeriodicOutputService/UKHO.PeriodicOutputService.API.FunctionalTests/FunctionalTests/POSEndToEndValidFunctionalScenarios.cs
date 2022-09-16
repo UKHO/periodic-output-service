@@ -6,7 +6,7 @@ using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfigur
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
-    [TestFixture, Order(6)]
+    [Category("POSEndToEndValidFunctionalScenarios")]
     public class POSEndToEndValidFunctionalScenarios
     {
         private string fssJwtToken;
