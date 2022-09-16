@@ -60,8 +60,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string PosAvcsIsoSha1FileName { get; set; }
             public string PosUpdateZipFileName { get; set; }
             public string AVCSCatalogueFileName { get; set; }
-            public string EncUpdateListCsvBatchId { get; set; }
             public string EncUpdateListFileName { get; set; }
+            public string AVCSCatalogueFileMimeType { get; set; }
+            public string EncUpdateListFileMimeType { get; set; }
+            public string IsoSha1FileMimeType { get; set; }
+            public string ZipFileMimeType { get; set; }
         }
 
         public TestConfiguration()

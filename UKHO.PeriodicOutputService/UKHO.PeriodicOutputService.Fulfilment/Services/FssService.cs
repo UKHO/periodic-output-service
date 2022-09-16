@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.IO.Abstractions;
 using System.Net;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -23,18 +24,21 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private readonly IFssApiClient _fssApiClient;
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
+        private readonly IConfiguration _configuration;
 
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
                                IAuthFssTokenProvider authFssTokenProvider,
-                               IFileSystemHelper fileSystemHelper)
+                               IFileSystemHelper fileSystemHelper,
+                               IConfiguration configuration)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _fssApiConfiguration = fssApiConfiguration ?? throw new ArgumentNullException(nameof(fssApiConfiguration));
             _fssApiClient = fssApiClient ?? throw new ArgumentNullException(nameof(fssApiClient));
             _authFssTokenProvider = authFssTokenProvider ?? throw new ArgumentNullException(nameof(authFssTokenProvider));
             _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
         public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId)
@@ -186,7 +190,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel();
+            AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName);
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
             HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, "application/octet-stream");
 
@@ -326,29 +330,36 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 Attributes = new List<KeyValuePair<string, string>>
                 {
                     new("Product Type", "AVCS"),
-                    new("S63 Version", "1.2"),
                     new("Week Number", currentWeek),
                     new("Year", currentYear),
-                    new("Year / Week", currentYear + " / " + currentWeek),
-                    new("Batch Type", batchType.ToString())
+                    new("Year / Week", currentYear + " / " + currentWeek)
                 }
             };
+
+            //This batch attribute is added for fss stub.
+            if (bool.Parse(_configuration["IsFTRunning"]))
+            {
+                createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", batchType.ToString()));
+            }
 
             switch (batchType)
             {
                 case Batch.PosFullAvcsIsoSha1Batch:
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "DVD"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("S63 Version", "1.2"));
                     break;
 
                 case Batch.PosFullAvcsZipBatch:
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("S63 Version", "1.2"));
                     break;
 
                 case Batch.PosUpdateBatch:
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("S63 Version", "1.2"));
                     break;
 
                 case Batch.PosCatalogueBatch:
@@ -366,13 +377,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             return createBatchRequest;
         }
 
-        private AddFileToBatchRequestModel CreateAddFileRequestModel()
+        private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName)
         {
             AddFileToBatchRequestModel addFileToBatchRequestModel = new()
             {
                 Attributes = new List<KeyValuePair<string, string>>()
                 {
-                    new("Product Type", "AVCS")
+                    new("Product Type", "AVCS"),
+                    new("File Name", fileName)
                 }
             };
             return addFileToBatchRequestModel;
