@@ -23,24 +23,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/mock/configurefm/{posTestCase}")]
         public IActionResult ConfigureFleetManager(PosTestCase posTestCase)
         {
-            try
-            {
-                string sourcePath = Path.Combine(Environment.CurrentDirectory, @"Data", posTestCase.ToString(), "avcs_catalogue_ft.xml");
-                string destPath = Path.Combine(Environment.CurrentDirectory, @"Data", "FM");
-
-                if (SystemFile.File.Exists(sourcePath) && Directory.Exists(destPath))
-                {
-                    SystemFile.File.Copy(sourcePath, Path.Combine(destPath, "avcs_catalogue_ft.xml"), true);
-                    _mockService.UpdatePOSTestCase(posTestCase);
-                    return Ok();
-                }
-
-                return BadRequest();
-            }
-            catch (Exception ex)
-            {
-                throw;
-            }
+            return Ok();
         }
 
         [HttpPost]
