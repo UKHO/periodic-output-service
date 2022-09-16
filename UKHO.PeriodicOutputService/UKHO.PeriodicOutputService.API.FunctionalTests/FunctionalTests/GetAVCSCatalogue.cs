@@ -10,6 +10,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
     public class GetAVCSCatalogue
     {
         public string userCredentialsBytes;
+        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
 
         private GetUNPResponse getunp { get; set; }
         private TestConfiguration config { get; set; }
@@ -23,6 +24,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             config = new TestConfiguration();
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
+
+            HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
             userCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(fleet.userName, fleet.password);
             return Task.CompletedTask;
