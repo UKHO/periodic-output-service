@@ -469,6 +469,18 @@ stages:
                     version: 6.0.x
 
                 - task: DotNetCoreCLI@2
+                  displayName: "Run Functional tests CallEssEndPoint"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    arguments: '--filter Category~CallEssEndPoint'
+                    testRunTitle: "Dev-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+
+                - task: DotNetCoreCLI@2
                   displayName: "Run Functional tests GetAVCSCatalogue"
                   inputs:
                     command: "test"
@@ -477,6 +489,42 @@ stages:
                       !**/*TestAdapter.dll
                       !**/obj/**
                     arguments: '--filter Category~GetAVCSCatalogue'
+                    testRunTitle: "Dev-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run Functional tests POSEndToEndScenarioFullAvcsPollingTimeOut"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    arguments: '--filter Category~POSEndToEndScenarioFullAvcsPollingTimeOut'
+                    testRunTitle: "Dev-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run Functional tests POSEndToEndScenarioUpdatePollingTimeOut"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    arguments: '--filter Category~POSEndToEndScenarioUpdatePollingTimeOut'
+                    testRunTitle: "Dev-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run Functional tests POSEndToEndScenarioWithInvalidProductIdentifier"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    arguments: '--filter Category~POSEndToEndScenarioWithInvalidProductIdentifier'
                     testRunTitle: "Dev-AutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
 
