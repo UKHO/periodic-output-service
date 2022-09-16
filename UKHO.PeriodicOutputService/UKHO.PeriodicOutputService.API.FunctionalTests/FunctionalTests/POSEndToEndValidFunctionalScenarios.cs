@@ -6,7 +6,7 @@ using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfigur
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
-    [NonParallelizable]
+    [TestFixture, Order(6)]
     public class POSEndToEndValidFunctionalScenarios
     {
         private string fssJwtToken;

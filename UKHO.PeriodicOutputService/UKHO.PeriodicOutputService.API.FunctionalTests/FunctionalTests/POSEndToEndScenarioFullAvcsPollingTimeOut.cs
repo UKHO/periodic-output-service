@@ -6,7 +6,7 @@ using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
-    [NonParallelizable]
+    [TestFixture, Order(3)]
     public class POSEndToEndScenarioFullAvcsPollingTimeOut
     {
         private string fssJwtToken;

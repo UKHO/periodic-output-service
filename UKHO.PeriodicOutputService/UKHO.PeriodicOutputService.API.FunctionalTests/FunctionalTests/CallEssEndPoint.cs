@@ -7,7 +7,7 @@ using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfigur
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
-    [NonParallelizable]
+    [TestFixture, Order(1)]
     public class CallEssEndPoint
     {
         public string userCredentialsBytes;
@@ -45,8 +45,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             productIdentifiers = await getcat.GetProductList(httpResponse);
 
             unpResponse.StatusCode.Should().Be((HttpStatusCode)200, "Catalogue endpoint");
+
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+
             await CommonHelper.RunWebJob();
         }
 
