@@ -41,7 +41,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
-            Console.WriteLine("ConfigureFMcleared");
 
             unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
             string unpToken = await unpResponse.DeserializeAsyncToken();
