@@ -7,7 +7,7 @@ param (
     [Parameter(Mandatory = $true)] [string] $fssapibaseurl,
     [Parameter(Mandatory = $true)] [string] $fleetmanagerbaseurl,
     [Parameter(Mandatory = $true)] [string] $fleetmanagerfilepath,
-    [Parameter(Mandatory = $true)] [string] $ftrunning
+    [Parameter(Mandatory = $true)] [string] $ftrunning,
     [Parameter(Mandatory = $true)] [string] $fssapipollingcutoffime,
     [Parameter(Mandatory = $true)] [string] $fssapipollingdelaytime
 )
