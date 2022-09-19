@@ -7,6 +7,15 @@ namespace UKHO.FmEssFssMock.API.Services
 {
     public class FileShareService
     {
+        private readonly Dictionary<string, string> mimeTypes = new()
+        {
+            { ".zip", "application/zip" },
+            { ".xml", "text/xml" },
+            { ".csv", "text/csv" },
+            { ".iso", "application/octet-stream" },
+            { ".sha1", "application/octet-stream" }
+        };
+
         public BatchResponse CreateBatch(IEnumerable<KeyValuePair<string, string>> attributes, string homeDirectoryPath)
         {
             string attributeValue = attributes.FirstOrDefault(a => a.Key.ToLower() == "batch type").Value.ToLower();
@@ -30,14 +39,32 @@ namespace UKHO.FmEssFssMock.API.Services
 
             foreach (string? filePath in Directory.GetFiles(path))
             {
-                string fileName = Path.GetFileName(filePath);
-                files.Add(new BatchFile() { Filename = fileName, Links = new Links() { Get = new Link() { Href = "/batch/" + batchId + "/files/" + fileName } } });
+                FileInfo fileInfo = new(filePath);
+
+                files.Add(new BatchFile()
+                {
+                    Attributes = new List<Models.Response.Attribute>
+                    {
+                        new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" },
+                        new Models.Response.Attribute { Key = "File Name", Value = fileInfo.Name }
+                    },
+                    MimeType = mimeTypes[fileInfo.Extension.ToLower()],
+                    FileSize = fileInfo.Length,
+                    Hash = FileHelper.GetFileMD5(fileInfo),
+                    Filename = fileInfo.Name,
+                    Links = new Links()
+                    {
+                        Get = new Link()
+                        {
+                            Href = "/batch/" + batchId + "/files/" + fileInfo.Name
+                        }
+                    }
+                });
             }
 
             List<KeyValuePair<string, string>> attributes = new()
             {
                 new("Product Type", "AVCS"),
-                new("S63 Version", "1.2"),
                 new("Week Number", currentWeek.ToString()),
                 new("Year", currentYear),
                 new("Year / Week", currentYear + " / " + currentWeek.ToString()),
@@ -48,16 +75,19 @@ namespace UKHO.FmEssFssMock.API.Services
                 case Batch.PosFullAvcsIsoSha1Batch:
                     attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
                     attributes.Add(new KeyValuePair<string, string>("Media Type", "DVD"));
+                    attributes.Add(new KeyValuePair<string, string>("S63 Version", "1.2"));
                     break;
 
                 case Batch.PosFullAvcsZipBatch:
                     attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Base"));
                     attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    attributes.Add(new KeyValuePair<string, string>("S63 Version", "1.2"));
                     break;
 
                 case Batch.PosUpdateBatch:
                     attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    attributes.Add(new KeyValuePair<string, string>("S63 Version", "1.2"));
                     break;
 
                 case Batch.PosCatalogueBatch:

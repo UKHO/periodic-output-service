@@ -310,7 +310,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             string batchId = await _fssService.CreateBatch(batchType);
             IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
             UploadBatchFiles(filePaths, batchId);
-            bool isCommitted = await _fssService.CommitBatch(batchId, filePaths);
+            bool isCommitted = await _fssService.CommitBatch(batchId, filePaths, batchType);
 
             return isCommitted;
         }

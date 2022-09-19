@@ -2,6 +2,7 @@
 using System.Text;
 using FakeItEasy;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Enums;
@@ -22,6 +23,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IFssService _fssService;
         private IFileSystemHelper _fileSystemHelper;
         private IFileSystem _fakeFileSystem;
+        private IConfiguration _fakeconfiguration;
 
         [SetUp]
         public void Setup()
@@ -31,7 +33,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 BaseUrl = "http://test.com",
                 FssClientId = "8YFGEFI78TYIUGH78YGHR5",
                 BatchStatusPollingCutoffTime = "1",
-                BatchStatusPollingDelayTime = "20000"
+                BatchStatusPollingDelayTime = "20000",
+                PosReadUsers = "",
+                PosReadGroups = "public"
             });
 
             _fakeLogger = A.Fake<ILogger<FssService>>();
@@ -39,37 +43,43 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeAuthFssTokenProvider = A.Fake<IAuthFssTokenProvider>();
             _fileSystemHelper = A.Fake<IFileSystemHelper>();
             _fakeFileSystem = A.Fake<IFileSystem>();
+            _fakeconfiguration = A.Fake<IConfiguration>();
 
-            _fssService = new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper);
+            _fssService = new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper))
+                () => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
                 .ParamName
                 .Should().Be("logger");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper))
+                () => new FssService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
                 .ParamName
                 .Should().Be("fssApiConfiguration");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider, _fileSystemHelper))
+                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
                 .ParamName
                 .Should().Be("fssApiClient");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null, _fileSystemHelper))
+                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null, _fileSystemHelper, _fakeconfiguration))
                 .ParamName
                 .Should().Be("authFssTokenProvider");
 
             Assert.Throws<ArgumentNullException>(
-                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, null))
+                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, null, _fakeconfiguration))
                  .ParamName
                  .Should().Be("fileSystemHelper");
+
+            Assert.Throws<ArgumentNullException>(
+                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, null))
+                 .ParamName
+                 .Should().Be("configuration");
         }
 
         [Test]
@@ -315,6 +325,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public void DoesCreateBatch_Throws_Exception_If_InValidRequest()
         {
+            _fakeconfiguration["IsFTRunning"] = "true";
+
             A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
@@ -340,6 +352,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public async Task DoesCreateBatch_Returns_BatchId_If_ValidRequest()
         {
+            _fakeconfiguration["IsFTRunning"] = "true";
+
             A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
@@ -489,14 +503,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             IEnumerable<string> fileNames = new List<string> { "MX0101.zip", "MX0201.zip" };
 
-            bool result = await _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames);
+            bool result = await _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames, Batch.EssFullAvcsZipBatch);
 
             Assert.That(result, Is.True);
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch {BatchType} with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
@@ -518,12 +532,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             IEnumerable<string> fileNames = new List<string> { "MX0101.zip", "MX0201.zip" };
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames));
+            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames, Batch.EssFullAvcsZipBatch));
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch commit failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
