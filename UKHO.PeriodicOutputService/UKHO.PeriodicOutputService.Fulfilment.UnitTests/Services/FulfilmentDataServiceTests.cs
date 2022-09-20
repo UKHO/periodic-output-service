@@ -84,7 +84,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.GetFileInfo(A<string>.Ignored))
                           .Returns(_fakeFileInfo);
 
-            A.CallTo(() => _fakeFssService.AddFileToBatch(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored))
+            A.CallTo(() => _fakeFssService.AddFileToBatch(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
                 .Returns(true);
 
             A.CallTo(() => _fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored))

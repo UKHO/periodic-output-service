@@ -108,7 +108,7 @@ namespace UKHO.FmEssFssMock.API.Services
             return new BatchDetail
             {
                 BatchId = batchId,
-                Status = File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed",
+                Status = GetBatchStatus(batchId),
                 BusinessUnit = businessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Attributes = attributes,
@@ -168,18 +168,15 @@ namespace UKHO.FmEssFssMock.API.Services
 
             if (FileHelper.ValidateFilePath(batchFolderPath) && FileHelper.CheckFolderExists(batchFolderPath))
             {
-                if (File.Exists(Path.Combine(batchFolderPath, "CommitInProgress.txt")))
+                if (FileHelper.ValidateFilePath(batchFolderPath) && FileHelper.CheckFolderExists(batchFolderPath))
                 {
                     batchStatusResponse.BatchId = batchId;
-                    batchStatusResponse.Status = "CommitInProgress";
-                }
-                else
-                {
-                    batchStatusResponse.BatchId = batchId;
-                    batchStatusResponse.Status = "Committed";
+                    batchStatusResponse.Status = GetBatchStatus(batchFolderPath);
                 }
             }
             return batchStatusResponse;
         }
+
+        private string GetBatchStatus(string path) => File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed";
     }
 }

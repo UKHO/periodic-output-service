@@ -392,7 +392,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     },
                 });
 
-            bool result = await _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233);
+            bool result = await _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream");
 
             Assert.That(result, Is.True);
 
@@ -420,7 +420,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 });
 
             Assert.ThrowsAsync<FulfilmentException>(
-            () => _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233));
+            () => _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream"));
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();

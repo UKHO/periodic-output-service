@@ -183,7 +183,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
         }
 
-        public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength)
+        public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType)
         {
             _logger.LogInformation(EventIds.AddFileToBatchRequestStarted.ToEventId(), "Adding file {FileName} in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
@@ -192,7 +192,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName);
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
-            HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, "application/octet-stream");
+            HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, mimeType);
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {

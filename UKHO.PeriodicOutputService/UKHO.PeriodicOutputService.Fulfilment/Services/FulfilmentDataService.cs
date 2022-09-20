@@ -26,6 +26,17 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string CATALOGUEFILEEXTENSION = "xml";
         private const string ENCUPDATELISTFILEEXTENSION = "csv";
+
+        private readonly Dictionary<string, string> mimeTypes = new()
+        {
+            { ".zip", "application/zip" },
+            { ".xml", "text/xml" },
+            { ".csv", "text/csv" },
+            { ".iso", "application/octet-stream" },
+            { ".sha1", "application/octet-stream" }
+        };
+        private readonly string DEFAULTMIMETYPE = "application/octet-stream";
+
         private readonly string _homeDirectoryPath = string.Empty;
 
         private DateTime? _nextSchedule;
@@ -320,7 +331,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             Parallel.ForEach(filePaths, filePath =>
            {
                IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
-               bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length).Result;
+
+               bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE).Result;
                if (isFileAdded)
                {
                    List<string> blockIds = _fssService.UploadBlocks(batchId, fileInfo).Result;

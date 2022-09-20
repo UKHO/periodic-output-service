@@ -12,8 +12,7 @@ namespace UKHO.FmEssFssMock.API.Services
     {
         private readonly IOptions<ExchangeSetServiceConfiguration> _essConfiguration;
         private readonly FileShareService _fssService;
-        protected IConfiguration _configuration;
-        private readonly string _homeDirectoryPath = string.Empty;
+        private readonly string _homeDirectoryPath;
         private readonly MockService _mockService;
         public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,
                                   FileShareService fssService,
@@ -22,10 +21,9 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             _essConfiguration = essConfiguration;
             _fssService = fssService;
-            _configuration = configuration;
             _mockService = mockService;
 
-            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
+            _homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["POSFolderName"]);
         }
 
         public ExchangeSetServiceResponse CreateExchangeSetForGetProductDataSinceDateTime(string sinceDateTime)
@@ -93,6 +91,10 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             PosTestCase currentTestCase = _mockService.GetCurrentPOSTestCase(_homeDirectoryPath);
 
+            string batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
+                ? currentTestCase.ToString()
+                : isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString();
+
             CreateBatchRequest createBatchRequest = new()
             {
                 BusinessUnit = "AVCSCustomExchangeSets",
@@ -100,7 +102,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 {
                     new("Exchange Set Type", "Update"),
                     new("Media Type", "Zip"),
-
+                    new("Batch Type", batchType)
                 },
                 ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl()
@@ -109,14 +111,6 @@ namespace UKHO.FmEssFssMock.API.Services
                 }
             };
 
-            if (currentTestCase != PosTestCase.ValidProductIdentifiers)
-            {
-                createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", currentTestCase.ToString()));
-            }
-            else
-            {
-                createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString()));
-            }
             return createBatchRequest;
         }
     }
