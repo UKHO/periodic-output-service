@@ -469,7 +469,7 @@ stages:
                     version: 6.0.x
 
                 - task: DotNetCoreCLI@2
-                  displayName: "Run Functional tests CallEssEndPoint"
+                  displayName: "Run Functional tests"
                   inputs:
                     command: "test"
                     projects: |
@@ -649,6 +649,7 @@ stages:
                       **/*FunctionalTest*.dll
                       !**/*TestAdapter.dll
                       !**/obj/**
+                    arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios'
                     testRunTitle: "QA-AutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
 
