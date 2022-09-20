@@ -108,7 +108,7 @@ namespace UKHO.FmEssFssMock.API.Services
             return new BatchDetail
             {
                 BatchId = batchId,
-                Status = GetBatchStatus(batchId),
+                Status = GetBatchStatus(path),
                 BusinessUnit = businessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Attributes = attributes,
