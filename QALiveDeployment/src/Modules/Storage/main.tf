@@ -7,4 +7,10 @@ resource "azurerm_storage_account" "pos_storage" {
   account_kind                      = "StorageV2"
   
   tags                              = var.tags
+    network_rules {
+    default_action                 = "Deny"
+    ip_rules                       = var.allowed_ips
+    bypass                         = ["Logging", "Metrics", "AzureServices"]
+    virtual_network_subnet_ids     = [var.m_spoke_subnet,var.agent_subnet]
+}
 }
