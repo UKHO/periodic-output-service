@@ -185,37 +185,6 @@
         </Metadata>
       </ENC>
       <ENC>
-        <ShortName>US5CN13M</ShortName>
-        <Metadata>
-          <DatasetTitle>US5CN13M</DatasetTitle>
-          <GeographicLimit>
-            <BoundingBox>
-              <NorthLimit>41.2873579</NorthLimit>
-              <SouthLimit>41.1206767</SouthLimit>
-              <EastLimit>-73.0034148</EastLimit>
-              <WestLimit>-73.139401</WestLimit>
-            </BoundingBox>
-          </GeographicLimit>
-          <Folio>
-            <ID>PAYSF</ID>
-          </Folio>
-          <CatalogueNumber>US5CN13M</CatalogueNumber>
-          <Status>
-            <ChartStatus date="2021-05-06">Cancelled</ChartStatus>
-          </Status>
-          <Unit>
-            <ID>US5CN13M</ID>
-          </Unit>
-          <Edtn>0</Edtn>
-          <Base_isdt>2021-05-06</Base_isdt>
-          <UPDN>0</UPDN>
-          <Last_reissue_UPDN>0</Last_reissue_UPDN>
-          <CD>
-            <Base>5</Base>
-          </CD>
-        </Metadata>
-      </ENC>
-      <ENC>
         <ShortName>CA172005</ShortName>
         <Metadata>
           <DatasetTitle>CA172005</DatasetTitle>
@@ -243,37 +212,6 @@
           <Last_reissue_UPDN>0</Last_reissue_UPDN>
           <CD>
             <Base>6</Base>
-          </CD>
-        </Metadata>
-      </ENC>
-      <ENC>
-        <ShortName>DE521900</ShortName>
-        <Metadata>
-          <DatasetTitle>DE521900</DatasetTitle>
-          <GeographicLimit>
-            <BoundingBox>
-              <NorthLimit>53.3701674</NorthLimit>
-              <SouthLimit>53.3259999</SouthLimit>
-              <EastLimit>7.2286667</EastLimit>
-              <WestLimit>7.1703318</WestLimit>
-            </BoundingBox>
-          </GeographicLimit>
-          <Folio>
-            <ID>PAYSF</ID>
-          </Folio>
-          <CatalogueNumber>DE521900</CatalogueNumber>
-          <Status>
-            <ChartStatus date="2021-04-16">Cancelled</ChartStatus>
-          </Status>
-          <Unit>
-            <ID>DE521900</ID>
-          </Unit>
-          <Edtn>0</Edtn>
-          <Base_isdt>2021-04-16</Base_isdt>
-          <UPDN>0</UPDN>
-          <Last_reissue_UPDN>0</Last_reissue_UPDN>
-          <CD>
-            <Base>8</Base>
           </CD>
         </Metadata>
       </ENC>
@@ -393,16 +331,6 @@
       </SubUnit>
     </UnitOfSale>
     <UnitOfSale>
-      <ID>US5CN13M</ID>
-      <CatalogueNumber>US5CN13M</CatalogueNumber>
-      <Usage>C24</Usage>
-      <UnitType>AVCS Units Harbour</UnitType>
-      <Status>NotForSale</Status>
-      <SubUnit>
-        <Unit>US5CN13M</Unit>
-      </SubUnit>
-    </UnitOfSale>
-    <UnitOfSale>
       <ID>CA172005</ID>
       <CatalogueNumber>CA172005</CatalogueNumber>
       <Usage>C12</Usage>
@@ -410,16 +338,6 @@
       <Status>ForSale</Status>
       <SubUnit>
         <Unit>CA172005</Unit>
-      </SubUnit>
-    </UnitOfSale>
-    <UnitOfSale>
-      <ID>DE521900</ID>
-      <CatalogueNumber>DE521900</CatalogueNumber>
-      <Usage>C24</Usage>
-      <UnitType>AVCS Units Harbour</UnitType>
-      <Status>NotForSale</Status>
-      <SubUnit>
-        <Unit>DE521900</Unit>
       </SubUnit>
     </UnitOfSale>
     <UnitOfSale>
@@ -454,9 +372,7 @@
         <Unit>NO3B2020</Unit>
         <Unit>GB20486A</Unit>
         <Unit>RU3P0ZM0</Unit>
-        <Unit>US5CN13M</Unit>
         <Unit>CA172005</Unit>
-        <Unit>DE521900</Unit>
         <Unit>NZ300661</Unit>
         <Unit>KR676D03</Unit>
       </SubUnit>
