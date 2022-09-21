@@ -181,7 +181,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 return essBatchId;
             }
 
-            _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [(Products)] while creating full avcs excahnge set {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [{Products}] while creating full avcs excahnge set {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
         }
 
@@ -240,7 +240,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 return essBatchId;
             }
 
-            _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [(Products)] while creating update excahnge set { DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [{Products}] while creating update excahnge set { DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
         }
 
