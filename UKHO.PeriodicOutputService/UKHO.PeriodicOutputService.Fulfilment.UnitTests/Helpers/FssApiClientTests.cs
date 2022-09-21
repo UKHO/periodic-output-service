@@ -198,6 +198,28 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         }
 
         [Test]
+        public void DoesDownloadFile_With_Client_That_Allow_Redirect_As_False_Returns_OK()
+        {
+            string Content = "";
+
+            HttpMessageHandler? messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+                               Content, HttpStatusCode.OK);
+
+            var httpClient = new HttpClient(messageHandler)
+            {
+                BaseAddress = new Uri("http://test.com")
+            };
+
+            A.CallTo(() => _fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
+
+            _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
+
+            Task<HttpResponseMessage>? result = _fakeFssApiClient.DownloadFile("http://test.com", _authToken);
+
+            Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        }
+
+        [Test]
         public void DoesGetBatchDetailsAsync_Returns_OK()
         {
             string Content = "";

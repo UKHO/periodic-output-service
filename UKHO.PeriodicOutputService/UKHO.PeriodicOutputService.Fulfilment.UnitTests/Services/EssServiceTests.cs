@@ -157,6 +157,36 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
         }
 
+        [Test]
+        public void DoesGetProductIdentifiersData_LogsError_When_ResponseStatus_Is_NotModified()
+        {
+            A.CallTo(() => _fakeEssApiClient.PostProductIdentifiersDataAsync
+            (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
+                  .Returns(new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.NotModified,
+
+                      RequestMessage = new HttpRequestMessage()
+                      {
+                          RequestUri = new Uri("http://test.com")
+                      },
+                      Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
+                  });
+
+            Assert.ThrowsAsync<FulfilmentException>(
+                 () => _essService.PostProductIdentifiersData(GetProductIdentifiers()));
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Error
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Exchange set not modified | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+        }
+
 
         [Test]
         public async Task DoesGetProductDataSinceDateTime_Returns_ValidData_WhenValidProductIdentifiersArePassed()

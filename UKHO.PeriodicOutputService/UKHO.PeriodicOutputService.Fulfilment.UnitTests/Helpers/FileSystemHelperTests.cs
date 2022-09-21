@@ -13,6 +13,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         private IFileSystem _fakefileSystem;
         private IZipHelper _fakeZipHelper;
         private IFileUtility _fakeFileUtility;
+        private IFileInfo _fakeFileInfo;
 
         private const string filePath = @"d:\Test";
         private const string fileName = "M01X01.zip";
@@ -23,6 +24,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             _fakefileSystem = A.Fake<IFileSystem>();
             _fakeZipHelper = A.Fake<IZipHelper>();
             _fakeFileUtility = A.Fake<IFileUtility>();
+            _fakeFileInfo = A.Fake<IFileInfo>();
 
             _fileSystemHelper = new FileSystemHelper(_fakefileSystem, _fakeZipHelper, _fakeFileUtility);
         }
@@ -136,5 +138,42 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             A.CallTo(() => _fakeFileUtility.CreateXmlFile(A<byte[]>.Ignored, A<string>.Ignored))
                            .MustHaveHappenedOnceExactly();
         }
+
+        [Test]
+        public void Does_GetFileInBytes_Returns_Bytes_Passing_Stream()
+        {
+            Stream stream = new MemoryStream(new byte[10]);
+
+            A.CallTo(() => _fakefileSystem.FileInfo.FromFileName(A<string>.Ignored))
+                            .Returns(_fakeFileInfo);
+
+            A.CallTo(() => _fakeFileInfo.Open(A<FileMode>.Ignored, A<FileAccess>.Ignored, A<FileShare>.Ignored)).Returns(stream);
+
+            byte[] result = _fileSystemHelper.GetFileInBytes(GetUploadFileBlockRequestModel());
+
+            Assert.That(result.Length, Is.EqualTo(100000));
+        }
+
+        [Test]
+        public void Does_GetFileInfo_Executes_Successfully()
+        {
+            A.CallTo(() => _fakefileSystem.FileInfo.FromFileName(filePath)).Returns(_fakeFileInfo);
+            A.CallTo(() => _fakeFileInfo.Name).Returns(fileName);
+
+            IFileInfo result = _fileSystemHelper.GetFileInfo(filePath);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result, Is.SameAs(_fakeFileInfo));
+            });
+        }
+
+        private static UploadFileBlockRequestModel GetUploadFileBlockRequestModel() => new()
+        {
+            FileName = fileName,
+            FullFileName = Path.Combine(filePath, fileName),
+            Length = 100000
+        };
     }
 }
