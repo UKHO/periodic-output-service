@@ -83,7 +83,11 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public IActionResult GetCatalogue([FromHeader(Name = "token")] string? token, [FromHeader(Name = "Ocp-Apim-Subscription-Key")] string? subscriptionKey)
         {
             string? fleetManagerStubSubscriptionKey = _fmConfiguration.Value.SubscriptionKey;
-            string? path = Path.Combine(_homeDirectoryPath, _fmConfiguration.Value.GetCatalogueResponseFilePath);
+
+            string path = bool.Parse(_configuration["IsFTRunning"])
+                ? Path.Combine(_homeDirectoryPath, _fmConfiguration.Value.GetCatalogueResponseFilePath)
+                : Path.Combine("Data", _fmConfiguration.Value.GetCatalogueResponseFilePath);
+
             HttpResponseMessage httpResponse = new();
 
             if (string.IsNullOrEmpty(subscriptionKey))
