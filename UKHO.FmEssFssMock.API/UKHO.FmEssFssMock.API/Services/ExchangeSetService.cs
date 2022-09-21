@@ -12,17 +12,18 @@ namespace UKHO.FmEssFssMock.API.Services
     {
         private readonly IOptions<ExchangeSetServiceConfiguration> _essConfiguration;
         private readonly FileShareService _fssService;
-        protected IConfiguration _configuration;
-        private readonly string _homeDirectoryPath = string.Empty;
-
+        private readonly string _homeDirectoryPath;
+        private readonly MockService _mockService;
         public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,
                                   FileShareService fssService,
-                                  IConfiguration configuration)
+                                  IConfiguration configuration,
+                                  MockService mockService)
         {
             _essConfiguration = essConfiguration;
             _fssService = fssService;
-            _configuration = configuration;
-            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
+            _mockService = mockService;
+
+            _homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["POSFolderName"]);
         }
 
         public ExchangeSetServiceResponse CreateExchangeSetForGetProductDataSinceDateTime(string sinceDateTime)
@@ -88,14 +89,20 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private CreateBatchRequest CreateBatchRequestModel(bool isPostProductIdentifiersRequest)
         {
+            PosTestCase currentTestCase = _mockService.GetCurrentPOSTestCase(_homeDirectoryPath);
+
+            string batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
+                ? currentTestCase.ToString()
+                : isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString();
+
             CreateBatchRequest createBatchRequest = new()
             {
                 BusinessUnit = "AVCSCustomExchangeSets",
                 Attributes = new List<KeyValuePair<string, string>>()
                 {
-                    new KeyValuePair<string, string>("Exchange Set Type", "Update"),
-                    new KeyValuePair<string, string>("Media Type", "Zip"),
-                    new KeyValuePair<string, string>("Batch Type", isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString())
+                    new("Exchange Set Type", "Update"),
+                    new("Media Type", "Zip"),
+                    new("Batch Type", batchType)
                 },
                 ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl()

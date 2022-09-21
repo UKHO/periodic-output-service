@@ -11,5 +11,15 @@
 
             return httpClient.Send(httpRequestMessage, CancellationToken.None);
         }
+
+
+        public static HttpResponseMessage ConfigureFM(string baseUrl, string configurationOption)
+        {
+            string uri = $"{baseUrl}/configurefm/{configurationOption}";
+
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+
+            return httpClient.Send(httpRequestMessage, CancellationToken.None);
+        }
     }
 }

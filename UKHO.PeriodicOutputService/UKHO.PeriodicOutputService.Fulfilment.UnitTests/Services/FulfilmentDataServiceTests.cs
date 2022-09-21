@@ -84,7 +84,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.GetFileInfo(A<string>.Ignored))
                           .Returns(_fakeFileInfo);
 
-            A.CallTo(() => _fakeFssService.AddFileToBatch(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored))
+            A.CallTo(() => _fakeFssService.AddFileToBatch(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
                 .Returns(true);
 
             A.CallTo(() => _fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored))
@@ -293,6 +293,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
                 }
             },
+            RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>(),
             ResponseDateTime = DateTime.UtcNow
         };
 

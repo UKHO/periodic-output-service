@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UKHOCatalogueFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SchemaVersion="2.0.4.6">
+  <BaseFileMetadata>
+    <MD_FileIdentifier>2022271</MD_FileIdentifier>
+    <MD_CharacterSet />
+    <MD_PointOfContact>
+      <ResponsibleParty>
+        <organisationName>The United Kingdom Hydrographic Office</organisationName>
+        <contactInfo>
+          <fax>+44 (0)1823 284077</fax>
+          <phone>+44 (0)1823 337900</phone>
+          <address>
+            <deliveryPoint>Admiralty Way</deliveryPoint>
+            <city>Taunton</city>
+            <administrativeArea>IMT</administrativeArea>
+            <postalCode>TA1 2DN</postalCode>
+            <country>United Kingdom</country>
+            <electronicMailAddress>helpdesk@ukho.gov.uk</electronicMailAddress>
+          </address>
+        </contactInfo>
+      </ResponsibleParty>
+    </MD_PointOfContact>
+    <MD_DateStamp>2022-07-13</MD_DateStamp>
+    <MD_StandardName />
+    <MD_StandardVersion />
+  </BaseFileMetadata>
+  <Products>
+    <Digital>
+      <ENC>
+        <ShortName>ABCD1234</ShortName>
+        <Metadata>
+          <DatasetTitle>ABCD1234</DatasetTitle>
+          <GeographicLimit>
+            <BoundingBox>
+              <NorthLimit>45.04333</NorthLimit>
+              <SouthLimit>44.83567</SouthLimit>
+              <EastLimit>-0.523</EastLimit>
+              <WestLimit>-0.62668</WestLimit>
+            </BoundingBox>
+          </GeographicLimit>
+          <Folio>
+            <ID>PAYSF</ID>
+          </Folio>
+          <CatalogueNumber>ABCD1234</CatalogueNumber>
+          <Status>
+            <ChartStatus date="2021-05-11">Updated</ChartStatus>
+          </Status>
+          <Unit>
+            <ID>ABCD1234</ID>
+          </Unit>
+          <Edtn>1</Edtn>
+          <Base_isdt>2015-02-25</Base_isdt>
+          <UPDN>9</UPDN>
+          <Last_update_isdt>2021-05-11</Last_update_isdt>
+          <Last_reissue_UPDN>0</Last_reissue_UPDN>
+          <CD>
+            <Base>1</Base>
+          </CD>
+        </Metadata>
+      </ENC>
+    </Digital>
+    <UnitOfSale>
+      <ID>ABCD1234</ID>
+      <CatalogueNumber>ABCD1234</CatalogueNumber>
+      <Usage>C24</Usage>
+      <UnitType>AVCS Units Harbour</UnitType>
+      <Status>ForSale</Status>
+      <SubUnit>
+        <Unit>ABCD1234</Unit>
+      </SubUnit>
+    </UnitOfSale>
+    <UnitOfSale>
+      <ID>PAYSF</ID>
+      <CatalogueNumber>PAYSF</CatalogueNumber>
+      <Title>World Folio</Title>
+      <Usage>C03</Usage>
+      <UnitType>AVCS Folio Transit</UnitType>
+      <SubUnit>
+        <Unit>ABCD1234</Unit>
+      </SubUnit>
+    </UnitOfSale>
+  </Products>
+</UKHOCatalogueFile>

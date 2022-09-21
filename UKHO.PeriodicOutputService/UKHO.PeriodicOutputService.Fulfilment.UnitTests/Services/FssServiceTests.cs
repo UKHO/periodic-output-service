@@ -35,7 +35,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 BatchStatusPollingCutoffTime = "1",
                 BatchStatusPollingDelayTime = "20000",
                 PosReadUsers = "",
-                PosReadGroups = "public"
+                PosReadGroups = "public",
+                BlockSizeInMultipleOfKBs = 4096
             });
 
             _fakeLogger = A.Fake<ILogger<FssService>>();
@@ -158,7 +159,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Fss batch status polling timed out for BatchID - {BatchID} failed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Fss batch status polling timed out for BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
         }
@@ -244,6 +245,34 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
+        public async Task DoesDownloadFile_Returns_True_If_StatusCode_Is_TemporaryRedirect()
+        {
+            var responseMessage = new HttpResponseMessage();
+
+            responseMessage.StatusCode = System.Net.HttpStatusCode.TemporaryRedirect;
+            responseMessage.RequestMessage = new HttpRequestMessage()
+            {
+                RequestUri = new Uri("http://test.com")
+            };
+
+            responseMessage.Headers.Add("Location", "https://newlocation.com");
+
+            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
+                 .Returns(responseMessage);
+
+            bool result = await _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\POS");
+
+            Assert.That(result, Is.True);
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
         public void DoesDownloadFile_Throws_Exception_If_InValidRequest()
         {
             A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
@@ -269,11 +298,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public void DoesUploadBlocks_Returns_BlockIds_If_ValidRequest()
+        [TestCase(true)]
+        [TestCase(false)]
+        public void DoesUploadBlocks_Returns_BlockIds_If_ValidRequest(bool isParallelUploadThreadCountConfigured)
         {
             IFileInfo fileInfo = _fakeFileSystem.FileInfo.FromFileName("M01X01.zip");
             A.CallTo(() => fileInfo.Name).Returns("M01X01.zip");
-            A.CallTo(() => fileInfo.Length).Returns(100);
+            A.CallTo(() => fileInfo.Length).Returns(100000);
 
             A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(new HttpResponseMessage()
@@ -284,6 +315,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                       RequestUri = new Uri("http://test.com")
                   },
               });
+
+            if (isParallelUploadThreadCountConfigured)
+            {
+                _fakeFssApiConfiguration.Value.ParallelUploadThreadCount = 3;
+            }
 
             Task<List<string>>? result = _fssService.UploadBlocks("", fileInfo);
 
@@ -350,7 +386,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public async Task DoesCreateBatch_Returns_BatchId_If_ValidRequest()
+        [TestCase(Batch.PosFullAvcsIsoSha1Batch)]
+        [TestCase(Batch.PosFullAvcsZipBatch)]
+        [TestCase(Batch.PosUpdateBatch)]
+        [TestCase(Batch.PosCatalogueBatch)]
+        [TestCase(Batch.PosEncUpdateBatch)]
+        [TestCase(Batch.EssUpdateZipBatch)]
+        public async Task DoesCreateBatch_Returns_BatchId_If_ValidRequest(Batch batchType)
         {
             _fakeconfiguration["IsFTRunning"] = "true";
 
@@ -366,7 +408,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\"}")))
                 });
 
-            string result = await _fssService.CreateBatch(Batch.PosFullAvcsIsoSha1Batch);
+            string result = await _fssService.CreateBatch(batchType);
 
             Assert.That(result, Is.EqualTo("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
 
@@ -392,7 +434,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     },
                 });
 
-            bool result = await _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233);
+            bool result = await _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream");
 
             Assert.That(result, Is.True);
 
@@ -420,7 +462,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 });
 
             Assert.ThrowsAsync<FulfilmentException>(
-            () => _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233));
+            () => _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream"));
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();

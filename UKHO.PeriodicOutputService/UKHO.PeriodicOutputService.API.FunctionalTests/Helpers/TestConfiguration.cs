@@ -35,16 +35,19 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string BaseUrl { get; set; }
             public string FssClientId { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
-            public string BatchStatusPollingCutoffTime { get; set; }
-            public string BatchStatusPollingDelayTime { get; set; }
-            public int BatchCommitWaitTime { get; set; }
         }
+
         public class POSWebJobApiConfiguration
         {
             public string UserName { get; set; }
             public string Password { get; set; }
             public string BaseUrl { get; set; }
+            public string MockApiBaseUrl { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
+            public string FMConfigurationValidProductIdentifier { get; set; }
+            public string FMConfigurationInValidProductIdentifier { get; set; }
+            public string FMConfigurationFullAvcsPollingTimeOut { get; set; }
+            public string FMConfigurationUpdatePollingTimeout { get; set; }
         }
 
         public class POSFileDetails
@@ -53,6 +56,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string IsoSha1BatchId { get; set; }
             public string CatalogueBatchId { get; set; }
             public string UpdateExchangeSetBatchId { get; set; }
+            public string InvalidProductIdentifierBatchId { get; set; }
+            public string FullAvcsPollingTimeOutBatchId { get; set; }
+            public string UpdatePollingTimeoutBatchId { get; set; }
+            public string EncUpdateListCsvBatchId { get; set; }
             public string TempFolderName { get; set; }
             public string UpdateExchangeSet { get; set; }
             public string PosAvcsZipFileName { get; set; }

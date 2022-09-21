@@ -30,6 +30,7 @@ namespace UKHO.FmEssFssMock.API
 
             services.AddScoped<FileShareService>();
             services.AddScoped<ExchangeSetService>();
+            services.AddScoped<MockService>();
 
             services.AddHealthChecks()
                 .AddCheck<FleetManagerStubHealthCheck>("FleetManagerStubHealthCheck");

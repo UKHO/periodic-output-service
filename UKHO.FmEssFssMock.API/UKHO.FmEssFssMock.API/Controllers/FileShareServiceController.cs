@@ -19,6 +19,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public Dictionary<string, string> ErrorsPutBlocksInFile { get; set; }
         public Dictionary<string, string> ErrorsCommitBatch { get; set; }
         public Dictionary<string, string> ErrorsAddFileinBatch { get; set; }
+
         private readonly string _homeDirectoryPath;
 
         public _fileShareServiceController(IHttpContextAccessor httpContextAccessor, FileShareService fileShareService, IConfiguration configuration) : base(httpContextAccessor)
@@ -71,10 +72,18 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             if (!string.IsNullOrEmpty(batchId))
             {
-                BatchDetail response = _fileShareService.GetBatchDetails(batchId, _homeDirectoryPath);
-                if (response != null)
+                string path = Path.Combine(_homeDirectoryPath, batchId);
+                if (Directory.Exists(path))
                 {
-                    return Ok(response);
+                    BatchDetail response = _fileShareService.GetBatchDetails(batchId, _homeDirectoryPath);
+                    if (response != null)
+                    {
+                        return Ok(response);
+                    }
+                }
+                else
+                {
+                    return NotFound();
                 }
             }
             return BadRequest();
@@ -182,20 +191,12 @@ namespace UKHO.FmEssFssMock.API.Controllers
             if (!string.IsNullOrEmpty(batchId))
             {
                 BatchStatusResponse batchStatusResponse = _fileShareService.GetBatchStatus(batchId, _homeDirectoryPath);
-                if (batchStatusResponse.Status == "Committed")
+                if (batchStatusResponse.Status == "Committed" || batchStatusResponse.Status == "CommitInProgress")
                 {
                     return new OkObjectResult(batchStatusResponse);
                 }
             }
-            return Unauthorized();
-        }
-
-        [HttpPost]
-        [Route("/fss/cleanUp")]
-        public IActionResult CleanUp()
-        {
-            bool response = _fileShareService.CleanUp(_homeDirectoryPath);
-            return response ? Ok() : BadRequest();
+            return NotFound();
         }
     }
 }

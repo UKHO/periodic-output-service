@@ -93,9 +93,9 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BatchCreatedInESS = 809021,
         /// <summary>
-        /// 809022 - Fss batch details url not found.
+        /// 809022 - ESS validation failed.
         /// </summary>
-        FssBatchDetailUrlNotFound = 809022,
+        EssValidationFailed = 809022,
         /// <summary>
         /// 809023 - Fss batch status polling started.
         /// </summary>

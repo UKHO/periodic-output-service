@@ -1,8 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
-using DiscUtils.Iso9660;
 using System.Text;
 using System.Xml;
+using DiscUtils.Iso9660;
 
 namespace UKHO.PeriodicOutputService.Common.Utilities
 {
@@ -14,7 +14,7 @@ namespace UKHO.PeriodicOutputService.Common.Utilities
             var iso = new CDBuilder
             {
                 UseJoliet = true,
-                VolumeIdentifier = "FullAVCSExchangeSet"
+                VolumeIdentifier = new DirectoryInfo(directoryPath).Name
             };
 
             foreach (string? file in srcFiles)

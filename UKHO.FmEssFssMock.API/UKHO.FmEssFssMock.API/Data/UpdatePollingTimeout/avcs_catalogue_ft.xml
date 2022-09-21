@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<UKHOCatalogueFile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SchemaVersion="2.0.4.6">
+  <BaseFileMetadata>
+    <MD_FileIdentifier>2022271</MD_FileIdentifier>
+    <MD_CharacterSet />
+    <MD_PointOfContact>
+      <ResponsibleParty>
+        <organisationName>The United Kingdom Hydrographic Office</organisationName>
+        <contactInfo>
+          <fax>+44 (0)1823 284077</fax>
+          <phone>+44 (0)1823 337900</phone>
+          <address>
+            <deliveryPoint>Admiralty Way</deliveryPoint>
+            <city>Taunton</city>
+            <administrativeArea>IMT</administrativeArea>
+            <postalCode>TA1 2DN</postalCode>
+            <country>United Kingdom</country>
+            <electronicMailAddress>helpdesk@ukho.gov.uk</electronicMailAddress>
+          </address>
+        </contactInfo>
+      </ResponsibleParty>
+    </MD_PointOfContact>
+    <MD_DateStamp>2022-07-13</MD_DateStamp>
+    <MD_StandardName />
+    <MD_StandardVersion />
+  </BaseFileMetadata>
+  <Products>
+    <Digital>
+      <ENC>
+        <ShortName>SE6IIFE1</ShortName>
+        <Metadata>
+          <DatasetTitle>SE6IIFE1</DatasetTitle>
+          <GeographicLimit>
+            <BoundingBox>
+              <NorthLimit>59.5</NorthLimit>
+              <SouthLimit>59.375</SouthLimit>
+              <EastLimit>18.5</EastLimit>
+              <WestLimit>18.375</WestLimit>
+            </BoundingBox>
+          </GeographicLimit>
+          <Folio>
+            <ID>PAYSF</ID>
+          </Folio>
+          <CatalogueNumber>SE6IIFE1</CatalogueNumber>
+          <Status>
+            <ChartStatus date="2021-03-26">Base</ChartStatus>
+          </Status>
+          <Unit>
+            <ID>SE6IIFE1</ID>
+          </Unit>
+          <Edtn>13</Edtn>
+          <Base_isdt>2021-03-26</Base_isdt>
+          <UPDN>0</UPDN>
+          <Last_reissue_UPDN>0</Last_reissue_UPDN>
+          <CD>
+            <Base>1</Base>
+          </CD>
+        </Metadata>
+      </ENC>
+    </Digital>
+    <UnitOfSale>
+      <ID>SE6IIFE1</ID>
+      <CatalogueNumber>SE6IIFE1</CatalogueNumber>
+      <Usage>C25</Usage>
+      <UnitType>AVCS Units Berthing</UnitType>
+      <Status>ForSale</Status>
+      <SubUnit>
+        <Unit>SE6IIFE1</Unit>
+      </SubUnit>
+    </UnitOfSale>
+    <UnitOfSale>
+      <ID>PAYSF</ID>
+      <CatalogueNumber>PAYSF</CatalogueNumber>
+      <Title>World Folio</Title>
+      <Usage>C03</Usage>
+      <UnitType>AVCS Folio Transit</UnitType>
+      <SubUnit>
+        <Unit>SE6IIFE1</Unit>
+      </SubUnit>
+    </UnitOfSale>
+  </Products>
+</UKHOCatalogueFile>

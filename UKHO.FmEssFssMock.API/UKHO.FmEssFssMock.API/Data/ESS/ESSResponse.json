@@ -1,6 +1,6 @@
 [
     {
-        "id": "productIdentifier-FR570300-SE6IIFE1-NO3B2020-GB20486A-RU3P0ZM0-US5CN13M-CA172005-DE521900-NZ300661-KR676D03",
+        "id": "productIdentifier-FR570300-SE6IIFE1-NO3B2020-GB20486A-RU3P0ZM0-CA172005-NZ300661-KR676D03",
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
@@ -16,6 +16,48 @@
             "exchangeSetUrlExpiryDateTime": "",
             "requestedProductCount": 10,
             "exchangeSetCellCount": 10,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
+    },
+    {
+        "id": "productIdentifier-FR570300",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/d2b46c4f-415a-4ca3-b844-6577254f39e5/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/d2b46c4f-415a-4ca3-b844-6577254f39e5"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/d2b46c4f-415a-4ca3-b844-6577254f39e5/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 1,
+            "exchangeSetCellCount": 1,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
+    },
+    {
+        "id": "productIdentifier-SE6IIFE1",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/38ebeb5c-2faa-47f5-b3ac-b196d411fa75/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/38ebeb5c-2faa-47f5-b3ac-b196d411fa75"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/38ebeb5c-2faa-47f5-b3ac-b196d411fa75/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 1,
+            "exchangeSetCellCount": 1,
             "requestedProductsAlreadyUpToDateCount": 0,
             "requestedProductsNotInExchangeSet": []
         }
@@ -42,7 +84,7 @@
         }
     },
     {
-        "id": "productIdentifier-FR570300-SE6IIFE1-NO3B2020-GB20486A-RU3P0ZM0-US5CN13M-CA172005-DE521900-NZ300661-KR676D03-ABCDEFGH",
+        "id": "productIdentifier-FR570300-SE6IIFE1-NO3B2020-GB20486A-RU3P0ZM0-CA172005-NZ300661-KR676D03-ABCDEFGH",
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
@@ -62,6 +104,32 @@
             "requestedProductsNotInExchangeSet": [
                 {
                     "productName": "ABCDEFGH",
+                    "reason": "invalidProduct"
+                }
+            ]
+        }
+    },
+    {
+        "id": "productIdentifier-ABCD1234",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/a1c65857-1e51-4b91-b74e-66b9bebaf4e8/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/a1c65857-1e51-4b91-b74e-66b9bebaf4e8"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/a1c65857-1e51-4b91-b74e-66b9bebaf4e8/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "2022-08-19T15:32:34.631Z",
+            "requestedProductCount": 1,
+            "exchangeSetCellCount": 0,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": [
+                {
+                    "productName": "ABCD1234",
                     "reason": "invalidProduct"
                 }
             ]

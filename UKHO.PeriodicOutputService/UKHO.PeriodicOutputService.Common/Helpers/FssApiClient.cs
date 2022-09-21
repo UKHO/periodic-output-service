@@ -37,7 +37,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return response;
         }
 
-        public async Task<HttpResponseMessage> AddFileToBatchAsync(string uri, string requestBody, string authToken, long? fileContentSizeHeader, string mimeTypeHeader = "application/octet-stream")
+        public async Task<HttpResponseMessage> AddFileToBatchAsync(string uri, string requestBody, string authToken, long? fileContentSizeHeader, string mimeTypeHeader)
         {
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
             { Content = new StringContent(requestBody, Encoding.UTF8, "application/json") };

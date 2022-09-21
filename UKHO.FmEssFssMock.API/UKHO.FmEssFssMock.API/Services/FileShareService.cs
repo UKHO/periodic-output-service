@@ -16,6 +16,7 @@ namespace UKHO.FmEssFssMock.API.Services
             { ".sha1", "application/octet-stream" }
         };
 
+        private readonly string DEFAULTMIMETYPE = "application/octet-stream";
         public BatchResponse CreateBatch(IEnumerable<KeyValuePair<string, string>> attributes, string homeDirectoryPath)
         {
             string attributeValue = attributes.FirstOrDefault(a => a.Key.ToLower() == "batch type").Value.ToLower();
@@ -48,7 +49,7 @@ namespace UKHO.FmEssFssMock.API.Services
                         new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" },
                         new Models.Response.Attribute { Key = "File Name", Value = fileInfo.Name }
                     },
-                    MimeType = mimeTypes[fileInfo.Extension.ToLower()],
+                    MimeType = mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE,
                     FileSize = fileInfo.Length,
                     Hash = FileHelper.GetFileMD5(fileInfo),
                     Filename = fileInfo.Name,
@@ -107,7 +108,7 @@ namespace UKHO.FmEssFssMock.API.Services
             return new BatchDetail
             {
                 BatchId = batchId,
-                Status = "Committed",
+                Status = GetBatchStatus(path),
                 BusinessUnit = businessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Attributes = attributes,
@@ -167,15 +168,15 @@ namespace UKHO.FmEssFssMock.API.Services
 
             if (FileHelper.ValidateFilePath(batchFolderPath) && FileHelper.CheckFolderExists(batchFolderPath))
             {
-                batchStatusResponse.BatchId = batchId;
-                batchStatusResponse.Status = "Committed";
+                if (FileHelper.ValidateFilePath(batchFolderPath) && FileHelper.CheckFolderExists(batchFolderPath))
+                {
+                    batchStatusResponse.BatchId = batchId;
+                    batchStatusResponse.Status = GetBatchStatus(batchFolderPath);
+                }
             }
             return batchStatusResponse;
         }
 
-        public bool CleanUp(string homeDirectoryPath)
-        {
-            return FileHelper.CleanUp(homeDirectoryPath);
-        }
+        private static string GetBatchStatus(string path) => File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed";
     }
 }

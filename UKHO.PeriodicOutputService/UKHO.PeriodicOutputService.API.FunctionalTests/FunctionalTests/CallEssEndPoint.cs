@@ -7,6 +7,7 @@ using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfigur
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
+    [Category("CallEssEndPoint")]
     public class CallEssEndPoint
     {
         public string userCredentialsBytes;
@@ -20,10 +21,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private static readonly ESSApiConfiguration ESSAuth = new TestConfiguration().EssConfig;
         private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
+        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
         private List<string> productIdentifiers = new();
         private HttpResponseMessage unpResponse;
         private List<string> DownloadedFolderPath;
-     
+
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -36,6 +38,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             AuthTokenProvider authTokenProvider = new();
             EssJwtToken = await authTokenProvider.GetEssToken();
             FssJwtToken = await authTokenProvider.GetFssToken();
+
+            HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
             unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
             string unpToken = await unpResponse.DeserializeAsyncToken();
@@ -84,10 +89,15 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             DownloadedFolderPath.Count.Should().Be(2);
         }
 
-        [TearDown]
+        [OneTimeTearDown]
         public void GlobalTearDown()
         {
+            //cleaning up the downloaded files from temp folder
             FileContentHelper.DeleteTempDirectory(posDetails.TempFolderName);
+
+            //cleaning up the stub home directory
+            HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }
 }
