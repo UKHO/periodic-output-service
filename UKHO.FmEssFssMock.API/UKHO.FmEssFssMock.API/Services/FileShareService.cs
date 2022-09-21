@@ -177,6 +177,6 @@ namespace UKHO.FmEssFssMock.API.Services
             return batchStatusResponse;
         }
 
-        private string GetBatchStatus(string path) => File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed";
+        private static string GetBatchStatus(string path) => File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed";
     }
 }
