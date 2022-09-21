@@ -37,7 +37,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         };
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
 
-        private readonly string _homeDirectoryPath = string.Empty;
+        private readonly string _homeDirectoryPath;
 
         private DateTime? _nextSchedule;
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
@@ -191,11 +191,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 try
                 {
-                    _logger.LogInformation(EventIds.ExtractZipFileStarted.ToEventId(), "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogInformation(EventIds.ExtractZipFileStarted.ToEventId(), "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
                     _fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
 
-                    _logger.LogInformation(EventIds.ExtractZipFileCompleted.ToEventId(), "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogInformation(EventIds.ExtractZipFileCompleted.ToEventId(), "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
                 catch (Exception ex)
                 {
@@ -211,12 +211,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 try
                 {
-                    _logger.LogInformation(EventIds.CreateIsoAndSha1Started.ToEventId(), "Creating ISO and Sha1 file of {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogInformation(EventIds.CreateIsoAndSha1Started.ToEventId(), "Creating ISO and Sha1 file of {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
                     string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
                     _fileSystemHelper.CreateIsoAndSha1(Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension));
 
-                    _logger.LogInformation(EventIds.CreateIsoAndSha1Completed.ToEventId(), "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogInformation(EventIds.CreateIsoAndSha1Completed.ToEventId(), "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
                 catch (Exception ex)
                 {
