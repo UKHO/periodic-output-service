@@ -432,7 +432,6 @@ stages:
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
           - name: mockWebAppResourceGroup
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
-
         steps:
           - task: AzureCLI@2
             displayName: "Set QA Subnet Configuration"
