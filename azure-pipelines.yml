@@ -422,6 +422,27 @@ stages:
               filePath: '$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
+      - job: SetPOSQASubnet
+        displayName: "Set QA Subnet Configuration"
+        dependsOn: DevDeployApp
+        pool: $(DeploymentPool)
+        container: ${{variables.Container}}
+        variables:
+          - name: mockWebAppName
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
+          - name: mockWebAppResourceGroup
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+
+        steps:
+          - task: AzureCLI@2
+            displayName: "Set QA Subnet Configuration"
+            inputs:
+              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: '$(Build.SourcesDirectory)/DevDeployment/set_qa_subnet_configuration.ps1'
+              arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+
       - job: FunctionalTests
         dependsOn:
         - DevDeployApp
@@ -514,7 +535,7 @@ stages:
         value: $(AutoTestClientSecret_Authed)
       - name: "ESSApiConfiguration.EssClientId"
         value: $(ESSClientId)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+#    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
 
     jobs:
       - deployment: QADeployApp
