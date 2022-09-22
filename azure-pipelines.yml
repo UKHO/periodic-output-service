@@ -440,7 +440,7 @@ stages:
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
               scriptPath: '$(Build.SourcesDirectory)/DevDeployment/set_qa_subnet_configuration.ps1'
-              arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)' -qasubscriptionid $(POSQASubscriptionId) -qavnetresourcegroup $(spokeRG) -qavnetname $(POSQAspokeVnetName) -qasubnetname $(POSESSspokeSubnetName)'
+              arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -qasubscriptionid $(POSQASubscriptionId) -qavnetresourcegroup $(spokeRG) -qavnetname $(POSQAspokeVnetName) -qasubnetname $(POSESSspokeSubnetName)'
 
       - job: FunctionalTests
         dependsOn:
