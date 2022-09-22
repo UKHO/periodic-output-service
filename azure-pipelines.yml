@@ -639,7 +639,7 @@ stages:
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/QALiveDeployment/set_stub_configuration.ps1"
-                    arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath) -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+                    arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath) -ftrunning "true" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download Functional test Artifact"
