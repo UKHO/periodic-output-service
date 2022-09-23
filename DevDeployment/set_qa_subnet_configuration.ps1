@@ -8,7 +8,7 @@ param (
 )
 
 Write-Output "Set QA Subnet in Mock Network Configuration ..."
-az webapp config access-restriction add -g $mockresourcegroup -n $mockwebappname --action Allow --subnet "/subscriptions/'$qasubscriptionid'/resourceGroups/'$qavnetresourcegroup'/providers/Microsoft.Network/virtualNetworks/'$qavnetname'/subnets/'$qasubnetname'" --priority 65000 --scm-site false -i
+az webapp config access-restriction add -g $mockresourcegroup -n $mockwebappname --action Allow --subnet "/subscriptions/$qasubscriptionid/resourceGroups/$qavnetresourcegroup/providers/Microsoft.Network/virtualNetworks/$qavnetname/subnets/$qasubnetname" --priority 65000 --scm-site false -i
 
 
 
