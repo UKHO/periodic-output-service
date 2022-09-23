@@ -1,6 +1,6 @@
 param (
     [Parameter(Mandatory = $true)] [string] $mockresourcegroup,
-    [Parameter(Mandatory = $true)] [string] $mockwebappname
+    [Parameter(Mandatory = $true)] [string] $mockwebappname,
     [Parameter(Mandatory = $true)] [string] $qasubscriptionid,
     [Parameter(Mandatory = $true)] [string] $qavnetresourcegroup,
     [Parameter(Mandatory = $true)] [string] $qavnetname,
