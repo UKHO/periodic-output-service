@@ -298,7 +298,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         ExchangeSetNotModified = 809072,
         /// <summary>
-        /// 809073 - Cancelled products found
+        /// 809073 - Cancelled products found in ESS repsonse
         /// </summary>
         CancelledProductsFound = 809073
     }
