@@ -229,6 +229,19 @@ stages:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService'
               ArtifactName: PeriodicOutputService
 
+          - task: PowerShell@2
+            displayName: "Generate event id runbook"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)\Utility\XmlToRtfTransformation.ps1'
+              arguments: '-xmlFilePath $(Build.BinariesDirectory)\PeriodicOutputFulfilmentService\UKHO.PeriodicOutputService.Common.xml -xsltFilePath $(Build.SourcesDirectory)\Utility\EventIdXmlTransformation.xslt -outputFileName Runbook-EventId'
+          
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish event id runbook"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\Utility\Runbook-EventId.rtf'
+              ArtifactName: Runbook
+
       - job: PublishTerraformArtifacts
         workspace:
           clean: all
