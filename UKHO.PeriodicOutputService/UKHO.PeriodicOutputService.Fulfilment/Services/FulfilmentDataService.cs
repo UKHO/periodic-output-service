@@ -26,7 +26,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string CATALOGUEFILEEXTENSION = "xml";
         private const string ENCUPDATELISTFILEEXTENSION = "csv";
-        private const string CANCELLEDPRODUCT = "noDataAvailableForCancelledProduct";
+        private const string ESSVALIDATIONREASONFORCANCELLEDPRODUCT = "noDataAvailableForCancelledProduct";
 
         private readonly Dictionary<string, string> mimeTypes = new()
         {
@@ -177,7 +177,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count() > 0)
             {
-                if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == CANCELLEDPRODUCT))
+                if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == ESSVALIDATIONREASONFORCANCELLEDPRODUCT))
                 {
                     _logger.LogWarning(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found when creating full avcs exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
@@ -240,7 +240,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count() > 0)
             {
-                if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == CANCELLEDPRODUCT))
+                if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == ESSVALIDATIONREASONFORCANCELLEDPRODUCT))
                 {
                     _logger.LogWarning(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found when creating update exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
