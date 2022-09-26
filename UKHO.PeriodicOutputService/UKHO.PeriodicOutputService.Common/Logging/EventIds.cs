@@ -296,7 +296,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809072 - Exchange set not modified
         /// </summary>
-        ExchangeSetNotModified = 809072
+        ExchangeSetNotModified = 809072,
+        /// <summary>
+        /// 809073 - Cancelled products found
+        /// </summary>
+        CancelledProductsFound = 809073
     }
 
     public static class EventIdExtensions
