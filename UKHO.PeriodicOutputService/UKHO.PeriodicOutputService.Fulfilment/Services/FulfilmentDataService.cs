@@ -179,7 +179,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == CANCELLEDPRODUCT))
                 {
-                    _logger.LogWarning(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found and are [{Products}], when creating full avcs excahnge set {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogWarning(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found when creating full avcs excahnge set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
                 else
                 {
@@ -242,7 +242,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == CANCELLEDPRODUCT))
                 {
-                    _logger.LogWarning(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found and are [{Products}], when creating full avcs excahnge set {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogWarning(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found when creating full avcs excahnge set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
                 else
                 {
