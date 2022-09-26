@@ -121,7 +121,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             _httpClient = _httpClientFactory.CreateClient("DownloadClient");
 
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, Path.Combine(_httpClient.BaseAddress.AbsoluteUri.ToString(), uri));
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, Path.Combine(_httpClient.BaseAddress!.AbsoluteUri.ToString(), uri));
             httpRequestMessage.SetBearerToken(accessToken);
 
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
