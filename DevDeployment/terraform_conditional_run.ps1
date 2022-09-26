@@ -65,5 +65,7 @@ Write-Host "##vso[task.setvariable variable=ResourceGroup;isOutput=true]$($terra
 Write-Host "##vso[task.setvariable variable=webJobUsername;isOutput=true]$($terraformOutput.webjob_username.value)"
 Write-Host "##vso[task.setvariable variable=webJobPassword;issecret=true;isOutput=true]$($terraformOutput.webjob_password.value)"
 Write-Host "##vso[task.setvariable variable=AzureStorageConfiguration.ConnectionString;issecret=true]$($terraformOutput.pos_storage_connection_string.value)"
+Write-Host "##vso[task.setvariable variable=EventHubLoggingConfiguration.ConnectionString;issecret=true]$($terraformOutput.log_primary_connection_string.value)"
+Write-Host "##vso[task.setvariable variable=EventHubLoggingConfiguration.EntityPath;issecret=true]$($terraformOutput.entity_path.value)"
 
 $terraformOutput | ConvertTo-Json -Depth 5 > $terraformJsonOutputFile
