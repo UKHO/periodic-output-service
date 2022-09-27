@@ -37,10 +37,10 @@
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="System.Net.WebSockets.Client" Version="4.0.2" />
-    <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.22217.9" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.21.0" />
+    <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.22047.3" />
   </ItemGroup>
 
   <ItemGroup>
