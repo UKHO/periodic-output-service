@@ -33,8 +33,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             { ".zip", "application/zip" },
             { ".xml", "text/xml" },
             { ".csv", "text/csv" },
-            { ".iso", "application/octet-stream" },
-            { ".sha1", "application/octet-stream" }
+            { ".iso", "application/x-raw-disk-image" },
+            { ".sha1", "text/plain" }
         };
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
 
@@ -179,7 +179,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == ESSVALIDATIONREASONFORCANCELLEDPRODUCT))
                 {
-                    _logger.LogWarning(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found when creating full avcs exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogInformation(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found when creating full avcs exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
                 else
                 {
@@ -242,7 +242,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             {
                 if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == ESSVALIDATIONREASONFORCANCELLEDPRODUCT))
                 {
-                    _logger.LogWarning(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found when creating update exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogInformation(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found when creating update exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
                 else
                 {
