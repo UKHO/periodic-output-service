@@ -39,6 +39,16 @@ output "pos_storage_connection_string"{
   sensitive = true
 }
 
+output "log_primary_connection_string" {
+  value     = module.eventhub.log_primary_connection_string
+  sensitive = true
+}
+
+output "entity_path" {
+  value = module.eventhub.entity_path
+  sensitive = true
+}
+
 output "webjob_username" {
   value = module.webapp_service.username
 }

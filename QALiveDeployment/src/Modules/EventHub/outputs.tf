@@ -5,4 +5,5 @@ output "log_primary_connection_string" {
 
 output "entity_path" {
   value = azurerm_eventhub.eventhub.name
+  sensitive = true
 }

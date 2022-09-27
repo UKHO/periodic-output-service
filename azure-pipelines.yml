@@ -229,6 +229,19 @@ stages:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService'
               ArtifactName: PeriodicOutputService
 
+          - task: PowerShell@2
+            displayName: "Generate event id runbook"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)\Utility\XmlToRtfTransformation.ps1'
+              arguments: '-xmlFilePath $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob\UKHO.PeriodicOutputService.Common.xml -xsltFilePath $(Build.SourcesDirectory)\Utility\EventIdXmlTransformation.xslt -outputFileName Runbook-EventId'
+          
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish event id runbook"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\Utility\Runbook-EventId.rtf'
+              ArtifactName: Runbook
+
       - job: PublishTerraformArtifacts
         workspace:
           clean: all
@@ -709,7 +722,6 @@ stages:
       - group: "ESS-Deployment-Variables-LIVE"
       - group: "POS-Live-Variables"
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
-
     jobs:
       - deployment: LiveDeployApp
         displayName: "Live - Deploy Terraform and Dotnet App"
@@ -726,6 +738,19 @@ stages:
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
+
+      - job: LiveSetup
+        displayName: "Set webjob variables for Live"
+        steps:
+          - task: AzureCLI@2
+            displayName: "Swap Webjob Configuration"
+            condition: always()
+            inputs:
+              azureSubscription: "Exchange-Set-Service-Live-A-008-02"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_webjob_configuration.ps1"
+              arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
       - job: CheckInfra
         displayName: "Check Infrastructure Health"

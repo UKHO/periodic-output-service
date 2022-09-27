@@ -3,6 +3,7 @@ using System.Net;
 using FakeItEasy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -38,6 +39,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeconfiguration = A.Fake<IConfiguration>();
             _fakeFileInfo = A.Fake<IFileInfo>();
             _fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
+
+            _fakeconfiguration["IsFTRunning"] = "false";
 
             _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeEssService, _fakeFssService, _fakefileSystemHelper, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
         }

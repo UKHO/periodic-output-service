@@ -26,14 +26,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string CATALOGUEFILEEXTENSION = "xml";
         private const string ENCUPDATELISTFILEEXTENSION = "csv";
+        private const string ESSVALIDATIONREASONFORCANCELLEDPRODUCT = "noDataAvailableForCancelledProduct";
 
         private readonly Dictionary<string, string> mimeTypes = new()
         {
             { ".zip", "application/zip" },
             { ".xml", "text/xml" },
             { ".csv", "text/csv" },
-            { ".iso", "application/octet-stream" },
-            { ".sha1", "application/octet-stream" }
+            { ".iso", "application/x-raw-disk-image" },
+            { ".sha1", "text/plain" }
         };
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
 
@@ -87,8 +88,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             finally
             {
-                LogHistory(_nextSchedule ?? sinceDateTime, isSuccess);
-
+                if (!bool.Parse(_configuration["IsFTRunning"]))
+                {
+                    LogHistory(_nextSchedule ?? sinceDateTime, isSuccess);
+                }
             }
         }
 
@@ -174,15 +177,22 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             ExchangeSetResponseModel exchangeSetResponseModel = await _essService.PostProductIdentifiersData(productIdentifiers);
 
-            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count() == 0)
+            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Any())
             {
-                string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
-                _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch for Full AVCS exchange set created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                return essBatchId;
+                if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == ESSVALIDATIONREASONFORCANCELLEDPRODUCT))
+                {
+                    _logger.LogInformation(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found while creating full avcs exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
+                else
+                {
+                    _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [{Products}] while creating full avcs exchange set {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName + " - " + a.Reason).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
+                }
             }
 
-            _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [{Products}] while creating full avcs excahnge set {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
+            string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
+            _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch for Full AVCS exchange set created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            return essBatchId;
         }
 
         private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
@@ -230,18 +240,25 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             ExchangeSetResponseModel exchangeSetResponseModel = await _essService.GetProductDataSinceDateTime(sinceDateTime);
 
-            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count() == 0)
+            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Any())
             {
-                string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
-                _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch for Update exchange set created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-                _nextSchedule = exchangeSetResponseModel.ResponseDateTime.AddMinutes(-5);
-
-                return essBatchId;
+                if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == ESSVALIDATIONREASONFORCANCELLEDPRODUCT))
+                {
+                    _logger.LogInformation(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found while creating update exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
+                else
+                {
+                    _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [{Products}] while creating update exchange set {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName + " - " + a.Reason).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
+                }
             }
 
-            _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [{Products}] while creating update excahnge set { DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
+            string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
+            _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch for Update exchange set created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            _nextSchedule = exchangeSetResponseModel.ResponseDateTime.AddMinutes(-5);
+
+            return essBatchId;
         }
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId, Batch batchType)
