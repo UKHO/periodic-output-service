@@ -45,7 +45,7 @@ output "log_primary_connection_string" {
 }
 
 output "entity_path" {
-  value = module.eventhub.logstash_primary_connection_string
+  value = module.eventhub.entity_path
   sensitive = true
 }
 

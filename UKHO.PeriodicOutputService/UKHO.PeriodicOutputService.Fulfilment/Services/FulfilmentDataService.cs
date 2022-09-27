@@ -175,7 +175,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             ExchangeSetResponseModel exchangeSetResponseModel = await _essService.PostProductIdentifiersData(productIdentifiers);
 
-            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count() > 0)
+            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Any())
             {
                 if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == ESSVALIDATIONREASONFORCANCELLEDPRODUCT))
                 {
@@ -238,7 +238,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             ExchangeSetResponseModel exchangeSetResponseModel = await _essService.GetProductDataSinceDateTime(sinceDateTime);
 
-            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count() > 0)
+            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Any())
             {
                 if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == ESSVALIDATIONREASONFORCANCELLEDPRODUCT))
                 {
