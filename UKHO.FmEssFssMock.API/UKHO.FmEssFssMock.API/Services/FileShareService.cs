@@ -12,8 +12,8 @@ namespace UKHO.FmEssFssMock.API.Services
             { ".zip", "application/zip" },
             { ".xml", "text/xml" },
             { ".csv", "text/csv" },
-            { ".iso", "application/octet-stream" },
-            { ".sha1", "application/octet-stream" }
+            { ".iso", "application/x-raw-disk-image" },
+            { ".sha1", "text/plain" }
         };
 
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";

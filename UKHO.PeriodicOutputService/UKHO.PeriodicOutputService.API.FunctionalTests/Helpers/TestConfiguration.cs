@@ -70,7 +70,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string EncUpdateListFileName { get; set; }
             public string AVCSCatalogueFileMimeType { get; set; }
             public string EncUpdateListFileMimeType { get; set; }
-            public string IsoSha1FileMimeType { get; set; }
+            public string IsoFileMimeType { get; set; }
+            public string Sha1FileMimeType { get; set; }
             public string ZipFileMimeType { get; set; }
         }
 
