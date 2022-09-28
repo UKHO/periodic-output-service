@@ -35,9 +35,9 @@ namespace UKHO.PeriodicOutputService.Common.Utilities
         public void CreateSha1File(string targetPath)
         {
             FileInfo fileInfo = new(targetPath);
-            using Stream fs = fileInfo.OpenRead();
+            using Stream fileStream = fileInfo.OpenRead();
 
-            string hash = BitConverter.ToString(SHA1.Create().ComputeHash(fs)).Replace("-", "");
+            string hash = BitConverter.ToString(SHA1.Create().ComputeHash(fileStream)).Replace("-", "");
             File.WriteAllText(targetPath + ".sha1", hash);
         }
 
