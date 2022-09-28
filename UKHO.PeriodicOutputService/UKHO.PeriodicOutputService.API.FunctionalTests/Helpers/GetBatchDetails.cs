@@ -91,16 +91,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     string responseFileName = batchDetailsResponse.files[responseFileNameLocation].filename;
                     responseFileName.Should().Be(expectedFileName[responseFileNameLocation]);
 
-                    if (responseFileName.Contains(".sha1"))
-                    {
-                        string responseFileMimeName = batchDetailsResponse.files[responseFileNameLocation].mimeType;
-                        responseFileMimeName.Should().Be(posDetails.Sha1FileMimeType);
-                    }
-                    else
-                    {
-                        string responseFileMimeName = batchDetailsResponse.files[responseFileNameLocation].mimeType;
-                        responseFileMimeName.Should().Be(posDetails.IsoFileMimeType);
-                    }
+                    string responseFileMimeName = batchDetailsResponse.files[responseFileNameLocation].mimeType;
+
+                    responseFileMimeName.Should().Be(responseFileName.Contains(".sha1")
+                        ? posDetails.Sha1FileMimeType
+                        : posDetails.IsoFileMimeType);
 
                     string fileSize = batchDetailsResponse.files[responseFileNameLocation].fileSize;
                     fileSize.Should().NotBeNullOrEmpty();
