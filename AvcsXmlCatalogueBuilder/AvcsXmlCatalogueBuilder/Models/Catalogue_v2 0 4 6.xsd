@@ -1,0 +1,1399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- edited with XMLSpy v2013 rel. 2 sp2 (http://www.altova.com) by Paula Ballands (UK Hydrographic Officer) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified" version="2.0.4.6" id="UKHO-CATALOGUE">
+	<!--<xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="xlink.xsd"/>-->
+	<xs:element name="UKHOCatalogueFile">
+		<xs:annotation>
+			<xs:documentation>
+        Catalogue Version Control Change Log:
+        Baselined as 2.0.0 ES 04\11\09
+        Change 2.0.1 ES 24\11\09
+        1) Polygon on global geographic limit made unbounded
+
+        Change 2.0.2 (Verified as correct version SG 24/06/2011)
+        1) New ACRS Folio type added to Unit type
+
+        Change 2.0.3 SG 14/04/2011: To Support e-Navigator 2.4 and the Product Information Database
+        1) UnitOfSale/Status type becomes TypeUnitStatus (instead of String)
+        2) TypeChartStatus updated to reflect new PID states
+        3) TypeUnitStatus added to describe new unit of sale PID states
+        4) New ToBeNewEdition element added under ChartStatus
+        5) New ToBeCancelled element added under ChartStatus
+        6) New ReplacesList element added under ChartStatus, with Replaces attribute
+        7) New ReplacedByList element added under ChartStatus, with ReplacedBy attribute
+
+        Change 2.0.4 CHP 20130909
+        1) Added support for eNP Catalogues
+        2) Update enumerations UnitType and ProductTypeCode
+        3) Added complex types SearchKeywords and PublicationsMetaData
+        4) Added element ElectronicPublications to DigitalPublications
+
+        Change 2.0.4.1 CHP 20130910
+        1) Updated eNPMetadata to an extension of PublicationsMetadata
+
+        Change 2.0.4.2 CHP 20131113
+        1) Incorporated changes from correct live version 2.0.3
+        2)Updated enumeration productTypeCode for new e-NP codes
+
+        Change 2.0.4.3 CHP 20140205
+        1) Updated unitType and productTypeCode enumerations for ADRS 2
+
+        Change 2.0.4.4 20140731
+        1) Added support for Additional Coverage scenarios to ChartStatus element
+
+        Change 2.0.4.5 20141009
+        1) Updated unitType and productTypeCode enumerations for ADRS 1345
+        2) Added unit types for e-NP
+		
+		Change 2.0.4.6 20151112
+		1) Added a AdmiraltyApplication element into the DigitalProduct Element
+		2) Added a new Usage Code for Passage Planner
+
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="BaseFileMetadata">
+					<xs:annotation>
+						<xs:documentation>
+              Metadata about the catalogue file  #1 IHO TRANSFER STANDARD for DIGITAL HYDROGRAPHIC DATA http://www.iho.shom.fr/publicat/free/files/31Main.pdf
+              3.1
+              November 2000
+            </xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="MD_FileIdentifier" type="xs:string">
+								<xs:annotation>
+									<xs:documentation>Unique ID for this metadata file</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="MD_CharacterSet" type="xs:string">
+								<xs:annotation>
+									<xs:documentation>
+                    full name of the ISO character coding standard used for documenting a plain text C / ISO/IEC 10646-1
+                    [#1 B.2.14]
+                  </xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="MD_PointOfContact">
+								<xs:annotation>
+									<xs:documentation>identification of, and means of communication with, person(s) and organization(s) associated with the resource(s) [#1 B.2.2.1.29]</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="ResponsibleParty">
+											<xs:annotation>
+												<xs:documentation>identification of, and means of communication with, person(s) and organizations associated with the dataset (MD_Identification) [#1 B.3.2.2.374]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="MD_DateStamp" type="xs:date">
+								<xs:annotation>
+									<xs:documentation>Date that the metadata was created</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="MD_StandardName" type="xs:string">
+								<xs:annotation>
+									<xs:documentation>name of the metadata standard including profile name</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="MD_StandardVersion" type="xs:string">
+								<xs:annotation>
+									<xs:documentation>Version of the metadata standard used</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				<xs:element name="Products">
+					<xs:annotation>
+						<xs:documentation>Product Catalogue Metadata</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="Digital" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Digital products produced by UKHO</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="ENC" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Electronic Navigational Chart</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName">
+														<xs:annotation>
+															<xs:documentation>Short name used for  fast searching</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="Metadata" type="S57Metadata">
+														<xs:annotation>
+															<xs:documentation>Product Metadata derived from base metadata</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="ARCS" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Admiralty Raster Chart Service</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName">
+														<xs:annotation>
+															<xs:documentation>Short name used for  fast searching</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="Metadata" type="ARCSMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="ATPL" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Admiralty Temporary and Preliminary Layer</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="S57Metadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="TotalTide" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Admiralty Total Tide</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="PublicationsMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element ref="ListOfLights" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Admiralty List of Lights</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element ref="RadioSignals" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Admiralty List of Radio Signals</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="ElectronicPublications" minOccurs="0" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="eNPMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="AdmiraltyApplications" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Admiralty Application</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="PublicationsMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Paper" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Paper products produced by UKHO</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="StandardNavigationChart" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Navigational Paper Chart Metadata</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="ARCSMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="ThematicChart" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Thematic Chart Metadata</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="ARCSMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="SailingDirections" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Details of the sailing directions books and volumes</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="PublicationsMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="TideTables" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Details of the Tide Tables books and volumes</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="PublicationsMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="TidalStreamAtlas" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Details of the Tidal Stream Atlas books and volumes</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="PublicationsMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element ref="ListOfLights" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Details of the List of Lights books and volumes</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element ref="RadioSignals" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Details of the Radio Signals books and volumes</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="NMPublications" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Details of the Notices to mariners publications</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="PublicationsMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element ref="MiscPublications" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Details of the books and volumes not included in sections above</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="UKHOCatalogue" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>TBC</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="ShortName"/>
+													<xs:element name="Metadata" type="PublicationsMetadata"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="UnitOfSale" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Unit of Sale contains the prices and high level definitions of all UKHO products in the catalogue XML file. The diagram to the left details of the unit types currently used in the catalogue. This section contains the sales hierarchy for all UKHO sellable products.</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="ID">
+											<xs:annotation>
+												<xs:documentation>Unique folio ID </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="SAPIPN" type="MinLenOne"/>
+										<xs:element name="CatalogueNumber" type="MinLenOne"/>
+										<xs:element name="Title" type="MinLenOne">
+											<xs:annotation>
+												<xs:documentation>Geographical title of the folio</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Usage" type="productTypeCode">
+											<xs:annotation>
+												<xs:documentation>Usage Band or Scale</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="UnitType" type="UnitType">
+											<xs:annotation>
+												<xs:documentation>Use e.g. AVCS - Transit, Regional, Port. ARCS - World, Regional, Chart </xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element ref="GeographicLimit">
+											<xs:annotation>
+												<xs:documentation>Geographical extent of the Unit</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="Duration" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Available purchasable licensing periods</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element ref="Price"/>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element name="Status" type="TypeUnitStatus" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Current status of the folio e.g. live, deprecated etc.</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="SubUnit" minOccurs="0">
+											<xs:annotation>
+												<xs:documentation>Units contained in this unit (i.e cells in a unit, units in a folio)</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="Unit" maxOccurs="unbounded" type="xs:string" />
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element ref="Notes" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>Additional textual or a reference to further information</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Software" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Software patches, service packs and software release information  released by UKHO</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="ID"/>
+										<xs:element name="SoftwareType">
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:enumeration value="Hotfix"/>
+													<xs:enumeration value="ServicePack"/>
+													<xs:enumeration value="Release"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="ThirdPartyProduct" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>Third party products suppiled by Third Party Distributors</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element ref="ID"/>
+										<xs:element ref="ShortName"/>
+										<xs:element name="Metadata">
+											<xs:complexType>
+												<xs:complexContent>
+													<xs:extension base="ThirdPartyMetadata"/>
+												</xs:complexContent>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="Agents" minOccurs="0" maxOccurs="unbounded">
+								<xs:annotation>
+									<xs:documentation>A listing of UKHO distributors and contact details</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="SAPID" type="MinLenOne">
+											<xs:annotation>
+												<xs:documentation>The SAP identifier for this agent</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="AgentDiscount" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>UKHO discount that this agent is allocated. This data is sensitive abd should not be publically available.</xs:documentation>
+											</xs:annotation>
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="ProductType" type="productTypeCode">
+														<xs:annotation>
+															<xs:documentation>ARCS, AVCS, SNC and Pubs</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+													<xs:element name="Discount">
+														<xs:annotation>
+															<xs:documentation>% of total discount</xs:documentation>
+														</xs:annotation>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+										<xs:element ref="ResponsibleParty">
+											<xs:annotation>
+												<xs:documentation>identification of, and means of communication with, person(s) and organizations associated with the dataset (MD_Identification)</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="AgentCategory">
+											<xs:annotation>
+												<xs:documentation>Category of distributor (Paper \ Digital \ Both \ None)</xs:documentation>
+											</xs:annotation>
+											<xs:simpleType>
+												<xs:restriction base="xs:string">
+													<xs:enumeration value="Paper"/>
+													<xs:enumeration value="Digital"/>
+													<xs:enumeration value="Both"/>
+													<xs:enumeration value="None"/>
+												</xs:restriction>
+											</xs:simpleType>
+										</xs:element>
+										<xs:element name="PaperChartUpdatingAPI" type="PCU_API_Type" minOccurs="0" maxOccurs="unbounded">
+											<xs:annotation>
+												<xs:documentation>The paper chart updaing service provided by this distributor</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+			<xs:attribute name="SchemaVersion" type="xs:NMTOKEN" use="required" fixed="2.0.4.6">
+				<xs:annotation>
+					<xs:documentation>This enforces the use of the correct schema on validation</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="MetadataType">
+		<xs:annotation>
+			<xs:documentation>The generic metadata type form which all others inherit</xs:documentation>
+		</xs:annotation>
+		<xs:sequence>
+			<xs:annotation>
+				<xs:documentation>See generic product metadata definition</xs:documentation>
+			</xs:annotation>
+			<xs:element ref="DatasetTitle">
+				<xs:annotation>
+					<xs:documentation>Title of the dataset</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="DatasetAbstract" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Abstract describing the data product</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="Scale" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Compilation Scale of the depiction of the real world objects in the dataset </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="GeographicLimit">
+				<xs:annotation>
+					<xs:documentation>Geographical Extent  of the information of dataset</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="TemporalExtent" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Time period covered by the content of the dataset</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="VerticalExtent" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Vertical extent of dataset</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="Lineage" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Information about the source data used in constructing the dataset</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="ReferenceSystem" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Description of the spatial and temporal reference systems used in the dataset</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="Notes" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Additional textual information or a reference to further textual information</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="Folio" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Folio(s) to which the product is included </xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="SAP_IPN">
+				<xs:annotation>
+					<xs:documentation>SAP product code</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element ref="CatalogueNumber">
+				<xs:annotation>
+					<xs:documentation>Catalogue product code</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Status" type="CTypeChartStatus" minOccurs="0">
+				<xs:annotation>
+					<xs:documentation>Product availablity</xs:documentation>
+				</xs:annotation>
+			</xs:element>
+			<xs:element name="Unit" minOccurs="0" maxOccurs="unbounded">
+				<xs:annotation>
+					<xs:documentation>Identifier(s) to product unit of sale</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ID" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="DatasetResponsibleParty">
+		<xs:annotation>
+			<xs:documentation>
+        #1 IHO TRANSFER STANDARD for DIGITAL HYDROGRAPHIC DATA http://www.iho.shom.fr/publicat/free/files/31Main.pdf v3.1 November 2000
+      </xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="individualName" type="xs:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>name of the responsible personsurname, given name, title separated by a delimiter  [#1 B.3.2.2.375]</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="organisationName" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>name of the responsible organization  [#1 B.3.2.2.376]</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="positionName" type="xs:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>role or position of the responsible person  [#1 B.3.2.2.377]</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="contactInfo">
+					<xs:annotation>
+						<xs:documentation>address of the responsible party (CI_Contact) [#1 B.3.2.2.387]</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="phone" type="xs:int">
+								<xs:annotation>
+									<xs:documentation>telephone number at which the organization or individual may be contacted  [#1 B.3.2.2.388]</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="address">
+								<xs:annotation>
+									<xs:documentation>physical and email address at which the organization or individual may be contacted  [#1 B.3.2.2.389]</xs:documentation>
+								</xs:annotation>
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="deliveryPoint" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>address line for the location (as described in ISO 11180, Annex A) (CI_Address) [#1 B.3.2.2.381]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="city" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>city of the location (CI_Address) [#1 B.3.2.2.382]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="administrativeArea" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>state, province of the location (CI_Address) [#1 B.3.2.2.383]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="postalCode" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>ZIP or other postal code (CI_Address) [#1 B.3.2.2.384]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="country" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>country of the physical address (ISO 3166-3, other parts may be used) (CI_Address) [#1 B.3.2.2.385]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="electronicMailAddress" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>address of the electronic mailbox of the responsible organization or individual  (CI_Address) [#1 B.3.2.2.386]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="onlineResource" type="xs:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>information about online sources from which the resource can be obtained (CI_OnlineResource) (#1 B.3.2.5)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="hoursOfService" type="xs:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>time period (including time zone) when individuals can contact the  organization or individual [#1 B.3.2.2.391]</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="contactInstructions" type="xs:string" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>supplemental instructions on how or when to contact the individual or organization [#1 B.3.2.2.392]</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="S57Metadata">
+		<xs:complexContent>
+			<xs:extension base="MetadataType">
+				<xs:sequence>
+					<xs:element name="DSNM" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>A String indicating the data set name </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="Usage" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>A numeric value indicating the intended usage for which the data has been compiled </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="Edtn" type="xs:int">
+						<xs:annotation>
+							<xs:documentation>A string indicating the “edition number” </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="Base_isdt" type="xs:date">
+						<xs:annotation>
+							<xs:documentation>Cell issue date</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="UPDN" type="xs:integer">
+						<xs:annotation>
+							<xs:documentation>A string indicating the “update number”, default to zero if none exist</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="Last_update_isdt" type="xs:date" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Last update issue date, conditional on an update being present</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="Last_reissue_UPDN" type="xs:int">
+						<xs:annotation>
+							<xs:documentation>Update number for last cell re-issue, default to zero if none exist</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="TotalFileSize" type="xs:double" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Size of file(s) that make up this dataset</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="CD">
+						<xs:annotation>
+							<xs:documentation>CD on which the chart or update is located. </xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Base" type="xs:integer">
+									<xs:annotation>
+										<xs:documentation>The Base CD on which the chart is located  0 for no data or 01 to 52 for week number.</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="Update" type="xs:integer">
+									<xs:annotation>
+										<xs:documentation>The Update CD on which the chart is located  0 for no data or 01 to 52 for week number.</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ARCSMetadata">
+		<xs:complexContent>
+			<xs:extension base="MetadataType">
+				<xs:sequence>
+					<xs:element name="ChartID">
+						<xs:annotation>
+							<xs:documentation>The chart ID is normally a three part concatenation  of the chart prefix (country) + number + suffix (A-D).</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="ChartPrefix" minOccurs="0"/>
+					<xs:element name="ChartNumber" type="MinLenOne"/>
+					<xs:element name="ChartSuffix" minOccurs="0"/>
+					<xs:element name="ChartInternationalNumber" minOccurs="0"/>
+					<!-- ChartInternationalIndicator deprecated as the presence of an intNumber shows a chart to be international -->
+					<!-- xs:element name="ChartInternationalIndicator"-->
+					<xs:element name="ChartSmallCraftEditionIndicator" minOccurs="0"/>
+					<xs:element name="ChartNewEditionDate"/>
+					<xs:element name="Panel" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="PanelID"/>
+								<xs:element name="PanelAreaName"/>
+								<xs:element name="PanelName"/>
+								<xs:element name="PanelScale"/>
+								<xs:element ref="BoundingBox" minOccurs="0"/>
+								<xs:element name="Polygon" minOccurs="0" maxOccurs="unbounded">
+									<xs:annotation>
+										<xs:documentation>Physical boundary of a dataset expressed as a closed set of x,y coordinates </xs:documentation>
+									</xs:annotation>
+									<xs:complexType>
+										<xs:sequence>
+											<xs:element ref="Position" minOccurs="0" maxOccurs="unbounded"/>
+										</xs:sequence>
+									</xs:complexType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="NoticesToMariners" minOccurs="0" maxOccurs="unbounded">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Year"/>
+								<xs:element name="Week"/>
+								<xs:element name="Number"/>
+								<xs:element name="Type" type="NMType"/>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+					<xs:element name="EditionNumber"/>
+					<xs:element name="LastNMNumber"/>
+					<xs:element name="LastNMDate"/>
+					<xs:element name="PublicationDate" type="xs:date" minOccurs="0"/>
+					<xs:element name="CD" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>CD on which the chart or update is located. </xs:documentation>
+						</xs:annotation>
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="Base" type="xs:integer">
+									<xs:annotation>
+										<xs:documentation>The Base CD on which the chart is located  0 for no data or 01 to 52 for week number.</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+								<xs:element name="Update" type="xs:integer">
+									<xs:annotation>
+										<xs:documentation>The Update CD on which the chart is located  0 for no data or 01 to 52 for week number.</xs:documentation>
+									</xs:annotation>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:complexType name="ThirdPartyMetadata">
+		<xs:sequence>
+			<xs:element ref="DatasetTitle" minOccurs="0"/>
+			<xs:element ref="DatasetAbstract" minOccurs="0"/>
+			<xs:element ref="Scale" minOccurs="0"/>
+			<xs:element ref="GeographicLimit" minOccurs="0"/>
+			<xs:element ref="TemporalExtent" minOccurs="0"/>
+			<xs:element ref="VerticalExtent" minOccurs="0"/>
+			<xs:element ref="Lineage" minOccurs="0"/>
+			<xs:element ref="ReferenceSystem" minOccurs="0"/>
+			<xs:element ref="Notes" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="Price" minOccurs="0" maxOccurs="unbounded"/>
+			<xs:element ref="CatalogueNumber" minOccurs="0"/>
+			<xs:element ref="Status" minOccurs="0"/>
+			<!--These elements need to be identified so paper chart updating can be introduced for non-BA charts-->
+			<xs:element name="NavPurpose" minOccurs="0"/>
+			<xs:element name="EditionNumber" minOccurs="0"/>
+			<xs:element name="EditionDate" minOccurs="0"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="ListOfLights">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ShortName"/>
+				<xs:element name="Metadata" type="PublicationsMetadata"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RadioSignals">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ShortName"/>
+				<xs:element name="Metadata" type="PublicationsMetadata"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Position">
+		<xs:complexType>
+			<xs:attribute name="ID" type="xs:int"/>
+			<xs:attribute name="latitude" type="LatitudeType"/>
+			<xs:attribute name="longitude" type="LongitudeType"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ResponsibleParty">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="individualName" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>name of the responsible personsurname, given name, title separated by a delimiter  [#1 B.3.2.2.375]</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="organisationName" type="xs:string">
+					<xs:annotation>
+						<xs:documentation>name of the responsible organization  [#1 B.3.2.2.376]</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="positionName" type="xs:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>role or position of the responsible person  [#1 B.3.2.2.377]</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="contactInfo">
+					<xs:annotation>
+						<xs:documentation>address of the responsible party (CI_Contact) [#1 B.3.2.2.387]</xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="fax" type="xs:string">
+								<xs:annotation>
+									<xs:documentation>fax number at which the organization or individual may be contacted</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="phone" type="xs:string"/>
+							<xs:element name="address">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="deliveryPoint" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>address line for the location (as described in ISO 11180, Annex A) (CI_Address) [#1 B.3.2.2.381]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="city" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>city of the location (CI_Address) [#1 B.3.2.2.382]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="administrativeArea" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>state, province of the location (CI_Address) [#1 B.3.2.2.383]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="postalCode" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>ZIP or other postal code (CI_Address) [#1 B.3.2.2.384]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="country" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>country of the physical address (ISO 3166-3, other parts may be used) (CI_Address) [#1 B.3.2.2.385]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+										<xs:element name="electronicMailAddress" type="xs:string">
+											<xs:annotation>
+												<xs:documentation>address of the electronic mailbox of the responsible organization or individual  (CI_Address) [#1 B.3.2.2.386]</xs:documentation>
+											</xs:annotation>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="onlineResource" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>information about online sources from which the resource can be obtained (CI_OnlineResource) [#1 B.3.2.5]</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="hoursOfService" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>time period (including time zone) when individuals can contact the  organization or individual [#1 B.3.2.2.391]</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element name="contactInstructions" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>supplemental instructions on how or when to contact the individual or organization [#1 B.3.2.2.392]</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ShortName" type="MinLenOne"/>
+	<xs:complexType name="AdmiraltyPublications">
+		<xs:sequence>
+			<xs:element name="ManualOfTides"/>
+			<xs:element name="TidalHandbook"/>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="MiscPublications">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ShortName"/>
+				<xs:element name="Metadata" type="PublicationsMetadata"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="PublicationsMetadata">
+		<xs:complexContent>
+			<xs:extension base="MetadataType">
+				<xs:sequence>
+					<xs:element name="NavPurpose" minOccurs="0"/>
+					<xs:element name="EditionNumber"/>
+					<xs:element name="EditionDate"/>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	<xs:element name="DatasetTitle" type="MinLenOne">
+		<xs:annotation>
+			<xs:documentation>Title of the dataset</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="DatasetAbstract" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>Abstract describing the data product</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Scale" type="xs:int">
+		<xs:annotation>
+			<xs:documentation>Natural scale of the depiction of the real world objects in the dataset </xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="VerticalExtent">
+		<xs:complexType>
+			<xs:attribute name="maximumValue">
+				<xs:annotation>
+					<xs:documentation>Highest vertical extent contained in the dataset</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="minimumValue">
+				<xs:annotation>
+					<xs:documentation>Lowest vertical extent contained in the dataset</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+			<xs:attribute name="verticalDatum">
+				<xs:annotation>
+					<xs:documentation>Provides information about the origin from which the max and min elevations are measured</xs:documentation>
+				</xs:annotation>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="TemporalExtent" type="xs:dateTime">
+		<xs:annotation>
+			<xs:documentation>Time period covered by the content of the dataset</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Lineage" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>Information about the source data used in constructing the dataset</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="ReferenceSystem" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>Description of the spatial and temporal reference systems ued in the dataset</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="SAP_IPN" type="MinLenOne">
+		<xs:annotation>
+			<xs:documentation>SAP product code</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="CatalogueNumber" type="MinLenOne">
+		<xs:annotation>
+			<xs:documentation>catalogue product code</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Status" type="xs:string">
+		<xs:annotation>
+			<xs:documentation>Product availablity - possible values Cancelled, Replaced etc</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="BoundingBox">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="NorthLimit" type="LatitudeType">
+					<xs:annotation>
+						<xs:documentation>Geographic position of dataset defined by the most northern coordinates. 0 if empty</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="SouthLimit" type="LatitudeType">
+					<xs:annotation>
+						<xs:documentation>Geographic position of dataset defined by the most southern coordinates. 0 if empty</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="EastLimit" type="LongitudeType">
+					<xs:annotation>
+						<xs:documentation>Geographic position of dataset defined by most eastern coordinates. 0 if empty</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="WestLimit" type="LongitudeType">
+					<xs:annotation>
+						<xs:documentation>Geographic position of dataset defined by most western coordinates. 0 if empty</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="GeographicLimit">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Description" type="xs:string" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Textual description of the location</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element ref="BoundingBox" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>Geographic position of dataset defined by corner coordinates </xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="Polygon" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Physical boundary of a dataset expressed as a closed set of x,y coordinates </xs:documentation>
+					</xs:annotation>
+					<xs:complexType>
+						<xs:choice>
+							<xs:element name="PositionString" minOccurs="0">
+								<xs:annotation>
+									<xs:documentation>Position as a list of comma seperated values (Lat, long)</xs:documentation>
+								</xs:annotation>
+							</xs:element>
+							<xs:element ref="Position" minOccurs="0" maxOccurs="unbounded"/>
+						</xs:choice>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Price">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="Period"/>
+				<xs:element name="Currency" type="MinLenOne">
+					<xs:annotation>
+						<xs:documentation>Currency of price</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="RRP" type="xs:decimal">
+					<xs:annotation>
+						<xs:documentation>Recommended Retail Price</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Folio">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="ID"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="ID" type="MinLenOne">
+		<xs:annotation>
+			<xs:documentation>Unique ID</xs:documentation>
+		</xs:annotation>
+	</xs:element>
+	<xs:element name="Period">
+		<xs:annotation>
+			<xs:documentation>Can be used to detail duration lengths</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:choice>
+				<xs:sequence minOccurs="0">
+					<xs:element name="StartDate" type="xs:date">
+						<xs:annotation>
+							<xs:documentation>Start of price duration</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="EndDate" type="xs:date">
+						<xs:annotation>
+							<xs:documentation>End of price duration</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+				<xs:element name="NumberOfMonths" type="xs:int" minOccurs="0">
+					<xs:annotation>
+						<xs:documentation>12, 6, 9, 3 month</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:choice>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="Notes">
+		<xs:annotation>
+			<xs:documentation>Additional textual information or a reference to further textual information</xs:documentation>
+		</xs:annotation>
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Note" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>Textual information</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+				<xs:element name="Reference" type="xs:string" minOccurs="0" maxOccurs="unbounded">
+					<xs:annotation>
+						<xs:documentation>External reference to textual information</xs:documentation>
+					</xs:annotation>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:simpleType name="NMType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Temporary"/>
+			<xs:enumeration value="Preliminary"/>
+			<xs:enumeration value="ChartUpdate"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="UnitType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AVCS Folio Transit"/>
+			<xs:enumeration value="AVCS Folio Regional"/>
+			<xs:enumeration value="AVCS Folio Port"/>
+			<xs:enumeration value="AVCS Units Overview"/>
+			<xs:enumeration value="AVCS Units General"/>
+			<xs:enumeration value="AVCS Units Coastal"/>
+			<xs:enumeration value="AVCS Units Approach"/>
+			<xs:enumeration value="AVCS Units Harbour"/>
+			<xs:enumeration value="AVCS Units Berthing"/>
+			<xs:enumeration value="ARCS Folio"/>
+			<xs:enumeration value="ARCS Planning - 5,000,000 and over"/>
+			<xs:enumeration value="ARCS Overview - 1,500,000 to 4,999,999"/>
+			<xs:enumeration value="ARCS General - 350,000 to 1,499,999"/>
+			<xs:enumeration value="ARCS Coastal - 90,000 to 349,999"/>
+			<xs:enumeration value="ARCS Approach - 22,000 to 89,999"/>
+			<xs:enumeration value="ARCS Harbour - 4,000 to 21,999"/>
+			<xs:enumeration value="ARCS Berthing - 3,999 and less"/>
+			<xs:enumeration value="SNC Planning - 5,000,000 and over"/>
+			<xs:enumeration value="SNC Overview - 1,500,000 to 4,999,999"/>
+			<xs:enumeration value="SNC General - 350,000 to 1,499,999"/>
+			<xs:enumeration value="SNC Coastal - 90,000 to 349,999"/>
+			<xs:enumeration value="SNC Approach - 22,000 to 89,999"/>
+			<xs:enumeration value="SNC Harbour - 4,000 to 21,999"/>
+			<xs:enumeration value="SNC Berthing - 3,999 and less"/>
+			<xs:enumeration value="Digital Pub ATT TotalTide"/>
+			<xs:enumeration value="Digital Pub Radio Signals Volume 1345"/>
+			<xs:enumeration value="Digital Pub Radio Signals Volume 2"/>
+			<xs:enumeration value="Digital Pub Radio Signals Volume 6"/>
+			<xs:enumeration value="Digital Pub List of Lights"/>
+			<xs:enumeration value="Paper Pub List of Lights"/>
+			<xs:enumeration value="Paper Pub List of Radio Signals"/>
+			<xs:enumeration value="Paper Pub Sailing Directions"/>
+			<xs:enumeration value="Paper Pub Tidal Publications"/>
+			<xs:enumeration value="UKHO Misc Products"/>
+			<xs:enumeration value="Third Party Products"/>
+			<xs:enumeration value="Digital Pub e-NP"/>
+			<xs:enumeration value="Passage Planner"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="productTypeCode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="C03"/>
+			<xs:enumeration value="C06"/>
+			<xs:enumeration value="C09"/>
+			<xs:enumeration value="C12"/>
+			<xs:enumeration value="C15"/>
+			<xs:enumeration value="C18"/>
+			<xs:enumeration value="C21"/>
+			<xs:enumeration value="C24"/>
+			<xs:enumeration value="C25"/>
+			<xs:enumeration value="E07"/>
+			<xs:enumeration value="E10"/>
+			<xs:enumeration value="E13"/>
+			<xs:enumeration value="E16"/>
+			<xs:enumeration value="E19"/>
+			<xs:enumeration value="E22"/>
+			<xs:enumeration value="E25"/>
+			<xs:enumeration value="G05"/>
+			<xs:enumeration value="G08"/>
+			<xs:enumeration value="G11"/>
+			<xs:enumeration value="G14"/>
+			<xs:enumeration value="G17"/>
+			<xs:enumeration value="G20"/>
+			<xs:enumeration value="G23"/>
+			<xs:enumeration value="M01"/>
+			<xs:enumeration value="M02"/>
+			<xs:enumeration value="M03"/>
+			<xs:enumeration value="M05"/>
+			<xs:enumeration value="M09"/>
+			<xs:enumeration value="N01"/>
+			<xs:enumeration value="N02"/>
+			<xs:enumeration value="N03"/>
+			<xs:enumeration value="N04"/>
+			<xs:enumeration value="P03"/>
+			<xs:enumeration value="P06"/>
+			<xs:enumeration value="P09"/>
+			<xs:enumeration value="P12"/>
+			<xs:enumeration value="Q01"/>
+			<xs:enumeration value="X01"/>
+			<xs:enumeration value="Y01"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="MinLenOne">
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LatitudeType">
+		<xs:restriction base="xs:double">
+			<xs:maxInclusive value="90"/>
+			<xs:minInclusive value="-90"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="LongitudeType">
+		<xs:restriction base="xs:double">
+			<xs:maxInclusive value="180"/>
+			<xs:minInclusive value="-180"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="PCU_API_Type">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Maris"/>
+			<xs:enumeration value="none"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TypeChartStatus">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="Base"/>
+			<xs:enumeration value="Updated"/>
+			<xs:enumeration value="Reissued"/>
+			<xs:enumeration value="New"/>
+			<xs:enumeration value="Edition"/>
+			<xs:enumeration value="Published"/>
+			<xs:enumeration value="Cancelled"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TypeUnitStatus">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ForSale"/>
+			<xs:enumeration value="NotForSale"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="CTypeChartStatus">
+		<xs:sequence>
+			<xs:element name="ChartStatus">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="TypeChartStatus">
+							<xs:attribute name="date" type="xs:date" use="required"/>
+						</xs:extension>
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ToBeNewEdition" type="xs:date" minOccurs="0"/>
+			<xs:element name="ToBeCancelled" type="xs:date" minOccurs="0"/>
+			<xs:element name="ReplacesList" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="Replaces" nillable="true" minOccurs="0" maxOccurs="unbounded">
+							<xs:complexType>
+								<xs:simpleContent>
+									<xs:extension base="xs:string">
+										<xs:attribute name="date" type="xs:date"/>
+									</xs:extension>
+								</xs:simpleContent>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="ReplacedByList" minOccurs="0">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ReplacedBy" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="AdditionalCoverage" minOccurs="0" maxOccurs="1">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ID" minOccurs="1" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="SearchKeywords">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="Keyword" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:complexType name="eNPMetadata">
+		<xs:complexContent>
+			<xs:extension base="PublicationsMetadata">
+				<xs:sequence>
+					<xs:element name="PublicationFileName" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>Sourced from eNP_Cat.xml</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="EditionName" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>Sourced from eNP_Cat.xml</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="ProductDownloadSizeKB" type="xs:long">
+						<xs:annotation>
+							<xs:documentation>
+                Download Size for a full eNP product in KB.
+                Sourced from eNP_Cat.xml
+              </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="PublicationHash" type="xs:string">
+						<xs:annotation>
+							<xs:documentation>
+                Hash value (SHA1) of publication for consistency checking of eNP products and updates.
+                Sourced from eNP_Cat.xml
+              </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element ref="SearchKeywords">
+						<xs:annotation>
+							<xs:documentation>
+                Search Keywords for the eNP publication (for future implementation).
+                Sourced from eNP_Cat.xml
+              </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="LastUpdateDate" type="xs:date" nillable="true" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>
+                Last NM Update Date.
+                Sourced from eNP_Cat.xml
+              </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="LastUpdateWeekNumber" type="xs:string" nillable="true" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>
+                Week Number for last NM update - Format = YYYYWW
+                Sourced from eNP_Cat.xml
+              </xs:documentation>
+						</xs:annotation>
+					</xs:element>
+					<xs:element name="eNPCategory" type="xs:string" minOccurs="0">
+						<xs:annotation>
+							<xs:documentation>Identifies eNP as SD, NMs or Reference for eNP Reader. Unused at eNP Phase 1.</xs:documentation>
+						</xs:annotation>
+					</xs:element>
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+</xs:schema>
