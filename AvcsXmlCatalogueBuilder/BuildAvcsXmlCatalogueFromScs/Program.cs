@@ -1,5 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 
+using System.Xml;
 using AvcsXmlCatalogueBuilder;
 using BuildAvcsXmlCatalogueFromScs;
 using Microsoft.Extensions.Configuration;
@@ -18,6 +19,8 @@ var builder = new ConfigurationBuilder()
 
 using var config = builder.Build() as ConfigurationRoot;
 
+var outputFilePathTemplate = config["outputFilePathTemplate"];
+
 var scsTenantId = config["scs:tennantId"];
 var scsClientId = config["scs:clientId"];
 var scsBaseUrl = config["scs:baseUrl"];
@@ -29,5 +32,5 @@ var catalogueBuilder = new CatalogueBuilder(
     new ScsCatalogProvider(scsAuthProvider, scsBaseUrl),
     new RulesBasedUnitsAndFoliosProvider(config["agenciesExcludedFromPays"]));
 
-await File.WriteAllTextAsync($@"D:\temp\AVCS Catalogues\avcs_catalogue_{environmentName}.xml",
+await File.WriteAllTextAsync( string.Format(outputFilePathTemplate, environmentName),
     await catalogueBuilder.BuildAsync());
