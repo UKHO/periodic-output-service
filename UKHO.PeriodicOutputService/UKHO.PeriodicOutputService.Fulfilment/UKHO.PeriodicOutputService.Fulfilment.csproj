@@ -34,7 +34,7 @@
     <PackageReference Include="runtime.native.System.Net.Security" Version="4.3.1" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.22047.3" />
+    <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.22236.4" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.21.0" />
