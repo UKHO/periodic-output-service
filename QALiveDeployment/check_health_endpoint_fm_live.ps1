@@ -1,6 +1,6 @@
 Param(
 	[Parameter(mandatory=$true)][string]$healthEndPointUrl,
-    [Parameter(mandatory=$true)][string]$waitTimeInMinute
+    [Parameter(mandatory=$true)][string]$waitTimeInMinute,
     [Parameter(mandatory=$true)][string]$ocpapimsubscriptionkey
 )
 
