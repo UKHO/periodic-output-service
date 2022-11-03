@@ -749,7 +749,7 @@ stages:
               azureSubscription: "Exchange-Set-Service-Live-A-008-02"
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
-              scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_webjob_configuration.ps1"
+              scriptPath: "$(Build.SourcesDirectory)/QALiveDeployment/set_webjob_configuration.ps1"
               arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
       - job: CheckInfra
