@@ -44,15 +44,17 @@ namespace UKHO.PeriodicOutputService.Common.Utilities
         public void CreateXmlFile(byte[] fileContent, string targetPath)
         {
             XmlDocument doc = new();
-            string xml = Encoding.UTF8.GetString(fileContent);
+            var xml = Encoding.UTF8.GetString(fileContent);
+
+            ////Added below code to remove the ? hidden text from the XML Response text
+            var byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+
+            if (xml.StartsWith(byteOrderMarkUtf8, StringComparison.Ordinal))
+            {
+                xml = xml.Remove(0, byteOrderMarkUtf8.Length);
+            }
+
             doc.LoadXml(xml);
-
-            //Create an XML declaration.
-            XmlDeclaration xmlDecl = doc.CreateXmlDeclaration("1.0", "utf-8", null);
-
-            //Add the new node to the document.
-            XmlElement root = doc.DocumentElement!;
-            doc.InsertBefore(xmlDecl, root);
 
             doc.Save(targetPath);
         }
