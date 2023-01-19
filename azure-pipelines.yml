@@ -10,7 +10,9 @@ trigger:
   - main
   - release/*
 
-pool: NautilusBuild
+pool: 
+    name: NautilusBuild
+    demands: vs_16 -equals 1 #exclude agents 13 and 14 as code coverage report fails
 
 variables:
   - name: BuildConfiguration
