@@ -35,6 +35,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return hash;
         }
 
-        public static int GetCurrentWeekNumber(DateTime date) => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
+        public static string GetCurrentWeekNumber(DateTime date) { string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString(); return currentWeek.Length == 1 ? string.Concat("0", currentWeek) : currentWeek; }
     }
 }
