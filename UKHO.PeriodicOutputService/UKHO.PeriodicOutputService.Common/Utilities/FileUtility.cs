@@ -9,12 +9,12 @@ namespace UKHO.PeriodicOutputService.Common.Utilities
     [ExcludeFromCodeCoverage]
     public class FileUtility : IFileUtility
     {
-        public void CreateISOImage(IEnumerable<string> srcFiles, string targetPath, string directoryPath)
+        public void CreateISOImage(IEnumerable<string> srcFiles, string targetPath, string directoryPath, string volumeIdentifier)
         {
             var iso = new CDBuilder
             {
                 UseJoliet = true,
-                VolumeIdentifier = new DirectoryInfo(directoryPath).Name
+                VolumeIdentifier = volumeIdentifier
             };
 
             foreach (string? file in srcFiles)

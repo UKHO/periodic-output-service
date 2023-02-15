@@ -224,7 +224,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     _logger.LogInformation(EventIds.CreateIsoAndSha1Started.ToEventId(), "Creating ISO and Sha1 file of {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
                     string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
-                    _fileSystemHelper.CreateIsoAndSha1(Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension));
+                    _fileSystemHelper.CreateIsoAndSha1(Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension), file.VolumeIdentifier);
 
                     _logger.LogInformation(EventIds.CreateIsoAndSha1Completed.ToEventId(), "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
@@ -299,6 +299,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 {
                     int dvdNumber = int.Parse(file.FileName.Substring(1, 2));
                     file.FileName = string.Format(_configuration["PosAvcsZipFileName"], dvdNumber, weekNumber, currentYear);
+                    file.VolumeIdentifier = string.Format(_configuration["PosDVDVolume"], dvdNumber);
                 }
                 else
                 {
