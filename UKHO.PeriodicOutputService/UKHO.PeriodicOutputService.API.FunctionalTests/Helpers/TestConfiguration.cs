@@ -73,6 +73,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string IsoFileMimeType { get; set; }
             public string Sha1FileMimeType { get; set; }
             public string ZipFileMimeType { get; set; }
+            public string PosDVDVolumeIdentifier { get; set; }
         }
 
         public TestConfiguration()

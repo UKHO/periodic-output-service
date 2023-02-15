@@ -14,7 +14,8 @@ namespace UKHO.PeriodicOutputService.Common.Utilities
             var iso = new CDBuilder
             {
                 UseJoliet = true,
-                VolumeIdentifier = volumeIdentifier
+               VolumeIdentifier = volumeIdentifier
+               //VolumeIdentifier = new DirectoryInfo(directoryPath).Name
             };
 
             foreach (string? file in srcFiles)

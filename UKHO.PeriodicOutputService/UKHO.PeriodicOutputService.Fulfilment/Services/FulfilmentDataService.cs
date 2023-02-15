@@ -299,7 +299,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 {
                     int dvdNumber = int.Parse(file.FileName.Substring(1, 2));
                     file.FileName = string.Format(_configuration["PosAvcsZipFileName"], dvdNumber, weekNumber, currentYear);
-                    file.VolumeIdentifier = string.Format(_configuration["PosDVDVolume"], dvdNumber);
+                    file.VolumeIdentifier = string.Format(_configuration["PosDVDVolumeIdentifier"], dvdNumber);
                 }
                 else
                 {
