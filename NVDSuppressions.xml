@@ -295,4 +295,120 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
     </notes>
     <cve>CVE-2023-21538</cve>
   </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+	file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
+	See https://nvd.nist.gov/vuln/detail/CVE-2018-8409 for details on this CVE.
+	Note: This was reanalysed by NIST on 4th October, and is now a breaking issue.
+	This is a temporary suppression pending a fix being available.
+	Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=58430
+	]]>
+    </notes>
+    <cve>CVE-2018-8409</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+		file name: Serilog.Extensions.Logging.File:2.0.0
+		This is a temporary suppression pending a fix being available.
+		Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_workitems/edit/63100
+		]]>
+    </notes>
+    <cve>CVE-2014-2270</cve>
+    <cve>CVE-2014-3479</cve>
+    <cve>CVE-2014-3480</cve>
+    <cve>CVE-2014-3487</cve>
+    <cve>CVE-2007-1536</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+		file name: Serilog.Sinks.File:5.0.0
+		This is a temporary suppression pending a fix being available.
+		Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_workitems/edit/63101
+		]]>
+    </notes>
+    <cve>CVE-2014-2270</cve>
+    <cve>CVE-2014-3479</cve>
+    <cve>CVE-2014-3480</cve>
+    <cve>CVE-2014-3487</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Private.DataContractSerialization:4.3.0
+   This CVE appiles to .net version >= 6.0.0 and < 6.0.12. Version 6.0.13 is not vulnerable
+   See https://github.com/dotnet/announcements/issues/244
+   ]]>
+    </notes>
+    <cve>CVE-2023-21538</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.Azure.EventGrid:3.2.1, Microsoft.Azure.KeyVault.dll, Microsoft.Azure.Services.AppAuthentication.dll
+   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
+   ]]>
+    </notes>
+    <cve>CVE-2021-42306</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.Azure.WebJobs.Core:3.0.30, Microsoft.Azure.WebJobs.dll
+   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
+   ]]>
+    </notes>
+    <cve>CVE-2022-29149</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.CSharp:4.0.1, Microsoft.CSharp:4.3.0, Microsoft.CSharp:4.5.0, Microsoft.CSharp:4.5.0,
+   Microsoft.NETCore.Platforms:1.0.1, Microsoft.NETCore.Platforms:1.1.0, Microsoft.NETCore.Platforms:1.1.1,
+   Microsoft.NETCore.Platforms:2.0.0
+   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
+   ]]>
+    </notes>
+    <cve>CVE-2022-41064</cve>
+    <cve>CVE-2022-30184</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.Extensions.Configuration.FileExtensions.dll
+   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
+   ]]>
+    </notes>
+    <cve>CVE-2018-1000413</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.IdentityModel.Clients.ActiveDirectory.dll, Microsoft.IdentityModel.Clients.ActiveDirectory:3.19.1
+   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
+   ]]>
+    </notes>
+    <cve>CVE-2021-42306</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.OpenApi.dll
+   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
+   ]]>
+    </notes>
+    <cve>CVE-2022-3064</cve>
+    <cve>CVE-2021-4235</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: NETStandard.Library:1.6.0, NETStandard.Library:1.6.1
+   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
+   ]]>
+    </notes>
+    <cve>CVE-2001-0152</cve>
+  </suppress>
 </suppressions>
