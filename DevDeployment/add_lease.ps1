@@ -9,7 +9,7 @@ Param(
 )
 
 try{
-    $ownerId = @'User:'($requestedForId)
+    $ownerId = @{'User:'$requestedForId}
     $contentType = "application/json";
     $headers = @{ Authorization = 'Bearer $accessToken' };
     $rawRequest = @{ daysValid = $daysValid; definitionId = $definitionId; ownerId = $ownerId; protectPipeline = $false; runId = $buildId };

@@ -48,33 +48,33 @@ resources:
     ref: refs/heads/master
 
 stages:
-  - stage: CoverityScan
-    displayName: "Coverity Scan"
-    pool:
-      name: $(coverityPool)
-    jobs:
-    - job: Coverity
-      workspace:
-        clean: all
-      steps:
-        - checkout: self
-          submodules: recursive
-        - task: UseDotNet@2
-          displayName: 'Use .NET 6 LTS SDK'
-          inputs:
-            packageType: sdk
-            version: 6.0.x
-            installationPath: $(Agent.ToolsDirectory)/dotnet
-        - checkout: covscan
-        - template: dotnet-cov.yml@covScan
-          parameters:
-            CovHostUrl: "$(CovHostUrl)"
-            CovUser: "$(CovUser)"
-            CovPwd: "$(CovPwd)"
-            StreamName: "periodic-output-service"
-            BuildCommand: "$(Build.Repository.LocalPath)/periodic-output-service/UKHO.PeriodicOutputService/UKHO.PeriodicOutputService.Fulfilment/UKHO.PeriodicOutputService.Fulfilment.csproj"
-            StripPath: $(Build.Repository.LocalPath)/periodic-output-service
-            CoverityScanPath: $(Build.Repository.LocalPath)/coverityscan-buildtemplates
+  #- stage: CoverityScan
+  #  displayName: "Coverity Scan"
+  #  pool:
+  #    name: $(coverityPool)
+  #  jobs:
+  #  - job: Coverity
+  #    workspace:
+  #      clean: all
+  #    steps:
+  #      - checkout: self
+  #        submodules: recursive
+  #      - task: UseDotNet@2
+  #        displayName: 'Use .NET 6 LTS SDK'
+  #        inputs:
+  #          packageType: sdk
+  #          version: 6.0.x
+  #          installationPath: $(Agent.ToolsDirectory)/dotnet
+  #      - checkout: covscan
+  #      - template: dotnet-cov.yml@covScan
+  #        parameters:
+  #          CovHostUrl: "$(CovHostUrl)"
+  #          CovUser: "$(CovUser)"
+  #          CovPwd: "$(CovPwd)"
+  #          StreamName: "periodic-output-service"
+  #          BuildCommand: "$(Build.Repository.LocalPath)/periodic-output-service/UKHO.PeriodicOutputService/UKHO.PeriodicOutputService.Fulfilment/UKHO.PeriodicOutputService.Fulfilment.csproj"
+  #          StripPath: $(Build.Repository.LocalPath)/periodic-output-service
+  #          CoverityScanPath: $(Build.Repository.LocalPath)/coverityscan-buildtemplates
 
   - stage: PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     displayName: "Build (inc DependencyChecker, Dotnet Build , dotnet test and publish artifact )"
