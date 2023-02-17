@@ -169,80 +169,80 @@ stages:
           #    PathtoPublish: "$(Build.ArtifactStagingDirectory)/codecoveragereport"
           #    ArtifactName: codecoveragereport
 
-      - job: BuildAndPublishWebJob
-        workspace:
-          clean: all
-        displayName: "Dotnet Build publish WebJob"
-        steps:
-          - task: PowerShell@2
-            displayName: "Set assembly version numbers based on build ID"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
-              arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"'
+      #- job: BuildAndPublishWebJob
+      #  workspace:
+      #    clean: all
+      #  displayName: "Dotnet Build publish WebJob"
+      #  steps:
+      #    - task: PowerShell@2
+      #      displayName: "Set assembly version numbers based on build ID"
+      #      inputs:
+      #        targetType: filePath
+      #        filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
+      #        arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"'
 
-          - task: UseDotNet@2
-            displayName: 'Use .NET Core 6.0.x sdk'
-            inputs:
-              packageType: sdk
-              useGlobalJson: true
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+      #    - task: UseDotNet@2
+      #      displayName: 'Use .NET Core 6.0.x sdk'
+      #      inputs:
+      #        packageType: sdk
+      #        useGlobalJson: true
+      #        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
 
-          - task: DotNetCoreCLI@2
-            displayName: ".Net Core - NuGet restore"
-            inputs:
-              command: restore
-              projects: |
-                **/*.csproj
-              feedsToUse: config
-              noCache: true
-              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+      #    - task: DotNetCoreCLI@2
+      #      displayName: ".Net Core - NuGet restore"
+      #      inputs:
+      #        command: restore
+      #        projects: |
+      #          **/*.csproj
+      #        feedsToUse: config
+      #        noCache: true
+      #        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+      #        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
 
-          - task: DotNetCoreCLI@2
-            displayName: "dotnet build task"
-            inputs:
-              command: "build"
-              projects: "**/*.csproj"
-              arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
+      #    - task: DotNetCoreCLI@2
+      #      displayName: "dotnet build task"
+      #      inputs:
+      #        command: "build"
+      #        projects: "**/*.csproj"
+      #        arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
 
-          - task: DotNetCoreCLI@2
-            displayName: "Publish POS Fulfilment Service Code"
-            inputs:
-              command: "publish"
-              publishWebProjects: false
-              projects: "**/*UKHO.PeriodicOutputService.Fulfilment.csproj"
-              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob'
-              zipAfterPublish: false
-              modifyOutputPath: false
+      #    - task: DotNetCoreCLI@2
+      #      displayName: "Publish POS Fulfilment Service Code"
+      #      inputs:
+      #        command: "publish"
+      #        publishWebProjects: false
+      #        projects: "**/*UKHO.PeriodicOutputService.Fulfilment.csproj"
+      #        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob'
+      #        zipAfterPublish: false
+      #        modifyOutputPath: false
 
-          - task: ArchiveFiles@2
-            displayName: "Zip POS fulfilment service"
-            inputs:
-              rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\'
-              includeRootFolder: false
-              archiveType: "zip"
-              archiveFile: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\PeriodicOutputFulfilmentService.zip'
-              replaceExistingArchive: true
+      #    - task: ArchiveFiles@2
+      #      displayName: "Zip POS fulfilment service"
+      #      inputs:
+      #        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\'
+      #        includeRootFolder: false
+      #        archiveType: "zip"
+      #        archiveFile: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\PeriodicOutputFulfilmentService.zip'
+      #        replaceExistingArchive: true
 
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish PeriodicOutputFulfilmentService Artifact"
-            inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService'
-              ArtifactName: PeriodicOutputService
+      #    - task: PublishBuildArtifacts@1
+      #      displayName: "Publish PeriodicOutputFulfilmentService Artifact"
+      #      inputs:
+      #        PathtoPublish: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService'
+      #        ArtifactName: PeriodicOutputService
 
-          - task: PowerShell@2
-            displayName: "Generate event id runbook"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)\Utility\XmlToRtfTransformation.ps1'
-              arguments: '-xmlFilePath $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob\UKHO.PeriodicOutputService.Common.xml -xsltFilePath $(Build.SourcesDirectory)\Utility\EventIdXmlTransformation.xslt -outputFileName Runbook-EventId'
+      #    - task: PowerShell@2
+      #      displayName: "Generate event id runbook"
+      #      inputs:
+      #        targetType: filePath
+      #        filePath: '$(Build.SourcesDirectory)\Utility\XmlToRtfTransformation.ps1'
+      #        arguments: '-xmlFilePath $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob\UKHO.PeriodicOutputService.Common.xml -xsltFilePath $(Build.SourcesDirectory)\Utility\EventIdXmlTransformation.xslt -outputFileName Runbook-EventId'
           
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish event id runbook"
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\Utility\Runbook-EventId.rtf'
-              ArtifactName: Runbook
+      #    - task: PublishBuildArtifacts@1
+      #      displayName: "Publish event id runbook"
+      #      inputs:
+      #        PathtoPublish: '$(Build.SourcesDirectory)\Utility\Runbook-EventId.rtf'
+      #        ArtifactName: Runbook
 
       - job: PublishTerraformArtifacts
         workspace:
