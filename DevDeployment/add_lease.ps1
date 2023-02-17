@@ -9,9 +9,10 @@ Param(
 )
 
 try{
+    $ownerId = 'User:'$requestedForId
     $contentType = "application/json";
     $headers = @{ Authorization = 'Bearer $accessToken' };
-    $rawRequest = @{ daysValid = $daysValid; definitionId = $definitionId; ownerId = 'User:$requestedForId'; protectPipeline = $false; runId = $buildId };
+    $rawRequest = @{ daysValid = $daysValid; definitionId = $definitionId; ownerId = $ownerId; protectPipeline = $false; runId = $buildId };
     $request = ConvertTo-Json @($rawRequest);
     $uri = "$collectionUri$teamProject/_apis/build/retention/leases?api-version=7.0";
 
@@ -25,5 +26,5 @@ catch{
    Write-Host "##vso[task.complete result=SucceededWithIssues;]"
 }
 finally{
-  Write-Host "Pipeline will be retained for  $daysValid days"
+  Write-Host "Pipeline will be retained for $daysValid days"
 }

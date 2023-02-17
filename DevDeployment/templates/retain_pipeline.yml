@@ -8,9 +8,9 @@ steps:
       filePath: "$(Build.SourcesDirectory)/DevDeployment/add_lease.ps1"
       arguments: "-daysValid 365
                   -accessToken '$(System.AccessToken)'
-                  -definitionId '$(System.DefinitionId)'
-                  -requestedForId '$(Build.RequestedForId)'
-                  -buildId '$(Build.BuildId)'
+                  -definitionId $(System.DefinitionId)
+                  -requestedForId $(Build.RequestedForId)
+                  -buildId $(Build.BuildId)
                   -collectionUri '$(System.CollectionUri)'
                   -teamProject '$(System.TeamProject)'"
       #targetType: 'inline'
