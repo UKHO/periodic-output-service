@@ -5,7 +5,7 @@ steps:
     inputs:
       #failOnStderr: false
       targetType: filePath
-      filePath: "$(Build.SourcesDirectory)/Deployment/add_lease.ps1"      
+      filePath: "$(Build.SourcesDirectory)/DevDeployment/add_lease.ps1"      
       #targetType: 'inline'
       #script: |
       #  $contentType = "application/json";

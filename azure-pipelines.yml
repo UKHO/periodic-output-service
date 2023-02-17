@@ -359,7 +359,7 @@ stages:
         dependsOn: PublishTerraformArtifacts
         displayName: "Retain Pipeline"        
         steps:
-          - template: Deployment/templates/retain_pipeline.yml
+          - template: DevDeployment/templates/retain_pipeline.yml
      
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
