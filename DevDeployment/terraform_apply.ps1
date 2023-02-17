@@ -14,16 +14,6 @@ Write-output "Executing terraform scripts for deployment in $workSpace enviromen
 terraform init -backend-config="resource_group_name=$deploymentResourceGroupName" -backend-config="storage_account_name=$deploymentStorageAccountName" -backend-config="key=posterraform.deployment.tfplan"
 if ( !$? ) { echo "Something went wrong during terraform initialization"; throw "Error" }
 
-Write-output "Selecting workspace"
-
-$ErrorActionPreference = 'SilentlyContinue'
-terraform workspace new $WorkSpace 2>&1 > $null
-$ErrorActionPreference = 'Continue'
-
-terraform workspace select $workSpace
-if ( !$? ) { echo "Error while selecting workspace"; throw "Error" }
-
-
 Write-output "Executing terraform apply"
 terraform apply  "posterraform.deployment.tfplan"
 if ( !$? ) { echo "Something went wrong during terraform apply" ; throw "Error" }
