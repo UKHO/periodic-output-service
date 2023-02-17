@@ -35,12 +35,11 @@ $totalDestroyLines=(Get-Content -Path terraform_output.txt | Select-String -Patt
 if($totalDestroyLines -ge 2) 
 {
     write-Host("Terraform is destroying some resources, please verify...................")
-    if ( !$ContinueEvenIfResourcesAreGettingDestroyed) 
-    {
-        write-Host("exiting...................")
-        Write-Output $_
-        exit 1
-    }
+    Write-Host "##vso[task.setvariable variable=Destroy_Resources]$($terraformOutput.Website_Url.value)"
+    write-Host("exiting...................")
+    Write-Output $_
+    exit 1
+    
     write-host("Continue executing terraform apply - as continueEvenIfResourcesAreGettingDestroyed param is set to true in pipeline")
 }
 
