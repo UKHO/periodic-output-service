@@ -124,28 +124,28 @@ stages:
       #          param($ReportLocation)
       #          Invoke-VulnerabilityCheck -ReportLocation $ReportLocation
 
-      - job: UnitTestsAndCodeCoverage
-        workspace:
-          clean: all
-        displayName: "Dotnet Test and Publish Code Coverage"
-        steps:
-          - task: UseDotNet@2
-            displayName: 'Use .NET 6.0.x sdk'
-            inputs:
-              packageType: sdk
-              useGlobalJson: true
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+      #- job: UnitTestsAndCodeCoverage
+      #  workspace:
+      #    clean: all
+      #  displayName: "Dotnet Test and Publish Code Coverage"
+      #  steps:
+      #    - task: UseDotNet@2
+      #      displayName: 'Use .NET 6.0.x sdk'
+      #      inputs:
+      #        packageType: sdk
+      #        useGlobalJson: true
+      #        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
 
-          - task: DotNetCoreCLI@2
-            displayName: ".Net Core - NuGet restore test projects only"
-            inputs:
-              command: "restore"
-              projects: "**/*Tests.csproj"
-              feedsToUse: config
-              noCache: true
-              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
-              packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packagesForTests'
+      #    - task: DotNetCoreCLI@2
+      #      displayName: ".Net Core - NuGet restore test projects only"
+      #      inputs:
+      #        command: "restore"
+      #        projects: "**/*Tests.csproj"
+      #        feedsToUse: config
+      #        noCache: true
+      #        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+      #        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+      #        packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packagesForTests'
 
           #- task: DotNetCoreCLI@2
           #  displayName: "dotnet test - Perform Unit Tests"
