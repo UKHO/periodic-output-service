@@ -1,7 +1,7 @@
 steps:
   - task: PowerShell@2
     condition: and(succeeded(), not(canceled()))
-    displayName: Retain on Success
+    displayName: Retain pipeline for 365 dats
     inputs:
       #failOnStderr: true
       targetType: filePath

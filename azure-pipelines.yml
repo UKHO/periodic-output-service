@@ -534,6 +534,13 @@ stages:
                     scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/set_stub_webjob_configuration.ps1"
                     arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME) -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
+      - job: PostDeploymentActions
+        pool: $(WindowPool)
+        dependsOn: DevDeployApp
+        displayName: Post Deployment Actions
+        steps:
+          - template: DevDeployment/templates/retain_pipeline.yml
+
   - stage: QAdeploy
     dependsOn: Devdeploy
     displayName: "QAdeploy (inc terraform, webapp deploy)"
