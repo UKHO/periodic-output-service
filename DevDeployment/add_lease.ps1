@@ -1,5 +1,5 @@
 Param(
-    [Parameter(mandatory=$true)][number]$daysValid,
+    [Parameter(mandatory=$true)][int]$daysValid,
 	[Parameter(mandatory=$true)][string]$accessToken,
     [Parameter(mandatory=$true)][string]$definitionId,
     [Parameter(mandatory=$true)][string]$requestedForId,
