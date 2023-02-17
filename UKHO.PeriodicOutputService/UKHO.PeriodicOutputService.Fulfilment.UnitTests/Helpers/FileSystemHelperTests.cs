@@ -17,6 +17,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
         private const string filePath = @"d:\Test";
         private const string fileName = "M01X01.zip";
+        private const string volumeIdentifier = "M01X01";
 
         [SetUp]
         public void Setup()
@@ -118,9 +119,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         {
             A.CallTo(() => _fakefileSystem.Directory.EnumerateFiles(filePath, "*.*", SearchOption.AllDirectories)).Returns(new List<string> { "Test1", "Test2" });
 
-            _fileSystemHelper.CreateIsoAndSha1(filePath, filePath);
+            _fileSystemHelper.CreateIsoAndSha1(filePath, filePath, volumeIdentifier);
 
-            A.CallTo(() => _fakeFileUtility.CreateISOImage(A<IEnumerable<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFileUtility.CreateISOImage(A<IEnumerable<string>>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                            .MustHaveHappenedOnceExactly();
 
 

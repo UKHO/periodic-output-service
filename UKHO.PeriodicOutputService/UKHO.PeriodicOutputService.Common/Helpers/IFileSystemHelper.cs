@@ -13,7 +13,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         List<FileDetail> GetFileMD5(IEnumerable<string> fileNames);
         IEnumerable<string> GetAllFiles(string directoryPath, SearchOption searchOption);
         void ExtractZipFile(string sourceArchiveFileName, string destinationDirectoryName, bool deleteSourceDirectory);
-        void CreateIsoAndSha1(string targetPath, string directoryPath);
+        void CreateIsoAndSha1(string targetPath, string directoryPath, string volumeIdentifier);
         void CreateXmlFile(byte[] fileContent, string targetPath);
     }
 }

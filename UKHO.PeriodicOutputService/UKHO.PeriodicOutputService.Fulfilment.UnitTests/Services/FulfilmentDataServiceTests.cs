@@ -191,7 +191,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .MustNotHaveHappened();
         }
 
@@ -262,7 +262,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
 
-            A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored)).Throws<Exception>();
+            A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<Exception>();
 
             Assert.ThrowsAsync<AggregateException>(
                 () => _fulfilmentDataService.CreatePosExchangeSets());
