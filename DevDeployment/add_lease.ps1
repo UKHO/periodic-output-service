@@ -11,7 +11,7 @@ Param(
 try{
     $contentType = "application/json";
     $headers = @{ Authorization = 'Bearer $accessToken' };
-    $rawRequest = @{ daysValid = $daysValid; definitionId = $definitionId; ownerId = $ownerId; protectPipeline = $false; runId = $buildId };
+    $rawRequest = @{ daysValid = 365; definitionId = $definitionId; ownerId = $ownerId; protectPipeline = $false; runId = $buildId };
     $request = ConvertTo-Json @($rawRequest);
     $uri = "$collectionUri$teamProject/_apis/build/retention/leases?api-version=7.0";
 
