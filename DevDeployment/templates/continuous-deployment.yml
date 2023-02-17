@@ -9,7 +9,7 @@ steps:
 
   - task: PowerShell@2
     displayName: "Prepare Terraform Plan for $(Environment)"
-    name: TerraformDeploy
+    name: PrepareTerraform
     inputs:
       targetType: filePath
       filePath: '$(Pipeline.Workspace)/devterraformartifact/terraform_conditional_run.ps1'
@@ -31,7 +31,7 @@ steps:
 
   - task: PowerShell@2
     displayName: "Apply Terraform Plan for $(Environment)"
-    name: TerraformDeploy
+    name: ApplyTerraform
     inputs:
       targetType: filePath
       filePath: '$(Pipeline.Workspace)/devterraformartifact/terraform_apply.ps1'
