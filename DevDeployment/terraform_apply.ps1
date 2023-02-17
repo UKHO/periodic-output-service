@@ -23,26 +23,10 @@ $ErrorActionPreference = 'Continue'
 terraform workspace select $workSpace
 if ( !$? ) { echo "Error while selecting workspace"; throw "Error" }
 
-Write-output "Validating terraform"
-terraform validate
-if ( !$? ) { echo "Something went wrong during terraform validation" ; throw "Error" }
 
-Write-output "Execute Terraform plan"
-terraform plan -out "posterraform.deployment.tfplan" | tee terraform_output.txt
-if ( !$? ) { echo "Something went wrong during terraform plan" ; throw "Error" }
-
-$totalDestroyLines=(Get-Content -Path terraform_output.txt | Select-String -Pattern "destroy" -CaseSensitive |  where {$_ -ne ""}).length
-if($totalDestroyLines -ge 2) 
-{
-    write-Host("Terraform is destroying some resources, please verify...................")
-    if ( !$ContinueEvenIfResourcesAreGettingDestroyed) 
-    {
-        write-Host("exiting...................")
-        Write-Output $_
-        exit 1
-    }
-    write-host("Continue executing terraform apply - as continueEvenIfResourcesAreGettingDestroyed param is set to true in pipeline")
-}
+Write-output "Executing terraform apply"
+terraform apply  "posterraform.deployment.tfplan"
+if ( !$? ) { echo "Something went wrong during terraform apply" ; throw "Error" }
 
 Write-output "Terraform output as json"
 $terraformOutput = terraform output -json | ConvertFrom-Json
