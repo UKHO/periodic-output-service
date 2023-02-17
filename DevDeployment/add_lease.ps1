@@ -11,7 +11,7 @@ Param(
 try{
     $ownerId = @{ User:'$requestedForId' };
 
-    Write-Host $ownerId;
+    
 
     $contentType = "application/json";
     $headers = @{ Authorization = 'Bearer $accessToken' };
@@ -19,13 +19,13 @@ try{
     $request = ConvertTo-Json @($rawRequest);
     $uri = "$collectionUri$teamProject/_apis/build/retention/leases?api-version=7.0";
 
-    Write-Host $request;
-    Write-Host $uri;
+    Write-Host $request
+    Write-Host $uri
 
     Invoke-RestMethod -uri $uri -method POST -Headers $headers -ContentType $contentType -Body $request;
-    Write-Host "Pipeline will be retained for $daysValid days";
+    Write-Host "Pipeline will be retained for $daysValid days"
 }
 catch{
-   Write-Host $_;
-   Write-Host "##vso[task.complete result=SucceededWithIssues;]";
+   Write-Host $_
+   Write-Host "##vso[task.complete result=SucceededWithIssues;]"
 }
