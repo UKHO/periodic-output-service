@@ -2,17 +2,13 @@ Param(
     [Parameter(mandatory=$true)][int]$daysValid,
 	[Parameter(mandatory=$true)][string]$accessToken,
     [Parameter(mandatory=$true)][string]$definitionId,
-    [Parameter(mandatory=$true)][string]$requestedForId,
+    [Parameter(mandatory=$true)][string]$ownerId,
     [Parameter(mandatory=$true)][string]$buildId,
     [Parameter(mandatory=$true)][string]$collectionUri,
     [Parameter(mandatory=$true)][string]$teamProject    
 )
 
 try{
-    $ownerId = @{ User:'$requestedForId' };
-
-    
-
     $contentType = "application/json";
     $headers = @{ Authorization = 'Bearer $accessToken' };
     $rawRequest = @{ daysValid = $daysValid; definitionId = $definitionId; ownerId = $ownerId; protectPipeline = $false; runId = $buildId };
