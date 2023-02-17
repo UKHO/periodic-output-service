@@ -96,11 +96,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         }
 
 
-        public void CreateIsoAndSha1(string targetPath, string directoryPath)
+        public void CreateIsoAndSha1(string targetPath, string directoryPath, string volumeIdentifier)
         {
             IEnumerable<string>? srcFiles = GetAllFiles(directoryPath, SearchOption.AllDirectories);
 
-            _fileUtility.CreateISOImage(srcFiles, targetPath, directoryPath);
+            _fileUtility.CreateISOImage(srcFiles, targetPath, directoryPath, volumeIdentifier);
 
             _fileUtility.CreateSha1File(targetPath);
         }
