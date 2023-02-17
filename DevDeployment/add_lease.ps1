@@ -9,7 +9,7 @@ Param(
 )
 
 try{
-    $ownerId = @{'User:$requestedForId'};
+    $ownerId = @{ User:'$requestedForId' };
 
     Write-Host $ownerId;
 
