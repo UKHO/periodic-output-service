@@ -35,6 +35,8 @@ variables:
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.1.9"
   - name: coverityPool
     value: NautilusBuild
+  - name: WindowPool
+    value: "NautilusBuild"
   - group: Covscan-vars
 
 resources:
