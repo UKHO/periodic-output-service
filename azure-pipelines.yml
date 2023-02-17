@@ -372,7 +372,7 @@ stages:
         value: $(ESSClientId)
 
     jobs:
-      - deployment: DevDeployApp
+      - job: PrepareTerraform
         displayName: "Dev - Deploy Terraform and Dotnet App"
         environment: "Ess-Dev"
         pool: $(DeploymentPool)
