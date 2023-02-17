@@ -7,36 +7,36 @@ parameters:
 
 steps:
 
-  - task: PowerShell@2
-    displayName: "Prepare Terraform Plan for $(Environment)"
-    name: PrepareTerraform
-    inputs:
-      targetType: filePath
-      filePath: '$(Pipeline.Workspace)/devterraformartifact/terraform_conditional_run.ps1'
-      arguments: '-deploymentResourceGroupName $(DeploymentResourceGroupName) -deploymentStorageAccountName $(DeploymentStorageAccountName) -workSpace $(Environment) -continueEvenIfResourcesAreGettingDestroyed $${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }} -terraformJsonOutputFile $(Pipeline.Workspace)/devterraformartifact/terraform_output.json'
-    env:
-      ARM_CLIENT_ID: $(TERRAFORM-CLIENT-ID)
-      ARM_CLIENT_SECRET: $(TERRAFORM-CLIENT-SECRET)
-      ARM_TENANT_ID: $(TERRAFORM-TENANT-ID)
-      ARM_SUBSCRIPTION_ID: $(TERRAFORM-SUBSCRIPTION-ID)
-      TF_VAR_agent_rg: $(agentRG)
-      TF_VAR_agent_vnet_name: $(agentVnetName)
-      TF_VAR_agent_subnet_name: $(agentSubnetName)
-      TF_VAR_agent_subscription_id: $(agentSubscriptionId)
-      TF_VAR_spoke_rg: $(spokeRG)
-      TF_VAR_spoke_vnet_name: $(spokeVnetName)
-      TF_VAR_spoke_subnet_name: $(POSESSspokeSubnetName)
-      TF_VAR_mock_spoke_subnet_name: $(POSESSmockspokeSubnetName)
-      TF_VAR_allowed_ips: $(whiteListedIps)
+  #- task: PowerShell@2
+  #  displayName: "Prepare Terraform Plan for $(Environment)"
+  #  name: PrepareTerraform
+  #  inputs:
+  #    targetType: filePath
+  #    filePath: '$(Pipeline.Workspace)/devterraformartifact/terraform_conditional_run.ps1'
+  #    arguments: '-deploymentResourceGroupName $(DeploymentResourceGroupName) -deploymentStorageAccountName $(DeploymentStorageAccountName) -workSpace $(Environment) -continueEvenIfResourcesAreGettingDestroyed $${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }} -terraformJsonOutputFile $(Pipeline.Workspace)/devterraformartifact/terraform_output.json'
+  #  env:
+  #    ARM_CLIENT_ID: $(TERRAFORM-CLIENT-ID)
+  #    ARM_CLIENT_SECRET: $(TERRAFORM-CLIENT-SECRET)
+  #    ARM_TENANT_ID: $(TERRAFORM-TENANT-ID)
+  #    ARM_SUBSCRIPTION_ID: $(TERRAFORM-SUBSCRIPTION-ID)
+  #    TF_VAR_agent_rg: $(agentRG)
+  #    TF_VAR_agent_vnet_name: $(agentVnetName)
+  #    TF_VAR_agent_subnet_name: $(agentSubnetName)
+  #    TF_VAR_agent_subscription_id: $(agentSubscriptionId)
+  #    TF_VAR_spoke_rg: $(spokeRG)
+  #    TF_VAR_spoke_vnet_name: $(spokeVnetName)
+  #    TF_VAR_spoke_subnet_name: $(POSESSspokeSubnetName)
+  #    TF_VAR_mock_spoke_subnet_name: $(POSESSmockspokeSubnetName)
+  #    TF_VAR_allowed_ips: $(whiteListedIps)
 
-  - task: ManualValidation@0
-    displayName: "Validate terraform changes"
-    timeoutInMinutes: "1440" 
-    inputs:
-      notifyUsers: |
-        jivitesh.trivedi@ukho.gov.uk
-      instructions: "There are resources being destroyed as part of this deployment, please review the output of Terraform plan before approving."
-      onTimeout: "reject"
+  #- task: ManualValidation@0
+  #  displayName: "Validate terraform changes"
+  #  timeoutInMinutes: "1440" 
+  #  inputs:
+  #    notifyUsers: |
+  #      jivitesh.trivedi@ukho.gov.uk
+  #    instructions: "There are resources being destroyed as part of this deployment, please review the output of Terraform plan before approving."
+  #    onTimeout: "reject"
 
   - task: PowerShell@2
     displayName: "Apply Terraform Plan for $(Environment)"

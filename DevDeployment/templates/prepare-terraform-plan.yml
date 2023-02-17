@@ -1,0 +1,92 @@
+parameters:
+  - name: ContinueEvenIfResourcesAreGettingDestroyed
+    type: boolean
+    default: false
+  - name: AzureSubscription
+    type: string
+
+steps:
+
+  - task: PowerShell@2
+    displayName: "Prepare Terraform Plan for $(Environment)"
+    name: PrepareTerraform
+    inputs:
+      targetType: filePath
+      filePath: '$(Pipeline.Workspace)/devterraformartifact/terraform_conditional_run.ps1'
+      arguments: '-deploymentResourceGroupName $(DeploymentResourceGroupName) -deploymentStorageAccountName $(DeploymentStorageAccountName) -workSpace $(Environment) -continueEvenIfResourcesAreGettingDestroyed $${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }} -terraformJsonOutputFile $(Pipeline.Workspace)/devterraformartifact/terraform_output.json'
+    env:
+      ARM_CLIENT_ID: $(TERRAFORM-CLIENT-ID)
+      ARM_CLIENT_SECRET: $(TERRAFORM-CLIENT-SECRET)
+      ARM_TENANT_ID: $(TERRAFORM-TENANT-ID)
+      ARM_SUBSCRIPTION_ID: $(TERRAFORM-SUBSCRIPTION-ID)
+      TF_VAR_agent_rg: $(agentRG)
+      TF_VAR_agent_vnet_name: $(agentVnetName)
+      TF_VAR_agent_subnet_name: $(agentSubnetName)
+      TF_VAR_agent_subscription_id: $(agentSubscriptionId)
+      TF_VAR_spoke_rg: $(spokeRG)
+      TF_VAR_spoke_vnet_name: $(spokeVnetName)
+      TF_VAR_spoke_subnet_name: $(POSESSspokeSubnetName)
+      TF_VAR_mock_spoke_subnet_name: $(POSESSmockspokeSubnetName)
+      TF_VAR_allowed_ips: $(whiteListedIps)
+
+  #- task: ManualValidation@0
+  #  displayName: "Validate terraform changes"
+  #  timeoutInMinutes: "1440" 
+  #  inputs:
+  #    notifyUsers: |
+  #      jivitesh.trivedi@ukho.gov.uk
+  #    instructions: "There are resources being destroyed as part of this deployment, please review the output of Terraform plan before approving."
+  #    onTimeout: "reject"
+
+  #- task: PowerShell@2
+  #  displayName: "Apply Terraform Plan for $(Environment)"
+  #  name: ApplyTerraform
+  #  inputs:
+  #    targetType: filePath
+  #    filePath: '$(Pipeline.Workspace)/devterraformartifact/terraform_apply.ps1'
+  #    arguments: '-deploymentResourceGroupName $(DeploymentResourceGroupName) -deploymentStorageAccountName $(DeploymentStorageAccountName) -workSpace $(Environment) -continueEvenIfResourcesAreGettingDestroyed $${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }} -terraformJsonOutputFile $(Pipeline.Workspace)/devterraformartifact/terraform_output.json'
+  #  env:
+  #    ARM_CLIENT_ID: $(TERRAFORM-CLIENT-ID)
+  #    ARM_CLIENT_SECRET: $(TERRAFORM-CLIENT-SECRET)
+  #    ARM_TENANT_ID: $(TERRAFORM-TENANT-ID)
+  #    ARM_SUBSCRIPTION_ID: $(TERRAFORM-SUBSCRIPTION-ID)
+  #    TF_VAR_agent_rg: $(agentRG)
+  #    TF_VAR_agent_vnet_name: $(agentVnetName)
+  #    TF_VAR_agent_subnet_name: $(agentSubnetName)
+  #    TF_VAR_agent_subscription_id: $(agentSubscriptionId)
+  #    TF_VAR_spoke_rg: $(spokeRG)
+  #    TF_VAR_spoke_vnet_name: $(spokeVnetName)
+  #    TF_VAR_spoke_subnet_name: $(POSESSspokeSubnetName)
+  #    TF_VAR_mock_spoke_subnet_name: $(POSESSmockspokeSubnetName)
+  #    TF_VAR_allowed_ips: $(whiteListedIps)
+
+  #- task: FileTransform@2
+  #  displayName: "File Transform: Mock API WebApp"
+  #  inputs:
+  #    folderPath: '$(Pipeline.Workspace)/MockWebAPI/*.zip'
+  #    xmlTransformationRules:
+  #    jsonTargetFiles: '**/appsettings.json'
+
+  #- task: AzureCLI@2
+  #  displayName: "Mock API WebApp deployment"
+  #  inputs:
+  #    azureSubscription: "${{ parameters.AzureSubscription }}"
+  #    scriptType: 'pscore'
+  #    scriptLocation: 'scriptPath'
+  #    scriptPath: '$(Pipeline.Workspace)/devterraformartifact/mock_api_deployment.ps1'
+  #    arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FmEssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
+
+  #- task: FileTransform@2
+  #  displayName: "File Transform: POS Config"
+  #  inputs:
+  #    folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
+  #    xmlTransformationRules:
+  #    jsonTargetFiles: '**/appsettings.json'
+
+  #- task: AzureWebApp@1
+  #  displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp"
+  #  inputs:
+  #    azureSubscription: "${{ parameters.AzureSubscription }}"
+  #    appType: webApp
+  #    appName: "$(WEB_APP_NAME)"
+  #    package: "$(Pipeline.Workspace)/PeriodicOutputService/PeriodicOutputFulfilmentService.zip"
