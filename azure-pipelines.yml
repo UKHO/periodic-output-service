@@ -548,8 +548,7 @@ stages:
       - name: "ESSApiConfiguration.AutoTestClientSecret"
         value: $(AutoTestClientSecret_Authed)
       - name: "ESSApiConfiguration.EssClientId"
-        value: $(ESSClientId)
-    condition: and(succeeded())
+        value: $(ESSClientId)    
 
     jobs:
       - deployment: QADeployApp
