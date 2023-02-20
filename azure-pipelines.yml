@@ -35,6 +35,8 @@ variables:
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.1.9"
   - name: coverityPool
     value: NautilusBuild
+  - name: WindowPool
+    value: "NautilusBuild"
   - group: Covscan-vars
 
 resources:
@@ -532,7 +534,7 @@ stages:
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/set_stub_webjob_configuration.ps1"
-                    arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME) -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+                    arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME) -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'                          
 
   - stage: QAdeploy
     dependsOn: Devdeploy
@@ -818,3 +820,16 @@ stages:
               targetType: filePath
               filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint_fm_live.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/live/echo/health-check -waitTimeInMinute $(waitTimeInMinute) -ocpapimsubscriptionkey $(FM_Ocp_Apim_Subscription_Key)"
+
+      - job: PostDeploymentActions
+        dependsOn:
+        - LiveDeployApp
+        - LiveSetup
+        - CheckInfra
+        - CheckFSS
+        - CheckESS
+        - CheckFM        
+        pool: $(WindowPool)        
+        displayName: Post Deployment Actions
+        steps:
+          - template: QALiveDeployment/templates/retain-pipeline.yml
