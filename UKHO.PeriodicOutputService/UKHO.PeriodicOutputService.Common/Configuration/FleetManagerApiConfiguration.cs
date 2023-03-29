@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.Configuration
+namespace UKHO.PeriodicOutputService.Common.Configuration
 {
     [ExcludeFromCodeCoverage]
     public class FleetManagerApiConfiguration : IFleetManagerApiConfiguration

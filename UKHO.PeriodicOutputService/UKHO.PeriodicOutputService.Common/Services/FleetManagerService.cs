@@ -2,12 +2,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
-using UKHO.PeriodicOutputService.Fulfilment.Models;
+using UKHO.PeriodicOutputService.Common.Models.Fm.Response;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.Services
+namespace UKHO.PeriodicOutputService.Common.Services
 {
     public class FleetManagerService : IFleetManagerService
     {

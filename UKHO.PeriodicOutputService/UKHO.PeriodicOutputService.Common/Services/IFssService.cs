@@ -2,7 +2,7 @@
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.Services
+namespace UKHO.PeriodicOutputService.Common.Services
 {
     public interface IFssService
     {

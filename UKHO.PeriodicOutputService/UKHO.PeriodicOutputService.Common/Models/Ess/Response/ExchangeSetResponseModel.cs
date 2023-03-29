@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.Models
+namespace UKHO.PeriodicOutputService.Common.Models.Ess.Response
 {
     public class ExchangeSetResponseModel
     {

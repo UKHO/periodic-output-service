@@ -1,5 +1,5 @@
 ﻿
-namespace UKHO.PeriodicOutputService.Common.Models.FileShareService.Response
+namespace UKHO.PeriodicOutputService.Common.Models.Fss.Response
 {
     public class CreateBatchResponseModel
     {

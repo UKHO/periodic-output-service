@@ -3,12 +3,13 @@ using System.Net;
 using FakeItEasy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
+using UKHO.PeriodicOutputService.Common.Models.Fm.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
-using UKHO.PeriodicOutputService.Fulfilment.Models;
+using UKHO.PeriodicOutputService.Common.Services;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
@@ -281,7 +282,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         {
             ExchangeSetCellCount = 3,
             RequestedProductCount = 3,
-            Links = new Models.Links
+            Links = new Common.Models.Ess.Response.Links
             {
                 ExchangeSetBatchDetailsUri = new LinkSetBatchDetailsUri
                 {
