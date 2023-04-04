@@ -14,8 +14,8 @@ using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Services;
 using UKHO.PeriodicOutputService.Common.Utilities;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
@@ -116,7 +116,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 loggingBuilder.AddDebug();
 
                 EventHubLoggingConfiguration eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
-                
+
                 if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
                 {
                     loggingBuilder.AddEventHub(config =>

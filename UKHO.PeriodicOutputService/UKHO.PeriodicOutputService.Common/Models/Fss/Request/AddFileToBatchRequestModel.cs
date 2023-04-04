@@ -1,5 +1,5 @@
 ﻿
-namespace UKHO.PeriodicOutputService.Common.Models.Request
+namespace UKHO.PeriodicOutputService.Common.Models.Fss.Request
 {
     public class AddFileToBatchRequestModel
     {

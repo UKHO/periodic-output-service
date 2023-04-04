@@ -2,7 +2,7 @@
 using FakeItEasy;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Fulfilment.Models;
+using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers

@@ -5,17 +5,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.FileShareService.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
-using UKHO.PeriodicOutputService.Common.Models.Request;
-using UKHO.PeriodicOutputService.Fulfilment.Configuration;
-using UKHO.PeriodicOutputService.Fulfilment.Models;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.Services
+namespace UKHO.PeriodicOutputService.Common.Services
 {
     public class FssService : IFssService
     {

@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.Models
+namespace UKHO.PeriodicOutputService.Common.Models.Fm.Response
 {
     public class FleetMangerGetAuthTokenResponseModel
     {

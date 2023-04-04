@@ -4,10 +4,12 @@ using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
+using UKHO.PeriodicOutputService.Common.Models.Fm.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
-using UKHO.PeriodicOutputService.Fulfilment.Models;
+using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.Services
 {

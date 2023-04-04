@@ -1,6 +1,6 @@
-﻿using UKHO.PeriodicOutputService.Fulfilment.Models;
+﻿using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.Services
+namespace UKHO.PeriodicOutputService.Common.Services
 {
     public interface IEssService
     {

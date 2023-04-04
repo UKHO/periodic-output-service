@@ -1,4 +1,4 @@
-﻿namespace UKHO.PeriodicOutputService.Fulfilment.Configuration
+﻿namespace UKHO.PeriodicOutputService.Common.Configuration
 {
     public interface IFleetManagerApiConfiguration
     {

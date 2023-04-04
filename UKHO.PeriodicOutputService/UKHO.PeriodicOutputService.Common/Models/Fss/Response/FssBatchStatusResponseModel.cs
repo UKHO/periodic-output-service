@@ -1,5 +1,4 @@
-﻿
-namespace UKHO.PeriodicOutputService.Fulfilment.Models
+﻿namespace UKHO.PeriodicOutputService.Common.Models.Fss.Response
 {
     public class FssBatchStatusResponseModel
     {
