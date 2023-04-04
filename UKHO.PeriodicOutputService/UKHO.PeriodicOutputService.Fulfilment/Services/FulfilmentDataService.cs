@@ -186,7 +186,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 else
                 {
                     _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [{Products}] while creating full avcs exchange set {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName + " - " + a.Reason).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                    throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
+                    //throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
                 }
             }
 
