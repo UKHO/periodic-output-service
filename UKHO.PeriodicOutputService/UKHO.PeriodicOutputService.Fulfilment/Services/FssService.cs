@@ -179,7 +179,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             else
             {
                 _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
+                // throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
             }
         }
 
