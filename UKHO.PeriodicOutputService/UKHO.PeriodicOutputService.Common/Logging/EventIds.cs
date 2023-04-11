@@ -306,9 +306,9 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         AIOFulfilmentJobStarted = 809074,
         /// <summary>
-        /// 809075 - AIO fulfilment job ended
+        /// 809075 - AIO fulfilment job completed
         /// </summary>
-        AIOFulfilmentJobEnded = 809075,
+        AIOFulfilmentJobCompleted = 809075,
 
     }
 
