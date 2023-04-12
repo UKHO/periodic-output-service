@@ -300,7 +300,16 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809073 - Cancelled products found in ESS repsonse
         /// </summary>
-        CancelledProductsFound = 809073
+        CancelledProductsFound = 809073,
+        /// <summary>
+        /// 809074 - AIO fulfilment job started
+        /// </summary>
+        AIOFulfilmentJobStarted = 809074,
+        /// <summary>
+        /// 809075 - AIO fulfilment job completed
+        /// </summary>
+        AIOFulfilmentJobCompleted = 809075,
+
     }
 
     public static class EventIdExtensions
