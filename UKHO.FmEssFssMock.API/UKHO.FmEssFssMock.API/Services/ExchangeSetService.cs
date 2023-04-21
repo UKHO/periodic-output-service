@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Helpers;
@@ -14,16 +15,19 @@ namespace UKHO.FmEssFssMock.API.Services
         private readonly FileShareService _fssService;
         private readonly string _homeDirectoryPath;
         private readonly MockService _mockService;
+        private readonly AioConfiguration _aioConfiguration;
         public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,
                                   FileShareService fssService,
                                   IConfiguration configuration,
-                                  MockService mockService)
+                                  MockService mockService,
+                                  IOptions<AioConfiguration> aioConfiguration)
         {
             _essConfiguration = essConfiguration;
             _fssService = fssService;
             _mockService = mockService;
 
             _homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["POSFolderName"]);
+            _aioConfiguration = aioConfiguration.Value;
         }
 
         public ExchangeSetServiceResponse CreateExchangeSetForGetProductDataSinceDateTime(string sinceDateTime)
@@ -90,10 +94,20 @@ namespace UKHO.FmEssFssMock.API.Services
         private CreateBatchRequest CreateBatchRequestModel(bool isPostProductIdentifiersRequest)
         {
             PosTestCase currentTestCase = _mockService.GetCurrentPOSTestCase(_homeDirectoryPath);
+            string batchType;
 
-            string batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
-                ? currentTestCase.ToString()
-                : isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString();
+            if (_aioConfiguration.IsAioEnabled && !string.IsNullOrEmpty(_aioConfiguration.AioCells))
+            {
+                batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
+                   ? currentTestCase.ToString()
+                   : isPostProductIdentifiersRequest ? Batch.AioFullAvcsZipBatch.ToString() : Batch.AioUpdateZipBatch.ToString();
+            }
+            else
+            {
+                batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
+                   ? currentTestCase.ToString()
+                   : isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString();
+            }
 
             CreateBatchRequest createBatchRequest = new()
             {

@@ -134,5 +134,32 @@
                 }
             ]
         }
+    },
+    {
+        "id": "productIdentifier-GB800001",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/eb74b68e-95a7-4d3b-a162-1444efe43257/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/eb74b68e-95a7-4d3b-a162-1444efe43257"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/eb74b68e-95a7-4d3b-a162-1444efe43257/files/V01X01.zip"
+                },
+                "aioExchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/eb74b68e-95a7-4d3b-a162-1444efe43257/files/AIO.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "2022-08-19T15:32:34.631Z",
+            "requestedProductCount": 0,
+            "exchangeSetCellCount": 0,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedAioProductCount": 1,
+            "aioExchangeSetCellCount": 1,
+            "requestedAioProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
     }
 ]

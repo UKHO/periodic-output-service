@@ -31,6 +31,7 @@ namespace UKHO.FmEssFssMock.API
             services.AddScoped<FileShareService>();
             services.AddScoped<ExchangeSetService>();
             services.AddScoped<MockService>();
+            services.Configure<AioConfiguration>(Configuration.GetSection("AioConfiguration"));
 
             services.AddHealthChecks()
                 .AddCheck<FleetManagerStubHealthCheck>("FleetManagerStubHealthCheck");
