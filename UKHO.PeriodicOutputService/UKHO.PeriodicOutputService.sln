@@ -15,7 +15,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.PeriodicOutputService.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.PeriodicOutputService.API.FunctionalTests", "UKHO.PeriodicOutputService.API.FunctionalTests\UKHO.PeriodicOutputService.API.FunctionalTests.csproj", "{2BD7B957-DCFF-4F22-B179-331E12A133BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.AdmiraltyInformationOverlay.Fulfilment", "UKHO.AdmiraltyInformationOverlay.Fulfilment\UKHO.AdmiraltyInformationOverlay.Fulfilment.csproj", "{4944E3A9-1AB1-46ED-90CA-FECBF55A344B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.AdmiraltyInformationOverlay.Fulfilment", "UKHO.AdmiraltyInformationOverlay.Fulfilment\UKHO.AdmiraltyInformationOverlay.Fulfilment.csproj", "{4944E3A9-1AB1-46ED-90CA-FECBF55A344B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests", "UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests\UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.csproj", "{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,6 +45,10 @@ Global
 		{4944E3A9-1AB1-46ED-90CA-FECBF55A344B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4944E3A9-1AB1-46ED-90CA-FECBF55A344B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4944E3A9-1AB1-46ED-90CA-FECBF55A344B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,6 +58,7 @@ Global
 		{9C526F75-05C6-4C17-871B-D8D95F19F633} = {0316516B-C6E9-47BF-9305-3E566EB1EC55}
 		{2BD7B957-DCFF-4F22-B179-331E12A133BD} = {0316516B-C6E9-47BF-9305-3E566EB1EC55}
 		{4944E3A9-1AB1-46ED-90CA-FECBF55A344B} = {1592E1AE-C3E7-46D6-B0A6-15785835EBD2}
+		{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44} = {0316516B-C6E9-47BF-9305-3E566EB1EC55}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3412128A-AFD7-431C-AA35-E39C4668DC9F}

@@ -340,19 +340,19 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             string batchId = await _fssService.CreateBatch(batchType);
             IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
-            UploadBatchFiles(filePaths, batchId);
+            UploadBatchFiles(filePaths, batchId, batchType);
             bool isCommitted = await _fssService.CommitBatch(batchId, filePaths, batchType);
 
             return isCommitted;
         }
 
-        private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId)
+        private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
         {
             Parallel.ForEach(filePaths, filePath =>
            {
                IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
 
-               bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE).Result;
+               bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
                if (isFileAdded)
                {
                    List<string> blockIds = _fssService.UploadBlocks(batchId, fileInfo).Result;

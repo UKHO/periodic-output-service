@@ -66,9 +66,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             //finally { }
 
             await CreateAioBaseExchangeSet();
+            isSuccess = true;
 
-            Console.Write("Stop");
-            Console.ReadLine();
             return isSuccess;
         }
 
