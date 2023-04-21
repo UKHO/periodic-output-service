@@ -22,6 +22,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IConfiguration _configuration;
+        private readonly Enum[] aioBatchTypes = new Enum[]
+                                      {
+                                            Batch.AioBaseCDZipIsoSha1Batch,
+                                            Batch.AioUpdateBatch
+                                      };
 
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
@@ -180,14 +185,14 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
-        public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType)
+        public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType, Batch batchType)
         {
             _logger.LogInformation(EventIds.AddFileToBatchRequestStarted.ToEventId(), "Adding file {FileName} in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName);
+            AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName, batchType);
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
             HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, mimeType);
 
@@ -312,26 +317,51 @@ namespace UKHO.PeriodicOutputService.Common.Services
         //Private Methods
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
         {
+
             string currentYear = DateTime.UtcNow.Year.ToString();
             string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+            CreateBatchRequestModel createBatchRequest;
 
-            CreateBatchRequestModel createBatchRequest = new()
+            if (aioBatchTypes.Contains(batchType))
             {
-                BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
-                ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                Acl = new Acl()
+                createBatchRequest = new()
                 {
-                    ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
-                    ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
-                },
-                Attributes = new List<KeyValuePair<string, string>>
+                    BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
+                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Acl = new Acl()
+                    {
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
+                    },
+                    Attributes = new List<KeyValuePair<string, string>>
+                    {
+                        new("Product Type", "AIO"),
+                        new("Week Number", currentWeek),
+                        new("Year", currentYear),
+                        new("Year / Week", currentYear + " / " + currentWeek)
+                    }
+                };
+            }
+            else
+            {
+                createBatchRequest = new()
                 {
-                    new("Product Type", "AVCS"),
-                    new("Week Number", currentWeek),
-                    new("Year", currentYear),
-                    new("Year / Week", currentYear + " / " + currentWeek)
-                }
-            };
+                    BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
+                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Acl = new Acl()
+                    {
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
+                    },
+                    Attributes = new List<KeyValuePair<string, string>>
+                    {
+                        new("Product Type", "AVCS"),
+                        new("Week Number", currentWeek),
+                        new("Year", currentYear),
+                        new("Year / Week", currentYear + " / " + currentWeek)
+                    }
+                };
+            }
 
             //This batch attribute is added for fss stub.
             if (bool.Parse(_configuration["IsFTRunning"]))
@@ -368,19 +398,28 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Content", "ENC Updates"));
                     break;
 
+                case Batch.AioBaseCDZipIsoSha1Batch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
+                    break;
+
+                case Batch.AioUpdateBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    break;
+
                 default:
                     break;
             };
             return createBatchRequest;
         }
 
-        private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName)
+        private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName, Batch batchType)
         {
             AddFileToBatchRequestModel addFileToBatchRequestModel = new()
             {
                 Attributes = new List<KeyValuePair<string, string>>()
                 {
-                    new("Product Type", "AVCS"),
+                    new("Product Type", aioBatchTypes.Contains(batchType) ? "AIO" : "AVCS"),
                     new("File Name", fileName)
                 }
             };

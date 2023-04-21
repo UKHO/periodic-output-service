@@ -309,6 +309,14 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809075 - AIO fulfilment job completed
         /// </summary>
         AIOFulfilmentJobCompleted = 809075,
+        ///<summary>
+        ///809076 - AIO Base Exchange Set creation started
+        ///</summary>
+        AioBaseExchangeSetCreationStarted = 809076,
+        ///<summary>
+        ///809077 - AIO Base Exchange Set creation Completed
+        ///</summary>
+        AioBaseExchangeSetCreationCompleted = 809077
 
     }
 
