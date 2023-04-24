@@ -22,7 +22,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
         private readonly string _homeDirectoryPath;
         private const string ESSVALIDATIONREASONFORCANCELLEDPRODUCT = "noDataAvailableForCancelledProduct";
-        private const string AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION = "zip,iso;sha1";
+        private const string AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION = "zip;iso;sha1";
         private readonly Dictionary<string, string> mimeTypes = new()
         {
             { ".zip", "application/zip" },
@@ -52,20 +52,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             bool isSuccess = false;
 
-            //try
-            //{
-            //    Task[] tasks = null;
-
-            //    Task aioBaseExchangeSetTask = Task.Run(() => CreateAioBaseExchangeSet());
-            //    tasks = new Task[] { aioBaseExchangeSetTask };
-
-            //    await Task.WhenAll(tasks);
-
-            //    isSuccess = true;
-            //}
-            //finally { }
-
             await CreateAioBaseExchangeSet();
+
             isSuccess = true;
 
             return isSuccess;
@@ -75,19 +63,33 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         {
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationStarted.ToEventId(), "Creation of AIO base exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            string essBatchId = await PostProductIdentifiersToESS(new List<string>() { "FR570300", "SE6IIFE1", "NO3B2020", "GB20486A", "RU3P0ZM0", "CA172005", "NZ300661", "KR676D03" });
-
-            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssAioBaseZipBatch);
-
-            if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
+            if (string.IsNullOrEmpty(_configuration["AioCells"]))
             {
-                ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+                var aioCells = Convert.ToString(_configuration["AioCells"]).Split(',').ToList();
 
-                CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
+                string essBatchId = await PostProductIdentifiersToESS(aioCells);
 
-                bool isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION, Batch.AioBaseCDZipIsoSha1Batch);
+                (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssAioBaseZipBatch);
+
+                if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
+                {
+                    ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+
+                    CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
+
+                    bool isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION, Batch.AioBaseCDZipIsoSha1Batch);
+                }
+                else
+                {
+                    _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
+                }
             }
-
+            else
+            {
+                _logger.LogError(EventIds.AioCellsConfigurationMissing.ToEventId(), "AIO cells empty in configuration | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.AioCellsConfigurationMissing.ToEventId());
+            }
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
 

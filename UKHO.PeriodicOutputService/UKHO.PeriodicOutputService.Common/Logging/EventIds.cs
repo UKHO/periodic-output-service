@@ -316,8 +316,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         ///<summary>
         ///809077 - AIO Base Exchange Set creation Completed
         ///</summary>
-        AioBaseExchangeSetCreationCompleted = 809077
-
+        AioBaseExchangeSetCreationCompleted = 809077,
+        ///<summary>
+        ///809078 - AIO Cells Configuration Missing
+        ///</summary>
+        AioCellsConfigurationMissing = 809078
     }
 
     public static class EventIdExtensions
