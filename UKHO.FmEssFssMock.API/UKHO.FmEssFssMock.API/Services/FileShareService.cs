@@ -16,6 +16,12 @@ namespace UKHO.FmEssFssMock.API.Services
             { ".sha1", "text/plain" }
         };
 
+        private readonly Enum[] aioBatchTypes = new Enum[]
+                                     {
+                                            Batch.ValidAioProductIdentifier,
+                                            Batch.AioUpdateZipBatch
+                                     };
+
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
         public BatchResponse CreateBatch(IEnumerable<KeyValuePair<string, string>> attributes, string homeDirectoryPath)
         {
@@ -46,7 +52,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 {
                     Attributes = new List<Models.Response.Attribute>
                     {
-                        new Models.Response.Attribute { Key = "Product Type", Value = "AVCS" },
+                        new Models.Response.Attribute { Key = "Product Type", Value = aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)) ? "AIO" : "AVCS" },
                         new Models.Response.Attribute { Key = "File Name", Value = fileInfo.Name }
                     },
                     MimeType = mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE,
@@ -65,7 +71,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
             List<KeyValuePair<string, string>> attributes = new()
             {
-                new("Product Type", "AVCS"),
+                new("Product Type", aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)) ? "AIO" : "AVCS"),
                 new("Week Number", currentWeek.ToString()),
                 new("Year", currentYear),
                 new("Year / Week", currentYear + " / " + currentWeek.ToString()),
@@ -98,6 +104,15 @@ namespace UKHO.FmEssFssMock.API.Services
 
                 case Batch.PosEncUpdateBatch:
                     attributes.Add(new KeyValuePair<string, string>("Content", "ENC Updates"));
+                    break;
+
+                case Batch.ValidAioProductIdentifier:
+                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
+                    break;
+
+                case Batch.AioUpdateZipBatch:
+                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
+                    attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
 
                 default:

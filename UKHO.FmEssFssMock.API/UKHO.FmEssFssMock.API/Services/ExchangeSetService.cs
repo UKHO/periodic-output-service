@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Helpers;
@@ -15,19 +14,17 @@ namespace UKHO.FmEssFssMock.API.Services
         private readonly FileShareService _fssService;
         private readonly string _homeDirectoryPath;
         private readonly MockService _mockService;
-        private readonly AioConfiguration _aioConfiguration;
+
         public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,
                                   FileShareService fssService,
                                   IConfiguration configuration,
-                                  MockService mockService,
-                                  IOptions<AioConfiguration> aioConfiguration)
+                                  MockService mockService)
         {
             _essConfiguration = essConfiguration;
             _fssService = fssService;
             _mockService = mockService;
 
             _homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["POSFolderName"]);
-            _aioConfiguration = aioConfiguration.Value;
         }
 
         public ExchangeSetServiceResponse CreateExchangeSetForGetProductDataSinceDateTime(string sinceDateTime)
@@ -59,7 +56,17 @@ namespace UKHO.FmEssFssMock.API.Services
         public ExchangeSetServiceResponse CreateExchangeSetForPostProductIdentifier(string[] productIdentifiers)
         {
             string productIdentifiersPattern = "productIdentifier-" + string.Join("-", productIdentifiers);
-            CreateBatchRequest batchRequest = CreateBatchRequestModel(true);
+            CreateBatchRequest batchRequest;
+
+            if (productIdentifiers.Contains("GB800001"))
+            {
+                batchRequest = CreateBatchRequestModelForAIO();
+            }
+            else
+            {
+                batchRequest = CreateBatchRequestModel(true);
+            }
+
 
             BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
 
@@ -96,18 +103,33 @@ namespace UKHO.FmEssFssMock.API.Services
             PosTestCase currentTestCase = _mockService.GetCurrentPOSTestCase(_homeDirectoryPath);
             string batchType;
 
-            if (_aioConfiguration.IsAioEnabled && !string.IsNullOrEmpty(_aioConfiguration.AioCells))
+            batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
+               ? currentTestCase.ToString()
+               : isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString();
+
+            CreateBatchRequest createBatchRequest = new()
             {
-                batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
-                   ? currentTestCase.ToString()
-                   : isPostProductIdentifiersRequest ? Batch.AioFullAvcsZipBatch.ToString() : Batch.AioUpdateZipBatch.ToString();
-            }
-            else
-            {
-                batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
-                   ? currentTestCase.ToString()
-                   : isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString();
-            }
+                BusinessUnit = "AVCSCustomExchangeSets",
+                Attributes = new List<KeyValuePair<string, string>>()
+                {
+                    new("Exchange Set Type", "Update"),
+                    new("Media Type", "Zip"),
+                    new("Batch Type", batchType)
+                },
+                ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Acl = new Acl()
+                {
+                    ReadUsers = new List<string>() { "public" }
+                }
+            };
+
+            return createBatchRequest;
+        }
+
+        private CreateBatchRequest CreateBatchRequestModelForAIO()
+        {
+            AioTestCase currentTestCase = _mockService.GetCurrentAIOTestCase(_homeDirectoryPath);
+            string batchType = currentTestCase.ToString();
 
             CreateBatchRequest createBatchRequest = new()
             {

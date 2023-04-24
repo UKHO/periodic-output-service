@@ -23,6 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_Wk09_23_Only.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\38EBEB5C-2FAA-47F5-B3AC-B196D411FA75\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -33,6 +36,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\D2B46C4F-415A-4CA3-B844-6577254F39E5\CommitInProgress.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\FullAvcsPollingTimeOut\avcs_catalogue_ft.xml">
