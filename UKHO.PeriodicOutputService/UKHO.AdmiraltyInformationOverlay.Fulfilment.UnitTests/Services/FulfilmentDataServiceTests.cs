@@ -85,6 +85,10 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
                .MustHaveHappenedOnceExactly();
 
+
+            A.CallTo(() => _fakeFileInfo.MoveTo(A<string>.Ignored))
+               .MustHaveHappenedOnceExactly();
+
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
                .MustHaveHappenedOnceExactly();
 
@@ -114,6 +118,17 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch for AIO base CD created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
                 ).MustHaveHappenedOnceExactly();
 
+            A.CallTo(_fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+                ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+               call.Method.Name == "Log"
+               && call.GetArgument<LogLevel>(0) == LogLevel.Information
+               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+               ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -126,7 +141,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(FssBatchStatus.CommitInProgress);
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => _fulfilmentDataService.CreateAioExchangeSets());
+                 () => _fulfilmentDataService.CreateAioExchangeSets());
+
 
             A.CallTo(_fakeLogger).Where(call =>
                call.Method.Name == "Log"
@@ -234,6 +250,33 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
              .MustNotHaveHappened();
+        }
+
+        [Test]
+        public void Does_CreateAioExchangeSets_Throws_Error_If_GetBatchFiles_Contains_FileName_Error()
+        {
+
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+
+            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
+              .Returns(GetBatchResponseModelWithFileNameError());
+
+            Assert.ThrowsAsync<FulfilmentException>(
+                () => _fulfilmentDataService.CreateAioExchangeSets());
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Either no files found or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceOrMore();
+
         }
 
         private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
