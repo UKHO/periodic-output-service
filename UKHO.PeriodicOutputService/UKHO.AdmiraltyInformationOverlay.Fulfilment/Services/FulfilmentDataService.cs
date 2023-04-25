@@ -63,7 +63,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         {
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationStarted.ToEventId(), "Creation of AIO base exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            if (string.IsNullOrEmpty(_configuration["AioCells"]))
+            if (!string.IsNullOrEmpty(_configuration["AioCells"]))
             {
                 var aioCells = Convert.ToString(_configuration["AioCells"]).Split(',').ToList();
 
