@@ -87,7 +87,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             }
             else
             {
-                _logger.LogError(EventIds.AioCellsConfigurationMissing.ToEventId(), "AIO cells empty in configuration | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.AioCellsConfigurationMissing.ToEventId(), "AIO cells are empty in configuration | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 throw new FulfilmentException(EventIds.AioCellsConfigurationMissing.ToEventId());
             }
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
@@ -137,7 +137,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             if (!batchFiles.Any() || batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
             {
-                _logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found or error file found in batch with BathcID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 throw new FulfilmentException(EventIds.ErrorFileFoundInBatch.ToEventId());
             }
             return batchFiles;

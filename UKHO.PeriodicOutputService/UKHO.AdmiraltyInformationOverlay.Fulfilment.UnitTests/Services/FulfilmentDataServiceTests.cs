@@ -37,6 +37,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakeFileInfo = A.Fake<IFileInfo>();
 
             _fakeconfiguration["IsFTRunning"] = "false";
+            _fakeconfiguration["AioCells"] = "GB800001";
 
             _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration);
         }
@@ -216,6 +217,24 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                ).MustHaveHappenedOnceExactly();
         }
 
+        [Test]
+        public void Does_CreateAioExchangeSets_Throws_Error_When_Blank_AIO_Cell_Is_Passed()
+        {
+            _fakeconfiguration["AioCells"] = string.Empty;
+
+
+            Assert.ThrowsAsync<FulfilmentException>(
+                () => _fulfilmentDataService.CreateAioExchangeSets());
+
+            A.CallTo(_fakeLogger).Where(call =>
+               call.Method.Name == "Log"
+               && call.GetArgument<LogLevel>(0) == LogLevel.Error
+               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "AIO cells are empty in configuration | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+               ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+             .MustNotHaveHappened();
+        }
 
         private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
         {
