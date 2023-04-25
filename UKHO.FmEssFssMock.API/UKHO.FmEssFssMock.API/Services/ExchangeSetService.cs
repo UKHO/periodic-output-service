@@ -60,7 +60,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
             if (productIdentifiers.Contains("GB800001"))
             {
-                batchRequest = CreateBatchRequestModelForAIO();
+                batchRequest = CreateBatchRequestModelForAIO(true);
             }
             else
             {
@@ -89,6 +89,42 @@ namespace UKHO.FmEssFssMock.API.Services
             return null;
         }
 
+        public ExchangeSetServiceResponse CreateExchangeSetForPostProductVersion(List<ProductVersionRequest> productVersionsRequest)
+        {
+            CreateBatchRequest batchRequest;
+
+            foreach (ProductVersionRequest? item in productVersionsRequest)
+            {
+                if(item.ProductName.Contains("GB800001"))
+                {
+                    batchRequest = CreateBatchRequestModelForAIO(false);
+                }
+                else
+                {
+                    batchRequest = CreateBatchRequestModel(true);
+                }
+
+                BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
+                string productVersion = $"productVersion-{item.ProductName}-{item.EditionNumber}-{item.UpdateNumber}";
+        
+                if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
+                {
+                    string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
+                    foreach (string fileName in Directory.GetFiles(path))
+                    {
+                        FileInfo file = new(fileName);
+                        bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _homeDirectoryPath);
+
+                        if (!isFileAdded)
+                        {
+                            return null;
+                        }
+                    }
+                    return GetEssResponse(productVersion);
+                }     
+            }      
+            return null;
+        }
 
         private ExchangeSetServiceResponse GetEssResponse(string responseId)
         {
@@ -126,28 +162,33 @@ namespace UKHO.FmEssFssMock.API.Services
             return createBatchRequest;
         }
 
-        private CreateBatchRequest CreateBatchRequestModelForAIO()
+        private CreateBatchRequest CreateBatchRequestModelForAIO(bool isPostProductIdentifiersRequest)
         {
             AioTestCase currentTestCase = _mockService.GetCurrentAIOTestCase(_homeDirectoryPath);
-            string batchType = currentTestCase.ToString();
+            string batchType;
 
-            CreateBatchRequest createBatchRequest = new()
-            {
-                BusinessUnit = "AVCSCustomExchangeSets",
-                Attributes = new List<KeyValuePair<string, string>>()
+            batchType = currentTestCase != AioTestCase.ValidAioProductIdentifier
+                  ? currentTestCase.ToString()
+                  : isPostProductIdentifiersRequest ? Batch.ValidAioProductIdentifier.ToString() : Batch.AioUpdateZipBatch.ToString();
+           
+           
+                CreateBatchRequest createBatchRequest = new()
+                {
+                    BusinessUnit = "AVCSCustomExchangeSets",
+                    Attributes = new List<KeyValuePair<string, string>>()
                 {
                     new("Exchange Set Type", "Update"),
                     new("Media Type", "Zip"),
                     new("Batch Type", batchType)
                 },
-                ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                Acl = new Acl()
-                {
-                    ReadUsers = new List<string>() { "public" }
-                }
-            };
-
-            return createBatchRequest;
+                    ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Acl = new Acl()
+                    {
+                        ReadUsers = new List<string>() { "public" }
+                    }
+                };
+                return createBatchRequest;
+                      
         }
     }
 }

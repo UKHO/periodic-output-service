@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_Wk09_23_Only.zip">
+    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\38EBEB5C-2FAA-47F5-B3AC-B196D411FA75\CommitInProgress.txt">

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UKHO.FmEssFssMock.API.Models.Request;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
 
@@ -36,6 +37,22 @@ namespace UKHO.FmEssFssMock.API.Controllers
             if (productIdentifiers != null && productIdentifiers.Any())
             {
                 ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductIdentifier(productIdentifiers);
+                if (response == null)
+                {
+                    return BadRequest();
+                }
+                return Ok(response.ResponseBody);
+            }
+            return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("/ess/productData/productVersions")]
+        public IActionResult PostProductVersions([FromBody] List<ProductVersionRequest> productVersionRequest)
+        {
+            if (productVersionRequest != null && productVersionRequest.Any())
+            {
+                ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductVersion(productVersionRequest);
                 if (response == null)
                 {
                     return BadRequest();

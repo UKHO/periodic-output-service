@@ -161,5 +161,32 @@
             "requestedAioProductsAlreadyUpToDateCount": 0,
             "requestedProductsNotInExchangeSet": []
         }
+    },
+    {
+        "id": "productVersion-GB800001-31-32",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/15B38135-AA92-4D1A-9B6B-846462A18362/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/15B38135-AA92-4D1A-9B6B-846462A18362"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/15B38135-AA92-4D1A-9B6B-846462A18362/files/V01X01.zip"
+                },
+                "aioExchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/15B38135-AA92-4D1A-9B6B-846462A18362/files/AIO.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "2023-04-25T07:05:55.411Z",
+            "requestedProductCount": 0,
+            "exchangeSetCellCount": 0,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedAioProductCount": 1,
+            "aioExchangeSetCellCount": 1,
+            "requestedAioProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
     }
 ]
