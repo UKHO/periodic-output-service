@@ -58,7 +58,9 @@ namespace UKHO.FmEssFssMock.API.Services
             string productIdentifiersPattern = "productIdentifier-" + string.Join("-", productIdentifiers);
             CreateBatchRequest batchRequest;
 
-            if (productIdentifiers.Contains("GB800001"))
+            if (productIdentifiers.Contains("GB800001") ||
+                productIdentifiers.Contains("GA800001") ||
+                productIdentifiers.Contains("GC800001"))
             {
                 batchRequest = CreateBatchRequestModelForAIO(true);
             }
@@ -95,7 +97,9 @@ namespace UKHO.FmEssFssMock.API.Services
 
             foreach (ProductVersionRequest? item in productVersionsRequest)
             {
-                if(item.ProductName.Contains("GB800001"))
+                if (item.ProductName.Contains("GB800001") ||
+                    item.ProductName.Contains("GA800001") ||
+                    item.ProductName.Contains("GC800001"))
                 {
                     batchRequest = CreateBatchRequestModelForAIO(false);
                 }
@@ -106,7 +110,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
                 BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
                 string productVersion = $"productVersion-{item.ProductName}-{item.EditionNumber}-{item.UpdateNumber}";
-        
+
                 if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
                 {
                     string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
@@ -121,8 +125,8 @@ namespace UKHO.FmEssFssMock.API.Services
                         }
                     }
                     return GetEssResponse(productVersion);
-                }     
-            }      
+                }
+            }
             return null;
         }
 
@@ -169,26 +173,26 @@ namespace UKHO.FmEssFssMock.API.Services
 
             batchType = currentTestCase != AioTestCase.ValidAioProductIdentifier
                   ? currentTestCase.ToString()
-                  : isPostProductIdentifiersRequest ? Batch.ValidAioProductIdentifier.ToString() : Batch.AioUpdateZipBatch.ToString();
-           
-           
-                CreateBatchRequest createBatchRequest = new()
-                {
-                    BusinessUnit = "AVCSCustomExchangeSets",
-                    Attributes = new List<KeyValuePair<string, string>>()
+                  : isPostProductIdentifiersRequest ? Batch.EssAioBaseZipBatch.ToString() : Batch.EssAioUpdateZipBatch.ToString();
+
+
+            CreateBatchRequest createBatchRequest = new()
+            {
+                BusinessUnit = "AVCSCustomExchangeSets",
+                Attributes = new List<KeyValuePair<string, string>>()
                 {
                     new("Exchange Set Type", "Update"),
                     new("Media Type", "Zip"),
                     new("Batch Type", batchType)
                 },
-                    ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl()
-                    {
-                        ReadUsers = new List<string>() { "public" }
-                    }
-                };
-                return createBatchRequest;
-                      
+                ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Acl = new Acl()
+                {
+                    ReadUsers = new List<string>() { "public" }
+                }
+            };
+            return createBatchRequest;
+
         }
     }
 }

@@ -18,7 +18,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private readonly Enum[] aioBatchTypes = new Enum[]
                                      {
-                                            Batch.ValidAioProductIdentifier,
+                                            Batch.AioBaseCDZipIsoSha1Batch,
                                             Batch.AioUpdateZipBatch
                                      };
 
@@ -106,7 +106,7 @@ namespace UKHO.FmEssFssMock.API.Services
                     attributes.Add(new KeyValuePair<string, string>("Content", "ENC Updates"));
                     break;
 
-                case Batch.ValidAioProductIdentifier:
+                case Batch.AioBaseCDZipIsoSha1Batch:
                     attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
                     break;
 

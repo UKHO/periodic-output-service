@@ -140,16 +140,16 @@
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/eb74b68e-95a7-4d3b-a162-1444efe43257/status"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/7D302AD3-97C3-4108-BC8A-B19FC4920079/status"
                 },
                 "exchangeSetBatchDetailsUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/eb74b68e-95a7-4d3b-a162-1444efe43257"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/7D302AD3-97C3-4108-BC8A-B19FC4920079"
                 },
                 "exchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/eb74b68e-95a7-4d3b-a162-1444efe43257/files/V01X01.zip"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/7D302AD3-97C3-4108-BC8A-B19FC4920079/files/V01X01.zip"
                 },
                 "aioExchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/eb74b68e-95a7-4d3b-a162-1444efe43257/files/AIO.zip"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/7D302AD3-97C3-4108-BC8A-B19FC4920079/files/AIO.zip"
                 }
             },
             "exchangeSetUrlExpiryDateTime": "2022-08-19T15:32:34.631Z",
@@ -167,16 +167,75 @@
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/15B38135-AA92-4D1A-9B6B-846462A18362/status"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/094CDA16-FCC4-41CB-9317-BF4F26991E32/status"
                 },
                 "exchangeSetBatchDetailsUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/15B38135-AA92-4D1A-9B6B-846462A18362"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/094CDA16-FCC4-41CB-9317-BF4F26991E32"
                 },
                 "exchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/15B38135-AA92-4D1A-9B6B-846462A18362/files/V01X01.zip"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/094CDA16-FCC4-41CB-9317-BF4F26991E32/files/V01X01.zip"
                 },
                 "aioExchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/15B38135-AA92-4D1A-9B6B-846462A18362/files/AIO.zip"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/094CDA16-FCC4-41CB-9317-BF4F26991E32/files/AIO.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "2023-04-25T07:05:55.411Z",
+            "requestedProductCount": 0,
+            "exchangeSetCellCount": 0,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedAioProductCount": 1,
+            "aioExchangeSetCellCount": 1,
+            "requestedAioProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
+    },
+    {
+        "id": "productIdentifier-GC800001",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/a1c65857-1e51-4b91-b74e-66b9bebaf4e8/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/a1c65857-1e51-4b91-b74e-66b9bebaf4e8"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/a1c65857-1e51-4b91-b74e-66b9bebaf4e8/files/V01X01.zip"
+                },
+                "aioExchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/a1c65857-1e51-4b91-b74e-66b9bebaf4e8/files/AIO.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "2022-08-19T15:32:34.631Z",
+            "requestedProductCount": 0,
+            "exchangeSetCellCount": 0,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedAioProductCount": 1,
+            "aioExchangeSetCellCount": 0,
+            "requestedAioProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": [
+                {
+                    "productName": "GC800001",
+                    "reason": "invalidProduct"
+                }
+            ]
+        }
+    },
+    {
+        "id": "productIdentifier-GA800001",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/D2B46C4F-415A-4CA3-B844-6577254F39E5/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/D2B46C4F-415A-4CA3-B844-6577254F39E5"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/D2B46C4F-415A-4CA3-B844-6577254F39E5/files/V01X01.zip"
+                },
+                "aioExchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/D2B46C4F-415A-4CA3-B844-6577254F39E5/files/AIO.zip"
                 }
             },
             "exchangeSetUrlExpiryDateTime": "2023-04-25T07:05:55.411Z",

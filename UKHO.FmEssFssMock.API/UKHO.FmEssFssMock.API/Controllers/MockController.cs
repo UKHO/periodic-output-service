@@ -37,7 +37,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
         [HttpPost]
         [Route("/mock/configureAIO/{aioTestCase}")]
-        public IActionResult ConfigureFleetManager(AioTestCase aioTestCase)
+        public IActionResult ConfigureAioTestCase(AioTestCase aioTestCase)
         {
             _mockService.UpdateAIOTestCase(aioTestCase, _homeDirectoryPath);
             return Ok();
