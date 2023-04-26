@@ -309,7 +309,38 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809075 - AIO fulfilment job completed
         /// </summary>
         AIOFulfilmentJobCompleted = 809075,
-
+        ///<summary>
+        ///809076 - AIO Base Exchange Set creation started
+        ///</summary>
+        AioBaseExchangeSetCreationStarted = 809076,
+        ///<summary>
+        ///809077 - AIO Base Exchange Set creation Completed
+        ///</summary>
+        AioBaseExchangeSetCreationCompleted = 809077,
+        /// <summary>
+        /// 809078 - AIO Get info folder files not found
+        /// </summary>
+        GetAioInfoFolderFilesNotFound = 809078,
+        /// <summary>
+        /// 809079 - AIO Get info folder files found
+        /// </summary>
+        GetAioInfoFolderFilesOkResponse = 809079,
+        /// <summary>
+        /// 809080 - AIO Get info folder files status not ok
+        /// </summary>
+        GetAioInfoFolderFilesNonOkResponse = 809080,
+        /// <summary>
+        ///  809081 - AIO Base Exchange Set Ancillary Files download started
+        /// </summary>
+        AioAncillaryFilesDownloadStarted = 809081,
+        /// <summary>
+        ///  809082 - AIO Base Exchange Set Ancillary Files download completed
+        /// </summary>
+        AioAncillaryFilesDownloadCompleted = 809082,
+        /// <summary>
+        ///  809081 - AIO Base Exchange Set Ancillary Files not found
+        /// </summary>
+        AioAncillaryFilesNotFound = 809083,
     }
 
     public static class EventIdExtensions

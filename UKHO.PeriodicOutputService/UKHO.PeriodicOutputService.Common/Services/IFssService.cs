@@ -14,5 +14,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
         public Task<List<string>> UploadBlocks(string batchId, IFileInfo fileInfo);
         public Task<bool> WriteBlockFile(string batchId, string fileName, IEnumerable<string> blockIds);
         public Task<bool> CommitBatch(string batchId, IEnumerable<string> fileNames, Batch batchType);
+        Task<IEnumerable<BatchFile>> GetAioInfoFolderFiles(string batchId, string correlationId);
     }
 }

@@ -45,7 +45,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             if (stream != null)
             {
-                using (var outputFileStream = new FileStream(filePath, FileMode.Append))
+                using (var outputFileStream = new FileStream(filePath, FileMode.Append, FileAccess.Write))
                 {
                     stream.CopyTo(outputFileStream);
                 }

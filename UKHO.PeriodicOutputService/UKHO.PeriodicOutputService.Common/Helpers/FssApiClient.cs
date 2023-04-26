@@ -117,6 +117,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return await CallFSSApi(uri, accessToken, rangeHeader);
         }
 
+        public async Task<HttpResponseMessage> GetAncillaryFileDetails(string uri, string accessToken)
+        {
+            return await CallFSSApi(uri, accessToken);
+        }
+
         public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken)
         {
             _httpClient = _httpClientFactory.CreateClient("DownloadClient");
