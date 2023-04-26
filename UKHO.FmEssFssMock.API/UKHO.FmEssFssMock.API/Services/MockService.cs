@@ -16,7 +16,6 @@ namespace UKHO.FmEssFssMock.API.Services
             {
                 File.Create(destPath).Close();
             }
-            File.WriteAllText(destPath, "");
             File.WriteAllText(destPath, posTestCase.ToString());
         }
 
@@ -52,7 +51,6 @@ namespace UKHO.FmEssFssMock.API.Services
             {
                 File.Create(destPath).Close();
             }
-            File.WriteAllText(destPath, "");
             File.WriteAllText(destPath, aioTestCase.ToString());
         }
 

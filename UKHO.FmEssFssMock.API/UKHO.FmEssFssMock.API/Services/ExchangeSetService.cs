@@ -75,9 +75,9 @@ namespace UKHO.FmEssFssMock.API.Services
             if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
             {
                 string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
-                foreach (string fileName in Directory.GetFiles(path))
+                foreach (string filePath in Directory.GetFiles(path))
                 {
-                    FileInfo file = new(fileName);
+                    FileInfo file = new(filePath);
 
                     bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _homeDirectoryPath);
 
@@ -95,7 +95,7 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             CreateBatchRequest batchRequest;
 
-            foreach (ProductVersionRequest? item in productVersionsRequest)
+            foreach (ProductVersionRequest item in productVersionsRequest)
             {
                 if (item.ProductName.Contains("GB800001") ||
                     item.ProductName.Contains("GA800001") ||
@@ -114,9 +114,9 @@ namespace UKHO.FmEssFssMock.API.Services
                 if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
                 {
                     string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
-                    foreach (string fileName in Directory.GetFiles(path))
+                    foreach (string filePath in Directory.GetFiles(path))
                     {
-                        FileInfo file = new(fileName);
+                        FileInfo file = new(filePath);
                         bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _homeDirectoryPath);
 
                         if (!isFileAdded)
@@ -143,9 +143,17 @@ namespace UKHO.FmEssFssMock.API.Services
             PosTestCase currentTestCase = _mockService.GetCurrentPOSTestCase(_homeDirectoryPath);
             string batchType;
 
-            batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
-               ? currentTestCase.ToString()
-               : isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString();
+            if (currentTestCase == PosTestCase.ValidProductIdentifiers)
+            {
+                if (isPostProductIdentifiersRequest)
+                    batchType = Batch.EssFullAvcsZipBatch.ToString();
+                else
+                    batchType = Batch.EssUpdateZipBatch.ToString();
+            }
+            else
+            {
+                batchType = currentTestCase.ToString();
+            }
 
             CreateBatchRequest createBatchRequest = new()
             {
@@ -171,9 +179,17 @@ namespace UKHO.FmEssFssMock.API.Services
             AioTestCase currentTestCase = _mockService.GetCurrentAIOTestCase(_homeDirectoryPath);
             string batchType;
 
-            batchType = currentTestCase != AioTestCase.ValidAioProductIdentifier
-                  ? currentTestCase.ToString()
-                  : isPostProductIdentifiersRequest ? Batch.EssAioBaseZipBatch.ToString() : Batch.EssAioUpdateZipBatch.ToString();
+            if (currentTestCase == AioTestCase.ValidAioProductIdentifier)
+            {
+                if (isPostProductIdentifiersRequest)
+                    batchType = Batch.EssAioBaseZipBatch.ToString();
+                else
+                    batchType = Batch.EssAioUpdateZipBatch.ToString();
+            }
+            else
+            {
+                batchType = currentTestCase.ToString();
+            }
 
 
             CreateBatchRequest createBatchRequest = new()
