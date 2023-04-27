@@ -25,6 +25,15 @@ namespace UKHO.FmEssFssMock.API.Models.Response
         [JsonProperty("requestedProductsAlreadyUpToDateCount")]
         public int? RequestedProductsAlreadyUpToDateCount { get; set; }
 
+        [JsonProperty("requestedAioProductCount", NullValueHandling = NullValueHandling.Ignore)]
+        public int? RequestedAioProductCount { get; set; } = null;
+
+        [JsonProperty("aioExchangeSetCellCount", NullValueHandling = NullValueHandling.Ignore)]
+        public int? AioExchangeSetCellCount { get; set; } = null;
+
+        [JsonProperty("RequestedAioProductsAlreadyUpToDateCount", NullValueHandling = NullValueHandling.Ignore)]
+        public int? RequestedAioProductsAlreadyUpToDateCount { get; set; } = null;
+
         [JsonProperty("requestedProductsNotInExchangeSet")]
         public IEnumerable<RequestedProductsNotInExchangeSet>? RequestedProductsNotInExchangeSet { get; set; }
     }
@@ -48,6 +57,9 @@ namespace UKHO.FmEssFssMock.API.Models.Response
 
         [JsonProperty("exchangeSetFileUri")]
         public LinkSetFileUri? ExchangeSetFileUri { get; set; }
+
+        [JsonProperty("aioExchangeSetFileUri", NullValueHandling = NullValueHandling.Ignore)]
+        public LinkSetFileUri? AioExchangeSetFileUri { get; set; } = null;
 
         [JsonProperty("errorFileUri", NullValueHandling = NullValueHandling.Ignore)]
         [System.Text.Json.Serialization.JsonIgnore]
