@@ -14,6 +14,7 @@ namespace UKHO.FmEssFssMock.API.Services
         private readonly FileShareService _fssService;
         private readonly string _homeDirectoryPath;
         private readonly MockService _mockService;
+
         public ExchangeSetService(IOptions<ExchangeSetServiceConfiguration> essConfiguration,
                                   FileShareService fssService,
                                   IConfiguration configuration,
@@ -55,16 +56,28 @@ namespace UKHO.FmEssFssMock.API.Services
         public ExchangeSetServiceResponse CreateExchangeSetForPostProductIdentifier(string[] productIdentifiers)
         {
             string productIdentifiersPattern = "productIdentifier-" + string.Join("-", productIdentifiers);
-            CreateBatchRequest batchRequest = CreateBatchRequestModel(true);
+            CreateBatchRequest batchRequest;
+
+            if (productIdentifiers.Contains("GB800001") ||
+                productIdentifiers.Contains("GA800001") ||
+                productIdentifiers.Contains("GC800001"))
+            {
+                batchRequest = CreateBatchRequestModelForAIO(true);
+            }
+            else
+            {
+                batchRequest = CreateBatchRequestModel(true);
+            }
+
 
             BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
 
             if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
             {
                 string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
-                foreach (string fileName in Directory.GetFiles(path))
+                foreach (string filePath in Directory.GetFiles(path))
                 {
-                    FileInfo file = new(fileName);
+                    FileInfo file = new(filePath);
 
                     bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _homeDirectoryPath);
 
@@ -78,6 +91,44 @@ namespace UKHO.FmEssFssMock.API.Services
             return null;
         }
 
+        public ExchangeSetServiceResponse CreateExchangeSetForPostProductVersion(List<ProductVersionRequest> productVersionsRequest)
+        {
+            CreateBatchRequest batchRequest;
+
+            foreach (ProductVersionRequest item in productVersionsRequest)
+            {
+                if (item.ProductName.Contains("GB800001") ||
+                    item.ProductName.Contains("GA800001") ||
+                    item.ProductName.Contains("GC800001"))
+                {
+                    batchRequest = CreateBatchRequestModelForAIO(false);
+                }
+                else
+                {
+                    batchRequest = CreateBatchRequestModel(true);
+                }
+
+                BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
+                string productVersion = $"productVersion-{item.ProductName}-{item.EditionNumber}-{item.UpdateNumber}";
+
+                if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
+                {
+                    string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
+                    foreach (string filePath in Directory.GetFiles(path))
+                    {
+                        FileInfo file = new(filePath);
+                        bool isFileAdded = _fssService.AddFile(createBatchResponse.BatchId.ToString(), file.Name, _homeDirectoryPath);
+
+                        if (!isFileAdded)
+                        {
+                            return null;
+                        }
+                    }
+                    return GetEssResponse(productVersion);
+                }
+            }
+            return null;
+        }
 
         private ExchangeSetServiceResponse GetEssResponse(string responseId)
         {
@@ -90,10 +141,19 @@ namespace UKHO.FmEssFssMock.API.Services
         private CreateBatchRequest CreateBatchRequestModel(bool isPostProductIdentifiersRequest)
         {
             PosTestCase currentTestCase = _mockService.GetCurrentPOSTestCase(_homeDirectoryPath);
+            string batchType;
 
-            string batchType = currentTestCase != PosTestCase.ValidProductIdentifiers
-                ? currentTestCase.ToString()
-                : isPostProductIdentifiersRequest ? Batch.EssFullAvcsZipBatch.ToString() : Batch.EssUpdateZipBatch.ToString();
+            if (currentTestCase == PosTestCase.ValidProductIdentifiers)
+            {
+                if (isPostProductIdentifiersRequest)
+                    batchType = Batch.EssFullAvcsZipBatch.ToString();
+                else
+                    batchType = Batch.EssUpdateZipBatch.ToString();
+            }
+            else
+            {
+                batchType = currentTestCase.ToString();
+            }
 
             CreateBatchRequest createBatchRequest = new()
             {
@@ -112,6 +172,43 @@ namespace UKHO.FmEssFssMock.API.Services
             };
 
             return createBatchRequest;
+        }
+
+        private CreateBatchRequest CreateBatchRequestModelForAIO(bool isPostProductIdentifiersRequest)
+        {
+            AioTestCase currentTestCase = _mockService.GetCurrentAIOTestCase(_homeDirectoryPath);
+            string batchType;
+
+            if (currentTestCase == AioTestCase.ValidAioProductIdentifier)
+            {
+                if (isPostProductIdentifiersRequest)
+                    batchType = Batch.EssAioBaseZipBatch.ToString();
+                else
+                    batchType = Batch.EssAioUpdateZipBatch.ToString();
+            }
+            else
+            {
+                batchType = currentTestCase.ToString();
+            }
+
+
+            CreateBatchRequest createBatchRequest = new()
+            {
+                BusinessUnit = "AVCSCustomExchangeSets",
+                Attributes = new List<KeyValuePair<string, string>>()
+                {
+                    new("Exchange Set Type", "Update"),
+                    new("Media Type", "Zip"),
+                    new("Batch Type", batchType)
+                },
+                ExpiryDate = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Acl = new Acl()
+                {
+                    ReadUsers = new List<string>() { "public" }
+                }
+            };
+            return createBatchRequest;
+
         }
     }
 }

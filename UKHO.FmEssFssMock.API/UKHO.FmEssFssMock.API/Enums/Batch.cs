@@ -32,8 +32,18 @@ namespace UKHO.FmEssFssMock.Enums
         FullAvcsPollingTimeOut = 9,
 
         [Description("38ebeb5c-2faa-47f5-b3ac-b196d411fa75")]
-        UpdatePollingTimeout = 10
+        UpdatePollingTimeout = 10,
 
+        [Description("eb74b68e-95a7-4d3b-a162-1444efe43257")]
+        AioBaseCDZipIsoSha1Batch = 11,
 
+        [Description("15b38135-aa92-4d1a-9b6b-846462a18362")]
+        AioUpdateZipBatch = 12,
+
+        [Description("7d302ad3-97c3-4108-bc8a-b19fc4920079")]
+        EssAioBaseZipBatch = 13,
+
+        [Description("094cda16-fcc4-41cb-9317-bf4f26991e32")]
+        EssAioUpdateZipBatch = 13,
     }
 }

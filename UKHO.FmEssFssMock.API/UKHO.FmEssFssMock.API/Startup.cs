@@ -25,7 +25,7 @@ namespace UKHO.FmEssFssMock.API
             });
             services.AddControllers(o => o.InputFormatters.Insert(0, new BinaryRequestBodyFormatter()));
 
-            services.Configure<FleetManagerB2BApiConfiguration>(Configuration.GetSection("FleetManagerB2BApiConfiguration"));            
+            services.Configure<FleetManagerB2BApiConfiguration>(Configuration.GetSection("FleetManagerB2BApiConfiguration"));
             services.Configure<ExchangeSetServiceConfiguration>(Configuration.GetSection("ExchangeSetServiceConfiguration"));
             services.Configure<FileShareServiceConfiguration>(Configuration.GetSection("FileShareServiceConfiguration"));
 
