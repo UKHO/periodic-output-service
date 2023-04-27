@@ -19,7 +19,9 @@ namespace UKHO.FmEssFssMock.API.Services
         private readonly Enum[] aioBatchTypes = new Enum[]
                                      {
                                             Batch.AioBaseCDZipIsoSha1Batch,
-                                            Batch.AioUpdateZipBatch
+                                            Batch.AioUpdateZipBatch,
+                                            Batch.EssAioBaseZipBatch,
+                                            Batch.EssAioUpdateZipBatch
                                      };
 
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
