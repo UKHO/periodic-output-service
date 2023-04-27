@@ -211,7 +211,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
             if (!string.IsNullOrWhiteSpace(filter))
             {
                 string responseFilePath = Path.Combine(_fssConfiguration.Value.FssDataDirectoryPath, _fssConfiguration.Value.FssInfoResponseFileName);
-                SearchBatchResponse response = _fileShareService.GetBatchResponse(filter, responseFilePath);
+                SearchBatchResponse response = _fileShareService.GetBatchResponse(filter, responseFilePath, _homeDirectoryPath);
 
                 if (response != null)
                 {

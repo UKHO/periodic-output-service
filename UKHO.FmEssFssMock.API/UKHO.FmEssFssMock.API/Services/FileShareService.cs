@@ -7,6 +7,7 @@ namespace UKHO.FmEssFssMock.API.Services
 {
     public class FileShareService
     {
+        private readonly string _aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";
         private readonly Dictionary<string, string> mimeTypes = new()
         {
             { ".zip", "application/zip" },
@@ -179,10 +180,24 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private static string GetBatchStatus(string path) => File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed";
 
-        public SearchBatchResponse GetBatchResponse(string filter, string filePath)
+        public SearchBatchResponse GetBatchResponse(string filter, string filePath, string homeDirectoryPath)
         {
             if (filter.ToUpper().Contains("AIO CD INFO"))
             {
+                FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, _aioInfoFilesBatchId));
+
+                string path = Path.Combine(Environment.CurrentDirectory, @"Data", _aioInfoFilesBatchId);
+                foreach (string fullfilePath in Directory.GetFiles(path))
+                {
+                    FileInfo file = new(fullfilePath);
+
+                    bool isFileAdded = AddFile(_aioInfoFilesBatchId, file.Name, homeDirectoryPath);
+
+                    if (!isFileAdded)
+                    {
+                        return null;
+                    }
+                }
                 return FileHelper.ReadJsonFile<SearchBatchResponse>(filePath);
             }
             return new SearchBatchResponse()
