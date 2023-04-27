@@ -70,7 +70,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
@@ -132,7 +132,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
@@ -175,7 +175,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
@@ -220,7 +220,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.CommitInProgress);
 
             Assert.ThrowsAsync<FulfilmentException>(
@@ -257,7 +257,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))

@@ -48,7 +48,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
 
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
@@ -137,7 +137,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
 
             Assert.ThrowsAsync<FulfilmentException>(
@@ -158,7 +158,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
 
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
@@ -197,7 +197,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
 
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
@@ -262,7 +262,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
 
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))

@@ -43,12 +43,25 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId)
+        public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId, RequestType requestType)
         {
             _logger.LogInformation(EventIds.FssBatchStatusPollingStarted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             FssBatchStatus batchStatus = FssBatchStatus.Incomplete;
             DateTime startTime = DateTime.UtcNow;
+            double batchStatusPollingCutoffTime = 0;
+            int batchStatusPollingDelayTime = 0;
+
+            if (requestType.Equals(RequestType.POS))
+            {
+                batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime);
+                batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime);
+            }
+            else
+            {
+                batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForAIO);
+                batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTimeForAIO);
+            }
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/status";
 
@@ -57,7 +70,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             FssBatchStatus[] pollBatchStatus = { FssBatchStatus.CommitInProgress, FssBatchStatus.Incomplete };
 
             while (pollBatchStatus.Contains(batchStatus) &&
-                        DateTime.UtcNow - startTime < TimeSpan.FromMinutes(double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime)))
+                        DateTime.UtcNow - startTime < TimeSpan.FromMinutes(batchStatusPollingCutoffTime))
             {
                 _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
@@ -70,7 +83,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
                     _logger.LogInformation(EventIds.GetBatchStatusRequestCompleted.ToEventId(), "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
 
-                    await Task.Delay(int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime));
+                    await Task.Delay(batchStatusPollingDelayTime);
                 }
                 else
                 {

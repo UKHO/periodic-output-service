@@ -6,7 +6,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 {
     public interface IFssService
     {
-        public Task<FssBatchStatus> CheckIfBatchCommitted(string batchId);
+        public Task<FssBatchStatus> CheckIfBatchCommitted(string batchId, RequestType requestType);
         public Task<GetBatchResponseModel> GetBatchDetails(string batchId);
         public Task<bool> DownloadFile(string fileName, string fileLink, long fileSize, string filePath);
         public Task<string> CreateBatch(Batch batchType);

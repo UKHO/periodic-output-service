@@ -270,7 +270,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             if (!string.IsNullOrEmpty(essBatchId))
             {
-                FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId);
+                FssBatchStatus fssBatchStatus = await _fssService.CheckIfBatchCommitted(essBatchId, RequestType.POS);
 
                 if (fssBatchStatus == FssBatchStatus.Committed)
                 {
