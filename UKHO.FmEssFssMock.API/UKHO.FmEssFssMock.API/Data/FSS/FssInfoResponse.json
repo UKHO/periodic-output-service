@@ -1,0 +1,85 @@
+{
+    "count": 1,
+    "total": 1,
+    "entries": [
+        {
+            "batchId": "649c902d-5282-4ccf-924a-2b548ef42179",
+            "status": "Committed",
+            "allFilesZipSize": 1054414,
+            "attributes": [
+                {
+                    "key": "Content",
+                    "value": "AIO CD INFO"
+                },
+                {
+                    "key": "Product Type",
+                    "value": "AIO"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2023-04-17T11:38:01.1Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "End-User-Licence-Agreement-for-ADMIRALTY-digital-data-services.pdf",
+                    "fileSize": 96589,
+                    "mimeType": "application/pdf",
+                    "hash": "ZRTGFpHCTwn/hs+qrl74NQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/649c902d-5282-4ccf-924a-2b548ef42179/files/End-User-Licence-Agreement-for-ADMIRALTY-digital-data-services.pdf"
+                        }
+                    }
+                },
+                {
+                    "filename": "AIO V2 - UKHO letter for inspectors.pdf",
+                    "fileSize": 206489,
+                    "mimeType": "application/pdf",
+                    "hash": "8GLg6ji7qPDipoYiEgcHuA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/649c902d-5282-4ccf-924a-2b548ef42179/files/AIO%20V2%20-%20UKHO%20letter%20for%20inspectors.pdf"
+                        }
+                    }
+                },
+                {
+                    "filename": "ENC TandP NM status.pdf",
+                    "fileSize": 355252,
+                    "mimeType": "application/pdf",
+                    "hash": "o2yEsTNQndV9Tp2JMnj1fg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/649c902d-5282-4ccf-924a-2b548ef42179/files/ENC%20TandP%20NM%20status.pdf"
+                        }
+                    }
+                },
+                {
+                    "filename": "AVCS User Guide.pdf",
+                    "fileSize": 690265,
+                    "mimeType": "application/pdf",
+                    "hash": "LtZiAI7b2NbJX+NBX8MeBg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/649c902d-5282-4ccf-924a-2b548ef42179/files/AVCS%20User%20Guide.pdf"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "_Links": {
+        "self": {
+            "href": "/batch?limit=10&start=0&$filter=%24batch%28Content%29%20eq%20%27AIO%20CD%20INFO%27%20"
+        },
+        "first": {
+            "href": "/batch?limit=10&start=0&$filter=%24batch%28Content%29%20eq%20%27AIO%20CD%20INFO%27%20"
+        },
+        "last": {
+            "href": "/batch?limit=10&start=0&$filter=%24batch%28Content%29%20eq%20%27AIO%20CD%20INFO%27%20"
+        }
+    }
+}

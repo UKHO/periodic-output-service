@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
+using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Models.Request;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
@@ -15,6 +17,8 @@ namespace UKHO.FmEssFssMock.API.Controllers
         private readonly FileShareService _fileShareService;
 
         private readonly IConfiguration _configuration;
+        private readonly IOptions<FileShareServiceConfiguration> _fssConfiguration;
+
         public Dictionary<string, string> ErrorsCreateBatch { get; set; }
         public Dictionary<string, string> ErrorsPutBlocksInFile { get; set; }
         public Dictionary<string, string> ErrorsCommitBatch { get; set; }
@@ -22,9 +26,10 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
         private readonly string _homeDirectoryPath;
 
-        public _fileShareServiceController(IHttpContextAccessor httpContextAccessor, FileShareService fileShareService, IConfiguration configuration) : base(httpContextAccessor)
+        public _fileShareServiceController(IHttpContextAccessor httpContextAccessor, FileShareService fileShareService, IConfiguration configuration, IOptions<FileShareServiceConfiguration> fssConfiguration) : base(httpContextAccessor)
         {
             _fileShareService = fileShareService;
+            _fssConfiguration = fssConfiguration;
 
             ErrorsCreateBatch = new Dictionary<string, string>
             {
@@ -197,6 +202,23 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 }
             }
             return NotFound();
+        }
+
+        [HttpGet]
+        [Route("/fss/batch")]
+        public IActionResult GetBatchResponse([FromQuery(Name = "$filter")] string filter = "")
+        {
+            if (!string.IsNullOrWhiteSpace(filter))
+            {
+                string responseFilePath = Path.Combine(_fssConfiguration.Value.FssDataDirectoryPath, _fssConfiguration.Value.FssInfoResponseFileName);
+                SearchBatchResponse response = _fileShareService.GetBatchResponse(filter, responseFilePath);
+
+                if (response != null)
+                {
+                    return Ok(response);
+                }
+            }
+            return BadRequest();
         }
     }
 }

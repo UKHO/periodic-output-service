@@ -178,5 +178,24 @@ namespace UKHO.FmEssFssMock.API.Services
         }
 
         private static string GetBatchStatus(string path) => File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed";
+
+        public SearchBatchResponse GetBatchResponse(string filter, string filePath)
+        {
+            if (filter.ToUpper().Contains("AIO CD INFO"))
+            {
+                return FileHelper.ReadJsonFile<SearchBatchResponse>(filePath);
+            }
+            return new SearchBatchResponse()
+            {
+                Entries = new List<BatchDetail>(),
+                _Links = new PagingLinks()
+                {
+                    Self = new Link()
+                    {
+                        Href = "/batch?limit=10&start=0&$filter=%24batch%28Content%29%20eq%20%27AIO%20CD%20INFO%27%20and%20%24batch%28Product%20Type%29%20eq%20%27%27"
+                    },
+                }
+            };
+        }
     }
 }

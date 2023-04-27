@@ -27,6 +27,7 @@ namespace UKHO.FmEssFssMock.API
 
             services.Configure<FleetManagerB2BApiConfiguration>(Configuration.GetSection("FleetManagerB2BApiConfiguration"));            
             services.Configure<ExchangeSetServiceConfiguration>(Configuration.GetSection("ExchangeSetServiceConfiguration"));
+            services.Configure<FileShareServiceConfiguration>(Configuration.GetSection("FileShareServiceConfiguration"));
 
             services.AddScoped<FileShareService>();
             services.AddScoped<ExchangeSetService>();
