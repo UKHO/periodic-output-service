@@ -45,6 +45,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string MockApiBaseUrl { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
             public string FMConfigurationValidProductIdentifier { get; set; }
+            public string FMConfigurationValidAIOProductIdentifier { get; set; }
             public string FMConfigurationInValidProductIdentifier { get; set; }
             public string FMConfigurationFullAvcsPollingTimeOut { get; set; }
             public string FMConfigurationUpdatePollingTimeout { get; set; }
@@ -59,6 +60,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string InvalidProductIdentifierBatchId { get; set; }
             public string FullAvcsPollingTimeOutBatchId { get; set; }
             public string UpdatePollingTimeoutBatchId { get; set; }
+            public string AIOValidBatchId { get; set; }
             public string EncUpdateListCsvBatchId { get; set; }
             public string TempFolderName { get; set; }
             public string UpdateExchangeSet { get; set; }

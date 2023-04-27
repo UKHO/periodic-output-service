@@ -131,5 +131,47 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     break;
             }
         }
+
+        public static void GetBatchDetailsResponseValidationForAio(dynamic batchDetailsResponse)
+        {
+            string expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
+            string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+            string yearNumber = DateTime.UtcNow.Year.ToString();
+            string year2 = DateTime.UtcNow.Year.ToString().Substring(DateTime.UtcNow.Year.ToString().Length - 2);
+
+            //to check status
+            string batchStatus = batchDetailsResponse.status;
+            batchStatus.Should().Be("Committed");
+
+            string businessUnit = batchDetailsResponse.businessUnit;
+            businessUnit.Should().Be("AVCSData");
+
+            string expiryDate = batchDetailsResponse.expiryDate;
+            expiryDate.Should().Contain(expectedExpiryDate);
+
+            string fileSize = batchDetailsResponse.files[0].fileSize;
+            fileSize.Should().NotBeNullOrEmpty();
+
+            string hash = batchDetailsResponse.files[0].hash;
+            hash.Should().NotBeNullOrEmpty();
+
+            string mimeType = batchDetailsResponse.files[0].mimeType;
+            mimeType.Should().Be("application/x-raw-disk-image");
+
+            string productType = batchDetailsResponse.attributes[0].value;
+            productType.Should().Be("AIO");
+
+            string weeknumber = batchDetailsResponse.attributes[1].value;
+            weeknumber.Should().Be(weekNumber);
+
+            string year = batchDetailsResponse.attributes[2].value;
+            year.Should().Be(yearNumber);
+
+            string yearweek = batchDetailsResponse.attributes[3].value;
+            yearweek.Should().Be(yearNumber + " / " +weeknumber);
+
+            string exchangesettype = batchDetailsResponse.attributes[4].value;
+            exchangesettype.Should().Be("AIO");
+        }
     }
 }
