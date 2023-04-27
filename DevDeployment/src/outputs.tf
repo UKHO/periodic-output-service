@@ -57,3 +57,8 @@ output "webjob_password" {
   value = module.webapp_service.password
   sensitive = true
 }
+
+output "connection_string" {
+  value = module.app_insights.connection_string
+  sensitive = true
+}

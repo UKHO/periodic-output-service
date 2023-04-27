@@ -76,6 +76,32 @@ stages:
             StripPath: $(Build.Repository.LocalPath)/periodic-output-service
             CoverityScanPath: $(Build.Repository.LocalPath)/coverityscan-buildtemplates
 
+  - stage: Stryker_Mutator
+    displayName: "Stryker Mutator"
+    dependsOn: []
+    jobs:
+    - job: Stryker
+      workspace:
+        clean: all
+      steps:
+        - task: DotNetCoreCLI@2
+          displayName: "Install Stryker"
+          inputs:
+            command: custom
+            custom: tool
+            arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools
+        - task: Powershell@2
+          displayName: "Run Stryker"
+          inputs:
+            workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+            targetType: 'inline'
+            pwsh: true
+            script: $(Agent.BuildDirectory)/tools/dotnet-stryker
+        - task: PublishMutationReport@0
+          displayName: 'Publish Strkyer Mutator Report'
+          inputs:
+            reportPattern: '**/mutation-report.html'
+
   - stage: PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     displayName: "Build (inc DependencyChecker, Dotnet Build , dotnet test and publish artifact )"
     dependsOn: []
@@ -215,6 +241,16 @@ stages:
               publishWebProjects: false
               projects: "**/*UKHO.PeriodicOutputService.Fulfilment.csproj"
               arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob'
+              zipAfterPublish: false
+              modifyOutputPath: false
+
+          - task: DotNetCoreCLI@2
+            displayName: "Publish AIO Fulfilment Service Code"
+            inputs:
+              command: "publish"
+              publishWebProjects: false
+              projects: "**/*UKHO.AdmiraltyInformationOverlay.Fulfilment.csproj"
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\AIOFulfilmentWebJob'
               zipAfterPublish: false
               modifyOutputPath: false
 
