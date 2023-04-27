@@ -39,6 +39,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
         public BatchDetail GetBatchDetails(string batchId, string homeDirectoryPath)
         {
+            batchId = batchId.ToLower();
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
             int currentWeek = cultureInfo.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
             string currentYear = DateTime.UtcNow.Year.ToString();
