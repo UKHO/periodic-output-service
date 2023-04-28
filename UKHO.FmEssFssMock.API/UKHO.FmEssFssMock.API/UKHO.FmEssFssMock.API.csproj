@@ -44,13 +44,10 @@
     <None Update="Data\D2B46C4F-415A-4CA3-B844-6577254F39E5\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631_CD_WK34_22.iso">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.iso">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631_CD_WK34_22.iso.sha1">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631_CD_WK34_22.zip">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\FullAvcsPollingTimeOut\avcs_catalogue_ft.xml">
