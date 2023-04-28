@@ -21,7 +21,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFMAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationInValidProductIdentifier);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
-            await CommonHelper.RunWebJob();
+            await CommonHelper.RunWebJobAio();
         }
 
         [Test]

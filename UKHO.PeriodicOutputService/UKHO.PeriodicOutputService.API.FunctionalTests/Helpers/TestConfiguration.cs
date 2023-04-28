@@ -10,6 +10,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public FSSApiConfiguration FssConfig = new();
         public POSWebJobApiConfiguration POSWebJobConfig = new();
         public POSFileDetails posFileDetails = new();
+        public AioWebjobApiConfiguration AioWebjobApiConfig = new();
 
         public class FleetManagerB2BApiConfiguration
         {
@@ -78,7 +79,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string PosDVDVolumeIdentifier { get; set; }
         }
 
-        public TestConfiguration()
+        public class AioWebjobApiConfiguration
+        {
+            public string BaseUrl { get; set; }
+        }
+
+            public TestConfiguration()
         {
             ConfigurationRoot = new ConfigurationBuilder()
                                .AddJsonFile("appsettings.json", false)
@@ -89,6 +95,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             ConfigurationRoot.Bind("FSSApiConfiguration", FssConfig);
             ConfigurationRoot.Bind("POSWebjobApiConfiguration", POSWebJobConfig);
             ConfigurationRoot.Bind("POSFileDetails", posFileDetails);
+            ConfigurationRoot.Bind("AioWebjobApiConfiguration", AioWebjobApiConfig);
         }
     }
 }
