@@ -93,7 +93,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 
         private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
         {
-            //serviceCollection.AddApplicationInsightsTelemetryWorkerService();
+            serviceCollection.AddApplicationInsightsTelemetryWorkerService();
 
             //Add logging
             serviceCollection.AddLogging(loggingBuilder =>

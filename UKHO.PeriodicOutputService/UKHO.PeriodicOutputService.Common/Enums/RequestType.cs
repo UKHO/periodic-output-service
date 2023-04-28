@@ -3,6 +3,6 @@
     public enum RequestType
     {
         POS = 1,
-        AIO = 2,
+        AIO = 2
     }
 }
