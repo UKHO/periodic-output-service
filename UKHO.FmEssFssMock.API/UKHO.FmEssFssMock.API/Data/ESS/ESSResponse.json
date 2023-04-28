@@ -17,6 +17,9 @@
             "requestedProductCount": 10,
             "exchangeSetCellCount": 10,
             "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedAioProductCount": 0,
+            "aioExchangeSetCellCount": 0,
+            "requestedAioProductsAlreadyUpToDateCount": 0,
             "requestedProductsNotInExchangeSet": []
         }
     },
@@ -101,6 +104,9 @@
             "requestedProductCount": 11,
             "exchangeSetCellCount": 10,
             "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedAioProductCount": 0,
+            "aioExchangeSetCellCount": 0,
+            "requestedAioProductsAlreadyUpToDateCount": 0,
             "requestedProductsNotInExchangeSet": [
                 {
                     "productName": "ABCDEFGH",
