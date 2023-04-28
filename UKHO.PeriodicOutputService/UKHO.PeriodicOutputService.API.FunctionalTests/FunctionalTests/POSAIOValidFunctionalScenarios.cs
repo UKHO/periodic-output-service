@@ -12,6 +12,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
         private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
+        private string DownloadedFolderPath { get; set; }
+        private string fssJwtToken;
 
         [OneTimeSetUp]
         public async Task Setup()
@@ -20,7 +22,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
             await CommonHelper.RunWebJobAio();
         }
-
 
         [Test]
         public async Task WhenICallBatchDetailsEndpointWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
@@ -31,6 +32,15 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             GetBatchDetails.GetBatchDetailsResponseValidationForAio(batchDetailsResponse);
+        }
+
+        [Test]
+        public async Task WhenIDownloadAioExchangeSet_ThenAdditionalAioCdFilesAreGenerated()
+        {
+            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractAioZip(fssJwtToken, posDetails.AioExchangeSetBatchId);
+
+            int fileCount = Directory.GetFiles(Path.Combine(DownloadedFolderPath, posDetails.AioFolderName,posDetails.InfoFolderName), "*.*", SearchOption.TopDirectoryOnly).Length;
+            Assert.IsTrue(fileCount > 0, $"File count is {fileCount} in the specified folder path.");
         }
 
         [OneTimeTearDown]
