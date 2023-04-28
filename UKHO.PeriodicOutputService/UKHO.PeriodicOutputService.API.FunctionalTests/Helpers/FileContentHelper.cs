@@ -120,5 +120,18 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 responseMessage.StatusCode.Should().Be((System.Net.HttpStatusCode)404);
             }
         }
+
+        public static async Task <string> DownloadAndExtractAioZip(string FssJwtToken, string batchId)
+        {
+            string filename = "AIO_S631-1_CD_WK" + weekNumber + "_" + currentYear;
+            var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{filename}.zip";
+
+            var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedAioFolder(downloadFileUrl.ToString(), FssJwtToken);
+
+            var downloadFolder = FssBatchHelper.RenameFolder(extractDownloadedFolder);
+            var downloadFolderPath = Path.Combine(Path.GetTempPath(), downloadFolder);
+
+            return downloadFolderPath;
+        }
     }
 }

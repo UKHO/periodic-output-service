@@ -77,6 +77,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string Sha1FileMimeType { get; set; }
             public string ZipFileMimeType { get; set; }
             public string PosDVDVolumeIdentifier { get; set; }
+            public string AioExchangeSetBatchId { get; set; }
+            public string InfoFolderName { get; set; }
+            public string AioFolderName { get; set; }
+
         }
 
         public class AioWebjobApiConfiguration
