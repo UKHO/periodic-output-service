@@ -78,9 +78,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                 configBuilder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
             }
 
-            ////#if DEBUG   //Add development overrides configuration
-            ////            configBuilder.AddJsonFile("appsettings.local.overrides.json", true, true);
-            ////#endif
+#if DEBUG   //Add development overrides configuration
+            configBuilder.AddJsonFile("appsettings.local.overrides.json", true, true);
+#endif
             //Add environment variables
             configBuilder.AddEnvironmentVariables();
 
