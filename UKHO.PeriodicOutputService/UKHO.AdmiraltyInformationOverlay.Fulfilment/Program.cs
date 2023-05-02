@@ -145,6 +145,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                 configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
             }
 
+            serviceCollection.AddDistributedMemoryCache();
+
             serviceCollection.AddTransient<AioFulfilmentJob>();
             serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
 
