@@ -11,6 +11,6 @@
         public Task<HttpResponseMessage> GetBatchStatusAsync(string uri, string accessToken);
         public Task<HttpResponseMessage> DownloadFile(string uri, string accessToken, string rangeHeader);
         public Task<HttpResponseMessage> DownloadFile(string uri, string accessToken);
-        Task<HttpResponseMessage> GetAncillaryFileDetails(string uri, string accessToken);
+        Task<HttpResponseMessage> GetAncillaryFileDetailsAsync(string uri, string accessToken);
     }
 }

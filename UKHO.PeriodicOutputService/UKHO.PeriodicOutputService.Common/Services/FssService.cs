@@ -105,7 +105,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
-        public async Task<bool> DownloadFile(string fileName, string fileLink, long fileSize, string filePath)
+        public async Task<bool> DownloadFileAsync(string fileName, string fileLink, long fileSize, string filePath)
         {
                 long startByte = 0;
                 long downloadSize = fileSize < 10485760 ? fileSize : 10485760;
@@ -309,18 +309,18 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
-        public async Task<IEnumerable<BatchFile>> GetAioInfoFolderFiles(string batchId, string correlationId)
+        public async Task<IEnumerable<BatchFile>> GetAioInfoFolderFilesAsync(string batchId, string correlationId)
         {
             IEnumerable<BatchFile>? fileDetails = null;
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch?$filter=$batch(Content) eq '{_fssApiConfiguration.Value.Content}' and $batch(Product Type) eq '{_fssApiConfiguration.Value.ProductType}'";
 
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            HttpResponseMessage httpResponseMessage = await _fssApiClient.GetAncillaryFileDetails(uri, accessToken);
+            HttpResponseMessage httpResponseMessage = await _fssApiClient.GetAncillaryFileDetailsAsync(uri, accessToken);
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                SearchBatchResponse searchBatchResponse = await SearchBatchResponse(httpResponseMessage);
+                SearchBatchResponse searchBatchResponse = await SearchBatchResponseAsync(httpResponseMessage);
                 if (searchBatchResponse.Count > 0 && searchBatchResponse.Entries.Count > 0)
                 {
                     GetBatchResponseModel? batchResult = searchBatchResponse.Entries.OrderByDescending(j => j.BatchPublishedDate).FirstOrDefault();
@@ -451,7 +451,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
-        private static async Task<SearchBatchResponse> SearchBatchResponse(HttpResponseMessage httpResponse)
+        private static async Task<SearchBatchResponse> SearchBatchResponseAsync(HttpResponseMessage httpResponse)
         {
             string body = await httpResponse.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<SearchBatchResponse>(body);

@@ -24,7 +24,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
             {
                 _logger.LogInformation(EventIds.AIOFulfilmentJobStarted.ToEventId(), "AIO webjob started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                bool result = await _fulfilmentDataService.CreateAioExchangeSets();
+                bool result = await _fulfilmentDataService.CreateAioExchangeSetsAsync();
 
                 _logger.LogInformation(EventIds.AIOFulfilmentJobCompleted.ToEventId(), "AIO webjob completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }

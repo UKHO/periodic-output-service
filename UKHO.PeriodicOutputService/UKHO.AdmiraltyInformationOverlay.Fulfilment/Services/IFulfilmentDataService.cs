@@ -2,6 +2,6 @@
 {
     public interface IFulfilmentDataService
     {
-        Task<bool> CreateAioExchangeSets();
+        Task<bool> CreateAioExchangeSetsAsync();
     }
 }

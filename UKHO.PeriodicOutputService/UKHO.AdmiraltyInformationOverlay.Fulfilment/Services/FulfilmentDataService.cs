@@ -29,7 +29,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["AIOFolderName"]);
         }
 
-        public async Task<bool> CreateAioExchangeSets()
+        public async Task<bool> CreateAioExchangeSetsAsync()
         {
             await CreateAioBaseExchangeSet();
 
@@ -47,22 +47,22 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _fileSystemHelper.CreateDirectory(aioExchangeSetInfoPath);
             //Temporary Code
 
-            await DownloadAioAncillaryFiles(CommonHelper.CorrelationID.ToString(), aioExchangeSetInfoPath);
+            await DownloadAioAncillaryFilesAsync(CommonHelper.CorrelationID.ToString(), aioExchangeSetInfoPath);
 
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
 
-        private async Task DownloadAioAncillaryFiles(string batchId, string aioExchangeSetInfoPath)
+        private async Task DownloadAioAncillaryFilesAsync(string batchId, string aioExchangeSetInfoPath)
         {
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadStarted.ToEventId(), "Downloading of AIO base exchange set ancillary files started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
 
-            IEnumerable<BatchFile> fileDetails = await _fssService.GetAioInfoFolderFiles(batchId, CommonHelper.CorrelationID.ToString());
+            IEnumerable<BatchFile> fileDetails = await _fssService.GetAioInfoFolderFilesAsync(batchId, CommonHelper.CorrelationID.ToString());
 
             if (fileDetails != null && fileDetails.Any())
             {
                 foreach (BatchFile file in fileDetails)
                 {
-                    await _fssService.DownloadFile(file.Filename, file.Links.Get.Href, file.FileSize, Path.Combine(aioExchangeSetInfoPath, file.Filename));
+                    await _fssService.DownloadFileAsync(file.Filename, file.Links.Get.Href, file.FileSize, Path.Combine(aioExchangeSetInfoPath, file.Filename));
                 }
             }
             else
