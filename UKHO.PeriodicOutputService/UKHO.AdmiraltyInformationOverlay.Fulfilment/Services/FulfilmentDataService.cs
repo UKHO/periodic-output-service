@@ -46,7 +46,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["AIOFolderName"]);
         }
-        public async Task<bool> CreateAioExchangeSets()
+        public async Task<bool> CreateAioExchangeSetsAsync()
         {
             _fileSystemHelper.CreateDirectory(_homeDirectoryPath);
 
@@ -188,7 +188,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(EventIds.ExtractZipFileFailed.ToEventId(), "Extracting zip file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
-                    throw;
+                    throw new Exception($"Extracting zip file {file.FileName} failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
                 }
             });
         }
@@ -209,7 +209,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 catch (Exception ex)
                 {
                     _logger.LogError(EventIds.CreateIsoAndSha1Failed.ToEventId(), "Creating ISO and Sha1 file of {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
-                    throw;
+                    throw new Exception($"Creating ISO and Sha1 file of {file.FileName} failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
                 }
             });
         }

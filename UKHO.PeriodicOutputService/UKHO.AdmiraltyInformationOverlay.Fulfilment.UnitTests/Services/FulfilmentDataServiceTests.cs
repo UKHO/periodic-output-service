@@ -75,7 +75,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
               .Returns(true);
 
-            bool result = await _fulfilmentDataService.CreateAioExchangeSets();
+            bool result = await _fulfilmentDataService.CreateAioExchangeSetsAsync();
 
             Assert.That(result, Is.True);
 
@@ -141,7 +141,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(FssBatchStatus.CommitInProgress);
 
             Assert.ThrowsAsync<FulfilmentException>(
-                 () => _fulfilmentDataService.CreateAioExchangeSets());
+                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
 
             A.CallTo(_fakeLogger).Where(call =>
@@ -167,7 +167,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
             Assert.ThrowsAsync<AggregateException>(
-                () => _fulfilmentDataService.CreateAioExchangeSets());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
@@ -206,7 +206,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<AggregateException>();
 
             Assert.ThrowsAsync<AggregateException>(
-                () => _fulfilmentDataService.CreateAioExchangeSets());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
@@ -240,7 +240,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => _fulfilmentDataService.CreateAioExchangeSets());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(_fakeLogger).Where(call =>
                call.Method.Name == "Log"
@@ -269,7 +269,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetBatchResponseModelWithFileNameError());
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => _fulfilmentDataService.CreateAioExchangeSets());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"

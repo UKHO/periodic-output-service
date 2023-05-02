@@ -43,11 +43,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 
                 try
                 {
-                    await serviceProvider.GetService<AioFulfilmentJob>().ProcessFulfilmentJob();
-                }
-                catch (Exception)
-                {
-                    throw;
+                    await serviceProvider.GetService<AioFulfilmentJob>().ProcessFulfilmentJobAsync();
                 }
                 finally
                 {
