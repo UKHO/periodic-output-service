@@ -82,7 +82,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
               .MustHaveHappenedTwiceExactly();
 
-            A.CallTo(() => _fakeFssService.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
                .MustHaveHappenedOnceExactly();
 
 
@@ -169,7 +169,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             Assert.ThrowsAsync<AggregateException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
-            A.CallTo(() => _fakeFssService.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
 
             A.CallTo(_fakeLogger).Where(call =>
@@ -208,7 +208,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             Assert.ThrowsAsync<AggregateException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
-            A.CallTo(() => _fakeFssService.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))

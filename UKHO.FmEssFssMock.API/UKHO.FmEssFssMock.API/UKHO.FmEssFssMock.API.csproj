@@ -47,6 +47,9 @@
     <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.iso">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.iso.sha1">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -128,6 +131,10 @@
     <None Update="Data\F9523D33-EF12-4CC1-969D-8A95F094A48B\M02X02.iso">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\649C902D-5282-4CCF-924A-2B548EF42179\" />
   </ItemGroup>
 
 </Project>

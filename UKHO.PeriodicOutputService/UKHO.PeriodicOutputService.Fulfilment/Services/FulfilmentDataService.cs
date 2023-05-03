@@ -332,7 +332,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             Parallel.ForEach(fileDetails, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
+                _fssService.DownloadFileAsync(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
             });
         }
 

@@ -5,11 +5,14 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Services;
+using Attribute = UKHO.PeriodicOutputService.Common.Models.Fss.Response.Attribute;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 {
@@ -240,7 +243,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     },
                 });
 
-            bool result = await _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\POS");
+            bool result = await _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\POS");
 
             Assert.That(result, Is.True);
             A.CallTo(_fakeLogger).Where(call =>
@@ -268,7 +271,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
                  .Returns(responseMessage);
 
-            bool result = await _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\POS");
+            bool result = await _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\POS");
 
             Assert.That(result, Is.True);
             A.CallTo(_fakeLogger).Where(call =>
@@ -294,7 +297,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\": \"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\": \"Committed\",\"allFilesZipSize\": 11323697,\"attributes\": [{\"key\": \"Product Type\",\"value\": \"AVCS\"}],\"businessUnit\": \"AVCSCustomExchangeSets\",\"batchPublishedDate\": \"2022-07-13T10:53:58.98Z\",\"expiryDate\": \"2022-08-12T10:53:06Z\",\"files\": [{\"filename\": \"M01X02.zip\",\"fileSize\": 5095731,\"mimeType\": \"application/zip\",\"hash\": \"TLwn4f5J36mvWvrTafkXYA==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip\"}}},{\"filename\": \"M02X02.zip\",\"fileSize\": 6267757,\"mimeType\": \"application/zip\",\"hash\": \"7tP0BwgbMdKZT8koKakR+w==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M02X02.zip\"}}}]}")))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.DownloadFile("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\"));
+            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\"));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -593,5 +596,133 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
              .MustHaveHappenedOnceExactly();
         }
+
+        [Test]
+        public async Task DoesGetAioInfoFolderFiles_Returns_Files_If_ValidRequest()
+        {
+            SearchBatchResponse searchBatchResponse = GetSearchBatchResponse();
+            string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
+
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))),
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                });
+
+            IEnumerable<BatchFile> response = await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81");
+
+            Assert.That(response, Is.Not.Null);
+            Assert.That(response.Count, Is.EqualTo(1));
+
+            A.CallTo(_fakeLogger).Where(call => call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.GetAioInfoFolderFilesOkResponse.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Successfully searched aio info folder files path for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}").MustHaveHappened();
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                         .MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void DoesGetAioInfoFolderFiles_Throws_Exception_If_NoDataFound()
+        {
+            SearchBatchResponse searchBatchResponse = new();
+            string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
+
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))),
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                });
+
+            Assert.ThrowsAsync<FulfilmentException>(async () => await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+
+            A.CallTo(_fakeLogger).Where(call => call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<EventId>(1) == EventIds.GetAioInfoFolderFilesNotFound.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service, aio info folder files not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}").MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                         .MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void DoesGetAioInfoFolderFiles_Throws_Exception_If_BadRequest()
+        {
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest,
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                });
+
+            Assert.ThrowsAsync<FulfilmentException>(async () => await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+
+            A.CallTo(_fakeLogger).Where(call => call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<EventId>(1) == EventIds.GetAioInfoFolderFilesNonOkResponse.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching aio info folder files with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}").MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                         .MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void DoesGetAioInfoFolderFiles_Throws_Exception_If_InvalidRequest()
+        {
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.Unauthorized,
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                });
+
+            Assert.ThrowsAsync<FulfilmentException>(async () => await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+
+            A.CallTo(_fakeLogger).Where(call => call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<EventId>(1) == EventIds.GetAioInfoFolderFilesNonOkResponse.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching aio info folder files with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}").MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                         .MustHaveHappenedOnceExactly();
+        }
+
+        #region GetSearchBatchResponse
+        private static SearchBatchResponse GetSearchBatchResponse()
+        {
+            return new SearchBatchResponse()
+            {
+                Entries = new List<GetBatchResponseModel>() {
+                    new GetBatchResponseModel {
+                        BatchId ="63d38bde-5191-4a59-82d5-aa22ca1cc6dc",
+                        Files= new List<BatchFile>(){ new BatchFile { Filename = "test.txt", FileSize = 400, Links = new Links { Get = new Link { Href = "" }}}},
+                        Attributes = new List<Attribute> { new Attribute { Key= "Content", Value= "AIO CD INFO" } ,
+                                                           new Attribute { Key= "Product Type", Value= "AIO" }
+                                                         },
+                        BatchPublishedDate = DateTime.UtcNow
+                    } },
+                Links = new PagingLinks(),
+                Count = 1,
+                Total = 1,
+            };
+        }
+        #endregion
     }
 }

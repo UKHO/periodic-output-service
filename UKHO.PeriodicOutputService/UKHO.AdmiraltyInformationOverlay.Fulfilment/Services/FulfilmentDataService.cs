@@ -46,6 +46,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["AIOFolderName"]);
         }
+
         public async Task<bool> CreateAioExchangeSetsAsync()
         {
             _fileSystemHelper.CreateDirectory(_homeDirectoryPath);
@@ -74,6 +75,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
                 {
                     ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+
+                    await DownloadAioAncillaryFilesAsync(essBatchId);
 
                     CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
 
@@ -148,7 +151,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             Parallel.ForEach(fileDetails, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                _fssService.DownloadFile(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
+                _fssService.DownloadFileAsync(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
             });
         }
 
@@ -240,6 +243,30 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                     }
                 }
             });
+        }
+
+        private async Task DownloadAioAncillaryFilesAsync(string batchId)
+        {
+            _logger.LogInformation(EventIds.AioAncillaryFilesDownloadStarted.ToEventId(), "Downloading of AIO base exchange set ancillary files started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
+
+            string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+            string aioInfoFolderPath = string.Format(_configuration["AIOAdditionalContentFilePath"], weekNumber, DateTime.UtcNow.ToString("yy"));
+            string aioExchangeSetInfoPath = Path.Combine(_homeDirectoryPath, batchId, aioInfoFolderPath);
+
+            IEnumerable<BatchFile> fileDetails = await _fssService.GetAioInfoFolderFilesAsync(batchId, CommonHelper.CorrelationID.ToString());
+
+            if (fileDetails != null && fileDetails.Any())
+            {
+                Parallel.ForEach(fileDetails, file =>
+                {
+                    _fssService.DownloadFileAsync(file.Filename, file.Links.Get.Href, file.FileSize, Path.Combine(aioExchangeSetInfoPath, file.Filename)).Wait();
+                });
+            }
+            else
+            {
+                _logger.LogInformation(EventIds.AioAncillaryFilesNotFound.ToEventId(), "Downloading of AIO base exchange set ancillary files not found | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
+            }
+            _logger.LogInformation(EventIds.AioAncillaryFilesDownloadCompleted.ToEventId(), "Downloading of AIO base exchange set ancillary files completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
         }
     }
 }
