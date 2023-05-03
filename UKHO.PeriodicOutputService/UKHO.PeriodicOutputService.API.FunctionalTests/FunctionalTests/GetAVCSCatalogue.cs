@@ -2,26 +2,16 @@
 using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
-using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     [Category("GetAVCSCatalogue")]
-    public class GetAVCSCatalogue
+    public class GetAVCSCatalogue : ObjectStorage
     {
-        public string userCredentialsBytes;
-        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
-
-        private GetUNPResponse getunp { get; set; }
-        private TestConfiguration config { get; set; }
-        private GetCatalogue getcat { get; set; }
-
-        private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
-
         [OneTimeSetUp]
         public Task Setup()
         {
-            config = new TestConfiguration();
+            //testConfiguration = new TestConfiguration();
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
 

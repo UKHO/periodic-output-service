@@ -2,24 +2,17 @@
 using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
-using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     [Category("POSEndToEndValidFunctionalScenarios")]
-    public class POSEndToEndValidFunctionalScenarios
+    public class POSEndToEndValidFunctionalScenarios: ObjectStorage
     {
-        private string fssJwtToken;
-        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
-        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
-        private List<string> DownloadedFolderPath;
-
         [OneTimeSetUp]
         public async Task Setup()
         {
             AuthTokenProvider authTokenProvider = new();
-            fssJwtToken = await authTokenProvider.GetFssToken();
+            FssJwtToken = await authTokenProvider.GetFssToken();
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
             await CommonHelper.RunWebJob();
@@ -48,7 +41,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.ZipFilesBatchId, fssJwtToken, batchDetailsResponse);
+            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.ZipFilesBatchId, FssJwtToken, batchDetailsResponse);
             DownloadedFolderPath.Count.Should().Be(2);
         }
 
@@ -60,7 +53,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             await apiResponse.DeserializeAsyncResponse();
 
-            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForIsoAndSha1Files(posDetails.IsoSha1BatchId, fssJwtToken);
+            DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForIsoAndSha1Files(posDetails.IsoSha1BatchId, FssJwtToken);
             DownloadedFolderPath.Count.Should().Be(4);
         }
 
@@ -85,7 +78,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.UpdateExchangeSetBatchId, fssJwtToken, batchDetailsResponse);
+            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.UpdateExchangeSetBatchId, FssJwtToken, batchDetailsResponse);
             DownloadedFolderPath.Count.Should().Be(1);
         }
 
@@ -116,7 +109,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-            DownloadedFolderPath = await FileContentHelper.DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(batchId, fssJwtToken, batchDetailsResponse);
+            DownloadedFolderPath = await FileContentHelper.DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(batchId, FssJwtToken, batchDetailsResponse);
             DownloadedFolderPath.Count.Should().Be(1);
         }
 

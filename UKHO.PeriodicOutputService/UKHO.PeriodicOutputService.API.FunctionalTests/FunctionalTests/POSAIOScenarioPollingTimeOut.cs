@@ -1,18 +1,13 @@
 ﻿using System.Net;
 using FluentAssertions;
 using NUnit.Framework;
-using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     [Category("POSAIOScenarioPollingTimeOut")]
-    public class POSAIOScenarioPollingTimeOut
+    public class POSAIOScenarioPollingTimeOut : ObjectStorage
     {
-        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
-        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
-
         [OneTimeSetUp]
         public async Task Setup()
         {

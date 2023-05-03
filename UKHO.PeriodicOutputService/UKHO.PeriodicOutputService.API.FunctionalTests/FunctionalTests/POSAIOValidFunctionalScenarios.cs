@@ -2,19 +2,12 @@
 using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
-using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     [Category("POSAIOValidFunctionalScenarios")]
-    public class POSAIOValidFunctionalScenarios
+    public class POSAIOValidFunctionalScenarios : ObjectStorage
     {
-        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
-        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
-        private string DownloadedFolderPath { get; set; }
-        private string fssJwtToken;
-
         [OneTimeSetUp]
         public async Task Setup()
         {
@@ -37,7 +30,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [Test]
         public async Task WhenIDownloadAioExchangeSet_ThenAdditionalAioCdFilesAreGenerated()
         {
-            DownloadedFolderPath = await FileContentHelper.DownloadAndExtractAioZip(fssJwtToken, posDetails.AioExchangeSetBatchId);
+            string DownloadedFolderPath = await FileContentHelper.DownloadAndExtractAioZip(FssJwtToken, posDetails.AioExchangeSetBatchId);
 
             int fileCount = Directory.GetFiles(Path.Combine(DownloadedFolderPath, posDetails.AioFolderName,posDetails.InfoFolderName), "*.*", SearchOption.TopDirectoryOnly).Length;
             Assert.IsTrue(fileCount > 0, $"File count is {fileCount} in the specified folder path.");
