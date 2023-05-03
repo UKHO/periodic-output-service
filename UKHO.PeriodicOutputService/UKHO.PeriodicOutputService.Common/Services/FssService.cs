@@ -105,55 +105,55 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
-        public async Task<bool> DownloadFile(string fileName, string fileLink, long fileSize, string filePath)
+        public async Task<bool> DownloadFileAsync(string fileName, string fileLink, long fileSize, string filePath)
         {
-            long startByte = 0;
-            long downloadSize = fileSize < 10485760 ? fileSize : 10485760;
-            long endByte = downloadSize;
+                long startByte = 0;
+                long downloadSize = fileSize < 10485760 ? fileSize : 10485760;
+                long endByte = downloadSize;
 
-            _logger.LogInformation(EventIds.DownloadFileStarted.ToEventId(), "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.DownloadFileStarted.ToEventId(), "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            string uri = $"{_fssApiConfiguration.Value.BaseUrl}" + fileLink;
+                string uri = $"{_fssApiConfiguration.Value.BaseUrl}" + fileLink;
 
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+                string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            HttpResponseMessage fileDownloadResponse = await _fssApiClient.DownloadFile(fileLink, accessToken);
+                HttpResponseMessage fileDownloadResponse = await _fssApiClient.DownloadFile(fileLink, accessToken);
 
-            string rangeHeader = String.Empty;
+                string rangeHeader = String.Empty;
 
-            if (fileDownloadResponse.StatusCode == HttpStatusCode.TemporaryRedirect)
-            {
-                uri = fileDownloadResponse.Headers.GetValues("Location").FirstOrDefault();
-                rangeHeader = $"bytes={startByte}-{endByte}";
-            }
-
-            while (startByte <= endByte)
-            {
-
-                fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader);
-
-                if (!fileDownloadResponse.IsSuccessStatusCode)
+                if (fileDownloadResponse.StatusCode == HttpStatusCode.TemporaryRedirect)
                 {
-                    _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                    throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
+                    uri = fileDownloadResponse.Headers.GetValues("Location").FirstOrDefault();
+                    rangeHeader = $"bytes={startByte}-{endByte}";
                 }
 
-                Stream stream = fileDownloadResponse.Content.ReadAsStream();
-
-                _fileSystemHelper.CreateFileCopy(filePath, stream);
-
-                startByte = endByte + 1;
-                endByte = endByte + downloadSize;
-
-                if (endByte > fileSize - 1)
+                while (startByte <= endByte)
                 {
-                    endByte = fileSize - 1;
-                }
 
-                rangeHeader = $"bytes={startByte}-{endByte}";
-            }
-            _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading of file {fileName} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            return true;
+                    fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader);
+
+                    if (!fileDownloadResponse.IsSuccessStatusCode)
+                    {
+                        _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                        throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
+                    }
+
+                    Stream stream = fileDownloadResponse.Content.ReadAsStream();
+
+                    _fileSystemHelper.CreateFileCopy(filePath, stream);
+
+                    startByte = endByte + 1;
+                    endByte = endByte + downloadSize;
+
+                    if (endByte > fileSize - 1)
+                    {
+                        endByte = fileSize - 1;
+                    }
+
+                    rangeHeader = $"bytes={startByte}-{endByte}";
+                }
+                _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading of file {fileName} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                return true;
         }
 
         public async Task<string> CreateBatch(Batch batchType)
@@ -309,6 +309,49 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
+        public async Task<IEnumerable<BatchFile>> GetAioInfoFolderFilesAsync(string batchId, string correlationId)
+        {
+            IEnumerable<BatchFile>? fileDetails = null;
+            string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch?$filter=$batch(Content) eq '{_fssApiConfiguration.Value.Content}' and $batch(Product Type) eq '{_fssApiConfiguration.Value.ProductType}'";
+
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+
+            HttpResponseMessage httpResponseMessage = await _fssApiClient.GetAncillaryFileDetailsAsync(uri, accessToken);
+
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                SearchBatchResponse searchBatchResponse = await SearchBatchResponseAsync(httpResponseMessage);
+                if (searchBatchResponse.Count > 0 && searchBatchResponse.Entries.Count > 0)
+                {
+                    GetBatchResponseModel? batchResult = searchBatchResponse.Entries.OrderByDescending(j => j.BatchPublishedDate).FirstOrDefault();
+                    fileDetails = batchResult!.Files.Select(x => new BatchFile
+                    {
+                        Filename = x.Filename,
+                        FileSize = x.FileSize,
+                        Links = new Links
+                        {
+                            Get = new Link
+                            {
+                                Href = x.Links.Get.Href
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    _logger.LogError(EventIds.GetAioInfoFolderFilesNotFound.ToEventId(), "Error in file share service, aio info folder files not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
+                    throw new FulfilmentException(EventIds.GetAioInfoFolderFilesNotFound.ToEventId());
+                }
+                _logger.LogInformation(EventIds.GetAioInfoFolderFilesOkResponse.ToEventId(), "Successfully searched aio info folder files path for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
+            }
+            else
+            {
+                _logger.LogError(EventIds.GetAioInfoFolderFilesNonOkResponse.ToEventId(), "Error in file share service while searching aio info folder files with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", httpResponseMessage!.RequestMessage!.RequestUri, httpResponseMessage.StatusCode, batchId, correlationId);
+                throw new FulfilmentException(EventIds.GetAioInfoFolderFilesNonOkResponse.ToEventId());
+            }
+            return fileDetails;
+        }
+
         //Private Methods
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
         {
@@ -406,6 +449,12 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _logger.LogError(EventIds.UploadFileBlockFailed.ToEventId(), "Request to upload block {BlockID} of {FileName} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", uploadBlockMetaData.BlockId, uploadBlockMetaData.FileName, uploadBlockMetaData.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID.ToString());
                 throw new FulfilmentException(EventIds.UploadFileBlockFailed.ToEventId());
             }
+        }
+
+        private static async Task<SearchBatchResponse> SearchBatchResponseAsync(HttpResponseMessage httpResponse)
+        {
+            string body = await httpResponse.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<SearchBatchResponse>(body);
         }
     }
 }

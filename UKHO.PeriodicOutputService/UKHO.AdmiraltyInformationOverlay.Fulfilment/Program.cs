@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -10,8 +11,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using UKHO.AdmiraltyInformationOverlay.Fulfilment.Services;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Services;
+using UKHO.PeriodicOutputService.Common.Utilities;
 
 namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 {
@@ -38,7 +43,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 
                 try
                 {
-                    serviceProvider.GetService<AioFulfilmentJob>().ProcessFulfilmentJob();
+                    await serviceProvider.GetService<AioFulfilmentJob>().ProcessFulfilmentJobAsync();
                 }
                 finally
                 {
@@ -131,12 +136,35 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                  config.TelemetryChannel = s_aIChannel;
              }
          );
+            var fssApiConfiguration = new FssApiConfiguration();
 
             if (configuration != null)
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
+                serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
+                configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
             }
-                serviceCollection.AddTransient<AioFulfilmentJob>();
+
+            serviceCollection.AddDistributedMemoryCache();
+
+            serviceCollection.AddTransient<AioFulfilmentJob>();
+            serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
+
+            serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
+            serviceCollection.AddScoped<IFssService, FssService>();
+            serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
+            serviceCollection.AddScoped<IFileSystem, FileSystem>();
+            serviceCollection.AddScoped<IZipHelper, ZipHelper>();
+            serviceCollection.AddScoped<IFileUtility, FileUtility>();
+
+            serviceCollection.AddHttpClient("DownloadClient",
+               httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
+           .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+           {
+               AllowAutoRedirect = false
+           }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
+
+            serviceCollection.AddTransient<IFssApiClient, FssApiClient>();
         }
     }
 }
