@@ -76,11 +76,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_ExtractZipFile_Completed_When_DirectoryExists()
         {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.File.Exists(filePath)).Returns(true);
 
             _fileSystemHelper.ExtractZipFile(filePath, filePath, true);
 
-            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath, true))
+            A.CallTo(() => _fakefileSystem.File.Delete(filePath))
                             .MustHaveHappenedOnceExactly();
         }
 
