@@ -89,12 +89,16 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             _zipHelper.ExtractZipFile(sourceArchiveFileName, destinationDirectoryName);
 
-            if (deleteSourceDirectory && _fileSystem.Directory.Exists(sourceArchiveFileName))
+            if (deleteSourceDirectory && _fileSystem.File.Exists(sourceArchiveFileName))
             {
-                _fileSystem.Directory.Delete(sourceArchiveFileName, true);
+                _fileSystem.File.Delete(sourceArchiveFileName);
             }
         }
 
+        public void CreateZipFile(string sourceDirectoryName, string destinationArchiveFileName, bool deleteSourceDirectory = false)
+        {
+            _zipHelper.CreateZipFile(sourceDirectoryName, destinationArchiveFileName);
+        }
 
         public void CreateIsoAndSha1(string targetPath, string directoryPath, string volumeIdentifier)
         {
