@@ -16,6 +16,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         void CreateIsoAndSha1(string targetPath, string directoryPath, string volumeIdentifier);
         void CreateXmlFile(byte[] fileContent, string targetPath);
 
-        void CreateZipFile(string sourceDirectoryName, string destinationArchiveFileName, bool deleteSourceDirectory = false);
+        void CreateZipFile(string sourceDirectoryName, string destinationArchiveFileName, bool deleteOldArchive = false);
     }
 }
