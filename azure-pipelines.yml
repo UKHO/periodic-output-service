@@ -120,8 +120,7 @@ stages:
 
           - task: NuGetToolInstaller@1
             inputs:
-            versionSpec: 'x'
-            checkLatest: true
+              checkLatest: true
 
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore non test projects only"
