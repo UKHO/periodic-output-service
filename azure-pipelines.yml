@@ -118,6 +118,11 @@ stages:
               useGlobalJson: true
               workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
 
+          - task: NuGetToolInstaller@1
+            inputs:
+            versionSpec: 
+            checkLatest: true
+
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore non test projects only"
             inputs:
