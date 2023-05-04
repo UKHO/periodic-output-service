@@ -78,6 +78,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
                     await DownloadAioAncillaryFilesAsync(essBatchId);
 
+                    CreateExchangeSetZip(essFiles, essFileDownloadPath);
+
                     CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
 
                     bool isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION, Batch.AioBaseCDZipIsoSha1Batch);
@@ -196,6 +198,27 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             });
         }
 
+        private void CreateExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
+        {
+
+            Parallel.ForEach(fileDetails, file =>
+            {
+                try
+                {
+                    _logger.LogInformation(EventIds.ZipFileCreationStarted.ToEventId(), "Creating zip file of directory {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                    _fileSystemHelper.CreateZipFile(Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), Path.Combine(downloadPath, file.FileName), true);
+
+                    _logger.LogInformation(EventIds.ZipFileCreationCompleted.ToEventId(), "Creating zip file of directory {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(EventIds.ZipFileCreationFailed.ToEventId(), "Creating zip file of directory {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                    throw new Exception($"Creating zip file {file.FileName} failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+                }
+            });
+        }
+
         private void CreateIsoAndSha1ForExchangeSet(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
@@ -249,14 +272,14 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         {
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadStarted.ToEventId(), "Downloading of AIO base exchange set ancillary files started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
 
-            string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-            string aioInfoFolderPath = string.Format(_configuration["AIOAdditionalContentFilePath"], weekNumber, DateTime.UtcNow.ToString("yy"));
-            string aioExchangeSetInfoPath = Path.Combine(_homeDirectoryPath, batchId, aioInfoFolderPath);
-
             IEnumerable<BatchFile> fileDetails = await _fssService.GetAioInfoFolderFilesAsync(batchId, CommonHelper.CorrelationID.ToString());
 
             if (fileDetails != null && fileDetails.Any())
             {
+                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+                string aioInfoFolderPath = string.Format(_configuration["AIOAdditionalContentFilePath"], weekNumber, DateTime.UtcNow.ToString("yy"));
+                string aioExchangeSetInfoPath = Path.Combine(_homeDirectoryPath, batchId, aioInfoFolderPath);
+
                 Parallel.ForEach(fileDetails, file =>
                 {
                     _fssService.DownloadFileAsync(file.Filename, file.Links.Get.Href, file.FileSize, Path.Combine(aioExchangeSetInfoPath, file.Filename)).Wait();

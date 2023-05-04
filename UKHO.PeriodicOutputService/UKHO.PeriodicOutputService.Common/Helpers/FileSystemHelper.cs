@@ -95,6 +95,15 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
         }
 
+        public void CreateZipFile(string sourceDirectoryName, string destinationArchiveFileName, bool deleteOldArchive = false)
+        {
+            if (deleteOldArchive && _fileSystem.File.Exists(destinationArchiveFileName))
+            {
+                _fileSystem.File.Delete(destinationArchiveFileName);
+            }
+
+            _zipHelper.CreateZipFile(sourceDirectoryName, destinationArchiveFileName);
+        }
 
         public void CreateIsoAndSha1(string targetPath, string directoryPath, string volumeIdentifier)
         {

@@ -343,7 +343,19 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         ///<summary>
         ///809084 - AIO Cells Configuration Missing
         ///</summary>
-        AioCellsConfigurationMissing = 809084
+        AioCellsConfigurationMissing = 809084,
+        /// <summary>
+        /// 809085 - creating zip file started
+        /// </summary>
+        ZipFileCreationStarted = 809085,
+        /// <summary>
+        /// 809086 - creating zip file failed
+        /// </summary>
+        ZipFileCreationFailed = 809086,
+        /// <summary>
+        /// 809087 - creating zip file completed
+        /// </summary>
+        ZipFileCreationCompleted = 809087,
     }
 
     public static class EventIdExtensions
