@@ -70,16 +70,16 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
                 _logger.LogInformation(EventIds.GetProductDataSinceDateTimeCompleted.ToEventId(), "ESS request to create exhchange set for data since {SinceDateTime} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                ExchangeSetResponseModel exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
-                exchangeSetResponseModel.ResponseDateTime = httpResponse!.Headers!.Date!.Value.UtcDateTime;
+                ExchangeSetResponseModel? exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
 
-                return exchangeSetResponseModel;
+                if (exchangeSetResponseModel != null)
+                {
+                    exchangeSetResponseModel.ResponseDateTime = httpResponse!.Headers!.Date!.Value.UtcDateTime;
+                    return exchangeSetResponseModel;
+                }
             }
-            else
-            {
-                _logger.LogError(EventIds.GetProductDataSinceDateTimeFailed.ToEventId(), "Failed to create exchange set for data since {SinceDateTime} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.GetProductDataSinceDateTimeFailed.ToEventId());
-            }
+            _logger.LogError(EventIds.GetProductDataSinceDateTimeFailed.ToEventId(), "Failed to create exchange set for data since {SinceDateTime} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.GetProductDataSinceDateTimeFailed.ToEventId());
         }
     }
 }
