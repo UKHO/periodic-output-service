@@ -28,7 +28,7 @@ variables:
   - name: UKHOAssemblyProduct
     value: "Periodic Output Service"
   - name: UKHOAssemblyCopyright
-    value: "Copyright © UK Hydrographic Office"
+    value: "Copyright Â© UK Hydrographic Office"
   - name: DeploymentPool
     value: "UKHO Ubuntu 1804"
   - name: Container
@@ -111,17 +111,17 @@ stages:
           clean: all
         displayName: "Dependencychecker"
         steps:
+          - task: NuGetToolInstaller@1
+            inputs:
+              versionSpec: 'x'
+              checkLatest: true
+
           - task: UseDotNet@2
             displayName: 'Use .NET Core 6.0.x sdk'
             inputs:
               packageType: sdk
               useGlobalJson: true
               workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
-
-          - task: NuGetToolInstaller@1
-            inputs:
-              versionSpec:
-              checkLatest: true
 
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore non test projects only"
