@@ -32,6 +32,18 @@
     <None Update="Data\38EBEB5C-2FAA-47F5-B3AC-B196D411FA75\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\AIO V2 - UKHO letter for inspectors.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\AVCS User Guide.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\ENC TandP NM status.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\End-User-Licence-Agreement-for-ADMIRALTY-digital-data-services.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\7D302AD3-97C3-4108-BC8A-B19FC4920079\AIO.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
