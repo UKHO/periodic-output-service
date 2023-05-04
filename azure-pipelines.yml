@@ -120,7 +120,7 @@ stages:
 
           - task: NuGetToolInstaller@1
             inputs:
-            versionSpec: 
+            versionSpec: 'x'
             checkLatest: true
 
           - task: DotNetCoreCLI@2
