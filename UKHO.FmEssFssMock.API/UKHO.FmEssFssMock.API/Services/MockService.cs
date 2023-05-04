@@ -47,6 +47,10 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             string destPath = Path.Combine(homeDirectoryPath, currentAioTestFileName);
 
+            if (!Directory.Exists(homeDirectoryPath))
+            {
+                Directory.CreateDirectory(homeDirectoryPath);
+            }
             if (!File.Exists(destPath))
             {
                 File.Create(destPath).Close();

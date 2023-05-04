@@ -37,6 +37,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 FssClientId = "8YFGEFI78TYIUGH78YGHR5",
                 BatchStatusPollingCutoffTime = "1",
                 BatchStatusPollingDelayTime = "20000",
+                BatchStatusPollingCutoffTimeForAIO = "1",
+                BatchStatusPollingDelayTimeForAIO = "20000",
                 PosReadUsers = "",
                 PosReadGroups = "public",
                 BlockSizeInMultipleOfKBs = 4096
@@ -87,7 +89,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus_If_ValidRequest()
+        [TestCase(RequestType.POS)]
+        [TestCase(RequestType.AIO)]
+        public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus_If_ValidRequest(RequestType requestType)
         {
             A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -100,7 +104,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Committed\"}")))
                 });
 
-            FssBatchStatus result = await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status");
+            FssBatchStatus result = await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType);
 
             Assert.That(result, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed));
 
@@ -115,7 +119,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public void DoesCheckIfBatchCommitted_Throws_Exception_If_InvalidRequest()
+        [TestCase(RequestType.POS)]
+        [TestCase(RequestType.AIO)]
+        public void DoesCheckIfBatchCommitted_Throws_Exception_If_InvalidRequest(RequestType requestType)
         {
             A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -128,7 +134,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"statusCode\":\"401\",\"message\":\"Authorization token is missing or invalid\"}")))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status"));
+            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -140,7 +146,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public void DoesCheckIfBatchCommitted_Returns_Error_If_TimedOut()
+        [TestCase(RequestType.POS)]
+        [TestCase(RequestType.AIO)]
+        public void DoesCheckIfBatchCommitted_Returns_Error_If_TimedOut(RequestType requestType)
         {
             A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -157,7 +165,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeFssApiConfiguration.Value.BatchStatusPollingDelayTime = "500";
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status"));
+                () => _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType));
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -437,7 +445,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     },
                 });
 
-            bool result = await _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream");
+            bool result = await _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream", Batch.PosFullAvcsIsoSha1Batch);
 
             Assert.That(result, Is.True);
 
@@ -465,7 +473,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 });
 
             Assert.ThrowsAsync<FulfilmentException>(
-            () => _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream"));
+            () => _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream", Batch.PosFullAvcsIsoSha1Batch));
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();

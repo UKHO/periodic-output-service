@@ -7,7 +7,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public async Task<HttpResponseMessage> POSWebJobEndPoint(string baseUrl, string base64Credentials)
         {
-            string uri = $"{baseUrl}";
+            string uri = $"{baseUrl}/run";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
 

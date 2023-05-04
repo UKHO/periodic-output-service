@@ -10,6 +10,8 @@ namespace UKHO.PeriodicOutputService.Common.Configuration
         public string BaseUrl { get; set; }
         public string BatchStatusPollingCutoffTime { get; set; }
         public string BatchStatusPollingDelayTime { get; set; }
+        public string BatchStatusPollingCutoffTimeForAIO { get; set; }
+        public string BatchStatusPollingDelayTimeForAIO { get; set; }
         public int BlockSizeInMultipleOfKBs { get; set; }
         public int ParallelUploadThreadCount { get; set; }
         public string BusinessUnit { get; set; }

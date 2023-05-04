@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-
 namespace UKHO.PeriodicOutputService.Common.Logging
 {
     public enum EventIds
@@ -341,6 +340,22 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         ///  809081 - AIO Base Exchange Set Ancillary Files not found
         /// </summary>
         AioAncillaryFilesNotFound = 809083,
+        ///<summary>
+        ///809084 - AIO Cells Configuration Missing
+        ///</summary>
+        AioCellsConfigurationMissing = 809084,
+        /// <summary>
+        /// 809085 - creating zip file started
+        /// </summary>
+        ZipFileCreationStarted = 809085,
+        /// <summary>
+        /// 809086 - creating zip file failed
+        /// </summary>
+        ZipFileCreationFailed = 809086,
+        /// <summary>
+        /// 809087 - creating zip file completed
+        /// </summary>
+        ZipFileCreationCompleted = 809087,
     }
 
     public static class EventIdExtensions

@@ -86,6 +86,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 
             return configBuilder.Build();
         }
+
         private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
         {
             serviceCollection.AddApplicationInsightsTelemetryWorkerService();
@@ -134,14 +135,16 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
              (config) =>
              {
                  config.TelemetryChannel = s_aIChannel;
-             }
-         );
+             });
+
             var fssApiConfiguration = new FssApiConfiguration();
 
             if (configuration != null)
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
+                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
+                serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
                 configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
             }
 
@@ -149,8 +152,10 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 
             serviceCollection.AddTransient<AioFulfilmentJob>();
             serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
+            serviceCollection.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
 
             serviceCollection.AddScoped<IFulfilmentDataService, FulfilmentDataService>();
+            serviceCollection.AddScoped<IEssService, EssService>();
             serviceCollection.AddScoped<IFssService, FssService>();
             serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
             serviceCollection.AddScoped<IFileSystem, FileSystem>();
@@ -164,6 +169,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                AllowAutoRedirect = false
            }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
 
+            serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFssApiClient, FssApiClient>();
         }
     }

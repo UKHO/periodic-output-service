@@ -1,6 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Models
 {
@@ -13,6 +11,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Models
 
         [JsonProperty("requestedProductCount")]
         public int RequestedProductCount { get; set; }
+
+        [JsonProperty("requestedAioProductCount")]
+        public int RequestedAioProductCount { get; set; }
+
+        [JsonProperty("aioExchangeSetCellCount")]
+        public int AioExchangeSetCellCount { get; set; }
 
         [JsonProperty("exchangeSetCellCount")]
         public int ExchangeSetCellCount { get; set; }
@@ -28,6 +32,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Models
 
         public LinkSetBatchStatusUri ExchangeSetBatchStatusUri { get; set; }
         public LinkSetFileUri ExchangeSetFileUri { get; set; }
+        public AioExchangeSetFileUri AioExchangeSetFileUri { get; set; }
     }
 
     public class LinkSetBatchStatusUri
@@ -36,6 +41,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Models
         public string Href { get; set; }
     }
     public class LinkSetFileUri
+    {
+        [JsonProperty("href")]
+        public string Href { get; set; }
+    }
+
+    public class AioExchangeSetFileUri
     {
         [JsonProperty("href")]
         public string Href { get; set; }
