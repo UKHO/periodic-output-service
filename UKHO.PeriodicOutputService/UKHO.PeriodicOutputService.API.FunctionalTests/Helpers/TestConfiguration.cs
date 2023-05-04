@@ -86,6 +86,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public class AioWebjobApiConfiguration
         {
             public string BaseUrl { get; set; }
+            public int WebjobRunningStatusDelayTime { get; set; }
         }
 
             public TestConfiguration()

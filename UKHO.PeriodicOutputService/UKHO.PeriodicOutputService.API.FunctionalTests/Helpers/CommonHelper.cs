@@ -78,8 +78,20 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(aioWebJob.BaseUrl, POSWebJobUserCredentialsBytes);
                 POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
 
-                //As there is no way to check if webjob execution is completed or not, we have added below delay to wait till the execution completes and files get downloaded.
-                await Task.Delay(140000);
+                HttpResponseMessage response = await WebJob.POSWebJobEndPointRunningStatus(aioWebJob.BaseUrl, POSWebJobUserCredentialsBytes);
+                response.StatusCode.Should().Be((HttpStatusCode)200);
+                dynamic dynResponse = await response.DeserializeAsyncResponse();
+
+                string status = dynResponse.runs[0].status;
+
+                while (status.Equals("Running"))
+                {
+                    await Task.Delay(aioWebJob.WebjobRunningStatusDelayTime);
+                    HttpResponseMessage responseCheck = await WebJob.POSWebJobEndPointRunningStatus(aioWebJob.BaseUrl, POSWebJobUserCredentialsBytes);
+                    dynamic dystatusResponse = await responseCheck.DeserializeAsyncResponse();
+                    status = dystatusResponse.runs[0].status;
+                }
+
             }
         }
     }
