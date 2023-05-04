@@ -111,11 +111,6 @@ stages:
           clean: all
         displayName: "Dependencychecker"
         steps:
-          - task: NuGetToolInstaller@1
-            inputs:
-              versionSpec: 'x'
-              checkLatest: true
-
           - task: UseDotNet@2
             displayName: 'Use .NET Core 6.0.x sdk'
             inputs:
@@ -168,6 +163,11 @@ stages:
               packageType: sdk
               useGlobalJson: true
               workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+
+          - task: NuGetToolInstaller@1
+            inputs:
+              versionSpec: 'x'
+              checkLatest: true
 
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore test projects only"
