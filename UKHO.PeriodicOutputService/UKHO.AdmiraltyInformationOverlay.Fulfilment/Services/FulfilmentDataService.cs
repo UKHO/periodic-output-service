@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
@@ -16,21 +17,24 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IEssService _essService;
         private readonly IFssService _fssService;
-
         private readonly ILogger<FulfilmentDataService> _logger;
         private readonly IConfiguration _configuration;
 
         private readonly string _homeDirectoryPath;
+
         private const string ESSVALIDATIONREASONFORCANCELLEDPRODUCT = "noDataAvailableForCancelledProduct";
         private const string AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION = "zip;iso;sha1";
-        private readonly Dictionary<string, string> mimeTypes = new()
+        private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
+        private const string DEFAULTMIMETYPE = "application/octet-stream";
+
+
+        private readonly Dictionary<string, string> _mimeTypes = new()
         {
             { ".zip", "application/zip" },
             { ".iso", "application/x-raw-disk-image" },
             { ".sha1", "text/plain" }
         };
 
-        private readonly string DEFAULTMIMETYPE = "application/octet-stream";
 
         public FulfilmentDataService(IFileSystemHelper fileSystemHelper,
                                      IEssService essService,
@@ -53,7 +57,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             bool isSuccess = false;
 
-            await CreateAioBaseExchangeSet();
+            //await CreateAioBaseExchangeSet();
+            await CreateUpdateExchangeSet("");
 
             isSuccess = true;
 
@@ -96,6 +101,72 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 throw new FulfilmentException(EventIds.AioCellsConfigurationMissing.ToEventId());
             }
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+        }
+
+        private async Task CreateUpdateExchangeSet(string sinceDateTime)
+        {
+            _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for SinceDateTime - {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            string essBatchId = await GetProductDataVersionFromEss(new ProductVersionsRequest()
+            {
+                ProductVersions = new List<ProductVersion>
+                                                                        {
+                                                                            new ProductVersion()
+                                                                            {
+                                                                                 ProductName = "GB800001",
+                                                                                 EditionNumber = 31,
+                                                                                 UpdateNumber =30
+                                                                            }
+                                                                        }
+            });
+
+            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssUpdateZipBatch);
+
+            if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
+            {
+                bool isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateBatch);
+                if (isUpdateZipBatchCreated)
+
+                {
+                    _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationCompleted.ToEventId(), "Update exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
+            }
+            else
+            {
+                _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
+            }
+        }
+
+        private async Task<string> GetProductDataVersionFromEss(ProductVersionsRequest productVersionsRequest)
+        {
+            ExchangeSetResponseModel exchangeSetResponseModel = await _essService.GetProductDataProductVersions(productVersionsRequest);
+
+            if (exchangeSetResponseModel.AioExchangeSetCellCount == 0)
+            {
+                _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "Due to the empty exchange set, ESS validation failed while producing an update | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
+            }
+
+            if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Any())
+            {
+                if (exchangeSetResponseModel.RequestedProductsNotInExchangeSet.All(p => p.Reason == ESSVALIDATIONREASONFORCANCELLEDPRODUCT))
+                {
+                    _logger.LogInformation(EventIds.CancelledProductsFound.ToEventId(), "{Count} cancelled products found while creating update exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
+                else
+                {
+                    _logger.LogError(EventIds.EssValidationFailed.ToEventId(), "ESS validation failed for {Count} products [{Products}] while creating update exchange set {DateTime} | _X-Correlation-ID : {CorrelationId}", exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), string.Join(',', exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Select(a => a.ProductName + " - " + a.Reason).ToList()), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.EssValidationFailed.ToEventId());
+                }
+            }
+
+
+
+            string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
+            _logger.LogInformation(EventIds.BatchCreatedInESS.ToEventId(), "Batch for Update exchange set created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            return essBatchId;
         }
 
         private async Task<string> PostProductIdentifiersToESS(List<string> productIdentifiers)
@@ -256,7 +327,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             {
                 IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(filePath);
 
-                bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
+                bool isFileAdded = _fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, _mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? _mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
                 if (isFileAdded)
                 {
                     List<string> blockIds = _fssService.UploadBlocks(batchId, fileInfo).Result;
