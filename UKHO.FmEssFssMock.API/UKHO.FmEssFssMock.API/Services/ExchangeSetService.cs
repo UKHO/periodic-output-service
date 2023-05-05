@@ -177,7 +177,7 @@ namespace UKHO.FmEssFssMock.API.Services
         private CreateBatchRequest CreateBatchRequestModelForAIO(bool isPostProductIdentifiersRequest)
         {
             AioTestCase currentTestCase = _mockService.GetCurrentAIOTestCase(_homeDirectoryPath);
-            string batchType;
+            string batchType = string.Empty;
 
             if (currentTestCase == AioTestCase.ValidAioProductIdentifier)
             {

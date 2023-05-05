@@ -115,7 +115,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                                                                             {
                                                                                  ProductName = "GB800001",
                                                                                  EditionNumber = 31,
-                                                                                 UpdateNumber =30
+                                                                                 UpdateNumber =48
                                                                             }
                                                                         }
             });
@@ -124,7 +124,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
             {
-                bool isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateBatch);
+                bool isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch);
                 if (isUpdateZipBatchCreated)
 
                 {

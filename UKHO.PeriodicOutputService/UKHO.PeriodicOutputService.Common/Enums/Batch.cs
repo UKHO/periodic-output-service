@@ -12,6 +12,6 @@
         EssAioBaseZipBatch = 8,
         EssAioUpdateZipBatch = 9,
         AioBaseCDZipIsoSha1Batch = 10,
-        AioUpdateBatch = 11
+        AioUpdateZipBatch = 11
     }
 }

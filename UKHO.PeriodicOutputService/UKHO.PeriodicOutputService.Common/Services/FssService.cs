@@ -25,7 +25,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly Enum[] _aioBatchTypes = new Enum[]
                                       {
                                             Batch.AioBaseCDZipIsoSha1Batch,
-                                            Batch.AioUpdateBatch
+                                            Batch.AioUpdateZipBatch
                                       };
 
         public FssService(ILogger<FssService> logger,
@@ -457,7 +457,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
                     break;
 
-                case Batch.AioUpdateBatch:
+                case Batch.AioUpdateZipBatch:
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
