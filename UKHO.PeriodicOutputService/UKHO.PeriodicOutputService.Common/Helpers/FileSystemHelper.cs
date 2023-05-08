@@ -1,5 +1,6 @@
 ﻿
 using System.IO.Abstractions;
+using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Utilities;
 
@@ -117,6 +118,42 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         public void CreateXmlFile(byte[] fileContent, string targetPath)
         {
             _fileUtility.CreateXmlFile(fileContent, targetPath);
+        }
+
+        public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string aioCellName)
+        {
+            string searchPath = $"ENC_ROOT/GB/{aioCellName}";
+            string currentPath = Path.Combine(sourcePath, searchPath);
+
+            List<ProductVersion> productVersions = new();
+
+            if (!_fileSystem.Directory.Exists(currentPath))
+            {
+                return productVersions;
+            }
+
+            var editionFolders = _fileSystem.Directory.GetDirectories(currentPath).Select(Path.GetFileName).ToList();
+
+            foreach (var editionFolder in editionFolders)
+            {
+                ProductVersion productVersion = new();
+
+                productVersion.ProductName = aioCellName;
+
+                productVersion.EditionNumber = Convert.ToInt32(editionFolder);
+
+                var updateNumberFolders = _fileSystem.Directory.GetDirectories(Path.Combine(currentPath, editionFolder));
+
+                var maxDirectory = updateNumberFolders.Select(d => new { Path = d, Number = int.Parse(Path.GetFileName(d)) })
+                                               .OrderByDescending(d => d.Number)
+                                               .FirstOrDefault();
+
+                productVersion.UpdateNumber = Convert.ToInt32(maxDirectory.Number);
+
+                productVersions.Add(productVersion);
+            }
+
+            return productVersions;
         }
     }
 }

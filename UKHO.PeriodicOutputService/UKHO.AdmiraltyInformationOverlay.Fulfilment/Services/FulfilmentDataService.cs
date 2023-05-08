@@ -124,6 +124,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
             {
+                ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+
+                GetTheLatestUpdateNumber(essFileDownloadPath);
                 bool isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch);
                 if (isUpdateZipBatchCreated)
 
@@ -361,6 +364,20 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 _logger.LogInformation(EventIds.AioAncillaryFilesNotFound.ToEventId(), "Downloading of AIO base exchange set ancillary files not found | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
             }
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadCompleted.ToEventId(), "Downloading of AIO base exchange set ancillary files completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
+        }
+
+        private void GetTheLatestUpdateNumber(string filePath)
+        {
+            string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+            string aioInfoFolderPath = string.Format(_configuration["AioUpdateZipFileName"], weekNumber, DateTime.UtcNow.ToString("yy"));
+            string aioExchangeSetInfoPath = Path.Combine(filePath, Path.GetFileNameWithoutExtension(aioInfoFolderPath));
+
+            string[] aioCellNames = { "GB800001", "GB800003", "GB800004" };
+
+            foreach (var aioCellName in aioCellNames)
+            {
+                var files = _fileSystemHelper.GetProductVersionsFromDirectory(aioExchangeSetInfoPath, aioCellName);
+            }
         }
     }
 }

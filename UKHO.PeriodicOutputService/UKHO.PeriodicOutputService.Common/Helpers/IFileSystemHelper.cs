@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
@@ -17,5 +18,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         void CreateXmlFile(byte[] fileContent, string targetPath);
 
         void CreateZipFile(string sourceDirectoryName, string destinationArchiveFileName, bool deleteOldArchive = false);
+
+        IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string aioCellName);
     }
 }
