@@ -305,7 +305,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [TestCase(false)]
         public void DoesUploadBlocks_Returns_BlockIds_If_ValidRequest(bool isParallelUploadThreadCountConfigured)
         {
-            IFileInfo fileInfo = _fakeFileSystem.FileInfo.FromFileName("M01X01.zip");
+            IFileInfo fileInfo = _fakeFileSystem.FileInfo.New("M01X01.zip");
             A.CallTo(() => fileInfo.Name).Returns("M01X01.zip");
             A.CallTo(() => fileInfo.Length).Returns(100000);
 
@@ -335,7 +335,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         public void DoesUploadBlocks_Throws_Exception_If_InValidRequest()
         {
-            IFileInfo fileInfo = _fakeFileSystem.FileInfo.FromFileName("M01X01.zip");
+            IFileInfo fileInfo = _fakeFileSystem.FileInfo.New("M01X01.zip");
             A.CallTo(() => fileInfo.Name).Returns("M01X01.zip");
             A.CallTo(() => fileInfo.Length).Returns(100);
 

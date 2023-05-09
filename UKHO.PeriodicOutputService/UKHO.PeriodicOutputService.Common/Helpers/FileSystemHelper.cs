@@ -1,5 +1,4 @@
-﻿
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Utilities;
 
@@ -29,7 +28,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
         {
-            IFileInfo fileInfo = _fileSystem.FileInfo.FromFileName(UploadBlockMetaData.FullFileName);
+            IFileInfo fileInfo = _fileSystem.FileInfo.New(UploadBlockMetaData.FullFileName);
 
             byte[] byteData = new byte[UploadBlockMetaData.Length];
 
@@ -58,7 +57,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             foreach (string? fileName in fileNames)
             {
-                IFileInfo fileInfo = _fileSystem.FileInfo.FromFileName(fileName);
+                IFileInfo fileInfo = _fileSystem.FileInfo.New(fileName);
                 using Stream? fs = fileInfo.OpenRead();
                 byte[]? fileMd5Hash = CommonHelper.CalculateMD5(fs);
 
@@ -72,7 +71,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return fileDetails;
         }
 
-        public IFileInfo GetFileInfo(string filePath) => _fileSystem.FileInfo.FromFileName(filePath);
+        public IFileInfo GetFileInfo(string filePath) => _fileSystem.FileInfo.New(filePath);
 
         public IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption)
         {

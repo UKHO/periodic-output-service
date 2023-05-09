@@ -58,19 +58,19 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
                 HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
 
-                bool errorRaised = batchStatusResponse.IsSuccessStatusCode;
+                bool success = batchStatusResponse.IsSuccessStatusCode;
 
-                if (!errorRaised)
+                if (success)
                 {
                     FssBatchStatusResponseModel? fssBatchStatusResponseModel = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
-                    errorRaised = Enum.TryParse(fssBatchStatusResponseModel?.Status, false, out batchStatus);
-                    if (!errorRaised)
+                    success = Enum.TryParse(fssBatchStatusResponseModel?.Status, false, out batchStatus);
+                    if (success)
                     {
                         _logger.LogInformation(EventIds.GetBatchStatusRequestCompleted.ToEventId(), "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                         await Task.Delay(int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime));
                     }
                 }
-                if (errorRaised)
+                if (!success)
                 {
                     _logger.LogError(EventIds.GetBatchStatusRequestFailed.ToEventId(), "Request to get batch status for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                     throw new FulfilmentException(EventIds.GetBatchStatusRequestFailed.ToEventId());

@@ -89,10 +89,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         {
             IEnumerable<string> fileNames = new List<string> { fileName };
 
-            IFileInfo fileInfo = _fakefileSystem.FileInfo.FromFileName(fileName);
+            IFileInfo fileInfo = _fakefileSystem.FileInfo.New(fileName);
             A.CallTo(() => fileInfo.Name).Returns(fileName);
 
-            A.CallTo(() => _fakefileSystem.FileInfo.FromFileName(A<string>.Ignored)).Returns(fileInfo);
+            A.CallTo(() => _fakefileSystem.FileInfo.New(A<string>.Ignored)).Returns(fileInfo);
 
             List<FileDetail>? result = _fileSystemHelper.GetFileMD5(fileNames);
 
@@ -145,10 +145,11 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         {
             Stream stream = new MemoryStream(new byte[10]);
 
-            A.CallTo(() => _fakefileSystem.FileInfo.FromFileName(A<string>.Ignored))
+            
+            A.CallTo(() => _fakefileSystem.FileInfo.New(A<string>.Ignored))
                             .Returns(_fakeFileInfo);
 
-            A.CallTo(() => _fakeFileInfo.Open(A<FileMode>.Ignored, A<FileAccess>.Ignored, A<FileShare>.Ignored)).Returns(stream);
+            A.CallTo(() => _fakeFileInfo.Open(A<FileMode>.Ignored, A<FileAccess>.Ignored, A<FileShare>.Ignored)).Returns(new MockFileSystemStream(stream, "Test", default));
 
             byte[] result = _fileSystemHelper.GetFileInBytes(GetUploadFileBlockRequestModel());
 
@@ -158,7 +159,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_GetFileInfo_Executes_Successfully()
         {
-            A.CallTo(() => _fakefileSystem.FileInfo.FromFileName(filePath)).Returns(_fakeFileInfo);
+            A.CallTo(() => _fakefileSystem.FileInfo.New(filePath)).Returns(_fakeFileInfo);
             A.CallTo(() => _fakeFileInfo.Name).Returns(fileName);
 
             IFileInfo result = _fileSystemHelper.GetFileInfo(filePath);
@@ -176,5 +177,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             FullFileName = Path.Combine(filePath, fileName),
             Length = 100000
         };
+    }
+
+    public class MockFileSystemStream : FileSystemStream
+    {
+
+        public MockFileSystemStream(Stream stream, string path, bool isAsync) : base(stream, path, isAsync)
+        {
+        }
     }
 }
