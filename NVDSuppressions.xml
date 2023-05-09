@@ -252,34 +252,6 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
   <suppress>
     <notes>
       <![CDATA[
-   file name: Microsoft.Extensions.Configuration.FileExtensions.dll
-   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
-   ]]>
-    </notes>
-    <cve>CVE-2018-1000413</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Microsoft.IdentityModel.Clients.ActiveDirectory.dll, Microsoft.IdentityModel.Clients.ActiveDirectory:3.19.1
-   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
-   ]]>
-    </notes>
-    <cve>CVE-2021-42306</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Microsoft.OpenApi.dll
-   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
-   ]]>
-    </notes>
-    <cve>CVE-2022-3064</cve>
-    <cve>CVE-2021-4235</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: NETStandard.Library:1.6.0, NETStandard.Library:1.6.1
    https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
    ]]>
