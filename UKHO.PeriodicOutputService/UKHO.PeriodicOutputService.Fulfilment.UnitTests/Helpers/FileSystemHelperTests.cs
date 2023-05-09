@@ -1,4 +1,5 @@
-﻿using System.IO.Abstractions;
+﻿using System.IO;
+using System.IO.Abstractions;
 using FakeItEasy;
 using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -91,7 +92,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             IFileInfo fileInfo = _fakefileSystem.FileInfo.New(fileName);
             A.CallTo(() => fileInfo.Name).Returns(fileName);
-
+            A.CallTo(() => fileInfo.OpenRead()).Returns(new MockFileSystemStream(new MemoryStream(new byte[10]), "Test", default)); 
             A.CallTo(() => _fakefileSystem.FileInfo.New(A<string>.Ignored)).Returns(fileInfo);
 
             List<FileDetail>? result = _fileSystemHelper.GetFileMD5(fileNames);
@@ -181,7 +182,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
     public class MockFileSystemStream : FileSystemStream
     {
-
         public MockFileSystemStream(Stream stream, string path, bool isAsync) : base(stream, path, isAsync)
         {
         }
