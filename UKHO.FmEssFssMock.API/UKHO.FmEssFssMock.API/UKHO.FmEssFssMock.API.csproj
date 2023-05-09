@@ -26,10 +26,22 @@
     <None Update="Data\094CDA16-FCC4-41CB-9317-BF4F26991E32\AIO.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_WK34_22_Only.zip">
+    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S631_WK34_22_Only.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\38EBEB5C-2FAA-47F5-B3AC-B196D411FA75\CommitInProgress.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\AIO V2 - UKHO letter for inspectors.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\AVCS User Guide.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\ENC TandP NM status.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\End-User-Licence-Agreement-for-ADMIRALTY-digital-data-services.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\7D302AD3-97C3-4108-BC8A-B19FC4920079\AIO.zip">
@@ -44,13 +56,13 @@
     <None Update="Data\D2B46C4F-415A-4CA3-B844-6577254F39E5\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631_CD_WK34_22.iso">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.iso">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631_CD_WK34_22.iso.sha1">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.iso.sha1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631_CD_WK34_22.zip">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\FullAvcsPollingTimeOut\avcs_catalogue_ft.xml">

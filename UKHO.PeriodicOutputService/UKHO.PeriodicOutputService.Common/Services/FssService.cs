@@ -22,6 +22,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IConfiguration _configuration;
+        private readonly Enum[] aioBatchTypes = new Enum[]
+                                      {
+                                            Batch.AioBaseCDZipIsoSha1Batch,
+                                            Batch.AioUpdateBatch
+                                      };
 
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
@@ -38,12 +43,25 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId)
+        public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId, RequestType requestType)
         {
             _logger.LogInformation(EventIds.FssBatchStatusPollingStarted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             FssBatchStatus batchStatus = FssBatchStatus.Incomplete;
             DateTime startTime = DateTime.UtcNow;
+            double batchStatusPollingCutoffTime = 0;
+            int batchStatusPollingDelayTime = 0;
+
+            if (requestType.Equals(RequestType.POS))
+            {
+                batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime);
+                batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime);
+            }
+            else
+            {
+                batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForAIO);
+                batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTimeForAIO);
+            }
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/status";
 
@@ -52,7 +70,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             FssBatchStatus[] pollBatchStatus = { FssBatchStatus.CommitInProgress, FssBatchStatus.Incomplete };
 
             while (pollBatchStatus.Contains(batchStatus) &&
-                        DateTime.UtcNow - startTime < TimeSpan.FromMinutes(double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime)))
+                        DateTime.UtcNow - startTime < TimeSpan.FromMinutes(batchStatusPollingCutoffTime))
             {
                 _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
@@ -67,7 +85,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     if (success)
                     {
                         _logger.LogInformation(EventIds.GetBatchStatusRequestCompleted.ToEventId(), "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                        await Task.Delay(int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime));
+                        await Task.Delay(batchStatusPollingDelayTime);
                     }
                 }
                 if (!success)
@@ -135,23 +153,23 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 {
                     fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader);
 
-                    if (!fileDownloadResponse.IsSuccessStatusCode)
-                    {
-                        _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                        throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
-                    }
+                if (!fileDownloadResponse.IsSuccessStatusCode)
+                {
+                    _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
+                }
 
-                    Stream stream = fileDownloadResponse.Content.ReadAsStream();
+                Stream stream = fileDownloadResponse.Content.ReadAsStream();
 
-                    _fileSystemHelper.CreateFileCopy(filePath, stream);
+                _fileSystemHelper.CreateFileCopy(filePath, stream);
 
-                    startByte = endByte + 1;
-                    endByte += downloadSize;
+                startByte = endByte + 1;
+                endByte = endByte + downloadSize;
 
-                    if (endByte > fileSize - 1)
-                    {
-                        endByte = fileSize - 1;
-                    }
+                if (endByte > fileSize - 1)
+                {
+                    endByte = fileSize - 1;
+                }
 
                     rangeHeader = $"bytes={startByte}-{endByte}";
                 }
@@ -184,14 +202,14 @@ namespace UKHO.PeriodicOutputService.Common.Services
             throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
         }
 
-        public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType)
+        public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType, Batch batchType)
         {
             _logger.LogInformation(EventIds.AddFileToBatchRequestStarted.ToEventId(), "Adding file {FileName} in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName);
+            AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName, batchType);
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
             HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, mimeType);
 
@@ -359,26 +377,51 @@ namespace UKHO.PeriodicOutputService.Common.Services
         //Private Methods
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
         {
+
             string currentYear = DateTime.UtcNow.Year.ToString();
             string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+            CreateBatchRequestModel createBatchRequest;
 
-            CreateBatchRequestModel createBatchRequest = new()
+            if (aioBatchTypes.Contains(batchType))
             {
-                BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
-                ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                Acl = new Acl()
+                createBatchRequest = new()
                 {
-                    ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
-                    ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
-                },
-                Attributes = new List<KeyValuePair<string, string>>
+                    BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
+                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Acl = new Acl()
+                    {
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
+                    },
+                    Attributes = new List<KeyValuePair<string, string>>
+                    {
+                        new("Product Type", "AIO"),
+                        new("Week Number", currentWeek),
+                        new("Year", currentYear),
+                        new("Year / Week", currentYear + " / " + currentWeek)
+                    }
+                };
+            }
+            else
+            {
+                createBatchRequest = new()
                 {
-                    new("Product Type", "AVCS"),
-                    new("Week Number", currentWeek),
-                    new("Year", currentYear),
-                    new("Year / Week", currentYear + " / " + currentWeek)
-                }
-            };
+                    BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
+                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Acl = new Acl()
+                    {
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
+                    },
+                    Attributes = new List<KeyValuePair<string, string>>
+                    {
+                        new("Product Type", "AVCS"),
+                        new("Week Number", currentWeek),
+                        new("Year", currentYear),
+                        new("Year / Week", currentYear + " / " + currentWeek)
+                    }
+                };
+            }
 
             //This batch attribute is added for fss stub.
             if (bool.Parse(_configuration["IsFTRunning"]))
@@ -415,19 +458,28 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Content", "ENC Updates"));
                     break;
 
+                case Batch.AioBaseCDZipIsoSha1Batch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
+                    break;
+
+                case Batch.AioUpdateBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    break;
+
                 default:
                     break;
             };
             return createBatchRequest;
         }
 
-        private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName)
+        private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName, Batch batchType)
         {
             AddFileToBatchRequestModel addFileToBatchRequestModel = new()
             {
                 Attributes = new List<KeyValuePair<string, string>>()
                 {
-                    new("Product Type", "AVCS"),
+                    new("Product Type", aioBatchTypes.Contains(batchType) ? "AIO" : "AVCS"),
                     new("File Name", fileName)
                 }
             };

@@ -1,24 +1,18 @@
 ﻿using System.Net;
 using FluentAssertions;
 using NUnit.Framework;
-using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     [Category("POSEndToEndScenarioFullAvcsPollingTimeOut")]
-    public class POSEndToEndScenarioFullAvcsPollingTimeOut
+    public class POSEndToEndScenarioFullAvcsPollingTimeOut: ObjectStorage
     {
-        private string fssJwtToken;
-        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
-        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly FSSApiConfiguration FSSAuth = new TestConfiguration().FssConfig;
-
         [OneTimeSetUp]
         public async Task Setup()
         {
             AuthTokenProvider authTokenProvider = new();
-            fssJwtToken = await authTokenProvider.GetFssToken();
+            FssJwtToken = await authTokenProvider.GetFssToken();
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationFullAvcsPollingTimeOut);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
@@ -35,7 +29,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             string batchStatus = batchDetailsResponse.status;
             batchStatus.Should().Be("CommitInProgress");
 
-            await FileContentHelper.VerifyPosBatches(fssJwtToken);
+            await FileContentHelper.VerifyPosBatches(FssJwtToken);
         }
 
         [OneTimeTearDown]

@@ -3,30 +3,12 @@ using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
-using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     [Category("CallEssEndPoint")]
-    public class CallEssEndPoint
+    public class CallEssEndPoint : ObjectStorage
     {
-        public string userCredentialsBytes;
-
-        private GetUNPResponse getunp { get; set; }
-        private GetCatalogue getcat { get; set; }
-        private string EssJwtToken { get; set; }
-        private string FssJwtToken { get; set; }
-        private GetProductIdentifiers getproductIdentifier { get; set; }
-
-        private static readonly ESSApiConfiguration ESSAuth = new TestConfiguration().EssConfig;
-        private static readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
-        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly POSWebJobApiConfiguration posWebJob = new TestConfiguration().POSWebJobConfig;
-        private List<string> productIdentifiers = new();
-        private HttpResponseMessage unpResponse;
-        private List<string> DownloadedFolderPath;
-
-
         [OneTimeSetUp]
         public async Task Setup()
         {
@@ -87,6 +69,34 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForLargeMedia(posDetails.ZipFilesBatchId, FssJwtToken);
             DownloadedFolderPath.Count.Should().Be(2);
+        }
+
+        [Test]
+        public async Task WhenICallTheExchangeSetApiWithValidAioProductIdentifiers_ThenCorrectResponseIsReturned()
+        {
+            productIdentifiersAIO.Add("GB800001");
+
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiersAIO, EssJwtToken);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+
+            //verify model structure
+            await apiResponse.CheckModelStructureForSuccessResponseAio();
+
+            productIdentifiersAIO.Clear();
+        }
+
+        [Test]
+        public async Task WhenICallTheExchangeSetApiWithInvalidAioProductIdentifiers_ThenCorrectResponseIsReturned()
+        {
+            productIdentifiersAIO.Add("GC800001");
+
+            HttpResponseMessage apiResponse = await getproductIdentifier.GetProductIdentifiersDataAsync(ESSAuth.BaseUrl, productIdentifiersAIO, EssJwtToken);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+
+            //verify model structure
+            await apiResponse.CheckModelStructureForSuccessResponseAio();
+
+            productIdentifiersAIO.Clear();
         }
 
         [OneTimeTearDown]

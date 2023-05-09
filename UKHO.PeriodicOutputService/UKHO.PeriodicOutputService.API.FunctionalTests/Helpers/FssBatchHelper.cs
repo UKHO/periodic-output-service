@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.Globalization;
+using System.IO.Compression;
 using FluentAssertions;
 using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
@@ -10,6 +11,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static FssApiClient FssApiClient { get; set; }
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
         private static readonly TestConfiguration config = new();
+        private static readonly string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+        private static readonly string currentYear = DateTime.UtcNow.ToString("yy");
         static FssBatchHelper()
         {
             FssApiClient = new FssApiClient();
@@ -69,5 +72,34 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             HttpResponseMessage response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
             return response;
           }
+
+        public static async Task<string> ExtractDownloadedAioFolder(string downloadFileUrl, string jwtToken)
+        {
+            string filename = "AIO_S631-1_CD_WK" + weekNumber+"_"+currentYear+".zip";
+            
+            string posFolderPath = Path.Combine(Path.GetTempPath(), posDetails.TempFolderName);
+            if (!Directory.Exists(posFolderPath))
+            {
+                Directory.CreateDirectory(posFolderPath);
+            }
+            string tempFilePath = Path.Combine(posFolderPath, filename);
+
+            var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
+            Assert.That((int)response.StatusCode, Is.EqualTo(200), $"Incorrect status code File Download api returned {response.StatusCode} for the url {downloadFileUrl}, instead of the expected 200.");
+
+            Stream stream = await response.Content.ReadAsStreamAsync();
+
+            using (FileStream outputFileStream = new FileStream(tempFilePath, FileMode.Create))
+            {
+                stream.CopyTo(outputFileStream);
+            }
+
+            string zipPath = tempFilePath;
+            string extractPath = Path.GetTempPath() + RenameFolder(tempFilePath);
+
+            ZipFile.ExtractToDirectory(zipPath, extractPath);
+
+            return extractPath;
+        }
     }
  }

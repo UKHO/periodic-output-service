@@ -10,6 +10,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public FSSApiConfiguration FssConfig = new();
         public POSWebJobApiConfiguration POSWebJobConfig = new();
         public POSFileDetails posFileDetails = new();
+        public AioWebjobApiConfiguration AioWebjobApiConfig = new();
 
         public class FleetManagerB2BApiConfiguration
         {
@@ -45,6 +46,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string MockApiBaseUrl { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
             public string FMConfigurationValidProductIdentifier { get; set; }
+            public string FMConfigurationValidAIOProductIdentifier { get; set; }
             public string FMConfigurationInValidProductIdentifier { get; set; }
             public string FMConfigurationFullAvcsPollingTimeOut { get; set; }
             public string FMConfigurationUpdatePollingTimeout { get; set; }
@@ -59,6 +61,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string InvalidProductIdentifierBatchId { get; set; }
             public string FullAvcsPollingTimeOutBatchId { get; set; }
             public string UpdatePollingTimeoutBatchId { get; set; }
+            public string AIOValidBatchId { get; set; }
             public string EncUpdateListCsvBatchId { get; set; }
             public string TempFolderName { get; set; }
             public string UpdateExchangeSet { get; set; }
@@ -74,9 +77,19 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string Sha1FileMimeType { get; set; }
             public string ZipFileMimeType { get; set; }
             public string PosDVDVolumeIdentifier { get; set; }
+            public string AioExchangeSetBatchId { get; set; }
+            public string InfoFolderName { get; set; }
+            public string AioFolderName { get; set; }
+
         }
 
-        public TestConfiguration()
+        public class AioWebjobApiConfiguration
+        {
+            public string BaseUrl { get; set; }
+            public int WebjobRunningStatusDelayTime { get; set; }
+        }
+
+            public TestConfiguration()
         {
             ConfigurationRoot = new ConfigurationBuilder()
                                .AddJsonFile("appsettings.json", false)
@@ -87,6 +100,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             ConfigurationRoot.Bind("FSSApiConfiguration", FssConfig);
             ConfigurationRoot.Bind("POSWebjobApiConfiguration", POSWebJobConfig);
             ConfigurationRoot.Bind("POSFileDetails", posFileDetails);
+            ConfigurationRoot.Bind("AioWebjobApiConfiguration", AioWebjobApiConfig);
         }
     }
 }

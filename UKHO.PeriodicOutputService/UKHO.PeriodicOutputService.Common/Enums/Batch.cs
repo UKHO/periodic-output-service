@@ -8,6 +8,10 @@
         EssUpdateZipBatch = 4,
         PosUpdateBatch = 5,
         PosCatalogueBatch = 6,
-        PosEncUpdateBatch = 7
+        PosEncUpdateBatch = 7,
+        EssAioBaseZipBatch = 8,
+        EssAioUpdateZipBatch = 9,
+        AioBaseCDZipIsoSha1Batch = 10,
+        AioUpdateBatch = 11
     }
 }
