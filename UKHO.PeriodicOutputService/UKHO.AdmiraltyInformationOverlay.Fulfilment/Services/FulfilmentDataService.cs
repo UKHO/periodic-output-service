@@ -28,7 +28,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         private const string AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION = "zip;iso;sha1";
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string DEFAULTMIMETYPE = "application/octet-stream";
-        private readonly string[] _aioCellNames;
 
         private readonly Dictionary<string, string> _mimeTypes = new()
         {
@@ -51,7 +50,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _configuration = configuration;
             _azureTableStorageHelper = azureTableStorageHelper;
 
-            _aioCellNames = Convert.ToString(_configuration["AioCells"]).Split(',').ToArray();
             _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["AIOFolderName"]);
         }
 
@@ -85,9 +83,11 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         {
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationStarted.ToEventId(), "Creation of AIO base exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            if (!(_aioCellNames == null || _aioCellNames.Length == 0))
+            if (!string.IsNullOrEmpty(_configuration["AioCells"]))
             {
-                string essBatchId = await PostProductIdentifiersToESS(_aioCellNames.ToList());
+                var aioCells = Convert.ToString(_configuration["AioCells"]).Split(',').ToList();
+
+                string essBatchId = await PostProductIdentifiersToESS(aioCells);
 
                 (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssAioBaseZipBatch);
 
@@ -121,7 +121,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         {
             _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for Productversions - {Productversions} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productVersionEntities, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            var productVersions = GetProductVersionsFromEntities(productVersionEntities);
+            string[] aioCellNames = Convert.ToString(_configuration["AioCells"]).Split(',').ToArray();
+
+            var productVersions = GetProductVersionsFromEntities(productVersionEntities, aioCellNames);
 
             string essBatchId = await GetProductDataVersionFromEss(new ProductVersionsRequest()
             {
@@ -134,12 +136,11 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             {
                 ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath);
+                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, aioCellNames);
 
                 bool isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch);
 
                 if (isUpdateZipBatchCreated)
-
                 {
                     _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationCompleted.ToEventId(), "Update exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
@@ -381,7 +382,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadCompleted.ToEventId(), "Downloading of AIO base exchange set ancillary files completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
         }
 
-        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath)
+        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] aioCellNames)
         {
             string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
             string aioInfoFolderPath = string.Format(_configuration["AioUpdateZipFileName"], weekNumber, DateTime.UtcNow.ToString("yy"));
@@ -390,7 +391,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             ProductVersionsRequest productVersionsRequest = new();
             productVersionsRequest.ProductVersions = new();
 
-            foreach (var aioCellName in _aioCellNames)
+            foreach (var aioCellName in aioCellNames)
             {
                 var files = _fileSystemHelper.GetProductVersionsFromDirectory(aioExchangeSetInfoPath, aioCellName);
 
@@ -419,11 +420,11 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             }
         }
 
-        private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities)
+        private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, string[] aioCellNames)
         {
             List<ProductVersion> productVersions = new List<ProductVersion>();
 
-            foreach (var item in _aioCellNames)
+            foreach (var item in aioCellNames)
             {
                 ProductVersion productVersion = new();
 

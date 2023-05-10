@@ -6,6 +6,7 @@ using UKHO.AdmiraltyInformationOverlay.Fulfilment.Services;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Services;
@@ -49,6 +50,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
+            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
+
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
 
@@ -81,17 +85,17 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             Assert.That(result, Is.True);
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
-              .MustHaveHappenedTwiceExactly();
+              .MustHaveHappened(3, Times.Exactly);
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
-               .MustHaveHappenedOnceExactly();
+              .MustHaveHappened(2, Times.Exactly);
 
 
             A.CallTo(() => _fakeFileInfo.MoveTo(A<string>.Ignored))
-               .MustHaveHappenedOnceExactly();
+              .MustHaveHappened(2, Times.Exactly);
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
-               .MustHaveHappenedOnceExactly();
+               .MustHaveHappened(2, Times.Exactly);
 
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
@@ -123,7 +127,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-                ).MustHaveHappenedOnceExactly();
+                ).MustHaveHappened(2, Times.Exactly);
 
             A.CallTo(_fakeLogger).Where(call =>
                call.Method.Name == "Log"
@@ -299,6 +303,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                     Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
                 }
             },
+            AioExchangeSetCellCount = 1,
             RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>(),
             ResponseDateTime = DateTime.UtcNow
         };
