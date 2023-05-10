@@ -126,7 +126,7 @@ stages:
                 **/*.csproj
                 !**/*Tests.csproj
               feedsToUse: config
-              noCache: false
+              noCache: true
               nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
               workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
               packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packages'
