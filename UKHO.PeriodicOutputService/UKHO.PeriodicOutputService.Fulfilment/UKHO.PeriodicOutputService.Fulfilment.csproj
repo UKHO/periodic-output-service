@@ -35,7 +35,6 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="3.1.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="System.Net.WebSockets.Client" Version="4.3.2" />
     <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.23073.7" />
   </ItemGroup>
   <ItemGroup>
