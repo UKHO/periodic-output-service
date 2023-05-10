@@ -14,3 +14,12 @@ resource "azurerm_storage_account" "pos_storage" {
     virtual_network_subnet_ids     = [var.m_spoke_subnet,var.agent_subnet]
 }
 }
+
+resource "azurerm_storage_table" "storage_table" {
+  name = "AioProductVersionDetails"
+  storage_account_name = azurerm_storage_account.pos_storage.name
+
+  lifecycle {
+        prevent_destroy = true
+  }
+}
