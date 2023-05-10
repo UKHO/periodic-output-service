@@ -97,7 +97,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string zipPath = tempFilePath;
             string extractPath = Path.GetTempPath() + RenameFolder(tempFilePath);
 
-            ZipFile.ExtractToDirectory(zipPath, extractPath);
+            ZipFile.ExtractToDirectory(zipPath, extractPath, true);
 
             return extractPath;
         }
