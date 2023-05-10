@@ -24,7 +24,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         private IFileSystemHelper _fakefileSystemHelper;
         private IConfiguration _fakeconfiguration;
         private IFileInfo _fakeFileInfo;
-
+        private IAzureTableStorageHelper _fakeAzureTableStorageHelper;
 
         [SetUp]
         public void Setup()
@@ -35,11 +35,12 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakefileSystemHelper = A.Fake<IFileSystemHelper>();
             _fakeconfiguration = A.Fake<IConfiguration>();
             _fakeFileInfo = A.Fake<IFileInfo>();
+            _fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
 
             _fakeconfiguration["IsFTRunning"] = "false";
             _fakeconfiguration["AioCells"] = "GB800001";
 
-            _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration);
+            _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
         }
 
         [Test]

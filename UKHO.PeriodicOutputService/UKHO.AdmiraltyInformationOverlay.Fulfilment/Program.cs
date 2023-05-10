@@ -145,6 +145,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                 serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                 serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
                 configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
             }
 
@@ -161,6 +162,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
             serviceCollection.AddScoped<IFileSystem, FileSystem>();
             serviceCollection.AddScoped<IZipHelper, ZipHelper>();
             serviceCollection.AddScoped<IFileUtility, FileUtility>();
+            serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
 
             serviceCollection.AddHttpClient("DownloadClient",
                httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
