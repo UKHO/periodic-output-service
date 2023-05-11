@@ -375,7 +375,27 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809092 -  Get product data for given product version failed
         /// </summary>
-        GetProductDataProductVersionFailed = 809092
+        GetProductDataProductVersionFailed = 809092,
+        /// <summary>
+        /// 809093 -  Logging Product Versions started
+        /// </summary>
+        LoggingProductVersionsStarted = 809093,
+        /// <summary>
+        /// 809094 -  Logging Product Versions Completed
+        /// </summary>
+        LoggingProductVersionsCompleted = 809094,
+        /// <summary>
+        /// 809095 -  Logging Product Versions failed
+        /// </summary>
+        LoggingProductVersionsFailed = 809095,
+        /// <summary>
+        /// 809096 -  Get latest product version details started.
+        /// </summary>
+        GetLatestProductVersionDetailsStarted = 809096,
+        /// <summary>
+        /// 809097 -  Get latest product version details completed.
+        /// </summary>
+        GetLatestProductVersionDetailsCompleted = 809097,
     }
 
     public static class EventIdExtensions

@@ -1,4 +1,5 @@
-﻿using UKHO.PeriodicOutputService.Common.Models.TableEntities;
+﻿using UKHO.PeriodicOutputService.Common.Models.Ess;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -6,5 +7,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         void SaveHistory(WebJobHistory webJobHistory);
         DateTime GetSinceDateTime();
+
+        void SaveProductVersionDetails(List<ProductVersion> productVersions);
+
+        List<ProductVersionEntities> GetLatestProductVersionDetails();
     }
 }

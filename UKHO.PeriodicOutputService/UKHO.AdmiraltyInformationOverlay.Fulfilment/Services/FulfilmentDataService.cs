@@ -8,6 +8,7 @@ using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
@@ -19,6 +20,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         private readonly IFssService _fssService;
         private readonly ILogger<FulfilmentDataService> _logger;
         private readonly IConfiguration _configuration;
+        private readonly IAzureTableStorageHelper _azureTableStorageHelper;
 
         private readonly string _homeDirectoryPath;
 
@@ -27,7 +29,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         private const string UPDATEZIPEXCHANGESETFILEEXTENSION = "zip";
         private const string DEFAULTMIMETYPE = "application/octet-stream";
 
-
         private readonly Dictionary<string, string> _mimeTypes = new()
         {
             { ".zip", "application/zip" },
@@ -35,18 +36,19 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             { ".sha1", "text/plain" }
         };
 
-
         public FulfilmentDataService(IFileSystemHelper fileSystemHelper,
                                      IEssService essService,
                                      IFssService fssService,
                                      ILogger<FulfilmentDataService> logger,
-                                     IConfiguration configuration)
+                                     IConfiguration configuration,
+                                     IAzureTableStorageHelper azureTableStorageHelper)
         {
             _fileSystemHelper = fileSystemHelper;
             _essService = essService;
             _fssService = fssService;
             _logger = logger;
             _configuration = configuration;
+            _azureTableStorageHelper = azureTableStorageHelper;
 
             _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["AIOFolderName"]);
         }
@@ -57,8 +59,20 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             bool isSuccess = false;
 
-            //await CreateAioBaseExchangeSet();
-            await CreateUpdateExchangeSet("");
+            _logger.LogInformation(EventIds.GetLatestProductVersionDetailsStarted.ToEventId(), "Getting latest product version details started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            var productVersionEntities = _azureTableStorageHelper.GetLatestProductVersionDetails();
+
+            _logger.LogInformation(EventIds.GetLatestProductVersionDetailsCompleted.ToEventId(), "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            Task[] tasks = null;
+
+            Task aioBaseExchangeSetTask = Task.Run(() => CreateAioBaseExchangeSet());
+            Task updateAioExchangeSetTask = Task.Run(() => CreateUpdateAIOExchangeSet(productVersionEntities));
+
+            tasks = new Task[] { aioBaseExchangeSetTask, updateAioExchangeSetTask };
+
+            await Task.WhenAll(tasks);
 
             isSuccess = true;
 
@@ -103,21 +117,17 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
 
-        private async Task CreateUpdateExchangeSet(string sinceDateTime)
+        private async Task CreateUpdateAIOExchangeSet(List<ProductVersionEntities> productVersionEntities)
         {
-            _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for SinceDateTime - {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for Productversions - {Productversions} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productVersionEntities, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            string[] aioCellNames = Convert.ToString(_configuration["AioCells"]).Split(',').ToArray();
+
+            var productVersions = GetProductVersionsFromEntities(productVersionEntities, aioCellNames);
 
             string essBatchId = await GetProductDataVersionFromEss(new ProductVersionsRequest()
             {
-                ProductVersions = new List<ProductVersion>
-                                                                        {
-                                                                            new ProductVersion()
-                                                                            {
-                                                                                 ProductName = "GB800001",
-                                                                                 EditionNumber = 31,
-                                                                                 UpdateNumber =48
-                                                                            }
-                                                                        }
+                ProductVersions = productVersions
             });
 
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssUpdateZipBatch);
@@ -126,12 +136,18 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             {
                 ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-                GetTheLatestUpdateNumber(essFileDownloadPath);
-                bool isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch);
-                if (isUpdateZipBatchCreated)
+                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, aioCellNames);
 
+                bool isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch);
+
+                if (isUpdateZipBatchCreated)
                 {
                     _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationCompleted.ToEventId(), "Update exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                    if (!bool.Parse(_configuration["IsFTRunning"]))
+                    {
+                        LogProductVersions(latestProductVersions);
+                    }
                 }
             }
             else
@@ -366,18 +382,70 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadCompleted.ToEventId(), "Downloading of AIO base exchange set ancillary files completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
         }
 
-        private void GetTheLatestUpdateNumber(string filePath)
+        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] aioCellNames)
         {
             string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
             string aioInfoFolderPath = string.Format(_configuration["AioUpdateZipFileName"], weekNumber, DateTime.UtcNow.ToString("yy"));
             string aioExchangeSetInfoPath = Path.Combine(filePath, Path.GetFileNameWithoutExtension(aioInfoFolderPath));
 
-            string[] aioCellNames = { "GB800001", "GB800003", "GB800004" };
+            ProductVersionsRequest productVersionsRequest = new();
+            productVersionsRequest.ProductVersions = new();
 
             foreach (var aioCellName in aioCellNames)
             {
                 var files = _fileSystemHelper.GetProductVersionsFromDirectory(aioExchangeSetInfoPath, aioCellName);
+
+                productVersionsRequest.ProductVersions.AddRange(files);
             }
+            return productVersionsRequest;
+        }
+
+
+        private void LogProductVersions(ProductVersionsRequest productVersionsRequest)
+        {
+            try
+            {
+                _logger.LogInformation(EventIds.LoggingProductVersionsStarted.ToEventId(), "Logging product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                _azureTableStorageHelper.SaveProductVersionDetails(productVersionsRequest.ProductVersions);
+
+                _logger.LogInformation(EventIds.LoggingProductVersionsCompleted.ToEventId(), "Logging product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(EventIds.LoggingProductVersionsFailed.ToEventId(), "Logging product version failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                throw new Exception($"Logging Product version failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+            }
+        }
+
+        private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, string[] aioCellNames)
+        {
+            List<ProductVersion> productVersions = new List<ProductVersion>();
+
+            foreach (var item in aioCellNames)
+            {
+                ProductVersion productVersion = new();
+
+                var result = productVersionEntities.Where(p => p.ProductName == item);
+
+                if (result != null && result.Count() > 0)
+                {
+                    productVersion.ProductName = result.FirstOrDefault().ProductName;
+                    productVersion.EditionNumber = result.FirstOrDefault().EditionNumber;
+                    productVersion.UpdateNumber = result.FirstOrDefault().UpdateNumber;
+                }
+                else
+                {
+                    productVersion.ProductName = item;
+                    productVersion.EditionNumber = 0;
+                    productVersion.UpdateNumber = 0;
+                }
+                productVersions.Add(productVersion);
+            }
+
+            return productVersions;
         }
     }
 }
