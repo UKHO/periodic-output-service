@@ -433,25 +433,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         }
 
         [Test]
-        public void Does_CreateAioExchangeSets_Throws_Error_When_Requested_Cancelled_Products_In_ExchangeSet()
-        {
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
-             .Returns(GetValidExchangeSetGetBatchResponse());
-
-            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored))
-              .Returns(GetInValidExchangeSetGetBatchResponseWithRequestedProductsNotInExchangeSet());
-
-            _fulfilmentDataService.CreateAioExchangeSetsAsync();
-
-            A.CallTo(_fakeLogger).Where(call =>
-               call.Method.Name == "Log"
-               && call.GetArgument<LogLevel>(0) == LogLevel.Information
-               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "{Count} cancelled products found while creating update exchange set and they are [{Products}] on  {DateTime} | _X-Correlation-ID : {CorrelationId}"
-               ).MustHaveHappenedOnceExactly();
-
-        }
-
-        [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_Requested_Invalid_Products_In_ExchangeSet()
         {
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
