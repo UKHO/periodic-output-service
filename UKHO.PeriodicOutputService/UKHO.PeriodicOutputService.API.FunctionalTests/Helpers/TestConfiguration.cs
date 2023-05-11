@@ -61,7 +61,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string InvalidProductIdentifierBatchId { get; set; }
             public string FullAvcsPollingTimeOutBatchId { get; set; }
             public string UpdatePollingTimeoutBatchId { get; set; }
-            public string AIOValidBatchId { get; set; }
+            public string AIOFullValidBatchId { get; set; }
+            public string AIOUpdateValidBatchId { get; set; }
             public string EncUpdateListCsvBatchId { get; set; }
             public string TempFolderName { get; set; }
             public string UpdateExchangeSet { get; set; }

@@ -132,12 +132,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
         }
 
-        public static void GetBatchDetailsResponseValidationForAio(dynamic batchDetailsResponse)
+        public static void GetBatchDetailsResponseValidationForAio(dynamic batchDetailsResponse, string exchangeSetType)
         {
             string expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
             string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
             string yearNumber = DateTime.UtcNow.Year.ToString();
-            string year2 = DateTime.UtcNow.Year.ToString().Substring(DateTime.UtcNow.Year.ToString().Length - 2);
 
             //to check status
             string batchStatus = batchDetailsResponse.status;
@@ -148,15 +147,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
             string expiryDate = batchDetailsResponse.expiryDate;
             expiryDate.Should().Contain(expectedExpiryDate);
-
-            //string fileSize = batchDetailsResponse.files[0].fileSize;
-            //fileSize.Should().NotBeNullOrEmpty();
-
-            //string hash = batchDetailsResponse.files[0].hash;
-            //hash.Should().NotBeNullOrEmpty();
-
-            //string mimeType = batchDetailsResponse.files[0].mimeType;
-            //mimeType.Should().Be("application/x-raw-disk-image");
 
             string productType = batchDetailsResponse.attributes[0].value;
             productType.Should().Be("AIO");
@@ -170,8 +160,19 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string yearweek = batchDetailsResponse.attributes[3].value;
             yearweek.Should().Be(yearNumber + " / " +weeknumber);
 
-            string exchangesettype = batchDetailsResponse.attributes[4].value;
-            exchangesettype.Should().Be("AIO");
+            string actualExchangeSetType = batchDetailsResponse.attributes[4].value;
+
+            if (exchangeSetType.Equals("AIO"))
+            {
+                actualExchangeSetType.Should().Be("AIO");
+            }
+            else if (exchangeSetType.Equals("Update"))
+            {
+                actualExchangeSetType.Should().Be("Update");
+                string mediaType = batchDetailsResponse.attributes[5].value;
+                mediaType.Should().Be("Zip");
+
+            }           
         }
     }
 }

@@ -458,7 +458,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     break;
 
                 case Batch.AioUpdateZipBatch:
-                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
 
