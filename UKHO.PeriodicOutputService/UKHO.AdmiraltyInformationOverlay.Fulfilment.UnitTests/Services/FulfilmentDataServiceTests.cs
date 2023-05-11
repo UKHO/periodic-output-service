@@ -382,9 +382,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
             .Returns(GetValidBatchResponseModel());
 
-            A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
+            A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<AggregateException>();
 
-            Assert.ThrowsAsync<Exception>(
+            Assert.ThrowsAsync<AggregateException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))

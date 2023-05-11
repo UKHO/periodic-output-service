@@ -357,7 +357,18 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                  });
 
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R")));
+            Assert.ThrowsAsync<FulfilmentException>(() => _essService.GetProductDataProductVersions(new ProductVersionsRequest
+            {
+                ProductVersions = new List<ProductVersion>
+                                                                                                    {
+                                                                                                         new ProductVersion
+                                                                                                         {
+                                                                                                             ProductName="ABC000001",
+                                                                                                             EditionNumber=31,
+                                                                                                             UpdateNumber = 10
+                                                                                                         }
+                                                                                                    }
+            }));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
