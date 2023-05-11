@@ -17,14 +17,14 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         }
 
         [Test]
-        public async Task WhenICallBatchDetailsEndpointWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
+        public async Task WhenICallBatchDetailsEndpointForFullExchangeSetTypeWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
         {
-            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.AIOValidBatchId);
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.AIOFullValidBatchId);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-            GetBatchDetails.GetBatchDetailsResponseValidationForAio(batchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidationForAio(batchDetailsResponse, "AIO");
         }
 
         [Test]
@@ -34,6 +34,17 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             int fileCount = Directory.GetFiles(Path.Combine(DownloadedFolderPath, posDetails.AioFolderName,posDetails.InfoFolderName), "*.*", SearchOption.TopDirectoryOnly).Length;
             Assert.IsTrue(fileCount > 0, $"File count is {fileCount} in the specified folder path.");
+        }
+
+        [Test]
+        public async Task WhenICallBatchDetailsEndpointForUpdateExchangeSetTypeWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
+        {
+            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.AIOUpdateValidBatchId);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+
+            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+
+            GetBatchDetails.GetBatchDetailsResponseValidationForAio(batchDetailsResponse, "Update");
         }
 
         [OneTimeTearDown]
