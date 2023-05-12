@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using FakeItEasy;
+using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.AdmiraltyInformationOverlay.Fulfilment.Services;
@@ -42,6 +43,40 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakeconfiguration["AioCells"] = "GB800001";
 
             _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
+        }
+
+        [Test]
+        public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
+                .ParamName
+                .Should().Be("fileSystemHelper");
+
+            Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
+                .ParamName
+                .Should().Be("essService");
+
+            Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
+                .ParamName
+                .Should().Be("fssService");
+
+            Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper))
+                .ParamName
+                .Should().Be("logger");
+
+            Assert.Throws<ArgumentNullException>(
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper))
+                 .ParamName
+                 .Should().Be("configuration");
+
+            Assert.Throws<ArgumentNullException>(
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null))
+                 .ParamName
+                 .Should().Be("azureTableStorageHelper");
         }
 
         [Test]

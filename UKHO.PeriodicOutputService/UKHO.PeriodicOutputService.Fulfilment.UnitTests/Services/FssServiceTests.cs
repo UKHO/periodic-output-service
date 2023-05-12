@@ -114,6 +114,21 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Polling to FSS to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Polling to FSS to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
@@ -200,8 +215,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch details for BatchID - {BatchID} from FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch details for BatchID - {BatchID} from FSS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
+
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -246,10 +268,17 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             bool result = await _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\POS");
 
             Assert.That(result, Is.True);
+
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Downloading of file {fileName} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
@@ -336,6 +365,19 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             Assert.That(result.Result.Count, Is.GreaterThan(0));
             Assert.That(result.Result.FirstOrDefault(), Does.Contain("Block"));
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Uploading of file blocks of {FileName} for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Uploading of file blocks of {FileName} for BatchID - {BatchID} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -429,6 +471,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
@@ -454,6 +503,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "File {FileName} is added in batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(_fakeLogger).Where(call =>
+           call.Method.Name == "Log"
+           && call.GetArgument<LogLevel>(0) == LogLevel.Information
+           && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Adding file {FileName} in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+           ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
@@ -510,6 +565,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "File blocks written in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
+            A.CallTo(_fakeLogger).Where(call =>
+           call.Method.Name == "Log"
+           && call.GetArgument<LogLevel>(0) == LogLevel.Information
+           && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Writing blocks in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+           ).MustHaveHappenedOnceOrMore();
+
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
@@ -564,6 +625,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch {BatchType} with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch commit for {BatchType} with BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))

@@ -43,12 +43,12 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                                      IConfiguration configuration,
                                      IAzureTableStorageHelper azureTableStorageHelper)
         {
-            _fileSystemHelper = fileSystemHelper;
-            _essService = essService;
-            _fssService = fssService;
-            _logger = logger;
-            _configuration = configuration;
-            _azureTableStorageHelper = azureTableStorageHelper;
+            _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
+            _essService = essService ?? throw new ArgumentNullException(nameof(essService));
+            _fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
 
             _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["AIOFolderName"]);
         }
@@ -422,7 +422,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
         private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, string[] aioCellNames)
         {
-            List<ProductVersion> productVersions = new List<ProductVersion>();
+            List<ProductVersion> productVersions = new();
 
             foreach (var item in aioCellNames)
             {
