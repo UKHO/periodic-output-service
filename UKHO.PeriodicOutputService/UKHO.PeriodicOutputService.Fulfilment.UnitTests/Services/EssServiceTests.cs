@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Services;
 
@@ -280,6 +281,99 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Error
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to create exchange set for data since {SinceDateTime} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+        }
+
+        [Test]
+        public async Task DoesGetGetProductDataProductVersions_Returns_ValidData_WhenValidProductVersionsArePassed()
+        {
+            A.CallTo(() => _fakeEssApiClient.GetProductDataProductVersion
+            (A<string>.Ignored, A<List<ProductVersion>>.Ignored, A<string>.Ignored))
+                  .Returns(new HttpResponseMessage()
+                  {
+                      StatusCode = HttpStatusCode.OK,
+                      RequestMessage = new HttpRequestMessage()
+                      {
+                          RequestUri = new Uri("http://test.com")
+                      },
+                      Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
+                      Headers = { Date = DateTime.UtcNow }
+                  });
+
+
+            ExchangeSetResponseModel response = await _essService.GetProductDataProductVersions(new ProductVersionsRequest
+            {
+                ProductVersions = new List<ProductVersion>
+                                                                                                    {
+                                                                                                         new ProductVersion
+                                                                                                         {
+                                                                                                             ProductName="ABC000001",
+                                                                                                             EditionNumber=31,
+                                                                                                             UpdateNumber = 10
+                                                                                                         }
+                                                                                                    }
+            });
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
+            });
+
+            A.CallTo(_fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "ESS request to create exchange set for product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                ).MustHaveHappened();
+
+            A.CallTo(_fakeLogger).Where(call =>
+               call.Method.Name == "Log"
+               && call.GetArgument<LogLevel>(0) == LogLevel.Information
+               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "ESS request to create exhchange set for product version completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+               ).MustHaveHappened();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+        }
+
+        [Test]
+        public void DoesGetGetProductDataProductVersions_Returns_ValidData_When_Response_Status_Is_Not_Ok()
+        {
+            A.CallTo(() => _fakeEssApiClient.GetProductDataProductVersion
+           (A<string>.Ignored, A<List<ProductVersion>>.Ignored, A<string>.Ignored))
+                 .Returns(new HttpResponseMessage()
+                 {
+                     StatusCode = HttpStatusCode.NotModified,
+                     RequestMessage = new HttpRequestMessage()
+                     {
+                         RequestUri = new Uri("http://test.com")
+                     },
+                     Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
+                 });
+
+
+            Assert.ThrowsAsync<FulfilmentException>(() => _essService.GetProductDataProductVersions(new ProductVersionsRequest
+            {
+                ProductVersions = new List<ProductVersion>
+                                                                                                    {
+                                                                                                         new ProductVersion
+                                                                                                         {
+                                                                                                             ProductName="ABC000001",
+                                                                                                             EditionNumber=31,
+                                                                                                             UpdateNumber = 10
+                                                                                                         }
+                                                                                                    }
+            }));
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Error
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to create exchange set for product version | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))

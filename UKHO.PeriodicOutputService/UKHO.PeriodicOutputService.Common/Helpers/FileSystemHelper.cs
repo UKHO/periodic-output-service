@@ -148,7 +148,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                                                .OrderByDescending(d => d.Number)
                                                .FirstOrDefault();
 
-                productVersion.UpdateNumber = Convert.ToInt32(maxDirectory.Number);
+                productVersion.UpdateNumber = Convert.ToInt32(maxDirectory!.Number);
 
                 productVersions.Add(productVersion);
             }
