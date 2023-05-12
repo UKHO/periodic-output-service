@@ -128,10 +128,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
             var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedAioFolder(downloadFileUrl.ToString(), FssJwtToken);
 
-            var downloadFolder = FssBatchHelper.RenameFolder(extractDownloadedFolder);
-            var downloadFolderPath = Path.Combine(Path.GetTempPath(), downloadFolder);
-
-            return downloadFolderPath;
+            return extractDownloadedFolder;
         }
     }
 }

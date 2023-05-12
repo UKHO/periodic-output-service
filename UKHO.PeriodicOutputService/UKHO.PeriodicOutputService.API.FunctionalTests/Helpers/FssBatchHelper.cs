@@ -95,7 +95,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
 
             string zipPath = tempFilePath;
-            string extractPath = Path.GetTempPath() + RenameFolder(tempFilePath);
+            string extractPath = Path.Combine(posFolderPath,RenameFolder(tempFilePath));
 
             ZipFile.ExtractToDirectory(zipPath, extractPath);
 
