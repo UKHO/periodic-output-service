@@ -1,11 +1,13 @@
 ﻿using System.IO.Abstractions;
 using FakeItEasy;
+using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.AdmiraltyInformationOverlay.Fulfilment.Services;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Services;
@@ -24,7 +26,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         private IFileSystemHelper _fakefileSystemHelper;
         private IConfiguration _fakeconfiguration;
         private IFileInfo _fakeFileInfo;
-
+        private IAzureTableStorageHelper _fakeAzureTableStorageHelper;
 
         [SetUp]
         public void Setup()
@@ -35,11 +37,46 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakefileSystemHelper = A.Fake<IFileSystemHelper>();
             _fakeconfiguration = A.Fake<IConfiguration>();
             _fakeFileInfo = A.Fake<IFileInfo>();
+            _fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
 
             _fakeconfiguration["IsFTRunning"] = "false";
             _fakeconfiguration["AioCells"] = "GB800001";
 
-            _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration);
+            _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
+        }
+
+        [Test]
+        public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
+                .ParamName
+                .Should().Be("fileSystemHelper");
+
+            Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
+                .ParamName
+                .Should().Be("essService");
+
+            Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
+                .ParamName
+                .Should().Be("fssService");
+
+            Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper))
+                .ParamName
+                .Should().Be("logger");
+
+            Assert.Throws<ArgumentNullException>(
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper))
+                 .ParamName
+                 .Should().Be("configuration");
+
+            Assert.Throws<ArgumentNullException>(
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null))
+                 .ParamName
+                 .Should().Be("azureTableStorageHelper");
         }
 
         [Test]
@@ -47,6 +84,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         {
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -80,23 +120,52 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             Assert.That(result, Is.True);
 
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
-              .MustHaveHappenedTwiceExactly();
+              .MustHaveHappened(3, Times.Exactly);
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
-               .MustHaveHappenedOnceExactly();
+              .MustHaveHappened(2, Times.Exactly);
 
 
             A.CallTo(() => _fakeFileInfo.MoveTo(A<string>.Ignored))
-               .MustHaveHappenedOnceExactly();
+              .MustHaveHappened(2, Times.Exactly);
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
-               .MustHaveHappenedOnceExactly();
+               .MustHaveHappened(2, Times.Exactly);
 
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+             .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
               .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored))
                 .MustHaveHappenedOnceOrMore();
+
+            #region Log checks
+
+            A.CallTo(_fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Getting latest product version details started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creation of update exchange set for Productversions - {Productversions} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Update exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
 
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -122,20 +191,46 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-                ).MustHaveHappenedOnceExactly();
+                ).MustHaveHappened(2, Times.Exactly);
 
             A.CallTo(_fakeLogger).Where(call =>
                call.Method.Name == "Log"
                && call.GetArgument<LogLevel>(0) == LogLevel.Information
                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
                ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Logging product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Logging product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            #endregion
         }
 
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_Batch_Is_Not_Committed()
         {
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
-             .Returns(GetValidExchangeSetGetBatchResponse());
+            .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
@@ -259,7 +354,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
@@ -278,6 +373,120 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             ).MustHaveHappenedOnceOrMore();
 
         }
+
+        [Test]
+        public void Does_CreateAioExchangeSets_Throws_Error_When_Logging_Product_Version_Details_In_Azure_Fails()
+        {
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+
+            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
+             .Returns(GetValidBatchResponseModel());
+
+            A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
+             .Returns(true);
+
+            A.CallTo(() => _fakeAzureTableStorageHelper.SaveProductVersionDetails(A<List<ProductVersion>>.Ignored)).Throws<Exception>();
+
+            Assert.ThrowsAsync<Exception>(
+               () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+
+            A.CallTo(_fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Error
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Logging product version failed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+        }
+
+        [Test]
+        public void Does_CreateAioExchangeSets_Throws_Error_When_CreateExchangeSetZip_Fails()
+        {
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+
+            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
+            .Returns(GetValidBatchResponseModel());
+
+            A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<AggregateException>();
+
+            Assert.ThrowsAsync<AggregateException>(
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+
+            A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+               call.Method.Name == "Log"
+               && call.GetArgument<LogLevel>(0) == LogLevel.Information
+               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+               ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+               call.Method.Name == "Log"
+               && call.GetArgument<LogLevel>(0) == LogLevel.Information
+               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+               ).MustNotHaveHappened();
+
+            A.CallTo(_fakeLogger).Where(call =>
+               call.Method.Name == "Log"
+               && call.GetArgument<LogLevel>(0) == LogLevel.Error
+               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}"
+               ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void Does_CreateAioExchangeSets_Throws_Error_When_AioExchangeSetCellCount_Is_Zero()
+        {
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored))
+              .Returns(GetInValidExchangeSetGetBatchRespGetProductDataProductVersionsonseWithZeroAIOCells());
+
+            Assert.ThrowsAsync<FulfilmentException>(
+              () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+
+            A.CallTo(_fakeLogger).Where(call =>
+               call.Method.Name == "Log"
+               && call.GetArgument<LogLevel>(0) == LogLevel.Error
+               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Due to the empty exchange set, ESS validation failed while producing an update | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+               ).MustHaveHappenedOnceExactly();
+
+        }
+
+        [Test]
+        public void Does_CreateAioExchangeSets_Throws_Error_When_Requested_Invalid_Products_In_ExchangeSet()
+        {
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored))
+              .Returns(GetInValidExchangeSetGetBatchResponseWithRequestedInvalidProductsNotInExchangeSet());
+
+            Assert.ThrowsAsync<FulfilmentException>(
+             () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+
+            A.CallTo(_fakeLogger).Where(call =>
+               call.Method.Name == "Log"
+               && call.GetArgument<LogLevel>(0) == LogLevel.Error
+               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "ESS validation failed for {Count} products [{Products}] while creating update exchange set {DateTime} | _X-Correlation-ID : {CorrelationId}"
+               ).MustHaveHappenedOnceExactly();
+
+        }
+
 
         private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
         {
@@ -298,7 +507,94 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                     Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
                 }
             },
+            AioExchangeSetCellCount = 1,
             RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>(),
+            ResponseDateTime = DateTime.UtcNow
+        };
+
+        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchRespGetProductDataProductVersionsonseWithZeroAIOCells() => new()
+        {
+            ExchangeSetCellCount = 3,
+            RequestedProductCount = 3,
+            Links = new PeriodicOutputService.Common.Models.Ess.Response.Links
+            {
+                ExchangeSetBatchDetailsUri = new LinkSetBatchDetailsUri
+                {
+                    Href = "http://test1.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
+                },
+                ExchangeSetBatchStatusUri = new LinkSetBatchStatusUri
+                {
+                    Href = "http://test2.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
+                },
+                ExchangeSetFileUri = new LinkSetFileUri
+                {
+                    Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
+                }
+            },
+            AioExchangeSetCellCount = 0,
+            RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>(),
+            ResponseDateTime = DateTime.UtcNow
+        };
+
+        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponseWithRequestedProductsNotInExchangeSet() => new()
+        {
+            ExchangeSetCellCount = 3,
+            RequestedProductCount = 3,
+            Links = new PeriodicOutputService.Common.Models.Ess.Response.Links
+            {
+                ExchangeSetBatchDetailsUri = new LinkSetBatchDetailsUri
+                {
+                    Href = "http://test1.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
+                },
+                ExchangeSetBatchStatusUri = new LinkSetBatchStatusUri
+                {
+                    Href = "http://test2.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
+                },
+                ExchangeSetFileUri = new LinkSetFileUri
+                {
+                    Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
+                }
+            },
+            AioExchangeSetCellCount = 1,
+            RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>
+                                                    {
+                                                        new RequestedProductsNotInExchangeSet
+                                                            {
+                                                            ProductName="ABC00001",
+                                                            Reason= "noDataAvailableForCancelledProduct"
+                                                        }
+                                                    },
+            ResponseDateTime = DateTime.UtcNow
+        };
+
+        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponseWithRequestedInvalidProductsNotInExchangeSet() => new()
+        {
+            ExchangeSetCellCount = 3,
+            RequestedProductCount = 3,
+            Links = new PeriodicOutputService.Common.Models.Ess.Response.Links
+            {
+                ExchangeSetBatchDetailsUri = new LinkSetBatchDetailsUri
+                {
+                    Href = "http://test1.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
+                },
+                ExchangeSetBatchStatusUri = new LinkSetBatchStatusUri
+                {
+                    Href = "http://test2.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
+                },
+                ExchangeSetFileUri = new LinkSetFileUri
+                {
+                    Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
+                }
+            },
+            AioExchangeSetCellCount = 1,
+            RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>
+                                                    {
+                                                        new RequestedProductsNotInExchangeSet
+                                                            {
+                                                            ProductName="ABC00001",
+                                                            Reason= "Invalid"
+                                                        }
+                                                    },
             ResponseDateTime = DateTime.UtcNow
         };
 

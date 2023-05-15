@@ -115,7 +115,7 @@ namespace UKHO.FmEssFssMock.API.Services
                     break;
 
                 case Batch.AioUpdateZipBatch:
-                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
+                    attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
 

@@ -169,7 +169,7 @@
         }
     },
     {
-        "id": "productVersion-GB800001-31-32",
+        "id": "productVersion-GB800001-*-*",
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {

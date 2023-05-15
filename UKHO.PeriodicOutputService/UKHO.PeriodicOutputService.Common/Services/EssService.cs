@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 
 namespace UKHO.PeriodicOutputService.Common.Services
@@ -70,8 +71,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
                 _logger.LogInformation(EventIds.GetProductDataSinceDateTimeCompleted.ToEventId(), "ESS request to create exhchange set for data since {SinceDateTime} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                ExchangeSetResponseModel exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
-                exchangeSetResponseModel.ResponseDateTime = httpResponse!.Headers!.Date!.Value.UtcDateTime;
+                ExchangeSetResponseModel? exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
+                exchangeSetResponseModel!.ResponseDateTime = httpResponse!.Headers!.Date!.Value.UtcDateTime;
 
                 return exchangeSetResponseModel;
             }
@@ -79,6 +80,30 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 _logger.LogError(EventIds.GetProductDataSinceDateTimeFailed.ToEventId(), "Failed to create exchange set for data since {SinceDateTime} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 throw new FulfilmentException(EventIds.GetProductDataSinceDateTimeFailed.ToEventId());
+            }
+        }
+
+        public async Task<ExchangeSetResponseModel?> GetProductDataProductVersions(ProductVersionsRequest productVersionsRequest)
+        {
+            _logger.LogInformation(EventIds.GetProductDataProductVersionStarted.ToEventId(), "ESS request to create exchange set for product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productVersions";
+            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
+
+            HttpResponseMessage httpResponse = await _essApiClient.GetProductDataProductVersion(uri, productVersionsRequest.ProductVersions, accessToken);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                string bodyJson = await httpResponse.Content.ReadAsStringAsync();
+                _logger.LogInformation(EventIds.GetProductDataProductVersionCompleted.ToEventId(), "ESS request to create exhchange set for product version completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                ExchangeSetResponseModel? exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
+
+                return exchangeSetResponseModel;
+            }
+            else
+            {
+                _logger.LogError(EventIds.GetProductDataProductVersionFailed.ToEventId(), "Failed to create exchange set for product version | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.GetProductDataProductVersionFailed.ToEventId());
             }
         }
     }
