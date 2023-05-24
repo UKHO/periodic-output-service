@@ -375,6 +375,33 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         }
 
         [Test]
+        public void Does_CreateAioExchangeSets_Throws_Error_If_GetBatchFiles_Contains_FileName_V01X01()
+        {
+
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored))
+              .Returns(GetValidExchangeSetGetBatchResponse());
+
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+
+            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
+              .Returns(GetBatchResponseModelWithFileNameV01X01());
+
+            Assert.ThrowsAsync<FulfilmentException>(
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "The configuration of the AIO cell is not synchronized with the ESS. V01X01 file found in AIO batch - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceOrMore();
+
+        }
+
+        [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_Logging_Product_Version_Details_In_Azure_Fails()
         {
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
@@ -625,6 +652,25 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                new BatchFile
                {
                    Filename = "Error.txt",
+                   Links = new PeriodicOutputService.Common.Models.Fss.Response.Links
+                   {
+                       Get = new Link
+                       {
+                           Href ="http://test1.com"
+                       }
+                   }
+               }
+            }
+        };
+
+        private static GetBatchResponseModel GetBatchResponseModelWithFileNameV01X01() => new()
+        {
+            BatchId = Guid.NewGuid().ToString(),
+            Files = new List<BatchFile>
+            {
+               new BatchFile
+               {
+                   Filename = "V01X01.zip",
                    Links = new PeriodicOutputService.Common.Models.Fss.Response.Links
                    {
                        Get = new Link

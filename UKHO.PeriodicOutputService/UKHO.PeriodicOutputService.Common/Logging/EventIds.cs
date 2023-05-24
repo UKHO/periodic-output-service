@@ -396,6 +396,10 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809097 -  Get latest product version details completed.
         /// </summary>
         GetLatestProductVersionDetailsCompleted = 809097,
+        /// <summary>
+        /// 809098 -  V01X01 file found in batch
+        /// </summary>
+        V01X01FileFoundInBatch = 809098
     }
 
     public static class EventIdExtensions
