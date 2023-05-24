@@ -397,7 +397,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         GetLatestProductVersionDetailsCompleted = 809097,
         /// <summary>
-        /// 809098 -  V01X01 file found in AIO batch
+        /// 809098 -  It reflects the configuration of the AIO cell is not synchronized with the ESS. V01X01 file found in AIO batch
         /// </summary>
         V01X01FileFoundInAIOBatch = 809098
     }
