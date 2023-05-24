@@ -236,8 +236,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             if (batchFiles.Any(f => f.FileName.ToLower().Contains("v01x01")))
             {
-                _logger.LogError(EventIds.V01X01FileFoundInBatch.ToEventId(), "The configuration of the AIO cell is not synchronized with the ESS. V01X01 file found in AIO batch - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.V01X01FileFoundInBatch.ToEventId());
+                _logger.LogError(EventIds.V01X01FileFoundInAIOBatch.ToEventId(), "The configuration of the AIO cell is not synchronized with the ESS. V01X01 file found in AIO batch - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.V01X01FileFoundInAIOBatch.ToEventId());
             }
 
             return batchFiles;
