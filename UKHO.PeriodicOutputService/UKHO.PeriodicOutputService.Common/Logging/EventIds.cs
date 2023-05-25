@@ -396,6 +396,10 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809097 -  Get latest product version details completed.
         /// </summary>
         GetLatestProductVersionDetailsCompleted = 809097,
+        /// <summary>
+        /// 809098 -  It reflects the configuration of the AIO cell is not synchronized with the ESS. V01X01 file found in AIO batch
+        /// </summary>
+        V01X01FileFoundInAIOBatch = 809098
     }
 
     public static class EventIdExtensions
