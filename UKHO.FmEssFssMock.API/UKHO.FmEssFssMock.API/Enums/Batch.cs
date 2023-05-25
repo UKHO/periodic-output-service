@@ -44,6 +44,6 @@ namespace UKHO.FmEssFssMock.Enums
         EssAioBaseZipBatch = 13,
 
         [Description("094cda16-fcc4-41cb-9317-bf4f26991e32")]
-        EssAioUpdateZipBatch = 13,
+        EssAioUpdateZipBatch = 14,
     }
 }

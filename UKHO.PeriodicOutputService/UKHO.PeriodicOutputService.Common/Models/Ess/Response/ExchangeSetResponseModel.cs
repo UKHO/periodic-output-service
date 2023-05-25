@@ -18,9 +18,21 @@ namespace UKHO.PeriodicOutputService.Common.Models.Ess.Response
         [JsonProperty("requestedProductsAlreadyUpToDateCount")]
         public int RequestedProductsAlreadyUpToDateCount { get; set; }
 
+        [JsonProperty("requestedAioProductCount", NullValueHandling = NullValueHandling.Ignore)]
+        public int? RequestedAioProductCount { get; set; } = null;
+
+        [JsonProperty("aioExchangeSetCellCount", NullValueHandling = NullValueHandling.Ignore)]
+        public int? AioExchangeSetCellCount { get; set; } = null;
+
+        [JsonProperty("RequestedAioProductsAlreadyUpToDateCount", NullValueHandling = NullValueHandling.Ignore)]
+        public int? RequestedAioProductsAlreadyUpToDateCount { get; set; } = null;
+
         public IEnumerable<RequestedProductsNotInExchangeSet>? RequestedProductsNotInExchangeSet { get; set; }
 
         public DateTime ResponseDateTime { get; set; }
+
+        [JsonProperty("fssBatchId", NullValueHandling = NullValueHandling.Ignore)]
+        public string BatchId { get; set; }
     }
 
     public class Links
@@ -28,6 +40,9 @@ namespace UKHO.PeriodicOutputService.Common.Models.Ess.Response
         public LinkSetBatchStatusUri? ExchangeSetBatchStatusUri { get; set; }
         public LinkSetBatchDetailsUri? ExchangeSetBatchDetailsUri { get; set; }
         public LinkSetFileUri? ExchangeSetFileUri { get; set; }
+
+        [JsonProperty("aioExchangeSetFileUri", NullValueHandling = NullValueHandling.Ignore)]
+        public LinkSetFileUri? AioExchangeSetFileUri { get; set; } = null;
     }
 
     public class LinkSetBatchStatusUri

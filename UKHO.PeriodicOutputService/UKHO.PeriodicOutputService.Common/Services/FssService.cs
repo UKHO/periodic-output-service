@@ -22,10 +22,10 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IConfiguration _configuration;
-        private readonly Enum[] aioBatchTypes = new Enum[]
+        private readonly Enum[] _aioBatchTypes = new Enum[]
                                       {
                                             Batch.AioBaseCDZipIsoSha1Batch,
-                                            Batch.AioUpdateBatch
+                                            Batch.AioUpdateZipBatch
                                       };
 
         public FssService(ILogger<FssService> logger,
@@ -49,9 +49,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             FssBatchStatus batchStatus = FssBatchStatus.Incomplete;
             DateTime startTime = DateTime.UtcNow;
-            double batchStatusPollingCutoffTime = 0;
-            int batchStatusPollingDelayTime = 0;
-
+            double batchStatusPollingCutoffTime;
+            int batchStatusPollingDelayTime;
             if (requestType.Equals(RequestType.POS))
             {
                 batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime);
@@ -76,7 +75,10 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
                 HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
 
-                bool success = batchStatusResponse.IsSuccessStatusCode;
+                if (batchStatusResponse.IsSuccessStatusCode)
+                {
+                    FssBatchStatusResponseModel? fssBatchStatusResponseModel = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
+                    Enum.TryParse(fssBatchStatusResponseModel?.Status, false, out batchStatus);
 
                 if (success)
                 {
@@ -144,7 +146,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             if (fileDownloadResponse.StatusCode == HttpStatusCode.TemporaryRedirect)
             {
-                uri = fileDownloadResponse.Headers.GetValues("Location").FirstOrDefault();
+                uri = fileDownloadResponse.Headers.GetValues("Location").FirstOrDefault() ?? throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
                 rangeHeader = $"bytes={startByte}-{endByte}";
             }
             if (uri != null)
@@ -164,7 +166,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _fileSystemHelper.CreateFileCopy(filePath, stream);
 
                 startByte = endByte + 1;
-                endByte = endByte + downloadSize;
+                endByte += downloadSize;
 
                 if (endByte > fileSize - 1)
                 {
@@ -192,14 +194,14 @@ namespace UKHO.PeriodicOutputService.Common.Services
             if (httpResponse.IsSuccessStatusCode)
             {
                 CreateBatchResponseModel? createBatchResponse = JsonConvert.DeserializeObject<CreateBatchResponseModel>(await httpResponse.Content.ReadAsStringAsync());
-                if (createBatchResponse != null)
-                {
-                    _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                    return createBatchResponse.BatchId;
-                }
+                _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse!.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                return createBatchResponse.BatchId;
             }
-            _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-            throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
+            else
+            {
+                _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
+            }
         }
 
         public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType, Batch batchType)
@@ -382,7 +384,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
             CreateBatchRequestModel createBatchRequest;
 
-            if (aioBatchTypes.Contains(batchType))
+            if (_aioBatchTypes.Contains(batchType))
             {
                 createBatchRequest = new()
                 {
@@ -462,8 +464,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
                     break;
 
-                case Batch.AioUpdateBatch:
-                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "AIO"));
+                case Batch.AioUpdateZipBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
 
@@ -479,7 +481,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 Attributes = new List<KeyValuePair<string, string>>()
                 {
-                    new("Product Type", aioBatchTypes.Contains(batchType) ? "AIO" : "AVCS"),
+                    new("Product Type", _aioBatchTypes.Contains(batchType) ? "AIO" : "AVCS"),
                     new("File Name", fileName)
                 }
             };

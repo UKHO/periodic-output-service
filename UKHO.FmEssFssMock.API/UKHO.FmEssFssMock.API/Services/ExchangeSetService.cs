@@ -109,7 +109,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 }
 
                 BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
-                string productVersion = $"productVersion-{item.ProductName}-{item.EditionNumber}-{item.UpdateNumber}";
+                string productVersion = $"productVersion-{item.ProductName}-*-*";
 
                 if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
                 {
@@ -177,7 +177,7 @@ namespace UKHO.FmEssFssMock.API.Services
         private CreateBatchRequest CreateBatchRequestModelForAIO(bool isPostProductIdentifiersRequest)
         {
             AioTestCase currentTestCase = _mockService.GetCurrentAIOTestCase(_homeDirectoryPath);
-            string batchType;
+            string batchType = string.Empty;
 
             if (currentTestCase == AioTestCase.ValidAioProductIdentifier)
             {

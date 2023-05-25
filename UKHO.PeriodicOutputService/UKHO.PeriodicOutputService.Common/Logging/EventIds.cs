@@ -356,6 +356,46 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809087 - creating zip file completed
         /// </summary>
         ZipFileCreationCompleted = 809087,
+        ///<summary>
+        /// 809088 - AIO Update Exchange Set Creation Started
+        ///</summary>
+        AioUpdateExchangeSetCreationStarted = 809088,
+        ///<summary>
+        /// 809089 - AIO Update Exchange Set Creation Completed
+        ///</summary>
+        AioUpdateExchangeSetCreationCompleted = 809089,
+        /// <summary>
+        /// 809090 - Get product data for given product version started
+        /// </summary>
+        GetProductDataProductVersionStarted = 809090,
+        /// <summary>
+        /// 809091 -  Get product data for given product version completed
+        /// </summary>
+        GetProductDataProductVersionCompleted = 809091,
+        /// <summary>
+        /// 809092 -  Get product data for given product version failed
+        /// </summary>
+        GetProductDataProductVersionFailed = 809092,
+        /// <summary>
+        /// 809093 -  Logging Product Versions started
+        /// </summary>
+        LoggingProductVersionsStarted = 809093,
+        /// <summary>
+        /// 809094 -  Logging Product Versions Completed
+        /// </summary>
+        LoggingProductVersionsCompleted = 809094,
+        /// <summary>
+        /// 809095 -  Logging Product Versions failed
+        /// </summary>
+        LoggingProductVersionsFailed = 809095,
+        /// <summary>
+        /// 809096 -  Get latest product version details started.
+        /// </summary>
+        GetLatestProductVersionDetailsStarted = 809096,
+        /// <summary>
+        /// 809097 -  Get latest product version details completed.
+        /// </summary>
+        GetLatestProductVersionDetailsCompleted = 809097,
     }
 
     public static class EventIdExtensions
