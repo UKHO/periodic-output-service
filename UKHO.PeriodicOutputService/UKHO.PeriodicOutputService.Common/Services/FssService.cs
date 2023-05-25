@@ -49,8 +49,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             FssBatchStatus batchStatus = FssBatchStatus.Incomplete;
             DateTime startTime = DateTime.UtcNow;
-            double batchStatusPollingCutoffTime;
-            int batchStatusPollingDelayTime;
+            double batchStatusPollingCutoffTime = 0;
+            int batchStatusPollingDelayTime = 0;
+
             if (requestType.Equals(RequestType.POS))
             {
                 batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime);
@@ -75,10 +76,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
                 HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
 
-                if (batchStatusResponse.IsSuccessStatusCode)
-                {
-                    FssBatchStatusResponseModel? fssBatchStatusResponseModel = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
-                    Enum.TryParse(fssBatchStatusResponseModel?.Status, false, out batchStatus);
+                bool success = batchStatusResponse.IsSuccessStatusCode;
 
                 if (success)
                 {
