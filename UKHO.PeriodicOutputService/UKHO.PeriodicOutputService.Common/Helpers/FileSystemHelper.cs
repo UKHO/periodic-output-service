@@ -124,7 +124,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             string currentPath = Path.Combine(sourcePath, "ENC_ROOT");
 
-            List <ProductVersion> productVersions = new();
+            List<ProductVersion> productVersions = new();
 
             if (!_fileSystem.Directory.Exists(currentPath))
             {
