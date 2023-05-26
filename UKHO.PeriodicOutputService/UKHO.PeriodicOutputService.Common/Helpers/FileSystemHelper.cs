@@ -11,7 +11,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         private readonly IFileSystem _fileSystem;
         private readonly IZipHelper _zipHelper;
         private readonly IFileUtility _fileUtility;
-        private const string ENCROOT = "ENC_ROOT";
+
         public FileSystemHelper(IFileSystem fileSystem, IZipHelper zipHelper, IFileUtility fileUtility)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
