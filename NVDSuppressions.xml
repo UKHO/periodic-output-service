@@ -14,63 +14,6 @@
     <notes>
       <![CDATA[
     file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
-    An information disclosure vulnerability exists in .NET Framework and .NET Core which allows bypassing Cross-origin Resource Sharing (CORS) configurations, aka ".NET Framework Information Disclosure Vulnerability."
-    This applies to version of System.Net.Http as deployed as part of .Net core below 2.1.7 or 2.2.1. POS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
-    ]]>
-    </notes>
-    <cve>CVE-2019-0545</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-    file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
-    See https://github.com/dotnet/announcements/issues/97 for MS details on this CVE.
-    This CVE only applies to .NetCore versions below 2.1.8 and 2.2.2. POS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
-    ]]>
-    </notes>
-    <cve>CVE-2019-0657</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-      file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
-        See https://github.com/dotnet/announcements/issues/112 for full MS Details on the CVE
-          A denial of service vulnerability exists when .NET Framework or .NET Core improperly handle web requests, aka '.Net Framework and .Net Core Denial of Service Vulnerability'. This CVE ID is unique from CVE-2019-0820, CVE-2019-0981.
-          Vunerability applies to System.Private.Uri version	4.3.0 and 4.3.1. System.Private.Uri is part of the .NetCore runtime, and fixed with version System.Private.Uri version 4.3.2.
-        POS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
-    ]]>
-    </notes>
-    <cve>CVE-2019-0980</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-    file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
-    See https://github.com/dotnet/announcements/issues/113 for full MS Details on the CVE
-    Vunerability applies to System.Private.Uri version	4.3.0 and 4.3.1. System.Private.Uri is part of the .NetCore runtime, and fixed with version System.Private.Uri version 4.3.2.
-    The issue is fixed:         
-        2.1.11 or SDK 2.1.507 for Visual Studio 2017 or SDK 2.1.604 for Visual Studio 2019
-        2.2.5 or SDK 2.2.107 for Visual Studio 2017 or SDK 2.2.204 for Visual Studio 2019
-    POS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
-    ]]>
-    </notes>
-    <cve>CVE-2019-0981</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-    file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
-    See https://github.com/dotnet/announcements/issues/121 for full MS Details on CVE.
-    A denial of service vulnerability exists when .NET Core improperly handles web requests. An attacker who successfully exploited this vulnerability could cause a denial of service against a .NET Core web application. The vulnerability can be exploited remotely, without authentication.
-    This CVE applies to any .NET Core based application running on .NET Core 2.1.0-2.1.12, or .NET Core 2.2.0-2.2.6. POS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
-    ]]>
-    </notes>
-    <cve>CVE-2019-1301</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-    file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
     See https://github.com/dotnet/announcements/issues/175 for full MS Details on CVE.
     .NET Core and Visual Studio Denial of Service Vulnerability. 
     This CVE applies to any .NET Core 3.1 but patch is provided at 3.1.405, POS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
@@ -155,7 +98,7 @@
 	file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
 	See https://nvd.nist.gov/vuln/detail/CVE-2018-8409 for details on this CVE.
 	Note: This was reanalysed by NIST on 4th October, and is now a breaking issue.
-  Affects .NET Core 2.1 - now on .NET 6 so false positive.
+	Affects .NET Core 2.1 - now on .NET 6 so false positive.
 	See https://msrc.microsoft.com/update-guide/en-us/vulnerability/CVE-2018-8409
 	]]></notes>
 	<cve>CVE-2018-8409</cve>
@@ -185,19 +128,8 @@
   <suppress>
     <notes>
       <![CDATA[
-	file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
-	See https://nvd.nist.gov/vuln/detail/CVE-2018-8409 for details on this CVE.
-	Note: This was reanalysed by NIST on 4th October, and is now a breaking issue.
-	Affects .NET Core 2.1 - now on .NET 6 so false positive.
-	See https://msrc.microsoft.com/update-guide/en-us/vulnerability/CVE-2018-8409
-	]]>
-    </notes>
-    <cve>CVE-2018-8409</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: Microsoft.Azure.EventGrid:3.2.1, Microsoft.Azure.KeyVault.dll, Microsoft.Azure.Services.AppAuthentication.dll
+   file name: Microsoft.IdentityModel.Clients.ActiveDirectory.dll, Microsoft.IdentityModel.Clients.ActiveDirectory:3.19.1
    https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
    ]]>
     </notes>
@@ -223,34 +155,6 @@
     </notes>
     <cve>CVE-2022-41064</cve>
     <cve>CVE-2022-30184</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Microsoft.Extensions.Configuration.FileExtensions.dll
-   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
-   ]]>
-    </notes>
-    <cve>CVE-2018-1000413</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Microsoft.IdentityModel.Clients.ActiveDirectory.dll, Microsoft.IdentityModel.Clients.ActiveDirectory:3.19.1
-   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
-   ]]>
-    </notes>
-    <cve>CVE-2021-42306</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Microsoft.OpenApi.dll
-   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
-   ]]>
-    </notes>
-    <cve>CVE-2022-3064</cve>
-    <cve>CVE-2021-4235</cve>
   </suppress>
   <suppress>
     <notes>
@@ -300,6 +204,8 @@
     <notes>
       <![CDATA[
    file name: System.Net.Http:4.3.3
+   False positive - applies to .NET Core 1.0, .NET Core 1.1 or .NET Core 2.0.
+   See https://github.com/dotnet/announcements/issues/88
    ]]>
     </notes>
     <packageUrl regex="true">^pkg:nuget/System\.Net\.Http@.*$</packageUrl>
