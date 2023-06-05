@@ -131,7 +131,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 return productVersions;
             }
 
-            var editionFolders = _fileSystem.Directory.GetDirectories(currentPath).Select(Path.GetFileName).ToList();
+            var aioFolder = _fileSystem.Directory.GetDirectories(currentPath, aioCellName, SearchOption.AllDirectories).ToList();
+
+            if (aioFolder.Count == 0)
+            {
+                return productVersions;
+            }
+
+            var editionFolders = _fileSystem.Directory.GetDirectories(aioFolder[0]).Select(Path.GetFileName).ToList();
 
             foreach (var editionFolder in editionFolders)
             {
