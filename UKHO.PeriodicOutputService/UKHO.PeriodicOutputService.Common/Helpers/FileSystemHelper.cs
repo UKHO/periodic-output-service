@@ -1,5 +1,4 @@
-﻿
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Utilities;
@@ -30,7 +29,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public byte[] GetFileInBytes(UploadFileBlockRequestModel UploadBlockMetaData)
         {
-            IFileInfo fileInfo = _fileSystem.FileInfo.FromFileName(UploadBlockMetaData.FullFileName);
+            IFileInfo fileInfo = _fileSystem.FileInfo.New(UploadBlockMetaData.FullFileName);
 
             byte[] byteData = new byte[UploadBlockMetaData.Length];
 
@@ -59,7 +58,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             foreach (string? fileName in fileNames)
             {
-                IFileInfo fileInfo = _fileSystem.FileInfo.FromFileName(fileName);
+                IFileInfo fileInfo = _fileSystem.FileInfo.New(fileName);
                 using Stream? fs = fileInfo.OpenRead();
                 byte[]? fileMd5Hash = CommonHelper.CalculateMD5(fs);
 
@@ -73,7 +72,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return fileDetails;
         }
 
-        public IFileInfo GetFileInfo(string filePath) => _fileSystem.FileInfo.FromFileName(filePath);
+        public IFileInfo GetFileInfo(string filePath) => _fileSystem.FileInfo.New(filePath);
 
         public IEnumerable<string> GetFiles(string directoryPath, string extensionsToSearch, SearchOption searchOption)
         {
@@ -122,7 +121,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string aioCellName)
         {
-            string currentPath = Path.Combine(sourcePath, "ENC_ROOT");
+            string searchPath = $"ENC_ROOT/GB/{aioCellName}";
+            string currentPath = Path.Combine(sourcePath, searchPath);
 
             List<ProductVersion> productVersions = new();
 
@@ -131,14 +131,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 return productVersions;
             }
 
-            var aioFolder = _fileSystem.Directory.GetDirectories(currentPath, aioCellName, SearchOption.AllDirectories).ToList();
-
-            if (aioFolder.Count == 0)
-            {
-                return productVersions;
-            }
-
-            var editionFolders = _fileSystem.Directory.GetDirectories(aioFolder[0]).Select(Path.GetFileName).ToList();
+            var editionFolders = _fileSystem.Directory.GetDirectories(currentPath).Select(Path.GetFileName).ToList();
 
             foreach (var editionFolder in editionFolders)
             {
@@ -148,7 +141,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
                 productVersion.EditionNumber = Convert.ToInt32(editionFolder);
 
-                var updateNumberFolders = _fileSystem.Directory.GetDirectories(Path.Combine(aioFolder[0], editionFolder));
+                var updateNumberFolders = _fileSystem.Directory.GetDirectories(Path.Combine(currentPath, editionFolder));
 
                 var maxDirectory = updateNumberFolders.Select(d => new { Path = d, Number = int.Parse(Path.GetFileName(d)) })
                                                .OrderByDescending(d => d.Number)
