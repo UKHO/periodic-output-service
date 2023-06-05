@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.1.xsd">
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
   <suppress>
     <notes>
       <![CDATA[
@@ -175,6 +175,16 @@
   <suppress>
     <notes>
       <![CDATA[
+   file name: System.Private.DataContractSerialization:4.3.0
+   This CVE appiles to .net version >= 6.0.0 and < 6.0.12. Version 6.0.13 is not vulnerable
+   See https://github.com/dotnet/announcements/issues/244
+   ]]>
+    </notes>
+    <cve>CVE-2023-21538</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
 	file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
 	See https://nvd.nist.gov/vuln/detail/CVE-2018-8409 for details on this CVE.
 	Note: This was reanalysed by NIST on 4th October, and is now a breaking issue.
@@ -263,6 +273,15 @@
   <suppress>
     <notes>
       <![CDATA[
+   file name: Microsoft.Identity.Client.dll
+   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
+   ]]>
+    </notes>
+    <cve>CVE-2019-20138</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
    file name: System.Runtime.Serialization.Json:4.0.2, System.Runtime.Serialization.Json:4.3.0,
    System.Text.Json:4.6.0, System.Text.Json:4.7.2, System.Text.Json:7.0.0
    Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=71085
@@ -276,5 +295,14 @@
    Bug to track fix:  https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=74860
    ]]></notes>
    <cve>CVE-2017-11770</cve>
-</suppress>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Net.Http:4.3.3
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Net\.Http@.*$</packageUrl>
+    <vulnerabilityName>CVE-2018-8292</vulnerabilityName>
+  </suppress>
 </suppressions>
