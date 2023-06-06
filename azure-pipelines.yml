@@ -28,7 +28,7 @@ variables:
   - name: UKHOAssemblyProduct
     value: "Periodic Output Service"
   - name: UKHOAssemblyCopyright
-    value: "Copyright © UK Hydrographic Office"
+    value: "Copyright Â© UK Hydrographic Office"
   - name: DeploymentPool
     value: "UKHO Ubuntu 1804"
   - name: Container
