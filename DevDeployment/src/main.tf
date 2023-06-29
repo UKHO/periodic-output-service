@@ -83,6 +83,11 @@ module "webapp_service" {
     "FSSApiConfiguration:BusinessUnit"                         = "AVCSData"
     "FSSApiConfiguration:PosReadGroups"                        = "public"
     "FSSApiConfiguration:PosReadUsers"                         = ""
+    "ELASTIC_APM_SERVER_URL"                                   = var.elastic_apm_server_url
+    "ELASTIC_APM_TRANSACTION_SAMPLE_RATE"                      = "1"
+    "ELASTIC_APM_ENVIRONMENT"                                  = local.env_name
+    "ELASTIC_APM_SERVICE_NAME"                                 = "POS Web Job"
+    "ELASTIC_APM_API_KEY"                                      = var.elastic_apm_api_key
   }
   tags                                                         = local.tags
   allowed_ips                                                  = var.allowed_ips

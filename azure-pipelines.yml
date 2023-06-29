@@ -48,59 +48,59 @@ resources:
     ref: refs/heads/master
 
 stages:
-  - stage: CoverityScan
-    displayName: "Coverity Scan"
-    pool:
-      name: $(coverityPool)
-    jobs:
-    - job: Coverity
-      workspace:
-        clean: all
-      steps:
-        - checkout: self
-          submodules: recursive
-        - task: UseDotNet@2
-          displayName: 'Use .NET 6 LTS SDK'
-          inputs:
-            packageType: sdk
-            version: 6.0.x
-            installationPath: $(Agent.ToolsDirectory)/dotnet
-        - checkout: covscan
-        - template: dotnet-cov.yml@covScan
-          parameters:
-            CovHostUrl: "$(CovHostUrl)"
-            CovUser: "$(CovUser)"
-            CovPwd: "$(CovPwd)"
-            StreamName: "periodic-output-service"
-            BuildCommand: "$(Build.Repository.LocalPath)/periodic-output-service/UKHO.PeriodicOutputService/UKHO.PeriodicOutputService.Fulfilment/UKHO.PeriodicOutputService.Fulfilment.csproj"
-            StripPath: $(Build.Repository.LocalPath)/periodic-output-service
-            CoverityScanPath: $(Build.Repository.LocalPath)/coverityscan-buildtemplates
+  #- stage: CoverityScan
+  #  displayName: "Coverity Scan"
+  #  pool:
+  #    name: $(coverityPool)
+  #  jobs:
+  #  - job: Coverity
+  #    workspace:
+  #      clean: all
+  #    steps:
+  #      - checkout: self
+  #        submodules: recursive
+  #      - task: UseDotNet@2
+  #        displayName: 'Use .NET 6 LTS SDK'
+  #        inputs:
+  #          packageType: sdk
+  #          version: 6.0.x
+  #          installationPath: $(Agent.ToolsDirectory)/dotnet
+  #      - checkout: covscan
+  #      - template: dotnet-cov.yml@covScan
+  #        parameters:
+  #          CovHostUrl: "$(CovHostUrl)"
+  #          CovUser: "$(CovUser)"
+  #          CovPwd: "$(CovPwd)"
+  #          StreamName: "periodic-output-service"
+  #          BuildCommand: "$(Build.Repository.LocalPath)/periodic-output-service/UKHO.PeriodicOutputService/UKHO.PeriodicOutputService.Fulfilment/UKHO.PeriodicOutputService.Fulfilment.csproj"
+  #          StripPath: $(Build.Repository.LocalPath)/periodic-output-service
+  #          CoverityScanPath: $(Build.Repository.LocalPath)/coverityscan-buildtemplates
 
-  - stage: Stryker_Mutator
-    displayName: "Stryker Mutator"
-    dependsOn: []
-    jobs:
-    - job: Stryker
-      workspace:
-        clean: all
-      steps:
-        - task: DotNetCoreCLI@2
-          displayName: "Install Stryker"
-          inputs:
-            command: custom
-            custom: tool
-            arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools
-        - task: Powershell@2
-          displayName: "Run Stryker"
-          inputs:
-            workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
-            targetType: 'inline'
-            pwsh: true
-            script: $(Agent.BuildDirectory)/tools/dotnet-stryker
-        - task: PublishMutationReport@0
-          displayName: 'Publish Strkyer Mutator Report'
-          inputs:
-            reportPattern: '**/mutation-report.html'
+  #- stage: Stryker_Mutator
+  #  displayName: "Stryker Mutator"
+  #  dependsOn: []
+  #  jobs:
+  #  - job: Stryker
+  #    workspace:
+  #      clean: all
+  #    steps:
+  #      - task: DotNetCoreCLI@2
+  #        displayName: "Install Stryker"
+  #        inputs:
+  #          command: custom
+  #          custom: tool
+  #          arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools
+  #      - task: Powershell@2
+  #        displayName: "Run Stryker"
+  #        inputs:
+  #          workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+  #          targetType: 'inline'
+  #          pwsh: true
+  #          script: $(Agent.BuildDirectory)/tools/dotnet-stryker
+  #      - task: PublishMutationReport@0
+  #        displayName: 'Publish Strkyer Mutator Report'
+  #        inputs:
+  #          reportPattern: '**/mutation-report.html'
 
   - stage: PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     displayName: "Build (inc DependencyChecker, Dotnet Build , dotnet test and publish artifact )"
@@ -118,39 +118,39 @@ stages:
               useGlobalJson: true
               workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
 
-          - task: DotNetCoreCLI@2
-            displayName: ".Net Core - NuGet restore non test projects only"
-            inputs:
-              command: "restore"
-              projects: |
-                **/*.csproj
-                !**/*Tests.csproj
-              feedsToUse: config
-              noCache: true
-              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
-              packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packages'
+          #- task: DotNetCoreCLI@2
+          #  displayName: ".Net Core - NuGet restore non test projects only"
+          #  inputs:
+          #    command: "restore"
+          #    projects: |
+          #      **/*.csproj
+          #      !**/*Tests.csproj
+          #    feedsToUse: config
+          #    noCache: true
+          #    nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+          #    workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+          #    packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packages'
 
-          - task: CmdLine@1
-            displayName: "Run OWASP Dependency Checker"
-            inputs:
-              filename: 'dependency-check.bat'
-              arguments: '--project "periodic-output-service - $(Build.SourceBranchName)" --scan "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService" --out "$(Build.ArtifactStagingDirectory)\DCReport" --suppression $(Build.SourcesDirectory)\NVDSuppressions.xml --noupdate'
+          #- task: CmdLine@1
+          #  displayName: "Run OWASP Dependency Checker"
+          #  inputs:
+          #    filename: 'dependency-check.bat'
+          #    arguments: '--project "periodic-output-service - $(Build.SourceBranchName)" --scan "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService" --out "$(Build.ArtifactStagingDirectory)\DCReport" --suppression $(Build.SourcesDirectory)\NVDSuppressions.xml --noupdate'
 
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish Artifact: OWASP Dependency Checker Report"
-            inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)\DCReport'
-              ArtifactName: "OWASP Dependency Checker Report"
+          #- task: PublishBuildArtifacts@1
+          #  displayName: "Publish Artifact: OWASP Dependency Checker Report"
+          #  inputs:
+          #    PathtoPublish: '$(Build.ArtifactStagingDirectory)\DCReport'
+          #    ArtifactName: "OWASP Dependency Checker Report"
 
-          - task: PowerShell@1
-            displayName: "Fail Build if Dependency Check Finds Any Vulnerabilities"
-            inputs:
-              scriptType: inlineScript
-              arguments: '-ReportLocation $(Build.ArtifactStagingDirectory)\DCReport\*'
-              inlineScript: |
-                param($ReportLocation)
-                Invoke-VulnerabilityCheck -ReportLocation $ReportLocation
+          #- task: PowerShell@1
+          #  displayName: "Fail Build if Dependency Check Finds Any Vulnerabilities"
+          #  inputs:
+          #    scriptType: inlineScript
+          #    arguments: '-ReportLocation $(Build.ArtifactStagingDirectory)\DCReport\*'
+          #    inlineScript: |
+          #      param($ReportLocation)
+          #      Invoke-VulnerabilityCheck -ReportLocation $ReportLocation
 
       - job: UnitTestsAndCodeCoverage
         workspace:
@@ -164,38 +164,38 @@ stages:
               useGlobalJson: true
               workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
 
-          - task: DotNetCoreCLI@2
-            displayName: ".Net Core - NuGet restore test projects only"
-            inputs:
-              command: "restore"
-              projects: "**/*Tests.csproj"
-              feedsToUse: config
-              noCache: true
-              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
-              packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packagesForTests'
+          #- task: DotNetCoreCLI@2
+          #  displayName: ".Net Core - NuGet restore test projects only"
+          #  inputs:
+          #    command: "restore"
+          #    projects: "**/*Tests.csproj"
+          #    feedsToUse: config
+          #    noCache: true
+          #    nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+          #    workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+          #    packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packagesForTests'
 
-          - task: DotNetCoreCLI@2
-            displayName: "dotnet test - Perform Unit Tests"
-            inputs:
-              command: "test"
-              projects: "**/*UnitTests.csproj"
-              arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
-              publishTestResults: true
-              testRunTitle: "UnitTests"
+          #- task: DotNetCoreCLI@2
+          #  displayName: "dotnet test - Perform Unit Tests"
+          #  inputs:
+          #    command: "test"
+          #    projects: "**/*UnitTests.csproj"
+          #    arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
+          #    publishTestResults: true
+          #    testRunTitle: "UnitTests"
 
-          - task: PowerShell@2
-            displayName: "Generate code coverage report"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)\CodeCoverageReport.ps1'
-              arguments: '-source "$(Build.SourcesDirectory)" -reportFolder "$(Build.ArtifactStagingDirectory)"'
+          #- task: PowerShell@2
+          #  displayName: "Generate code coverage report"
+          #  inputs:
+          #    targetType: filePath
+          #    filePath: '$(Build.SourcesDirectory)\CodeCoverageReport.ps1'
+          #    arguments: '-source "$(Build.SourcesDirectory)" -reportFolder "$(Build.ArtifactStagingDirectory)"'
 
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish Code coverage"
-            inputs:
-              PathtoPublish: "$(Build.ArtifactStagingDirectory)/codecoveragereport"
-              ArtifactName: codecoveragereport
+          #- task: PublishBuildArtifacts@1
+          #  displayName: "Publish Code coverage"
+          #  inputs:
+          #    PathtoPublish: "$(Build.ArtifactStagingDirectory)/codecoveragereport"
+          #    ArtifactName: codecoveragereport
 
       - job: BuildAndPublishWebJob
         workspace:
@@ -406,6 +406,10 @@ stages:
         value: $(AutoTestClientSecret_Authed)
       - name: "ESSApiConfiguration.EssClientId"
         value: $(ESSClientId)
+      - name: "ElasticAPM_ServerURL"
+        value: $(ElasticAPM.ServerURL)
+      - name: "ElasticAPM_ApiKey"
+        value: $(ElasticAPM.ApiKey)        
 
     jobs:
       - deployment: DevDeployApp

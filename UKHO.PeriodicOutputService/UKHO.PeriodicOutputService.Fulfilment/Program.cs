@@ -4,6 +4,9 @@ using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Elastic.Apm;
+using Elastic.Apm.Api;
+using Elastic.Apm.DiagnosticSource;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
@@ -32,6 +35,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             {
                 int delayTime = 5000;
 
+                Agent.Subscribe(new HttpDiagnosticsSubscriber());
+
                 //Build configuration
                 IConfigurationRoot configuration = BuildConfiguration();
 
@@ -45,7 +50,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
                 try
                 {
-                    await serviceProvider.GetService<PosFulfilmentJob>().ProcessFulfilmentJob();
+                    var posFulfilmentJob = serviceProvider.GetService<PosFulfilmentJob>();
+
+                    await Elastic.Apm.Agent.Tracer
+                        .CaptureTransaction("POSTransaction", ApiConstants.TypeRequest, async() => 
+                        {
+                            //application code that is captured as a transaction
+                            await posFulfilmentJob.ProcessFulfilmentJob();
+                        });
                 }
                 finally
                 {
@@ -57,6 +69,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
+
+                Agent.Tracer.CurrentTransaction.CaptureException(ex);
+
                 throw;
             }
         }
