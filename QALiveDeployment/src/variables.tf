@@ -55,3 +55,11 @@ variable "agent_subscription_id" {
 variable "allowed_ips" {
   type = list
 }
+
+variable "elastic_apm_server_url" {
+
+}
+
+variable "elastic_apm_api_key" {
+
+}
