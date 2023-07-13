@@ -406,6 +406,10 @@ stages:
         value: $(AutoTestClientSecret_Authed)
       - name: "ESSApiConfiguration.EssClientId"
         value: $(ESSClientId)
+      - name: "ElasticAPM_ServerURL"
+        value: $(ElasticAPM.ServerURL)
+      - name: "ElasticAPM_ApiKey"
+        value: $(ElasticAPM.ApiKey)
 
     jobs:
       - deployment: DevDeployApp
@@ -587,6 +591,10 @@ stages:
         value: $(AutoTestClientSecret_Authed)
       - name: "ESSApiConfiguration.EssClientId"
         value: $(ESSClientId)
+      - name: "ElasticAPM_ServerURL"
+        value: $(ElasticAPM.ServerURL)
+      - name: "ElasticAPM_ApiKey"
+        value: $(ElasticAPM.ApiKey)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
 
     jobs:
@@ -761,6 +769,10 @@ stages:
       - group: "ESS-Live-Variables"
       - group: "ESS-Deployment-Variables-LIVE"
       - group: "POS-Live-Variables"
+      - name: "ElasticAPM_ServerURL"
+        value: $(ElasticAPM.ServerURL)
+      - name: "ElasticAPM_ApiKey"
+        value: $(ElasticAPM.ApiKey)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     jobs:
       - deployment: LiveDeployApp

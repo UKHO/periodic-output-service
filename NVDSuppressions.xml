@@ -243,12 +243,13 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
       <![CDATA[
    file name: Microsoft.CSharp:4.0.1, Microsoft.CSharp:4.3.0, Microsoft.CSharp:4.5.0, Microsoft.CSharp:4.5.0,
    Microsoft.NETCore.Platforms:1.0.1, Microsoft.NETCore.Platforms:1.1.0, Microsoft.NETCore.Platforms:1.1.1,
-   Microsoft.NETCore.Platforms:2.0.0
+   Microsoft.NETCore.Platforms:2.0.0, Microsoft.NETCore.Platforms:3.1.0
    https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
    ]]>
     </notes>
     <cve>CVE-2022-41064</cve>
     <cve>CVE-2022-30184</cve>
+    <cve>CVE-2023-29326</cve>
   </suppress>
   <suppress>
     <notes>
@@ -295,5 +296,14 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
    ]]>
     </notes>
     <cve>CVE-2017-11770</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Elastic.Apm.dll
+   ]]>
+    </notes>
+    <cve>CVE-2021-37941</cve>
+    <cve>CVE-2019-7617</cve>
   </suppress>
 </suppressions>
