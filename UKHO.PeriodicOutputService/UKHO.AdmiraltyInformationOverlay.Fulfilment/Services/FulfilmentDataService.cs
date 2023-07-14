@@ -70,37 +70,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _logger.LogInformation(EventIds.GetLatestProductVersionDetailsCompleted.ToEventId(), "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             Task[] tasks = null;
-
-
-            Task aioBaseExchangeSetTask = Task.Run(() =>
-                _currentTransaction.CaptureSpan("AioBaseExchangeSet", ApiConstants.TypeApp,
-                    async (s) =>
-                    {
-                        try
-                        {
-                            await CreateAioBaseExchangeSet();
-                        }
-                        catch (Exception e)
-                        {
-                            s.CaptureException(e);
-                        }
-
-                    }, ApiConstants.SubTypeInternal)
-            );
             
-            Task updateAioExchangeSetTask = Task.Run(() =>
-                _currentTransaction.CaptureSpan("UpdateExchangeSet", ApiConstants.TypeApp,
-                    async (s) =>
-                    {
-                        try
-                        {
-                            await CreateUpdateAIOExchangeSet(productVersionEntities);
-                        }
-                        catch (Exception e)
-                        {
-                            s.CaptureException(e);
-                        }
-                    }, ApiConstants.SubTypeInternal));
+            Task aioBaseExchangeSetTask = Task.Run(() => CreateAioBaseExchangeSet());
+            Task updateAioExchangeSetTask = Task.Run(() => CreateUpdateAIOExchangeSet(productVersionEntities));
             
             tasks = new Task[] { aioBaseExchangeSetTask, updateAioExchangeSetTask };
 
@@ -117,6 +89,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             bool isFullAvcsDvdBatchCreated = false;
 
+            ISpan span = _currentTransaction?.StartSpan("AioBaseExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+
             try
             {
                 if (!string.IsNullOrEmpty(_configuration["AioCells"]))
@@ -125,7 +99,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
                     string essBatchId = await PostProductIdentifiersToESS(aioCells);
 
-                    (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssAioBaseZipBatch);
+                    (string essFileDownloadPath, List<FssBatchFile> essFiles) =
+                        await DownloadEssExchangeSet(essBatchId, Batch.EssAioBaseZipBatch);
 
                     if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
                     {
@@ -137,23 +112,34 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
                         CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
 
-                        isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION, Batch.AioBaseCDZipIsoSha1Batch);
+                        isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath,
+                            AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION, Batch.AioBaseCDZipIsoSha1Batch);
                     }
                     else
                     {
-                        _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                        _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(),
+                            "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                            DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                         throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
                     }
                 }
                 else
                 {
-                    _logger.LogError(EventIds.AioCellsConfigurationMissing.ToEventId(), "AIO cells are empty in configuration | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogError(EventIds.AioCellsConfigurationMissing.ToEventId(),
+                        "AIO cells are empty in configuration | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                        DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                     throw new FulfilmentException(EventIds.AioCellsConfigurationMissing.ToEventId());
                 }
             }
+            catch (Exception e)
+            {
+                span?.CaptureException(e);
+                throw;
+            }
             finally
             {
-                _currentTransaction.SetLabel("AIOFullAvcsDvdBatchCreated", isFullAvcsDvdBatchCreated);
+                _currentTransaction?.SetLabel("AIOFullAvcsDvdBatchCreated", isFullAvcsDvdBatchCreated);
+                span?.End();
             }
 
             
@@ -166,6 +152,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             bool isUpdateZipBatchCreated = false;
 
+            ISpan span = _currentTransaction?.StartSpan("UpdateExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+
             try
             {
                 string[] aioCellNames = Convert.ToString(_configuration["AioCells"]).Split(',').ToArray();
@@ -177,7 +165,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                     ProductVersions = productVersions
                 });
 
-                (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssUpdateZipBatch);
+                (string essFileDownloadPath, List<FssBatchFile> essFiles) =
+                    await DownloadEssExchangeSet(essBatchId, Batch.EssUpdateZipBatch);
 
                 if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
                 {
@@ -185,11 +174,14 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
                     var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, aioCellNames);
 
-                    isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch);
+                    isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath,
+                        UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch);
 
                     if (isUpdateZipBatchCreated)
                     {
-                        _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationCompleted.ToEventId(), "Update exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                        _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationCompleted.ToEventId(),
+                            "Update exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                            DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
                         if (!bool.Parse(_configuration["IsFTRunning"]))
                         {
@@ -199,13 +191,21 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 }
                 else
                 {
-                    _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(),
+                        "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                        DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                     throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
                 }
             }
+            catch (Exception e)
+            {
+                span?.CaptureException(e);
+                throw;
+            }
             finally
             {
-                _currentTransaction.SetLabel("AIOUpdateZipBatchCreated", isUpdateZipBatchCreated);
+                _currentTransaction?.SetLabel("AIOUpdateZipBatchCreated", isUpdateZipBatchCreated);
+                span?.End();
             }
         }
 
@@ -391,14 +391,19 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         {
             bool isCommitted = false;
 
-            await _currentTransaction.CaptureSpan("CreateAIOBatch", ApiConstants.TypeApp, async (s) =>
+            ISpan span = _currentTransaction?.StartSpan("CreateAIOBatch", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+
+            try
             {
                 string batchId = await _fssService.CreateBatch(batchType);
                 IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePaths, batchId, batchType);
                 isCommitted = await _fssService.CommitBatch(batchId, filePaths, batchType);
-
-            }, ApiConstants.SubTypeInternal);
+            }
+            finally
+            {
+                span?.End();
+            }
 
             return isCommitted;
         }

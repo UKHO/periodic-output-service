@@ -78,42 +78,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             bool isSuccess = false;
 
-
             try
             {
                 Task[] tasks = null;
 
-                Task fullAVCSExchangeSetTask = Task.Run(() =>
-                    _currentTransaction.CaptureSpan("FullAVCSExchangeSet", ApiConstants.TypeApp,
-                        async (s) =>
-                        {
-                            try
-                            {
-                                await CreateFullAVCSExchangeSet();
-                            }
-                            catch (Exception e)
-                            {
-                                s.CaptureException(e);
-                            }
-
-                        }, ApiConstants.SubTypeInternal)
-                );
-
-                Task updateAVCSExchangeSetTask = Task.Run(() =>
-                    _currentTransaction.CaptureSpan("UpdateExchangeSet", ApiConstants.TypeApp,
-                        async (s) =>
-                        {
-                            try
-                            {
-                                await CreateUpdateExchangeSet(sinceDateTime.ToString("R"));
-                            }
-                            catch (Exception e)
-                            {
-                                s.CaptureException(e);
-                            }
-                        }, ApiConstants.SubTypeInternal));
-
-
+                Task fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
+                Task updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime.ToString("R")));
+                
                 tasks = new Task[] { fullAVCSExchangeSetTask, updateAVCSExchangeSetTask };
 
                 await Task.WhenAll(tasks);
@@ -140,13 +111,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             bool isCatalogueFileBatchCreated = false;
             bool isEncUpdateFileBatchCreated = false;
 
+            ISpan span = _currentTransaction?.StartSpan("FullAVCSExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+
             try
             {
                 List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
 
                 string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
 
-                (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssFullAvcsZipBatch);
+                (string essFileDownloadPath, List<FssBatchFile> essFiles) =
+                    await DownloadEssExchangeSet(essBatchId, Batch.EssFullAvcsZipBatch);
 
                 if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
                 {
@@ -154,42 +128,62 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                     CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
 
-                    isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION, Batch.PosFullAvcsIsoSha1Batch);
-                    isFullAvcsZipBatchCreated = await CreatePosBatch(essFileDownloadPath, FULLAVCSZIPEXCHANGESETFILEEXTENSION, Batch.PosFullAvcsZipBatch);
+                    isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath,
+                        FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION, Batch.PosFullAvcsIsoSha1Batch);
+                    isFullAvcsZipBatchCreated = await CreatePosBatch(essFileDownloadPath,
+                        FULLAVCSZIPEXCHANGESETFILEEXTENSION, Batch.PosFullAvcsZipBatch);
 
                     if (isFullAvcsDvdBatchCreated && isFullAvcsZipBatchCreated)
                     {
-                        _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(), "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                        _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationCompleted.ToEventId(),
+                            "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                            DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-                        isCatalogueFileBatchCreated = await CreatePosBatch(_homeDirectoryPath, CATALOGUEFILEEXTENSION, Batch.PosCatalogueBatch);
+                        isCatalogueFileBatchCreated = await CreatePosBatch(_homeDirectoryPath, CATALOGUEFILEEXTENSION,
+                            Batch.PosCatalogueBatch);
                         if (isCatalogueFileBatchCreated)
                         {
-                            _logger.LogInformation(EventIds.BatchCreationForCatalogueCompleted.ToEventId(), "Batch for catalougue created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                            _logger.LogInformation(EventIds.BatchCreationForCatalogueCompleted.ToEventId(),
+                                "Batch for catalougue created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                                DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                         }
+
                         string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
                         string currentYear = DateTime.UtcNow.ToString("yy");
 
-                        string encUpdateListFilePath = Path.Combine(essFileDownloadPath, string.Format(_configuration["EncUpdateListFilePath"], weekNumber, currentYear));
+                        string encUpdateListFilePath = Path.Combine(essFileDownloadPath,
+                            string.Format(_configuration["EncUpdateListFilePath"], weekNumber, currentYear));
 
-                        isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath, ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
+                        isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath,
+                            ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
                         if (isEncUpdateFileBatchCreated)
                         {
-                            _logger.LogInformation(EventIds.BatchCreationForENCUpdateCompleted.ToEventId(), "Batch for ENC updates created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                            _logger.LogInformation(EventIds.BatchCreationForENCUpdateCompleted.ToEventId(),
+                                "Batch for ENC updates created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                                DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                         }
                     }
                 }
                 else
                 {
-                    _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    _logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(),
+                        "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                        DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                     throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
                 }
             }
+            catch (Exception e)
+            {
+                span?.CaptureException(e);
+                throw;
+            }
             finally
             {
-                _currentTransaction.SetLabel("FullAvcsDvdBatchCreated", isFullAvcsDvdBatchCreated);
-                _currentTransaction.SetLabel("FullAvcsZipBatchCreated", isFullAvcsZipBatchCreated);
-                _currentTransaction.SetLabel("CatalogueFileBatchCreated", isCatalogueFileBatchCreated);
-                _currentTransaction.SetLabel("EncUpdateFileBatchCreated", isEncUpdateFileBatchCreated);
+                _currentTransaction?.SetLabel("FullAvcsDvdBatchCreated", isFullAvcsDvdBatchCreated);
+                _currentTransaction?.SetLabel("FullAvcsZipBatchCreated", isFullAvcsZipBatchCreated);
+                _currentTransaction?.SetLabel("CatalogueFileBatchCreated", isCatalogueFileBatchCreated);
+                _currentTransaction?.SetLabel("EncUpdateFileBatchCreated", isEncUpdateFileBatchCreated);
+                span?.End();
             }
         }
 
@@ -198,6 +192,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _logger.LogInformation(EventIds.UpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for SinceDateTime - {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             bool isUpdateZipBatchCreated = false;
+            
+            ISpan span = _currentTransaction?.StartSpan("UpdateExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
@@ -220,9 +216,15 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
                 }
             }
+            catch (Exception e)
+            {
+                span?.CaptureException(e);
+                throw;
+            }
             finally
             {
-                _currentTransaction.SetLabel("UpdateZipBatchCreated", isUpdateZipBatchCreated);
+                _currentTransaction?.SetLabel("UpdateZipBatchCreated", isUpdateZipBatchCreated);
+                span?.End();
             }
         }
 
@@ -398,14 +400,20 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             bool isCommitted = false;
 
-            await _currentTransaction.CaptureSpan("CreatePOSBatch", ApiConstants.TypeApp, async (s) =>
+            ISpan span = _currentTransaction?.StartSpan("CreatePOSBatch", ApiConstants.TypeApp,ApiConstants.SubTypeInternal);
+
+            try
             {
                 string batchId = await _fssService.CreateBatch(batchType);
-                IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                IEnumerable<string> filePaths =
+                    _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePaths, batchId, batchType);
                 isCommitted = await _fssService.CommitBatch(batchId, filePaths, batchType);
-
-            }, ApiConstants.SubTypeInternal);
+            }
+            finally
+            {
+                span?.End();
+            }
 
             return isCommitted;
         }
