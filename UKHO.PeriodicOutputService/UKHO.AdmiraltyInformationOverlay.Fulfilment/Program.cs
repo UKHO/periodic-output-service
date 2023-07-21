@@ -4,6 +4,10 @@ using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Elastic.Apm.Azure.Storage;
+using Elastic.Apm.DiagnosticSource;
+using Elastic.Apm;
+using Elastic.Apm.Api;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
@@ -32,6 +36,10 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
             {
                 int delayTime = 5000;
 
+                // Elastic APM
+                Agent.Subscribe(new HttpDiagnosticsSubscriber());
+                Agent.Subscribe(new AzureBlobStorageDiagnosticsSubscriber());
+
                 //Build configuration
                 IConfigurationRoot configuration = BuildConfiguration();
 
@@ -43,7 +51,15 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 
                 try
                 {
-                    await serviceProvider.GetService<AioFulfilmentJob>().ProcessFulfilmentJobAsync();
+                    var aioFulfilmentJob = serviceProvider.GetService<AioFulfilmentJob>();
+
+                    await Elastic.Apm.Agent.Tracer
+                        .CaptureTransaction("AIOTransaction", ApiConstants.TypeRequest, async () =>
+                        {
+                            //application code that is captured as a transaction
+                            await serviceProvider.GetService<AioFulfilmentJob>().ProcessFulfilmentJobAsync();
+                        });
+                    
                 }
                 finally
                 {
@@ -55,6 +71,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
+                Agent.Tracer.CurrentTransaction.CaptureException(ex);
                 throw;
             }
         }

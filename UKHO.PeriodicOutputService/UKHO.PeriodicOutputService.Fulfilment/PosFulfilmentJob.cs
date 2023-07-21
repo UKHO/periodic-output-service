@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Elastic.Apm.Api;
+using Elastic.Apm;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -20,6 +22,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
         public async Task ProcessFulfilmentJob()
         {
+            var transaction = Agent.Tracer.CurrentTransaction;
+            ISpan span = transaction.StartSpan("POSJobStarted", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+            
             try
             {
                 _logger.LogInformation(EventIds.PosFulfilmentJobStarted.ToEventId(), "Periodic Output Service webjob started at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
@@ -31,6 +36,25 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             catch (Exception ex)
             {
                 _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+
+                transaction.CaptureException(ex);
+            }
+            finally
+            {
+                span.End();
+
+                transaction.TryGetLabel("FullAvcsDvdBatchCreated", out bool isFullAvcsDvdBatchCreated);
+                transaction.TryGetLabel("FullAvcsZipBatchCreated", out bool isFullAvcsZipBatchCreated);
+                transaction.TryGetLabel("CatalogueFileBatchCreated", out bool isCatalogueFileBatchCreated);
+                transaction.TryGetLabel("EncUpdateFileBatchCreated", out bool isEncUpdateFileBatchCreated);
+                transaction.TryGetLabel("UpdateZipBatchCreated", out bool isUpdateZipBatchCreated);
+                
+                transaction.SetLabel("POSBatchesCreated",
+                    isFullAvcsDvdBatchCreated &&
+                    isFullAvcsZipBatchCreated &&
+                    isCatalogueFileBatchCreated &&
+                    isEncUpdateFileBatchCreated &&
+                    isUpdateZipBatchCreated);
             }
 
         }
