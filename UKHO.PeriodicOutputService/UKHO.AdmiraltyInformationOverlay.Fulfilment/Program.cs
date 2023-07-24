@@ -57,7 +57,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                         .CaptureTransaction("AIOTransaction", ApiConstants.TypeRequest, async () =>
                         {
                             //application code that is captured as a transaction
-                            await serviceProvider.GetService<AioFulfilmentJob>().ProcessFulfilmentJobAsync();
+                            await aioFulfilmentJob.ProcessFulfilmentJobAsync();
                         });
                     
                 }
