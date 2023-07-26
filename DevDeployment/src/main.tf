@@ -83,6 +83,9 @@ module "webapp_service" {
     "FSSApiConfiguration:BusinessUnit"                         = "AVCSData"
     "FSSApiConfiguration:PosReadGroups"                        = "public"
     "FSSApiConfiguration:PosReadUsers"                         = ""
+    "FSSApiConfiguration:AIOBusinessUnit"                      = "AVCSData"
+    "FSSApiConfiguration:AIOReadGroups"                        = "public"
+    "FSSApiConfiguration:AIOReadUsers"                         = ""
     "ELASTIC_APM_SERVER_URL"                                   = var.elastic_apm_server_url
     "ELASTIC_APM_TRANSACTION_SAMPLE_RATE"                      = "1"
     "ELASTIC_APM_ENVIRONMENT"                                  = local.env_name

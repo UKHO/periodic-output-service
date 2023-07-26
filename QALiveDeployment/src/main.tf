@@ -53,6 +53,9 @@ module "webapp_service" {
     "FSSApiConfiguration:BusinessUnit"                         = "AVCSData"
     "FSSApiConfiguration:PosReadGroups"                        = "public"
     "FSSApiConfiguration:PosReadUsers"                         = ""
+    "FSSApiConfiguration:AIOBusinessUnit"                      = "AVCSData"
+    "FSSApiConfiguration:AIOReadGroups"                        = "public"
+    "FSSApiConfiguration:AIOReadUsers"                         = ""
   }
   tags                                                         = local.tags
   allowed_ips                                                  = var.allowed_ips
