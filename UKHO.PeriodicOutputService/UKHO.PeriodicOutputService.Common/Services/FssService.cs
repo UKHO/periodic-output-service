@@ -381,12 +381,12 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 createBatchRequest = new()
                 {
-                    BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
+                    BusinessUnit = _fssApiConfiguration.Value.AioBusinessUnit,
                     ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                     Acl = new Acl()
                     {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new() : _fssApiConfiguration.Value.AioReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new() : _fssApiConfiguration.Value.AioReadGroups.Split(",").ToList(),
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {
