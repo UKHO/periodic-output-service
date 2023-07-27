@@ -45,18 +45,12 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
             {
                 span.End();
 
-                transaction.TryGetLabel("FullAvcsDvdBatchCreated", out bool isFullAvcsDvdBatchCreated);
-                transaction.TryGetLabel("FullAvcsZipBatchCreated", out bool isFullAvcsZipBatchCreated);
-                transaction.TryGetLabel("CatalogueFileBatchCreated", out bool isCatalogueFileBatchCreated);
-                transaction.TryGetLabel("EncUpdateFileBatchCreated", out bool isEncUpdateFileBatchCreated);
-                transaction.TryGetLabel("UpdateZipBatchCreated", out bool isUpdateZipBatchCreated);
+                transaction.TryGetLabel("AIOFullAvcsDvdBatchCreated", out bool isAIOFullAvcsDvdBatchCreated);
+                transaction.TryGetLabel("AIOUpdateZipBatchCreated", out bool isAIOUpdateZipBatchCreated);
 
-                transaction.SetLabel("POSBatchesCreated",
-                    isFullAvcsDvdBatchCreated &&
-                    isFullAvcsZipBatchCreated &&
-                    isCatalogueFileBatchCreated &&
-                    isEncUpdateFileBatchCreated &&
-                    isUpdateZipBatchCreated);
+                transaction.SetLabel("AIOBatchesCreated",
+                    isAIOFullAvcsDvdBatchCreated &&
+                    isAIOUpdateZipBatchCreated);
             }
         }
     }

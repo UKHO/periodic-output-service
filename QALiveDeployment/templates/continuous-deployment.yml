@@ -13,7 +13,7 @@ steps:
     inputs:
       targetType: filePath
       filePath: '$(Pipeline.Workspace)/qaliveterraformartifact/terraform_conditional_run.ps1'
-      arguments: '-deploymentResourceGroupName $(DeploymentResourceGroupName) -deploymentStorageAccountName $(DeploymentStorageAccountName) -workSpace $(Environment) -continueEvenIfResourcesAreGettingDestroyed $${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }} -terraformJsonOutputFile $(Pipeline.Workspace)/qaliveterraformartifact/terraform_output.json'
+      arguments: '-deploymentResourceGroupName $(DeploymentResourceGroupName) -deploymentStorageAccountName $(DeploymentStorageAccountName) -workSpace $(Environment) -continueEvenIfResourcesAreGettingDestroyed $${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }} -terraformJsonOutputFile $(Pipeline.Workspace)/qaliveterraformartifact/terraform_output.json -elasticApmServerUrl $(ElasticAPM_ServerURL) -elasticApmApiKey $(ElasticAPM_ApiKey)'
     env:
       ARM_CLIENT_ID: $(TERRAFORM-CLIENT-ID)
       ARM_CLIENT_SECRET: $(TERRAFORM-CLIENT-SECRET)
