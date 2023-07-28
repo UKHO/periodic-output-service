@@ -59,7 +59,7 @@ module "webapp_service" {
     "ELASTIC_APM_SERVER_URL"                                   = var.elastic_apm_server_url
     "ELASTIC_APM_TRANSACTION_SAMPLE_RATE"                      = "1"
     "ELASTIC_APM_ENVIRONMENT"                                  = local.env_name
-    "ELASTIC_APM_SERVICE_NAME"                                 = "POS Web Job QA"
+    "ELASTIC_APM_SERVICE_NAME"                                 = "POS Web Job-${local.env_name}"
     "ELASTIC_APM_API_KEY"                                      = var.elastic_apm_api_key
   }
   tags                                                         = local.tags
