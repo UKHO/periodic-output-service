@@ -317,10 +317,9 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
   <suppress>
     <notes>
       <![CDATA[
-   file name: Azure.Identity:1.8.2
+   file name: Microsoft.Identity.Client.dll
    ]]>
     </notes>
-    <packageUrl regex="true">^pkg:nuget/Azure\.Identity@.*$</packageUrl>
-    <cve>CVE-2023-36414</cve>
+    <cve>CVE-2019-20138</cve>
   </suppress>
 </suppressions>
