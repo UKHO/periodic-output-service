@@ -29,8 +29,10 @@ variables:
     value: "Periodic Output Service"
   - name: UKHOAssemblyCopyright
     value: "Copyright © UK Hydrographic Office"
-  - name: DeploymentPool
+  - name: DeploymentPoolOld
     value: "UKHO Ubuntu 1804"
+  - name: DeploymentPool
+    value: "Mare Nectaris"
   - name: Container
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.1.9"
   - name: coverityPool
@@ -601,7 +603,7 @@ stages:
       - deployment: QADeployApp
         displayName: "QA - Deploy Terraform and Dotnet App"
         environment: "Ess-Qa"
-        pool: $(DeploymentPool)
+        pool: $(DeploymentPoolOld)
         container: ${{variables.Container}}
         workspace:
           clean: all
@@ -778,7 +780,7 @@ stages:
       - deployment: LiveDeployApp
         displayName: "Live - Deploy Terraform and Dotnet App"
         environment: "Ess-Live"
-        pool: $(DeploymentPool)
+        pool: $(DeploymentPoolOld)
         container: ${{variables.Container}}
         workspace:
           clean: all
