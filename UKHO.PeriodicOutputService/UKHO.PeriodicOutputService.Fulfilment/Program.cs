@@ -72,8 +72,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
-                Agent.Tracer.CurrentTransaction.CaptureException(ex);
+                Agent.Tracer.CurrentTransaction?.CaptureException(ex);
                 throw;
+            }
+            finally
+            {
+                Agent.Tracer.CurrentTransaction?.End();
             }
         }
 

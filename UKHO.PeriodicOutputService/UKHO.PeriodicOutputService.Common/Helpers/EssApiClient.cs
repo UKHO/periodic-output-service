@@ -11,6 +11,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         public EssApiClient(IHttpClientFactory httpClientFactory)
         {
             _httpClient = httpClientFactory.CreateClient();
+            _httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
 
         public async Task<HttpResponseMessage> PostProductIdentifiersDataAsync(string uri, List<string> productIdentifierModel, string accessToken)
