@@ -1155,17 +1155,17 @@ stages:
           clean: all
         variables:
           - name: WEB_APP_NAME
-            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.WEBAPP']  ]
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.WEBAPP']  ]
           - name: mockWebAppName
-            value: $[ stageDependencies.Devdeploy.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.mockWebApp']  ]
+            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
           - name: mockWebAppResourceGroup
-            value: $[ stageDependencies.Devdeploy.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
           - name: RGName
-            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.ResourceGroup']  ]
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: POSWebjobApiConfiguration.UserName
-            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.webJobUsername']  ]
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.webJobUsername']  ]
           - name: POSWebjobApiConfiguration.Password
-            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.webJobPassword']  ]
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.webJobPassword']  ]
         steps:
 
                 - task: AzureCLI@2
