@@ -881,3 +881,352 @@ stages:
         displayName: Post Deployment Actions
         steps:
           - template: QALiveDeployment/templates/retain-pipeline.yml
+
+  - stage: vnextiatDeploy
+    dependsOn: []
+    # - Devdeploy
+    displayName: vnextiatDeploy (inc terraform, webapp deploy)
+    jobs:
+      - deployment: vnextiatDeploy
+        displayName: VnexT IAT - deploy terraform and dotnet App
+        environment: "Ess-vnextiat"
+        pool: $(DeploymentPool)
+        container: ${{variables.Container}}
+        workspace:
+          clean: all
+        variables:
+          - group: "ESS-Deployment-Variables-QA"
+          - group: "ESS-QA-Variables"
+          - name: "ESSAzureADConfiguration.ClientId"
+            value: $(ESSClientId)
+          - name: "ESSAzureADConfiguration.TenantId"
+            value: $(TenantId)
+          - name: "EssAuthorizationConfiguration.TenantId"
+            value: $(TenantId)
+          - name: "EssAuthorizationConfiguration.AutoTestClientId"
+            value: $(AutoTestClientId_Authed)
+          - name: "EssAuthorizationConfiguration.AutoTestClientSecret"
+            value: $(AutoTestClientSecret_Authed)
+          - name: "EssAuthorizationConfiguration.EssClientId"
+            value: $(ESSClientId)
+          - name: "EssAuthorizationConfiguration.AutoTestClientIdNoAuth"
+            value: $(AutoTestClientId_NoAuth)
+          - name: "EssAuthorizationConfiguration.AutoTestClientSecretNoAuth"
+            value: $(AutoTestClientSecret_NoAuth)
+          - name: "AzureAdB2CTestConfiguration.ClientSecret"
+            value: $(AUTOTEST-ESS-SECRET)
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: Deployment/templates/continuous-deployment.yml
+                  parameters:
+                    ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+                    AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
+
+                - template: Deployment/templates/continuous-deployment-apim.yml
+                  parameters:
+                      ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+                      AzureSubscription: "Fleet Manager Dev/Test"
+                      TerraformKeyVault: $(APIM_TERRAFORM_KEYVAULT)
+                      APIMResourceGroup: $(APIM_RESOURCE_GROUP_NAME)
+                      APIMServiceInstance: $(APIM_SERVICE_NAME)
+                      tfstateStorageAccountRG: $(APIM_TFSTATE_STORAGE_ACCOUNT_RG)
+                      tfstateStorageAccountName: $(APIM_TFSTATE_STORAGE_ACCOUNT_NAME)
+                      
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download Functional test Artifact"
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'functionaltests'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download Terraform Artifact"
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'terraformartifact'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: FileTransform@2
+                  displayName: "File Transform: functionaltests"
+                  inputs:
+                    folderPath: '$(Build.SourcesDirectory)/functionaltests/'
+                    xmlTransformationRules:
+                    jsonTargetFiles: '**/appsettings.json'
+
+                - task: UseDotNet@2
+                  displayName: 'Use .NET Core $(SdkVersion) sdk'
+                  inputs:
+                    packageType: sdk
+                    version: $(SdkVersion)
+
+                - task: AzureCLI@2
+                  displayName: "Swap ESS API and ESS FulfilmentService Configuration AIOEnabled"
+                  condition: always()
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-QA-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/terraformartifact/set_api_webjob_aio_feature_configuration.ps1"
+                    arguments: '-aiocells $(AioConfiguration.AioCells_FT) -aioenabled "true" -resourcegroup $(RESOURCE_GROUP_NAME) -webappname $(WEB_APP_NAME) -fulfilmentwebappsname $(fulfilmentWebAppsName)'
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run Functional tests AIOEnabled"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    arguments: '--filter Category=SmokeTest-AIOEnabled'
+                    testRunTitle: "QA-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+
+                - task: AzureCLI@2
+                  displayName: "Swap ESS API and ESS FulfilmentService Configuration AIODisabled"                  
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-QA-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/terraformartifact/set_api_webjob_aio_feature_configuration.ps1"
+                    arguments: '-aiocells $(AioConfiguration.AioCells_FT) -aioenabled "false" -resourcegroup $(RESOURCE_GROUP_NAME) -webappname $(WEB_APP_NAME) -fulfilmentwebappsname $(fulfilmentWebAppsName)'
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run Functional tests AIODisabled"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    arguments: '--filter Category=SmokeTest-AIODisabled'
+                    testRunTitle: "QA-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+
+                - task: AzureCLI@2
+                  displayName: "Swap ESS API and ESS FulfilmentService Configuration"
+                  condition: always()
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-QA-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/terraformartifact/set_api_webjob_aio_feature_configuration.ps1"
+                    arguments: '-aiocells $(AioConfiguration.AioCells) -aioenabled $(AioConfiguration.AioEnabled) -resourcegroup $(RESOURCE_GROUP_NAME) -webappname $(WEB_APP_NAME) -fulfilmentwebappsname $(fulfilmentWebAppsName)'
+
+      - job: Run_ADDS_E2E_tests
+        displayName: Run ADDS E2E tests
+        dependsOn: vnextiatDeploy
+        pool: $(DeploymentPool)
+        variables:
+          - group: "ADDS-E2E"
+        container: ${{variables.Container}}
+        steps:
+        - task: PowerShell@2          
+          displayName: "Run ADDS E2E pipeline tests"
+          inputs:
+              pwsh: true
+              targetType: filePath
+              filePath: '$(System.DefaultWorkingDirectory)/Deployment/ADDS-e2e-tests.ps1'
+              arguments: '-queueSecret $(QueueSecret) -pollSecret $(PollSecret) -pollTimeInSecs $(PollTimeInSecs) -functionEndPoint $(FunctionEndPoint)'                   
+        
+  - stage: vnexte2eDeploy
+    dependsOn: 
+      - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+      
+    # - vNextIATDeploy
+    displayName: vnexte2eDeploy (inc terraform, webapp deploy)
+    jobs:
+      - deployment: E2EDeploy
+        displayName: vnexte2e - deploy terraform and dotnet App
+        environment: "Ess-vnexte2e"
+        pool: $(DeploymentPool)
+        container: ${{variables.Container}}
+        workspace:
+          clean: all
+          variables:
+            - group: "ESS-vNextE2E-Variables"
+            - group: "ESS-Deployment-Variables-vNextE2E"
+            - group: "POS-vNextE2E-Variables"
+            - name: "ESSApiConfiguration.TenantId"
+              value: $(TenantId)
+            - name: "ESSApiConfiguration.AutoTestClientId"
+              value: $(AutoTestClientId_Authed)
+            - name: "ESSApiConfiguration.AutoTestClientSecret"
+              value: $(AutoTestClientSecret_Authed)
+            - name: "ESSApiConfiguration.EssClientId"
+              value: $(ESSClientId)
+            - name: "ElasticAPM_ServerURL"
+              value: $(ElasticAPM.ServerURL)
+            - name: "ElasticAPM_ApiKey"
+              value: $(ElasticAPM.ApiKey)
+          condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+      
+          jobs:
+            - deployment: vNextE2EDeployApp
+              displayName: "vNextE2E - Deploy Terraform and Dotnet App"
+              environment: "Ess-vnexte2e"
+              pool: $(DeploymentPool)
+              container: ${{variables.Container}}
+              workspace:
+                clean: all
+              strategy:
+                runOnce:
+                  deploy:
+                    steps:
+                      - template: QALiveDeployment/templates/continuous-deployment.yml
+                        parameters:
+                          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+                          AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+      
+            - job: CheckInfra
+              displayName: "Check Infrastructure Health"
+              dependsOn: vNextE2EDeployApp
+              variables:
+                - name: WEB_APP_NAME
+                  value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
+                - name: RGName
+                  value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
+              steps:
+                - task: AzureCLI@2
+                  displayName: "Check Infrastructure is healthy"
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: '$(Build.SourcesDirectory)/QALiveDeployment/check_service_status_webjob.ps1'
+                    arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
+      
+            - job: CheckFSS
+              displayName: "Check FSS Health"
+              dependsOn: vNextE2EDeployApp
+              steps:
+                - task: PowerShell@2
+                  displayName: "Check FSS Health endpoint is healthy"
+                  inputs:
+                    targetType: filePath
+                    filePath: "$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1"
+                    arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
+      
+            - job: CheckESS
+              displayName: "Check ESS Health"
+              dependsOn: vNextE2EDeployApp
+              steps:
+                - task: PowerShell@2
+                  displayName: "Check ESS Health endpoint is healthy"
+                  inputs:
+                    targetType: filePath
+                    filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
+                    arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
+      
+            - job: CheckFM
+              displayName: "Check Fleet Manager Health"
+              dependsOn: vNextE2EDeployApp
+              steps:
+                - task: PowerShell@2
+                  displayName: "Check FM Health endpoint is healthy"
+                  inputs:
+                    targetType: filePath
+                    filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
+                    arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+      
+            - job: FunctionalTests
+              dependsOn:
+              - vNextE2EDeployApp
+              - CheckInfra
+              - CheckFSS
+              - CheckESS
+              - CheckFM
+              pool: NautilusBuild
+              displayName: "vNextE2E Functional Automated Tests"
+              workspace:
+               clean: all
+              variables:
+                - name: WEB_APP_NAME
+                  value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
+                - name: mockWebAppName
+                  value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
+                - name: mockWebAppResourceGroup
+                  value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+                - name: RGName
+                  value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
+                - name: POSWebjobApiConfiguration.UserName
+                  value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobUsername']  ]
+                - name: POSWebjobApiConfiguration.Password
+                  value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobPassword']  ]
+              steps:
+      
+                      - task: AzureCLI@2
+                        displayName: "Swap Stub Configuration"
+                        condition: always()
+                        inputs:
+                          azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                          scriptType: 'pscore'
+                          scriptLocation: 'scriptPath'
+                          scriptPath: "$(Build.SourcesDirectory)/QALiveDeployment/set_stub_configuration.ps1"
+                          arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath) -ftrunning "true" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+      
+                      - task: DownloadBuildArtifacts@0
+                        displayName: "Download Functional test Artifact"
+                        inputs:
+                          buildType: 'current'
+                          downloadType: 'single'
+                          artifactName: 'functionaltests'
+                          downloadPath: '$(Build.SourcesDirectory)'
+      
+                      - task: FileTransform@2
+                        displayName: "File Transform: functionaltests"
+                        inputs:
+                          folderPath: '$(Build.SourcesDirectory)/functionaltests/'
+                          xmlTransformationRules:
+                          jsonTargetFiles: '**/appsettings.json'
+      
+                      - task: UseDotNet@2
+                        displayName: 'Use .NET Core sdk'
+                        inputs:
+                          packageType: sdk
+                          version: 6.0.x
+      
+                      - task: DotNetCoreCLI@2
+                        displayName: "Run Functional tests"
+                        inputs:
+                          command: "test"
+                          projects: |
+                            **/*FunctionalTest*.dll
+                            !**/*TestAdapter.dll
+                            !**/obj/**
+                          arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
+                          testRunTitle: "QA-AutomationTests"
+                          workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+      
+                      - task: DownloadBuildArtifacts@0
+                        displayName: "Download Terraform Artifact"
+                        condition: always()
+                        inputs:
+                          buildType: 'current'
+                          downloadType: 'single'
+                          artifactName: 'qaliveterraformartifact'
+                          downloadPath: '$(Build.SourcesDirectory)'
+      
+                      - task: AzureCLI@2
+                        displayName: "Swap Webjob Configuration"
+                        condition: always()
+                        inputs:
+                          azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+                          scriptType: 'pscore'
+                          scriptLocation: 'scriptPath'
+                          scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_webjob_configuration.ps1"
+                          arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+      
+                      - task: AzureCLI@2
+                        displayName: "Swap Stub Configuration"
+                        condition: always()
+                        inputs:
+                          azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+                          scriptType: 'pscore'
+                          scriptLocation: 'scriptPath'
+                          scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_stub_configuration.ps1"
+                          arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+      
