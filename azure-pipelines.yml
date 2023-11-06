@@ -1058,6 +1058,22 @@ stages:
       
     # - vNextIATDeploy
     displayName: vnexte2eDeploy (inc terraform, webapp deploy)
+    variables:
+      - group: "ESS-vNextE2E-Variables"
+      - group: "ESS-Deployment-Variables-vNextE2E"
+      - group: "POS-vNextE2E-Variables"
+      - name: "ESSApiConfiguration.TenantId"
+        value: $(TenantId)
+      - name: "ESSApiConfiguration.AutoTestClientId"
+        value: $(AutoTestClientId_Authed)
+      - name: "ESSApiConfiguration.AutoTestClientSecret"
+        value: $(AutoTestClientSecret_Authed)
+      - name: "ESSApiConfiguration.EssClientId"
+        value: $(ESSClientId)
+      - name: "ElasticAPM_ServerURL"
+        value: $(ElasticAPM.ServerURL)
+      - name: "ElasticAPM_ApiKey"
+        value: $(ElasticAPM.ApiKey)
     jobs:
       - deployment: vNextE2EDeployApp
         displayName: "vNextE2E - Deploy Terraform and Dotnet App"
@@ -1070,7 +1086,7 @@ stages:
           runOnce:
             deploy:
               steps:
-                - template: QALiveDeployment/templates/continuous-deployment.yml
+                - template: vNextE2EDeployment/templates/continuous-deployment.yml
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
@@ -1080,9 +1096,9 @@ stages:
         dependsOn: vNextE2EDeployApp
         variables:
           - name: WEB_APP_NAME
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.WEBAPP']  ]
           - name: RGName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.ResourceGroup']  ]
         steps:
           - task: AzureCLI@2
             displayName: "Check Infrastructure is healthy"
@@ -1139,24 +1155,24 @@ stages:
           clean: all
         variables:
           - name: WEB_APP_NAME
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.WEBAPP']  ]
           - name: mockWebAppName
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
+            value: $[ stageDependencies.Devdeploy.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.mockWebApp']  ]
           - name: mockWebAppResourceGroup
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+            value: $[ stageDependencies.Devdeploy.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
           - name: RGName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: POSWebjobApiConfiguration.UserName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobUsername']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.webJobUsername']  ]
           - name: POSWebjobApiConfiguration.Password
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobPassword']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.webJobPassword']  ]
         steps:
 
                 - task: AzureCLI@2
                   displayName: "Swap Stub Configuration"
                   condition: always()
                   inputs:
-                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                    azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/QALiveDeployment/set_stub_configuration.ps1"
