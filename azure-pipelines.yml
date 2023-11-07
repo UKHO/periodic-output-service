@@ -1128,7 +1128,7 @@ stages:
             displayName: "Check ESS Health endpoint is healthy"
             inputs:
               targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
+              filePath: '$(Build.SourcesDirectory)/vNextE2EDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckFM
@@ -1155,17 +1155,17 @@ stages:
           clean: all
         variables:
           - name: WEB_APP_NAME
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.WEBAPP']  ]
+            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.WEBAPP']  ]
           - name: mockWebAppName
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
+            value: $[ stageDependencies.vnexte2eDeploy.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.mockWebApp']  ]
           - name: mockWebAppResourceGroup
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+            value: $[ stageDependencies.vnexte2eDeploy.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
           - name: RGName
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
+            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: POSWebjobApiConfiguration.UserName
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.webJobUsername']  ]
+            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.webJobUsername']  ]
           - name: POSWebjobApiConfiguration.Password
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.webJobPassword']  ]
+            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.webJobPassword']  ]
         steps:
 
                 - task: AzureCLI@2
