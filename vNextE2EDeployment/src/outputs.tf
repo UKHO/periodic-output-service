@@ -54,3 +54,7 @@ output "connection_string" {
 output "mock_webapp_rg" {
 value = azurerm_resource_group.mock_webapp_rg.name
 }
+
+output "mock_webapp_rg" {
+value = azurerm_resource_group.mock_webapp_rg.name
+}
