@@ -58,9 +58,11 @@ variable "allowed_ips" {
 }
 
 variable "elastic_apm_server_url" {
-
 }
 
 variable "elastic_apm_api_key" {
+}
 
+variable "mock_spoke_subnet_name" {
+  type = string
 }
