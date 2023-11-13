@@ -8,7 +8,7 @@ param (
     [Parameter(Mandatory = $true)] [string] $elasticApmApiKey
 )
 
-cd $env:AGENT_BUILDDIRECTORY/qaliveterraformartifact/src
+cd $env:AGENT_BUILDDIRECTORY/vnexte2eterraformartifact/src
 
 terraform --version
 
