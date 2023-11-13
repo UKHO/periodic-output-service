@@ -50,3 +50,7 @@ output "connection_string" {
   value = module.app_insights.connection_string
   sensitive = true
 }
+
+output "mock_webapp_rg" {
+value = azurerm_resource_group.mock_webapp_rg.name
+}
