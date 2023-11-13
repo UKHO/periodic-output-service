@@ -1163,9 +1163,9 @@ stages:
           - name: WEB_APP_NAME
             value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.WEBAPP']  ]
           - name: mockWebAppName
-            value: $[ stageDependencies.vnexte2eDeploy.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.mockWebApp']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.mockWebApp']  ]
           - name: mockWebAppResourceGroup
-            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.mockWebAppResourceGroup']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.mockWebAppResourceGroup']  ]
           - name: RGName
             value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: POSWebjobApiConfiguration.UserName
@@ -1223,7 +1223,7 @@ stages:
                   inputs:
                     buildType: 'current'
                     downloadType: 'single'
-                    artifactName: 'qaliveterraformartifact'
+                    artifactName: 'vnexte2eterraformartifact'
                     downloadPath: '$(Build.SourcesDirectory)'
 
                 - task: AzureCLI@2
@@ -1233,7 +1233,7 @@ stages:
                     azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_webjob_configuration.ps1"
+                    scriptPath: "$(Build.SourcesDirectory)/vnexte2eterraformartifact/set_webjob_configuration.ps1"
                     arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
                 - task: AzureCLI@2
@@ -1243,5 +1243,5 @@ stages:
                     azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_stub_configuration.ps1"
+                    scriptPath: "$(Build.SourcesDirectory)/vnexte2eterraformartifact/set_stub_configuration.ps1"
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
