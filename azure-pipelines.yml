@@ -300,6 +300,12 @@ stages:
               PathtoPublish: '$(Build.SourcesDirectory)\QALiveDeployment'
               ArtifactName: qaliveterraformartifact
 
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish vNext terraform Artifacts"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\vNextE2EDeployment'
+              ArtifactName: vnexte2eterraformartifact
+
       - job: PublishFunctionalTests
         workspace:
           clean: all
