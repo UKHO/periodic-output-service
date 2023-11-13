@@ -57,6 +57,12 @@ write-output "Set JSON output into pipeline variables"
 write-output "Testing something"
 Write-Host "Testing something2"
 
+Write-Host $terraformOutput
+Write-Host $terraformOutput.webapp_rg.value
+Write-Host $terraformOutput.mock_webapp_rg.value
+
+
+
 Write-Host "##vso[task.setvariable variable=Website_Url]$($terraformOutput.Website_Url.value)"
 Write-Host "##vso[task.setvariable variable=WEB_APP_NAME]$($terraformOutput.web_app_name.value)"
 Write-Host "##vso[task.setvariable variable=mockWebAppResourceGroup]$($terraformOutput.mock_webapp_rg.value)"
