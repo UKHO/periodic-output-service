@@ -51,8 +51,8 @@ output "connection_string" {
   sensitive = true
 }
 
-output "mock_webapp_rg" {
-value = azurerm_resource_group.mock_webapp_rg.name
+output "mock_webappname" {
+  value = local.mock_web_app_name
 }
 
 output "mock_webapp_rg" {

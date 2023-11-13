@@ -58,8 +58,8 @@ write-output "Testing something"
 Write-Host "Testing something2"
 
 Write-Host $terraformOutput
-Write-Host "webapp val" $terraformOutput.webapp_rg.value
-Write-Host "mock webb app rg" $terraformOutput.mock_webapp_rg.value
+Write-Host "webapp val:" $terraformOutput.webapp_rg.value
+Write-Host "mock webb app rg:" $terraformOutput.mock_webapp_rg.value
 
 
 
