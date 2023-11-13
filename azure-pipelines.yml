@@ -1106,7 +1106,7 @@ stages:
               azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/QALiveDeployment/check_service_status_webjob.ps1'
+              scriptPath: '$(Build.SourcesDirectory)/vNextE2EDeployment/check_service_status_webjob.ps1'
               arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
 
       - job: CheckFSS
@@ -1117,7 +1117,7 @@ stages:
             displayName: "Check FSS Health endpoint is healthy"
             inputs:
               targetType: filePath
-              filePath: "$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1"
+              filePath: "$(Build.SourcesDirectory)/vNextE2EDeployment/check_health_endpoint.ps1"
               arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckESS
@@ -1139,7 +1139,7 @@ stages:
             displayName: "Check FM Health endpoint is healthy"
             inputs:
               targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
+              filePath: '$(Build.SourcesDirectory)/vNextE2EDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: FunctionalTests
@@ -1175,7 +1175,7 @@ stages:
                     azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/QALiveDeployment/set_stub_configuration.ps1"
+                    scriptPath: "$(Build.SourcesDirectory)/vNextE2EDeployment/set_stub_configuration.ps1"
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath) -ftrunning "true" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
                 - task: DownloadBuildArtifacts@0
