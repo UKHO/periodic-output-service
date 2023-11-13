@@ -7,6 +7,22 @@ parameters:
 
 steps:
 
+  - task: FileTransform@2
+    displayName: "File Transform: Mock API WebApp"
+    inputs:
+      folderPath: '$(Pipeline.Workspace)/MockWebAPI/*.zip'
+      xmlTransformationRules:
+      jsonTargetFiles: '**/appsettings.json'
+
+  - task: AzureCLI@2
+    displayName: "Mock API WebApp deployment"
+    inputs:
+      azureSubscription: "${{ parameters.AzureSubscription }}"
+      scriptType: 'pscore'
+      scriptLocation: 'scriptPath'
+      scriptPath: '$(Pipeline.Workspace)/devterraformartifact/mock_api_deployment.ps1'
+      arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FmEssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
+
   - task: PowerShell@2
     displayName: "Terraform $(Environment)deploy"
     name: TerraformDeploy
@@ -29,21 +45,6 @@ steps:
       TF_VAR_mock_spoke_subnet_name: $(POSESSmockspokeSubnetName)
       TF_VAR_allowed_ips: $(whiteListedIps)
 
-  - task: FileTransform@2
-    displayName: "File Transform: Mock API WebApp"
-    inputs:
-      folderPath: '$(Pipeline.Workspace)/MockWebAPI/*.zip'
-      xmlTransformationRules:
-      jsonTargetFiles: '**/appsettings.json'
-
-  - task: AzureCLI@2
-    displayName: "Mock API WebApp deployment"
-    inputs:
-      azureSubscription: "${{ parameters.AzureSubscription }}"
-      scriptType: 'pscore'
-      scriptLocation: 'scriptPath'
-      scriptPath: '$(Pipeline.Workspace)/devterraformartifact/mock_api_deployment.ps1'
-      arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FmEssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
 
   - task: FileTransform@2
     displayName: "File Transform: POS Config"
