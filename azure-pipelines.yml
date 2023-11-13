@@ -1159,7 +1159,7 @@ stages:
           - name: mockWebAppName
             value: $[ stageDependencies.vnexte2eDeploy.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.mockWebApp']  ]
           - name: mockWebAppResourceGroup
-            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.mockWebAppResourceGroup']  ]
           - name: RGName
             value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: POSWebjobApiConfiguration.UserName
