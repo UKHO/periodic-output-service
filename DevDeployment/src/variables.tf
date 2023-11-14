@@ -61,9 +61,7 @@ variable "allowed_ips" {
 }
 
 variable "elastic_apm_server_url" {
-
 }
 
 variable "elastic_apm_api_key" {
-
 }
