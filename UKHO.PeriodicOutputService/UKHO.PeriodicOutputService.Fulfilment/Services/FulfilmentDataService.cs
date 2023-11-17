@@ -98,7 +98,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             finally
             {
-                if (!bool.Parse(_configuration["IsFTRunning"]))
+                if (!bool.Parse(_configuration["IsFTRunning"] ?? bool.FalseString))
                 {
                     LogHistory(_nextSchedule ?? sinceDateTime, isSuccess);
                 }
