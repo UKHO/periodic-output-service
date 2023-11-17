@@ -14,7 +14,7 @@ function DeployWebApp($webAppName, $package, $webAppRGroup){
 
     az webapp deployment source config-zip -g $webAppRGroup -n $webAppName --src $package
 
-    if ( !$? ) { echo "Error while deplying webapp $webAppName" ; throw $_ }
+    if ( !$? ) { echo "Error while deploying webapp" $webAppName ; throw $_ }
 }
 
 echo "Deploying mock api ..."
