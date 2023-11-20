@@ -18,8 +18,8 @@ data "azurerm_subnet" "agent_subnet" {
 }
 
 data "azurerm_app_service_plan" "essft_asp" {
-  name                =  azurerm_resource_group.mock_webapp_rg.name
-  resource_group_name = "essft-qc-webapp-rg"
+  name                = "essft-qc-yh3r1-asp"
+  resource_group_name = azurerm_resource_group.mock_webapp_rg.name
 }
 
 data "azurerm_app_service_plan" "ess_asp" {
