@@ -17,10 +17,10 @@ data "azurerm_subnet" "agent_subnet" {
   resource_group_name  = var.agent_rg
 }
 
-data "azurerm_app_service_plan" "essft_asp" {
-  name                = "essft-qc-yh3r1-asp"
-  resource_group_name = azurerm_resource_group.mock_webapp_rg.name
-}
+# data "azurerm_app_service_plan" "essft_asp" {
+#   name                = "essft-qc-yh3r1-asp"
+#   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
+# }
 
 data "azurerm_app_service_plan" "ess_asp" {
   name                = "ess-${local.env_name}-lxs-1-asp"
