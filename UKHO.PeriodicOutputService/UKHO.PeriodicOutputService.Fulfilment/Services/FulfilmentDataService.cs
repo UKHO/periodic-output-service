@@ -48,6 +48,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private ITransaction _currentTransaction => Agent.Tracer.CurrentTransaction;
 
+        private readonly string _aioFileName;
+
         public FulfilmentDataService(IFleetManagerService fleetManagerService,
                                      IEssService exchangeSetApiService,
                                      IFssService fssService,
@@ -64,6 +66,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _configuration = configuration;
             _azureTableStorageHelper = azureTableStorageHelper;
             _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
+            _aioFileName = _configuration["AIOFileName"] ?? string.Empty;
         }
 
         public async Task<bool> CreatePosExchangeSets()
@@ -84,7 +87,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
                 Task fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
                 Task updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime.ToString("R")));
-                
+
                 tasks = new Task[] { fullAVCSExchangeSetTask, updateAVCSExchangeSetTask };
 
                 await Task.WhenAll(tasks);
@@ -95,7 +98,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             }
             finally
             {
-                if (!bool.Parse(_configuration["IsFTRunning"]))
+                if (!bool.Parse(_configuration["IsFTRunning"] ?? bool.FalseString))
                 {
                     LogHistory(_nextSchedule ?? sinceDateTime, isSuccess);
                 }
@@ -326,7 +329,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId, Batch batchType)
         {
             string downloadPath = Path.Combine(_homeDirectoryPath, essBatchId);
-            List<FssBatchFile> files = new();
+            List<FssBatchFile> encFiles = new();
 
             if (!string.IsNullOrEmpty(essBatchId))
             {
@@ -335,10 +338,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                 if (fssBatchStatus == FssBatchStatus.Committed)
                 {
                     _fileSystemHelper.CreateDirectory(downloadPath);
-                    files = await GetBatchFiles(essBatchId);
-                    DownloadFiles(files, downloadPath);
+                    List<FssBatchFile> batchFiles = await GetBatchFiles(essBatchId);
 
-                    files = RenameFiles(downloadPath, files, batchType);
+                    // exclude AIO file 
+                    encFiles = batchFiles.Where(f => !f.FileName.ToLower().Equals(_aioFileName.ToLower())).ToList();
+
+                    DownloadFiles(encFiles, downloadPath);
+
+                    encFiles = RenameFiles(downloadPath, encFiles, batchType);
                 }
                 else
                 {
@@ -346,7 +353,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                     throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
                 }
             }
-            return (downloadPath, files);
+            return (downloadPath, encFiles);
         }
 
         private List<FssBatchFile> RenameFiles(string downloadPath, List<FssBatchFile> files, Batch batchType)

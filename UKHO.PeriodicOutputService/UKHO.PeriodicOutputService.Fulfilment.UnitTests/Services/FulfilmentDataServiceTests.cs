@@ -42,6 +42,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             _fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
 
             _fakeconfiguration["IsFTRunning"] = "false";
+            _fakeconfiguration["PosUpdateZipFileName"] = "AVCS_UPDATE_WK{0}_{1}_Only.zip";
+            _fakeconfiguration["AIOFileName"] = "AIO.zip";
 
             _fulfilmentDataService = new FulfilmentDataService(_fakeFleetManagerService, _fakeEssService, _fakeFssService, _fakefileSystemHelper, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
         }
@@ -51,7 +53,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         {
             jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
             jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
-
+            
             FleetManagerGetCatalogueResponseModel fleetManagerGetCatalogue = new()
             {
                 StatusCode = HttpStatusCode.OK,
@@ -84,6 +86,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakeFileInfo.Name).Returns("M01X01.zip");
             A.CallTo(() => _fakeFileInfo.Length).Returns(100990);
+            A.CallTo(() => _fakeFileInfo.MoveTo(A<string>.Ignored));
 
             A.CallTo(() => _fakefileSystemHelper.GetFileInfo(A<string>.Ignored))
                           .Returns(_fakeFileInfo);
@@ -106,6 +109,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored))
                 .MustHaveHappenedOnceOrMore();
+
+            A.CallTo(() => _fakeFileInfo.MoveTo(A<string>.That.Contains("AVCS_UPDATE")))
+                .MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -316,6 +322,18 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                            Href ="http://test1.com"
                        }
                    }
+               },
+               new BatchFile
+               {
+                   Filename = "AIO.zip",
+                   Links = new Common.Models.Fss.Response.Links
+                   {
+                       Get = new Link
+                       {
+                           Href ="http://testaio1.com"
+                       }
+                   },
+
                }
             }
         };
