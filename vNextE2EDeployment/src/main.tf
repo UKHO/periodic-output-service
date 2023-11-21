@@ -18,8 +18,8 @@ data "azurerm_subnet" "agent_subnet" {
 }
 
 data "azurerm_app_service_plan" "essft_asp" {
-  name                = "essft-qc-yh3r1-asp"
-  resource_group_name = "essft-qc-webapp-rg"
+  name                = "ess-vne-mxs-1-asp"
+  resource_group_name = "ess-vne-rg"
 }
 
 data "azurerm_app_service_plan" "ess_asp" {
@@ -47,7 +47,7 @@ module "eventhub" {
 module "mock_webapp_service" {
   source              = "./Modules/MockWebApp"
   name                = local.mock_web_app_name
-  env_name            = "dev"
+  env_name            = local.env_name
   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
   service_plan_id     = data.azurerm_app_service_plan.essft_asp.id
   location            = azurerm_resource_group.mock_webapp_rg.location
