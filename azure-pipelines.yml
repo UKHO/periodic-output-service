@@ -310,7 +310,7 @@ stages:
             displayName: "Publish vNext terraform Artifacts"
             inputs:
               PathtoPublish: '$(Build.SourcesDirectory)\vNextIATDeployment'
-              ArtifactName: vnexte2eterraformartifact
+              ArtifactName: vnextiatterraformartifact
 
       - job: PublishFunctionalTests
         workspace:
