@@ -933,7 +933,7 @@ stages:
 
       - job: CheckInfra
         displayName: "Check Infrastructure Health"
-        dependsOn: vNextE2EDeployApp
+        dependsOn: vNextIATDeployApp
         variables:
           - name: WEB_APP_NAME
             value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.WEBAPP']  ]
@@ -951,7 +951,7 @@ stages:
 
       - job: CheckFSS
         displayName: "Check FSS Health"
-        dependsOn: vNextE2EDeployApp
+        dependsOn: vNextIATDeployApp
         steps:
           - task: PowerShell@2
             displayName: "Check FSS Health endpoint is healthy"
@@ -962,7 +962,7 @@ stages:
 
       - job: CheckESS
         displayName: "Check ESS Health"
-        dependsOn: vNextE2EDeployApp
+        dependsOn: vNextIATDeployApp
         steps:
           - task: PowerShell@2
             displayName: "Check ESS Health endpoint is healthy"
@@ -973,7 +973,7 @@ stages:
 
       - job: CheckFM
         displayName: "Check Fleet Manager Health"
-        dependsOn: vNextE2EDeployApp
+        dependsOn: vNextIATDeployApp
         steps:
           - task: PowerShell@2
             displayName: "Check FM Health endpoint is healthy"
