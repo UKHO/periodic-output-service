@@ -299,11 +299,17 @@ stages:
             inputs:
               PathtoPublish: '$(Build.SourcesDirectory)\QALiveDeployment'
               ArtifactName: qaliveterraformartifact
-
+              
           - task: PublishBuildArtifacts@1
             displayName: "Publish vNext terraform Artifacts"
             inputs:
               PathtoPublish: '$(Build.SourcesDirectory)\vNextE2EDeployment'
+              ArtifactName: vnexte2eterraformartifact
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish vNext terraform Artifacts"
+            inputs:
+              PathtoPublish: '$(Build.SourcesDirectory)\vNextIATDeployment'
               ArtifactName: vnexte2eterraformartifact
 
       - job: PublishFunctionalTests
@@ -888,10 +894,26 @@ stages:
         steps:
           - template: QALiveDeployment/templates/retain-pipeline.yml
 
-  - stage: vnextiatDeploy
-    dependsOn: []
-    # - Devdeploy
+  - stage: vNextIATDeploy
+    dependsOn: 
+      - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     displayName: vnextiatDeploy (inc terraform, webapp deploy)
+    variables:
+      - group: "ESS-vNextIAT-Variables"
+      - group: "ESS-Deployment-Variables-vNextIAT"
+      - group: "POS-vNextIAT-Variables"
+      - name: "ESSApiConfiguration.TenantId"
+        value: $(TenantId)
+      - name: "ESSApiConfiguration.AutoTestClientId"
+        value: $(AutoTestClientId_Authed)
+      - name: "ESSApiConfiguration.AutoTestClientSecret"
+        value: $(AutoTestClientSecret_Authed)
+      - name: "ESSApiConfiguration.EssClientId"
+        value: $(ESSClientId)
+      - name: "ElasticAPM_ServerURL"
+        value: $(ElasticAPM.ServerURL)
+      - name: "ElasticAPM_ApiKey"
+        value: $(ElasticAPM.ApiKey)
     jobs:
       - deployment: vNextIATDeployApp
         displayName: "vNextIAT - Deploy Terraform and Dotnet App"
@@ -904,60 +926,60 @@ stages:
           runOnce:
             deploy:
               steps:
-                - template: QALiveDeployment/templates/continuous-deployment.yml
+                - template: vNextIATDeployment/templates/continuous-deployment.yml
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-                    AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+                    AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
 
       - job: CheckInfra
         displayName: "Check Infrastructure Health"
-        dependsOn: vNextIATDeployApp
+        dependsOn: vNextE2EDeployApp
         variables:
           - name: WEB_APP_NAME
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.WEBAPP']  ]
           - name: RGName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.ResourceGroup']  ]
         steps:
           - task: AzureCLI@2
             displayName: "Check Infrastructure is healthy"
             inputs:
-              azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+              azureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
               scriptType: 'pscore'
               scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/QALiveDeployment/check_service_status_webjob.ps1'
+              scriptPath: '$(Build.SourcesDirectory)/vNextIATDeployment/check_service_status_webjob.ps1'
               arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
 
       - job: CheckFSS
         displayName: "Check FSS Health"
-        dependsOn: vNextIATDeployApp
+        dependsOn: vNextE2EDeployApp
         steps:
           - task: PowerShell@2
             displayName: "Check FSS Health endpoint is healthy"
             inputs:
               targetType: filePath
-              filePath: "$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1"
+              filePath: "$(Build.SourcesDirectory)/vNextIATDeployment/check_health_endpoint.ps1"
               arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckESS
         displayName: "Check ESS Health"
-        dependsOn: vNextIATDeployApp
+        dependsOn: vNextE2EDeployApp
         steps:
           - task: PowerShell@2
             displayName: "Check ESS Health endpoint is healthy"
             inputs:
               targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
+              filePath: '$(Build.SourcesDirectory)/vNextIATDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: CheckFM
         displayName: "Check Fleet Manager Health"
-        dependsOn: vNextIATDeployApp
+        dependsOn: vNextE2EDeployApp
         steps:
           - task: PowerShell@2
             displayName: "Check FM Health endpoint is healthy"
             inputs:
               targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
+              filePath: '$(Build.SourcesDirectory)/vNextIATDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
       - job: FunctionalTests
@@ -973,27 +995,27 @@ stages:
           clean: all
         variables:
           - name: WEB_APP_NAME
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.WEBAPP']  ]
           - name: mockWebAppName
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.mockWebApp']  ]
           - name: mockWebAppResourceGroup
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
           - name: RGName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: POSWebjobApiConfiguration.UserName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobUsername']  ]
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.webJobUsername']  ]
           - name: POSWebjobApiConfiguration.Password
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobPassword']  ]
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.webJobPassword']  ]
         steps:
 
                 - task: AzureCLI@2
                   displayName: "Swap Stub Configuration"
                   condition: always()
                   inputs:
-                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                    azureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/QALiveDeployment/set_stub_configuration.ps1"
+                    scriptPath: "$(Build.SourcesDirectory)/vNextIATDeployment/set_stub_configuration.ps1"
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath) -ftrunning "true" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
                 - task: DownloadBuildArtifacts@0
@@ -1035,34 +1057,33 @@ stages:
                   inputs:
                     buildType: 'current'
                     downloadType: 'single'
-                    artifactName: 'qaliveterraformartifact'
+                    artifactName: 'vnexte2eterraformartifact'
                     downloadPath: '$(Build.SourcesDirectory)'
 
                 - task: AzureCLI@2
                   displayName: "Swap Webjob Configuration"
                   condition: always()
                   inputs:
-                    azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+                    azureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_webjob_configuration.ps1"
+                    scriptPath: "$(Build.SourcesDirectory)/vnexte2eterraformartifact/set_webjob_configuration.ps1"
                     arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
                 - task: AzureCLI@2
                   displayName: "Swap Stub Configuration"
                   condition: always()
                   inputs:
-                    azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+                    azureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_stub_configuration.ps1"
+                    scriptPath: "$(Build.SourcesDirectory)/vnexte2eterraformartifact/set_stub_configuration.ps1"
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
-        
+
+  
   - stage: vnexte2eDeploy
     dependsOn: 
-      - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
-      
-    # - vNextIATDeploy
+      - vNextIATDeploy
     displayName: vnexte2eDeploy (inc terraform, webapp deploy)
     variables:
       - group: "ESS-vNextE2E-Variables"
@@ -1161,17 +1182,17 @@ stages:
           clean: all
         variables:
           - name: WEB_APP_NAME
-            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.WEBAPP']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.WEBAPP']  ]
           - name: mockWebAppName
             value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.mockWebApp']  ]
           - name: mockWebAppResourceGroup
             value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
           - name: RGName
-            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.ResourceGroup']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: POSWebjobApiConfiguration.UserName
-            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.webJobUsername']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.webJobUsername']  ]
           - name: POSWebjobApiConfiguration.Password
-            value: $[ dependencies.vnexte2eDeployApp.outputs['vnexte2eDeployApp.TerraformDeploy.webJobPassword']  ]
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.webJobPassword']  ]
         steps:
 
                 - task: AzureCLI@2
