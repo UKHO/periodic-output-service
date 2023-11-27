@@ -17,7 +17,10 @@ data "azurerm_subnet" "agent_subnet" {
   resource_group_name  = var.agent_rg
 }
 
-
+data "azurerm_app_service_plan" "ess_asp" {
+  name                = "ess-${local.env_name}-lxs-1-asp"
+  resource_group_name = "ess-${local.env_name}-rg"
+}
 
 module "app_insights" {
   source              = "./Modules/AppInsights"
@@ -104,11 +107,6 @@ module "key_vault" {
 # data "azurerm_app_service_plan" "essft_asp" {
 #   name                = "ess-vni-sxs-2-asp"
 #   resource_group_name = "ess-vni-rg"
-# }
-
-# data "azurerm_app_service_plan" "ess_asp" {
-#   name                = "ess-${local.env_name}-lxs-1-asp"
-#   resource_group_name = "ess-${local.env_name}-rg"
 # }
 
 # module "mock_webapp_service" {
