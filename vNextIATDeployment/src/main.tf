@@ -17,10 +17,7 @@ data "azurerm_subnet" "agent_subnet" {
   resource_group_name  = var.agent_rg
 }
 
-data "azurerm_app_service_plan" "ess_asp" {
-  name                = "ess-${local.env_name}-lxs-1-asp"
-  resource_group_name = "ess-${local.env_name}-rg"
-}
+Fix
 
 module "app_insights" {
   source              = "./Modules/AppInsights"
@@ -37,6 +34,35 @@ module "eventhub" {
   location            = azurerm_resource_group.webapp_rg.location
   tags                = local.tags
   env_name            = local.env_name
+}
+
+data "azurerm_app_service_plan" "essft_asp" {
+  name                = "ess-vni-sxs-2-asp"
+  resource_group_name = "ess-vni-rg"
+}
+
+data "azurerm_app_service_plan" "ess_asp" {
+  name                = "ess-${local.env_name}-lxs-1-asp"
+  resource_group_name = "ess-${local.env_name}-rg"
+}
+
+module "mock_webapp_service" {
+  source              = "./Modules/MockWebApp"
+  name                = local.mock_web_app_name
+  env_name            = local.env_name
+  resource_group_name = azurerm_resource_group.mock_webapp_rg.name
+  service_plan_id     = data.azurerm_app_service_plan.essft_asp.id
+  location            = azurerm_resource_group.mock_webapp_rg.location
+  subnet_id           = data.azurerm_subnet.mock_main_subnet.id
+  main_subnet_id      = data.azurerm_subnet.main_subnet.id
+  app_settings = {
+    "ASPNETCORE_ENVIRONMENT"                               = local.env_name
+    "WEBSITE_RUN_FROM_PACKAGE"                             = "1"
+    "WEBSITE_ENABLE_SYNC_UPDATE_SITE"                      = "true"
+    "APPINSIGHTS_INSTRUMENTATIONKEY"                       = "NOT_CONFIGURED"
+  }
+  tags                                                     = local.tags
+  allowed_ips                                              = var.allowed_ips
 }
 
 module "webapp_service" {
@@ -103,27 +129,3 @@ module "key_vault" {
  }
   tags                                                       = local.tags
 }
-
-# data "azurerm_app_service_plan" "essft_asp" {
-#   name                = "ess-vni-sxs-2-asp"
-#   resource_group_name = "ess-vni-rg"
-# }
-
-# module "mock_webapp_service" {
-#   source              = "./Modules/MockWebApp"
-#   name                = local.mock_web_app_name
-#   env_name            = local.env_name
-#   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
-#   service_plan_id     = data.azurerm_app_service_plan.essft_asp.id
-#   location            = azurerm_resource_group.mock_webapp_rg.location
-#   subnet_id           = data.azurerm_subnet.mock_main_subnet.id
-#   main_subnet_id      = data.azurerm_subnet.main_subnet.id
-#   app_settings = {
-#     "ASPNETCORE_ENVIRONMENT"                               = local.env_name
-#     "WEBSITE_RUN_FROM_PACKAGE"                             = "1"
-#     "WEBSITE_ENABLE_SYNC_UPDATE_SITE"                      = "true"
-#     "APPINSIGHTS_INSTRUMENTATIONKEY"                       = "NOT_CONFIGURED"
-#   }
-#   tags                                                     = local.tags
-#   allowed_ips                                              = var.allowed_ips
-# }
