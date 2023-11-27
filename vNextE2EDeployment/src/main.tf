@@ -18,7 +18,7 @@ data "azurerm_subnet" "agent_subnet" {
 }
 
 data "azurerm_app_service_plan" "essft_asp" {
-  name                = "ess-vne-sxs-2-asp"
+  name                = "ess-vne-lxs-2-asp"
   resource_group_name = "ess-vne-rg"
 }
 
