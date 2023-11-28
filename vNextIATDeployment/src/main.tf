@@ -17,8 +17,6 @@ data "azurerm_subnet" "agent_subnet" {
   resource_group_name  = var.agent_rg
 }
 
-Fix
-
 module "app_insights" {
   source              = "./Modules/AppInsights"
   name                = "${local.service_name}-${local.env_name}-insights"
