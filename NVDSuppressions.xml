@@ -99,4 +99,90 @@
     </notes>
     <cve>CVE-2023-36052</cve>
   </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Various
+   False positive - applies to https://www.drupal.org
+   ]]>
+    </notes>
+    <cve>CVE-2014-9152</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Dataflow.dll
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks\.Dataflow@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Dataflow:Various
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks\.Dataflow@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Extensions.dll
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Extensions:Various
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.dll
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks:Various
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Parallel.dll
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks\.Parallel@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
 </suppressions>
