@@ -18,7 +18,7 @@
   <ItemGroup>
     <PackageReference Include="Elastic.Apm" Version="1.25.1" />
     <PackageReference Include="Elastic.Apm.Azure.Storage" Version="1.25.1" />
-    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.21.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
     <PackageReference Include="Microsoft.Azure.Amqp" Version="2.6.3" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
