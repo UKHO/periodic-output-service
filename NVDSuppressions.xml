@@ -174,4 +174,85 @@
     <cve>CVE-2020-22475</cve>
     <cve>CVE-2022-39349</cve>
   </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.Azure.EventHubs:4.3.2
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Microsoft\.Azure\.EventHubs@.*$</packageUrl>
+    <cve>CVE-2021-42306</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.Azure.Services.AppAuthentication:1.0.3
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Microsoft\.Azure\.Services\.AppAuthentication@.*$</packageUrl>
+    <cve>CVE-2021-42306</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.IdentityModel.Clients.ActiveDirectory:3.14.2
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Microsoft\.IdentityModel\.Clients\.ActiveDirectory@.*$</packageUrl>
+    <cve>CVE-2021-42306</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.IdentityModel.Clients.ActiveDirectory:3.19.1
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Microsoft\.IdentityModel\.Clients\.ActiveDirectory@.*$</packageUrl>
+    <cve>CVE-2021-42306</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Net.Http:4.3.3
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Net\.Http@.*$</packageUrl>
+    <vulnerabilityName>CVE-2018-8292</vulnerabilityName>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Private.DataContractSerialization:4.1.1
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Private\.DataContractSerialization@.*$</packageUrl>
+    <vulnerabilityName>CVE-2023-21538</vulnerabilityName>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Private.DataContractSerialization:4.3.0
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Private\.DataContractSerialization@.*$</packageUrl>
+    <vulnerabilityName>CVE-2023-21538</vulnerabilityName>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Security.Cryptography.X509Certificates:4.1.0
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Security\.Cryptography\.X509Certificates@.*$</packageUrl>
+    <vulnerabilityName>CVE-2017-11770</vulnerabilityName>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Security.Cryptography.X509Certificates:4.3.0
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Security\.Cryptography\.X509Certificates@.*$</packageUrl>
+    <vulnerabilityName>CVE-2017-11770</vulnerabilityName>
+  </suppress>
 </suppressions>
