@@ -59,6 +59,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                             //application code that is captured as a transaction
                             await aioFulfilmentJob.ProcessFulfilmentJobAsync();
                         });
+
+                    Agent.Tracer.CurrentTransaction?.End();
                 }
                 finally
                 {
@@ -71,11 +73,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
                 Agent.Tracer.CurrentTransaction?.CaptureException(ex);
-                throw;
-            }
-            finally
-            {
                 Agent.Tracer.CurrentTransaction?.End();
+                throw;
             }
         }
 
