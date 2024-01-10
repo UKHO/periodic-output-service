@@ -157,8 +157,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string actualYear = batchDetailsResponse.attributes[2].value;
             actualYear.Should().Be(expectedYear);
 
-            string yearAndWeek = batchDetailsResponse.attributes[3].value;
-            yearAndWeek.Should().Be(expectedYear + " / " + actualWeekNumber);
+            string actualYearAndWeek = batchDetailsResponse.attributes[3].value;
+            actualYearAndWeek.Should().Be(expectedYear + " / " + expectedWeekNumber);
 
             string actualExchangeSetType = batchDetailsResponse.attributes[4].value;
 
