@@ -37,7 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\UKHO.PeriodicOutputService.Common\UKHO.PeriodicOutputService.Common.csproj" />
     <ProjectReference Include="..\UKHO.PeriodicOutputService.Fulfilment\UKHO.PeriodicOutputService.Fulfilment.csproj" />
   </ItemGroup>
 
