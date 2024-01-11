@@ -42,7 +42,7 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             batchId = batchId.ToLower();
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
-            int currentWeek = cultureInfo.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
+            string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
             string currentYear = DateTime.UtcNow.Year.ToString();
             string path = Path.Combine(homeDirectoryPath, batchId);
             string businessUnit = "AVCSData";
@@ -76,10 +76,9 @@ namespace UKHO.FmEssFssMock.API.Services
             List<KeyValuePair<string, string>> attributes = new()
             {
                 new("Product Type", aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)) ? "AIO" : "AVCS"),
-                new("Week Number", currentWeek.ToString()),
+                new("Week Number", currentWeek),
                 new("Year", currentYear),
-                new("Year / Week", currentYear + " / " + currentWeek.ToString()),
-            };
+                new("Year / Week", currentYear + " / " + currentWeek), };
 
             switch (EnumHelper.GetValueFromDescription<Batch>(batchId))
             {
