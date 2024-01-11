@@ -135,7 +135,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public static void GetBatchDetailsResponseValidationForAio(dynamic batchDetailsResponse, string exchangeSetType)
         {
             string expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
-            string expectedWeekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0'); ;
+            string expectedWeekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
             string expectedYear = DateTime.UtcNow.Year.ToString();
 
             //to check status

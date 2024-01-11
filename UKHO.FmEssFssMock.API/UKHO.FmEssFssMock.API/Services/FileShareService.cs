@@ -77,7 +77,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 new("Product Type", aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)) ? "AIO" : "AVCS"),
                 new("Week Number", currentWeek),
                 new("Year", currentYear),
-                new("Year / Week", currentYear + " / " + currentWeek),
+                new("Year / Week", currentYear + " / " + currentWeek)
             };
 
             switch (EnumHelper.GetValueFromDescription<Batch>(batchId))
