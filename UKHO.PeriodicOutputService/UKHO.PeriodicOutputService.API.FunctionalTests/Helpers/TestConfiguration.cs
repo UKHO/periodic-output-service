@@ -50,6 +50,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string FMConfigurationInValidProductIdentifier { get; set; }
             public string FMConfigurationFullAvcsPollingTimeOut { get; set; }
             public string FMConfigurationUpdatePollingTimeout { get; set; }
+            public int WebjobRunningStatusDelayTime { get; set; }
         }
 
         public class POSFileDetails
