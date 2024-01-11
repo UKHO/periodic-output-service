@@ -33,7 +33,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             string DownloadedFolderPath = await FileContentHelper.DownloadAndExtractAioZip(FssJwtToken, posDetails.AioExchangeSetBatchId);
 
             int fileCount = Directory.GetFiles(Path.Combine(DownloadedFolderPath, posDetails.AioFolderName,posDetails.InfoFolderName), "*.*", SearchOption.TopDirectoryOnly).Length;
-            Assert.IsTrue(fileCount > 0, $"File count is {fileCount} in the specified folder path.");
+            Assert.That(fileCount > 0, $"File count is {fileCount} in the specified folder path.");
         }
 
         [Test]
