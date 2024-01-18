@@ -2,7 +2,6 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.Annotations;
 using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Models.Request;

@@ -135,30 +135,30 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public static void GetBatchDetailsResponseValidationForAio(dynamic batchDetailsResponse, string exchangeSetType)
         {
             string expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
-            string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-            string yearNumber = DateTime.UtcNow.Year.ToString();
+            string expectedWeekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+            string expectedYear = DateTime.UtcNow.Year.ToString();
 
             //to check status
-            string batchStatus = batchDetailsResponse.status;
-            batchStatus.Should().Be("Committed");
+            string actualBatchStatus = batchDetailsResponse.status;
+            actualBatchStatus.Should().Be("Committed");
 
-            string businessUnit = batchDetailsResponse.businessUnit;
-            businessUnit.Should().Be("AVCSData");
+            string actualBusinessUnit = batchDetailsResponse.businessUnit;
+            actualBusinessUnit.Should().Be("AVCSData");
 
-            string expiryDate = batchDetailsResponse.expiryDate;
-            expiryDate.Should().Contain(expectedExpiryDate);
+            string actualExpiryDate = batchDetailsResponse.expiryDate;
+            actualExpiryDate.Should().Contain(expectedExpiryDate);
 
-            string productType = batchDetailsResponse.attributes[0].value;
-            productType.Should().Be("AIO");
+            string actualProductType = batchDetailsResponse.attributes[0].value;
+            actualProductType.Should().Be("AIO");
 
-            string weeknumber = batchDetailsResponse.attributes[1].value;
-            weeknumber.Should().Be(weekNumber);
+            string actualWeekNumber = batchDetailsResponse.attributes[1].value;
+            actualWeekNumber.Should().Be(expectedWeekNumber);
 
-            string year = batchDetailsResponse.attributes[2].value;
-            year.Should().Be(yearNumber);
+            string actualYear = batchDetailsResponse.attributes[2].value;
+            actualYear.Should().Be(expectedYear);
 
-            string yearweek = batchDetailsResponse.attributes[3].value;
-            yearweek.Should().Be(yearNumber + " / " +weeknumber);
+            string actualYearAndWeek = batchDetailsResponse.attributes[3].value;
+            actualYearAndWeek.Should().Be(expectedYear + " / " + expectedWeekNumber);
 
             string actualExchangeSetType = batchDetailsResponse.attributes[4].value;
 
@@ -169,10 +169,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             else if (exchangeSetType.Equals("Update"))
             {
                 actualExchangeSetType.Should().Be("Update");
-                string mediaType = batchDetailsResponse.attributes[5].value;
-                mediaType.Should().Be("Zip");
+                string actualMediaType = batchDetailsResponse.attributes[5].value;
+                actualMediaType.Should().Be("Zip");
 
-            }           
+            }
         }
     }
 }

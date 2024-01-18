@@ -13,58 +13,6 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: GetDocument.Insider.dll
-  CVE References ASP.Net versions 1.0-1.1. POS is built on ASP.Net Core 3.1+, not classic ASP.Net.
-See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus.com/bid/14217 for more details.
-   ]]>
-    </notes>
-    <cve>CVE-2005-2224</cve>
-  </suppress>
-
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: GetDocument.Insider.dll
-  Vunerability applies to AfterLogic MailBee WebMail Pro 4.1 for ASP.NET which is not used by the POS
-   ]]>
-    </notes>
-    <cve>CVE-2008-0333</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-    file name: Serilog.Sinks.File:4.1.0
-      8117-softmagic.c in file before 5.21 does not properly limit recursion, which allows remote attackers to cause a denial of service (CPU consumption or crash) via unspecified vectors.
-      9652-The mconvert function in softmagic.c in file before 5.21, as used in the Fileinfo component in PHP before 5.4.37, 5.5.x before 5.5.21, and 5.6.x before 5.6.5, does not properly handle a certain string-length field during a copy of a truncated version of a Pascal string, which might allow remote attackers to cause a denial of service (out-of-bounds memory access and application crash) via a crafted file.
-    This is a false positive. These two CVEs references a C library softmagic.c which is not used by POS
-    ]]>
-    </notes>
-    <cve>CVE-2014-8117</cve>
-    <cve>CVE-2014-9652</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-     file name: Serilog.Sinks.File:5.0.0
-      readelf.c in file before 5.22, as used in the Fileinfo component in PHP before 5.4.37, 5.5.x before 5.5.21, and 5.6.x before 5.6.5, does not consider that pread calls sometimes read only a subset of the available data, which allows remote attackers to cause a denial of service (uninitialized memory access) or possibly have unspecified other impact via a crafted ELF file.
-     This is a false positive in readelf.c as POS is not using this, or PHP.
-    ]]>
-    </notes>
-    <cve>CVE-2014-9653</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-    file name: Serilog.Extensions.Logging.File:2.0.0
-      cdf_read_property_info in cdf.c in file through 5.37 does not restrict the number of CDF_VECTOR elements, which allows a heap-based buffer overflow (4-byte out-of-bounds write)
-    This is a false positive in cdf.c which is not used by POS
-    ]]>
-    </notes>
-    <cve>CVE-2019-18218</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
     file name: Microsoft.AspNetCore.Hosting.Abstractions.dll
     An information disclosure vulnerability exists in .NET Framework and .NET Core which allows bypassing Cross-origin Resource Sharing (CORS) configurations, aka ".NET Framework Information Disclosure Vulnerability."
     This applies to version of System.Net.Http as deployed as part of .Net core below 2.1.7 or 2.2.1. POS is pinned to .Net core SDK > 3.1.408 which is not vunerable, and deployed to Azure App Service which will have the security patch applied.
@@ -87,147 +35,11 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
   <suppress>
     <notes>
       <![CDATA[
-    file name: System.Net.Http:4.3.3
-    See https://github.com/dotnet/announcements/issues/111 for MS details on this CVE.
-    Package name: System.Net.Http:4.3.3 (included as part of the .Net Core runtime)
-    Vulnerable versions: 4.3.3 and below
-    Secure versions: 4.3.4+
-    This CVE applies to .NET Core 2.1, .NET Core 1.0, .NET Core 1.1, PowerShell Core 6.0. POS is pinned to .Net core SDK > 3.1.419 which is not vulnerable, and deployed to Azure App Service which will have the security patch applied.
-    ]]>
-    </notes>
-    <cve>CVE-2018-8292</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-        file name: System.Threading.Tasks.Extensions.dll
-        Suppressing this CVE Because it relates to a mobile "Tasks" application (Astrid Tasks) version before 9.7.3. POS is not a mobile application.
-      ]]>
-    </notes>
-    <cve>CVE-2020-22475</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
         file name:  Azure.Storage.Blobs:12.10.0
         We have upgrade to Azure.Storage.Blobs 12.16.0, this is no a false flag
       ]]>
     </notes>
     <cve>CVE-2022-30187</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-	file name: Microsoft.Extensions.Hosting.Abstractions.dll
-	See https://nvd.nist.gov/vuln/detail/CVE-2020-1147 for details on this CVE.
-	This is a temporary suppression pending a fix being available.
-	Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=58192
-	]]>
-    </notes>
-    <cve>CVE-2020-1147</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-	file name: System.Net.WebSockets.Client:4.0.0
-	For details on these CVEs see:
-		http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2017-0247
-		http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2017-0249
-		http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2017-0256
-	This is a temporary suppression pending a fix being available.
-	Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=58195
-	]]>
-    </notes>
-    <cve>CVE-2017-0247</cve>
-    <cve>CVE-2017-0249</cve>
-    <cve>CVE-2017-0256</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-	file name: Serilog.Sinks.File:5.0.0
-	For details on these CVEs see:
-		http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-2270
-		http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-3479
-		http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-3480
-		http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2014-3487
-		This is a temporary suppression pending a fix being available.
-       Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=59829
-	]]>
-    </notes>
-    <cve>CVE-2014-2270</cve>
-    <cve>CVE-2014-3479</cve>
-    <cve>CVE-2014-3480</cve>
-    <cve>CVE-2014-3487</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: DiscUtils.Core.dll, DiscUtils.Streams.dll
-   	For details on these CVEs see:
-		http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2021-4277
-    This is a temporary suppression pending a fix being available.
-       Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=67185
-   ]]>
-    </notes>
-    <cve>CVE-2021-4277</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Private.DataContractSerialization:4.3.0
-   This CVE appiles to .net version >= 6.0.0 and < 6.0.12. Version 6.0.13 is not vulnerable
-   See https://github.com/dotnet/announcements/issues/244
-   ]]>
-    </notes>
-    <cve>CVE-2023-21538</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-		file name: Serilog.Extensions.Logging.File:2.0.0
-		This is a temporary suppression pending a fix being available.
-		Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_workitems/edit/63100
-		]]>
-    </notes>
-    <cve>CVE-2014-2270</cve>
-    <cve>CVE-2014-3479</cve>
-    <cve>CVE-2014-3480</cve>
-    <cve>CVE-2014-3487</cve>
-    <cve>CVE-2007-1536</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-		file name: Serilog.Sinks.File:5.0.0
-		This is a temporary suppression pending a fix being available.
-		Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_workitems/edit/63101
-		]]>
-    </notes>
-    <cve>CVE-2014-2270</cve>
-    <cve>CVE-2014-3479</cve>
-    <cve>CVE-2014-3480</cve>
-    <cve>CVE-2014-3487</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Private.DataContractSerialization:4.3.0
-   This CVE appiles to .net version >= 6.0.0 and < 6.0.12. Version 6.0.13 is not vulnerable
-   See https://github.com/dotnet/announcements/issues/244
-   ]]>
-    </notes>
-    <cve>CVE-2023-21538</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Microsoft.Azure.EventGrid:3.2.1, Microsoft.Azure.KeyVault.dll, Microsoft.Azure.Services.AppAuthentication.dll
-   file name: Microsoft.IdentityModel.Clients.ActiveDirectory.dll, Microsoft.IdentityModel.Clients.ActiveDirectory:3.19.1
-   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
-   ]]>
-    </notes>
-    <cve>CVE-2021-42306</cve>
   </suppress>
   <suppress>
     <notes>
@@ -254,56 +66,11 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
   <suppress>
     <notes>
       <![CDATA[
-   file name: NETStandard.Library:1.6.0, NETStandard.Library:1.6.1
-   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
-   ]]>
-    </notes>
-    <cve>CVE-2001-0152</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: Microsoft.Bcl.AsyncInterfaces:1.0.0, Microsoft.Bcl.AsyncInterfaces:1.1.1
    https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
    ]]>
     </notes>
     <cve>CVE-2021-43138</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Microsoft.Identity.Client.dll
-   https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=70014
-   ]]>
-    </notes>
-    <cve>CVE-2019-20138</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Runtime.Serialization.Json:4.0.2, System.Runtime.Serialization.Json:4.3.0,
-   System.Text.Json:4.6.0, System.Text.Json:4.7.2, System.Text.Json:7.0.0
-   These packages are dependencies of nuget packages. All packages at latest version, must update dependent packages when newer versions are available.
-   ]]>
-    </notes>
-    <cve>CVE-2022-45688</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Security.Cryptography.X509Certificates:4.1.0
-  This part of .NetCoreApp. Either waiting on fix through .net sdk to fix, or update to .net core 8 when available.
-   ]]>
-    </notes>
-    <cve>CVE-2017-11770</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Microsoft.NETCore.Platforms:3.1.0
-   ]]>
-    </notes>
-    <cve>CVE-2023-29326</cve>
   </suppress>
   <suppress>
     <notes>
@@ -320,6 +87,93 @@ See https://nvd.nist.gov/vuln/detail/CVE-2005-2224 and https://www.securityfocus
    file name: Microsoft.Identity.Client.dll
    ]]>
     </notes>
+    <cve>CVE-2019-20138</cve>
+    <cve>CVE-2023-36415</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Various Azure.
+   Refers to Azure CLI.
+   ]]>
+    </notes>
+    <cve>CVE-2023-36052</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Various
+   False positive - applies to https://www.drupal.org
+   ]]>
+    </notes>
+    <cve>CVE-2014-9152</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Dataflow.dll
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks\.Dataflow@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Dataflow:Various
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks\.Dataflow@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Extensions.dll
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Extensions:Various
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.dll
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks:Various
+   False positive - applies to Tasks.org Android app
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks@.*$</packageUrl>
+    <cve>CVE-2020-22475</cve>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
     <cve>CVE-2019-20138</cve>
     <cve>CVE-2023-36415</cve>
   </suppress>

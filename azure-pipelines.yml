@@ -37,7 +37,6 @@ variables:
     value: "NautilusBuild"
 
 stages:
-
   - stage: Stryker_Mutator
     displayName: "Stryker Mutator"
     dependsOn: []
@@ -46,6 +45,12 @@ stages:
       workspace:
         clean: all
       steps:
+        - task: UseDotNet@2
+          displayName: 'Use .NET SDK'
+          inputs:
+            packageType: sdk
+            useGlobalJson: true
+            workingDirectory: '$(Build.SourcesDirectory)'
         - task: DotNetCoreCLI@2
           displayName: "Install Stryker"
           inputs:
@@ -74,11 +79,11 @@ stages:
         displayName: "Dependencychecker"
         steps:
           - task: UseDotNet@2
-            displayName: 'Use .NET Core 6.0.x sdk'
+            displayName: 'Use .NET SDK'
             inputs:
               packageType: sdk
               useGlobalJson: true
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+              workingDirectory: '$(Build.SourcesDirectory)'
 
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore non test projects only"
@@ -120,11 +125,11 @@ stages:
         displayName: "Dotnet Test and Publish Code Coverage"
         steps:
           - task: UseDotNet@2
-            displayName: 'Use .NET 6.0.x sdk'
+            displayName: 'Use .NET SDK'
             inputs:
               packageType: sdk
               useGlobalJson: true
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+              workingDirectory: '$(Build.SourcesDirectory)'
 
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore test projects only"
@@ -172,11 +177,11 @@ stages:
               arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"'
 
           - task: UseDotNet@2
-            displayName: 'Use .NET Core 6.0.x sdk'
+            displayName: 'Use .NET SDK'
             inputs:
               packageType: sdk
               useGlobalJson: true
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+              workingDirectory: '$(Build.SourcesDirectory)'
 
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore"
@@ -280,11 +285,11 @@ stages:
         displayName: "Publish Functional Tests"
         steps:
           - task: UseDotNet@2
-            displayName: 'Use .NET Core 6.0.x sdk'
+            displayName: 'Use .NET SDK'
             inputs:
               packageType: sdk
               useGlobalJson: true
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+              workingDirectory: '$(Build.SourcesDirectory)'
 
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore"
@@ -325,11 +330,11 @@ stages:
               arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
 
           - task: UseDotNet@2
-            displayName: 'Use .NET Core 6.0.x sdk'
+            displayName: 'Use .NET SDK'
             inputs:
               packageType: sdk
               useGlobalJson: true
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API'
+              workingDirectory: '$(Build.SourcesDirectory)'
 
           - task: DotNetCoreCLI@2
             displayName: ".Net Core - NuGet restore"
@@ -514,7 +519,7 @@ stages:
                     jsonTargetFiles: '**/appsettings.json'
 
                 - task: UseDotNet@2
-                  displayName: 'Use .NET Core sdk'
+                  displayName: 'Use .NET SDK'
                   inputs:
                     packageType: sdk
                     version: 6.0.x
@@ -691,7 +696,7 @@ stages:
                     jsonTargetFiles: '**/appsettings.json'
 
                 - task: UseDotNet@2
-                  displayName: 'Use .NET Core sdk'
+                  displayName: 'Use .NET SDK'
                   inputs:
                     packageType: sdk
                     version: 6.0.x
