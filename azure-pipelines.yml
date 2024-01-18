@@ -864,7 +864,7 @@ stages:
   - stage: vNextIATDeploy
     dependsOn: 
       - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
-    displayName: vnextiatDeploy (inc terraform, webapp deploy)
+    displayName: vNext IAT Deploy (inc terraform, webapp deploy)
     variables:
       - group: "ESS-vNextIAT-Variables"
       - group: "ESS-Deployment-Variables-vNextIAT"
@@ -957,7 +957,7 @@ stages:
         - CheckESS
         - CheckFM
         pool: NautilusBuild
-        displayName: "vNextE2E Functional Automated Tests"
+        displayName: "v Next IAT Functional Automated Tests"
         workspace:
           clean: all
         variables:
@@ -1052,7 +1052,7 @@ stages:
     dependsOn: 
       # - vNextIATDeploy
       - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
-    displayName: vnexte2eDeploy (inc terraform, webapp deploy)
+    displayName: vNext E2E Deploy (inc terraform, webapp deploy)
     variables:
       - group: "ESS-vNextE2E-Variables"
       - group: "ESS-Deployment-Variables-vNextE2E"
@@ -1145,7 +1145,7 @@ stages:
         - CheckESS
         - CheckFM
         pool: NautilusBuild
-        displayName: "vNextE2E Functional Automated Tests"
+        displayName: "vNext E2E Functional Automated Tests"
         workspace:
           clean: all
         variables:
