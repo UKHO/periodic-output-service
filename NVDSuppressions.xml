@@ -173,7 +173,6 @@
     <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks@.*$</packageUrl>
     <cve>CVE-2020-22475</cve>
     <cve>CVE-2022-39349</cve>
-  </suppress>
     <cve>CVE-2019-20138</cve>
     <cve>CVE-2023-36415</cve>
   </suppress>
