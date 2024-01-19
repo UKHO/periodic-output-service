@@ -957,7 +957,7 @@ stages:
         - CheckESS
         - CheckFM
         pool: NautilusBuild
-        displayName: "v Next IAT Functional Automated Tests"
+        displayName: "vNext IAT Functional Automated Tests"
         workspace:
           clean: all
         variables:
