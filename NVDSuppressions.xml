@@ -212,4 +212,16 @@
    ]]></notes>
    <cve>CVE-2024-21907</cve>
 </suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: Microsoft.IdentityModel.Abstractions.dll
+   ]]></notes>
+   <cve>CVE-2024-21319</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: Newtonsoft.Json.Bson.dll
+   ]]></notes>
+   <cve>CVE-2024-21907</cve>
+</suppress>
 </suppressions>
