@@ -865,6 +865,7 @@ stages:
     dependsOn: 
       - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     displayName: vNext IAT Deploy (inc terraform, webapp deploy)
+    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     variables:
       - group: "ESS-vNextIAT-Variables"
       - group: "ESS-Deployment-Variables-vNextIAT"
@@ -1046,13 +1047,12 @@ stages:
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/vnexte2eterraformartifact/set_stub_configuration.ps1"
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
-
   
   - stage: vnexte2eDeploy
     dependsOn: 
-      # - vNextIATDeploy
-      - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+       - vNextIATDeploy
     displayName: vNext E2E Deploy (inc terraform, webapp deploy)
+    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     variables:
       - group: "ESS-vNextE2E-Variables"
       - group: "ESS-Deployment-Variables-vNextE2E"
