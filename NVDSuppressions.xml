@@ -173,25 +173,55 @@
     <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks@.*$</packageUrl>
     <cve>CVE-2020-22475</cve>
     <cve>CVE-2022-39349</cve>
+    <cve>CVE-2019-20138</cve>
+    <cve>CVE-2023-36415</cve>
   </suppress>
   <suppress>
-    <notes>
-      <![CDATA[
+   <notes><![CDATA[
+   file name: Azure.Core:1.19.0
+   ]]></notes>
+   <cve>CVE-2023-36052</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
    file name: Microsoft.IdentityModel.Abstractions.dll
-   Fixed in SDK >= 6.0.418
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/Microsoft\.IdentityModel\.Abstractions@.*$</packageUrl>
-    <cve>CVE-2024-21319</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Microsoft.IdentityModel.Abstractions:6.22.0
-   Fixed in SDK >= 6.0.418
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:nuget/Microsoft\.IdentityModel\.Abstractions@.*$</packageUrl>
-    <cve>CVE-2024-21319</cve>
-  </suppress>
+   ]]></notes>
+   <cve>CVE-2024-21319</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: System.Runtime.CompilerServices.Unsafe.dll
+   ]]></notes>
+   <cve>CVE-2014-9152</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: System.Security.Cryptography.X509Certificates:4.3.0
+   ]]></notes>
+   <vulnerabilityName>CVE-2024-0057</vulnerabilityName>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: System.Threading.Tasks.Dataflow:4.8.0
+   ]]></notes>
+   <cve>CVE-2022-39349</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: Newtonsoft.Json.dll
+   ]]></notes>
+   <cve>CVE-2024-21907</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: Microsoft.IdentityModel.Abstractions.dll
+   ]]></notes>
+   <cve>CVE-2024-21319</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: Newtonsoft.Json.Bson.dll
+   ]]></notes>
+   <cve>CVE-2024-21907</cve>
+</suppress>
 </suppressions>

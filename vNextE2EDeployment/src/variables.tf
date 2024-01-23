@@ -2,6 +2,7 @@ variable "location" {
   type    = string
   default = "uksouth"
 }
+
 variable "resource_group_name" {
   type    = string
   default = "pos"
@@ -18,9 +19,9 @@ locals {
     SERVICE                   = "Periodic Output Service"
     ENVIRONMENT               = local.env_name
     SERVICE_OWNER             = "UKHO"
-    RESPONSIBLE_TEAM          = "Mastek"
+    RESPONSIBLE_TEAM          = "ABZU"
     CALLOUT_TEAM              = "On-Call_N/A"
-    COST_CENTRE               = "A.008.02"
+    COST_CENTRE               = "A.011.08"
   }
 }
 
@@ -33,10 +34,6 @@ variable "spoke_vnet_name" {
 }
 
 variable "spoke_subnet_name" {
-  type = string
-}
-
-variable "mock_spoke_subnet_name" {
   type = string
 }
 
@@ -64,4 +61,8 @@ variable "elastic_apm_server_url" {
 }
 
 variable "elastic_apm_api_key" {
+}
+
+variable "mock_spoke_subnet_name" {
+  type = string
 }
