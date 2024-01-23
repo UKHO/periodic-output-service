@@ -863,7 +863,7 @@ stages:
 
   - stage: vNextIATDeploy
     dependsOn: 
-      - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+      - Devdeploy
     displayName: vNext IAT Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     variables:
