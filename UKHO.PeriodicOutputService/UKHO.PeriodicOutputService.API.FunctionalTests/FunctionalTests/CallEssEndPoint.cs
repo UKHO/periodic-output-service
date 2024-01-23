@@ -4,6 +4,7 @@ using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
+//testing PUSH access
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
     public class CallEssEndPoint
