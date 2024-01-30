@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.AdmiraltyInformationOv
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests", "UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests\UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.csproj", "{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.ConfigurationService", "UKHO.BESS.ConfigurationService\UKHO.BESS.ConfigurationService.csproj", "{E06531A8-1851-43F3-A0A4-3606AEAB7984}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +51,10 @@ Global
 		{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E06531A8-1851-43F3-A0A4-3606AEAB7984}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E06531A8-1851-43F3-A0A4-3606AEAB7984}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E06531A8-1851-43F3-A0A4-3606AEAB7984}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E06531A8-1851-43F3-A0A4-3606AEAB7984}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -59,6 +65,7 @@ Global
 		{2BD7B957-DCFF-4F22-B179-331E12A133BD} = {0316516B-C6E9-47BF-9305-3E566EB1EC55}
 		{4944E3A9-1AB1-46ED-90CA-FECBF55A344B} = {1592E1AE-C3E7-46D6-B0A6-15785835EBD2}
 		{2BCA809E-C52D-4A05-9CC5-9F785DFA0F44} = {0316516B-C6E9-47BF-9305-3E566EB1EC55}
+		{E06531A8-1851-43F3-A0A4-3606AEAB7984} = {1592E1AE-C3E7-46D6-B0A6-15785835EBD2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3412128A-AFD7-431C-AA35-E39C4668DC9F}
