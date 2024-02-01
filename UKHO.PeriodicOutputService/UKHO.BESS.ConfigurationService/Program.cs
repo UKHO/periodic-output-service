@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using Serilog;
+using Serilog.Events;
 
 namespace UKHO.BESS.ConfigurationService
 {
@@ -68,6 +70,18 @@ namespace UKHO.BESS.ConfigurationService
         {
             serviceCollection.AddLogging(loggingBuilder =>
             {
+                loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
+#if DEBUG
+                loggingBuilder.AddSerilog(new LoggerConfiguration()
+                    .WriteTo.File("Logs/UKHO.BESS.ConfigurationService-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
+                    .MinimumLevel.Information()
+                    .MinimumLevel.Override("UKHO", LogEventLevel.Debug)
+                    .CreateLogger(), dispose: true);
+#endif
+                loggingBuilder.AddConsole();
+                loggingBuilder.AddDebug();
+                loggingBuilder.AddSerilog();
+
                 string instrumentationKey = configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
                 if (!string.IsNullOrEmpty(instrumentationKey))
                 {
