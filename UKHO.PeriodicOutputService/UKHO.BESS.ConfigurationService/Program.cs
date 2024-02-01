@@ -1,12 +1,15 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Microsoft.Extensions.Logging;
+using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
-using Azure.Security.KeyVault.Secrets;
 using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Microsoft.ApplicationInsights.Channel;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.ApplicationInsights.Channel;
+using Microsoft.Extensions.Logging;
+using UKHO.Logging.EventHubLogProvider;
+using UKHO.PeriodicOutputService.Common.Configuration;
 
 namespace UKHO.BESS.ConfigurationService
 {
@@ -14,6 +17,7 @@ namespace UKHO.BESS.ConfigurationService
     public static class Program
     {
         private static readonly InMemoryChannel s_aIChannel = new();
+        private static readonly string s_assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         static void Main()
         {
             try
@@ -68,6 +72,29 @@ namespace UKHO.BESS.ConfigurationService
                 if (!string.IsNullOrEmpty(instrumentationKey))
                 {
                     loggingBuilder.AddApplicationInsights(instrumentationKey);
+                }
+
+                EventHubLoggingConfiguration eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+
+                if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
+                {
+                    loggingBuilder.AddEventHub(config =>
+                    {
+                        config.Environment = eventHubConfig.Environment;
+                        config.DefaultMinimumLogLevel =
+                            (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.MinimumLoggingLevel, true);
+                        config.MinimumLogLevels["UKHO"] =
+                            (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.UkhoMinimumLoggingLevel, true);
+                        config.EventHubConnectionString = eventHubConfig.ConnectionString;
+                        config.EventHubEntityPath = eventHubConfig.EntityPath;
+                        config.System = eventHubConfig.System;
+                        config.Service = eventHubConfig.Service;
+                        config.NodeName = eventHubConfig.NodeName;
+                        config.AdditionalValuesProvider = additionalValues =>
+                        {
+                            additionalValues["_AssemblyVersion"] = s_assemblyVersion;
+                        };
+                    });
                 }
             });
 
