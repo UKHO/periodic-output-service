@@ -401,7 +401,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         V01X01FileFoundInAIOBatch = 809098,
         /// <summary>
-        /// 809098 - BESS Configuration Service Started
+        /// 809099 - BESS Configuration Service Started
         /// </summary>
         BESSConfigurationServiceStarted = 809099,
         /// <summary>
