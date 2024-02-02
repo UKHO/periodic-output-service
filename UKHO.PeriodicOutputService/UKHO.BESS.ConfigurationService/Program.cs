@@ -8,10 +8,10 @@ using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using UKHO.Logging.EventHubLogProvider;
-using UKHO.PeriodicOutputService.Common.Configuration;
 using Serilog;
 using Serilog.Events;
+using UKHO.Logging.EventHubLogProvider;
+using UKHO.PeriodicOutputService.Common.Configuration;
 
 namespace UKHO.BESS.ConfigurationService
 {
@@ -20,11 +20,15 @@ namespace UKHO.BESS.ConfigurationService
     {
         private static readonly InMemoryChannel s_aIChannel = new();
         private static readonly string s_assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
-        static void Main()
+
+        public static async Task Main()
         {
+            int delayTime = 5000;
+
             try
             {
                 Console.WriteLine("Started");
+
                 //Build configuration
                 IConfigurationRoot configuration = BuildConfiguration();
 
@@ -32,7 +36,21 @@ namespace UKHO.BESS.ConfigurationService
 
                 //Configure required services
                 ConfigureServices(serviceCollection, configuration);
+
+                ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
+                try
+                {
+                    var configurationServiceJob = serviceProvider.GetService<BESSConfigurationServiceJob>();
+                    configurationServiceJob.TestMethod();
+                }
+                finally
+                {
+                    //Ensure all buffered app insights logs are flushed into Azure
+                    s_aIChannel.Flush();
+                    await Task.Delay(delayTime);
+                }
             }
+
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
@@ -51,7 +69,6 @@ namespace UKHO.BESS.ConfigurationService
                 configBuilder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
             }
 
-            //IConfigurationRoot tempConfig = configBuilder.Build();
             string kvServiceUri = configBuilder.Build()["KeyVaultSettings:ServiceUri"];
             if (!string.IsNullOrWhiteSpace(kvServiceUri))
             {
@@ -59,6 +76,10 @@ namespace UKHO.BESS.ConfigurationService
                                                         new DefaultAzureCredentialOptions()));
                 configBuilder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
             }
+
+#if DEBUG   //Add development overrides configuration
+            configBuilder.AddJsonFile("appsettings.local.overrides.json", true, true);
+#endif
 
             //Add environment variables
             configBuilder.AddEnvironmentVariables();
@@ -68,6 +89,8 @@ namespace UKHO.BESS.ConfigurationService
 
         private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
         {
+            serviceCollection.AddApplicationInsightsTelemetryWorkerService();
+
             serviceCollection.AddLogging(loggingBuilder =>
             {
                 loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
@@ -81,12 +104,6 @@ namespace UKHO.BESS.ConfigurationService
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
                 loggingBuilder.AddSerilog();
-
-                string instrumentationKey = configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
-                if (!string.IsNullOrEmpty(instrumentationKey))
-                {
-                    loggingBuilder.AddApplicationInsights(instrumentationKey);
-                }
 
                 EventHubLoggingConfiguration eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
 
@@ -110,6 +127,8 @@ namespace UKHO.BESS.ConfigurationService
                         };
                     });
                 }
+                loggingBuilder.AddConsole();
+                loggingBuilder.AddDebug();
             });
 
             serviceCollection.Configure<TelemetryConfiguration>(
@@ -118,6 +137,13 @@ namespace UKHO.BESS.ConfigurationService
                     config.TelemetryChannel = s_aIChannel;
                 }
             );
+
+            if (configuration != null)
+            {
+                serviceCollection.AddSingleton<IConfiguration>(configuration);
+            }
+
+            serviceCollection.AddTransient<BESSConfigurationServiceJob>();
         }
     }
 }

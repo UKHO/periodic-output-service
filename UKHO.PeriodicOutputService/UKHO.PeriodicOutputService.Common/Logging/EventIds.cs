@@ -399,7 +399,15 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809098 -  It reflects the configuration of the AIO cell is not synchronized with the ESS. V01X01 file found in AIO batch
         /// </summary>
-        V01X01FileFoundInAIOBatch = 809098
+        V01X01FileFoundInAIOBatch = 809098,
+        /// <summary>
+        /// 809098 - BESS Configuration Service Started
+        /// </summary>
+        BESSConfigurationServiceStarted = 809099,
+        /// <summary>
+        /// 809100 - BESS Configuration Service Completed
+        /// </summary>
+        BESSConfigurationServiceCompleted = 809100
     }
 
     public static class EventIdExtensions
