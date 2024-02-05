@@ -143,7 +143,7 @@ namespace UKHO.BESS.ConfigurationService
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
             }
 
-            serviceCollection.AddTransient<BESSConfigurationServiceJob>();
+            serviceCollection.AddSingleton<BESSConfigurationServiceJob>();
         }
     }
 }
