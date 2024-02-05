@@ -27,8 +27,6 @@ namespace UKHO.BESS.ConfigurationService
 
             try
             {
-                Console.WriteLine("Started");
-
                 //Build configuration
                 IConfigurationRoot configuration = BuildConfiguration();
 
@@ -40,8 +38,8 @@ namespace UKHO.BESS.ConfigurationService
                 ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
                 try
                 {
-                    var configurationServiceJob = serviceProvider.GetService<BESSConfigurationServiceJob>();
-                    configurationServiceJob.TestMethod();
+                    var bessConfigurationServiceJob = serviceProvider.GetService<BESSConfigurationServiceJob>();
+                    bessConfigurationServiceJob.CreateBespokeExchangeSet();
                 }
                 finally
                 {
@@ -103,7 +101,6 @@ namespace UKHO.BESS.ConfigurationService
 #endif
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
-                loggingBuilder.AddSerilog();
 
                 EventHubLoggingConfiguration eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
 
@@ -127,8 +124,6 @@ namespace UKHO.BESS.ConfigurationService
                         };
                     });
                 }
-                loggingBuilder.AddConsole();
-                loggingBuilder.AddDebug();
             });
 
             serviceCollection.Configure<TelemetryConfiguration>(

@@ -12,7 +12,7 @@ namespace UKHO.BESS.ConfigurationService
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public void TestMethod()
+        public void CreateBespokeExchangeSet()
         {
             logger.LogInformation(EventIds.BESSConfigurationServiceStarted.ToEventId(),
                 "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
