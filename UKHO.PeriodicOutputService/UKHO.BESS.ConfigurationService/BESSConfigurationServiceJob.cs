@@ -12,12 +12,15 @@ namespace UKHO.BESS.ConfigurationService
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public void CreateBespokeExchangeSet()
+        public async Task CreateBespokeExchangeSetAsync()
         {
             logger.LogInformation(EventIds.BESSConfigurationServiceStarted.ToEventId(),
                 "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+
+            await Task.CompletedTask; // temporary code
+
             logger.LogInformation(EventIds.BESSConfigurationServiceCompleted.ToEventId(),
-                "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);           
         }
     }
 }
