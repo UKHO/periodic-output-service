@@ -10,8 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using UKHO.BESS.ConfigurationService.Services;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Helpers;
 
 namespace UKHO.BESS.ConfigurationService
 {
@@ -136,9 +138,12 @@ namespace UKHO.BESS.ConfigurationService
             if (configuration != null)
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
+                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
             }
 
             serviceCollection.AddSingleton<BESSConfigurationServiceJob>();
+            serviceCollection.AddScoped<IConfigurationFileReaderService, ConfigurationFileReaderService>();
+            serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
         }
     }
 }

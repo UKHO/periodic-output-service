@@ -407,7 +407,27 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809100 - BESS Configuration Service Completed
         /// </summary>
-        BESSConfigurationServiceCompleted = 809100
+        BESSConfigurationServiceCompleted = 809100,
+        /// <summary>
+        /// 809101 - BESS Configuration Service Failed
+        /// </summary>
+        BESSConfigurationServiceFailed = 809101,
+        /// <summary>
+        /// 809102 - BESS Json File Processing Started 
+        /// </summary>
+        BESSJsonFileProcessingStarted = 809102,
+        /// <summary>
+        /// 809103 - BESS Json File Processing Started 
+        /// </summary>
+        BESSJsonFileProcessingCompleted = 809103,
+        /// <summary>
+        /// 809104 - BESS Json File Processing Failed 
+        /// </summary>
+        BESSJsonFileProcessingFailed = 809104,
+        /// <summary>
+        /// 809105 - BESS Storage Container is not exists
+        /// </summary>
+        BESSContainerNotExist = 809105
     }
 
     public static class EventIdExtensions
