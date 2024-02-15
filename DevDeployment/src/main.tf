@@ -105,6 +105,7 @@ module "storage" {
   agent_subnet        = data.azurerm_subnet.agent_subnet.id
   env_name            = local.env_name
   service_name        = local.service_name
+  service_name_bess   = local.service_name_bess
   tags                = local.tags
 }
 

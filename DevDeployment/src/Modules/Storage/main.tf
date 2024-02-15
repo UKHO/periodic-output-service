@@ -14,3 +14,14 @@ resource "azurerm_storage_account" "pos_storage" {
     virtual_network_subnet_ids     = [var.m_spoke_subnet,var.agent_subnet]
 }
 }
+
+resource "azurerm_storage_account" "bess_configuration_storage" {
+  name                              = lower("${var.service_name_bess}${var.env_name}configurationstorageukho")
+  resource_group_name               = var.resource_group_name
+  location                          = var.location
+  account_tier                      = "Standard"
+  account_replication_type          = "LRS"
+  account_kind                      = "StorageV2"
+  
+  tags                              = var.tags
+}
