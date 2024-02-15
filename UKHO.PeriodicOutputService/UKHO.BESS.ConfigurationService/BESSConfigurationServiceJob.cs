@@ -8,12 +8,12 @@ namespace UKHO.BESS.ConfigurationService
     public class BESSConfigurationServiceJob
     {
         private readonly ILogger<BESSConfigurationServiceJob> logger;
-        private readonly IConfigurationFileReaderService configurationFileReaderService;
+        private readonly IConfigurationService configurationService;
 
-        public BESSConfigurationServiceJob(ILogger<BESSConfigurationServiceJob> logger, IConfigurationFileReaderService configurationFileReaderService)
+        public BESSConfigurationServiceJob(ILogger<BESSConfigurationServiceJob> logger, IConfigurationService configurationService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.configurationFileReaderService = configurationFileReaderService;
+            this.configurationService = configurationService;
         }
 
         public async Task CreateBespokeExchangeSetAsync()
@@ -22,7 +22,7 @@ namespace UKHO.BESS.ConfigurationService
             {
                 logger.LogInformation(EventIds.BESSConfigurationServiceStarted.ToEventId(), "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                await configurationFileReaderService.ReadConfigurationJsonFiles();
+                await configurationService.ReadConfigurationJsonFiles();
 
                 logger.LogInformation(EventIds.BESSConfigurationServiceCompleted.ToEventId(), "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }

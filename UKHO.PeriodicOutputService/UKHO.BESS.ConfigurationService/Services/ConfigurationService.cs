@@ -1,18 +1,18 @@
 ﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using UKHO.BESS.ConfigurationService.Models;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.BESS;
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
-    public class ConfigurationFileReaderService : IConfigurationFileReaderService
+    public class ConfigurationService : IConfigurationService
     {
         private readonly List<ConfigurationSetting> configSettings = new();
         private readonly IAzureBlobStorageClient azureBlobStorageClient;
-        private readonly ILogger<ConfigurationFileReaderService> logger;
+        private readonly ILogger<ConfigurationService> logger;
 
-        public ConfigurationFileReaderService(IAzureBlobStorageClient azureBlobStorageClient, ILogger<ConfigurationFileReaderService> logger)
+        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, ILogger<ConfigurationService> logger)
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));

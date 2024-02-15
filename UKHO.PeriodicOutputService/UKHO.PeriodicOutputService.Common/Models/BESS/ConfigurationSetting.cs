@@ -1,4 +1,4 @@
-﻿namespace UKHO.BESS.ConfigurationService.Models
+﻿namespace UKHO.PeriodicOutputService.Common.Models.BESS
 {
     public class ConfigurationSetting
     {

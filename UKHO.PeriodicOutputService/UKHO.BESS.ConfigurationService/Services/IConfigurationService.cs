@@ -1,8 +1,8 @@
-﻿using UKHO.BESS.ConfigurationService.Models;
+﻿using UKHO.PeriodicOutputService.Common.Models.BESS;
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
-    public interface IConfigurationFileReaderService
+    public interface IConfigurationService
     {
         Task<List<ConfigurationSetting>> ReadConfigurationJsonFiles();
     }
