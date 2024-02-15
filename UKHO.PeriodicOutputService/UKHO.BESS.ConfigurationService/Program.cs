@@ -138,7 +138,7 @@ namespace UKHO.BESS.ConfigurationService
             if (configuration != null)
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
-                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
+                serviceCollection.Configure<BESSStorageConfiguration>(configuration.GetSection("BESSStorageConfiguration"));
             }
 
             serviceCollection.AddSingleton<BESSConfigurationServiceJob>();
