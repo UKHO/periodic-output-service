@@ -106,6 +106,7 @@ module "storage" {
   env_name            = local.env_name
   service_name        = local.service_name
   service_name_bess   = local.service_name_bess
+  container_name      = local.container_name
   tags                = local.tags
 }
 
