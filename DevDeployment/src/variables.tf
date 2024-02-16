@@ -14,6 +14,7 @@ locals {
   web_app_name       = "${local.service_name}-${local.env_name}-lxs-webapp"
   mock_web_app_name  = "${local.service_name}-${local.env_name}-mock-webapp"
   key_vault_name     = "${local.service_name}-ukho-${local.env_name}-kv"
+  container_name     = "bess-1-configuration"
 
   tags = {
     SERVICE                   = "Periodic Output Service"

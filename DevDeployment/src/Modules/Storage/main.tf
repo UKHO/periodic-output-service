@@ -25,3 +25,9 @@ resource "azurerm_storage_account" "bess_storage" {
   
   tags                              = var.tags
 }
+
+resource "azurerm_storage_container" "bess_config_container" {
+  name                  = var.container_name
+  storage_account_name  = azurerm_storage_account.bess_storage.name
+  container_access_type = "private"
+}

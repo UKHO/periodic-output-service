@@ -22,6 +22,10 @@ variable "service_name_bess" {
   type = string
 }
 
+variable "container_name" {
+  type = string
+}
+
 variable "m_spoke_subnet" {
   type = string
 }
