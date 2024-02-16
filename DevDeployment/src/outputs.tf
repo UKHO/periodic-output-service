@@ -39,8 +39,8 @@ output "pos_storage_connection_string"{
   sensitive = true
 }
 
-output "bess_configuration_storage_connection_string"{
-  value = module.storage.bess_configuration_storage_connection_string
+output "bess_storage_connection_string"{
+  value = module.storage.bess_storage_connection_string
   sensitive = true
 }
 

@@ -7,7 +7,7 @@ output pos_storage_connection_string {
   sensitive = true
 }
 
-output bess_configuration_storage_connection_string {
-  value = azurerm_storage_account.bess_configuration_storage.primary_connection_string
+output bess_storage_connection_string {
+  value = azurerm_storage_account.bess_storage.primary_connection_string
   sensitive = true
 }
