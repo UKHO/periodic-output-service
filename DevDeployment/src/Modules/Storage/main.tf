@@ -16,7 +16,7 @@ resource "azurerm_storage_account" "pos_storage" {
 }
 
 resource "azurerm_storage_account" "bess_configuration_storage" {
-  name                              = lower("${var.service_name_bess}${var.env_name}configurationstorageukho")
+  name                              = lower("${var.service_name_bess}${var.env_name}storageukho")
   resource_group_name               = var.resource_group_name
   location                          = var.location
   account_tier                      = "Standard"
