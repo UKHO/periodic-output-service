@@ -41,7 +41,7 @@ namespace UKHO.BESS.ConfigurationService
                 try
                 {
                     var bessConfigurationServiceJob = serviceProvider.GetService<BESSConfigurationServiceJob>();
-                    await bessConfigurationServiceJob.CreateBespokeExchangeSetAsync();
+                    bessConfigurationServiceJob.Start();
                 }
                 finally
                 {
@@ -50,7 +50,6 @@ namespace UKHO.BESS.ConfigurationService
                     await Task.Delay(delayTime);
                 }
             }
-
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
@@ -138,7 +137,7 @@ namespace UKHO.BESS.ConfigurationService
             if (configuration != null)
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
-                serviceCollection.Configure<BESSStorageConfiguration>(configuration.GetSection("BESSStorageConfiguration"));
+                serviceCollection.Configure<BessStorageConfiguration>(configuration.GetSection("BESSStorageConfiguration"));
             }
 
             serviceCollection.AddSingleton<BESSConfigurationServiceJob>();

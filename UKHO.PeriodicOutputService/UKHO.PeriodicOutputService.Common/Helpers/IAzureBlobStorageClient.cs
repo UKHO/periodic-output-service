@@ -2,6 +2,6 @@
 {
     public interface IAzureBlobStorageClient
     {
-        Task<List<string>> GetJsonStringListFromBlobStorageContainer();
+        List<string> GetConfigsInContainer();
     }
 }

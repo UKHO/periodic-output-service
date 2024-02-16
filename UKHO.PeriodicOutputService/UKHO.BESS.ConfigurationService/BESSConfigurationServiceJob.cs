@@ -16,13 +16,14 @@ namespace UKHO.BESS.ConfigurationService
             this.configurationService = configurationService;
         }
 
-        public async Task CreateBespokeExchangeSetAsync()
+        public void Start()
         {
             try
             {
                 logger.LogInformation(EventIds.BESSConfigurationServiceStarted.ToEventId(), "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                await configurationService.ReadConfigurationJsonFiles();
+                //await configurationService.ReadConfigurationJsonFiles();
+                configurationService.ProcessConfigs();
 
                 logger.LogInformation(EventIds.BESSConfigurationServiceCompleted.ToEventId(), "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
