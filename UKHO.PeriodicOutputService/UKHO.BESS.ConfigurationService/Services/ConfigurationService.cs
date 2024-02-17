@@ -39,7 +39,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 var bessFrequencyHistories = azureTableStorageHelper.GetBessFrequencyHistory();
 
                 var configurationServiceFrequencyDetails = configurationSettings.Where(x => x.IsEnabled.Equals(true)
-                                                                                        && GetScheduleTime(x.Frequency).Day.Equals(DateTime.UtcNow.Day) //Todays data                                                                                        
+                                                                                        && GetScheduleTime(x.Frequency).Day.Equals(DateTime.UtcNow.Day) //Filter todays data                                                                                        
                                                                                         && !bessFrequencyHistories.Any(y => y.Name.Equals(x.Name))).ToList(); //Same day not executed yet data
 
                 if (configurationServiceFrequencyDetails.Any())
@@ -59,13 +59,12 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {
                         //Add bespoke details to msg queue
 
-                        logger.LogInformation(EventIds.BESSMsgQueueDetailsSaved.ToEventId(), "Bespoke details added in msg queue for Name : {Name} | {DateTime} | _X-Correlation-ID : {CorrelationId}", bessFrequencyHistory.Name, DateTime.UtcNow, CommonHelper.CorrelationID);
+                        logger.LogInformation(EventIds.BESSMsgQueueDetailsSaved.ToEventId(), "Bespoke details added in msg queue for Name : {Name} | Frequency : {Frequency} | {DateTime} | _X-Correlation-ID : {CorrelationId}", bessFrequencyHistory.Name, bessFrequencyHistory.Frequency, DateTime.UtcNow, CommonHelper.CorrelationID);
                     }
                 }
+                logger.LogInformation(EventIds.BESSSaveMsgQueueCompleted.ToEventId(), "Save bespoke details to msg queue completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
 
                 await Task.CompletedTask;
-
-                logger.LogInformation(EventIds.BESSSaveMsgQueueCompleted.ToEventId(), "Save bespoke details to msg queue completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
