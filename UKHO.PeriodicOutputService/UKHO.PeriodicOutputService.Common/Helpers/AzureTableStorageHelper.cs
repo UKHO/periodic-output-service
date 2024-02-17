@@ -2,6 +2,7 @@
 using Azure.Data.Tables;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Models.BESS;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 
@@ -12,6 +13,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         private const string WEBJOB_HISTORY_TABLE_NAME = "poswebjobhistory";
         private const string AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME = "aioproductversiondetails";
+        private const string BESS_FREQUENCY_HISTORY_TABLE_NAME = "bessfrequencyhistory";
 
         private readonly IOptions<AzureStorageConfiguration> _azureStorageConfig;
 
@@ -74,6 +76,34 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             TableClient? tableClient = serviceClient.GetTableClient(tableName);
             tableClient.CreateIfNotExists();
             return tableClient;
+        }
+
+        public List<BessFrequencyHistory> GetBessFrequencyHistory()
+        {
+            TableClient bessFrequencyHistoryEntityClient = GetTableClient(BESS_FREQUENCY_HISTORY_TABLE_NAME);
+            List<BessFrequencyHistory> bessFrequencyEntities = bessFrequencyHistoryEntityClient.Query<BessFrequencyHistory>().Where(x => x.Timestamp!.Value.Date.Equals(DateTime.UtcNow.Date)).ToList();
+
+            return bessFrequencyEntities;
+        }
+
+        public void SaveBessFrequencyDetails(List<ConfigurationSetting> configurationSettings)
+        {
+            TableClient bessFrequencyHistoryEntityClient = GetTableClient(BESS_FREQUENCY_HISTORY_TABLE_NAME);
+
+            foreach (var item in configurationSettings)
+            {
+                BessFrequencyHistory bessFrequencyEntities = new();
+                long invertedTimeKey = DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks;
+
+                bessFrequencyEntities = new()
+                {
+                    PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
+                    RowKey = invertedTimeKey.ToString(),
+                    Name = item.Name,
+                    Frequency = item.Frequency,
+                };
+                bessFrequencyHistoryEntityClient.UpsertEntity(bessFrequencyEntities);
+            }
         }
     }
 }
