@@ -4,7 +4,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 {
     public interface IConfigurationService
     {
-        Task<List<ConfigurationSetting>> ReadConfigurationJsonFiles();
-        Task SaveBespokeDetailsToQueue(List<ConfigurationSetting> configurationSettings);
+        List<ConfigurationSetting> ProcessConfigs();
+        bool SaveBespokeDetailsToQueue(List<ConfigurationSetting> configurationSettings);
     }
 }

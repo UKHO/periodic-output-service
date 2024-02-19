@@ -16,9 +16,8 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.azureTableStorageHelper = azureTableStorageHelper;
             this.logger = logger;
         }
-        public async Task<List<ConfigurationSetting>> ReadConfigurationJsonFiles()
+        public List<ConfigurationSetting> ProcessConfigs()
         {
-            await Task.CompletedTask;
             ////string content = File.ReadAllText(@"C:\home\site\wwwroot\App_Data\jobs\continuous\UKHO.BESS.ConfigurationService\TempConfigurationSetting.json");
             string content = File.ReadAllText(@"D:\Repos\Periodic-Output-Service\UKHO.PeriodicOutputService\UKHO.BESS.ConfigurationService\TempConfigurationSetting.json");
             return JsonConvert.DeserializeObject<List<ConfigurationSetting>>(content)!;
@@ -29,7 +28,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// </summary>
         /// <param name="configurationSettings"></param>
         /// <returns></returns>
-        public async Task SaveBespokeDetailsToQueue(List<ConfigurationSetting> configurationSettings)
+        public bool SaveBespokeDetailsToQueue(List<ConfigurationSetting> configurationSettings)
         {
             try
             {
@@ -64,12 +63,12 @@ namespace UKHO.BESS.ConfigurationService.Services
                 }
                 logger.LogInformation(EventIds.BESSSaveMsgQueueCompleted.ToEventId(), "Save bespoke details to msg queue completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
 
-                await Task.CompletedTask;
+                return true;
             }
             catch (Exception ex)
             {
                 logger.LogError(EventIds.BESSSaveMsgQueueException.ToEventId(), "Save bespoke details to msg queue failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
-                throw;
+                return false;
             }
         }
 
