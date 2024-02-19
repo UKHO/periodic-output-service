@@ -401,33 +401,29 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         V01X01FileFoundInAIOBatch = 809098,
         /// <summary>
-        /// 809099 - BESS Configuration Service Started
+        /// 809099 - Bess Configuration Service Started
         /// </summary>
-        BESSConfigurationServiceStarted = 809099,
+        BessConfigurationServiceStarted = 809099,
         /// <summary>
-        /// 809100 - BESS Configuration Service Completed
+        /// 809100 - Bess Configuration Service Completed
         /// </summary>
-        BESSConfigurationServiceCompleted = 809100,
+        BessConfigurationServiceCompleted = 809100,
         /// <summary>
-        /// 809101 - BESS Configuration Service Failed
+        /// 809101 - Bess Json File Processing Started 
         /// </summary>
-        BESSConfigurationServiceFailed = 809101,
+        BessJsonFileProcessingStarted = 809101,
         /// <summary>
-        /// 809102 - BESS Json File Processing Started 
+        /// 809102 - Bess Json File Processing Started 
         /// </summary>
-        BESSJsonFileProcessingStarted = 809102,
+        BessJsonFileProcessingCompleted = 809102,
         /// <summary>
-        /// 809103 - BESS Json File Processing Started 
+        /// 809103 - Bess Json File Processing Failed 
         /// </summary>
-        BESSJsonFileProcessingCompleted = 809103,
+        BessJsonFileProcessingFailed = 809103,
         /// <summary>
-        /// 809104 - BESS Json File Processing Failed 
+        /// 809104 - Bess json is not valid
         /// </summary>
-        BESSJsonFileProcessingFailed = 809104,
-        /// <summary>
-        /// 809105 - BESS Storage Container is not exists
-        /// </summary>
-        BESSContainerNotExist = 809105
+        BessJsonIsNotValid = 809104
     }
 
     public static class EventIdExtensions

@@ -5,26 +5,26 @@ using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.BESS.ConfigurationService
 {
-    public class BESSConfigurationServiceJob
+    public class BessConfigurationServiceJob
     {
-        private readonly ILogger<BESSConfigurationServiceJob> logger;
-        private readonly IConfigurationService configurationService;
+        private readonly ILogger<BessConfigurationServiceJob> logger;
+        private readonly IBessConfigurationService bessConfigurationService;
 
-        public BESSConfigurationServiceJob(ILogger<BESSConfigurationServiceJob> logger, IConfigurationService configurationService)
+        public BessConfigurationServiceJob(ILogger<BessConfigurationServiceJob> logger, IBessConfigurationService bessConfigurationService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.configurationService = configurationService;
+            this.bessConfigurationService = bessConfigurationService;
         }
 
-        public async Task CreateBespokeExchangeSetAsync()
+        public void Start()
         {
             try
             {
-                logger.LogInformation(EventIds.BESSConfigurationServiceStarted.ToEventId(), "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                await configurationService.ReadConfigurationJsonFiles();
+                bessConfigurationService.ProcessConfigs();
 
-                logger.LogInformation(EventIds.BESSConfigurationServiceCompleted.ToEventId(), "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {

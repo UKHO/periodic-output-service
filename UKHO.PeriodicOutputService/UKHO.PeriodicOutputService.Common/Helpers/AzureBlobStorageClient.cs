@@ -9,54 +9,58 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     [ExcludeFromCodeCoverage]
     public class AzureBlobStorageClient : IAzureBlobStorageClient
     {
-        private readonly BESSStorageConfiguration bessStorageConfiguration;
+        private readonly BessStorageConfiguration bessStorageConfiguration;
 
-        public AzureBlobStorageClient(IOptions<BESSStorageConfiguration> bessStorageConfiguration)
+        public AzureBlobStorageClient(IOptions<BessStorageConfiguration> bessStorageConfiguration)
         {
             this.bessStorageConfiguration = bessStorageConfiguration.Value ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
         }
 
-        public async Task<List<string>> GetJsonStringListFromBlobStorageContainer()
+        public Dictionary<string, string> GetConfigsInContainer()
         {
-            List<string> jsonStringList = new();
-            string azureStorageConnectionString = bessStorageConfiguration.ConnectionString;
-            string containerName = bessStorageConfiguration.StorageContainerName;
+            Dictionary<string, string> configs = new();
 
-            BlobServiceClient blobServiceClient = new(azureStorageConnectionString);
+            BlobContainerClient blobContainerClient = GetBlobContainerClient();
 
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            foreach (BlobItem blobItem in blobContainerClient.GetBlobs())
+            {
+                if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                {
+                    BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
+                    configs.Add(blobItem.Name, DownloadBlobContent(blobClient));
+                }
+            }
 
-            bool isExist = await containerClient.ExistsAsync();
+            return configs;
+        }
+
+        //Private Methods
+
+        private BlobContainerClient GetBlobContainerClient()
+        {
+            BlobContainerClient blobContainerClient = new(bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName);
+
+            bool isExist = blobContainerClient.Exists();
 
             if (!isExist)
             {
                 throw new Exception("Container does not exists");
             }
-            else
-            {
-
-                foreach (BlobItem blobItem in containerClient.GetBlobs())
-                {
-                    if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-                    {
-                        BlobClient blobClient = containerClient.GetBlobClient(blobItem.Name);
-                        string jsonString = GetJsonFileContent(blobClient);
-                        jsonStringList.Add(jsonString);
-                    }
-                }
-            }
-
-            return jsonStringList;
+            return blobContainerClient;
         }
 
-        private static string GetJsonFileContent(BlobClient blobClient)
+        private static BlobClient GetBlobClient(BlobContainerClient blobContainerClient, string blobName)
+        {
+            BlobClient blobClient = blobContainerClient.GetBlobClient(blobName);
+            return blobClient;
+        }
+
+        private static string DownloadBlobContent(BlobClient blobClient)
         {
             BlobDownloadInfo response = blobClient.DownloadAsync().Result;
 
             using var reader = new StreamReader(response.Content);
-            string jsonContent = reader.ReadToEnd();
-
-            return jsonContent;
+            return reader.ReadToEnd();
         }
     }
 }

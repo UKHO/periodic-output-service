@@ -40,8 +40,8 @@ namespace UKHO.BESS.ConfigurationService
                 ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
                 try
                 {
-                    var bessConfigurationServiceJob = serviceProvider.GetService<BESSConfigurationServiceJob>();
-                    await bessConfigurationServiceJob.CreateBespokeExchangeSetAsync();
+                    var bessConfigurationServiceJob = serviceProvider.GetService<BessConfigurationServiceJob>();
+                    bessConfigurationServiceJob.Start();
                 }
                 finally
                 {
@@ -50,7 +50,6 @@ namespace UKHO.BESS.ConfigurationService
                     await Task.Delay(delayTime);
                 }
             }
-
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
@@ -138,11 +137,11 @@ namespace UKHO.BESS.ConfigurationService
             if (configuration != null)
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
-                serviceCollection.Configure<BESSStorageConfiguration>(configuration.GetSection("BESSStorageConfiguration"));
+                serviceCollection.Configure<BessStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
             }
 
-            serviceCollection.AddSingleton<BESSConfigurationServiceJob>();
-            serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
+            serviceCollection.AddSingleton<BessConfigurationServiceJob>();
+            serviceCollection.AddScoped<IBessConfigurationService, BessConfigurationService>();
             serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
             serviceCollection.AddScoped<IConfigValidator, ConfigValidator>();
         }
