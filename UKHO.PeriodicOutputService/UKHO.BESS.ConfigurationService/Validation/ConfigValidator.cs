@@ -22,49 +22,51 @@ namespace UKHO.BESS.ConfigurationService
                 DependentRules(() =>
                 {
                     RuleFor(config => config.Name).NotEmpty().WithMessage("value is not provided")
- .DependentRules(() =>
- {
-     RuleFor(config => config.Name).Length(1, 50).WithMessage("Name should be of max 50 characters length")
-.Must(name => IsValidName(name)).WithMessage("should not have characters \\/:*?\"<>|");
- });
-                });
-
-            RuleFor(config => config.IsEncrypted).NotNull().WithMessage("attribute is missing or value is not provided")
-                     //.DependentRules(() =>
-                     //{
-                     //  RuleFor(config => config.IsEncrypted).NotEmpty().WithMessage("value is not provided")
                      .DependentRules(() =>
                      {
-                         RuleFor(config => config.IsEncrypted).Must(x => x == false || x == true).WithMessage(" Expected value is either true or false");
+                         RuleFor(config => config.Name).Length(1, 50).WithMessage("Name should be of max 50 characters length")
+                    .Must(name => IsValidName(name)).WithMessage("should not have characters \\/:*?\"<>|");
                      });
-            //});
+                });
+
+            //RuleFor(config => config.IsEncrypted).NotNull().WithMessage("attribute is missing or value is not provided")
+            //         .DependentRules(() =>
+            //         {
+            //             RuleFor(config => config.IsEncrypted).Must(x => x == false || x == true).WithMessage(" Expected value is either true or false");
+            //         });
+
+            RuleFor(config => config.ExchangeSetStandard).NotNull().WithMessage("attribute is missing or value is not provided")
+                     .DependentRules(() =>
+                     {
+                         RuleFor(config => config.ExchangeSetStandard).Must(exchangeSetStandard => IsValidExchangeSetStandard(exchangeSetStandard.ToUpper())).WithMessage("attribute value is invalid. Expected value is either s63 or s57");
+                     });
 
             RuleFor(config => config.IsEnabled).NotNull().WithMessage("attribute is missing or value is not provided")
                      .DependentRules(() =>
                      {
-                         RuleFor(config => config.IsEnabled).Must(x => x == false || x == true).WithMessage(" Expected value is either true or false");
+                         RuleFor(config => config.IsEnabled).Must(x => x == false || x == true).WithMessage("attribute value is invalid. Expected value is either true or false");
                      });
 
-            RuleFor(b => b.Type).NotNull().WithMessage("attribute is missing").
-                DependentRules(() =>
-                {
-                    RuleFor(config => config.Type).
-                NotEmpty().WithMessage("value is not provided")
+            RuleFor(b => b.Type).NotNull().WithMessage("attribute is missing")
+                //.DependentRules(() =>
+                //{
+                //    RuleFor(config => config.Type).
+                //NotEmpty().WithMessage("value is not provided")
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.Type).Must(type => IsValidBESType(type.ToUpper())).WithMessage("attribute value is invalid. Expected value is either BASE, CHANGE or UPDATE");
-                });
+                    //});
                 });
 
-            RuleFor(b => b.KeyFileType).NotNull().WithMessage("attribute is missing").
-               DependentRules(() =>
-               {
-                   RuleFor(config => config.KeyFileType).
-               NotEmpty().WithMessage("value is not provided")
+            RuleFor(b => b.KeyFileType).NotNull().WithMessage("attribute is missing")
+               //.DependentRules(() =>
+               //{
+               //    RuleFor(config => config.KeyFileType).
+               //NotEmpty().WithMessage("value is not provided")
                .DependentRules(() =>
                {
                    RuleFor(config => config.KeyFileType).Must(keyFileType => IsValidKeyFileType(keyFileType.ToUpper())).WithMessage("attribute value is invalid. Expected value is KEY_TEXT, KEY_XML, PERMIT_XML or NONE");
-               });
+                   //});
                });
 
             RuleFor(b => b.BatchExpiryInDays).NotNull().WithMessage("attribute is missing")
@@ -77,15 +79,26 @@ namespace UKHO.BESS.ConfigurationService
                 });
                 });
 
-            RuleFor(b => b.ReadMeSearchFilter).NotNull().WithMessage("attribute is missing");
+            RuleFor(b => b.ReadMeSearchFilter)
+                .Must(b => !string.IsNullOrWhiteSpace(b))
+                .WithMessage("attribute is missing or value not provided");
 
-            RuleFor(b => b.Tags).NotNull().NotEmpty().WithMessage("attribute is missing")
-                 .Must(at => at.All(a => !string.IsNullOrWhiteSpace(a.key) && !string.IsNullOrWhiteSpace(a.value)))
-                 .When(ru => ru.Tags != null && ru.Tags.Count() > 0)
+            RuleFor(config => config.EncCellNames)
+               .Must(encs => encs != null && encs.Count() > 0 && encs.All(enc => !string.IsNullOrWhiteSpace(enc)))
+               .WithMessage("attribute is missing or value is not provided");
+
+            RuleFor(config => config.Tags)//.NotNull().NotEmpty().WithMessage("attribute is missing")
+                .Must(tags => tags != null && tags.Count() > 0).WithMessage("attribute is missing or value not provided")
+                .DependentRules(() =>
+                {
+                    RuleFor(config => config.Tags)
+                    .Must(tags => tags.All(tag => !string.IsNullOrWhiteSpace(tag?.key) && !string.IsNullOrWhiteSpace(tag?.value)))
                  .WithMessage("key or value not provided");
+                });
 
-            RuleFor(p => p.EncCellNames)
-               .Must(pi => pi != null && pi.Count() > 0 && pi.All(u => !string.IsNullOrWhiteSpace(u)))
+
+            RuleFor(config => config.EncCellNames)
+               .Must(encs => encs != null && encs.Count() > 0 && encs.All(enc => !string.IsNullOrWhiteSpace(enc)))
                .WithMessage("attribute is missing or value is not provided");
 
             //RuleFor(config => config.AllowedUsers.Length <1 && config.AllowedUserGroups.Length<1)
@@ -96,17 +109,6 @@ namespace UKHO.BESS.ConfigurationService
 
             RuleFor(c => c.AllowedUsers).Must((c, s) => IsAclProvided(c)).WithMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided")
             .When(c => c.AllowedUserGroups != null && c.AllowedUsers != null);
-
-
-            //RuleFor(b => b.Tags)
-            //  .Must(at => at.All(a => !string.IsNullOrWhiteSpace(a.Key) && !string.IsNullOrWhiteSpace(a.Value)))
-            //.WithMessage("Either key or value is not provided.");
-
-            //RuleFor(config => config.AllowedUsers)
-            //  .Must(users => users.All(user => Guid.TryParse(user, out var userOid)))
-            //.WithMessage("Allowed user is not in valid format.");
-
-
         }
         private bool IsAclProvided(ConfigurationSetting c)
         {
@@ -140,16 +142,16 @@ namespace UKHO.BESS.ConfigurationService
                 return true;
             return false;
         }
+
+        private bool IsValidExchangeSetStandard(string exchangeSetStandard)
+        {
+            if (Enum.IsDefined(typeof(ExchangeSetStandard), exchangeSetStandard))
+                return true;
+            return false;
+        }
         Task<ValidationResult> IConfigValidator.Validate(ConfigurationSetting configurationSetting)
         {
             return ValidateAsync(configurationSetting);
         }
-
-        //private bool IsValidEnum(string value, Type enumName)
-        //{
-        //    if (Enum.IsDefined(enumName, value))
-        //        return true;
-        //    return false;
-        //}
     }
 }
