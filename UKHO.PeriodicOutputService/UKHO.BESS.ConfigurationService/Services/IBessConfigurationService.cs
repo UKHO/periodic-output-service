@@ -2,7 +2,7 @@
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
-    public interface IConfigurationService
+    public interface IBessConfigurationService
     {
         List<BessConfig> ProcessConfigs();
     }

@@ -7,12 +7,12 @@ using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
-    public class ConfigurationService : IConfigurationService
+    public class BessConfigurationService : IBessConfigurationService
     {
         private readonly IAzureBlobStorageClient azureBlobStorageClient;
-        private readonly ILogger<ConfigurationService> logger;
+        private readonly ILogger<BessConfigurationService> logger;
 
-        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, ILogger<ConfigurationService> logger)
+        public BessConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, ILogger<BessConfigurationService> logger)
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
