@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
@@ -15,26 +18,55 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public void ProcessConfigs()
+        public List<BessConfig> ProcessConfigs()
         {
             try
             {
-                logger.LogInformation(EventIds.BESSJsonFileProcessingStarted.ToEventId(), "Json file processing started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessJsonFileProcessingStarted.ToEventId(), "Json file processing started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                var configs = azureBlobStorageClient.GetConfigsInContainer();
+                IDictionary<string, string> configs = azureBlobStorageClient.GetConfigsInContainer();
 
-                //validate
-                //Deserialize
-                //schema validation
-                //attribute validation
+                List<BessConfig> bessConfigs = new();
 
-                logger.LogInformation(EventIds.BESSJsonFileProcessingCompleted.ToEventId(), "Json file processing Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                foreach (string fileName in configs.Keys.ToList())
+                {
+                    string content = configs[fileName];
+
+                    bool isValidJson = IsValidJson(content, fileName);
+
+                    if (isValidJson)
+                    {
+                        List<BessConfig> deserializedBessConfigs = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
+
+                        foreach (BessConfig json in deserializedBessConfigs)
+                        {
+                            bessConfigs.Add(json);
+                        }
+                    }
+                }
+
+                logger.LogInformation(EventIds.BessJsonFileProcessingCompleted.ToEventId(), "Json file processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+
+                return bessConfigs;
             }
             catch
             {
-                logger.LogError(EventIds.BESSJsonFileProcessingFailed.ToEventId(), "Json file Processing failed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessJsonFileProcessingFailed.ToEventId(), "Json file Processing failed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
                 throw;
             }
+        }
+
+        private bool IsValidJson(string json, string fileName)
+        {
+            var token = JToken.Parse(json);
+
+            if (!token.ToString().Contains("undefined"))
+            {
+                return true;
+            }
+
+            logger.LogWarning(EventIds.BessJsonIsNotValid.ToEventId(), "Json is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+            return false;
         }
     }
 }

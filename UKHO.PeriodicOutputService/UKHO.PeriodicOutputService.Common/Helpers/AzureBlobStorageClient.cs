@@ -16,9 +16,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             this.bessStorageConfiguration = bessStorageConfiguration.Value ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
         }
 
-        public List<string> GetConfigsInContainer()
+        public Dictionary<string, string> GetConfigsInContainer()
         {
-            List<string> configs = new();
+            Dictionary<string, string> configs = new();
 
             BlobContainerClient blobContainerClient = GetBlobContainerClient();
 
@@ -27,7 +27,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                 {
                     BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
-                    configs.Add(DownloadBlobContent(blobClient));
+                    configs.Add(blobItem.Name, DownloadBlobContent(blobClient));
                 }
             }
 

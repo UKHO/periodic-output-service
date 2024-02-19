@@ -2,6 +2,6 @@
 {
     public interface IAzureBlobStorageClient
     {
-        List<string> GetConfigsInContainer();
+        Dictionary<string, string> GetConfigsInContainer();
     }
 }

@@ -5,12 +5,12 @@ using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.BESS.ConfigurationService
 {
-    public class BESSConfigurationServiceJob
+    public class BessConfigurationServiceJob
     {
-        private readonly ILogger<BESSConfigurationServiceJob> logger;
+        private readonly ILogger<BessConfigurationServiceJob> logger;
         private readonly IConfigurationService configurationService;
 
-        public BESSConfigurationServiceJob(ILogger<BESSConfigurationServiceJob> logger, IConfigurationService configurationService)
+        public BessConfigurationServiceJob(ILogger<BessConfigurationServiceJob> logger, IConfigurationService configurationService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.configurationService = configurationService;
@@ -20,12 +20,11 @@ namespace UKHO.BESS.ConfigurationService
         {
             try
             {
-                logger.LogInformation(EventIds.BESSConfigurationServiceStarted.ToEventId(), "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                //await configurationService.ReadConfigurationJsonFiles();
                 configurationService.ProcessConfigs();
 
-                logger.LogInformation(EventIds.BESSConfigurationServiceCompleted.ToEventId(), "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
