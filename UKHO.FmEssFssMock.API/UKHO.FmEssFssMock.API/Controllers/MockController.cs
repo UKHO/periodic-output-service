@@ -1,4 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using UKHO.FmEssFssMock.API.Filters;
+using UKHO.FmEssFssMock.API.Models.Bess;
+using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
 using UKHO.FmEssFssMock.Enums;
 using SystemFile = System.IO;
@@ -49,6 +55,28 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             bool response = _mockService.CleanUp(_homeDirectoryPath);
             return response ? Ok() : BadRequest();
+        }
+
+        [HttpPost]
+        [Route("/mock/bessConfigUpload")]
+        public async Task<IActionResult> UploadConfigFileDataAsync([FromBody] List<BessConfig> configurationSetting)
+        {
+            if (configurationSetting.Any())
+            {
+                await Task.CompletedTask;
+                return Ok();
+            }
+
+            var error = new List<Error>
+            {
+                new() { Source = "requestBody", Description = "Either body is null or malformed." }
+            };
+            return BuildBadRequestErrorResponse(error);
+        }
+
+        protected IActionResult BuildBadRequestErrorResponse(List<Error> errors)
+        {
+            return new BadRequestObjectResult(errors);
         }
     }
 }
