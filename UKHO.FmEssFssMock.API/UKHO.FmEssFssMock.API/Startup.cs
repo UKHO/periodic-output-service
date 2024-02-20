@@ -28,10 +28,12 @@ namespace UKHO.FmEssFssMock.API
             services.Configure<FleetManagerB2BApiConfiguration>(Configuration.GetSection("FleetManagerB2BApiConfiguration"));
             services.Configure<ExchangeSetServiceConfiguration>(Configuration.GetSection("ExchangeSetServiceConfiguration"));
             services.Configure<FileShareServiceConfiguration>(Configuration.GetSection("FileShareServiceConfiguration"));
+            services.Configure<BessStorageConfiguration>(Configuration.GetSection("BessStorageConfiguration"));
 
             services.AddScoped<FileShareService>();
             services.AddScoped<ExchangeSetService>();
             services.AddScoped<MockService>();
+            services.AddScoped<AzureStorageService>();
 
             services.AddHealthChecks()
                 .AddCheck<FleetManagerStubHealthCheck>("FleetManagerStubHealthCheck");

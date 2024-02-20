@@ -1,8 +1,4 @@
-﻿using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using UKHO.FmEssFssMock.API.Filters;
+﻿using Microsoft.AspNetCore.Mvc;
 using UKHO.FmEssFssMock.API.Models.Bess;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
@@ -15,10 +11,12 @@ namespace UKHO.FmEssFssMock.API.Controllers
     {
         private readonly string _homeDirectoryPath;
         private readonly MockService _mockService;
+        private readonly AzureStorageService _azureStorageService;
 
-        public MockController(MockService mockService, IConfiguration configuration)
+        public MockController(MockService mockService, IConfiguration configuration, AzureStorageService azureStorageService)
         {
             _mockService = mockService;
+            _azureStorageService = azureStorageService;
 
             _homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["POSFolderName"]);
         }
@@ -59,18 +57,23 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
         [HttpPost]
         [Route("/mock/bessConfigUpload")]
-        public async Task<IActionResult> UploadConfigFileDataAsync([FromBody] List<BessConfig> configurationSetting)
+        public async Task<IActionResult> UploadConfigFileDataAsync([FromBody] List<BessConfig> bessConfigs)
         {
-            if (configurationSetting.Any())
+            if (bessConfigs.Any())
             {
-                await Task.CompletedTask;
-                return Ok();
+                string result = await _azureStorageService.UploadConfigurationToBlob(bessConfigs);
+
+                if (!string.IsNullOrEmpty(result))
+                    return Ok(result);
+
+                return BadRequest("Blob Not Created");
             }
 
             var error = new List<Error>
             {
                 new() { Source = "requestBody", Description = "Either body is null or malformed." }
             };
+
             return BuildBadRequestErrorResponse(error);
         }
 
