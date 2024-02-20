@@ -8,13 +8,13 @@ using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
-    public class BessConfigurationService : IBessConfigurationService
+    public class ConfigurationService : IConfigurationService
     {
         private readonly IAzureBlobStorageClient azureBlobStorageClient;
-        private readonly ILogger<BessConfigurationService> logger;
+        private readonly ILogger<ConfigurationService> logger;
         private readonly IConfigValidator configValidator;
 
-        public BessConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, ILogger<BessConfigurationService> logger, IConfigValidator configValidator)
+        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, ILogger<ConfigurationService> logger, IConfigValidator configValidator)
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -27,7 +27,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             {
                 logger.LogInformation(EventIds.BessJsonFileProcessingStarted.ToEventId(), "Json file processing started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                IDictionary<string, string> configs = azureBlobStorageClient.GetConfigsInContainer();
+                Dictionary<string, string> configs = azureBlobStorageClient.GetConfigsInContainer();
 
                 List<BessConfig> bessConfigs = new();
 

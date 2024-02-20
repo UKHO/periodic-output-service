@@ -141,7 +141,7 @@ namespace UKHO.BESS.ConfigurationService
             }
 
             serviceCollection.AddSingleton<BessConfigurationServiceJob>();
-            serviceCollection.AddScoped<IBessConfigurationService, BessConfigurationService>();
+            serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
             serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
             serviceCollection.AddScoped<IConfigValidator, ConfigValidator>();
         }

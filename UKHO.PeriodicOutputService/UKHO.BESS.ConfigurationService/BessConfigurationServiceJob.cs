@@ -8,12 +8,12 @@ namespace UKHO.BESS.ConfigurationService
     public class BessConfigurationServiceJob
     {
         private readonly ILogger<BessConfigurationServiceJob> logger;
-        private readonly IBessConfigurationService bessConfigurationService;
+        private readonly IConfigurationService configurationService;
 
-        public BessConfigurationServiceJob(ILogger<BessConfigurationServiceJob> logger, IBessConfigurationService bessConfigurationService)
+        public BessConfigurationServiceJob(ILogger<BessConfigurationServiceJob> logger, IConfigurationService configurationService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.bessConfigurationService = bessConfigurationService;
+            this.configurationService = configurationService;
         }
 
         public void Start()
@@ -22,7 +22,7 @@ namespace UKHO.BESS.ConfigurationService
             {
                 logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                bessConfigurationService.ProcessConfigs();
+                configurationService.ProcessConfigs();
 
                 logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
