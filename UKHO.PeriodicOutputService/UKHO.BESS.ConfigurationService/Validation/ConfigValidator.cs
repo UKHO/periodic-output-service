@@ -1,20 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentValidation;
+﻿using FluentValidation;
 using FluentValidation.Results;
 using UKHO.PeriodicOutputService.Common.Enums;
-using UKHO.PeriodicOutputService.Common.Models.BESS;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.ConfigurationService
 {
     public interface IConfigValidator
     {
-        Task<ValidationResult> Validate(ConfigurationSetting configurationSetting);
+        ValidationResult Validate(BessConfig configurationSetting);
     }
-    public class ConfigValidator : AbstractValidator<ConfigurationSetting>, IConfigValidator
+    public class ConfigValidator : AbstractValidator<BessConfig>, IConfigValidator
     {
         public ConfigValidator()
         {
@@ -110,7 +105,7 @@ namespace UKHO.BESS.ConfigurationService
             RuleFor(c => c.AllowedUsers).Must((c, s) => IsAclProvided(c)).WithMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided")
             .When(c => c.AllowedUserGroups != null && c.AllowedUsers != null);
         }
-        private bool IsAclProvided(ConfigurationSetting c)
+        private bool IsAclProvided(BessConfig c)
         {
             if (c.AllowedUsers.Count() == 0 && c.AllowedUserGroups.Count() == 0)
                 return false;
@@ -149,9 +144,9 @@ namespace UKHO.BESS.ConfigurationService
                 return true;
             return false;
         }
-        Task<ValidationResult> IConfigValidator.Validate(ConfigurationSetting configurationSetting)
+        ValidationResult IConfigValidator.Validate(BessConfig bessConfig)
         {
-            return ValidateAsync(configurationSetting);
+            return Validate(bessConfig);
         }
     }
 }

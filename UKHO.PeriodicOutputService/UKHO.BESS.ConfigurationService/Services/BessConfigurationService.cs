@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using FluentValidation.Results;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -11,11 +12,13 @@ namespace UKHO.BESS.ConfigurationService.Services
     {
         private readonly IAzureBlobStorageClient azureBlobStorageClient;
         private readonly ILogger<BessConfigurationService> logger;
+        private readonly IConfigValidator configValidator;
 
-        public BessConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, ILogger<BessConfigurationService> logger)
+        public BessConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, ILogger<BessConfigurationService> logger, IConfigValidator configValidator)
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.configValidator = configValidator;
         }
 
         public List<BessConfig> ProcessConfigs()
@@ -40,11 +43,47 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         foreach (BessConfig json in deserializedBessConfigs)
                         {
-                            bessConfigs.Add(json);
+                            json.FileName = fileName; //for logging
+                            ValidationResult results = configValidator.Validate(json);
+
+                            if (!results.IsValid)
+                            {
+                                string errors = string.Empty;
+
+                                foreach (var failure in results.Errors)
+                                {
+                                    errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
+                                }
+                                logger.LogInformation("\nBespoke ES is not created for file - " + fileName + ". \nValidation errors - " + errors);
+                            }
+                            else
+                                bessConfigs.Add(json);
                         }
                     }
                 }
 
+                RemoveDuplicateBessConfigs(bessConfigs);
+
+                //         //find duplicates with property name
+                //         var dupes = bessConfigs.GroupBy(x => new { x.Name })
+                //.Where(x => x.Skip(1).Any()).ToList();
+
+                //         //var dupes = bessConfigs.GroupBy(x => new { x.Name }).ToList();
+                //         //.Where(x => x.Skip(1).Any());
+                //         if (dupes.Any())
+                //         {
+                //             List<BessConfig> duplicateBessConfigs = new();
+                //             int dupCount = dupes.Count();
+                //             for (int i = 0; i < dupCount; i++)
+                //             {
+                //                 foreach (var duplicateConfigs in dupes[i].ToList())
+                //                 {
+                //                     duplicateBessConfigs.Add(duplicateConfigs);
+                //                     logger.LogInformation("\nBespoke ES is not created for file - " + duplicateConfigs.FileName + ". \nValidation errors - Config with duplicate Name attribute value found");
+                //                     bessConfigs.RemoveAll(x => x.FileName.Equals(duplicateConfigs.FileName, StringComparison.OrdinalIgnoreCase));
+                //                 }
+                //             }
+                //         }
                 logger.LogInformation(EventIds.BessJsonFileProcessingCompleted.ToEventId(), "Json file processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
                 return bessConfigs;
@@ -67,6 +106,28 @@ namespace UKHO.BESS.ConfigurationService.Services
 
             logger.LogWarning(EventIds.BessJsonIsNotValid.ToEventId(), "Json is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
             return false;
+        }
+
+        private void RemoveDuplicateBessConfigs(List<BessConfig> bessConfigs)
+        {
+            //find duplicates with property value Name
+            var duplicateRecords = bessConfigs.GroupBy(x => new { x.Name })
+   .Where(x => x.Skip(1).Any()).ToList();
+
+            if (duplicateRecords.Any())
+            {
+                //List<BessConfig> duplicateBessConfigs = new();
+                int dupCount = duplicateRecords.Count();
+                for (int i = 0; i < dupCount; i++)
+                {
+                    foreach (var duplicateConfigs in duplicateRecords[i].ToList())
+                    {
+                        //duplicateBessConfigs.Add(duplicateConfigs);
+                        logger.LogInformation("\nBespoke ES is not created for file - " + duplicateConfigs.FileName + ". \nValidation errors - Config with duplicate Name attribute value found");
+                        bessConfigs.RemoveAll(x => x.FileName.Equals(duplicateConfigs.FileName, StringComparison.OrdinalIgnoreCase));
+                    }
+                }
+            }
         }
     }
 }
