@@ -49,9 +49,9 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 return bessConfigs;
             }
-            catch
+            catch(Exception ex)
             {
-                logger.LogError(EventIds.BessJsonFileProcessingFailed.ToEventId(), "Json file Processing failed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessJsonFileProcessingFailed.ToEventId(), "Json file Processing failed with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 throw;
             }
         }
