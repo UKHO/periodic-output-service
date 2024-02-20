@@ -64,26 +64,6 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 RemoveDuplicateBessConfigs(bessConfigs);
 
-                //         //find duplicates with property name
-                //         var dupes = bessConfigs.GroupBy(x => new { x.Name })
-                //.Where(x => x.Skip(1).Any()).ToList();
-
-                //         //var dupes = bessConfigs.GroupBy(x => new { x.Name }).ToList();
-                //         //.Where(x => x.Skip(1).Any());
-                //         if (dupes.Any())
-                //         {
-                //             List<BessConfig> duplicateBessConfigs = new();
-                //             int dupCount = dupes.Count();
-                //             for (int i = 0; i < dupCount; i++)
-                //             {
-                //                 foreach (var duplicateConfigs in dupes[i].ToList())
-                //                 {
-                //                     duplicateBessConfigs.Add(duplicateConfigs);
-                //                     logger.LogInformation("\nBespoke ES is not created for file - " + duplicateConfigs.FileName + ". \nValidation errors - Config with duplicate Name attribute value found");
-                //                     bessConfigs.RemoveAll(x => x.FileName.Equals(duplicateConfigs.FileName, StringComparison.OrdinalIgnoreCase));
-                //                 }
-                //             }
-                //         }
                 logger.LogInformation(EventIds.BessJsonFileProcessingCompleted.ToEventId(), "Json file processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
                 return bessConfigs;
@@ -116,17 +96,13 @@ namespace UKHO.BESS.ConfigurationService.Services
 
             if (duplicateRecords.Any())
             {
-                //List<BessConfig> duplicateBessConfigs = new();
-                int dupCount = duplicateRecords.Count();
-                for (int i = 0; i < dupCount; i++)
-                {
-                    foreach (var duplicateConfigs in duplicateRecords[i].ToList())
+                for (int i = 0; i < duplicateRecords.Count(); i++)
+                    foreach (var record in duplicateRecords[i].ToList())
                     {
-                        //duplicateBessConfigs.Add(duplicateConfigs);
-                        logger.LogInformation("\nBespoke ES is not created for file - " + duplicateConfigs.FileName + ". \nValidation errors - Config with duplicate Name attribute value found");
-                        bessConfigs.RemoveAll(x => x.FileName.Equals(duplicateConfigs.FileName, StringComparison.OrdinalIgnoreCase));
+                        logger.LogInformation("\nBespoke ES is not created for file - " + record.FileName + ". \nValidation errors - Config with duplicate Name: " + record.Name + " attribute value found.");
+
+                        bessConfigs.RemoveAll(x => x.FileName.Equals(record.FileName, StringComparison.OrdinalIgnoreCase));
                     }
-                }
             }
         }
     }
