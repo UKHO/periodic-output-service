@@ -5,6 +5,6 @@ namespace UKHO.BESS.ConfigurationService.Services
     public interface IConfigurationService
     {
         List<ConfigurationSetting> ProcessConfigs();
-        bool SaveBespokeDetailsToQueue(List<ConfigurationSetting> configurationSettings);
+        bool ScheduleConfigDetails(List<ConfigurationSetting> configurationSettings);
     }
 }

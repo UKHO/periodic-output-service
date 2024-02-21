@@ -409,25 +409,21 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BESSConfigurationServiceCompleted = 809100,
         /// <summary>
-        /// 809101 - Save Bespoke details to msg queue started
+        /// 809101 - Schedule config details to msg queue started
         /// </summary>
-        BESSSaveMsgQueueStarted = 809101,
+        BessScheduleConfigStarted = 809101,
         /// <summary>
-        /// 809102 - Save Bespoke details to msg queue completed
+        /// 809102 - Schedule config details to msg queue completed
         /// </summary>
-        BESSSaveMsgQueueCompleted = 809102,
+        BessScheduleConfigCompleted = 809102,
         /// <summary>
-        /// 809103 - Added Bespoke frequency details to history table
+        /// 809103 - Running config schedule
         /// </summary>
-        BESSFrequencyDetailsAdded = 809103,
+        BessScheduleConfigRunning = 809103,
         /// <summary>
-        /// 809104 - Saved Bespoke details to msg queue
+        /// 809104 - Exception occurred while processing bespoke details to queue
         /// </summary>
-        BESSMsgQueueDetailsSaved = 809104,
-        /// <summary>
-        /// 809105 - Exception occurred for Bespoke msg queue
-        /// </summary>
-        BESSSaveMsgQueueException = 809105
+        BessScheduleConfigException = 809104
     }
 
     public static class EventIdExtensions

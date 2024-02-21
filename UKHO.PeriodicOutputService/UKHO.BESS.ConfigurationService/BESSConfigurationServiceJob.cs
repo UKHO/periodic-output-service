@@ -26,7 +26,7 @@ namespace UKHO.BESS.ConfigurationService
 
             if (configurationDeatils.Any())
             {
-                configurationService.SaveBespokeDetailsToQueue(configurationDeatils);
+                configurationService.ScheduleConfigDetails(configurationDeatils);
             }
 
             logger.LogInformation(EventIds.BESSConfigurationServiceCompleted.ToEventId(),

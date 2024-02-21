@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         DateTime GetSinceDateTime();
         void SaveProductVersionDetails(List<ProductVersion> productVersions);
         List<ProductVersionEntities> GetLatestProductVersionDetails();
-        List<BessFrequencyHistory> GetBessFrequencyHistory();
-        void SaveBessFrequencyDetails(List<ConfigurationSetting> configurationSettings);
+        void RefreshNextSchedule(DateTime nextSchedule, ConfigurationSetting configurationSetting, bool IsExecuted);
+        ScheduleDetails GetNextScheduleDetails(string name);
     }
 }

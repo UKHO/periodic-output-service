@@ -13,7 +13,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         private const string WEBJOB_HISTORY_TABLE_NAME = "poswebjobhistory";
         private const string AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME = "aioproductversiondetails";
-        private const string BESS_FREQUENCY_HISTORY_TABLE_NAME = "bessfrequencyhistory";
+        private const string BESS_SCHEDULE_DETAILS_TABLE_NAME = "bessconfigscheduledetails";
 
         private readonly IOptions<AzureStorageConfiguration> _azureStorageConfig;
 
@@ -78,32 +78,27 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return tableClient;
         }
 
-        public List<BessFrequencyHistory> GetBessFrequencyHistory()
+        public void RefreshNextSchedule(DateTime nextSchedule, ConfigurationSetting configurationSetting, bool IsExecuted)
         {
-            TableClient bessFrequencyHistoryEntityClient = GetTableClient(BESS_FREQUENCY_HISTORY_TABLE_NAME);
-            List<BessFrequencyHistory> bessFrequencyEntities = bessFrequencyHistoryEntityClient.Query<BessFrequencyHistory>().Where(x => x.Timestamp!.Value.Date.Equals(DateTime.UtcNow.Date)).ToList();
+            ScheduleDetails scheduleDetails = new()
+            {
+                PartitionKey = "BessConfigSchedule",
+                RowKey = configurationSetting.Name,
+                ScheduleTime = nextSchedule,
+                IsEnabled = configurationSetting.IsEnabled,
+                IsExecuted = IsExecuted
+            };
 
-            return bessFrequencyEntities;
+            TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
+            tableJobScheduleEntityClient.UpsertEntity(scheduleDetails);
         }
 
-        public void SaveBessFrequencyDetails(List<ConfigurationSetting> configurationSettings)
+        public ScheduleDetails GetNextScheduleDetails(string name)
         {
-            TableClient bessFrequencyHistoryEntityClient = GetTableClient(BESS_FREQUENCY_HISTORY_TABLE_NAME);
-
-            foreach (var item in configurationSettings)
-            {
-                BessFrequencyHistory bessFrequencyEntities = new();
-                long invertedTimeKey = DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks;
-
-                bessFrequencyEntities = new()
-                {
-                    PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
-                    RowKey = invertedTimeKey.ToString(),
-                    Name = item.Name,
-                    Frequency = item.Frequency,
-                };
-                bessFrequencyHistoryEntityClient.UpsertEntity(bessFrequencyEntities);
-            }
+            TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
+            ScheduleDetails scheduleDetail = tableJobScheduleEntityClient.Query<ScheduleDetails>().Where(i => i.IsEnabled.Equals(true) && i.RowKey.Equals(name)
+                                                                                                            && i.Timestamp!.Value.Date.Equals(DateTime.UtcNow.Date)).FirstOrDefault();
+            return scheduleDetail;
         }
     }
 }
