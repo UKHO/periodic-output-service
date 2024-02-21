@@ -56,15 +56,23 @@ namespace UKHO.BESS.ConfigurationService.Services
 
         private bool IsValidJson(string json, string fileName)
         {
-            var token = JToken.Parse(json);
-
-            if (!token.ToString().Contains("undefined"))
+            try
             {
-                return true;
-            }
+                var token = JToken.Parse(json);
 
-            logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
-            return false;
+                if (!token.ToString().Contains("undefined"))
+                {
+                    return true;
+                }
+
+                logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+                return false;
+            }
+            catch
+            {
+                logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+                return false;
+            }
         }
     }
 }
