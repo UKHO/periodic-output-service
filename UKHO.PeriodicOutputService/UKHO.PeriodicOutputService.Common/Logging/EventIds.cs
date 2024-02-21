@@ -423,7 +423,19 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809104 - Bess config is invalid
         /// </summary>
-        BessConfigIsInvalid = 809104
+        BessConfigIsInvalid = 809104,
+        /// <summary>
+        /// 809105 - Bess config parsing error
+        /// </summary>
+        BessConfigParsingError = 809105,
+        /// <summary>
+        /// 809106 - Bess configs not found
+        /// </summary>
+        BessConfigsNotFound = 809106,
+        /// <summary>
+        /// 809107 - Bess get blob storage details failed
+        /// </summary>
+        BessGetBlobStorageDetailsFailed = 809107
     }
 
     public static class EventIdExtensions

@@ -22,27 +22,34 @@ namespace UKHO.BESS.ConfigurationService.Services
         {
             try
             {
-                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-
                 Dictionary<string, string> configs = azureBlobStorageClient.GetConfigsInContainer();
+
+                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs count:{count}  | _X-Correlation-ID : {CorrelationId}", configs.Keys.Count, CommonHelper.CorrelationID);
 
                 List<BessConfig> bessConfigs = new();
 
-                foreach (string fileName in configs.Keys.ToList())
+                if (configs.Count > 0)
                 {
-                    string content = configs[fileName];
-
-                    bool isValidJson = IsValidJson(content, fileName);
-
-                    if (isValidJson)
+                    foreach (string fileName in configs.Keys.ToList())
                     {
-                        List<BessConfig> bessconfig = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
+                        string content = configs[fileName];
 
-                        foreach (BessConfig json in bessconfig)
+                        bool isValidJson = IsValidJson(content, fileName);
+
+                        if (isValidJson)
                         {
-                            bessConfigs.Add(json);
+                            List<BessConfig> bessconfig = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
+
+                            foreach (BessConfig json in bessconfig)
+                            {
+                                bessConfigs.Add(json);
+                            }
                         }
                     }
+                }
+                else
+                {
+                    logger.LogInformation(EventIds.BessConfigsNotFound.ToEventId(), "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
                 }
 
                 logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
@@ -68,9 +75,9 @@ namespace UKHO.BESS.ConfigurationService.Services
                 logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
                 return false;
             }
-            catch
+            catch(Exception ex)
             {
-                logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occured while parsing Bess config file:{fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 return false;
             }
         }
