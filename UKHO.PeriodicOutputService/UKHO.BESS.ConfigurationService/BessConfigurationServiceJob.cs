@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using UKHO.BESS.ConfigurationService.Services;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.BESS.ConfigurationService
 {
+    [ExcludeFromCodeCoverage]
     public class BessConfigurationServiceJob
     {
         private readonly ILogger<BessConfigurationServiceJob> logger;
