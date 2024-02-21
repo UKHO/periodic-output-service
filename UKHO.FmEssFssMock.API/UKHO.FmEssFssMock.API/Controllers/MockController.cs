@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentValidation.Results;
+using Microsoft.AspNetCore.Mvc;
 using UKHO.FmEssFssMock.API.Models.Bess;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
+using UKHO.FmEssFssMock.API.Validation;
 using UKHO.FmEssFssMock.Enums;
 using SystemFile = System.IO;
 
@@ -12,11 +14,13 @@ namespace UKHO.FmEssFssMock.API.Controllers
         private readonly string _homeDirectoryPath;
         private readonly MockService _mockService;
         private readonly AzureStorageService _azureStorageService;
+        private readonly IConfigValidator _configValidator;
 
-        public MockController(MockService mockService, IConfiguration configuration, AzureStorageService azureStorageService)
+        public MockController(MockService mockService, IConfiguration configuration, AzureStorageService azureStorageService, IConfigValidator configValidator)
         {
             _mockService = mockService;
             _azureStorageService = azureStorageService;
+            _configValidator = configValidator;
 
             _homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["POSFolderName"]);
         }
@@ -59,8 +63,32 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/mock/bessConfigUpload")]
         public async Task<IActionResult> UploadConfigFileDataAsync([FromBody] List<BessConfig> bessConfigs)
         {
+            int counter = 0;
+
             if (bessConfigs.Any())
             {
+                string errors = string.Empty;
+
+                foreach (BessConfig json in bessConfigs)
+                {
+                    ValidationResult results = _configValidator.Validate(json);
+
+                    if (!results.IsValid)
+                    {
+                        foreach (var failure in results.Errors)
+                        {
+                            errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
+                        }
+                    }
+                    else
+                        counter++;
+                }
+
+                if (bessConfigs.Count != counter)
+                {
+                    return BadRequest(errors);
+                }
+
                 string result = await _azureStorageService.UploadConfigurationToBlob(bessConfigs);
 
                 if (!string.IsNullOrEmpty(result))
