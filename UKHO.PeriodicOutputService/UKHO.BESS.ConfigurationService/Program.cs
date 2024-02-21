@@ -14,6 +14,7 @@ using UKHO.BESS.ConfigurationService.Services;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.BESS.ConfigurationService.Validation;
 
 namespace UKHO.BESS.ConfigurationService
 {

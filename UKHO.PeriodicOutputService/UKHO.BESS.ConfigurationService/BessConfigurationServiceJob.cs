@@ -28,7 +28,7 @@ namespace UKHO.BESS.ConfigurationService
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Configuration Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing Configuration Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 throw;
             }
         }

@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UKHO.PeriodicOutputService.Common.Enums
+﻿namespace UKHO.PeriodicOutputService.Common.Enums;
+public enum ExchangeSetStandard
 {
-    public enum ExchangeSetStandard
-    {
-        S57 = 1,
-        S63 = 2
-    }
+    S57 = 1,
+    S63 = 2
 }
