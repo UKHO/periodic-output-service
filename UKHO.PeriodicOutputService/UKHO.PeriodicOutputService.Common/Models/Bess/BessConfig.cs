@@ -25,4 +25,10 @@ namespace UKHO.PeriodicOutputService.Common.Models.Bess
         public string key { get; set; }
         public string value { get; set; }
     }
+
+    public class Tag
+    {
+        public string key { get; set; }
+        public string value { get; set; }
+    }
 }

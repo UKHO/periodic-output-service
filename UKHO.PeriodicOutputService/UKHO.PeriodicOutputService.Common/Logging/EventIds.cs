@@ -409,21 +409,21 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BessConfigurationServiceCompleted = 809100,
         /// <summary>
-        /// 809101 - Bess Json File Processing Started 
+        /// 809101 - Bess configs Processing Started 
         /// </summary>
-        BessJsonFileProcessingStarted = 809101,
+        BessConfigsProcessingStarted = 809101,
         /// <summary>
-        /// 809102 - Bess Json File Processing Started 
+        /// 809102 - Bess configs Processing Started 
         /// </summary>
-        BessJsonFileProcessingCompleted = 809102,
+        BessConfigsProcessingCompleted = 809102,
         /// <summary>
-        /// 809103 - Bess Json File Processing Failed 
+        /// 809103 - Bess configs Processing Failed 
         /// </summary>
-        BessJsonFileProcessingFailed = 809103,
+        BessConfigsProcessingFailed = 809103,
         /// <summary>
-        /// 809104 - Bess json is not valid
+        /// 809104 - Bess config is invalid
         /// </summary>
-        BessJsonIsNotValid = 809104
+        BessConfigIsInvalid = 809104
     }
 
     public static class EventIdExtensions

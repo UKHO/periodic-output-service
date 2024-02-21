@@ -21,11 +21,11 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.configValidator = configValidator;
         }
 
-        public List<BessConfig> ProcessConfigs()
+        public void ProcessConfigs()
         {
             try
             {
-                logger.LogInformation(EventIds.BessJsonFileProcessingStarted.ToEventId(), "Json file processing started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
                 Dictionary<string, string> configs = azureBlobStorageClient.GetConfigsInContainer();
 
@@ -39,9 +39,9 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (isValidJson)
                     {
-                        List<BessConfig> deserializedBessConfigs = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
+                        List<BessConfig> bessconfig = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
 
-                        foreach (BessConfig json in deserializedBessConfigs)
+                        foreach (BessConfig json in bessconfig)
                         {
                             json.FileName = fileName; //for logging
                             ValidationResult results = configValidator.Validate(json);
@@ -61,16 +61,12 @@ namespace UKHO.BESS.ConfigurationService.Services
                         }
                     }
                 }
-
                 RemoveDuplicateBessConfigs(bessConfigs);
-
-                logger.LogInformation(EventIds.BessJsonFileProcessingCompleted.ToEventId(), "Json file processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-
-                return bessConfigs;
+                logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
-            catch
+            catch (Exception ex)
             {
-                logger.LogError(EventIds.BessJsonFileProcessingFailed.ToEventId(), "Json file Processing failed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessConfigsProcessingFailed.ToEventId(), "Bess configs Processing failed with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 throw;
             }
         }
@@ -84,7 +80,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 return true;
             }
 
-            logger.LogWarning(EventIds.BessJsonIsNotValid.ToEventId(), "Json is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+            logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
             return false;
         }
 
