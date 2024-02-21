@@ -78,15 +78,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return tableClient;
         }
 
-        public void RefreshNextSchedule(DateTime nextSchedule, BessConfig configDetails, bool IsExecuted)
+        public void RefreshNextSchedule(DateTime nextSchedule, BessConfig configDetails)
         {
             ScheduleDetails scheduleDetails = new()
             {
                 PartitionKey = "BessConfigSchedule",
                 RowKey = configDetails.Name,
-                ScheduleTime = nextSchedule,
+                NextScheduleTime = nextSchedule,
                 IsEnabled = configDetails.IsEnabled,
-                IsExecuted = IsExecuted
             };
 
             TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
