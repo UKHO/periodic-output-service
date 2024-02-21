@@ -421,9 +421,9 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BessConfigsProcessingFailed = 809103,
         /// <summary>
-        /// 809104 - Bess json is not valid
+        /// 809104 - Bess config is invalid
         /// </summary>
-        BessConfigIsInValid = 809104
+        BessConfigIsInvalid = 809104
     }
 
     public static class EventIdExtensions

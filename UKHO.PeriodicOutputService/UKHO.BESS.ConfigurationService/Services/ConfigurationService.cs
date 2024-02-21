@@ -63,7 +63,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 return true;
             }
 
-            logger.LogWarning(EventIds.BessConfigIsInValid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+            logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
             return false;
         }
     }
