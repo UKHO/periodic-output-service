@@ -2,7 +2,7 @@
 using Azure.Data.Tables;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
-using UKHO.PeriodicOutputService.Common.Models.BESS;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 
@@ -78,14 +78,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return tableClient;
         }
 
-        public void RefreshNextSchedule(DateTime nextSchedule, ConfigurationSetting configurationSetting, bool IsExecuted)
+        public void RefreshNextSchedule(DateTime nextSchedule, BessConfig configDetails, bool IsExecuted)
         {
             ScheduleDetails scheduleDetails = new()
             {
                 PartitionKey = "BessConfigSchedule",
-                RowKey = configurationSetting.Name,
+                RowKey = configDetails.Name,
                 ScheduleTime = nextSchedule,
-                IsEnabled = configurationSetting.IsEnabled,
+                IsEnabled = configDetails.IsEnabled,
                 IsExecuted = IsExecuted
             };
 

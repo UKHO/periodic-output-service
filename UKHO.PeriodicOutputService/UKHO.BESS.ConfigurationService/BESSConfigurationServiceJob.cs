@@ -2,7 +2,7 @@
 using UKHO.BESS.ConfigurationService.Services;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.BESS;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.ConfigurationService
 {
@@ -22,11 +22,11 @@ namespace UKHO.BESS.ConfigurationService
             logger.LogInformation(EventIds.BESSConfigurationServiceStarted.ToEventId(),
                 "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-            List<ConfigurationSetting> configurationDeatils = configurationService.ProcessConfigs();
+            List<BessConfig> configDetails = configurationService.ProcessConfigs();
 
-            if (configurationDeatils.Any())
+            if (configDetails.Any())
             {
-                configurationService.ScheduleConfigDetails(configurationDeatils);
+                configurationService.ScheduleConfigDetails(configDetails);
             }
 
             logger.LogInformation(EventIds.BESSConfigurationServiceCompleted.ToEventId(),

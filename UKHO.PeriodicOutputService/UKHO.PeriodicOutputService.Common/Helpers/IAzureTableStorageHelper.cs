@@ -1,4 +1,4 @@
-﻿using UKHO.PeriodicOutputService.Common.Models.BESS;
+﻿using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 
@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         DateTime GetSinceDateTime();
         void SaveProductVersionDetails(List<ProductVersion> productVersions);
         List<ProductVersionEntities> GetLatestProductVersionDetails();
-        void RefreshNextSchedule(DateTime nextSchedule, ConfigurationSetting configurationSetting, bool IsExecuted);
+        void RefreshNextSchedule(DateTime nextSchedule, BessConfig configDetails, bool IsExecuted);
         ScheduleDetails GetNextScheduleDetails(string name);
     }
 }

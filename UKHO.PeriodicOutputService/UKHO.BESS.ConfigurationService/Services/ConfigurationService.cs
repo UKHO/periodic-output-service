@@ -3,7 +3,7 @@ using NCrontab;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.BESS;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 
 namespace UKHO.BESS.ConfigurationService.Services
@@ -18,11 +18,11 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.logger = logger;
         }
 
-        public List<ConfigurationSetting> ProcessConfigs()
+        public List<BessConfig> ProcessConfigs()
         {
             ////string content = File.ReadAllText(@"C:\home\site\wwwroot\App_Data\jobs\continuous\UKHO.BESS.ConfigurationService\TempConfigurationSetting.json");
             string content = File.ReadAllText(@"D:\Repos\Periodic-Output-Service\UKHO.PeriodicOutputService\UKHO.BESS.ConfigurationService\TempConfigurationSetting.json");
-            return JsonConvert.DeserializeObject<List<ConfigurationSetting>>(content)!;
+            return JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
         }
 
         /// <summary>
@@ -30,18 +30,18 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// </summary>
         /// <param name="configurationSettings"></param>
         /// <returns></returns>
-        public bool ScheduleConfigDetails(List<ConfigurationSetting> configurationSettings)
+        public bool ScheduleConfigDetails(List<BessConfig> configDetails)
         {
             try
             {
                 logger.LogInformation(EventIds.BessScheduleConfigStarted.ToEventId(), "Schedule config details started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                foreach (var configurationSetting in configurationSettings)
+                foreach (var configDetail in configDetails)
                 {
-                    var fullUpdateCronSchedule = CrontabSchedule.Parse(configurationSetting.Frequency);
+                    var fullUpdateCronSchedule = CrontabSchedule.Parse(configDetail.Frequency);
 
                     var nextFullUpdateOccurrence = fullUpdateCronSchedule.GetNextOccurrence(DateTime.UtcNow);
-                    ScheduleDetails scheduleDetails = GetNextScheduledDateTime(nextFullUpdateOccurrence, configurationSetting);
+                    ScheduleDetails scheduleDetails = GetNextScheduledDateTime(nextFullUpdateOccurrence, configDetail);
 
                     var intervalInMins = ((int)scheduleDetails.ScheduleTime.Subtract(DateTime.UtcNow).TotalMinutes);
                     var isSameDay = scheduleDetails.ScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
@@ -54,14 +54,14 @@ namespace UKHO.BESS.ConfigurationService.Services
                          * 
                          */
 
-                        logger.LogInformation(EventIds.BessScheduleConfigRunning.ToEventId(), "Running schedule config for Name : {Name} | Frequency : {Frequency}| _X-Correlation-ID : {CorrelationId}", configurationSetting.Name, configurationSetting.Frequency, CommonHelper.CorrelationID);
-                        azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configurationSetting, true);
+                        logger.LogInformation(EventIds.BessScheduleConfigRunning.ToEventId(), "Running schedule config for Name : {Name} | Frequency : {Frequency}| _X-Correlation-ID : {CorrelationId}", configDetail.Name, configDetail.Frequency, CommonHelper.CorrelationID);
+                        azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetail, true);
                     }
                     else
                     {
-                        if (scheduleDetails.ScheduleTime < nextFullUpdateOccurrence || scheduleDetails.IsEnabled != configurationSetting.IsEnabled)
+                        if (scheduleDetails.ScheduleTime < nextFullUpdateOccurrence || scheduleDetails.IsEnabled != configDetail.IsEnabled)
                         {
-                            azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configurationSetting, false);
+                            azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetail, false);
                         }
                     }
                 }
@@ -76,18 +76,18 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
         }
 
-        private ScheduleDetails GetNextScheduledDateTime(DateTime nextFullUpdateOccurrence, ConfigurationSetting configurationSetting)
+        private ScheduleDetails GetNextScheduledDateTime(DateTime nextFullUpdateOccurrence, BessConfig configDetails)
         {
-            ScheduleDetails scheduleDetails = azureTableStorageHelper.GetNextScheduleDetails(configurationSetting.Name);
+            ScheduleDetails scheduleDetails = azureTableStorageHelper.GetNextScheduleDetails(configDetails.Name);
 
             if (scheduleDetails == null)
             {
-                azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configurationSetting, false);
+                azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetails, false);
 
                 ScheduleDetails scheduleDetail = new();
                 {
                     scheduleDetail.ScheduleTime = nextFullUpdateOccurrence;
-                    scheduleDetail.IsEnabled = configurationSetting.IsEnabled;
+                    scheduleDetail.IsEnabled = configDetails.IsEnabled;
                 }
 
                 return scheduleDetail;

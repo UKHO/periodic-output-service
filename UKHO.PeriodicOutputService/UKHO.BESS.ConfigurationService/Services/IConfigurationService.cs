@@ -1,10 +1,10 @@
-﻿using UKHO.PeriodicOutputService.Common.Models.BESS;
+﻿using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
     public interface IConfigurationService
     {
-        List<ConfigurationSetting> ProcessConfigs();
-        bool ScheduleConfigDetails(List<ConfigurationSetting> configurationSettings);
+        List<BessConfig> ProcessConfigs();
+        bool ScheduleConfigDetails(List<BessConfig> configurationSettings);
     }
 }
