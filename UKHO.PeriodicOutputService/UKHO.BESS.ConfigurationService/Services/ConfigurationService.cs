@@ -28,7 +28,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 List<BessConfig> bessConfigs = new();
 
-                if (configs.Count > 0)
+                if (configs.Any())
                 {
                     foreach (string fileName in configs.Keys.ToList())
                     {

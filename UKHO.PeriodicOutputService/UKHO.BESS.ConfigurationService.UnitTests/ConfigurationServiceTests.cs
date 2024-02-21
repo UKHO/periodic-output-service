@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
-using FakeItEasy;
+﻿using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using NUnit.Framework;
 using UKHO.BESS.ConfigurationService.Services;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.ConfigurationService.UnitTests
 {
