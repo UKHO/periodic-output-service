@@ -9,7 +9,8 @@ param (
     [Parameter(Mandatory = $true)] [string] $fleetmanagerfilepath,
     [Parameter(Mandatory = $true)] [string] $ftrunning,
     [Parameter(Mandatory = $true)] [string] $fssapipollingcutoffime,
-    [Parameter(Mandatory = $true)] [string] $fssapipollingdelaytime
+    [Parameter(Mandatory = $true)] [string] $fssapipollingdelaytime,
+    [Parameter(Mandatory = $true)] [string] $besscontainername
 )
 
 Write-Output "Set Stub Configuration in appsetting..."
@@ -17,5 +18,5 @@ az webapp config appsettings set -g $mockresourcegroup -n $mockwebappname --sett
 az webapp restart --name $mockwebappname --resource-group $mockresourcegroup
 
 Write-Output "Set Webjob Configuration in appsetting..."
-az webapp config appsettings set -g $resourcegroup -n $webappname --settings ESSApiConfiguration:BaseUrl=$essapibaseurl FSSApiConfiguration:BaseUrl=$fssapibaseurl FleetManagerB2BApiConfiguration:BaseUrl=$fleetmanagerbaseurl IsFTRunning=$ftrunning FSSApiConfiguration:BatchStatusPollingCutoffTime=$fssapipollingcutoffime FSSApiConfiguration:BatchStatusPollingDelayTime=$fssapipollingdelaytime
+az webapp config appsettings set -g $resourcegroup -n $webappname --settings ESSApiConfiguration:BaseUrl=$essapibaseurl FSSApiConfiguration:BaseUrl=$fssapibaseurl FleetManagerB2BApiConfiguration:BaseUrl=$fleetmanagerbaseurl IsFTRunning=$ftrunning FSSApiConfiguration:BatchStatusPollingCutoffTime=$fssapipollingcutoffime FSSApiConfiguration:BatchStatusPollingDelayTime=$fssapipollingdelaytime BESSStorageConfiguration:ContainerName=$besscontainername
 az webapp restart --name $webappname --resource-group $resourcegroup
