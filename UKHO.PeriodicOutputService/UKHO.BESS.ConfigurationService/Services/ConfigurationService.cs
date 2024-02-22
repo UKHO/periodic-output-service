@@ -47,7 +47,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     var intervalInMins = ((int)scheduleDetails.NextScheduleTime.Subtract(DateTime.UtcNow).TotalMinutes);
                     var isSameDay = scheduleDetails.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
 
-                    if (intervalInMins <= 0 && isSameDay && configDetail.IsEnabled) //Check if config schedule is missed or if it's due for the same day.
+                    if (intervalInMins <= 0 && isSameDay && configDetail.IsEnabled && scheduleDetails.IsExecuted.Equals(false)) //Check if config schedule is missed or if it's due for the same day.
                     {
                         /* -- save details to msg queue --
                          * 
@@ -56,13 +56,13 @@ namespace UKHO.BESS.ConfigurationService.Services
                          */
 
                         logger.LogInformation(EventIds.BessScheduleConfigRunning.ToEventId(), "Running schedule config for Name : {Name} | Frequency : {Frequency}| _X-Correlation-ID : {CorrelationId}", configDetail.Name, configDetail.Frequency, CommonHelper.CorrelationID);
-                        azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetail);
+                        azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetail, true);
                     }
                     else
                     {       //Update schedule details
                         if (scheduleDetails.NextScheduleTime != nextFullUpdateOccurrence || scheduleDetails.IsEnabled != configDetail.IsEnabled)
                         {
-                            azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetail);
+                            azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetail, false);
                         }
                     }
                 }
@@ -83,7 +83,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
             if (scheduleDetails == null)
             {
-                azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetails);
+                azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetails, false);
 
                 ScheduleDetails scheduleDetail = new();
                 {
