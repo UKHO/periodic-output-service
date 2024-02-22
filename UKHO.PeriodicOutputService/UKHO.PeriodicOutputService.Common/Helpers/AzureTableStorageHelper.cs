@@ -95,8 +95,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         public ScheduleDetails GetNextScheduleDetails(string name)
         {
             TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
-            ScheduleDetails scheduleDetail = tableJobScheduleEntityClient.Query<ScheduleDetails>().Where(i => i.IsEnabled.Equals(true) && i.RowKey.Equals(name)
-                                                                                                            && i.Timestamp!.Value.Date.Equals(DateTime.UtcNow.Date)).FirstOrDefault();
+            ScheduleDetails scheduleDetail = tableJobScheduleEntityClient.Query<ScheduleDetails>().Where(i => i.IsEnabled.Equals(true) && i.RowKey.Equals(name)).FirstOrDefault();
             return scheduleDetail;
         }
     }
