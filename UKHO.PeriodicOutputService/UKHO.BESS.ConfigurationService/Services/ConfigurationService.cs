@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using NCrontab;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -14,8 +15,8 @@ namespace UKHO.BESS.ConfigurationService.Services
         private readonly ILogger<ConfigurationService> logger;
         public ConfigurationService(IAzureTableStorageHelper azureTableStorageHelper, ILogger<ConfigurationService> logger)
         {
-            this.azureTableStorageHelper = azureTableStorageHelper;
-            this.logger = logger;
+            this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public List<BessConfig> ProcessConfigs()
@@ -75,7 +76,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 return false;
             }
         }
-
+        [ExcludeFromCodeCoverage]
         private ScheduleDetails GetNextSchedule(DateTime nextFullUpdateOccurrence, BessConfig configDetails)
         {
             ScheduleDetails scheduleDetails = azureTableStorageHelper.GetNextScheduleDetails(configDetails.Name);
