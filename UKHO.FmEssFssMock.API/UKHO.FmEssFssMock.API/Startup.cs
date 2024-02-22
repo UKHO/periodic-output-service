@@ -1,9 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using UKHO.FmEssFssMock.API.Common;
+﻿using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Filters;
 using UKHO.FmEssFssMock.API.HealthChecks;
 using UKHO.FmEssFssMock.API.Services;
-using UKHO.FmEssFssMock.API.Validation;
 
 namespace UKHO.FmEssFssMock.API
 {
@@ -36,7 +34,6 @@ namespace UKHO.FmEssFssMock.API
             services.AddScoped<ExchangeSetService>();
             services.AddScoped<MockService>();
             services.AddScoped<AzureStorageService>();
-            services.AddScoped<IConfigValidator, ConfigValidator>();
 
             services.AddHealthChecks()
                 .AddCheck<FleetManagerStubHealthCheck>("FleetManagerStubHealthCheck");

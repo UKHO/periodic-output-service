@@ -1,9 +1,7 @@
-﻿using FluentValidation.Results;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using UKHO.FmEssFssMock.API.Models.Bess;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
-using UKHO.FmEssFssMock.API.Validation;
 using UKHO.FmEssFssMock.Enums;
 using SystemFile = System.IO;
 
@@ -14,13 +12,11 @@ namespace UKHO.FmEssFssMock.API.Controllers
         private readonly string _homeDirectoryPath;
         private readonly MockService _mockService;
         private readonly AzureStorageService _azureStorageService;
-        private readonly IConfigValidator _configValidator;
 
-        public MockController(MockService mockService, IConfiguration configuration, AzureStorageService azureStorageService, IConfigValidator configValidator)
+        public MockController(MockService mockService, IConfiguration configuration, AzureStorageService azureStorageService)
         {
             _mockService = mockService;
             _azureStorageService = azureStorageService;
-            _configValidator = configValidator;
 
             _homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["POSFolderName"]);
         }
@@ -63,46 +59,28 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/mock/bessConfigUpload")]
         public async Task<IActionResult> UploadConfigFileDataAsync([FromBody] List<BessConfig> bessConfigs)
         {
-            int counter = 0;
-
-            if (bessConfigs.Any())
+            try
             {
-                string errors = string.Empty;
-
-                foreach (BessConfig json in bessConfigs)
+                if (bessConfigs.Any())
                 {
-                    ValidationResult results = _configValidator.Validate(json);
+                    string result = await _azureStorageService.UploadConfigurationToBlob(bessConfigs);
 
-                    if (!results.IsValid)
-                    {
-                        foreach (var failure in results.Errors)
-                        {
-                            errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
-                        }
-                    }
-                    else
-                        counter++;
+                    return !string.IsNullOrEmpty(result)
+                        ? StatusCode(StatusCodes.Status201Created, result)
+                        : StatusCode(StatusCodes.Status500InternalServerError, "Blob Not Created");
                 }
 
-                if (bessConfigs.Count != counter)
+                var error = new List<Error>
                 {
-                    return BadRequest(errors);
-                }
+                    new() { Source = "requestBody", Description = "Either body is null or malformed." }
+                };
 
-                string result = await _azureStorageService.UploadConfigurationToBlob(bessConfigs);
-
-                if (!string.IsNullOrEmpty(result))
-                    return Ok(result);
-
-                return BadRequest("Blob Not Created");
+                return BuildBadRequestErrorResponse(error);
             }
-
-            var error = new List<Error>
+            catch (Exception ex)
             {
-                new() { Source = "requestBody", Description = "Either body is null or malformed." }
-            };
-
-            return BuildBadRequestErrorResponse(error);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
         }
 
         protected IActionResult BuildBadRequestErrorResponse(List<Error> errors)

@@ -28,12 +28,14 @@ namespace UKHO.FmEssFssMock.API.Models.Bess
         [JsonProperty("batchExpiryInDays")]
         public int BatchExpiryInDays { get; set; }
         [JsonProperty("isEnabled")]
-        public bool IsEnabled { get; set; }
+        public bool? IsEnabled { get; set; }
     }
 
     public class Tag
     {
+        [JsonProperty("key")]
         public string Key { get; set; }
+        [JsonProperty("value")]
         public string Value { get; set; }
     }
 }
