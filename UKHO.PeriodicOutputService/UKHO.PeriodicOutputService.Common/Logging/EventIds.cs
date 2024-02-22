@@ -433,9 +433,9 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BessConfigsNotFound = 809106,
         /// <summary>
-        /// 809107 - Bess get blob storage details failed
+        /// 809107 - Bess error occured while downloading configs from azure storage
         /// </summary>
-        BessGetBlobStorageDetailsFailed = 809107,
+        BessErrorOccuredWhileDownloadingConfigFromAzureStorage = 809107
         /// <summary>
         /// 80908 - Bess config invalid attributes
         /// </summary>

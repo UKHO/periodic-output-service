@@ -22,15 +22,15 @@ namespace UKHO.BESS.ConfigurationService
         {
             try
             {
-                logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "Bess Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
                 configurationService.ProcessConfigs();
 
-                logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "Bess Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing Configuration Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing Bess Configuration Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 throw;
             }
         }

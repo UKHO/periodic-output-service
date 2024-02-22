@@ -39,7 +39,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessGetBlobStorageDetailsFailed.ToEventId(), "Exception occured while fetching Blob details with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessErrorOccuredWhileDownloadingConfigFromAzureStorage.ToEventId(), "Exception occured while dowloading configs from azure storage with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
             }
             return configs;
         }
