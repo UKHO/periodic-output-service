@@ -56,7 +56,7 @@ stages:
           inputs:
             command: custom
             custom: tool
-            arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools
+            arguments: install dotnet-stryker --version 3.13.2 --tool-path $(Agent.BuildDirectory)/tools
         - task: Powershell@2
           displayName: "Run Stryker"
           inputs:
