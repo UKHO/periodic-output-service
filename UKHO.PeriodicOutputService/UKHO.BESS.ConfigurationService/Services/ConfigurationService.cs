@@ -46,7 +46,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     var intervalInMins = ((int)scheduleDetails.NextScheduleTime.Subtract(DateTime.UtcNow).TotalMinutes);
                     var isSameDay = scheduleDetails.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
 
-                    if (intervalInMins <= 0 && isSameDay) //Check if config schedule is missed or if it's due for the same day.
+                    if (intervalInMins <= 0 && isSameDay && configDetail.IsEnabled) //Check if config schedule is missed or if it's due for the same day.
                     {
                         /* -- save details to msg queue --
                          * 
