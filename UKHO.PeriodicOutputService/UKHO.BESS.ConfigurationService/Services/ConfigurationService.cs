@@ -30,7 +30,7 @@ public class ConfigurationService : IConfigurationService
             Dictionary<string, string> configs = azureBlobStorageClient.GetConfigsInContainer();
 
             List<BessConfig> bessConfigs = new();
-
+            int invalidFileCount = 0;
             foreach (string fileName in configs.Keys.ToList())
             {
                 string content = configs[fileName];
@@ -48,20 +48,28 @@ public class ConfigurationService : IConfigurationService
 
                         if (!results.IsValid)
                         {
+                            invalidFileCount++;
                             string errors = string.Empty;
 
                             foreach (var failure in results.Errors)
                             {
                                 errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
                             }
-                            logger.LogInformation("\nBespoke ES is not created for file - " + fileName + ". \nValidation errors - " + errors);
+                            logger.LogInformation(EventIds.BessConfigInvalidAttributes.ToEventId(), "\nBespoke ES is not created for file - " + fileName + ". \nValidation errors - " + errors + " | _X-Correlation-ID :" + CommonHelper.CorrelationID);
                         }
                         else
+                        {
                             bessConfigs.Add(json);
+                        }
                     }
                 }
             }
+
+            logger.LogInformation(EventIds.BessConfigInvalidFilesCount.ToEventId(), "\nFile count with invalid attributes   {invalidFileCount} | _X-Correlation-ID : {CorrelationId}", invalidFileCount, CommonHelper.CorrelationID);
             RemoveDuplicateBessConfigs(bessConfigs);
+
+            int validFileCount = bessConfigs.Count;
+            logger.LogInformation(EventIds.BessConfigValidFilesCount.ToEventId(), "\nFile count with valid attributes   {validFileCount} | _X-Correlation-ID : {CorrelationId}", validFileCount, CommonHelper.CorrelationID);
 
             logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
         }
@@ -92,6 +100,9 @@ public class ConfigurationService : IConfigurationService
             .Where(x => x.Skip(1).Any()).ToList();
 
         if (!duplicateRecords.Any()) return;
+
+        int duplicateFileCount = duplicateRecords.Select(record => record.Count()).Sum();
+        
         foreach (var duplicateRecord in duplicateRecords)
         {
             foreach (BessConfig? duplicateBessConfig in duplicateRecord.ToList())
@@ -102,5 +113,6 @@ public class ConfigurationService : IConfigurationService
                 bessConfigs.RemoveAll(x => x.FileName.Equals(duplicateBessConfig.FileName, StringComparison.OrdinalIgnoreCase));
             }
         }
+        logger.LogInformation(EventIds.BessConfigDuplicateFileCount.ToEventId(), "\nFile count with duplicate Name attributes   {duplicateFileCount} | _X-Correlation-ID : {CorrelationId}", duplicateFileCount, CommonHelper.CorrelationID);
     }
 }

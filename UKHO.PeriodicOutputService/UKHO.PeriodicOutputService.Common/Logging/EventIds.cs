@@ -423,7 +423,23 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809104 - Bess config is invalid
         /// </summary>
-        BessConfigIsInvalid = 809104
+        BessConfigIsInvalid = 809104,
+        /// <summary>
+        /// 809105 - Bess config invalid attributes
+        /// </summary>
+        BessConfigInvalidAttributes = 809105,
+        /// <summary>
+        /// 809106 - Bess config duplicate Name attribute
+        /// </summary>
+        BessConfigDuplicateFileCount = 809106,
+        /// <summary>
+        /// 809107 - Bess config invalid files count
+        /// </summary>
+        BessConfigInvalidFilesCount = 809107,
+        /// <summary>
+        /// 809108 - Bess config valid files count
+        /// </summary>
+        BessConfigValidFilesCount = 809108
     }
 
     public static class EventIdExtensions

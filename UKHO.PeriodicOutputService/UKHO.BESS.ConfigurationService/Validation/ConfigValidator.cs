@@ -136,7 +136,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
         private static bool IsValidCron(string frequency)
         {
-            return CrontabSchedule.TryParse(frequency, CronStringFormat.Default) == null ? false : true;
+            return CrontabSchedule.TryParse(frequency, CronStringFormat.Default) != null;
         }
 
         ValidationResult IConfigValidator.Validate(BessConfig bessConfig)
