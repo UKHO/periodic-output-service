@@ -58,8 +58,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                         azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetail);
                     }
                     else
-                    {
-                        if (scheduleDetails.NextScheduleTime < nextFullUpdateOccurrence || scheduleDetails.IsEnabled != configDetail.IsEnabled)
+                    {       //Update schedule details
+                        if (scheduleDetails.NextScheduleTime != nextFullUpdateOccurrence || scheduleDetails.IsEnabled != configDetail.IsEnabled)
                         {
                             azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetail);
                         }
