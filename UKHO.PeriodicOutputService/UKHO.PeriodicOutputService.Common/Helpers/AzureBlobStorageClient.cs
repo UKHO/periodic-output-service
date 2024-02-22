@@ -1,8 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -10,27 +12,35 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     public class AzureBlobStorageClient : IAzureBlobStorageClient
     {
         private readonly BessStorageConfiguration bessStorageConfiguration;
+        private readonly ILogger<AzureBlobStorageClient> logger;
 
-        public AzureBlobStorageClient(IOptions<BessStorageConfiguration> bessStorageConfiguration)
+        public AzureBlobStorageClient(IOptions<BessStorageConfiguration> bessStorageConfiguration, ILogger<AzureBlobStorageClient> logger)
         {
             this.bessStorageConfiguration = bessStorageConfiguration.Value ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public Dictionary<string, string> GetConfigsInContainer()
         {
             Dictionary<string, string> configs = new();
 
-            BlobContainerClient blobContainerClient = GetBlobContainerClient();
-
-            foreach (BlobItem blobItem in blobContainerClient.GetBlobs())
+            try
             {
-                if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                BlobContainerClient blobContainerClient = GetBlobContainerClient();
+
+                foreach (BlobItem blobItem in blobContainerClient.GetBlobs())
                 {
-                    BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
-                    configs.Add(blobItem.Name, DownloadBlobContent(blobClient));
+                    if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                    {
+                        BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
+                        configs.Add(blobItem.Name, DownloadBlobContent(blobClient));
+                    }
                 }
             }
-
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.BessGetBlobStorageDetailsFailed.ToEventId(), "Exception occured while fetching Blob details with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+            }
             return configs;
         }
 

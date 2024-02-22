@@ -425,21 +425,33 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BessConfigIsInvalid = 809104,
         /// <summary>
-        /// 809105 - Bess config invalid attributes
+        /// 809105 - Bess config parsing error
         /// </summary>
-        BessConfigInvalidAttributes = 809105,
+        BessConfigParsingError = 809105,
         /// <summary>
-        /// 809106 - Bess config duplicate Name attribute
+        /// 809106 - Bess configs not found
         /// </summary>
-        BessConfigDuplicateFileCount = 809106,
+        BessConfigsNotFound = 809106,
         /// <summary>
-        /// 809107 - Bess config invalid files count
+        /// 809107 - Bess get blob storage details failed
         /// </summary>
-        BessConfigInvalidFilesCount = 809107,
+        BessGetBlobStorageDetailsFailed = 809107,
         /// <summary>
-        /// 809108 - Bess config valid files count
+        /// 80908 - Bess config invalid attributes
         /// </summary>
-        BessConfigValidFilesCount = 809108
+        BessConfigInvalidAttributes = 809108,
+        /// <summary>
+        /// 809109 - Bess config duplicate Name attribute
+        /// </summary>
+        BessConfigDuplicateFileCount = 809109,
+        /// <summary>
+        /// 809110 - Bess config invalid files count
+        /// </summary>
+        BessConfigInvalidFilesCount = 809110,
+        /// <summary>
+        /// 809111 - Bess config valid files count
+        /// </summary>
+        BessConfigValidFilesCount = 809111
     }
 
     public static class EventIdExtensions
