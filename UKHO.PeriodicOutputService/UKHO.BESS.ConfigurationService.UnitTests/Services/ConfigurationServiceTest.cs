@@ -68,7 +68,7 @@ public class ConfigurationServiceTest
     }
 
     [Test]
-    public void Does_SaveBespokeDetailsToQueue_Returns_False_WhenExceptionOccurs()
+    public void Does_ScheduleConfigDetails_Returns_False_WhenExceptionOccurs()
     {
         A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails(GetFakeConfigurationSetting()[0].Name)).Throws<Exception>();
 
@@ -94,7 +94,7 @@ public class ConfigurationServiceTest
     }
 
     [Test]
-    public void Does_SaveBespokeDetailsToQueue_Returns_True_WhenScheduleDetailsAddedToMsgQueue()
+    public void Does_ScheduleConfigDetails_Returns_True_WhenScheduleDetailsAddedToMsgQueue()
     {
         A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails(GetFakeConfigurationSetting()[0].Name)).Returns(GetFakeScheduleDetailsToAddInMsgQueue());
 
@@ -136,7 +136,7 @@ public class ConfigurationServiceTest
     }
 
     [Test]
-    public void Does_SaveBespokeDetailsToQueue_Returns_True_WhenScheduleDetailsNotAddedToMsgQueue()
+    public void Does_ScheduleConfigDetails_Returns_True_WhenScheduleDetailsNotAddedToMsgQueue()
     {
         A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails(GetFakeConfigurationSetting()[0].Name)).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
 
@@ -169,7 +169,7 @@ public class ConfigurationServiceTest
     }
 
     [Test]
-    public void Does_SaveBespokeDetailsToQueue_Returns_True_WhenScheduleDetailsNotAddedToMsgQueueOnSameDay()
+    public void Does_ScheduleConfigDetails_Returns_True_WhenScheduleDetailsNotAddedToMsgQueueOnSameDay()
     {
         A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueueOnSameDay());
 
@@ -202,7 +202,7 @@ public class ConfigurationServiceTest
     }
 
     [Test]
-    public void Does_SaveBespokeDetailsToQueue_Returns_True_WhenNextScheduleDetailsIsNull()
+    public void Does_ScheduleConfigDetails_Returns_True_WhenNextScheduleDetailsIsNull()
     {
         A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1"))!.Returns(null);
 
