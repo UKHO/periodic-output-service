@@ -12,9 +12,10 @@ namespace UKHO.BESS.ConfigurationService.UnitTests
         private IConfigurationService configurationService;
         private IAzureBlobStorageClient fakeAzureBlobStorageClient;
         private ILogger<Services.ConfigurationService> fakeLogger;
-        private const string InvalidConfigJson = "[{\"Name\":,\"ExchangeSetStandard\":null,\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":true}]"; 
-        private const string ValidConfigJson = "[{\"Name\":\"Xyz.json\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":true}]"; 
-        private const string InvalidEmptyJson = "[{,,,}]"; 
+        private const string InvalidConfigJson = "[{\"Name\":,\"ExchangeSetStandard\":null,\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":true}]";
+        private const string ValidConfigJson = "[{\"Name\":\"Xyz.json\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":true}]";
+        private const string InvalidEmptyJson = "[{,,,}]";
+        private Dictionary<string, string> dictionary;
 
         [SetUp]
         public void SetUp()
@@ -22,7 +23,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests
             fakeAzureBlobStorageClient = A.Fake<IAzureBlobStorageClient>();
             fakeLogger = A.Fake<ILogger<Services.ConfigurationService>>();
 
-           configurationService = new Services.ConfigurationService(fakeAzureBlobStorageClient, fakeLogger);
+            configurationService = new Services.ConfigurationService(fakeAzureBlobStorageClient, fakeLogger);
+            dictionary = new Dictionary<string, string>();
         }
 
         [Test]
@@ -40,7 +42,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests
         [Test]
         public void WhenInvalidConfigFileIsFound_ThenDataIsNotAddedInModelList()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidConfigFilesJson());            
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidConfigFilesJson());
             configurationService.ProcessConfigs();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -87,7 +89,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Throws<Exception>();
             configurationService.Invoking(x => x.ProcessConfigs()).Should().ThrowExactly<Exception>();
-            
+
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -123,7 +125,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests
         [Test]
         public void WhenContainerHasNoConfigFiles_ThenDataIsNotAddedInModelList()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(new Dictionary<string,string>());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(new Dictionary<string, string>());
             configurationService.ProcessConfigs();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -147,20 +149,17 @@ namespace UKHO.BESS.ConfigurationService.UnitTests
 
         private Dictionary<string, string> GetValidConfigFilesJson()
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
             dictionary.Add("Valid.json", ValidConfigJson);
             return dictionary;
         }
 
         private Dictionary<string, string> GetInvalidConfigFilesJson()
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
             dictionary.Add("Invalid.json", InvalidConfigJson);
             return dictionary;
         }
         private Dictionary<string, string> GetInvalidEmptyJson()
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
             dictionary.Add("Empty.json", InvalidEmptyJson);
             return dictionary;
         }
