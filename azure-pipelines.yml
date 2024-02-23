@@ -253,6 +253,16 @@ stages:
               zipAfterPublish: false
               modifyOutputPath: false
 
+          - task: DotNetCoreCLI@2
+            displayName: "Publish BESS Builder Service Code"
+            inputs:
+              command: "publish"
+              publishWebProjects: false
+              projects: "**/*UKHO.BESS.BuilderService.csproj"
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\BESSBuilderServiceWebJob'
+              zipAfterPublish: false
+              modifyOutputPath: false
+
           - task: ArchiveFiles@2
             displayName: "Zip POS fulfilment service"
             inputs:
