@@ -46,8 +46,8 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     var intervalInMins = ((int)scheduleDetails.NextScheduleTime.Subtract(DateTime.UtcNow).TotalMinutes);
                     var isSameDay = scheduleDetails.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
-
-                    if (intervalInMins <= 0 && isSameDay && configDetail.IsEnabled && scheduleDetails.IsExecuted.Equals(false)) //Check if config schedule is missed or if it's due for the same day.
+                    bool isMissed = CheckScheduleTime(intervalInMins, isSameDay, configDetail, scheduleDetails);
+                    if (isMissed) //Check if config schedule is missed or if it's due for the same day.
                     {
                         /* -- save details to msg queue --
                          * 
@@ -60,7 +60,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                     }
                     else
                     {       //Update schedule details
-                        if (scheduleDetails.NextScheduleTime != nextFullUpdateOccurrence || scheduleDetails.IsEnabled != configDetail.IsEnabled)
+                        bool isNextSchedule = IsNextSchedule(scheduleDetails, nextFullUpdateOccurrence, configDetail);
+                        if (isNextSchedule)
                         {
                             azureTableStorageHelper.RefreshNextSchedule(nextFullUpdateOccurrence, configDetail, false);
                         }
@@ -76,6 +77,12 @@ namespace UKHO.BESS.ConfigurationService.Services
                 return false;
             }
         }
+        [ExcludeFromCodeCoverage]
+        private static bool IsNextSchedule(ScheduleDetails scheduleDetails, DateTime nextFullUpdateOccurrence, BessConfig configDetail) => scheduleDetails.NextScheduleTime != nextFullUpdateOccurrence || scheduleDetails.IsEnabled != configDetail.IsEnabled;
+
+        [ExcludeFromCodeCoverage]
+        private static bool CheckScheduleTime(int intervalInMins, bool isSameDay, BessConfig configDetail, ScheduleDetails scheduleDetails) => intervalInMins <= 0 && isSameDay && configDetail.IsEnabled && scheduleDetails.IsExecuted.Equals(false);
+
         [ExcludeFromCodeCoverage]
         private ScheduleDetails GetNextSchedule(DateTime nextFullUpdateOccurrence, BessConfig configDetails)
         {

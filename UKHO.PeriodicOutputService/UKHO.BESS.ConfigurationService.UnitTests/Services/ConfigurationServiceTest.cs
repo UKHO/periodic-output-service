@@ -42,7 +42,7 @@ public class ConfigurationServiceTest
     [Test]
     public void Does_ScheduleConfigDetails_Returns_True()
     {
-        A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails(GetFakeConfigurationSetting()[0].Name)).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
+        A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
 
         bool result = _fakeConfigurationService.ScheduleConfigDetails(GetFakeConfigurationSetting());
 
@@ -54,7 +54,7 @@ public class ConfigurationServiceTest
             "Schedule config details started | _X-Correlation-ID : {CorrelationId}"
         ).MustHaveHappenedOnceExactly();
         A.CallTo(() =>
-            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored)).MustHaveHappened();
+            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
 
         A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -70,7 +70,7 @@ public class ConfigurationServiceTest
     [Test]
     public void Does_ScheduleConfigDetails_Returns_False_WhenExceptionOccurs()
     {
-        A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails(GetFakeConfigurationSetting()[0].Name)).Throws<Exception>();
+        A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Throws<Exception>();
 
         bool result = _fakeConfigurationService.ScheduleConfigDetails(GetFakeConfigurationSetting());
 
@@ -96,7 +96,7 @@ public class ConfigurationServiceTest
     [Test]
     public void Does_ScheduleConfigDetails_Returns_True_WhenScheduleDetailsAddedToMsgQueue()
     {
-        A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails(GetFakeConfigurationSetting()[0].Name)).Returns(GetFakeScheduleDetailsToAddInMsgQueue());
+        A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Returns(GetFakeScheduleDetailsToAddInMsgQueue());
 
         bool result = _fakeConfigurationService.ScheduleConfigDetails(GetFakeConfigurationSetting());
 
@@ -120,7 +120,7 @@ public class ConfigurationServiceTest
             .MustHaveHappened();
 
         A.CallTo(() =>
-            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored)).MustHaveHappenedOnceOrMore();
+            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
 
 
@@ -138,7 +138,7 @@ public class ConfigurationServiceTest
     [Test]
     public void Does_ScheduleConfigDetails_Returns_True_WhenScheduleDetailsNotAddedToMsgQueue()
     {
-        A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails(GetFakeConfigurationSetting()[0].Name)).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
+        A.CallTo(() => _fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
 
         bool result = _fakeConfigurationService.ScheduleConfigDetails(GetFakeConfigurationSetting());
 
@@ -154,7 +154,7 @@ public class ConfigurationServiceTest
             .MustHaveHappened();
 
         A.CallTo(() =>
-            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored)).MustHaveHappenedOnceOrMore();
+            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
 
         A.CallTo(_fakeLogger).Where(call =>
@@ -187,7 +187,7 @@ public class ConfigurationServiceTest
             .MustHaveHappened();
 
         A.CallTo(() =>
-            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored)).MustHaveHappenedOnceOrMore();
+            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
 
         A.CallTo(_fakeLogger).Where(call =>
@@ -220,7 +220,7 @@ public class ConfigurationServiceTest
             .MustHaveHappened();
 
         A.CallTo(() =>
-            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored)).MustHaveHappenedOnceOrMore();
+            _fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
         A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -261,7 +261,8 @@ public class ConfigurationServiceTest
             Timestamp = DateTime.UtcNow,
             NextScheduleTime = DateTime.UtcNow.AddDays(1),
             IsEnabled = false,
-            ETag = new ETag("etag")
+            ETag = new ETag("etag"),
+            IsExecuted = true
 
         };
         return history;
@@ -278,7 +279,8 @@ public class ConfigurationServiceTest
             Timestamp = DateTime.UtcNow,
             NextScheduleTime = DateTime.UtcNow,
             IsEnabled = true,
-            ETag = new ETag("etag")
+            ETag = new ETag("etag"),
+            IsExecuted = false
 
         };
         return history;
