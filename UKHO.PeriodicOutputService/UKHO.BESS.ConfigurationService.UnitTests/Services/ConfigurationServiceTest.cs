@@ -1,5 +1,4 @@
-﻿using Azure;
-using FakeItEasy;
+﻿using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using UKHO.BESS.ConfigurationService.Services;
@@ -235,33 +234,27 @@ public class ConfigurationServiceTest
 
     private ScheduleDetails GetFakeScheduleDetailsToAddInMsgQueue()
     {
-        var today = DateTime.UtcNow.Day;
         var history = new ScheduleDetails
 
         {
-            PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
-            RowKey = (DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks).ToString(),
-            Timestamp = DateTime.UtcNow,
+            PartitionKey = "BessConfigSchedule",
+            RowKey = "BESS-1",
             NextScheduleTime = DateTime.UtcNow.AddMinutes(1),
             IsEnabled = true,
-            ETag = new ETag("etag")
-
+            IsExecuted = false,
         };
         return history;
     }
 
     private ScheduleDetails GetFakeScheduleDetailsNotToAddInMsgQueue()
     {
-        var today = DateTime.UtcNow.Day;
         var history = new ScheduleDetails
 
         {
-            PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
-            RowKey = (DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks).ToString(),
-            Timestamp = DateTime.UtcNow,
+            PartitionKey = "BessConfigSchedule",
+            RowKey = "BESS-1",
             NextScheduleTime = DateTime.UtcNow.AddDays(1),
             IsEnabled = false,
-            ETag = new ETag("etag"),
             IsExecuted = true
 
         };
@@ -270,16 +263,13 @@ public class ConfigurationServiceTest
 
     private ScheduleDetails GetFakeScheduleDetailsNotToAddInMsgQueueOnSameDay()
     {
-        var today = DateTime.UtcNow.Day;
         var history = new ScheduleDetails
 
         {
-            PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
+            PartitionKey = "BessConfigSchedule",
             RowKey = "BESS-1",
-            Timestamp = DateTime.UtcNow,
             NextScheduleTime = DateTime.UtcNow,
             IsEnabled = true,
-            ETag = new ETag("etag"),
             IsExecuted = false
 
         };
