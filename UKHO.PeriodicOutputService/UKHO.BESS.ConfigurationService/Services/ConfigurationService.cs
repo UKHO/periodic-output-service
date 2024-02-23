@@ -26,7 +26,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs count:{count}  | _X-Correlation-ID : {CorrelationId}", configs.Keys.Count, CommonHelper.CorrelationID);
 
-                List<BessConfig> bessConfigs = new();
+                IList<BessConfig> bessConfigs = new List<BessConfig>();
 
                 if (configs.Any())
                 {
@@ -38,7 +38,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         if (isValidJson)
                         {
-                            List<BessConfig> bessconfig = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
+                            IList<BessConfig> bessconfig = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
 
                             foreach (BessConfig json in bessconfig)
                             {
@@ -77,7 +77,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
             catch(Exception ex)
             {
-                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occured while parsing Bess config file:{fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file:{fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 return false;
             }
         }
