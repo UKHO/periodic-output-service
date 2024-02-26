@@ -64,7 +64,6 @@ namespace UKHO.BESS.ConfigurationService.Services
 
         private bool IsValidJson(string json, string fileName)
         {
-
             try
             {
                 var token = JToken.Parse(json);
@@ -77,7 +76,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
                 return false;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file:{fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 return false;
