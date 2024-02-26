@@ -11,6 +11,7 @@ namespace UKHO.BESS.ConfigurationService.Services
     {
         private readonly IAzureBlobStorageClient azureBlobStorageClient;
         private readonly ILogger<ConfigurationService> logger;
+        private const string UndefinedValue = "undefined";
 
         public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, ILogger<ConfigurationService> logger)
         {
@@ -40,9 +41,9 @@ namespace UKHO.BESS.ConfigurationService.Services
                         {
                             IList<BessConfig> bessConfig = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
 
-                            foreach (BessConfig json in bessConfig)
+                            foreach (BessConfig config in bessConfig)
                             {
-                                bessConfigs.Add(json);
+                                bessConfigs.Add(config);
                             }
                         }
                     }
@@ -63,11 +64,12 @@ namespace UKHO.BESS.ConfigurationService.Services
 
         private bool IsValidJson(string json, string fileName)
         {
+
             try
             {
                 var token = JToken.Parse(json);
 
-                if (!token.ToString().Contains("undefined"))
+                if (!token.ToString().Contains(UndefinedValue))
                 {
                     return true;
                 }
