@@ -53,16 +53,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
                 try
                 {
-                    var posFulfilmentJob = serviceProvider.GetService<PosFulfilmentJob>();
-
-                    await Elastic.Apm.Agent.Tracer
-                        .CaptureTransaction("POSTransaction", ApiConstants.TypeRequest, async () =>
-                        {
-                            //application code that is captured as a transaction
-                            await posFulfilmentJob.ProcessFulfilmentJob();
-                        });
-
-                    Agent.Tracer.CurrentTransaction?.End();
+                    await serviceProvider.GetService<PosFulfilmentJob>().ProcessFulfilmentJob();
                 }
                 finally
                 {
@@ -74,8 +65,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
-                Agent.Tracer.CurrentTransaction?.CaptureException(ex);
-                Agent.Tracer.CurrentTransaction?.End();
                 throw;
             }
         }
