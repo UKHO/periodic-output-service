@@ -15,7 +15,7 @@ namespace UKHO.BESS.ConfigurationService
         public BessConfigurationServiceJob(ILogger<BessConfigurationServiceJob> logger, IConfigurationService configurationService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.configurationService = configurationService;
+            this.configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService)); ;
         }
 
         public void Start()
