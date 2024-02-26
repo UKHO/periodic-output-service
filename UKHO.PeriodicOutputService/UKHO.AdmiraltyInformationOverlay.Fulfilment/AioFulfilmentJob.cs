@@ -22,6 +22,16 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 
         public async Task ProcessFulfilmentJobAsync()
         {
+            await Elastic.Apm.Agent.Tracer
+                .CaptureTransaction("AIOTransaction", ApiConstants.TypeRequest, async () =>
+                {
+                    //application code that is captured as a transaction
+                    await CreateAioExchangeSets();
+                });
+        }
+
+        private async Task CreateAioExchangeSets()
+        {
             var transaction = Agent.Tracer.CurrentTransaction;
             ISpan span = transaction.StartSpan("AIOJobStarted", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
@@ -40,6 +50,10 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                 _logger.LogError(EventIds.UnhandledException.ToEventId(),
                     "Exception occured while processing AIOFulfilment webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}",
                     ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+
+                transaction.CaptureException(ex);
+
+                throw;
             }
             finally
             {
@@ -51,6 +65,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                 transaction.SetLabel("AIOBatchesCreated",
                     isAIOFullAvcsDvdBatchCreated &&
                     isAIOUpdateZipBatchCreated);
+
+                transaction.End();
             }
         }
     }

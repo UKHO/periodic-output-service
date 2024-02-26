@@ -22,22 +22,40 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
         public async Task ProcessFulfilmentJob()
         {
+            await Elastic.Apm.Agent.Tracer
+                .CaptureTransaction("POSTransaction", ApiConstants.TypeRequest, async () =>
+                {
+                    //application code that is captured as a transaction
+                    await CreatePosExchangeSets();
+                });
+        }
+
+        private async Task CreatePosExchangeSets()
+        {
             var transaction = Agent.Tracer.CurrentTransaction;
             ISpan span = transaction.StartSpan("POSJobStarted", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
-            
+
             try
             {
-                _logger.LogInformation(EventIds.PosFulfilmentJobStarted.ToEventId(), "Periodic Output Service webjob started at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.PosFulfilmentJobStarted.ToEventId(),
+                    "Periodic Output Service webjob started at {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                    DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
                 bool result = await _fulfilmentDataService.CreatePosExchangeSets();
 
-                _logger.LogInformation(EventIds.PosFulfilmentJobCompleted.ToEventId(), "Periodic Output Service webjob completed at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.PosFulfilmentJobCompleted.ToEventId(),
+                    "Periodic Output Service webjob completed at {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                    DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.UnhandledException.ToEventId(),
+                    "Exception occured while processing Periodic Output Service webjob at {DateTime} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}",
+                    DateTime.Now.ToUniversalTime(), ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
 
                 transaction.CaptureException(ex);
+
+                throw;
             }
             finally
             {
@@ -48,15 +66,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 transaction.TryGetLabel("CatalogueFileBatchCreated", out bool isCatalogueFileBatchCreated);
                 transaction.TryGetLabel("EncUpdateFileBatchCreated", out bool isEncUpdateFileBatchCreated);
                 transaction.TryGetLabel("UpdateZipBatchCreated", out bool isUpdateZipBatchCreated);
-                
+
                 transaction.SetLabel("POSBatchesCreated",
                     isFullAvcsDvdBatchCreated &&
                     isFullAvcsZipBatchCreated &&
                     isCatalogueFileBatchCreated &&
                     isEncUpdateFileBatchCreated &&
                     isUpdateZipBatchCreated);
-            }
 
+                transaction.End();
+            }
         }
     }
 }

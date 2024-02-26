@@ -51,16 +51,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 
                 try
                 {
-                    var aioFulfilmentJob = serviceProvider.GetService<AioFulfilmentJob>();
-
-                    await Elastic.Apm.Agent.Tracer
-                        .CaptureTransaction("AIOTransaction", ApiConstants.TypeRequest, async () =>
-                        {
-                            //application code that is captured as a transaction
-                            await aioFulfilmentJob.ProcessFulfilmentJobAsync();
-                        });
-
-                    Agent.Tracer.CurrentTransaction?.End();
+                    await serviceProvider.GetService<AioFulfilmentJob>().ProcessFulfilmentJobAsync();
                 }
                 finally
                 {
@@ -72,8 +63,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
-                Agent.Tracer.CurrentTransaction?.CaptureException(ex);
-                Agent.Tracer.CurrentTransaction?.End();
                 throw;
             }
         }
