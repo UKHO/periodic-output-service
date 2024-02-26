@@ -44,16 +44,14 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {
                         string content = configs[fileName];
 
-                        bool isValidJson = IsValidJson(content, fileName);
+                        IList<BessConfig> bessconfig = GetValidConfig(content, fileName);
 
-                        if (isValidJson)
+                        if (bessconfig != null)
                         {
-                            IList<BessConfig> bessconfig = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
-
-                            foreach (BessConfig json in bessconfig)
+                            foreach (BessConfig config in bessconfig)
                             {
-                                json.FileName = fileName; //for logging
-                                ValidationResult results = configValidator.Validate(json);
+                                config.FileName = fileName; //for logging
+                                ValidationResult results = configValidator.Validate(config);
 
                                 if (!results.IsValid)
                                 {
@@ -72,7 +70,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                                 }
                                 else
                                 {
-                                    bessConfigs.Add(json);
+                                    bessConfigs.Add(config);
                                 }
                             }
                         }
@@ -108,28 +106,25 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
         }
 
-        private bool IsValidJson(string json, string fileName)
+        private IList<BessConfig> GetValidConfig(string json, string fileName)
         {
             try
             {
                 var token = JToken.Parse(json);
 
-                if (!token.ToString().Contains(UndefinedValue))
+                if (token.ToString().Contains(UndefinedValue))
                 {
-                    return true;
+                    logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+                    return null;
                 }
 
-                logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(),
-                    "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName,
-                    CommonHelper.CorrelationID);
-                return false;
+                IList<BessConfig> bessConfig = JsonConvert.DeserializeObject<List<BessConfig>>(json)!;
+                return bessConfig;
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessConfigParsingError.ToEventId(),
-                    "Error occured while parsing Bess config file:{fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}",
-                    fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
-                return false;
+                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file:{fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                return null;
             }
         }
 
