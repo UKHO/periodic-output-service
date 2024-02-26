@@ -38,9 +38,9 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         if (isValidJson)
                         {
-                            IList<BessConfig> bessconfig = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
+                            IList<BessConfig> bessConfig = JsonConvert.DeserializeObject<List<BessConfig>>(content)!;
 
-                            foreach (BessConfig json in bessconfig)
+                            foreach (BessConfig json in bessConfig)
                             {
                                 bessConfigs.Add(json);
                             }
