@@ -44,7 +44,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.Frequency).Must(f => IsValidCron(f))
-                        .WithMessage("Attribute value is invalid.");
+                        .WithMessage("Attribute value is invalid");
                 });
 
             RuleFor(config => config.Type).NotNull().WithMessage("Attribute is missing")
@@ -84,14 +84,14 @@ namespace UKHO.BESS.ConfigurationService.Validation
                 .WithMessage("Attribute is missing or value not provided");
 
             RuleFor(config => config.BatchExpiryInDays).NotEmpty()
-                .WithMessage("Attribute is missing or value is not provided")
+                .WithMessage("Attribute is missing or value not provided")
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.BatchExpiryInDays).GreaterThan(0)
                         .WithMessage("Expected value is natural number, i.e. number greater than 0");
                 });
 
-            RuleFor(config => config.IsEnabled).NotNull().WithMessage("Attribute is missing or value is not provided")
+            RuleFor(config => config.IsEnabled).NotNull().WithMessage("Attribute is missing or value not provided")
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.IsEnabled).Must(isEnabled => isEnabled == false || isEnabled == true)
@@ -101,12 +101,12 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
         private static bool IsAclProvided(BessConfig c)
         {
-            return ((c.AllowedUsers == null && c.AllowedUserGroups == null) || (c.AllowedUsers?.Count() == 0 &&
-                                                                                c.AllowedUserGroups?.Count() == 0)
-                                                                            || (c.AllowedUsers == null &&
-                                                                                c.AllowedUserGroups.Count() == 0) ||
-                                                                            (c.AllowedUsers.Count() == 0 &&
-                                                                             c.AllowedUserGroups == null))
+            return (c.AllowedUsers == null && c.AllowedUserGroups == null) ||
+                    (c.AllowedUsers?.Count() == 0 && c.AllowedUserGroups?.Count() == 0) ||
+                    (c.AllowedUsers == null && c.AllowedUserGroups.Count() == 0) ||
+                    (c.AllowedUsers.Count() == 0 && c.AllowedUserGroups == null) ||
+                    (c.AllowedUsers.Contains(null) && c.AllowedUserGroups.Contains(null))||
+                    (c.AllowedUsers.Contains(string.Empty) && c.AllowedUserGroups.Contains(string.Empty))
                 ? false
                 : true;
         }
