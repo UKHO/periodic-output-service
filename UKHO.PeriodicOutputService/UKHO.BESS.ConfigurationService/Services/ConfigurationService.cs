@@ -29,7 +29,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <summary>
         /// check cron expression and save bespoke details to msg queue
         /// </summary>
-        /// <param name="configurationSettings"></param>
+        /// <param name="configDetails"></param>
         /// <returns></returns>
         public bool ScheduleConfigDetails(List<BessConfig> configDetails)
         {
