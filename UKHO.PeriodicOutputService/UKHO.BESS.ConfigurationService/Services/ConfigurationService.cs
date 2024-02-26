@@ -44,11 +44,11 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {
                         string content = configs[fileName];
 
-                        IList<BessConfig> bessconfig = GetValidConfig(content, fileName);
+                        IList<BessConfig> bessConfig = GetValidConfig(content, fileName);
 
-                        if (bessconfig != null)
+                        if (bessConfig != null)
                         {
-                            foreach (BessConfig config in bessconfig)
+                            foreach (BessConfig config in bessConfig)
                             {
                                 config.FileName = fileName; //for logging
                                 ValidationResult results = configValidator.Validate(config);
@@ -108,6 +108,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
         private IList<BessConfig> GetValidConfig(string json, string fileName)
         {
+            IList<BessConfig> bessConfig = new List<BessConfig>();
             try
             {
                 var token = JToken.Parse(json);
@@ -115,16 +116,17 @@ namespace UKHO.BESS.ConfigurationService.Services
                 if (token.ToString().Contains(UndefinedValue))
                 {
                     logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
-                    return null;
                 }
-
-                IList<BessConfig> bessConfig = JsonConvert.DeserializeObject<List<BessConfig>>(json)!;
+                else
+                {
+                    bessConfig = JsonConvert.DeserializeObject<List<BessConfig>>(json)!;
+                }
                 return bessConfig;
             }
             catch (Exception ex)
             {
                 logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file:{fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
-                return null;
+                return bessConfig;
             }
         }
 
