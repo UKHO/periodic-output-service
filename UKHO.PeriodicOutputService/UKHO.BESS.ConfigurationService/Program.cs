@@ -50,7 +50,6 @@ namespace UKHO.BESS.ConfigurationService
                     await Task.Delay(delayTime);
                 }
             }
-
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
@@ -137,12 +136,14 @@ namespace UKHO.BESS.ConfigurationService
 
             if (configuration != null)
             {
-                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
+                serviceCollection.Configure<BessStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
+                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
             }
 
             serviceCollection.AddSingleton<BessConfigurationServiceJob>();
             serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
+            serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
         }
     }
