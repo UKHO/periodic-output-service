@@ -105,6 +105,8 @@ module "storage" {
   agent_subnet        = data.azurerm_subnet.agent_subnet.id
   env_name            = local.env_name
   service_name        = local.service_name
+  service_name_bess   = local.service_name_bess
+  container_name      = local.container_name
   tags                = local.tags
 }
 
@@ -124,6 +126,7 @@ module "key_vault" {
       "EventHubLoggingConfiguration--ConnectionString"       = module.eventhub.log_primary_connection_string
       "EventHubLoggingConfiguration--EntityPath"             = module.eventhub.entity_path
       "ApplicationInsights--ConnectionString"                = module.app_insights.connection_string
+      "BessStorageConfiguration--ConnectionString"           = module.storage.bess_storage_connection_string
  }
   tags                                                       = local.tags
 }
