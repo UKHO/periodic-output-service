@@ -2,6 +2,7 @@ variable "location" {
   type    = string
   default = "uksouth"
 }
+
 variable "resource_group_name" {
   type    = string
   default = "pos"
@@ -20,7 +21,7 @@ locals {
     SERVICE                   = "Periodic Output Service"
     ENVIRONMENT               = local.env_name
     SERVICE_OWNER             = "UKHO"
-    RESPONSIBLE_TEAM          = "Mastek"
+    RESPONSIBLE_TEAM          = "Abzu"
     CALLOUT_TEAM              = "On-Call_N/A"
     COST_CENTRE               = "A.008.02"
   }

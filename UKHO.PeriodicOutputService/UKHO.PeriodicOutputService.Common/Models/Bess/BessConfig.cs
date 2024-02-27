@@ -19,10 +19,4 @@ namespace UKHO.PeriodicOutputService.Common.Models.Bess
         public bool? IsEnabled { get; set; }
         public string FileName { get; set; }
     }
-
-    public class Tag
-    {
-        public string Key { get; set; }
-        public string Value { get; set; }
-    }
 }

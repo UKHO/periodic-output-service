@@ -19,8 +19,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient,
             ILogger<ConfigurationService> logger, IConfigValidator configValidator)
         {
-            this.azureBlobStorageClient = azureBlobStorageClient ??
-                                          throw new ArgumentNullException(nameof(azureBlobStorageClient));
+            this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.configValidator = configValidator ?? throw new ArgumentNullException(nameof(configValidator)); ;
         }
@@ -31,9 +30,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             {
                 Dictionary<string, string> configs = azureBlobStorageClient.GetConfigsInContainer();
 
-                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(),
-                    "Bess configs processing started, Total configs count:{count}  | _X-Correlation-ID : {CorrelationId}",
-                    configs.Keys.Count, CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs count:{count}  | _X-Correlation-ID : {CorrelationId}", configs.Keys.Count, CommonHelper.CorrelationID);
 
                 IList<BessConfig> bessConfigs = new List<BessConfig>();
 
@@ -94,19 +91,14 @@ namespace UKHO.BESS.ConfigurationService.Services
                 }
                 else
                 {
-                    logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(),
-                        "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                    logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(), "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
                 }
 
-                logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(),
-                    "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}",
-                    CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessConfigsProcessingFailed.ToEventId(),
-                    "Bess configs Processing failed with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}",
-                    ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessConfigsProcessingFailed.ToEventId(), "Bess configs Processing failed with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 throw;
             }
         }

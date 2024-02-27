@@ -55,7 +55,8 @@ output "entity_path" {
 }
 
 output "webjob_username" {
-  value = module.webapp_service.username
+  value     = module.webapp_service.username
+  sensitive = true
 }
 
 output "webjob_password" {
