@@ -199,6 +199,7 @@
    file name: System.Security.Cryptography.X509Certificates:4.3.0
    ]]></notes>
    <vulnerabilityName>CVE-2024-0057</vulnerabilityName>
+   <vulnerabilityName>CVE-2017-11770</vulnerabilityName>
 </suppress>
 <suppress>
    <notes><![CDATA[
