@@ -147,7 +147,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private static bool IsNextSchedule(ScheduleDetails scheduleDetails, DateTime nextFullUpdateOccurrence, BessConfig configDetail) => scheduleDetails.NextScheduleTime != nextFullUpdateOccurrence || scheduleDetails.IsEnabled != configDetail.IsEnabled;
 
         [ExcludeFromCodeCoverage]
-        private static bool CheckScheduleTime(int intervalInMins, bool isSameDay, BessConfig configDetail, ScheduleDetails scheduleDetails) => intervalInMins <= 0 && isSameDay && configDetail.IsEnabled && scheduleDetails.IsExecuted.Equals(false);
+        private static bool CheckScheduleTime(int intervalInMins, bool isSameDay, BessConfig configDetail, ScheduleDetails scheduleDetails) => intervalInMins <= 0 && isSameDay && configDetail.IsEnabled.Equals(true) && scheduleDetails.IsExecuted.Equals(false);
 
         [ExcludeFromCodeCoverage]
         private ScheduleDetails GetNextSchedule(DateTime nextFullUpdateOccurrence, BessConfig configDetails)
