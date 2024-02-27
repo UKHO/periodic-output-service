@@ -185,12 +185,34 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs count:{count}  | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            //A.CallTo(fakeLogger).Where(call =>
-            //    call.Method.Name == "Log"
-            //    && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            //    && call.GetArgument<EventId>(1) == EventIds.BessConfigParsingError.ToEventId()
-            //    && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing Bess config file:{fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
-            //).MustHaveHappenedOnceExactly();
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingFailed.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "\nBespoke ES is not created for file : {fileName}.\nValidation errors - duplicate value. Name : {name} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigDuplicateFileCount.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "File count with duplicate Name attributes {duplicateFileCount} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidFilesCount.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Invalid config count {invalidFileCount} and invalid files name : {invalidFileNames} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidFilesCount.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
+                "Valid config count : {validFileCount} and valid config names : {validConfigNames} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"

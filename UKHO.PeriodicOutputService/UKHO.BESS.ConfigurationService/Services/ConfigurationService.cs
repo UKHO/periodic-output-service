@@ -41,7 +41,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 {
                     int filesWithInvalidAttributeCount = 0;
                     string validConfigName = string.Empty;
-                    string inValidConfigName = string.Empty;
+                    string invalidConfigName = string.Empty;
 
                     foreach (string fileName in configs.Keys.ToList())
                     {
@@ -63,7 +63,9 @@ namespace UKHO.BESS.ConfigurationService.Services
                                 {
                                     errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
                                 }
-                                inValidConfigName += string.IsNullOrEmpty(inValidConfigName) ? fileName : "," + fileName;
+
+                                invalidConfigName +=
+                                    string.IsNullOrEmpty(invalidConfigName) ? fileName : "," + fileName;
 
                                 logger.LogInformation(EventIds.BessConfigInvalidAttributes.ToEventId(),
                                     "\nBespoke ES is not created for file - " + fileName +
@@ -73,23 +75,22 @@ namespace UKHO.BESS.ConfigurationService.Services
                             else
                             {
                                 bessConfigs.Add(config);
-                                validConfigName += string.IsNullOrEmpty(validConfigName) ? config.Name : "," + config.Name;
+                                validConfigName += string.IsNullOrEmpty(validConfigName)
+                                    ? config.Name
+                                    : "," + config.Name;
                             }
                         }
-
                     }
 
                     logger.LogInformation(EventIds.BessConfigInvalidFilesCount.ToEventId(),
-                    "\nInValid config count {invalidFileCount} and invalid files name : {inValidFileNames} | _X-Correlation-ID : {CorrelationId}",
-                    filesWithInvalidAttributeCount, inValidConfigName, CommonHelper.CorrelationID);
+                    "Invalid config count {invalidFileCount} and invalid files name : {invalidFileNames} | _X-Correlation-ID : {CorrelationId}",
+                    filesWithInvalidAttributeCount, invalidConfigName, CommonHelper.CorrelationID);
 
                     RemoveDuplicateBessConfigs((List<BessConfig>)bessConfigs);
 
-                    //int validFileCount = bessConfigs.Count;
                     logger.LogInformation(EventIds.BessConfigValidFilesCount.ToEventId(),
-                        "\nValid config count : {validFileCount} and valid config names : {validConfigNames} | _X-Correlation-ID : {CorrelationId}",
+                        "Valid config count : {validFileCount} and valid config names : {validConfigNames} | _X-Correlation-ID : {CorrelationId}",
                         bessConfigs.Count, validConfigName, CommonHelper.CorrelationID);
-
                 }
                 else
                 {
@@ -148,8 +149,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             {
                 foreach (BessConfig? duplicateBessConfig in duplicateRecord.ToList())
                 {
-                    logger.LogInformation("\nBespoke ES is not created for file - " + duplicateBessConfig.FileName +
-                                          ". \nValidation errors - duplicate value. Name: " + duplicateBessConfig.Name);
+                    logger.LogError(EventIds.BessConfigsProcessingFailed.ToEventId(), "\nBespoke ES is not created for file : {fileName}.\nValidation errors - duplicate value. Name : {name} | _X-Correlation-ID : {CorrelationId}", duplicateBessConfig.FileName, duplicateBessConfig.Name, CommonHelper.CorrelationID);
 
                     bessConfigs.RemoveAll(x =>
                         x.FileName.Equals(duplicateBessConfig.FileName, StringComparison.OrdinalIgnoreCase));
@@ -157,7 +157,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
 
             logger.LogInformation(EventIds.BessConfigDuplicateFileCount.ToEventId(),
-                "\nFile count with duplicate Name attributes   {duplicateFileCount} | _X-Correlation-ID : {CorrelationId}",
+                "File count with duplicate Name attributes {duplicateFileCount} | _X-Correlation-ID : {CorrelationId}",
                 duplicateFileCount, CommonHelper.CorrelationID);
         }
     }
