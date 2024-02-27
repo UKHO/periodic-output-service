@@ -18,10 +18,4 @@ namespace UKHO.PeriodicOutputService.Common.Models.Bess
         public int BatchExpiryInDays { get; set; }
         public bool? IsEnabled { get; set; }
     }
-
-    public class Tag
-    {
-        public string Key { get; set; }
-        public string Value { get; set; }
-    }
 }
