@@ -40,52 +40,56 @@ namespace UKHO.BESS.ConfigurationService.Services
                 if (configs.Any())
                 {
                     int filesWithInvalidAttributeCount = 0;
+                    string validConfigName = string.Empty;
+                    string inValidConfigName = string.Empty;
+
                     foreach (string fileName in configs.Keys.ToList())
                     {
                         string content = configs[fileName];
 
                         IList<BessConfig> bessConfig = GetValidConfig(content, fileName);
 
-                        if (bessConfig != null)
+                        foreach (BessConfig config in bessConfig)
                         {
-                            foreach (BessConfig config in bessConfig)
+                            config.FileName = fileName; //for logging
+                            ValidationResult results = configValidator.Validate(config);
+
+                            if (!results.IsValid)
                             {
-                                config.FileName = fileName; //for logging
-                                ValidationResult results = configValidator.Validate(config);
+                                filesWithInvalidAttributeCount++;
+                                string errors = string.Empty;
 
-                                if (!results.IsValid)
+                                foreach (var failure in results.Errors)
                                 {
-                                    filesWithInvalidAttributeCount++;
-                                    string errors = string.Empty;
-
-                                    foreach (var failure in results.Errors)
-                                    {
-                                        errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
-                                    }
-
-                                    logger.LogInformation(EventIds.BessConfigInvalidAttributes.ToEventId(),
-                                        "\nBespoke ES is not created for file - " + fileName +
-                                        ". \nValidation errors - " +
-                                        errors + " | _X-Correlation-ID :" + CommonHelper.CorrelationID);
+                                    errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
                                 }
-                                else
-                                {
-                                    bessConfigs.Add(config);
-                                }
+                                inValidConfigName += string.IsNullOrEmpty(inValidConfigName) ? fileName : "," + fileName;
+
+                                logger.LogInformation(EventIds.BessConfigInvalidAttributes.ToEventId(),
+                                    "\nBespoke ES is not created for file - " + fileName +
+                                    ". \nValidation errors - " +
+                                    errors + " | _X-Correlation-ID :" + CommonHelper.CorrelationID);
+                            }
+                            else
+                            {
+                                bessConfigs.Add(config);
+                                validConfigName += string.IsNullOrEmpty(validConfigName) ? config.Name : "," + config.Name;
                             }
                         }
+
                     }
 
                     logger.LogInformation(EventIds.BessConfigInvalidFilesCount.ToEventId(),
-                        "\nFile count with invalid attributes   {invalidFileCount} | _X-Correlation-ID : {CorrelationId}",
-                        filesWithInvalidAttributeCount, CommonHelper.CorrelationID);
+                    "\nInValid config count {invalidFileCount} and invalid files name : {inValidFileNames} | _X-Correlation-ID : {CorrelationId}",
+                    filesWithInvalidAttributeCount, inValidConfigName, CommonHelper.CorrelationID);
 
                     RemoveDuplicateBessConfigs((List<BessConfig>)bessConfigs);
 
                     //int validFileCount = bessConfigs.Count;
                     logger.LogInformation(EventIds.BessConfigValidFilesCount.ToEventId(),
-                        "\nFile count with valid attributes   {validFileCount} | _X-Correlation-ID : {CorrelationId}",
-                        bessConfigs.Count, CommonHelper.CorrelationID);
+                        "\nValid config count : {validFileCount} and valid config names : {validConfigNames} | _X-Correlation-ID : {CorrelationId}",
+                        bessConfigs.Count, validConfigName, CommonHelper.CorrelationID);
+
                 }
                 else
                 {

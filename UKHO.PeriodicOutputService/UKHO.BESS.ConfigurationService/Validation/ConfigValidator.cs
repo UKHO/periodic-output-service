@@ -103,8 +103,8 @@ namespace UKHO.BESS.ConfigurationService.Validation
         {
             return (c.AllowedUsers == null && c.AllowedUserGroups == null) ||
                     (c.AllowedUsers?.Count() == 0 && c.AllowedUserGroups?.Count() == 0) ||
-                    (c.AllowedUsers == null && c.AllowedUserGroups.Count() == 0) ||
-                    (c.AllowedUsers.Count() == 0 && c.AllowedUserGroups == null) ||
+                    (c.AllowedUsers == null && !c.AllowedUserGroups.Any()) ||
+                    (!c.AllowedUsers.Any() && c.AllowedUserGroups == null) ||
                     (c.AllowedUsers.Contains(null) && c.AllowedUserGroups.Contains(null))||
                     (c.AllowedUsers.Contains(string.Empty) && c.AllowedUserGroups.Contains(string.Empty))
                 ? false
