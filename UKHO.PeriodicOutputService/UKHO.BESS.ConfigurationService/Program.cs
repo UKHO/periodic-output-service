@@ -40,7 +40,7 @@ namespace UKHO.BESS.ConfigurationService
                 ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
                 try
                 {
-                    var bessConfigurationServiceJob = serviceProvider.GetService<BESSConfigurationServiceJob>();
+                    var bessConfigurationServiceJob = serviceProvider.GetService<BessConfigurationServiceJob>();
                     bessConfigurationServiceJob.Start();
                 }
                 finally
@@ -141,7 +141,7 @@ namespace UKHO.BESS.ConfigurationService
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
             }
 
-            serviceCollection.AddSingleton<BESSConfigurationServiceJob>();
+            serviceCollection.AddSingleton<BessConfigurationServiceJob>();
             serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
         }

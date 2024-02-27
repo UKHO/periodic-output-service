@@ -6,12 +6,12 @@ using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.ConfigurationService
 {
-    public class BESSConfigurationServiceJob
+    public class BessConfigurationServiceJob
     {
-        private readonly ILogger<BESSConfigurationServiceJob> logger;
+        private readonly ILogger<BessConfigurationServiceJob> logger;
         private readonly IConfigurationService configurationService;
 
-        public BESSConfigurationServiceJob(ILogger<BESSConfigurationServiceJob> logger, IConfigurationService configurationService)
+        public BessConfigurationServiceJob(ILogger<BessConfigurationServiceJob> logger, IConfigurationService configurationService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.configurationService = configurationService;
