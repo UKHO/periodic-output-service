@@ -91,12 +91,8 @@ namespace UKHO.BESS.ConfigurationService.Validation
                         .WithMessage("Expected value is natural number, i.e. number greater than 0");
                 });
 
-            RuleFor(config => config.IsEnabled).NotNull().WithMessage("Attribute is missing or value not provided")
-                .DependentRules(() =>
-                {
-                    RuleFor(config => config.IsEnabled).Must(isEnabled => isEnabled == false || isEnabled == true)
-                        .WithMessage("Attribute value is invalid. Expected value is either true or false");
-                });
+            RuleFor(config => config.IsEnabled).NotNull()
+                .WithMessage("Attribute is missing or value not provided. Expected value is either true or false");
         }
 
         private static bool IsAclProvided(BessConfig c)

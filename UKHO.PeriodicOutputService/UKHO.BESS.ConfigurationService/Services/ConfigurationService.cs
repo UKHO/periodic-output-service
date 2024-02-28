@@ -15,6 +15,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private readonly ILogger<ConfigurationService> logger;
         private const string UndefinedValue = "undefined";
         private readonly IConfigValidator configValidator;
+        List<string> invalidNameList = new();
 
         public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient,
             ILogger<ConfigurationService> logger, IConfigValidator configValidator)
@@ -37,8 +38,6 @@ namespace UKHO.BESS.ConfigurationService.Services
                 if (configs.Any())
                 {
                     int filesWithInvalidAttributeCount = 0;
-                    string validConfigName = string.Empty;
-                    string invalidConfigName = string.Empty;
 
                     foreach (string fileName in configs.Keys.ToList())
                     {
@@ -61,33 +60,27 @@ namespace UKHO.BESS.ConfigurationService.Services
                                     errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
                                 }
 
-                                invalidConfigName +=
-                                    string.IsNullOrEmpty(invalidConfigName) ? fileName : "," + fileName;
+                                invalidNameList.Add(config.Name);
 
-                                logger.LogInformation(EventIds.BessConfigInvalidAttributes.ToEventId(),
-                                    "\nBespoke ES is not created for file - " + fileName +
-                                    ". \nValidation errors - " +
-                                    errors + " | _X-Correlation-ID :" + CommonHelper.CorrelationID);
+                                logger.LogInformation(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bespoke ES is not created for file - {fileName}. \nValidation errors - {errors} | _X-Correlation-ID : {CorrelationId}",
+                                    fileName, errors, CommonHelper.CorrelationID);
                             }
                             else
                             {
                                 bessConfigs.Add(config);
-                                validConfigName += string.IsNullOrEmpty(validConfigName)
-                                    ? config.Name
-                                    : "," + config.Name;
                             }
                         }
                     }
 
                     logger.LogInformation(EventIds.BessConfigInvalidFilesCount.ToEventId(),
-                    "Invalid config count {invalidFileCount} and invalid files name : {invalidFileNames} | _X-Correlation-ID : {CorrelationId}",
-                    filesWithInvalidAttributeCount, invalidConfigName, CommonHelper.CorrelationID);
+                    "Invalid file count {invalidFileCount} and invalid config name : {invalidFileNames} | _X-Correlation-ID : {CorrelationId}",
+                    filesWithInvalidAttributeCount, string.Join(",", invalidNameList), CommonHelper.CorrelationID);
 
                     RemoveDuplicateBessConfigs((List<BessConfig>)bessConfigs);
 
                     logger.LogInformation(EventIds.BessConfigValidFilesCount.ToEventId(),
                         "Valid config count : {validFileCount} and valid config names : {validConfigNames} | _X-Correlation-ID : {CorrelationId}",
-                        bessConfigs.Count, validConfigName, CommonHelper.CorrelationID);
+                        bessConfigs.Count, string.Join(",", bessConfigs.Select(x => x.Name)), CommonHelper.CorrelationID);
                 }
                 else
                 {

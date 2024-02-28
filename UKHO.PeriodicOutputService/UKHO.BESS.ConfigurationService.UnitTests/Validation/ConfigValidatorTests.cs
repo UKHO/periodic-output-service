@@ -100,7 +100,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 .WithErrorMessage("Attribute is missing or value not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.IsEnabled)
-                .WithErrorMessage("Attribute is missing or value not provided");
+                .WithErrorMessage("Attribute is missing or value not provided. Expected value is either true or false");
         }
 
         [Test]
