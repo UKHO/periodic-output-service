@@ -9,7 +9,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         static readonly HttpClient httpClient = new();
         public static async Task<HttpResponseMessage> UploadConfigFile(string baseUrl, string path)
         {
-            var uri = $"{baseUrl}/mock/bessConfigUpload";
+            var uri = $"{baseUrl}/bessConfigUpload";
             var payloadJson = JsonConvert.SerializeObject(GetPayload(path));
             using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
             { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") })
