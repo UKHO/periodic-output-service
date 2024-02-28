@@ -117,7 +117,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
         private static bool IsValidBesType(string type)
         {
-            return Enum.IsDefined(typeof(BESType), type);
+            return Enum.IsDefined(typeof(BessType), type);
         }
 
         private static bool IsValidKeyFileType(string keyFileType)

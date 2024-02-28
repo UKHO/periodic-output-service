@@ -1,5 +1,5 @@
 ﻿namespace UKHO.PeriodicOutputService.Common.Enums;
-public enum BESType
+public enum BessType
 {
     BASE = 1,
     UPDATE = 2,
