@@ -4,7 +4,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 {
     public interface IConfigurationService
     {
-        IList<BessConfig> ProcessConfigs();
-        bool ScheduleConfigDetails(IList<BessConfig> configurationSettings);
+        void ProcessConfigs();
+        bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> configurationSettings);
     }
 }

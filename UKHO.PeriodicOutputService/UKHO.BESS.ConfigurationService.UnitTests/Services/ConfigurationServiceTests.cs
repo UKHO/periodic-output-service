@@ -186,47 +186,24 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void Does_ScheduleConfigDetails_Returns_True()
+        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
 
-            bool result = configurationService.ScheduleConfigDetails(GetFakeConfigurationSetting());
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details started | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
+                        
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details completed | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailEntities(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
 
             Assert.That(result, Is.True);
         }
 
         [Test]
-        public void Does_ScheduleConfigDetails_Returnsfalse_WhenExceptionOccurs()
+        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returnsfalse_WhenExceptionOccurs()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Throws<Exception>();
 
-            bool result = configurationService.ScheduleConfigDetails(GetFakeConfigurationSetting());
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details started | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -240,141 +217,73 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void Does_ScheduleConfigDetails_Returns_True_WhenScheduleDetailsAddedToMsgQueue()
+        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True_WhenScheduleDetailsAddedToMsgQueue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Returns(GetFakeScheduleDetailsToAddInMsgQueue());
 
-            bool result = configurationService.ScheduleConfigDetails(GetFakeConfigurationSetting());
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Schedule config details started | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Running schedule config for Name : {Name} | Frequency : {Frequency}| _X-Correlation-ID : {CorrelationId}"
+                "Config for Name : {Name} | Frequency : {Frequency} | executed at Timestamp: {Timestamp} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
-
-
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details completed | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailEntities(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
             Assert.That(result, Is.True);
         }
 
         [Test]
-        public void Does_ScheduleConfigDetails_Returns_True_WhenScheduleDetailsNotAddedToMsgQueue()
+        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True_WhenScheduleDetailsNotAddedToMsgQueue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
 
-            bool result = configurationService.ScheduleConfigDetails(GetFakeConfigurationSetting());
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details started | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
 
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
-
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details completed | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailEntities(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
             Assert.That(result, Is.True);
         }
 
         [Test]
-        public void Does_ScheduleConfigDetails_Returns_True_WhenScheduleDetailsNotAddedToMsgQueueOnSameDay()
+        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True_WhenScheduleDetailsNotAddedToMsgQueueOnSameDay()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueueOnSameDay());
 
-            bool result = configurationService.ScheduleConfigDetails(GetFakeConfigurationSettingNotEnabled());
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details started | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingNotEnabled());
 
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
-
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details completed | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailEntities(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
             Assert.That(result, Is.True);
         }
 
         [Test]
-        public void Does_ScheduleConfigDetails_Returns_True_WhenNextScheduleDetailsIsNull()
+        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True_WhenNextScheduleDetailsIsNull()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails("BESS-1"))!.Returns(null);
 
-            bool result = configurationService.ScheduleConfigDetails(GetFakeConfigurationSetting());
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details started | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
 
             A.CallTo(() => fakeAzureTableStorageHelper.GetNextScheduleDetails(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.RefreshNextSchedule(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Schedule config details completed | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailEntities(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
             Assert.That(result, Is.True);
         }

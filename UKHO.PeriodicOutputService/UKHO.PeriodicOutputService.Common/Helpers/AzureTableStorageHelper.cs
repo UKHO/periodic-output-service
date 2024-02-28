@@ -78,7 +78,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return tableClient;
         }
 
-        public void RefreshNextSchedule(DateTime nextSchedule, BessConfig configDetails, bool isExecuted)
+        public void UpsertScheduleDetailEntities(DateTime nextSchedule, BessConfig configDetails, bool isExecuted)
         {
             ScheduleDetails scheduleDetails = new()
             {

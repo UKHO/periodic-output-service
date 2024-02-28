@@ -24,11 +24,7 @@ namespace UKHO.BESS.ConfigurationService
             {
                 logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "Bess Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                var configs = configurationService.ProcessConfigs();
-                if (configs.Any())
-                {
-                    configurationService.ScheduleConfigDetails(configs);
-                }
+                configurationService.ProcessConfigs();
 
                 logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "Bess Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
