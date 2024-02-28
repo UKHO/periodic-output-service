@@ -592,7 +592,7 @@ stages:
         displayName: "Dev BESS Functional Automated Tests"
         workspace:
          clean: all
-        variables:
+        # variables:
           # - name: WEB_APP_NAME
           #   value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.WEBAPP']  ]
           # - name: mockWebAppName
