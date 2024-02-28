@@ -46,6 +46,32 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
+        [TestCase("s63", "base", "key_XML", "adds")]
+        [TestCase("s57", "change", "none", "blank")]
+        [TestCase("s57", "change", "none", "query")]
+        public void WhenConfigContainsCaseInsensitiveValidAttributes_ThenNoValidationErrorsAreFound(string exchangeSetStandard, string type, string keyFileType, string readMeSearchFilter)
+        {
+            BessConfig bessConfig = new()
+            {
+                Name = "BES-1",
+                ExchangeSetStandard = exchangeSetStandard,
+                EncCellNames = new List<string> { "GB123456", "GB234567" },
+                Frequency = "15 16 2 2 *",
+                Type = type,
+                KeyFileType = keyFileType,
+                AllowedUsers = new List<string> { "User1", "User2" },
+                AllowedUserGroups = new List<string> { "UG1", "UG2" },
+                Tags = new List<Tag> { new() { Key = "key1", Value = "value1" }, new() { Key = "key2", Value = "value2" } },
+                ReadMeSearchFilter = readMeSearchFilter,
+                BatchExpiryInDays = 30,
+                IsEnabled = true
+            };
+
+            TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
+            result.Errors.Count.Should().Be(0);
+        }
+
+        [Test]
         public void WhenConfigContainsInvalidAttributes_ThenThrowValidationError()
         {
             var bessConfig = new BessConfig
@@ -107,6 +133,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         [TestCase("")]
         [TestCase("Name/")]
         [TestCase("Abcde12345Abcde12345Abcde12345Abcde12345Abcde123451")]
+        [TestCase(" ")]
         public void WhenConfigContainsInvalidNameAttribute_ThenThrowValidationError(string name)
         {
             BessConfig bessConfig = GetBessConfig();
@@ -117,6 +144,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             switch (name)
             {
                 case "":
+                case " ":
                     result.ShouldHaveValidationErrorFor(x => x.Name)
                         .WithErrorMessage("Value is not provided");
                     break;
@@ -223,6 +251,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
+        [TestCase(null,null)]
         [TestCase("Key1", null)]
         [TestCase(null, "value1")]
         public void WhenConfigContainsInvalidTags_ThenThrowValidationError(string? key, string? value)
