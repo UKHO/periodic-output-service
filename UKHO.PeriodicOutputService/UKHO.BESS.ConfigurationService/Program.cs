@@ -10,8 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using UKHO.BESS.ConfigurationService.Services;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Helpers;
 
 namespace UKHO.BESS.ConfigurationService
 {
@@ -38,8 +40,8 @@ namespace UKHO.BESS.ConfigurationService
                 ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
                 try
                 {
-                    var bessConfigurationServiceJob = serviceProvider.GetService<BESSConfigurationServiceJob>();
-                    await bessConfigurationServiceJob.CreateBespokeExchangeSetAsync();
+                    var bessConfigurationServiceJob = serviceProvider.GetService<BessConfigurationServiceJob>();
+                    bessConfigurationServiceJob.Start();
                 }
                 finally
                 {
@@ -48,7 +50,6 @@ namespace UKHO.BESS.ConfigurationService
                     await Task.Delay(delayTime);
                 }
             }
-
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
@@ -136,9 +137,12 @@ namespace UKHO.BESS.ConfigurationService
             if (configuration != null)
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
+                serviceCollection.Configure<BessStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
             }
 
-            serviceCollection.AddSingleton<BESSConfigurationServiceJob>();
+            serviceCollection.AddSingleton<BessConfigurationServiceJob>();
+            serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
+            serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
         }
     }
 }

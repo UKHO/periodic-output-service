@@ -401,13 +401,41 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         V01X01FileFoundInAIOBatch = 809098,
         /// <summary>
-        /// 809099 - BESS Configuration Service Started
+        /// 809099 - Bess Configuration Service Started
         /// </summary>
-        BESSConfigurationServiceStarted = 809099,
+        BessConfigurationServiceStarted = 809099,
         /// <summary>
-        /// 809100 - BESS Configuration Service Completed
+        /// 809100 - Bess Configuration Service Completed
         /// </summary>
-        BESSConfigurationServiceCompleted = 809100
+        BessConfigurationServiceCompleted = 809100,
+        /// <summary>
+        /// 809101 - Bess configs Processing Started 
+        /// </summary>
+        BessConfigsProcessingStarted = 809101,
+        /// <summary>
+        /// 809102 - Bess configs Processing Started 
+        /// </summary>
+        BessConfigsProcessingCompleted = 809102,
+        /// <summary>
+        /// 809103 - Bess configs Processing Failed 
+        /// </summary>
+        BessConfigsProcessingFailed = 809103,
+        /// <summary>
+        /// 809104 - Bess config is invalid
+        /// </summary>
+        BessConfigIsInvalid = 809104,
+        /// <summary>
+        /// 809105 - Bess config parsing error
+        /// </summary>
+        BessConfigParsingError = 809105,
+        /// <summary>
+        /// 809106 - Bess configs not found
+        /// </summary>
+        BessConfigsNotFound = 809106,
+        /// <summary>
+        /// 809107 - Bess error occurred while downloading configs of json file from azure storage container
+        /// </summary>
+        BessErrorOccurredWhileDownloadingConfigFromAzureStorage = 809107
     }
 
     public static class EventIdExtensions

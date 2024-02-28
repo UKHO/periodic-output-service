@@ -2,6 +2,7 @@ variable "location" {
   type    = string
   default = "uksouth"
 }
+
 variable "resource_group_name" {
   type    = string
   default = "pos"
@@ -13,12 +14,14 @@ locals {
   web_app_name       = "${local.service_name}-${local.env_name}-lxs-webapp"
   mock_web_app_name  = "${local.service_name}-${local.env_name}-mock-webapp"
   key_vault_name     = "${local.service_name}-ukho-${local.env_name}-kv"
+  service_name_bess  = "bess"
+  container_name     = "bess-configs"
 
   tags = {
     SERVICE                   = "Periodic Output Service"
     ENVIRONMENT               = local.env_name
     SERVICE_OWNER             = "UKHO"
-    RESPONSIBLE_TEAM          = "Mastek"
+    RESPONSIBLE_TEAM          = "Abzu"
     CALLOUT_TEAM              = "On-Call_N/A"
     COST_CENTRE               = "A.008.02"
   }
