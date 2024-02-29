@@ -80,7 +80,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public void UpsertScheduleDetail(DateTime nextSchedule, BessConfig bessConfig, bool isExecuted)
         {
-            ScheduleDetailEntity scheduleDetail = new()
+            ScheduleDetailEntity scheduleDetailEntity = new()
             {
                 PartitionKey = "BessConfigSchedule",
                 RowKey = bessConfig.Name,
@@ -90,14 +90,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             };
 
             TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
-            tableJobScheduleEntityClient.UpsertEntity(scheduleDetail);
+            tableJobScheduleEntityClient.UpsertEntity(scheduleDetailEntity);
         }
 
         public ScheduleDetailEntity GetScheduleDetail(string name)
         {
             TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
-            ScheduleDetailEntity scheduleDetail = tableJobScheduleEntityClient.Query<ScheduleDetailEntity>().Where(i => i.IsEnabled.Equals(true) && i.RowKey.Equals(name)).FirstOrDefault();
-            return scheduleDetail;
+            ScheduleDetailEntity scheduleDetailEntity = tableJobScheduleEntityClient.Query<ScheduleDetailEntity>().Where(i => i.IsEnabled.Equals(true) && i.RowKey.Equals(name)).FirstOrDefault();
+            return scheduleDetailEntity;
         }
     }
 }

@@ -144,10 +144,10 @@ namespace UKHO.BESS.ConfigurationService.Services
         }
 
         [ExcludeFromCodeCoverage]
-        private static bool IsScheduleRefreshed(ScheduleDetailEntity scheduleDetail, DateTime nextFullUpdateOccurrence, BessConfig bessConfig) => scheduleDetail.NextScheduleTime != nextFullUpdateOccurrence || scheduleDetail.IsEnabled != bessConfig.IsEnabled;
+        private static bool IsScheduleRefreshed(ScheduleDetailEntity scheduleDetailEntity, DateTime nextOccurrence, BessConfig bessConfig) => scheduleDetailEntity.NextScheduleTime != nextOccurrence || scheduleDetailEntity.IsEnabled != bessConfig.IsEnabled;
 
         [ExcludeFromCodeCoverage]
-        private static bool CheckSchedule(int intervalInMins, bool isSameDay, BessConfig bessConfig, ScheduleDetailEntity scheduleDetail) => intervalInMins <= 0 && isSameDay && bessConfig.IsEnabled.Equals(true) && scheduleDetail.IsExecuted.Equals(false);
+        private static bool CheckSchedule(int intervalInMins, bool isSameDay, BessConfig bessConfig, ScheduleDetailEntity scheduleDetailEntity) => intervalInMins <= 0 && isSameDay && bessConfig.IsEnabled.Equals(true) && scheduleDetailEntity.IsExecuted.Equals(false);
 
         [ExcludeFromCodeCoverage]
         private ScheduleDetailEntity GetScheduleDetail(DateTime nextOccurrence, BessConfig bessConfig)
@@ -158,13 +158,13 @@ namespace UKHO.BESS.ConfigurationService.Services
             {
                 azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, bessConfig, false);
 
-                ScheduleDetailEntity scheduleDetail = new();
+                ScheduleDetailEntity scheduleDetailEntity = new();
                 {
-                    scheduleDetail.NextScheduleTime = nextOccurrence;
-                    scheduleDetail.IsEnabled = bessConfig.IsEnabled;
+                    scheduleDetailEntity.NextScheduleTime = nextOccurrence;
+                    scheduleDetailEntity.IsEnabled = bessConfig.IsEnabled;
                 }
 
-                return scheduleDetail;
+                return scheduleDetailEntity;
             }
             return existingScheduleDetail;
         }

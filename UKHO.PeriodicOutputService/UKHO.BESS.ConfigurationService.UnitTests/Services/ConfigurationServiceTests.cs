@@ -67,6 +67,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
         }
 
         [Test]
@@ -186,7 +189,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessful_ThenReturnsTrue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
 
@@ -199,7 +202,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returnsfalse_WhenExceptionOccurs()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsThrowsException_ThenReturnsFalse()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Throws<Exception>();
 
@@ -217,7 +220,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True_WhenScheduleDetailsAddedToMsgQueue()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndScheduleDetailsAddedToMsgQueue_ThenReturnsTrue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInMsgQueue());
 
@@ -241,7 +244,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True_WhenScheduleDetailsNotAddedToMsgQueue()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndScheduleDetailsNotAddedToMsgQueue_ThenReturnsTrue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
 
@@ -257,7 +260,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True_WhenScheduleDetailsNotAddedToMsgQueueOnSameDay()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndScheduleDetailsNotAddedToMsgQueueSameDay_ThenReturnsTrue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueueOnSameDay());
 
@@ -273,7 +276,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void Does_CheckConfigFrequencyAndSaveQueueDetails_Returns_True_WhenNextScheduleDetailsIsNull()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndWhenNextScheduleDetailsIsNull_ThenReturnsTrue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1"))!.Returns(null);
 
