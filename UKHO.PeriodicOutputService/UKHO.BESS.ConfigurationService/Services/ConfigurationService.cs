@@ -110,11 +110,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                     // Get the next occurrence of the cron expression after the last execution time
                     var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
                     ScheduleDetailEntity existingScheduleDetail = GetScheduleDetail(nextOccurrence, config);
-
-                    var intervalInMins = ((int)existingScheduleDetail.NextScheduleTime.Subtract(DateTime.UtcNow).TotalMinutes);
-                    var isSameDay = existingScheduleDetail.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
-
-                    if (CheckSchedule(intervalInMins, isSameDay, config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
+                    
+                    if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
                         /* -- save details to msg queue --
                          *
@@ -147,7 +144,13 @@ namespace UKHO.BESS.ConfigurationService.Services
         private static bool IsScheduleRefreshed(ScheduleDetailEntity scheduleDetailEntity, DateTime nextOccurrence, BessConfig bessConfig) => scheduleDetailEntity.NextScheduleTime != nextOccurrence || scheduleDetailEntity.IsEnabled != bessConfig.IsEnabled;
 
         [ExcludeFromCodeCoverage]
-        private static bool CheckSchedule(int intervalInMins, bool isSameDay, BessConfig bessConfig, ScheduleDetailEntity scheduleDetailEntity) => intervalInMins <= 0 && isSameDay && bessConfig.IsEnabled.Equals(true) && scheduleDetailEntity.IsExecuted.Equals(false);
+        private static bool CheckSchedule(BessConfig bessConfig, ScheduleDetailEntity scheduleDetailEntity)
+        {
+            var intervalInMinutes = ((int)scheduleDetailEntity.NextScheduleTime.Subtract(DateTime.UtcNow).TotalMinutes);
+            var isSameDay = scheduleDetailEntity.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
+
+            return intervalInMinutes <= 0 && isSameDay && bessConfig.IsEnabled.Equals(true) && scheduleDetailEntity.IsExecuted.Equals(false);
+        } 
 
         [ExcludeFromCodeCoverage]
         private ScheduleDetailEntity GetScheduleDetail(DateTime nextOccurrence, BessConfig bessConfig)
