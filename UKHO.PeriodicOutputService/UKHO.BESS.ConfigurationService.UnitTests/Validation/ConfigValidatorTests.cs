@@ -32,7 +32,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 Tags = new List<Tag> { new() { Key = "key1", Value = "value1" }, new() { Key = "key2", Value = "value2" } },
                 ReadMeSearchFilter = "ADDS",
                 BatchExpiryInDays = 30,
-                IsEnabled = true
+                IsEnabled = "yes"
             };
         }
 
@@ -46,10 +46,10 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
-        [TestCase("s63", "base", "key_XML", "avcs", true)]
-        [TestCase("s57", "change", "Permit_xml", "blank", false)]
-        [TestCase("s57", "upDate", "noNe", "query", false)]
-        public void WhenConfigContainsCaseInsensitiveValidAttributes_ThenNoValidationErrorsAreFound(string exchangeSetStandard, string type, string keyFileType, string readMeSearchFilter, bool? isEnabled)
+        [TestCase("s63", "base", "key_XML", "avcs", "yes")]
+        [TestCase("s57", "change", "Permit_xml", "blank", "YeS")]
+        [TestCase("s57", "upDate", "noNe", "query", "YES")]
+        public void WhenConfigContainsCaseInsensitiveValidAttributes_ThenNoValidationErrorsAreFound(string exchangeSetStandard, string type, string keyFileType, string readMeSearchFilter, string isEnabled)
         {
             BessConfig bessConfig = new()
             {
@@ -72,7 +72,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
-        public void WhenConfigContainsInvalidAttributes_ThenThrowValidationError()
+        public void WhenConfigContainsInvalidIsEnabledAttribute_ThenThrowValidationErrorForIsEnabledOnly()
         {
             var bessConfig = new BessConfig
             {
@@ -88,6 +88,30 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 ReadMeSearchFilter = "",
                 BatchExpiryInDays = 0,
                 IsEnabled = null
+            };
+
+            TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
+
+            result.ShouldHaveValidationErrorFor(x => x.IsEnabled)
+                .WithErrorMessage("Attribute is missing or value not provided. Expected value is either Yes or No.");
+        }
+
+        public void WhenIsEnabledYesAndConfigContainsInvalidAttributes_ThenThrowValidationError()
+        {
+            var bessConfig = new BessConfig
+            {
+                Name = null,
+                ExchangeSetStandard = null,
+                EncCellNames = new List<string>(),
+                Frequency = "",
+                Type = "",
+                KeyFileType = "",
+                AllowedUsers = new List<string>(),
+                AllowedUserGroups = new List<string>(),
+                Tags = null,
+                ReadMeSearchFilter = "",
+                BatchExpiryInDays = 0,
+                IsEnabled = "yes"
             };
 
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
@@ -124,9 +148,31 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
 
             result.ShouldHaveValidationErrorFor(x => x.BatchExpiryInDays)
                 .WithErrorMessage("Attribute is missing or value not provided");
+        }
+
+        [Test]
+        public void WhenIsEnabledNo_ThenNoBESCreatedMessage()
+        {
+            var bessConfig = new BessConfig
+            {
+                Name = null,
+                ExchangeSetStandard = null,
+                EncCellNames = new List<string>(),
+                Frequency = "",
+                Type = "",
+                KeyFileType = "",
+                AllowedUsers = new List<string>(),
+                AllowedUserGroups = new List<string>(),
+                Tags = null,
+                ReadMeSearchFilter = "",
+                BatchExpiryInDays = 0,
+                IsEnabled = "no"
+            };
+
+            TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.IsEnabled)
-                .WithErrorMessage("Attribute is missing or value not provided. Expected value is either true or false");
+                .WithErrorMessage("Bespoke ES is not created for file - , found IsEnabled: no.");
         }
 
         [Test]

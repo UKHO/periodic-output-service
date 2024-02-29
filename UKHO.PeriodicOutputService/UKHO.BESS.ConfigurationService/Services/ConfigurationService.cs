@@ -43,12 +43,13 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {
                         string content = configs[fileName];
 
-                        IList<BessConfig> bessConfig = GetValidConfig(content, fileName);
+                        IList<BessConfig> deserializedConfigs = ParseAndDeserializeConfig(content, fileName);
 
-                        foreach (BessConfig config in bessConfig)
+                        foreach (BessConfig deserializedConfig in deserializedConfigs)
                         {
-                            config.FileName = fileName; //for logging
-                            ValidationResult results = configValidator.Validate(config);
+                            deserializedConfig.FileName = fileName; //for logging
+
+                            ValidationResult results = configValidator.Validate(deserializedConfig);
 
                             if (!results.IsValid)
                             {
@@ -60,14 +61,14 @@ namespace UKHO.BESS.ConfigurationService.Services
                                     errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
                                 }
 
-                                invalidNameList.Add(config.Name);
+                                invalidNameList.Add(deserializedConfig.Name);
 
                                 logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bespoke ES is not created for file - {fileName}. Validation errors - {errors} | _X-Correlation-ID : {CorrelationId}",
                                     fileName, errors, CommonHelper.CorrelationID);
                             }
                             else
                             {
-                                bessConfigs.Add(config);
+                                bessConfigs.Add(deserializedConfig);
                             }
                         }
                     }
@@ -76,7 +77,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     "Invalid file count {invalidFileCount} and invalid config name : {invalidFileNames} | _X-Correlation-ID : {CorrelationId}",
                     filesWithInvalidAttributeCount, string.Join(",", invalidNameList), CommonHelper.CorrelationID);
 
-                    RemoveDuplicateBessConfigs((List<BessConfig>)bessConfigs);
+                    RemoveDuplicateConfigs((List<BessConfig>)bessConfigs);
 
                     logger.LogInformation(EventIds.BessConfigValidFilesCount.ToEventId(),
                         "Valid config count : {validFileCount} and valid config names : {validConfigNames} | _X-Correlation-ID : {CorrelationId}",
@@ -96,7 +97,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
         }
 
-        private IList<BessConfig> GetValidConfig(string json, string fileName)
+        private IList<BessConfig> ParseAndDeserializeConfig(string json, string fileName)
         {
             IList<BessConfig> bessConfig = new List<BessConfig>();
             try
@@ -120,7 +121,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
         }
 
-        private void RemoveDuplicateBessConfigs(List<BessConfig> bessConfigs)
+        private void RemoveDuplicateConfigs(List<BessConfig> bessConfigs)
         {
             //find duplicates with property Name
             var duplicateRecords = bessConfigs.GroupBy(x => new { x.Name })
@@ -132,12 +133,12 @@ namespace UKHO.BESS.ConfigurationService.Services
 
             foreach (var duplicateRecord in duplicateRecords)
             {
-                foreach (BessConfig? duplicateBessConfig in duplicateRecord.ToList())
+                foreach (BessConfig? duplicateConfig in duplicateRecord.ToList())
                 {
-                    logger.LogError(EventIds.BessConfigsProcessingFailed.ToEventId(), "Bespoke ES is not created for file : {fileName}.Validation errors - duplicate value. Name : {name} | _X-Correlation-ID : {CorrelationId}", duplicateBessConfig.FileName, duplicateBessConfig.Name, CommonHelper.CorrelationID);
+                    logger.LogError(EventIds.BessConfigsDuplicateRecordsFound.ToEventId(), "Bespoke ES is not created for file : {fileName}.Validation errors - Duplicate value. Name : {name} | _X-Correlation-ID : {CorrelationId}", duplicateConfig.FileName, duplicateConfig.Name, CommonHelper.CorrelationID);
 
                     bessConfigs.RemoveAll(x =>
-                        x.FileName.Equals(duplicateBessConfig.FileName, StringComparison.OrdinalIgnoreCase));
+                        x.FileName.Equals(duplicateConfig.FileName, StringComparison.OrdinalIgnoreCase));
                 }
             }
 

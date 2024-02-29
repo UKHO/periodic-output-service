@@ -90,9 +90,6 @@ namespace UKHO.BESS.ConfigurationService.Validation
                     RuleFor(config => config.BatchExpiryInDays).GreaterThan(0)
                         .WithMessage("Expected value is natural number, i.e. number greater than 0");
                 });
-
-            RuleFor(config => config.IsEnabled).NotNull()
-                .WithMessage("Attribute is missing or value not provided. Expected value is either true or false");
         }
 
         private static bool IsAclProvided(BessConfig c)
@@ -101,7 +98,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                     (c.AllowedUsers?.Count() == 0 && c.AllowedUserGroups?.Count() == 0) ||
                     (c.AllowedUsers == null && !c.AllowedUserGroups.Any()) ||
                     (!c.AllowedUsers.Any() && c.AllowedUserGroups == null) ||
-                    (c.AllowedUsers.Contains(null) && c.AllowedUserGroups.Contains(null))||
+                    (c.AllowedUsers.Contains(null) && c.AllowedUserGroups.Contains(null)) ||
                     (c.AllowedUsers.Contains(string.Empty) && c.AllowedUserGroups.Contains(string.Empty))
                 ? false
                 : true;
@@ -138,6 +135,21 @@ namespace UKHO.BESS.ConfigurationService.Validation
         ValidationResult IConfigValidator.Validate(BessConfig bessConfig)
         {
             return Validate(bessConfig);
+        }
+
+        protected override bool PreValidate(ValidationContext<BessConfig> context, ValidationResult result)
+        {
+            if (context.InstanceToValidate.IsEnabled?.ToLower() == "no")
+            {
+                result.Errors.Add(new ValidationFailure("IsEnabled", "Bespoke ES is not created for file - " + context.InstanceToValidate.FileName + ", found IsEnabled: no."));
+                return false;
+            }
+            else if (context.InstanceToValidate.IsEnabled?.ToLower() != "yes")
+            {
+                result.Errors.Add(new ValidationFailure("IsEnabled", "Attribute is missing or value not provided. Expected value is either Yes or No."));
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -451,7 +451,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809111 - Bess config valid files count
         /// </summary>
-        BessConfigValidFilesCount = 809111
+        BessConfigValidFilesCount = 809111,
+        /// <summary>
+        /// 809112 - Bess config duplicate records found
+        /// </summary>
+        BessConfigsDuplicateRecordsFound = 809112
     }
 
     public static class EventIdExtensions
