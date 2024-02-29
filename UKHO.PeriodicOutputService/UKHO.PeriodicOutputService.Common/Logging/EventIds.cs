@@ -455,7 +455,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809112 - Bess config duplicate records found
         /// </summary>
-        BessConfigsDuplicateRecordsFound = 809112
+        BessConfigsDuplicateRecordsFound = 809112,
+        /// <summary>
+        /// 809113 - Bess total config count
+        /// </summary>
+        BessTotalConfigsCount = 809113
     }
 
     public static class EventIdExtensions
