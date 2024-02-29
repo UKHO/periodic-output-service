@@ -78,25 +78,25 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return tableClient;
         }
 
-        public void UpsertScheduleDetailEntities(DateTime nextSchedule, BessConfig configDetails, bool isExecuted)
+        public void UpsertScheduleDetail(DateTime nextSchedule, BessConfig bessConfig, bool isExecuted)
         {
-            ScheduleDetails scheduleDetails = new()
+            ScheduleDetailEntity scheduleDetail = new()
             {
                 PartitionKey = "BessConfigSchedule",
-                RowKey = configDetails.Name,
+                RowKey = bessConfig.Name,
                 NextScheduleTime = nextSchedule,
-                IsEnabled = configDetails.IsEnabled,
+                IsEnabled = bessConfig.IsEnabled,
                 IsExecuted = isExecuted
             };
 
             TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
-            tableJobScheduleEntityClient.UpsertEntity(scheduleDetails);
+            tableJobScheduleEntityClient.UpsertEntity(scheduleDetail);
         }
 
-        public ScheduleDetails GetNextScheduleDetails(string name)
+        public ScheduleDetailEntity GetScheduleDetail(string name)
         {
             TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
-            ScheduleDetails scheduleDetail = tableJobScheduleEntityClient.Query<ScheduleDetails>().Where(i => i.IsEnabled.Equals(true) && i.RowKey.Equals(name)).FirstOrDefault();
+            ScheduleDetailEntity scheduleDetail = tableJobScheduleEntityClient.Query<ScheduleDetailEntity>().Where(i => i.IsEnabled.Equals(true) && i.RowKey.Equals(name)).FirstOrDefault();
             return scheduleDetail;
         }
     }

@@ -3,7 +3,7 @@ using Azure.Data.Tables;
 
 namespace UKHO.PeriodicOutputService.Common.Models.TableEntities
 {
-    public class ScheduleDetails : ITableEntity
+    public class ScheduleDetailEntity : ITableEntity
     {
         public string PartitionKey { get; set; }
         public string RowKey { get; set; }

@@ -439,7 +439,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809108 - Schedule config details matched with current time
         /// </summary>
-        BessConfigFrequencyMatched = 809108,
+        BessConfigFrequencyElapsed = 809108,
         /// <summary>
         /// 809109 - Exception occurred while processing bespoke details to queue
         /// </summary>

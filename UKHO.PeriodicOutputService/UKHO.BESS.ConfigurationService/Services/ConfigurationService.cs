@@ -64,7 +64,6 @@ namespace UKHO.BESS.ConfigurationService.Services
                 }
 
                 logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-
             }
             catch (Exception ex)
             {
@@ -97,40 +96,40 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <summary>
         /// check cron expression and save bespoke details to msg queue
         /// </summary>
-        /// <param name="configDetails"></param>
+        /// <param name="bessConfigs"></param>
         /// <returns></returns>
-        public bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> configDetails)
+        public bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs)
         {
             try
             {
-                foreach (var configDetail in configDetails)
+                foreach (var config in bessConfigs)
                 {
                     // Parse the cron expression using NCronTab library
-                    var schedule = CrontabSchedule.Parse(configDetail.Frequency);
+                    var schedule = CrontabSchedule.Parse(config.Frequency);
 
                     // Get the next occurrence of the cron expression after the last execution time
                     var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
-                    ScheduleDetails scheduleDetails = GetNextSchedule(nextOccurrence, configDetail);
+                    ScheduleDetailEntity existingScheduleDetail = GetScheduleDetail(nextOccurrence, config);
 
-                    var intervalInMins = ((int)scheduleDetails.NextScheduleTime.Subtract(DateTime.UtcNow).TotalMinutes);
-                    var isSameDay = scheduleDetails.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
+                    var intervalInMins = ((int)existingScheduleDetail.NextScheduleTime.Subtract(DateTime.UtcNow).TotalMinutes);
+                    var isSameDay = existingScheduleDetail.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
 
-                    if (CheckSchedule(intervalInMins, isSameDay, configDetail, scheduleDetails)) //Check if config schedule is missed or if it's due for the same day.
+                    if (CheckSchedule(intervalInMins, isSameDay, config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
                         /* -- save details to msg queue --
-                         * 
-                         * 
-                         * 
+                         *
+                         *
+                         *
                          */
 
-                        logger.LogInformation(EventIds.BessConfigFrequencyMatched.ToEventId(), "Config for Name : {Name} | Frequency : {Frequency} | executed at Timestamp: {Timestamp} | _X-Correlation-ID : {CorrelationId}", configDetail.Name, configDetail.Frequency, DateTime.UtcNow, CommonHelper.CorrelationID);
-                        azureTableStorageHelper.UpsertScheduleDetailEntities(nextOccurrence, configDetail, true);
+                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Config for Name : {Name} | Frequency : {Frequency} | executed at Timestamp: {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, DateTime.UtcNow, CommonHelper.CorrelationID);
+                        azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
                     else
                     {   //Update schedule details
-                        if (IsScheduleRefreshed(scheduleDetails, nextOccurrence, configDetail))
+                        if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
                         {
-                            azureTableStorageHelper.UpsertScheduleDetailEntities(nextOccurrence, configDetail, false);
+                            azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, false);
                         }
                     }
                 }
@@ -143,30 +142,31 @@ namespace UKHO.BESS.ConfigurationService.Services
                 return false;
             }
         }
-        [ExcludeFromCodeCoverage]
-        private static bool IsScheduleRefreshed(ScheduleDetails scheduleDetails, DateTime nextFullUpdateOccurrence, BessConfig configDetail) => scheduleDetails.NextScheduleTime != nextFullUpdateOccurrence || scheduleDetails.IsEnabled != configDetail.IsEnabled;
 
         [ExcludeFromCodeCoverage]
-        private static bool CheckSchedule(int intervalInMins, bool isSameDay, BessConfig configDetail, ScheduleDetails scheduleDetails) => intervalInMins <= 0 && isSameDay && configDetail.IsEnabled.Equals(true) && scheduleDetails.IsExecuted.Equals(false);
+        private static bool IsScheduleRefreshed(ScheduleDetailEntity scheduleDetail, DateTime nextFullUpdateOccurrence, BessConfig bessConfig) => scheduleDetail.NextScheduleTime != nextFullUpdateOccurrence || scheduleDetail.IsEnabled != bessConfig.IsEnabled;
 
         [ExcludeFromCodeCoverage]
-        private ScheduleDetails GetNextSchedule(DateTime nextFullUpdateOccurrence, BessConfig configDetails)
+        private static bool CheckSchedule(int intervalInMins, bool isSameDay, BessConfig bessConfig, ScheduleDetailEntity scheduleDetail) => intervalInMins <= 0 && isSameDay && bessConfig.IsEnabled.Equals(true) && scheduleDetail.IsExecuted.Equals(false);
+
+        [ExcludeFromCodeCoverage]
+        private ScheduleDetailEntity GetScheduleDetail(DateTime nextOccurrence, BessConfig bessConfig)
         {
-            var scheduleDetailEntities = azureTableStorageHelper.GetNextScheduleDetails(configDetails.Name);
+            var existingScheduleDetail = azureTableStorageHelper.GetScheduleDetail(bessConfig.Name);
 
-            if (scheduleDetailEntities == null)
+            if (existingScheduleDetail == null)
             {
-                azureTableStorageHelper.UpsertScheduleDetailEntities(nextFullUpdateOccurrence, configDetails, false);
+                azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, bessConfig, false);
 
-                ScheduleDetails scheduleDetail = new();
+                ScheduleDetailEntity scheduleDetail = new();
                 {
-                    scheduleDetail.NextScheduleTime = nextFullUpdateOccurrence;
-                    scheduleDetail.IsEnabled = configDetails.IsEnabled;
+                    scheduleDetail.NextScheduleTime = nextOccurrence;
+                    scheduleDetail.IsEnabled = bessConfig.IsEnabled;
                 }
 
                 return scheduleDetail;
             }
-            return scheduleDetailEntities;
+            return existingScheduleDetail;
         }
     }
 }
