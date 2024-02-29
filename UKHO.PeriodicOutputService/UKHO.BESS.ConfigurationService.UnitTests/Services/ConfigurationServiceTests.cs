@@ -231,7 +231,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Config for Name : {Name} | Frequency : {Frequency} | executed at Timestamp: {Timestamp} | _X-Correlation-ID : {CorrelationId}"
+                "Config for Name : {Name} | Frequency : {Frequency} | ScheduleTime : {ScheduleTime} | executed at Timestamp: {Timestamp} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
@@ -299,7 +299,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 PartitionKey = "BessConfigSchedule",
                 RowKey = "BESS-1",
                 NextScheduleTime = DateTime.UtcNow.AddMinutes(1),
-                IsEnabled = true,
+                IsEnabled = "Yes",
                 IsExecuted = false,
             };
             return history;
@@ -313,7 +313,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 PartitionKey = "BessConfigSchedule",
                 RowKey = "BESS-1",
                 NextScheduleTime = DateTime.UtcNow.AddDays(1),
-                IsEnabled = false,
+                IsEnabled = "No",
                 IsExecuted = true
 
             };
@@ -328,7 +328,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 PartitionKey = "BessConfigSchedule",
                 RowKey = "BESS-1",
                 NextScheduleTime = DateTime.UtcNow,
-                IsEnabled = true,
+                IsEnabled = "Yes",
                 IsExecuted = false
 
             };
@@ -353,7 +353,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 Tags = new List<Tag>(),
                 ReadMeSearchFilter = "",
                 BatchExpiryInDays = 1,
-                IsEnabled = true
+                IsEnabled = "Yes"
             },
         };
             return configurations;
@@ -377,7 +377,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 Tags = new List<Tag>(),
                 ReadMeSearchFilter = "",
                 BatchExpiryInDays = 1,
-                IsEnabled = false
+                IsEnabled = "No"
             },
         };
             return configurations;

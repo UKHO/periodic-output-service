@@ -119,7 +119,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                          *
                          */
 
-                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Config for Name : {Name} | Frequency : {Frequency} | executed at Timestamp: {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, DateTime.UtcNow, CommonHelper.CorrelationID);
+                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Config for Name : {Name} | Frequency : {Frequency} | ScheduleTime : {ScheduleTime} | executed at Timestamp: {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, nextOccurrence, DateTime.UtcNow, CommonHelper.CorrelationID);
                         azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
                     else
@@ -146,10 +146,10 @@ namespace UKHO.BESS.ConfigurationService.Services
         [ExcludeFromCodeCoverage]
         private static bool CheckSchedule(BessConfig bessConfig, ScheduleDetailEntity scheduleDetailEntity)
         {
-            var intervalInMinutes = ((int)scheduleDetailEntity.NextScheduleTime.Subtract(DateTime.UtcNow).TotalMinutes);
+            var intervalInMinutes = ((int)scheduleDetailEntity.NextScheduleTime.Subtract(DateTime.UtcNow).TotalSeconds);
             var isSameDay = scheduleDetailEntity.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
 
-            return intervalInMinutes <= 0 && isSameDay && bessConfig.IsEnabled.Equals(true) && scheduleDetailEntity.IsExecuted.Equals(false);
+            return intervalInMinutes <= 0 && isSameDay && bessConfig.IsEnabled.Equals("Yes") && scheduleDetailEntity.IsExecuted.Equals(false);
         } 
 
         [ExcludeFromCodeCoverage]

@@ -16,6 +16,6 @@ namespace UKHO.PeriodicOutputService.Common.Models.Bess
         public IEnumerable<Tag> Tags { get; set; }
         public string ReadMeSearchFilter { get; set; }
         public int BatchExpiryInDays { get; set; }
-        public bool? IsEnabled { get; set; }
+        public string IsEnabled { get; set; }
     }
 }
