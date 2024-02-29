@@ -62,7 +62,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                                 invalidNameList.Add(config.Name);
 
-                                logger.LogInformation(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bespoke ES is not created for file - {fileName}. Validation errors - {errors} | _X-Correlation-ID : {CorrelationId}",
+                                logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bespoke ES is not created for file - {fileName}. Validation errors - {errors} | _X-Correlation-ID : {CorrelationId}",
                                     fileName, errors, CommonHelper.CorrelationID);
                             }
                             else
@@ -134,7 +134,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             {
                 foreach (BessConfig? duplicateBessConfig in duplicateRecord.ToList())
                 {
-                    logger.LogInformation(EventIds.BessConfigsProcessingFailed.ToEventId(), "Bespoke ES is not created for file : {fileName}.Validation errors - duplicate value. Name : {name} | _X-Correlation-ID : {CorrelationId}", duplicateBessConfig.FileName, duplicateBessConfig.Name, CommonHelper.CorrelationID);
+                    logger.LogError(EventIds.BessConfigsProcessingFailed.ToEventId(), "Bespoke ES is not created for file : {fileName}.Validation errors - duplicate value. Name : {name} | _X-Correlation-ID : {CorrelationId}", duplicateBessConfig.FileName, duplicateBessConfig.Name, CommonHelper.CorrelationID);
 
                     bessConfigs.RemoveAll(x =>
                         x.FileName.Equals(duplicateBessConfig.FileName, StringComparison.OrdinalIgnoreCase));

@@ -46,25 +46,25 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
-        [TestCase("s63", "base", "key_XML", "adds")]
-        [TestCase("s57", "change", "none", "blank")]
-        [TestCase("s57", "change", "none", "query")]
-        public void WhenConfigContainsCaseInsensitiveValidAttributes_ThenNoValidationErrorsAreFound(string exchangeSetStandard, string type, string keyFileType, string readMeSearchFilter)
+        [TestCase("s63", "base", "key_XML", "avcs", true)]
+        [TestCase("s57", "change", "Permit_xml", "blank", false)]
+        [TestCase("s57", "upDate", "noNe", "query", false)]
+        public void WhenConfigContainsCaseInsensitiveValidAttributes_ThenNoValidationErrorsAreFound(string exchangeSetStandard, string type, string keyFileType, string readMeSearchFilter, bool? isEnabled)
         {
             BessConfig bessConfig = new()
             {
                 Name = "BES-1",
                 ExchangeSetStandard = exchangeSetStandard,
-                EncCellNames = new List<string> { "GB123456", "GB234567" },
+                EncCellNames = new List<string> { "GB123456", "GB234567", "GB*" },
                 Frequency = "15 16 2 2 *",
                 Type = type,
                 KeyFileType = keyFileType,
                 AllowedUsers = new List<string> { "User1", "User2" },
-                AllowedUserGroups = new List<string> { "UG1", "UG2" },
+                //No Allowed Users Group
                 Tags = new List<Tag> { new() { Key = "key1", Value = "value1" }, new() { Key = "key2", Value = "value2" } },
                 ReadMeSearchFilter = readMeSearchFilter,
-                BatchExpiryInDays = 30,
-                IsEnabled = true
+                BatchExpiryInDays = 1,
+                IsEnabled = isEnabled
             };
 
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
@@ -163,7 +163,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
 
         [Test]
         [TestCase("S631")]
-        public void WhenConfigContainsInvalidExchangeSetType_ThenThrowValidationError(string exchangeSetStandard)
+        [TestCase("S-63")]
+        [TestCase("57")]
+        public void WhenConfigContainsInvalidExchangeSetStandard_ThenThrowValidationError(string exchangeSetStandard)
         {
             BessConfig bessConfig = GetBessConfig();
             bessConfig.ExchangeSetStandard = exchangeSetStandard;
@@ -222,6 +224,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
 
         [Test]
         [TestCase("KEY_JSON")]
+        [TestCase("KEY-XML")]
         public void WhenConfigContainsInvalidKeyFileType_ThenThrowValidationError(string keyFileType)
         {
             BessConfig bessConfig = GetBessConfig();
@@ -251,7 +254,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
-        [TestCase(null,null)]
+        [TestCase(null, null)]
         [TestCase("Key1", null)]
         [TestCase(null, "value1")]
         public void WhenConfigContainsInvalidTags_ThenThrowValidationError(string? key, string? value)

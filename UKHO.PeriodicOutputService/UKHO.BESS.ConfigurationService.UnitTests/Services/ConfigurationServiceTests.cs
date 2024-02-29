@@ -192,7 +192,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Error
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingFailed.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "\nBespoke ES is not created for file : {fileName}.\nValidation errors - duplicate value. Name : {name} | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bespoke ES is not created for file : {fileName}.Validation errors - duplicate value. Name : {name} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -237,9 +237,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
-                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidAttributes.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bespoke ES is not created for file - {fileName}. \nValidation errors - {errors} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bespoke ES is not created for file - {fileName}. Validation errors - {errors} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappened();
         }
 
