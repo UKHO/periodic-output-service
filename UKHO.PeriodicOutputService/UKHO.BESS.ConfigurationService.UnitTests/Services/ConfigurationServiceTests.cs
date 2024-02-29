@@ -67,6 +67,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetailEntities(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
         }
 
         [Test]
