@@ -157,19 +157,20 @@ namespace UKHO.BESS.ConfigurationService.Services
         {
             var existingScheduleDetail = azureTableStorageHelper.GetScheduleDetail(bessConfig.Name);
 
-            if (existingScheduleDetail == null)
+            if (existingScheduleDetail != null)
             {
-                azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, bessConfig, false);
-
-                ScheduleDetailEntity scheduleDetailEntity = new();
-                {
-                    scheduleDetailEntity.NextScheduleTime = nextOccurrence;
-                    scheduleDetailEntity.IsEnabled = bessConfig.IsEnabled;
-                }
-
-                return scheduleDetailEntity;
+                return existingScheduleDetail;
             }
-            return existingScheduleDetail;
+
+            azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, bessConfig, false);
+
+            ScheduleDetailEntity scheduleDetailEntity = new();
+            {
+                scheduleDetailEntity.NextScheduleTime = nextOccurrence;
+                scheduleDetailEntity.IsEnabled = bessConfig.IsEnabled;
+            }
+
+            return scheduleDetailEntity;
         }
     }
 }
