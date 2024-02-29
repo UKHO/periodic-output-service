@@ -746,7 +746,7 @@ stages:
               filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
-      - job: FunctionalTests
+      - job: POSFunctionalTests
         dependsOn:
         - QADeployApp
         - CheckInfra
@@ -754,7 +754,7 @@ stages:
         - CheckESS
         - CheckFM
         pool: NautilusBuild
-        displayName: "QA Functional Automated Tests"
+        displayName: "QA POS Functional Automated Tests"
         workspace:
          clean: all
         variables:
@@ -783,17 +783,17 @@ stages:
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath) -ftrunning "true" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
                 - task: DownloadBuildArtifacts@0
-                  displayName: "Download Functional test Artifact"
+                  displayName: "Download POS Functional test Artifact"
                   inputs:
                     buildType: 'current'
                     downloadType: 'single'
-                    artifactName: 'functionaltests'
+                    artifactName: 'posfunctionaltests'
                     downloadPath: '$(Build.SourcesDirectory)'
 
                 - task: FileTransform@2
                   displayName: "File Transform: functionaltests"
                   inputs:
-                    folderPath: '$(Build.SourcesDirectory)/functionaltests/'
+                    folderPath: '$(Build.SourcesDirectory)/posfunctionaltests/'
                     xmlTransformationRules:
                     jsonTargetFiles: '**/appsettings.json'
 
@@ -804,7 +804,7 @@ stages:
                     version: 6.0.x
 
                 - task: DotNetCoreCLI@2
-                  displayName: "Run Functional tests"
+                  displayName: "Run POS Functional tests"
                   inputs:
                     command: "test"
                     projects: |
@@ -812,8 +812,8 @@ stages:
                       !**/*TestAdapter.dll
                       !**/obj/**
                     arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
-                    testRunTitle: "QA-AutomationTests"
-                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+                    testRunTitle: "QA-POSAutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
 
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download Terraform Artifact"
@@ -843,6 +843,51 @@ stages:
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_stub_configuration.ps1"
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+
+      - job: BESSFunctionalTests
+        dependsOn:
+        - DevDeployApp
+        - CheckInfra
+        - CheckFSS
+        - CheckESS
+        - CheckFM
+        - POSFunctionalTests
+        pool: NautilusBuild
+        displayName: "QA BESS Functional Automated Tests"
+        workspace:
+         clean: all
+        steps:
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download BESS Functional test Artifact"
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'bessfunctionaltests'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: FileTransform@2
+                  displayName: "File Transform: functionaltests"
+                  inputs:
+                    folderPath: '$(Build.SourcesDirectory)/bessfunctionaltests/'
+                    xmlTransformationRules:
+                    jsonTargetFiles: '**/appsettings.json'
+
+                - task: UseDotNet@2
+                  displayName: 'Use .NET SDK'
+                  inputs:
+                    packageType: sdk
+                    version: 6.0.x
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run BESS Functional tests"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    testRunTitle: "QA-BESSAutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
 
   - stage: Livedeploy
     displayName: "Livedeploy (inc terraform, webapp deploy)"
@@ -1052,7 +1097,7 @@ stages:
               filePath: '$(Build.SourcesDirectory)/vNextIATDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
-      - job: FunctionalTests
+      - job: POSFunctionalTests
         dependsOn:
         - vNextIATDeployApp
         - CheckInfra
@@ -1060,7 +1105,7 @@ stages:
         - CheckESS
         - CheckFM
         pool: NautilusBuild
-        displayName: "vNext IAT Functional Automated Tests"
+        displayName: "vNext IAT POS Functional Automated Tests"
         workspace:
           clean: all
         variables:
@@ -1089,17 +1134,17 @@ stages:
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath) -ftrunning "true" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
                 - task: DownloadBuildArtifacts@0
-                  displayName: "Download Functional test Artifact"
+                  displayName: "Download POS Functional test Artifact"
                   inputs:
                     buildType: 'current'
                     downloadType: 'single'
-                    artifactName: 'functionaltests'
+                    artifactName: 'posfunctionaltests'
                     downloadPath: '$(Build.SourcesDirectory)'
 
                 - task: FileTransform@2
                   displayName: "File Transform: functionaltests"
                   inputs:
-                    folderPath: '$(Build.SourcesDirectory)/functionaltests/'
+                    folderPath: '$(Build.SourcesDirectory)/posfunctionaltests/'
                     xmlTransformationRules:
                     jsonTargetFiles: '**/appsettings.json'
 
@@ -1110,7 +1155,7 @@ stages:
                     version: 6.0.x
 
                 - task: DotNetCoreCLI@2
-                  displayName: "Run Functional tests"
+                  displayName: "Run POS Functional tests"
                   inputs:
                     command: "test"
                     projects: |
@@ -1118,8 +1163,8 @@ stages:
                       !**/*TestAdapter.dll
                       !**/obj/**
                     arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
-                    testRunTitle: "QA-AutomationTests"
-                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+                    testRunTitle: "vNextIAT-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
 
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download Terraform Artifact"
@@ -1149,6 +1194,52 @@ stages:
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/vnexte2eterraformartifact/set_stub_configuration.ps1"
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+
+      - job: BESSFunctionalTests
+        dependsOn:
+        - vNextIATDeployApp
+        - CheckInfra
+        - CheckFSS
+        - CheckESS
+        - CheckFM
+        - POSFunctionalTests
+        pool: NautilusBuild
+        displayName: "vNext IAT BESS Functional Automated Tests"
+        workspace:
+          clean: all
+        steps:
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download BESS Functional test Artifact"
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'bessfunctionaltests'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: FileTransform@2
+                  displayName: "File Transform: functionaltests"
+                  inputs:
+                    folderPath: '$(Build.SourcesDirectory)/bessfunctionaltests/'
+                    xmlTransformationRules:
+                    jsonTargetFiles: '**/appsettings.json'
+
+                - task: UseDotNet@2
+                  displayName: 'Use .NET Core sdk'
+                  inputs:
+                    packageType: sdk
+                    version: 6.0.x
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run BESS Functional tests"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    testRunTitle: "vNextIAT-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
   
   - stage: vnexte2eDeploy
     dependsOn: 
@@ -1239,7 +1330,7 @@ stages:
               filePath: '$(Build.SourcesDirectory)/vNextE2EDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
-      - job: FunctionalTests
+      - job: POSFunctionalTests
         dependsOn:
         - vNextE2EDeployApp
         - CheckInfra
@@ -1247,7 +1338,7 @@ stages:
         - CheckESS
         - CheckFM
         pool: NautilusBuild
-        displayName: "vNext E2E Functional Automated Tests"
+        displayName: "vNext E2E POS Functional Automated Tests"
         workspace:
           clean: all
         variables:
@@ -1276,17 +1367,17 @@ stages:
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath) -ftrunning "true" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
                 - task: DownloadBuildArtifacts@0
-                  displayName: "Download Functional test Artifact"
+                  displayName: "Download POS Functional test Artifact"
                   inputs:
                     buildType: 'current'
                     downloadType: 'single'
-                    artifactName: 'functionaltests'
+                    artifactName: 'posfunctionaltests'
                     downloadPath: '$(Build.SourcesDirectory)'
 
                 - task: FileTransform@2
                   displayName: "File Transform: functionaltests"
                   inputs:
-                    folderPath: '$(Build.SourcesDirectory)/functionaltests/'
+                    folderPath: '$(Build.SourcesDirectory)/posfunctionaltests/'
                     xmlTransformationRules:
                     jsonTargetFiles: '**/appsettings.json'
 
@@ -1297,7 +1388,7 @@ stages:
                     version: 6.0.x
 
                 - task: DotNetCoreCLI@2
-                  displayName: "Run Functional tests"
+                  displayName: "Run POS Functional tests"
                   inputs:
                     command: "test"
                     projects: |
@@ -1305,8 +1396,8 @@ stages:
                       !**/*TestAdapter.dll
                       !**/obj/**
                     arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
-                    testRunTitle: "QA-AutomationTests"
-                    workingDirectory: '$(Build.SourcesDirectory)/functionaltests'
+                    testRunTitle: "vNextE2E-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
 
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download Terraform Artifact"
@@ -1336,3 +1427,49 @@ stages:
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/vnexte2eterraformartifact/set_stub_configuration.ps1"
                     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+
+      - job: BESSFunctionalTests
+        dependsOn:
+        - vNextIATDeployApp
+        - CheckInfra
+        - CheckFSS
+        - CheckESS
+        - CheckFM
+        - POSFunctionalTests
+        pool: NautilusBuild
+        displayName: "vNext E2E BESS Functional Automated Tests"
+        workspace:
+          clean: all
+        steps:
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download BESS Functional test Artifact"
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'bessfunctionaltests'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: FileTransform@2
+                  displayName: "File Transform: functionaltests"
+                  inputs:
+                    folderPath: '$(Build.SourcesDirectory)/bessfunctionaltests/'
+                    xmlTransformationRules:
+                    jsonTargetFiles: '**/appsettings.json'
+
+                - task: UseDotNet@2
+                  displayName: 'Use .NET Core sdk'
+                  inputs:
+                    packageType: sdk
+                    version: 6.0.x
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run BESS Functional tests"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    testRunTitle: "vNextE2E-AutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
