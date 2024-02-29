@@ -846,7 +846,7 @@ stages:
 
       - job: BESSFunctionalTests
         dependsOn:
-        - DevDeployApp
+        - QADeployApp
         - CheckInfra
         - CheckFSS
         - CheckESS
@@ -1430,7 +1430,7 @@ stages:
 
       - job: BESSFunctionalTests
         dependsOn:
-        - vNextIATDeployApp
+        - vNextE2EDeployApp
         - CheckInfra
         - CheckFSS
         - CheckESS
