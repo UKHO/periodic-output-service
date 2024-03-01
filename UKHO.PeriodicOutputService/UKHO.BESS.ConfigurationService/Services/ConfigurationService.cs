@@ -119,7 +119,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                          *
                          */
 
-                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Config for Name : {Name} | Frequency : {Frequency} | ScheduleTime : {ScheduleTime} | executed at Timestamp: {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, nextOccurrence, DateTime.UtcNow, CommonHelper.CorrelationID);
+                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, nextOccurrence, DateTime.UtcNow, CommonHelper.CorrelationID);
                         azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
                     else
@@ -135,7 +135,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessScheduleConfigException.ToEventId(), "Exception at schedule config details {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessConfigFrequencyProcessingException.ToEventId(), "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
                 return false;
             }
         }

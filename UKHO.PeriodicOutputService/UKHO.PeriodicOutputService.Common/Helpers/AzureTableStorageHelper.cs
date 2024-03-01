@@ -93,10 +93,10 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             tableJobScheduleEntityClient.UpsertEntity(scheduleDetailEntity);
         }
 
-        public ScheduleDetailEntity GetScheduleDetail(string name)
+        public ScheduleDetailEntity GetScheduleDetail(string configName)
         {
             TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
-            ScheduleDetailEntity scheduleDetailEntity = tableJobScheduleEntityClient.Query<ScheduleDetailEntity>().FirstOrDefault(i => i.IsEnabled.Equals("Yes") && i.RowKey.Equals(name));
+            ScheduleDetailEntity scheduleDetailEntity = tableJobScheduleEntityClient.Query<ScheduleDetailEntity>().FirstOrDefault(i => i.IsEnabled.Equals("Yes") && i.RowKey.Equals(configName));
             return scheduleDetailEntity;
         }
     }

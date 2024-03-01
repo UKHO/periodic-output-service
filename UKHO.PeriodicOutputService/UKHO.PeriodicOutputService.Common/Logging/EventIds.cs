@@ -437,13 +437,13 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BessErrorOccurredWhileDownloadingConfigFromAzureStorage = 809107,
         /// <summary>
-        /// 809108 - Schedule config details matched with current time
+        /// 809108 - Bess config frequency due or lapsed
         /// </summary>
         BessConfigFrequencyElapsed = 809108,
         /// <summary>
-        /// 809109 - Exception occurred while processing bespoke details to queue
+        /// 809109 - Exception occurred while processing bess config frequency
         /// </summary>
-        BessScheduleConfigException = 809109
+        BessConfigFrequencyProcessingException = 809109
     }
 
     public static class EventIdExtensions

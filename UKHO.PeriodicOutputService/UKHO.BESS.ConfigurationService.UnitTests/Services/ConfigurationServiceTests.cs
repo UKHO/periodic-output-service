@@ -213,7 +213,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<LogLevel>(0) == LogLevel.Error
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Exception at schedule config details {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}"
+                "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             Assert.That(result, Is.False);
@@ -231,7 +231,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Config for Name : {Name} | Frequency : {Frequency} | ScheduleTime : {ScheduleTime} | executed at Timestamp: {Timestamp} | _X-Correlation-ID : {CorrelationId}"
+                "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
@@ -298,7 +298,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             {
                 PartitionKey = "BessConfigSchedule",
                 RowKey = "BESS-1",
-                NextScheduleTime = DateTime.UtcNow.AddMinutes(1),
+                NextScheduleTime = DateTime.UtcNow,
                 IsEnabled = "Yes",
                 IsExecuted = false,
             };
