@@ -1,7 +1,9 @@
-﻿using FluentAssertions;
+﻿using FakeItEasy;
+using FluentAssertions;
 using UKHO.BESS.ConfigurationService.Validation;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using FluentValidation.TestHelper;
+using FluentValidation;
 
 namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
 {
@@ -9,10 +11,12 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
     public class ConfigValidatorTests
     {
         private ConfigValidator configValidator;
+        private ValidationContext<BessConfig> fakeContext;
 
         [SetUp]
         public void Setup()
         {
+            fakeContext = A.Fake<ValidationContext<BessConfig>>();
             configValidator = new ConfigValidator();
         }
 
@@ -72,7 +76,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
-        public void WhenConfigContainsInvalidIsEnabledAttribute_ThenThrowValidationErrorForIsEnabledOnly()
+        [TestCase(null)]
+        [TestCase("1")]
+        public void WhenConfigContainsInvalidIsEnabledAttribute_ThenThrowValidationErrorForIsEnabledOnly(string? isEnabled)
         {
             var bessConfig = new BessConfig
             {
@@ -87,7 +93,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 Tags = null,
                 ReadMeSearchFilter = "",
                 BatchExpiryInDays = 0,
-                IsEnabled = null
+                IsEnabled = isEnabled
             };
 
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
@@ -96,6 +102,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 .WithErrorMessage("Attribute is missing or value not provided. Expected value is either Yes or No.");
         }
 
+        [Test]
         public void WhenIsEnabledYesAndConfigContainsInvalidAttributes_ThenThrowValidationError()
         {
             var bessConfig = new BessConfig
@@ -103,9 +110,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 Name = null,
                 ExchangeSetStandard = null,
                 EncCellNames = new List<string>(),
-                Frequency = "",
-                Type = "",
-                KeyFileType = "",
+                Frequency = null,
+                Type = null,
+                KeyFileType = null,
                 AllowedUsers = new List<string>(),
                 AllowedUserGroups = new List<string>(),
                 Tags = null,
@@ -117,7 +124,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.Name)
-                .WithErrorMessage("Attribute is missing");
+                .WithErrorMessage("Attribute is missing or value not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.ExchangeSetStandard)
                 .WithErrorMessage("Attribute is missing or value is not provided");
@@ -126,13 +133,13 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 .WithErrorMessage("Attribute is missing or value is not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.Frequency)
-                .WithErrorMessage("Attribute value is invalid");
+                .WithErrorMessage("Attribute is missing or value is not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.Type)
-                .WithErrorMessage("Attribute value is invalid. Expected value is either BASE, CHANGE or UPDATE");
+                .WithErrorMessage("Attribute is missing or value is not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.KeyFileType)
-                .WithErrorMessage("Attribute value is invalid. Expected value is KEY_TEXT, KEY_XML, PERMIT_XML or NONE");
+                .WithErrorMessage("Attribute is missing or value is not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.AllowedUsers)
                 .WithErrorMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
@@ -151,7 +158,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
-        public void WhenIsEnabledNo_ThenNoBESCreatedMessage()
+        [TestCase("no")]
+        [TestCase("No")]
+        public void WhenIsEnabledNo_ThenNoBESCreatedMessage(string isEnabled)
         {
             var bessConfig = new BessConfig
             {
@@ -166,13 +175,15 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 Tags = null,
                 ReadMeSearchFilter = "",
                 BatchExpiryInDays = 0,
-                IsEnabled = "no"
+                IsEnabled = isEnabled,
+                FileName = "BES.json"
             };
+            fakeContext.InstanceToValidate.FileName = bessConfig.FileName;
 
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.IsEnabled)
-                .WithErrorMessage("Bespoke ES is not created for file - , found IsEnabled: no.");
+                .WithErrorMessage("Bespoke ES is not created for file - " + fakeContext.InstanceToValidate.FileName + ", found IsEnabled: no.");
         }
 
         [Test]
@@ -192,7 +203,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 case "":
                 case " ":
                     result.ShouldHaveValidationErrorFor(x => x.Name)
-                        .WithErrorMessage("Value is not provided");
+                        .WithErrorMessage("Attribute is missing or value not provided");
                     break;
 
                 case "Name/":
@@ -242,6 +253,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
+        [TestCase("")]
         [TestCase("5 4 * *")]
         [TestCase("F 4 * * *")]
         public void WhenConfigContainsInvalidFrequency_ThenThrowValidationError(string frequency)
