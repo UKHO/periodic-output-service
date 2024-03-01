@@ -94,7 +94,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         }
 
         /// <summary>
-        /// check cron expression and save bespoke details to message queue
+        /// Check config frequency and save details to message queue
         /// </summary>
         /// <param name="bessConfigs"></param>
         /// <returns></returns>
