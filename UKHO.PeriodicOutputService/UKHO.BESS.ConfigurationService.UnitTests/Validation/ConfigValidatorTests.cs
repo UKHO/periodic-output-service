@@ -229,13 +229,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
 
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
-            switch (exchangeSetStandard)
-            {
-                case "S631":
-                    result.ShouldHaveValidationErrorFor(x => x.ExchangeSetStandard)
-                        .WithErrorMessage("Attribute value is invalid. Expected value is either s63 or s57");
-                    break;
-            }
+            result.ShouldHaveValidationErrorFor(x => x.ExchangeSetStandard)
+                .WithErrorMessage("Attribute value is invalid. Expected value is either s63 or s57");
         }
 
         [Test]
