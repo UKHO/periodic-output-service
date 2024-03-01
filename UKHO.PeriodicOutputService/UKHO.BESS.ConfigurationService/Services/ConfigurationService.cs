@@ -113,7 +113,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
-                        /* -- save details to msg queue --
+                        /* -- save details to message queue --
                          *
                          *
                          *

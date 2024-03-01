@@ -191,7 +191,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         [Test]
         public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessful_ThenReturnsTrue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
 
             bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
 
@@ -220,9 +220,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndScheduleDetailsAddedToMsgQueue_ThenReturnsTrue()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndScheduleDetailsAddedToQueue_ThenReturnsTrue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInMsgQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
 
             bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
 
@@ -244,9 +244,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndScheduleDetailsNotAddedToMsgQueue_ThenReturnsTrue()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndScheduleDetailsNotAddedToQueue_ThenReturnsTrue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
 
             bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
 
@@ -260,9 +260,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndScheduleDetailsNotAddedToMsgQueueSameDay_ThenReturnsTrue()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsSuccessfulAndScheduleDetailsNotAddedToQueueSameDay_ThenReturnsTrue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInMsgQueueOnSameDay());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueueOnSameDay());
 
             bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingNotEnabled());
 
@@ -291,7 +291,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             Assert.That(result, Is.True);
         }
 
-        private ScheduleDetailEntity GetFakeScheduleDetailsToAddInMsgQueue()
+        private ScheduleDetailEntity GetFakeScheduleDetailsToAddInQueue()
         {
             var history = new ScheduleDetailEntity
 
@@ -305,7 +305,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             return history;
         }
 
-        private ScheduleDetailEntity GetFakeScheduleDetailsNotToAddInMsgQueue()
+        private ScheduleDetailEntity GetFakeScheduleDetailsNotToAddInQueue()
         {
             var history = new ScheduleDetailEntity
 
@@ -320,7 +320,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             return history;
         }
 
-        private ScheduleDetailEntity GetFakeScheduleDetailsNotToAddInMsgQueueOnSameDay()
+        private ScheduleDetailEntity GetFakeScheduleDetailsNotToAddInQueueOnSameDay()
         {
             var history = new ScheduleDetailEntity
 
