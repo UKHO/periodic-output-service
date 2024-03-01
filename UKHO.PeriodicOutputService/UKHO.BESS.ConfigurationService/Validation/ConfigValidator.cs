@@ -16,16 +16,15 @@ namespace UKHO.BESS.ConfigurationService.Validation
     {
         public ConfigValidator()
         {
-            RuleFor(config => config.Name).NotNull().WithMessage("Attribute is missing").DependentRules(() =>
-            {
-                RuleFor(config => config.Name).NotEmpty().WithMessage("Value is not provided")
-                    .DependentRules(() =>
-                    {
-                        RuleFor(config => config.Name).Length(1, 50)
-                            .WithMessage("Name should be of max 50 characters length")
-                            .Must(name => IsValidName(name)).WithMessage("Should not have characters \\/:*?\"<>|");
-                    });
-            });
+            RuleFor(config => config.Name)
+               .Must(name => !string.IsNullOrEmpty(name?.Trim()))
+               .WithMessage("Attribute is missing or value not provided")
+               .DependentRules(() =>
+               {
+                   RuleFor(config => config.Name).Length(1, 50)
+                       .WithMessage("Name should be of max 50 characters length")
+                       .Must(name => IsValidName(name)).WithMessage("Should not have characters \\/:*?\"<>|");
+               });
 
             RuleFor(config => config.ExchangeSetStandard).NotNull()
                 .WithMessage("Attribute is missing or value is not provided")
@@ -47,14 +46,14 @@ namespace UKHO.BESS.ConfigurationService.Validation
                         .WithMessage("Attribute value is invalid");
                 });
 
-            RuleFor(config => config.Type).NotNull().WithMessage("Attribute is missing")
+            RuleFor(config => config.Type).NotNull().WithMessage("Attribute is missing or value is not provided")
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.Type).Must(type => IsValidBesType(type.ToUpper()))
                         .WithMessage("Attribute value is invalid. Expected value is either BASE, CHANGE or UPDATE");
                 });
 
-            RuleFor(config => config.KeyFileType).NotNull().WithMessage("Attribute is missing")
+            RuleFor(config => config.KeyFileType).NotNull().WithMessage("Attribute is missing or value is not provided")
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.KeyFileType)
@@ -80,7 +79,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                 });
 
             RuleFor(config => config.ReadMeSearchFilter)
-                .Must(readMeSearchFilter => !string.IsNullOrWhiteSpace(readMeSearchFilter))
+                .Must(readMeSearchFilter => !string.IsNullOrEmpty(readMeSearchFilter?.Trim()))
                 .WithMessage("Attribute is missing or value not provided");
 
             RuleFor(config => config.BatchExpiryInDays).NotEmpty()
