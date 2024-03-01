@@ -13,7 +13,7 @@
         public List<Tag>? Tags { get; set; }
         public string? ReadMeSearchFilter { get; set; }
         public int BatchExpiryInDays { get; set; }
-        public bool IsEnabled { get; set; }
+        public string? IsEnabled { get; set; }
     }
 
     public class Tag

@@ -31,6 +31,6 @@
         ],
         "ReadMeSearchFilter": "",
         "BatchExpiryInDays": 30,
-        "IsEnabled": true
+        "IsEnabled": "Yes"
     }
 ]
