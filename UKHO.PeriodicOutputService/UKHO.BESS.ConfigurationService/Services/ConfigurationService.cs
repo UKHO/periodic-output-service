@@ -110,7 +110,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     // Get the next occurrence of the cron expression after the last execution time
                     var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
                     ScheduleDetailEntity existingScheduleDetail = GetScheduleDetail(nextOccurrence, config);
-                    
+
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
                         /* -- save details to msg queue --
@@ -150,7 +150,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             var isSameDay = scheduleDetailEntity.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
 
             return intervalInMinutes <= 0 && isSameDay && bessConfig.IsEnabled.Equals("Yes") && scheduleDetailEntity.IsExecuted.Equals(false);
-        } 
+        }
 
         [ExcludeFromCodeCoverage]
         private ScheduleDetailEntity GetScheduleDetail(DateTime nextOccurrence, BessConfig bessConfig)
