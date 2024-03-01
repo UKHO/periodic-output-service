@@ -111,7 +111,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
                     ScheduleDetailEntity existingScheduleDetail = GetScheduleDetail(nextOccurrence, config);
 
-                    if (CheckSchedule(existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
+                    if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
                         /* -- save details to message queue --
                          *
@@ -144,12 +144,12 @@ namespace UKHO.BESS.ConfigurationService.Services
         private static bool IsScheduleRefreshed(ScheduleDetailEntity scheduleDetailEntity, DateTime nextOccurrence, BessConfig bessConfig) => scheduleDetailEntity.NextScheduleTime != nextOccurrence || scheduleDetailEntity.IsEnabled != bessConfig.IsEnabled;
 
         [ExcludeFromCodeCoverage]
-        private static bool CheckSchedule(ScheduleDetailEntity scheduleDetailEntity)
+        private static bool CheckSchedule(BessConfig bessConfig, ScheduleDetailEntity scheduleDetailEntity)
         {
             var intervalInMinutes = ((int)scheduleDetailEntity.NextScheduleTime.Subtract(DateTime.UtcNow).TotalSeconds);
             var isSameDay = scheduleDetailEntity.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
 
-            return intervalInMinutes <= 0 && isSameDay;
+            return intervalInMinutes <= 0 && isSameDay && bessConfig.IsEnabled.ToLower().Equals("yes");
         }
 
         [ExcludeFromCodeCoverage]
