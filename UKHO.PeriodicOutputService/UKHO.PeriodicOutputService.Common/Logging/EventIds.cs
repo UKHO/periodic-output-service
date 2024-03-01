@@ -435,7 +435,15 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809107 - Bess error occurred while downloading configs of json file from azure storage container
         /// </summary>
-        BessErrorOccurredWhileDownloadingConfigFromAzureStorage = 809107
+        BessErrorOccurredWhileDownloadingConfigFromAzureStorage = 809107,
+        /// <summary>
+        /// 809108 - Bess Builder Service Started
+        /// </summary>
+        BessBuilderServiceStarted = 809108,
+        /// <summary>
+        /// 809109 - Bess Builder Service Completed
+        /// </summary>
+        BessBuilderServiceCompleted = 809109
     }
 
     public static class EventIdExtensions
