@@ -1,26 +1,30 @@
-﻿using FluentValidation.Results;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
+using NCrontab;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UKHO.BESS.ConfigurationService.Validation;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
     public class ConfigurationService : IConfigurationService
     {
         private readonly IAzureBlobStorageClient azureBlobStorageClient;
+        private readonly IAzureTableStorageHelper azureTableStorageHelper;
         private readonly ILogger<ConfigurationService> logger;
         private const string UndefinedValue = "undefined";
         private readonly IConfigValidator configValidator;
-        List<string> invalidNameList = new();
+        private List<string> invalidNameList = new();
 
-        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient,
-            ILogger<ConfigurationService> logger, IConfigValidator configValidator)
+        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, IAzureTableStorageHelper azureTableStorageHelper, ILogger<ConfigurationService> logger, IConfigValidator configValidator)
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
+            this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.configValidator = configValidator ?? throw new ArgumentNullException(nameof(configValidator)); ;
         }
@@ -87,6 +91,11 @@ namespace UKHO.BESS.ConfigurationService.Services
                     logger.LogInformation(EventIds.BessConfigValidFilesCount.ToEventId(),
                         "Valid config count : {validFileCount} and valid config names : {validConfigNames} | _X-Correlation-ID : {CorrelationId}",
                         bessConfigs.Count, bessConfigs.SelectMany(x => new[] { x.FileName + " - " + x.Name }), CommonHelper.CorrelationID);
+
+                    if (bessConfigs.Any())
+                    {
+                        CheckConfigFrequencyAndSaveQueueDetails(bessConfigs);
+                    }
                 }
                 else
                 {
@@ -150,6 +159,86 @@ namespace UKHO.BESS.ConfigurationService.Services
             logger.LogInformation(EventIds.BessConfigDuplicateFileCount.ToEventId(),
                 "File count with duplicate Name attributes {duplicateFileCount} | _X-Correlation-ID : {CorrelationId}",
                 duplicateFileCount, CommonHelper.CorrelationID);
+        }
+
+        /// <summary>
+        /// Check config frequency and save details to message queue
+        /// </summary>
+        /// <param name="bessConfigs"></param>
+        /// <returns></returns>
+        public bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs)
+        {
+            try
+            {
+                foreach (var config in bessConfigs)
+                {
+                    // Parse the cron expression using NCronTab library
+                    var schedule = CrontabSchedule.Parse(config.Frequency);
+
+                    // Get the next occurrence of the cron expression after the last execution time
+                    var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
+                    ScheduleDetailEntity existingScheduleDetail = GetScheduleDetail(nextOccurrence, config);
+
+                    if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
+                    {
+                        /* -- save details to message queue --
+                         *
+                         *
+                         *
+                         */
+
+                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
+                        azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
+                    }
+                    else
+                    {   //Update schedule details
+                        if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
+                        {
+                            azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, false);
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.BessConfigFrequencyProcessingException.ToEventId(), "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
+                return false;
+            }
+        }
+
+        [ExcludeFromCodeCoverage]
+        private static bool IsScheduleRefreshed(ScheduleDetailEntity scheduleDetailEntity, DateTime nextOccurrence, BessConfig bessConfig) => scheduleDetailEntity.NextScheduleTime != nextOccurrence || scheduleDetailEntity.IsEnabled != bessConfig.IsEnabled;
+
+        [ExcludeFromCodeCoverage]
+        private static bool CheckSchedule(BessConfig bessConfig, ScheduleDetailEntity scheduleDetailEntity)
+        {
+            var intervalInMinutes = ((int)scheduleDetailEntity.NextScheduleTime.Subtract(DateTime.UtcNow).TotalSeconds);
+            var isSameDay = scheduleDetailEntity.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
+
+            return intervalInMinutes <= 0 && isSameDay && bessConfig.IsEnabled.ToLower().Equals("yes");
+        }
+
+        [ExcludeFromCodeCoverage]
+        private ScheduleDetailEntity GetScheduleDetail(DateTime nextOccurrence, BessConfig bessConfig)
+        {
+            var existingScheduleDetail = azureTableStorageHelper.GetScheduleDetail(bessConfig.Name);
+
+            if (existingScheduleDetail != null)
+            {
+                return existingScheduleDetail;
+            }
+
+            azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, bessConfig, false);
+
+            ScheduleDetailEntity scheduleDetailEntity = new();
+            {
+                scheduleDetailEntity.NextScheduleTime = nextOccurrence;
+                scheduleDetailEntity.IsEnabled = bessConfig.IsEnabled;
+            }
+
+            return scheduleDetailEntity;
         }
     }
 }
