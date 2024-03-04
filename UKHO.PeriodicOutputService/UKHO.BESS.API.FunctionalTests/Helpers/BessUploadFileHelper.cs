@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Newtonsoft.Json;
-using UKHO.BESS.API.FunctionalTests.Models;
+////using UKHO.BESS.API.FunctionalTests.Models;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -18,9 +19,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
         }
 
-        public static List<BESSConfigModel>? GetPayload(string? path)
+        public static List<BessConfig>? GetPayload(string? path)
         {
-            return path != null ? JsonConvert.DeserializeObject<List<BESSConfigModel>>(File.ReadAllText(path)) : null;
+            return path != null ? JsonConvert.DeserializeObject<List<BessConfig>>(File.ReadAllText(path)) : null;
         }
     }
 }
