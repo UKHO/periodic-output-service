@@ -33,85 +33,73 @@ namespace UKHO.BESS.ConfigurationService.Services
         {
             try
             {
-                Dictionary<string, string> configs = azureBlobStorageClient.GetConfigsInContainer();
+                var configsInContainer = azureBlobStorageClient.GetConfigsInContainer();
+                if (!configsInContainer.Any())
+                {
+                    logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(), "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                }
 
-                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs file count:{count}  | _X-Correlation-ID : {CorrelationId}", configs.Keys.Count, CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}", configsInContainer.Keys.Count, CommonHelper.CorrelationID);
 
                 IList<BessConfig> bessConfigs = new List<BessConfig>();
 
-                if (configs.Any())
+                int filesWithInvalidAttributeCount = 0;
+                int totalConfigCount = 0;
+
+                foreach (string fileName in configsInContainer.Keys.ToList())
                 {
-                    int filesWithInvalidAttributeCount = 0;
-                    int totalConfigCount = 0;
+                    string content = configsInContainer[fileName];
 
-                    foreach (string fileName in configs.Keys.ToList())
+                    var deserializedConfigs = DeserializeConfig(content, fileName);
+
+                    foreach (BessConfig deserializedConfig in deserializedConfigs)
                     {
-                        string content = configs[fileName];
+                        totalConfigCount++;
+                        deserializedConfig.FileName = fileName; //for logging
 
-                        IList<BessConfig> deserializedConfigs = ParseAndDeserializeConfig(content, fileName);
+                        ValidationResult results = configValidator.Validate(deserializedConfig);
 
-                        foreach (BessConfig deserializedConfig in deserializedConfigs)
+                        if (!results.IsValid)
                         {
-                            totalConfigCount++;
-                            deserializedConfig.FileName = fileName; //for logging
+                            filesWithInvalidAttributeCount++;
+                            string errors = string.Empty;
 
-                            ValidationResult results = configValidator.Validate(deserializedConfig);
-
-                            if (!results.IsValid)
+                            foreach (var failure in results.Errors)
                             {
-                                filesWithInvalidAttributeCount++;
-                                string errors = string.Empty;
-
-                                foreach (var failure in results.Errors)
-                                {
-                                    errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
-                                }
-
-                                invalidNameList.Add(deserializedConfig.FileName + "- " + deserializedConfig.Name);
-
-                                logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bespoke ES is not created for file - {fileName}. Validation errors - {errors} | _X-Correlation-ID : {CorrelationId}",
-                                    fileName, errors, CommonHelper.CorrelationID);
+                                errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
                             }
-                            else
-                            {
-                                bessConfigs.Add(deserializedConfig);
-                            }
+
+                            invalidNameList.Add(deserializedConfig.FileName + "- " + deserializedConfig.Name);
+
+                            logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}", fileName, errors, CommonHelper.CorrelationID);
+                        }
+                        else
+                        {
+                            bessConfigs.Add(deserializedConfig);
                         }
                     }
-
-                    logger.LogInformation(EventIds.BessTotalConfigsCount.ToEventId(), "Total config count: {totalConfigCount} | _X-Correlation-ID : {CorrelationId}",
-                    totalConfigCount, CommonHelper.CorrelationID);
-
-                    logger.LogInformation(EventIds.BessConfigInvalidFilesCount.ToEventId(),
-                    "Invalid config count {invalidFileCount} and invalid config name : {invalidFileNames} | _X-Correlation-ID : {CorrelationId}",
-                    filesWithInvalidAttributeCount, string.Join(",", invalidNameList), CommonHelper.CorrelationID);
-
-                    RemoveDuplicateConfigs((List<BessConfig>)bessConfigs);
-
-                    logger.LogInformation(EventIds.BessConfigValidFilesCount.ToEventId(),
-                        "Valid config count : {validFileCount} and valid config names : {validConfigNames} | _X-Correlation-ID : {CorrelationId}",
-                        bessConfigs.Count, bessConfigs.SelectMany(x => new[] { x.FileName + " - " + x.Name }), CommonHelper.CorrelationID);
-
-                    if (bessConfigs.Any())
-                    {
-                        CheckConfigFrequencyAndSaveQueueDetails(bessConfigs);
-                    }
                 }
-                else
+
+                RemoveDuplicateConfigs((List<BessConfig>)bessConfigs);
+
+                logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
+"Configs validation summary, valid configs : {validFileCount} | invalid configs with missing attributes or values : {invalidFileCount} | _X-Correlation-ID : {CorrelationId}", bessConfigs.Count, filesWithInvalidAttributeCount, CommonHelper.CorrelationID);
+
+                if (bessConfigs.Any())
                 {
-                    logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(), "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                    CheckConfigFrequencyAndSaveQueueDetails(bessConfigs);
                 }
 
                 logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessConfigsProcessingFailed.ToEventId(), "Bess configs Processing failed with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessConfigsProcessingFailed.ToEventId(), "Bess configs processing failed with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 throw;
             }
         }
 
-        private IList<BessConfig> ParseAndDeserializeConfig(string json, string fileName)
+        private IList<BessConfig> DeserializeConfig(string json, string fileName)
         {
             IList<BessConfig> bessConfig = new List<BessConfig>();
             try
@@ -120,7 +108,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (token.ToString().Contains(UndefinedValue))
                 {
-                    logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config is invalid for file : {fileName} | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+                    logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config file : {fileName} contains undefined values or is invalid | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
                 }
                 else
                 {
@@ -130,7 +118,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file:{fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 return bessConfig;
             }
         }
@@ -149,16 +137,12 @@ namespace UKHO.BESS.ConfigurationService.Services
             {
                 foreach (BessConfig? duplicateConfig in duplicateRecord.ToList())
                 {
-                    logger.LogError(EventIds.BessConfigsDuplicateRecordsFound.ToEventId(), "Bespoke ES is not created for file : {fileName}.Validation errors - Duplicate value. Name : {name} | _X-Correlation-ID : {CorrelationId}", duplicateConfig.FileName, duplicateConfig.Name, CommonHelper.CorrelationID);
+                    logger.LogWarning(EventIds.BessConfigsDuplicateRecordsFound.ToEventId(), "Bess config file : {fileName} found with Dupicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}", duplicateConfig.FileName, duplicateConfig.Name, CommonHelper.CorrelationID);
 
                     bessConfigs.RemoveAll(x =>
                         x.FileName.Equals(duplicateConfig.FileName, StringComparison.OrdinalIgnoreCase));
                 }
             }
-
-            logger.LogInformation(EventIds.BessConfigDuplicateFileCount.ToEventId(),
-                "File count with duplicate Name attributes {duplicateFileCount} | _X-Correlation-ID : {CorrelationId}",
-                duplicateFileCount, CommonHelper.CorrelationID);
         }
 
         /// <summary>

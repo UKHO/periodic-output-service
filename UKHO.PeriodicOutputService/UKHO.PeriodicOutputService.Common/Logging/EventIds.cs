@@ -546,16 +546,6 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessErrorOccurredWhileDownloadingConfigFromAzureStorage = 809107,
 
         /// <summary>
-        /// 809108 - Bess config frequency due or lapsed
-        /// </summary>
-        BessConfigFrequencyElapsed = 809108,
-
-        /// <summary>
-        /// 809109 - Exception occurred while processing bess config frequency
-        /// </summary>
-        BessConfigFrequencyProcessingException = 809109,
-
-        /// <summary>
         /// 80908 - Bess config invalid attributes
         /// </summary>
         BessConfigInvalidAttributes = 809108,
@@ -566,24 +556,24 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessConfigDuplicateFileCount = 809109,
 
         /// <summary>
-        /// 809110 - Bess config invalid files count
+        /// 809110 - Bess config validation summary
         /// </summary>
-        BessConfigInvalidFilesCount = 809110,
+        BessConfigValidationSummary = 809110,
 
         /// <summary>
-        /// 809111 - Bess config valid files count
+        /// 809111 - Bess config duplicate records found
         /// </summary>
-        BessConfigValidFilesCount = 809111,
+        BessConfigsDuplicateRecordsFound = 809111,
 
         /// <summary>
-        /// 809112 - Bess config duplicate records found
+        /// 809112 - Bess config frequency due or lapsed
         /// </summary>
-        BessConfigsDuplicateRecordsFound = 809112,
+        BessConfigFrequencyElapsed = 809112,
 
         /// <summary>
-        /// 809113 - Bess total config count
+        /// 809113 - Exception occurred while processing bess config frequency
         /// </summary>
-        BessTotalConfigsCount = 809113
+        BessConfigFrequencyProcessingException = 809113
     }
 
     public static class EventIdExtensions
