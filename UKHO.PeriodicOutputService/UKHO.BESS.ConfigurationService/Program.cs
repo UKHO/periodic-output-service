@@ -138,11 +138,13 @@ namespace UKHO.BESS.ConfigurationService
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
                 serviceCollection.Configure<BessStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
+                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
             }
 
             serviceCollection.AddSingleton<BessConfigurationServiceJob>();
             serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
             serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
+            serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
         }
     }
 }
