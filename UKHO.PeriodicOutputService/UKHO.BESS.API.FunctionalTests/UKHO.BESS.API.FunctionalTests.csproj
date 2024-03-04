@@ -29,6 +29,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestData\ConfigFile.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TestData\InvalidConfigFile.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
