@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Newtonsoft.Json;
-////using UKHO.BESS.API.FunctionalTests.Models;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
