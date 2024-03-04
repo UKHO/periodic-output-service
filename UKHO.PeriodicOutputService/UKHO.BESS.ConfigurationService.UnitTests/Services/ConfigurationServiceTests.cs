@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using UKHO.BESS.ConfigurationService.Services;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 
 namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 {
@@ -12,9 +14,10 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
     {
         private IConfigurationService configurationService;
         private IAzureBlobStorageClient fakeAzureBlobStorageClient;
+        private IAzureTableStorageHelper fakeAzureTableStorageHelper;
         private ILogger<ConfigurationService.Services.ConfigurationService> fakeLogger;
-        private const string InvalidConfigJson = "[{\"Name\":,\"ExchangeSetStandard\":null,\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":true}]";
-        private const string ValidConfigJson = "[{\"Name\":\"Xyz.json\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":true}]";
+        private const string InvalidConfigJson = "[{\"Name\":,\"ExchangeSetStandard\":null,\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"Yes\"}]";
+        private const string ValidConfigJson = "[{\"Name\":\"Xyz.json\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"Yes\"}]";
         private const string InvalidEmptyJson = "[{,,,}]";
         private Dictionary<string, string> dictionary;
 
@@ -22,20 +25,25 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void SetUp()
         {
             fakeAzureBlobStorageClient = A.Fake<IAzureBlobStorageClient>();
+            fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
             fakeLogger = A.Fake<ILogger<ConfigurationService.Services.ConfigurationService>>();
 
-            configurationService = new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeLogger);
+            configurationService = new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger);
             dictionary = new Dictionary<string, string>();
         }
 
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeLogger);
+            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger);
 
             nullAzureBlobStorageClient.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageClient");
 
-            Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null);
+            Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger);
+
+            nullAzureTableHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureTableStorageHelper");
+
+            Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, null);
 
             nullConfigurationServiceLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
         }
@@ -59,6 +67,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
         }
 
         [Test]
@@ -175,6 +186,200 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             dictionary.Add("Empty.json", InvalidEmptyJson);
             return dictionary;
+        }
+
+        [Test]
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessful_ThenReturnsTrue()
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
+
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsThrowsException_ThenReturnsFalse()
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Throws<Exception>();
+
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
+                    "{OriginalFormat}"].ToString() ==
+                "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            Assert.That(result, Is.False);
+        }
+
+        [Test]
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsAddedToQueue_ThenReturnsTrue()
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
+                    "{OriginalFormat}"].ToString() ==
+                "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsNotAddedToQueue_ThenReturnsTrue()
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
+
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
+
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsNotAddedToQueueSameDay_ThenReturnsTrue()
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueueOnSameDay());
+
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingNotEnabled());
+
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+
+            Assert.That(result, Is.True);
+        }
+
+        [Test]
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndWhenNextScheduleDetailsIsNull_ThenReturnsTrue()
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1"))!.Returns(null);
+
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting());
+
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+
+            Assert.That(result, Is.True);
+        }
+
+        private ScheduleDetailEntity GetFakeScheduleDetailsToAddInQueue()
+        {
+            var history = new ScheduleDetailEntity
+            {
+                PartitionKey = "BessConfigSchedule",
+                RowKey = "BESS-1",
+                NextScheduleTime = DateTime.UtcNow,
+                IsEnabled = "Yes",
+                IsExecuted = false,
+            };
+            return history;
+        }
+
+        private ScheduleDetailEntity GetFakeScheduleDetailsNotToAddInQueue()
+        {
+            var history = new ScheduleDetailEntity
+
+            {
+                PartitionKey = "BessConfigSchedule",
+                RowKey = "BESS-1",
+                NextScheduleTime = DateTime.UtcNow.AddDays(1),
+                IsEnabled = "No",
+                IsExecuted = true
+
+            };
+            return history;
+        }
+
+        private ScheduleDetailEntity GetFakeScheduleDetailsNotToAddInQueueOnSameDay()
+        {
+            var history = new ScheduleDetailEntity
+
+            {
+                PartitionKey = "BessConfigSchedule",
+                RowKey = "BESS-1",
+                NextScheduleTime = DateTime.UtcNow,
+                IsEnabled = "Yes",
+                IsExecuted = false
+
+            };
+            return history;
+        }
+
+        private List<BessConfig> GetFakeConfigurationSetting()
+        {
+            int todayDay = DateTime.UtcNow.Day;
+            List<BessConfig> configurations = new()
+        {
+            new()
+            {
+                Name = "BESS-1",
+                ExchangeSetStandard = "s63",
+                EncCellNames = new List<string> { "" },
+                Frequency = $"0 * {todayDay} * *",
+                Type = "",
+                KeyFileType = "",
+                AllowedUsers = new List<string>(),
+                AllowedUserGroups = new List<string>(),
+                Tags = new List<Tag>(),
+                ReadMeSearchFilter = "",
+                BatchExpiryInDays = 1,
+                IsEnabled = "Yes"
+            },
+        };
+            return configurations;
+        }
+
+        private List<BessConfig> GetFakeConfigurationSettingNotEnabled()
+        {
+            int todayDay = DateTime.UtcNow.Day;
+            List<BessConfig> configurations = new()
+        {
+            new()
+            {
+                Name = "BESS-1",
+                ExchangeSetStandard = "s63",
+                EncCellNames = new List<string> { "" },
+                Frequency = $"0 * {todayDay} * *",
+                Type = "",
+                KeyFileType = "",
+                AllowedUsers = new List<string>(),
+                AllowedUserGroups = new List<string>(),
+                Tags = new List<Tag>(),
+                ReadMeSearchFilter = "",
+                BatchExpiryInDays = 1,
+                IsEnabled = "No"
+            },
+        };
+            return configurations;
         }
     }
 }

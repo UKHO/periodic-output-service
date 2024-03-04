@@ -2,6 +2,7 @@
 using Azure.Data.Tables;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 
@@ -12,6 +13,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         private const string WEBJOB_HISTORY_TABLE_NAME = "poswebjobhistory";
         private const string AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME = "aioproductversiondetails";
+        private const string BESS_SCHEDULE_DETAILS_TABLE_NAME = "bessconfigscheduledetails";
 
         private readonly IOptions<AzureStorageConfiguration> _azureStorageConfig;
 
@@ -74,6 +76,28 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             TableClient? tableClient = serviceClient.GetTableClient(tableName);
             tableClient.CreateIfNotExists();
             return tableClient;
+        }
+
+        public void UpsertScheduleDetail(DateTime nextSchedule, BessConfig bessConfig, bool isExecuted)
+        {
+            ScheduleDetailEntity scheduleDetailEntity = new()
+            {
+                PartitionKey = "BessConfigSchedule",
+                RowKey = bessConfig.Name,
+                NextScheduleTime = nextSchedule,
+                IsEnabled = bessConfig.IsEnabled,
+                IsExecuted = isExecuted
+            };
+
+            TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
+            tableJobScheduleEntityClient.UpsertEntity(scheduleDetailEntity);
+        }
+
+        public ScheduleDetailEntity GetScheduleDetail(string configName)
+        {
+            TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
+            ScheduleDetailEntity scheduleDetailEntity = tableJobScheduleEntityClient.Query<ScheduleDetailEntity>().FirstOrDefault(i => i.IsEnabled.ToLower().Equals("yes") && i.IsExecuted.Equals(false) && i.RowKey.Equals(configName));
+            return scheduleDetailEntity;
         }
     }
 }
