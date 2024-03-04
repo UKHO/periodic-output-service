@@ -15,10 +15,4 @@
         public int BatchExpiryInDays { get; set; }
         public string? IsEnabled { get; set; }
     }
-
-    public class Tag
-    {
-        public string? Key { get; set; }
-        public string? Value { get; set; }
-    }
 }

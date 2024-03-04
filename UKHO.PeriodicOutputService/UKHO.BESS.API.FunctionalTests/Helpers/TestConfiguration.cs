@@ -4,21 +4,21 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
     public class TestConfiguration
     {
-        protected IConfigurationRoot ConfigurationRoot;
-        public BESSApiConfiguration bessConfig = new();
+        protected IConfigurationRoot configurationRoot;
+        public BessApiConfiguration bessConfig = new();
 
-        public class BESSApiConfiguration
+        public class BessApiConfiguration
         {
             public string? BaseUrl { get; set; }
         }
 
         public TestConfiguration()
         {
-            ConfigurationRoot = new ConfigurationBuilder()
+            configurationRoot = new ConfigurationBuilder()
                                .AddJsonFile("appsettings.json", false)
                                .Build();
 
-            ConfigurationRoot.Bind("BESSApiConfiguration", bessConfig);
+            configurationRoot.Bind("BESSApiConfiguration", bessConfig);
         }
     }
 }
