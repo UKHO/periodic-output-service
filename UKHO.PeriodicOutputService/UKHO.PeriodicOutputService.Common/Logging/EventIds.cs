@@ -443,7 +443,23 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809109 - Exception occurred while processing bess config frequency
         /// </summary>
-        BessConfigFrequencyProcessingException = 809109
+        BessConfigFrequencyProcessingException = 809109,
+        /// <summary>
+        /// 809110 - Request to Sales Catalogue Service's catalogue essData endpoint is started.
+        /// </summary>
+        SCSGetSalesCatalogueDataRequestStarted = 809110,
+        /// <summary>
+        /// 809111 - Request to Sales Catalogue Service's catalogue essData endpoint is completed.
+        /// </summary>
+        SCSGetSalesCatalogueDataRequestCompleted = 809111,
+        /// <summary>
+        /// 809112 - Request to Sales Catalogue Service's catalogue essData endpoint failed due to Non-Ok response.
+        /// </summary>
+        SalesCatalogueServiceCatalogueDataNonOkResponse = 809112,
+        /// <summary>
+        /// 809113 - Request for retrying sales catalogue service endpoint.
+        /// </summary>
+        RetryHttpClientSCSRequest = 809113
     }
 
     public static class EventIdExtensions
