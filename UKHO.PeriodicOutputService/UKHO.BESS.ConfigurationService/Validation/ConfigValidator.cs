@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
 using FluentValidation.Results;
-using NCrontab.Advanced;
-using NCrontab.Advanced.Enumerations;
+using NCrontab;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 
@@ -128,7 +127,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
         private static bool IsValidCron(string frequency)
         {
-            return CrontabSchedule.TryParse(frequency, CronStringFormat.Default) != null;
+            return CrontabSchedule.TryParse(frequency) != null;
         }
 
         ValidationResult IConfigValidator.Validate(BessConfig bessConfig)
