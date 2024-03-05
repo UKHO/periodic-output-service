@@ -93,14 +93,32 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
         private static bool IsAclProvided(BessConfig c)
         {
-            return (c.AllowedUsers == null && c.AllowedUserGroups == null) ||
+            if ((c.AllowedUsers == null && c.AllowedUserGroups == null) ||
                     (c.AllowedUsers?.Count() == 0 && c.AllowedUserGroups?.Count() == 0) ||
-                    (c.AllowedUsers == null && !c.AllowedUserGroups.Any()) ||
-                    (!c.AllowedUsers.Any() && c.AllowedUserGroups == null) ||
-                    (c.AllowedUsers.Contains(null) && c.AllowedUserGroups.Contains(null)) ||
-                    (c.AllowedUsers.Contains(string.Empty) && c.AllowedUserGroups.Contains(string.Empty))
-                ? false
-                : true;
+                    (c.AllowedUsers == null && c.AllowedUserGroups?.Count() == 0) ||
+                    (c.AllowedUsers?.Count() == 0 && c.AllowedUserGroups == null))
+            {
+                return false;
+            }
+
+            if (c.AllowedUsers == null && c.AllowedUserGroups != null)
+            {
+                if (!c.AllowedUserGroups.Any() || c.AllowedUserGroups.All(group => group?.Trim() is null or "") || c.AllowedUserGroups.Contains(string.Empty) || c.AllowedUserGroups.Contains(null))
+                    return false;
+            }
+
+            if (c.AllowedUserGroups == null && c.AllowedUsers != null)
+            {
+                if (!c.AllowedUsers.Any() || c.AllowedUsers.All(user => user?.Trim() is null or "") || c.AllowedUsers.Contains(string.Empty) || c.AllowedUsers.Contains(null))
+                    return false;
+            }
+
+            if (c.AllowedUserGroups != null && c.AllowedUsers != null)
+            {
+                if (c.AllowedUsers.All(user => user?.Trim() is null or "") && c.AllowedUserGroups.All(group => group?.Trim() is null or ""))
+                    return false;
+            }
+            return true;
         }
 
         private static bool IsValidName(string text)
