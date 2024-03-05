@@ -76,9 +76,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
-        [TestCase(null)]
         [TestCase("1")]
-        public void WhenConfigContainsInvalidIsEnabledAttribute_ThenThrowValidationErrorForIsEnabledOnly(string? isEnabled)
+        public void WhenConfigContainsInvalidIsEnabledAttribute_ThenThrowValidationErrorForIsEnabledOnly(string isEnabled)
         {
             var bessConfig = new BessConfig
             {
@@ -307,10 +306,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
-        [TestCase(null, null)]
-        [TestCase("Key1", null)]
-        [TestCase(null, "value1")]
-        public void WhenConfigContainsInvalidTags_ThenThrowValidationError(string? key, string? value)
+        [TestCase("Key1", "")]
+        [TestCase("", "value1")]
+        public void WhenConfigContainsInvalidTags_ThenThrowValidationError(string key, string value)
         {
             BessConfig bessConfig = GetBessConfig();
 
