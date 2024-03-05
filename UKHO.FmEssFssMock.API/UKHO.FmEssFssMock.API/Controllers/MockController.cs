@@ -7,6 +7,7 @@ using SystemFile = System.IO;
 
 namespace UKHO.FmEssFssMock.API.Controllers
 {
+    [AutoValidateAntiforgeryToken]
     public class MockController : Controller
     {
         private readonly string homeDirectoryPath;
