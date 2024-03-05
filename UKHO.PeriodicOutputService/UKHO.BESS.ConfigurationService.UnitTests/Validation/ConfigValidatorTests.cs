@@ -1,9 +1,9 @@
 ﻿using FakeItEasy;
 using FluentAssertions;
+using FluentValidation;
+using FluentValidation.TestHelper;
 using UKHO.BESS.ConfigurationService.Validation;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
-using FluentValidation.TestHelper;
-using FluentValidation;
 
 namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
 {
@@ -183,7 +183,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.IsEnabled)
-                .WithErrorMessage("Bespoke ES is not created for file - " + fakeContext.InstanceToValidate.FileName + ", found IsEnabled: no.");
+                .WithErrorMessage("Bess config for file - " + fakeContext.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no.”");
         }
 
         [Test]

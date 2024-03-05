@@ -206,7 +206,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Warning
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigsDuplicateRecordsFound.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess config file : {fileName} found with Dupicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess config file : {fileName} found with duplicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -214,7 +214,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
-                "Configs validation summary, valid configs : {validFileCount} | invalid configs with missing attributes or values : {invalidFileCount} | _X-Correlation-ID : {CorrelationId}"
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with undefined value : {filesWithUndefinedValueCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>

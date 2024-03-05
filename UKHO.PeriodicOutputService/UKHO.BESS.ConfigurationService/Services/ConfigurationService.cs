@@ -20,13 +20,15 @@ namespace UKHO.BESS.ConfigurationService.Services
         private const string UndefinedValue = "undefined";
         private readonly IConfigValidator configValidator;
         private List<string> invalidNameList = new();
+        private int configsWithUndefinedValueCount;
+        private int configsWithDuplicateNameAttributeCount;
 
         public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, IAzureTableStorageHelper azureTableStorageHelper, ILogger<ConfigurationService> logger, IConfigValidator configValidator)
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.configValidator = configValidator ?? throw new ArgumentNullException(nameof(configValidator)); ;
+            this.configValidator = configValidator ?? throw new ArgumentNullException(nameof(configValidator));
         }
 
         public void ProcessConfigs()
@@ -43,8 +45,8 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 IList<BessConfig> bessConfigs = new List<BessConfig>();
 
-                int filesWithInvalidAttributeCount = 0;
-                int totalConfigCount = 0;
+                int configsWithInvalidAttributeCount = 0;
+                int deserializedConfigsCount = 0;
 
                 foreach (string fileName in configsInContainer.Keys.ToList())
                 {
@@ -54,14 +56,14 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     foreach (BessConfig deserializedConfig in deserializedConfigs)
                     {
-                        totalConfigCount++;
+                        deserializedConfigsCount++;
                         deserializedConfig.FileName = fileName; //for logging
 
                         ValidationResult results = configValidator.Validate(deserializedConfig);
 
                         if (!results.IsValid)
                         {
-                            filesWithInvalidAttributeCount++;
+                            configsWithInvalidAttributeCount++;
                             string errors = string.Empty;
 
                             foreach (var failure in results.Errors)
@@ -82,8 +84,9 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 RemoveDuplicateConfigs((List<BessConfig>)bessConfigs);
 
+                int totalConfigCount = deserializedConfigsCount + configsWithUndefinedValueCount;
                 logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
-"Configs validation summary, valid configs : {validFileCount} | invalid configs with missing attributes or values : {invalidFileCount} | _X-Correlation-ID : {CorrelationId}", bessConfigs.Count, filesWithInvalidAttributeCount, CommonHelper.CorrelationID);
+"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with undefined value : {filesWithUndefinedValueCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, configsWithUndefinedValueCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
 
                 if (bessConfigs.Any())
                 {
@@ -108,6 +111,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (token.ToString().Contains(UndefinedValue))
                 {
+                    configsWithUndefinedValueCount++;
                     logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config file : {fileName} contains undefined values or is invalid | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
                 }
                 else
@@ -131,13 +135,13 @@ namespace UKHO.BESS.ConfigurationService.Services
 
             if (!duplicateRecords.Any()) return;
 
-            int duplicateFileCount = duplicateRecords.Select(record => record.Count()).Sum();
+            configsWithDuplicateNameAttributeCount = duplicateRecords.Select(record => record.Count()).Sum();
 
             foreach (var duplicateRecord in duplicateRecords)
             {
                 foreach (BessConfig? duplicateConfig in duplicateRecord.ToList())
                 {
-                    logger.LogWarning(EventIds.BessConfigsDuplicateRecordsFound.ToEventId(), "Bess config file : {fileName} found with Dupicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}", duplicateConfig.FileName, duplicateConfig.Name, CommonHelper.CorrelationID);
+                    logger.LogWarning(EventIds.BessConfigsDuplicateRecordsFound.ToEventId(), "Bess config file : {fileName} found with duplicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}", duplicateConfig.FileName, duplicateConfig.Name, CommonHelper.CorrelationID);
 
                     bessConfigs.RemoveAll(x =>
                         x.FileName.Equals(duplicateConfig.FileName, StringComparison.OrdinalIgnoreCase));

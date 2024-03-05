@@ -103,7 +103,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                 : true;
         }
 
-        static bool IsValidName(string text)
+        private static bool IsValidName(string text)
         {
             char[] specialChars = "\\/:*?\"<>|".ToCharArray();
 
@@ -140,7 +140,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
         {
             if (context.InstanceToValidate.IsEnabled?.ToLower() == "no")
             {
-                result.Errors.Add(new ValidationFailure("IsEnabled", "Bespoke ES is not created for file - " + context.InstanceToValidate.FileName + ", found IsEnabled: no."));
+                result.Errors.Add(new ValidationFailure("IsEnabled", "Bess config for file - " + context.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no.”"));
                 return false;
             }
             else if (context.InstanceToValidate.IsEnabled?.ToLower() != "yes")
