@@ -164,10 +164,6 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
             serviceCollection.AddScoped<ISalesCatalogueService, SalesCatalogueService>();
-            serviceCollection.AddTransient<ISalesCatalogueClient, SalesCatalogueClient>();
-
-
-
         }
     }
 }

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -13,9 +9,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         private readonly HttpClient httpClient;
 
-        public SalesCatalogueClient(IHttpClientFactory httpClientFactory)
+        public SalesCatalogueClient(HttpClient httpClient)
         {
-            this.httpClient = httpClientFactory.CreateClient();
+            this.httpClient = httpClient;
         }
 
         public async Task<HttpResponseMessage> CallSalesCatalogueServiceApi(HttpMethod method, string requestBody, string authToken, string uri)

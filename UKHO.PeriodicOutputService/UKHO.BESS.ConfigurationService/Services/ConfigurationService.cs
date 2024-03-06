@@ -42,8 +42,6 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (configs.Any())
                 {
-                    var result = Task.Run(async () => await salesCatalogueService.GetSalesCatalogueData()).Result;
-
                     foreach (string fileName in configs.Keys.ToList())
                     {
                         string content = configs[fileName];
@@ -63,6 +61,8 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (bessConfigs.Any())
                     {
+                        var salesCatalogueDataResponse = Task.Run(async () => await salesCatalogueService.GetSalesCatalogueData()).Result;
+
                         CheckConfigFrequencyAndSaveQueueDetails(bessConfigs);
                     }
                 }
