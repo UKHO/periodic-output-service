@@ -165,7 +165,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
             }
             else if (context.InstanceToValidate.IsEnabled?.ToLower() != "yes")
             {
-                result.Errors.Add(new ValidationFailure("IsEnabled", "Attribute is missing or value not provided. Expected value is either Yes or No."));
+                result.Errors.Add(new ValidationFailure("IsEnabled", "Attribute is missing or value is not provided. Expected value is either Yes or No."));
                 return false;
             }
             return true;
