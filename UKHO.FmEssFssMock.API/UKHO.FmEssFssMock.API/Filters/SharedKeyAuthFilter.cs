@@ -1,4 +1,9 @@
-﻿namespace UKHO.FmEssFssMock.API.Filters
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Options;
+using UKHO.FmEssFssMock.API.Common;
+
+namespace UKHO.FmEssFssMock.API.Filters
 {
     public class SharedKeyAuthFilter : IAuthorizationFilter
     {
