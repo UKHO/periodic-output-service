@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UKHO.FmEssFssMock.API.Filters;
 using UKHO.FmEssFssMock.API.Models.Bess;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
@@ -7,7 +8,6 @@ using SystemFile = System.IO;
 
 namespace UKHO.FmEssFssMock.API.Controllers
 {
-    [AutoValidateAntiforgeryToken]
     public class MockController : Controller
     {
         private readonly string homeDirectoryPath;
@@ -57,6 +57,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpPost]
+        [ServiceFilter(typeof(SharedKeyAuthFilter))]
         [Route("/mock/bessConfigUpload")]
         public async Task<IActionResult> UploadConfigFileDataAsync([FromBody] List<BessConfig> bessConfigs)
         {
