@@ -1,10 +1,12 @@
-﻿using FakeItEasy;
+﻿using System.Net;
+using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using UKHO.BESS.ConfigurationService.Services;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
+using UKHO.PeriodicOutputService.Common.Models.Scs.Response;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
 
@@ -58,6 +60,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenValidConfigIsFound_ThenConfigIsAddedToList()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigFilesJson());
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             configurationService.ProcessConfigs();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -82,6 +85,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenInvalidConfigIsFound_ThenThrowsError()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidEmptyJson());
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             configurationService.ProcessConfigs();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -110,6 +114,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenUndefinedValuesFoundInConfig_ThenConfigIsNotAddedToList()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidConfigFilesJson());
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             configurationService.ProcessConfigs();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -387,5 +392,28 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         };
             return configurations;
         }
+
+        #region GetSalesCatalogueDataProductResponse
+        private SalesCatalogueDataResponse GetSalesCatalogueDataResponse()
+        {
+            return new SalesCatalogueDataResponse
+            {
+                ResponseCode = HttpStatusCode.OK,
+                ResponseBody = new List<SalesCatalogueDataProductResponse>()
+                {
+                    new SalesCatalogueDataProductResponse
+                    {
+                    ProductName="10000002",
+                    LatestUpdateNumber=5,
+                    FileSize=600,
+                    CellLimitSouthernmostLatitude=24,
+                    CellLimitWesternmostLatitude=119,
+                    CellLimitNorthernmostLatitude=25,
+                    CellLimitEasternmostLatitude=120
+                    }
+                }
+            };
+        }
+        #endregion
     }
 }
