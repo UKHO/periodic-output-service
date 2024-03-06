@@ -141,10 +141,10 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 .WithErrorMessage("Attribute is missing or value is not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.AllowedUsers)
-                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
 
             result.ShouldHaveValidationErrorFor(x => x.AllowedUserGroups)
-                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
 
             result.ShouldHaveValidationErrorFor(x => x.Tags)
                 .WithErrorMessage("Attribute is missing or value not provided");
@@ -182,7 +182,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.IsEnabled)
-                .WithErrorMessage("Bess config for file - " + fakeContext.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no.”");
+                .WithErrorMessage("Bess config for file - " + fakeContext.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no”.");
         }
 
         [Test]
@@ -300,9 +300,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.AllowedUsers)
-                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
             result.ShouldHaveValidationErrorFor(x => x.AllowedUserGroups)
-                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
         }
 
         [Test]

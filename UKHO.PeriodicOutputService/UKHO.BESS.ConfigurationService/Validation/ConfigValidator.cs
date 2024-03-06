@@ -62,10 +62,10 @@ namespace UKHO.BESS.ConfigurationService.Validation
                 });
 
             RuleFor(config => config.AllowedUsers).Must((config, s) => IsAclProvided(config)).WithMessage(
-                "AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                "AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
 
             RuleFor(config => config.AllowedUserGroups).Must((config, s) => IsAclProvided(config)).WithMessage(
-                "AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                "AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
 
             RuleFor(config => config.Tags)
                 .Must(tags => tags != null && tags.Any()).WithMessage("Attribute is missing or value not provided")
@@ -157,7 +157,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
         {
             if (context.InstanceToValidate.IsEnabled?.ToLower() == "no")
             {
-                result.Errors.Add(new ValidationFailure("IsEnabled", "Bess config for file - " + context.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no.”"));
+                result.Errors.Add(new ValidationFailure("IsEnabled", "Bess config for file - " + context.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no”."));
                 return false;
             }
             else if (context.InstanceToValidate.IsEnabled?.ToLower() != "yes")
