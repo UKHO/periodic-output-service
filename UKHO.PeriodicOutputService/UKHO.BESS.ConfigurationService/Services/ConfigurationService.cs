@@ -22,13 +22,15 @@ namespace UKHO.BESS.ConfigurationService.Services
         private List<string> invalidNameList = new();
         private int configsWithUndefinedValueCount;
         private int configsWithDuplicateNameAttributeCount;
+        private readonly IAzureBlobStorageService azureBlobStorageService;
 
-        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, IAzureTableStorageHelper azureTableStorageHelper, ILogger<ConfigurationService> logger, IConfigValidator configValidator)
+        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, IAzureTableStorageHelper azureTableStorageHelper, ILogger<ConfigurationService> logger, IConfigValidator configValidator, IAzureBlobStorageService azureBlobStorageService)
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.configValidator = configValidator ?? throw new ArgumentNullException(nameof(configValidator));
+            this.azureBlobStorageService = azureBlobStorageService ?? throw new ArgumentNullException(nameof(azureBlobStorageService));
         }
 
         public void ProcessConfigs()
@@ -154,7 +156,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// </summary>
         /// <param name="bessConfigs"></param>
         /// <returns></returns>
-        public bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs)
+        public async Task<bool> CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs)
         {
             try
             {
@@ -169,17 +171,15 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
-                        /* -- save details to message queue --
-                         *
-                         *
-                         *
-                         */
+                        /* -- save details to message queue -- */
+                        bool isSuccess = await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config);                        
 
                         logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
                         azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
                     else
                     {   //Update schedule details
+                        bool isSuccess = await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config);
                         if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
                         {
                             azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, false);

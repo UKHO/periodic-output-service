@@ -147,6 +147,8 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
             serviceCollection.AddScoped<IConfigValidator, ConfigValidator>();
+            serviceCollection.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
+            serviceCollection.AddScoped<IAzureMessageQueueHelper, AzureMessageQueueHelper>();
         }
     }
 }
