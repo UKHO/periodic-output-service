@@ -156,7 +156,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// </summary>
         /// <param name="bessConfigs"></param>
         /// <returns></returns>
-        public async Task<bool> CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs)
+        public bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs)
         {
             try
             {
@@ -172,21 +172,21 @@ namespace UKHO.BESS.ConfigurationService.Services
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
                         /* -- save details to message queue -- */
-                        bool isSuccess = await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config);                        
+                        azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config);
 
                         logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
                         azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
                     else
                     {   //Update schedule details
-                        bool isSuccess = await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config);
+                        azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config);
                         if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
                         {
                             azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, false);
                         }
                     }
                 }
-
+                bool isSuccess = Task.FromResult(true).Result;
                 return true;
             }
             catch (Exception ex)

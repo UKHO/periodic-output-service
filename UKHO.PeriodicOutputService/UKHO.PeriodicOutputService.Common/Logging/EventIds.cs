@@ -573,7 +573,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809113 - Exception occurred while processing bess config frequency
         /// </summary>
-        BessConfigFrequencyProcessingException = 809113
+        BessConfigFrequencyProcessingException = 809113,
+        /// <summary>
+        /// 809114 - Config message added in queue
+        /// </summary>
+        BessConfigPropertiesAddedInQueue = 809114
     }
 
     public static class EventIdExtensions

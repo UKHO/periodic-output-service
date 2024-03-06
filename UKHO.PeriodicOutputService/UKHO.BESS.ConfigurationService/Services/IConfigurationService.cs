@@ -6,6 +6,6 @@ namespace UKHO.BESS.ConfigurationService.Services
     {
         void ProcessConfigs();
 
-        Task<bool> CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs);
+        bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs);
     }
 }

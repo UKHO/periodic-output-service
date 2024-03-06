@@ -8,6 +8,7 @@ using Azure.Storage.Queues;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -33,6 +34,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             var messageBase64String = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(message));
             // Send a message to the queue
             await queueClient.SendMessageAsync(messageBase64String);
+
+            logger.LogInformation(EventIds.BessConfigPropertiesAddedInQueue.ToEventId(), "Added message in Queue:{queue}, QueueMessage: :{QueueMessage} and _X-Correlation-ID:{CorrelationId}", bessStorageConfiguration.QueueName, message, CommonHelper.CorrelationID);
         }
     }
 }
