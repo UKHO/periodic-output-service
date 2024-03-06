@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentValidation;
 using FluentValidation.Results;
 using NCrontab;
 using UKHO.PeriodicOutputService.Common.Enums;
@@ -90,6 +91,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                 });
         }
 
+        [ExcludeFromCodeCoverage]
         private static bool IsAclProvided(BessConfig c)
         {
             if ((c.AllowedUsers == null && c.AllowedUserGroups == null) ||
