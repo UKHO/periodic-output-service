@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 using NCrontab;
@@ -22,6 +23,9 @@ namespace UKHO.BESS.ConfigurationService.Services
         private List<string> invalidNameList = new();
         private int configsWithUndefinedValueCount;
         private int configsWithDuplicateNameAttributeCount;
+        private const string NewLine = "\n";
+        private const string Colon = ": ";
+        private const string Hyphen = "- ";
 
         public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, IAzureTableStorageHelper azureTableStorageHelper, ILogger<ConfigurationService> logger, IConfigValidator configValidator)
         {
@@ -45,8 +49,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 IList<BessConfig> bessConfigs = new List<BessConfig>();
 
-                int configsWithInvalidAttributeCount = 0;
-                int deserializedConfigsCount = 0;
+                int configsWithInvalidAttributeCount = 0, deserializedConfigsCount = 0;
 
                 foreach (string fileName in configsInContainer.Keys.ToList())
                 {
@@ -56,22 +59,23 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     foreach (BessConfig deserializedConfig in deserializedConfigs)
                     {
-                        deserializedConfigsCount++;
+                        deserializedConfigsCount = deserializedConfigsCount + 1;
                         deserializedConfig.FileName = fileName; //for logging
 
                         ValidationResult results = configValidator.Validate(deserializedConfig);
 
                         if (!results.IsValid)
                         {
-                            configsWithInvalidAttributeCount++;
-                            string errors = string.Empty;
+                            configsWithInvalidAttributeCount = configsWithInvalidAttributeCount + 1;
+
+                            var errors = new StringBuilder();
 
                             foreach (var failure in results.Errors)
                             {
-                                errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
+                                errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
                             }
 
-                            invalidNameList.Add(deserializedConfig.FileName + "- " + deserializedConfig.Name);
+                            invalidNameList.Add(deserializedConfig.FileName + Hyphen + deserializedConfig.Name);
 
                             logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}", fileName, errors, CommonHelper.CorrelationID);
                         }
@@ -111,7 +115,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (token.ToString().Contains(UndefinedValue))
                 {
-                    configsWithUndefinedValueCount++;
+                    configsWithUndefinedValueCount = configsWithUndefinedValueCount + 1;
                     logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config file : {fileName} contains undefined values or is invalid | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
                 }
                 else
@@ -133,18 +137,21 @@ namespace UKHO.BESS.ConfigurationService.Services
             var duplicateRecords = bessConfigs.GroupBy(x => new { x.Name })
                 .Where(x => x.Skip(1).Any()).ToList();
 
-            if (!duplicateRecords.Any()) return;
-
-            configsWithDuplicateNameAttributeCount = duplicateRecords.Select(record => record.Count()).Sum();
-
-            foreach (var duplicateRecord in duplicateRecords)
+            if (duplicateRecords.Any())
             {
-                foreach (BessConfig? duplicateConfig in duplicateRecord.ToList())
-                {
-                    logger.LogWarning(EventIds.BessConfigsDuplicateRecordsFound.ToEventId(), "Bess config file : {fileName} found with duplicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}", duplicateConfig.FileName, duplicateConfig.Name, CommonHelper.CorrelationID);
+                configsWithDuplicateNameAttributeCount = duplicateRecords.Select(record => record.Count()).Sum();
 
-                    bessConfigs.RemoveAll(x =>
-                        x.FileName.Equals(duplicateConfig.FileName, StringComparison.OrdinalIgnoreCase));
+                foreach (var duplicateRecord in duplicateRecords)
+                {
+                    foreach (BessConfig? duplicateConfig in duplicateRecord.ToList())
+                    {
+                        logger.LogWarning(EventIds.BessConfigsDuplicateRecordsFound.ToEventId(),
+                            "Bess config file : {fileName} found with duplicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}",
+                            duplicateConfig.FileName, duplicateConfig.Name, CommonHelper.CorrelationID);
+
+                        bessConfigs.RemoveAll(x =>
+                            x.FileName.Equals(duplicateConfig.FileName, StringComparison.OrdinalIgnoreCase));
+                    }
                 }
             }
         }

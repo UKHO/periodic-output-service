@@ -14,11 +14,12 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
     public class ConfigValidator : AbstractValidator<BessConfig>, IConfigValidator
     {
+        private const string ValidationMessageInvalidOrNullAttribute = "Attribute is missing or value is not provided";
         public ConfigValidator()
         {
             RuleFor(config => config.Name)
                .Must(name => !string.IsNullOrEmpty(name?.Trim()))
-               .WithMessage("Attribute is missing or value not provided")
+               .WithMessage(ValidationMessageInvalidOrNullAttribute)
                .DependentRules(() =>
                {
                    RuleFor(config => config.Name).Length(1, 50)
@@ -27,7 +28,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                });
 
             RuleFor(config => config.ExchangeSetStandard).NotNull()
-                .WithMessage("Attribute is missing or value is not provided")
+                .WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.ExchangeSetStandard)
@@ -37,23 +38,23 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
             RuleFor(config => config.EncCellNames)
                 .Must(encs => encs != null && encs.Any() && encs.All(enc => !string.IsNullOrWhiteSpace(enc)))
-                .WithMessage("Attribute is missing or value is not provided");
+                .WithMessage(ValidationMessageInvalidOrNullAttribute);
 
-            RuleFor(config => config.Frequency).NotNull().WithMessage("Attribute is missing or value is not provided")
+            RuleFor(config => config.Frequency).NotNull().WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.Frequency).Must(f => IsValidCron(f))
                         .WithMessage("Attribute value is invalid");
                 });
 
-            RuleFor(config => config.Type).NotNull().WithMessage("Attribute is missing or value is not provided")
+            RuleFor(config => config.Type).NotNull().WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.Type).Must(type => IsValidBesType(type.ToUpper()))
                         .WithMessage("Attribute value is invalid. Expected value is either BASE, CHANGE or UPDATE");
                 });
 
-            RuleFor(config => config.KeyFileType).NotNull().WithMessage("Attribute is missing or value is not provided")
+            RuleFor(config => config.KeyFileType).NotNull().WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.KeyFileType)
@@ -69,7 +70,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                 "AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
 
             RuleFor(config => config.Tags)
-                .Must(tags => tags != null && tags.Any()).WithMessage("Attribute is missing or value not provided")
+                .Must(tags => tags != null && tags.Any()).WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.Tags)
@@ -80,10 +81,10 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
             RuleFor(config => config.ReadMeSearchFilter)
                 .Must(readMeSearchFilter => !string.IsNullOrEmpty(readMeSearchFilter?.Trim()))
-                .WithMessage("Attribute is missing or value not provided");
+                .WithMessage(ValidationMessageInvalidOrNullAttribute);
 
             RuleFor(config => config.BatchExpiryInDays).NotEmpty()
-                .WithMessage("Attribute is missing or value not provided")
+                .WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.BatchExpiryInDays).GreaterThan(0)
