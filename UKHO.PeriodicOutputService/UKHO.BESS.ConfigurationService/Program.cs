@@ -20,8 +20,8 @@ namespace UKHO.BESS.ConfigurationService
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static readonly InMemoryChannel s_aIChannel = new();
-        private static readonly string s_assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
+        private static readonly InMemoryChannel aiChannel = new();
+        private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
 
         public static async Task Main()
         {
@@ -46,7 +46,7 @@ namespace UKHO.BESS.ConfigurationService
                 finally
                 {
                     //Ensure all buffered app insights logs are flushed into Azure
-                    s_aIChannel.Flush();
+                    aiChannel.Flush();
                     await Task.Delay(delayTime);
                 }
             }
@@ -121,7 +121,7 @@ namespace UKHO.BESS.ConfigurationService
                         config.NodeName = eventHubConfig.NodeName;
                         config.AdditionalValuesProvider = additionalValues =>
                         {
-                            additionalValues["_AssemblyVersion"] = s_assemblyVersion;
+                            additionalValues["_AssemblyVersion"] = assemblyVersion;
                         };
                     });
                 }
@@ -130,7 +130,7 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.Configure<TelemetryConfiguration>(
                 (config) =>
                 {
-                    config.TelemetryChannel = s_aIChannel;
+                    config.TelemetryChannel = aiChannel;
                 }
             );
 

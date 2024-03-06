@@ -7,6 +7,7 @@ namespace UKHO.BESS.BuilderService
     public class BessBuilderServiceJob
     {
         private readonly ILogger<BessBuilderServiceJob> logger;
+
         public BessBuilderServiceJob(ILogger<BessBuilderServiceJob> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
