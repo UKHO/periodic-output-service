@@ -13,8 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
         [OneTimeSetUp]
         public async Task OneTimeSetupAsync()
         {
-            AuthTokenProvider authTokenProvider = new();
-            ScsJwtToken = await authTokenProvider.GetScsToken();
+            ScsJwtToken = await AuthTokenProvider.GetScsToken();
         }
 
         //PBI 140034: BESS CS - Get AVCS catalogue from SCS
