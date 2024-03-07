@@ -172,21 +172,23 @@ namespace UKHO.BESS.ConfigurationService.Services
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
                         /* -- save details to message queue -- */
-                        azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config);
+                        var encCells = new List<(string, int)> { ("US121212", 1), ("GB212121", 2), ("CA545454", 3) };
+
+                        IEnumerable<string> ENCList = encCells.Select(t => t.Item1).ToList();
+
+                        azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, ENCList, 0);
 
                         logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
                         azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
                     else
                     {   //Update schedule details
-                        azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config);
                         if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
                         {
                             azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, false);
                         }
                     }
                 }
-                bool isSuccess = Task.FromResult(true).Result;
                 return true;
             }
             catch (Exception ex)

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 
@@ -19,7 +14,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureMessageQueueHelper = azureMessageQueueHelper ?? throw new ArgumentNullException(nameof(azureMessageQueueHelper));
         }
-        public async Task<bool> SetConfigQueueMessageModelAndAddToQueue(BessConfig bessConfig)
+        public async Task<bool> SetConfigQueueMessageModelAndAddToQueue(BessConfig bessConfig, IEnumerable<string> ENCList, long fileSize)
         {
             if (bessConfig == null)
             {
@@ -30,7 +25,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 Name = bessConfig.Name,
                 ExchangeSetStandard = bessConfig.ExchangeSetStandard,
-                EncCellNames = bessConfig.EncCellNames,
+                EncCellNames = ENCList,
                 Frequency = bessConfig.Frequency,
                 Type = bessConfig.Type,
                 KeyFileType = bessConfig.KeyFileType,
@@ -41,7 +36,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 BatchExpiryInDays = bessConfig.BatchExpiryInDays,
                 IsEnabled = bessConfig.IsEnabled,
                 FileName = bessConfig.FileName,
-                FileSize = 0, //FileSize = bessConfig.FileSize
+                FileSize = fileSize,
                 CorrelationId = CommonHelper.CorrelationID.ToString()
             };
             string configQueueMessageJSON = JsonConvert.SerializeObject(configQueueMessage);
