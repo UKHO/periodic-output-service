@@ -98,7 +98,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.IsEnabled)
-                .WithErrorMessage("Attribute is missing or value not provided. Expected value is either Yes or No.");
+                .WithErrorMessage("Attribute is missing or value is not provided. Expected value is either Yes or No.");
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.Name)
-                .WithErrorMessage("Attribute is missing or value not provided");
+                .WithErrorMessage("Attribute is missing or value is not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.ExchangeSetStandard)
                 .WithErrorMessage("Attribute is missing or value is not provided");
@@ -147,13 +147,13 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 .WithErrorMessage("AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
 
             result.ShouldHaveValidationErrorFor(x => x.Tags)
-                .WithErrorMessage("Attribute is missing or value not provided");
+                .WithErrorMessage("Attribute is missing or value is not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.ReadMeSearchFilter)
-                .WithErrorMessage("Attribute is missing or value not provided");
+                .WithErrorMessage("Attribute is missing or value is not provided");
 
             result.ShouldHaveValidationErrorFor(x => x.BatchExpiryInDays)
-                .WithErrorMessage("Attribute is missing or value not provided");
+                .WithErrorMessage("Attribute is missing or value is not provided");
         }
 
         [Test]
@@ -202,7 +202,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 case "":
                 case " ":
                     result.ShouldHaveValidationErrorFor(x => x.Name)
-                        .WithErrorMessage("Attribute is missing or value not provided");
+                        .WithErrorMessage("Attribute is missing or value is not provided");
                     break;
 
                 case "Name/":
