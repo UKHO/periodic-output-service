@@ -9,6 +9,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.MockEndPoint
     {
         static readonly TestConfiguration testConfiguration = new();
 
+        //PBI 142682: BESS CS : Create a mock endpoint to upload BESS configuration files to azure storage
         [Test]
         public async Task WhenICallUploadConfigApiWithValidConfigFile_ThenCreatedStatusCode201IsReturned()
         {
@@ -16,6 +17,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.MockEndPoint
             apiResponse.StatusCode.Should().Be((HttpStatusCode)201);
         }
 
+        //PBI 142682: BESS CS : Create a mock endpoint to upload BESS configuration files to azure storage
         [Test]
         public async Task WhenICallUploadConfigApiWithInvalidConfigFile_ThenBadRequestStatusCode400IsReturned()
         {

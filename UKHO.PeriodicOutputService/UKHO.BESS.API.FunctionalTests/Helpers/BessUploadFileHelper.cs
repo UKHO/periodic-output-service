@@ -7,6 +7,14 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
     public static class BessUploadFileHelper
     {
         static readonly HttpClient httpClient = new();
+
+        /// <summary>
+        /// This method is use to upload the confile file to storage.
+        /// </summary>
+        /// <param name="baseUrl">Sets the baseUrl of the endpoint</param>
+        /// <param name="path">Use to pass the correct config</param>
+        /// <param name="value">Sets the Authorization value</param>
+        /// <returns></returns>
         public static async Task<HttpResponseMessage> UploadConfigFile(string? baseUrl, string? path, string? value)
         {
             var uri = $"{baseUrl}/bessConfigUpload?Key={value}";
@@ -18,6 +26,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
         }
 
+        /// <summary>
+        /// This method is to deserialize the payload
+        /// </summary>
+        /// <param name="path">Use to pass the correct config</param>
+        /// <returns></returns>
         public static List<BessConfig>? GetPayload(string? path)
         {
             return path != null ? JsonConvert.DeserializeObject<List<BessConfig>>(File.ReadAllText(path)) : null;
