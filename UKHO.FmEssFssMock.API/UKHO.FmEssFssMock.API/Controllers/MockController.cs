@@ -57,6 +57,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         [ServiceFilter(typeof(SharedKeyAuthFilter))]
         [Route("/mock/bessConfigUpload")]
         public async Task<IActionResult> UploadConfigFileDataAsync([FromBody] List<BessConfig> bessConfigs)
