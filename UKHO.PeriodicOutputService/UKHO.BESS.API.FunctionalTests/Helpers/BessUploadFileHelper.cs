@@ -7,7 +7,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
     public static class BessUploadFileHelper
     {
         static readonly HttpClient httpClient = new();
-        public static async Task<HttpResponseMessage> UploadConfigFile(string baseUrl, string path, string value)
+        public static async Task<HttpResponseMessage> UploadConfigFile(string? baseUrl, string? path, string? value)
         {
             var uri = $"{baseUrl}/bessConfigUpload?Key={value}";
             var payloadJson = JsonConvert.SerializeObject(GetPayload(path));
@@ -18,7 +18,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
         }
 
-        public static List<BessConfig>? GetPayload(string path)
+        public static List<BessConfig>? GetPayload(string? path)
         {
             return path != null ? JsonConvert.DeserializeObject<List<BessConfig>>(File.ReadAllText(path)) : null;
         }
