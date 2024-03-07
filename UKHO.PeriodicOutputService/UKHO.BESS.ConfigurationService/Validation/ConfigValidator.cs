@@ -15,6 +15,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
     public class ConfigValidator : AbstractValidator<BessConfig>, IConfigValidator
     {
         private const string ValidationMessageInvalidOrNullAttribute = "Attribute is missing or value is not provided";
+        private const string ValidationMessageInvalidAcl = "AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided";
         public ConfigValidator()
         {
             RuleFor(config => config.Name)
@@ -63,11 +64,9 @@ namespace UKHO.BESS.ConfigurationService.Validation
                             "Attribute value is invalid. Expected value is KEY_TEXT, KEY_XML, PERMIT_XML or NONE");
                 });
 
-            RuleFor(config => config.AllowedUsers).Must((config, s) => IsAclProvided(config)).WithMessage(
-                "AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
+            RuleFor(config => config.AllowedUsers).Must((config, s) => IsAclProvided(config)).WithMessage(ValidationMessageInvalidAcl);
 
-            RuleFor(config => config.AllowedUserGroups).Must((config, s) => IsAclProvided(config)).WithMessage(
-                "AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided");
+            RuleFor(config => config.AllowedUserGroups).Must((config, s) => IsAclProvided(config)).WithMessage(ValidationMessageInvalidAcl);
 
             RuleFor(config => config.Tags)
                 .Must(tags => tags != null && tags.Any()).WithMessage(ValidationMessageInvalidOrNullAttribute)
