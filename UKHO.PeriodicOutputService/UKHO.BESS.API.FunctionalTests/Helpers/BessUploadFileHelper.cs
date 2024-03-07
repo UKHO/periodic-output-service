@@ -9,7 +9,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         static readonly HttpClient httpClient = new();
 
         /// <summary>
-        /// This method is use to upload the confile file to storage.
+        /// This method is use to upload the config file to storage.
         /// </summary>
         /// <param name="baseUrl">Sets the baseUrl of the endpoint</param>
         /// <param name="path">Use to pass the correct config</param>
