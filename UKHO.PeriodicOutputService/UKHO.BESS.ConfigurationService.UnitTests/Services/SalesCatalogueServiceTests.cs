@@ -20,6 +20,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         private IAuthScsTokenProvider fakeAuthScsTokenProvider;
         private ISalesCatalogueClient fakeSalesCatalogueClient;
         private ISalesCatalogueService salesCatalogueService;
+        private const string NotRequiredAccessToken = "xyz";
 
         [SetUp]
         public void Setup()
@@ -63,15 +64,32 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
         #region GetSalesCatalogueDataResponse
         [Test]
-        public void WhenSCSClientReturnsStatusCodeOtherThan200_ThenGetSalesCatalogueDataResponseReturnsFulfilmentException()
+        [TestCase(HttpStatusCode.BadRequest, "BadRequest")]
+        [TestCase(HttpStatusCode.Unauthorized,"Unauthorized")]
+        [TestCase(HttpStatusCode.Forbidden, "Forbidden")]        
+        public void WhenSCSClientReturnsOtherThanStatusCode200_ThenGetSalesCatalogueDataResponseReturnsFulfilmentException(HttpStatusCode statusCode, string content)
         {
-            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns("notRequiredDuringTesting");
+            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(NotRequiredAccessToken);
             A.CallTo(() => fakeSalesCatalogueClient.CallSalesCatalogueServiceApi(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
-                .Returns(new HttpResponseMessage() { StatusCode = HttpStatusCode.BadRequest, RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://abc.com") }, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("Bad request"))) });
+                .Returns(new HttpResponseMessage() { StatusCode = statusCode, RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://abc.com") }, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(content))) });
 
             Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
                  async delegate { await salesCatalogueService.GetSalesCatalogueData(); });
-        }
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                  && call.GetArgument<EventId>(1) == EventIds.SalesCatalogueServiceCatalogueDataNonOkResponse.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to Sales Catalogue Service catalogue end point with uri:{RequestUri} FAILED.| {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();            
+        }        
 
         [Test]
         public async Task WhenSCSClientReturnsStatusCode200_ThenGetSalesCatalogueDataResponseReturnsStatusCode200AndDataInResponse()
@@ -79,15 +97,29 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             List<SalesCatalogueDataProductResponse> scsResponse = GetSalesCatalogueDataProductResponse();
             var jsonString = JsonConvert.SerializeObject(scsResponse);
 
-            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns("notRequiredDuringTesting");
+            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(NotRequiredAccessToken);
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))) };
             A.CallTo(() => fakeSalesCatalogueClient.CallSalesCatalogueServiceApi(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(httpResponse);
 
-            var response = await salesCatalogueService.GetSalesCatalogueData();
+            var response = await salesCatalogueService.GetSalesCatalogueData();         
 
             response.ResponseCode.Should().Be(HttpStatusCode.OK);
             JsonConvert.SerializeObject(response.ResponseBody).Should().Be(jsonString);
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -120,6 +152,20 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             httpMethodParam.Should().Be(HttpMethod.Get);
             uriParam.Should().Be($"/{fakeSaleCatalogueConfig.Value.Version}/productData/{fakeSaleCatalogueConfig.Value.ProductType}/catalogue/{fakeSaleCatalogueConfig.Value.CatalogueType}");
             accessTokenParam.Should().Be(actualAccessToken);
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
         }
         #endregion GetSalesCatalogueDataResponse
     }

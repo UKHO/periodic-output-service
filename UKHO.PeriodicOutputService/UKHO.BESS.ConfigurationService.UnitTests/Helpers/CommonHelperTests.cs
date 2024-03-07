@@ -40,6 +40,13 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
             var result = await configuredClient.GetAsync("https://test.com");
 
             result.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientSCSRequest.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
+                  ).MustHaveHappenedTwiceOrMore();
         }
 
         [Test]
@@ -60,6 +67,13 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
             var result = await configuredClient.GetAsync("https://test.com");
 
             result.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientSCSRequest.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
+                  ).MustHaveHappenedTwiceOrMore();
         }
 
         [Test]
@@ -79,6 +93,13 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
 
             var result = await configuredClient.GetAsync("https://test.com");
             result.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientSCSRequest.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
+                  ).MustHaveHappenedTwiceOrMore();
         }
     }
 }
