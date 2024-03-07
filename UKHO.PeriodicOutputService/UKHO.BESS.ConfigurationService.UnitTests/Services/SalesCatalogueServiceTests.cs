@@ -65,8 +65,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         #region GetSalesCatalogueDataResponse
         [Test]
         [TestCase(HttpStatusCode.BadRequest, "BadRequest")]
-        [TestCase(HttpStatusCode.Unauthorized,"Unauthorized")]
-        [TestCase(HttpStatusCode.Forbidden, "Forbidden")]        
+        [TestCase(HttpStatusCode.Unauthorized, "Unauthorized")]
+        [TestCase(HttpStatusCode.Forbidden, "Forbidden")]
         public void WhenSCSClientReturnsOtherThanStatusCode200_ThenGetSalesCatalogueDataResponseReturnsFulfilmentException(HttpStatusCode statusCode, string content)
         {
             A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(NotRequiredAccessToken);
@@ -88,8 +88,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.SalesCatalogueServiceCatalogueDataNonOkResponse.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to Sales Catalogue Service catalogue end point with uri:{RequestUri} FAILED.| {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
-                  ).MustHaveHappenedOnceExactly();            
-        }        
+                  ).MustHaveHappenedOnceExactly();
+        }
 
         [Test]
         public async Task WhenSCSClientReturnsStatusCode200_ThenGetSalesCatalogueDataResponseReturnsStatusCode200AndDataInResponse()
@@ -102,7 +102,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeSalesCatalogueClient.CallSalesCatalogueServiceApi(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(httpResponse);
 
-            var response = await salesCatalogueService.GetSalesCatalogueData();         
+            var response = await salesCatalogueService.GetSalesCatalogueData();
 
             response.ResponseCode.Should().Be(HttpStatusCode.OK);
             JsonConvert.SerializeObject(response.ResponseBody).Should().Be(jsonString);
