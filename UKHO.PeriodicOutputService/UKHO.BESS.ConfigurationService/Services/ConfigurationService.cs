@@ -127,7 +127,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         if (!encCells.Any()) //If cells are not found then bespoke exchange set will not create
                         {
-                            logger.LogWarning(EventIds.BessInvalidCellAndPatternNotFoundInCatalog.ToEventId(), "All listed cells are not found and neither cell matching with the pattern, bespoke will not create for : {EncCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", config.EncCellNames), CommonHelper.CorrelationID);
+                            logger.LogWarning(EventIds.BessEncCellNamesAndPatternNotFoundInSalesCatalogue.ToEventId(), "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for : {EncCellNames} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", config.EncCellNames), CommonHelper.CorrelationID);
                             continue;
                         }
 
@@ -234,9 +234,10 @@ namespace UKHO.BESS.ConfigurationService.Services
                     invalidPatternOrCell.Add(prefixPattern);
                 }
             }
-            if (invalidPatternOrCell.Any() && filteredEncCell.Any()) //If invalid pattern found then log
+            //Apart from valid, invalid pattern or cell found then log
+            if (invalidPatternOrCell.Any() && filteredEncCell.Any())
             {
-                logger.LogWarning(EventIds.BessInvalidEncCellOrPatternNotFoundInCatalog.ToEventId(), "Invalid pattern or cell found : {InvalidEncCellName} | EncCellNames : {EncCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), string.Join(", ", encCellNames), CommonHelper.CorrelationID);
+                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), CommonHelper.CorrelationID);
             }
 
             return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1))); //remove aio cells and return all filtered data

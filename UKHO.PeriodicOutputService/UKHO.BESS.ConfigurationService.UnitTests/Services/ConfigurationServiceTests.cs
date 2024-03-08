@@ -344,7 +344,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Warning
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() == "Invalid pattern or cell found : {InvalidEncCellName} | EncCellNames : {EncCellName} | _X-Correlation-ID : {CorrelationId}").MustHaveHappened();
+                    "{OriginalFormat}"].ToString() == "Invalid pattern or ENC cell names found : {InvalidEncCellName} | _X-Correlation-ID : {CorrelationId}").MustHaveHappened();
 
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
@@ -364,7 +364,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<LogLevel>(0) == LogLevel.Warning
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "All listed cells are not found and neither cell matching with the pattern, bespoke will not create for : {EncCellName} | _X-Correlation-ID : {CorrelationId}"
+                "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for : {EncCellNames} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             A.CallTo(() =>
