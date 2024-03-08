@@ -9,11 +9,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;8603;8618;1591;8600;8604</NoWarn>
+    <NoWarn>1701;1702;8603;8618;1591;8600;8604;8601;8625;8602</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;8603;8618;1591;8600;8604</NoWarn>
+    <NoWarn>1701;1702;8603;8618;1591;8600;8604;8601;8625;8602</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +24,7 @@
     <PackageReference Include="DiscUtils.Iso9660" Version="0.16.13" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.IO.Abstractions" Version="19.2.91" />
   </ItemGroup>

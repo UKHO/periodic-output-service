@@ -1,4 +1,5 @@
-﻿using FakeItEasy;
+﻿using System.Net;
+using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -9,6 +10,7 @@ using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Scs.Response;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
+using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 {
@@ -19,6 +21,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         private IAzureBlobStorageClient fakeAzureBlobStorageClient;
         private IAzureTableStorageHelper fakeAzureTableStorageHelper;
         private ILogger<ConfigurationService.Services.ConfigurationService> fakeLogger;
+        private ISalesCatalogueService fakeSalesCatalogueService;
         private IConfiguration fakeConfiguration;
         private const string InvalidConfigJson = "[{\"Name\":,\"ExchangeSetStandard\":null,\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"Yes\"}]";
         private const string ValidConfigJson = "[{\"Name\":\"Xyz.json\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"Yes\"}]";
@@ -33,27 +36,32 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             fakeAzureBlobStorageClient = A.Fake<IAzureBlobStorageClient>();
             fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
             fakeLogger = A.Fake<ILogger<ConfigurationService.Services.ConfigurationService>>();
+            fakeSalesCatalogueService = A.Fake<ISalesCatalogueService>();
             fakeConfiguration = A.Fake<IConfiguration>();
-            configurationService = new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfiguration);
+
+            configurationService = new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeSalesCatalogueService, fakeConfiguration);
             dictionary = new Dictionary<string, string>();
         }
 
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfiguration);
+            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeSalesCatalogueService, fakeConfiguration);
 
             nullAzureBlobStorageClient.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageClient");
 
-            Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger, fakeConfiguration);
+            Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger, fakeSalesCatalogueService, fakeConfiguration);
 
             nullAzureTableHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureTableStorageHelper");
 
-            Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, null, fakeConfiguration);
+            Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, null, fakeSalesCatalogueService, fakeConfiguration);
 
             nullConfigurationServiceLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
 
-            Action nullConfigurationServiceConfiguration = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, null);
+            Action nullSalesCatalogueService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, null, fakeConfiguration);
+            nullSalesCatalogueService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("salesCatalogueService");
+
+            Action nullConfigurationServiceConfiguration = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeSalesCatalogueService, null);
 
             nullConfigurationServiceConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
         }
@@ -62,6 +70,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenValidConfigIsFound_ThenConfigIsAddedToList()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigFilesJson());
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             configurationService.ProcessConfigs();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -86,6 +95,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenInvalidConfigIsFound_ThenThrowsError()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidEmptyJson());
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             configurationService.ProcessConfigs();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -142,6 +152,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenUndefinedValuesFoundInConfig_ThenConfigIsNotAddedToList()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidConfigFilesJson());
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             configurationService.ProcessConfigs();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -641,5 +652,28 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             };
             return configurations;
         }
+
+        #region GetSalesCatalogueDataProductResponse
+        private SalesCatalogueDataResponse GetSalesCatalogueDataResponse()
+        {
+            return new SalesCatalogueDataResponse
+            {
+                ResponseCode = HttpStatusCode.OK,
+                ResponseBody = new List<SalesCatalogueDataProductResponse>()
+                {
+                    new SalesCatalogueDataProductResponse
+                    {
+                    ProductName="10000002",
+                    LatestUpdateNumber=5,
+                    FileSize=600,
+                    CellLimitSouthernmostLatitude=24,
+                    CellLimitWesternmostLatitude=119,
+                    CellLimitNorthernmostLatitude=25,
+                    CellLimitEasternmostLatitude=120
+                    }
+                }
+            };
+        }
+        #endregion
     }
 }

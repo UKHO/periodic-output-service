@@ -445,13 +445,29 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BessConfigFrequencyProcessingException = 809109,
         /// <summary>
-        /// 809110 - Listed cells or pattern not found in catalog
+        /// 809110 - Request to Sales Catalogue Service's catalogue essData endpoint is started.
         /// </summary>
-        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809110,
+        SCSGetSalesCatalogueDataRequestStarted = 809110,
         /// <summary>
-        /// 809111 - All listed cells are not found and neither cell is matching with the pattern
+        /// 809111 - Request to Sales Catalogue Service's catalogue essData endpoint is completed.
         /// </summary>
-        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809111
+        SCSGetSalesCatalogueDataRequestCompleted = 809111,
+        /// <summary>
+        /// 809112 - Request to Sales Catalogue Service's catalogue essData endpoint failed due to Non-Ok response.
+        /// </summary>
+        SalesCatalogueServiceCatalogueDataNonOkResponse = 809112,
+        /// <summary>
+        /// 809113 - Request for retrying sales catalogue service endpoint.
+        /// </summary>
+        RetryHttpClientSCSRequest = 809113,
+        /// <summary>
+        /// 809114 - Listed cells or pattern not found in catalog
+        /// </summary>
+        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809114,
+        /// <summary>
+        /// 809115 - All listed cells are not found and neither cell is matching with the pattern
+        /// </summary>
+        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809115
     }
 
     public static class EventIdExtensions

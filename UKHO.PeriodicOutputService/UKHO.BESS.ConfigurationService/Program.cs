@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Net.Http.Headers;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -14,6 +15,8 @@ using UKHO.BESS.ConfigurationService.Services;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.BESS.ConfigurationService
 {
@@ -22,6 +25,7 @@ namespace UKHO.BESS.ConfigurationService
     {
         private static readonly InMemoryChannel s_aIChannel = new();
         private static readonly string s_assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
+        private const string BESSConfigurationService = "BESSConfigurationService";
 
         public static async Task Main()
         {
@@ -139,12 +143,27 @@ namespace UKHO.BESS.ConfigurationService
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
                 serviceCollection.Configure<BessStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
                 serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
+                serviceCollection.Configure<SalesCatalogueConfiguration>(configuration.GetSection("SalesCatalogue"));
             }
+            serviceCollection.AddDistributedMemoryCache();
 
+            var retryCount = Convert.ToInt32(configuration["RetryConfiguration:RetryCount"]);
+            var sleepDuration = Convert.ToDouble(configuration["RetryConfiguration:SleepDuration"]);
+
+            serviceCollection.AddHttpClient<ISalesCatalogueClient, SalesCatalogueClient>(client =>
+            {
+                client.BaseAddress = new Uri(configuration["SalesCatalogue:BaseUrl"]);
+                var productHeaderValue = new ProductInfoHeaderValue(BESSConfigurationService, s_assemblyVersion);
+                client.DefaultRequestHeaders.UserAgent.Add(productHeaderValue);
+            }).AddPolicyHandler((services, request) =>
+                    CommonHelper.GetRetryPolicy(services.GetService<ILogger<ISalesCatalogueClient>>(), "Sales Catalogue", EventIds.RetryHttpClientSCSRequest, retryCount, sleepDuration));
+
+            serviceCollection.AddSingleton<IAuthScsTokenProvider, AuthTokenProvider>();
             serviceCollection.AddSingleton<BessConfigurationServiceJob>();
             serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
             serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
+            serviceCollection.AddScoped<ISalesCatalogueService, SalesCatalogueService>();
         }
     }
 }

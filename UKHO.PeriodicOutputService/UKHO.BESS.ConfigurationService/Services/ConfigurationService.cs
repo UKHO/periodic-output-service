@@ -9,6 +9,7 @@ using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Scs.Response;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
+using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
@@ -17,13 +18,19 @@ namespace UKHO.BESS.ConfigurationService.Services
         private readonly IAzureBlobStorageClient azureBlobStorageClient;
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
         private readonly ILogger<ConfigurationService> logger;
+        private readonly ISalesCatalogueService salesCatalogueService;
         private readonly IConfiguration configuration;
         private const string UndefinedValue = "undefined";
 
-        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, IAzureTableStorageHelper azureTableStorageHelper, ILogger<ConfigurationService> logger, IConfiguration configuration)
+        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient,
+                                    IAzureTableStorageHelper azureTableStorageHelper,
+                                    ILogger<ConfigurationService> logger,
+                                    ISalesCatalogueService salesCatalogueService,
+                                    IConfiguration configuration)
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
+            this.salesCatalogueService = salesCatalogueService ?? throw new ArgumentNullException(nameof(salesCatalogueService));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
@@ -40,6 +47,8 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (configs.Any())
                 {
+                    var salesCatalogueDataResponse = Task.Run(async () => await salesCatalogueService.GetSalesCatalogueData()).Result;
+
                     foreach (string fileName in configs.Keys.ToList())
                     {
                         string content = configs[fileName];
@@ -59,10 +68,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (bessConfigs.Any())
                     {
-                        //Temp scs call
-                        List<SalesCatalogueDataProductResponse> salesCatalogueDataProducts = new();
-
-                        CheckConfigFrequencyAndSaveQueueDetails(bessConfigs, salesCatalogueDataProducts);
+                       CheckConfigFrequencyAndSaveQueueDetails(bessConfigs, salesCatalogueDataResponse);
                     }
                 }
                 else
