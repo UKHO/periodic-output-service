@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
+    [ExcludeFromCodeCoverage]
     public class AzureBlobStorageService : IAzureBlobStorageService
     {
         private readonly ILogger<AzureBlobStorageService> logger;
