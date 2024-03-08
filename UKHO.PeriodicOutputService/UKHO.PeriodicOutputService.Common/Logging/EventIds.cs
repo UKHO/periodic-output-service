@@ -447,11 +447,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809110 - Listed cells or pattern not found in catalog
         /// </summary>
-        BessInvalidEncCellOrPatternNotFoundInCatalog = 809110,
+        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809110,
         /// <summary>
         /// 809111 - All listed cells are not found and neither cell is matching with the pattern
         /// </summary>
-        BessInvalidCellAndPatternNotFoundInCatalog = 809111
+        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809111
     }
 
     public static class EventIdExtensions
