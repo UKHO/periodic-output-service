@@ -30,8 +30,8 @@ namespace UKHO.BESS.ConfigurationService.Services
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
-            this.salesCatalogueService = salesCatalogueService ?? throw new ArgumentNullException(nameof(salesCatalogueService));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.salesCatalogueService = salesCatalogueService ?? throw new ArgumentNullException(nameof(salesCatalogueService));
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
@@ -68,7 +68,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (bessConfigs.Any())
                     {
-                       CheckConfigFrequencyAndSaveQueueDetails(bessConfigs, salesCatalogueDataResponse);
+                       CheckConfigFrequencyAndSaveQueueDetails(bessConfigs, salesCatalogueDataResponse.ResponseBody);
                     }
                 }
                 else
