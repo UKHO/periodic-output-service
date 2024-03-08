@@ -61,25 +61,32 @@ namespace UKHO.BESS.ConfigurationService.Services
                         deserializedConfigsCount++;
                         deserializedConfig.FileName = fileName; //for logging
 
-                        ValidationResult results = configValidator.Validate(deserializedConfig);
-
-                        if (!results.IsValid)
+                        try
                         {
-                            configsWithInvalidAttributeCount++;
-                            string errors = string.Empty;
+                            ValidationResult results = configValidator.Validate(deserializedConfig);
 
-                            foreach (var failure in results.Errors)
+                            if (!results.IsValid)
                             {
-                                errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
+                                configsWithInvalidAttributeCount++;
+                                string errors = string.Empty;
+
+                                foreach (var failure in results.Errors)
+                                {
+                                    errors += "\n" + failure.PropertyName + ": " + failure.ErrorMessage;
+                                }
+
+                                invalidNameList.Add(deserializedConfig.FileName + "- " + deserializedConfig.Name);
+
+                                logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}", fileName, errors, CommonHelper.CorrelationID);
                             }
-
-                            invalidNameList.Add(deserializedConfig.FileName + "- " + deserializedConfig.Name);
-
-                            logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}", fileName, errors, CommonHelper.CorrelationID);
+                            else
+                            {
+                                bessConfigs.Add(deserializedConfig);
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            bessConfigs.Add(deserializedConfig);
+                            logger.LogError(EventIds.BessConfigValidationError.ToEventId(), "Error occurred while validating Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                         }
                     }
                 }

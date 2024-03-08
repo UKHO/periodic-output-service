@@ -577,7 +577,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809114 - Config message added in queue
         /// </summary>
-        BessConfigPropertiesAddedInQueue = 809114
+        BessConfigPropertiesAddedInQueue = 809114,
+        /// <summary>
+        /// 809115 - Bess Config Validation Error
+        /// </summary>
+        BessConfigValidationError = 809115
     }
 
     public static class EventIdExtensions
