@@ -170,7 +170,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
-                  ).MustHaveHappenedOnceExactly();
+                  ).MustNotHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -184,7 +184,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
-                  ).MustHaveHappenedOnceExactly();
+                  ).MustNotHaveHappened();
         }
 
         [Test]
