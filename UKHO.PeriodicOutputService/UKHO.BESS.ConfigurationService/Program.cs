@@ -23,8 +23,8 @@ namespace UKHO.BESS.ConfigurationService
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static readonly InMemoryChannel s_aIChannel = new();
-        private static readonly string s_assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
+        private static readonly InMemoryChannel aiChannel = new();
+        private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         private const string BESSConfigurationService = "BESSConfigurationService";
 
         public static async Task Main()
@@ -50,7 +50,7 @@ namespace UKHO.BESS.ConfigurationService
                 finally
                 {
                     //Ensure all buffered app insights logs are flushed into Azure
-                    s_aIChannel.Flush();
+                    aiChannel.Flush();
                     await Task.Delay(delayTime);
                 }
             }
@@ -125,7 +125,7 @@ namespace UKHO.BESS.ConfigurationService
                         config.NodeName = eventHubConfig.NodeName;
                         config.AdditionalValuesProvider = additionalValues =>
                         {
-                            additionalValues["_AssemblyVersion"] = s_assemblyVersion;
+                            additionalValues["_AssemblyVersion"] = assemblyVersion;
                         };
                     });
                 }
@@ -134,7 +134,7 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.Configure<TelemetryConfiguration>(
                 (config) =>
                 {
-                    config.TelemetryChannel = s_aIChannel;
+                    config.TelemetryChannel = aiChannel;
                 }
             );
 
@@ -153,7 +153,7 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.AddHttpClient<ISalesCatalogueClient, SalesCatalogueClient>(client =>
             {
                 client.BaseAddress = new Uri(configuration["SalesCatalogue:BaseUrl"]);
-                var productHeaderValue = new ProductInfoHeaderValue(BESSConfigurationService, s_assemblyVersion);
+                var productHeaderValue = new ProductInfoHeaderValue(BESSConfigurationService, assemblyVersion);
                 client.DefaultRequestHeaders.UserAgent.Add(productHeaderValue);
             }).AddPolicyHandler((services, request) =>
                     CommonHelper.GetRetryPolicy(services.GetService<ILogger<ISalesCatalogueClient>>(), "Sales Catalogue", EventIds.RetryHttpClientSCSRequest, retryCount, sleepDuration));
