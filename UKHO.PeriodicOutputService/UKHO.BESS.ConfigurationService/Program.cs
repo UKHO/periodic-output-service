@@ -14,6 +14,7 @@ using UKHO.BESS.ConfigurationService.Services;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.BESS.ConfigurationService.Validation;
 
 namespace UKHO.BESS.ConfigurationService
 {
@@ -145,6 +146,7 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
             serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
+            serviceCollection.AddScoped<IConfigValidator, ConfigValidator>();
         }
     }
 }
