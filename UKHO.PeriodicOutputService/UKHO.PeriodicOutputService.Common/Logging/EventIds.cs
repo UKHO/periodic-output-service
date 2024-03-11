@@ -574,14 +574,24 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809113 - Exception occurred while processing bess config frequency
         /// </summary>
         BessConfigFrequencyProcessingException = 809113,
+
         /// <summary>
-        /// 809114 - Config message added in queue
+        /// 809114 - Bess Builder Service Started
         /// </summary>
-        BessConfigPropertiesAddedInQueue = 809114,
+        BessBuilderServiceStarted = 809114,
+
         /// <summary>
-        /// 809115 - Bess Config Validation Error
+        /// 809115 - Bess Builder Service Completed
         /// </summary>
-        BessConfigValidationError = 809115
+        BessBuilderServiceCompleted = 809115,
+        /// <summary>
+        /// 809116 - Config message added in queue
+        /// </summary>
+        BessConfigPropertiesAddedInQueue = 809116,
+        /// <summary>
+        /// 809117 - Bess Config Validation Error
+        /// </summary>
+        BessConfigValidationError = 809117
     }
 
     public static class EventIdExtensions

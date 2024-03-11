@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Diagnostics.CodeAnalysis;
+using FluentValidation;
 using FluentValidation.Results;
 using NCrontab;
 using UKHO.PeriodicOutputService.Common.Enums;
@@ -13,11 +14,13 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
     public class ConfigValidator : AbstractValidator<BessConfig>, IConfigValidator
     {
+        private const string ValidationMessageInvalidOrNullAttribute = "Attribute is missing or value is not provided";
+        private const string ValidationMessageInvalidAcl = "AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided";
         public ConfigValidator()
         {
             RuleFor(config => config.Name)
                .Must(name => !string.IsNullOrEmpty(name?.Trim()))
-               .WithMessage("Attribute is missing or value not provided")
+               .WithMessage(ValidationMessageInvalidOrNullAttribute)
                .DependentRules(() =>
                {
                    RuleFor(config => config.Name).Length(1, 50)
@@ -26,7 +29,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                });
 
             RuleFor(config => config.ExchangeSetStandard).NotNull()
-                .WithMessage("Attribute is missing or value is not provided")
+                .WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.ExchangeSetStandard)
@@ -36,23 +39,23 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
             RuleFor(config => config.EncCellNames)
                 .Must(encs => encs != null && encs.Any() && encs.All(enc => !string.IsNullOrWhiteSpace(enc)))
-                .WithMessage("Attribute is missing or value is not provided");
+                .WithMessage(ValidationMessageInvalidOrNullAttribute);
 
-            RuleFor(config => config.Frequency).NotNull().WithMessage("Attribute is missing or value is not provided")
+            RuleFor(config => config.Frequency).NotNull().WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.Frequency).Must(f => IsValidCron(f))
                         .WithMessage("Attribute value is invalid");
                 });
 
-            RuleFor(config => config.Type).NotNull().WithMessage("Attribute is missing or value is not provided")
+            RuleFor(config => config.Type).NotNull().WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.Type).Must(type => IsValidBesType(type.ToUpper()))
                         .WithMessage("Attribute value is invalid. Expected value is either BASE, CHANGE or UPDATE");
                 });
 
-            RuleFor(config => config.KeyFileType).NotNull().WithMessage("Attribute is missing or value is not provided")
+            RuleFor(config => config.KeyFileType).NotNull().WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.KeyFileType)
@@ -61,14 +64,12 @@ namespace UKHO.BESS.ConfigurationService.Validation
                             "Attribute value is invalid. Expected value is KEY_TEXT, KEY_XML, PERMIT_XML or NONE");
                 });
 
-            RuleFor(config => config.AllowedUsers).Must((config, s) => IsAclProvided(config)).WithMessage(
-                "AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+            RuleFor(config => config.AllowedUsers).Must((config, s) => IsAclProvided(config)).WithMessage(ValidationMessageInvalidAcl);
 
-            RuleFor(config => config.AllowedUserGroups).Must((config, s) => IsAclProvided(config)).WithMessage(
-                "AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+            RuleFor(config => config.AllowedUserGroups).Must((config, s) => IsAclProvided(config)).WithMessage(ValidationMessageInvalidAcl);
 
             RuleFor(config => config.Tags)
-                .Must(tags => tags != null && tags.Any()).WithMessage("Attribute is missing or value not provided")
+                .Must(tags => tags != null && tags.Any()).WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.Tags)
@@ -79,10 +80,10 @@ namespace UKHO.BESS.ConfigurationService.Validation
 
             RuleFor(config => config.ReadMeSearchFilter)
                 .Must(readMeSearchFilter => !string.IsNullOrEmpty(readMeSearchFilter?.Trim()))
-                .WithMessage("Attribute is missing or value not provided");
+                .WithMessage(ValidationMessageInvalidOrNullAttribute);
 
             RuleFor(config => config.BatchExpiryInDays).NotEmpty()
-                .WithMessage("Attribute is missing or value not provided")
+                .WithMessage(ValidationMessageInvalidOrNullAttribute)
                 .DependentRules(() =>
                 {
                     RuleFor(config => config.BatchExpiryInDays).GreaterThan(0)
@@ -90,6 +91,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                 });
         }
 
+        [ExcludeFromCodeCoverage]
         private static bool IsAclProvided(BessConfig c)
         {
             if ((c.AllowedUsers == null && c.AllowedUserGroups == null) ||
@@ -157,12 +159,12 @@ namespace UKHO.BESS.ConfigurationService.Validation
         {
             if (context.InstanceToValidate.IsEnabled?.ToLower() == "no")
             {
-                result.Errors.Add(new ValidationFailure("IsEnabled", "Bess config for file - " + context.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no.”"));
+                result.Errors.Add(new ValidationFailure("IsEnabled", "Bess config for file - " + context.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no”."));
                 return false;
             }
             else if (context.InstanceToValidate.IsEnabled?.ToLower() != "yes")
             {
-                result.Errors.Add(new ValidationFailure("IsEnabled", "Attribute is missing or value not provided. Expected value is either Yes or No."));
+                result.Errors.Add(new ValidationFailure("IsEnabled", "Attribute is missing or value is not provided. Expected value is either Yes or No."));
                 return false;
             }
             return true;

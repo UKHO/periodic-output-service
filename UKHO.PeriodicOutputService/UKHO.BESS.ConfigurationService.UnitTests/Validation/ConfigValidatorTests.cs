@@ -12,6 +12,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
     {
         private ConfigValidator configValidator;
         private ValidationContext<BessConfig> fakeContext;
+        private const string ValidationMessageInvalidOrNullAttribute = "Attribute is missing or value is not provided";
+        private const string ValidationMessageInvalidAcl = "AllowedUsers and AllowedUserGroups both attribute values are not provided. Either of them should be provided";
 
         [SetUp]
         public void Setup()
@@ -98,7 +100,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.IsEnabled)
-                .WithErrorMessage("Attribute is missing or value not provided. Expected value is either Yes or No.");
+                .WithErrorMessage("Attribute is missing or value is not provided. Expected value is either Yes or No.");
         }
 
         [Test]
@@ -123,37 +125,37 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.Name)
-                .WithErrorMessage("Attribute is missing or value not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
 
             result.ShouldHaveValidationErrorFor(x => x.ExchangeSetStandard)
-                .WithErrorMessage("Attribute is missing or value is not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
 
             result.ShouldHaveValidationErrorFor(x => x.EncCellNames)
-                .WithErrorMessage("Attribute is missing or value is not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
 
             result.ShouldHaveValidationErrorFor(x => x.Frequency)
-                .WithErrorMessage("Attribute is missing or value is not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
 
             result.ShouldHaveValidationErrorFor(x => x.Type)
-                .WithErrorMessage("Attribute is missing or value is not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
 
             result.ShouldHaveValidationErrorFor(x => x.KeyFileType)
-                .WithErrorMessage("Attribute is missing or value is not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
 
             result.ShouldHaveValidationErrorFor(x => x.AllowedUsers)
-                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                .WithErrorMessage(ValidationMessageInvalidAcl);
 
             result.ShouldHaveValidationErrorFor(x => x.AllowedUserGroups)
-                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                .WithErrorMessage(ValidationMessageInvalidAcl);
 
             result.ShouldHaveValidationErrorFor(x => x.Tags)
-                .WithErrorMessage("Attribute is missing or value not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
 
             result.ShouldHaveValidationErrorFor(x => x.ReadMeSearchFilter)
-                .WithErrorMessage("Attribute is missing or value not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
 
             result.ShouldHaveValidationErrorFor(x => x.BatchExpiryInDays)
-                .WithErrorMessage("Attribute is missing or value not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
         }
 
         [Test]
@@ -182,7 +184,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.IsEnabled)
-                .WithErrorMessage("Bess config for file - " + fakeContext.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no.”");
+                .WithErrorMessage("Bess config for file - " + fakeContext.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no”.");
         }
 
         [Test]
@@ -202,7 +204,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
                 case "":
                 case " ":
                     result.ShouldHaveValidationErrorFor(x => x.Name)
-                        .WithErrorMessage("Attribute is missing or value not provided");
+                        .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
                     break;
 
                 case "Name/":
@@ -243,7 +245,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.EncCellNames)
-                .WithErrorMessage("Attribute is missing or value is not provided");
+                .WithErrorMessage(ValidationMessageInvalidOrNullAttribute);
         }
 
         [Test]
@@ -300,9 +302,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.AllowedUsers)
-                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                .WithErrorMessage(ValidationMessageInvalidAcl);
             result.ShouldHaveValidationErrorFor(x => x.AllowedUserGroups)
-                .WithErrorMessage("AllowedUsers and AllowedUserGroups both attributes values are not provided. Either of them should be provided");
+                .WithErrorMessage(ValidationMessageInvalidAcl);
         }
 
         [Test]

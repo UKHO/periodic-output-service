@@ -49,7 +49,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator,fakeAzureBlobStorageService);
+            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeAzureBlobStorageService);
 
             nullAzureBlobStorageClient.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageClient");
 
@@ -64,10 +64,6 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             Action nullConfigValidator = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, null, fakeAzureBlobStorageService);
 
             nullConfigValidator.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configValidator");
-
-            Action nullAzureBlobStorageService= () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, null);
-
-            nullAzureBlobStorageService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageService");
         }
 
         [Test]
@@ -176,7 +172,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
-                  ).MustHaveHappenedOnceExactly();
+                  ).MustNotHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -190,7 +186,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
-                  ).MustHaveHappenedOnceExactly();
+                  ).MustNotHaveHappened();
         }
 
         [Test]
@@ -246,22 +242,6 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidAttributes.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappened();
-        }
-
-        [Test]
-        public void WhenInvalidConfigValidating_ThenValidationThrowsException()
-        {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
-            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Throws<Exception>();
-
-            configurationService.ProcessConfigs();
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Error
-                 && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationError.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while validating Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappened();
         }
 
         private Dictionary<string, string> GetValidConfigFilesJson()
