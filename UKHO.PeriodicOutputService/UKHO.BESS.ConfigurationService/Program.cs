@@ -166,6 +166,7 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
             serviceCollection.AddScoped<IConfigValidator, ConfigValidator>();
             serviceCollection.AddScoped<ISalesCatalogueService, SalesCatalogueService>();
+            serviceCollection.AddScoped<ISalesCatalogueClient, SalesCatalogueClient>();
         }
     }
 }

@@ -7,9 +7,5 @@ namespace UKHO.PeriodicOutputService.Common.Models.Scs.Response
         public List<SalesCatalogueDataProductResponse> ResponseBody { get; set; }
         public HttpStatusCode ResponseCode { get; set; }
         public DateTime? LastModified { get; set; }
-        public object Clone()
-        {
-            return this.MemberwiseClone();
-        }
     }
 }

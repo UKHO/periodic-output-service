@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Net.Http.Headers;
 using System.Text;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
@@ -7,11 +6,13 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     [ExcludeFromCodeCoverage]
     public class SalesCatalogueClient : ISalesCatalogueClient
     {
-        private readonly HttpClient httpClient;
-
-        public SalesCatalogueClient(HttpClient httpClient)
+        private HttpClient httpClient;
+        private readonly IHttpClientFactory httpClientFactory;
+        public SalesCatalogueClient(IHttpClientFactory httpClientFactory)
         {
-            this.httpClient = httpClient;
+            httpClient = httpClientFactory.CreateClient();
+            httpClient.MaxResponseContentBufferSize = 2147483647;
+            httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
 
         public async Task<HttpResponseMessage> CallSalesCatalogueServiceApi(HttpMethod method, string requestBody, string authToken, string uri)
@@ -24,9 +25,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             using var httpRequestMessage = new HttpRequestMessage(method, uri)
             { Content = content };
 
-            httpRequestMessage.Headers.Add("X-Correlation-ID", CommonHelper.CorrelationID.ToString());
+            httpRequestMessage.AddCorrelationId(CommonHelper.CorrelationID.ToString());
+            httpRequestMessage.SetBearerToken(authToken);
 
-            httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authToken);
             return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
     }
