@@ -248,6 +248,22 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   ).MustHaveHappened();
         }
 
+        [Test]
+        public void WhenInvalidConfigValidating_ThenValidationThrowsException()
+        {
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
+            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Throws<Exception>();
+
+            configurationService.ProcessConfigs();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                 && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationError.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while validating Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+        }
+
         private Dictionary<string, string> GetValidConfigFilesJson()
         {
             dictionary.Add("Valid.json", ValidConfigJson);
