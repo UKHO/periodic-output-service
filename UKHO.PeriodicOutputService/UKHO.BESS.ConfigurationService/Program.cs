@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using UKHO.BESS.ConfigurationService.Services;
+using UKHO.BESS.ConfigurationService.Validation;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -163,6 +164,7 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
             serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
+            serviceCollection.AddScoped<IConfigValidator, ConfigValidator>();
             serviceCollection.AddScoped<ISalesCatalogueService, SalesCatalogueService>();
         }
     }
