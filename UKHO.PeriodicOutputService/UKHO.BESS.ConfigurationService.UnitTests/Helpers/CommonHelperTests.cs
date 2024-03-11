@@ -28,7 +28,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
             IServiceCollection services = new ServiceCollection();
 
             services.AddHttpClient(TestClient)
-                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientSCSRequest, RetryCount, SleepDuration))
+                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientScsRequest , RetryCount, SleepDuration))
                 .AddHttpMessageHandler(() => new TooManyRequestsDelegatingHandler());
 
             HttpClient configuredClient =
@@ -44,7 +44,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientSCSRequest.ToEventId()
+                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest .ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
                   ).MustHaveHappenedTwiceOrMore();
         }
@@ -55,7 +55,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
             IServiceCollection services = new ServiceCollection();
 
             services.AddHttpClient(TestClient)
-                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientSCSRequest, RetryCount, SleepDuration))
+                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientScsRequest , RetryCount, SleepDuration))
                 .AddHttpMessageHandler(() => new ServiceUnavailableDelegatingHandler());
 
             HttpClient configuredClient =
@@ -71,7 +71,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientSCSRequest.ToEventId()
+                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest .ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
                   ).MustHaveHappenedTwiceOrMore();
         }
@@ -82,7 +82,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
             IServiceCollection services = new ServiceCollection();
 
             services.AddHttpClient(TestClient)
-                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientSCSRequest, RetryCount, SleepDuration))
+                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientScsRequest , RetryCount, SleepDuration))
                 .AddHttpMessageHandler(() => new InternalServerErrorDelegatingHandler());
 
             HttpClient configuredClient =
@@ -97,7 +97,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientSCSRequest.ToEventId()
+                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest .ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
                   ).MustHaveHappenedTwiceOrMore();
         }

@@ -144,7 +144,7 @@ namespace UKHO.BESS.ConfigurationService
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
                 serviceCollection.Configure<BessStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
                 serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
-                serviceCollection.Configure<SalesCatalogueConfiguration>(configuration.GetSection("SalesCatalogue"));
+                serviceCollection.Configure<SalesCatalogueConfiguration>(configuration.GetSection("SCSApiConfiguration"));
             }
             serviceCollection.AddDistributedMemoryCache();
 
@@ -153,11 +153,11 @@ namespace UKHO.BESS.ConfigurationService
 
             serviceCollection.AddHttpClient<ISalesCatalogueClient, SalesCatalogueClient>(client =>
             {
-                client.BaseAddress = new Uri(configuration["SalesCatalogue:BaseUrl"]);
+                client.BaseAddress = new Uri(configuration["SCSApiConfiguration:BaseUrl"]);
                 var productHeaderValue = new ProductInfoHeaderValue(BESSConfigurationService, assemblyVersion);
                 client.DefaultRequestHeaders.UserAgent.Add(productHeaderValue);
             }).AddPolicyHandler((services, request) =>
-                    CommonHelper.GetRetryPolicy(services.GetService<ILogger<ISalesCatalogueClient>>(), "Sales Catalogue", EventIds.RetryHttpClientSCSRequest, retryCount, sleepDuration));
+                    CommonHelper.GetRetryPolicy(services.GetService<ILogger<ISalesCatalogueClient>>(), "Sales Catalogue", EventIds.RetryHttpClientScsRequest, retryCount, sleepDuration));
 
             serviceCollection.AddSingleton<IAuthScsTokenProvider, AuthTokenProvider>();
             serviceCollection.AddSingleton<BessConfigurationServiceJob>();

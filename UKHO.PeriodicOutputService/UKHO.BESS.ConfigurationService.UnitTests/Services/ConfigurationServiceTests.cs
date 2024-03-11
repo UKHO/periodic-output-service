@@ -483,7 +483,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 ResponseCode = HttpStatusCode.OK,
                 ResponseBody = new List<SalesCatalogueDataProductResponse>()
                 {
-                    new SalesCatalogueDataProductResponse
+                    new ()
                     {
                     ProductName="10000002",
                     LatestUpdateNumber=5,

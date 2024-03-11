@@ -578,22 +578,22 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809114 - Request to Sales Catalogue Service's catalogue essData endpoint is started.
         /// </summary>
-        SCSGetSalesCatalogueDataRequestStarted = 809114,
+        ScsGetSalesCatalogueDataRequestStarted = 809114,
 
         /// <summary>
         /// 809115 - Request to Sales Catalogue Service's catalogue essData endpoint is completed.
         /// </summary>
-        SCSGetSalesCatalogueDataRequestCompleted = 809115,
+        ScsGetSalesCatalogueDataRequestCompleted = 809115,
 
         /// <summary>
         /// 809116 - Request to Sales Catalogue Service's catalogue essData endpoint failed due to Non-Ok response.
         /// </summary>
-        SalesCatalogueServiceCatalogueDataNonOkResponse = 809116,
+        ScsGetSalesCatalogueDataNonOkResponse = 809116,
 
         /// <summary>
         /// 809117 - Request for retrying sales catalogue service endpoint.
         /// </summary>
-        RetryHttpClientSCSRequest = 809117,
+        RetryHttpClientScsRequest = 809117,
 
         /// <summary>
         /// 809118 - Bess Builder Service Started

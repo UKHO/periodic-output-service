@@ -38,7 +38,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             return
                 new List<SalesCatalogueDataProductResponse>()
                 {
-                    new SalesCatalogueDataProductResponse()
+                    new ()
                     {
                     ProductName = "10000002",
                     LatestUpdateNumber = 5,
@@ -79,14 +79,14 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestStarted.ToEventId()
+                  && call.GetArgument<EventId>(1) == EventIds.ScsGetSalesCatalogueDataRequestStarted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
-                  && call.GetArgument<EventId>(1) == EventIds.SalesCatalogueServiceCatalogueDataNonOkResponse.ToEventId()
+                  && call.GetArgument<EventId>(1) == EventIds.ScsGetSalesCatalogueDataNonOkResponse.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to Sales Catalogue Service catalogue end point with uri:{RequestUri} FAILED.| {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
@@ -110,14 +110,14 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestStarted.ToEventId()
+                  && call.GetArgument<EventId>(1) == EventIds.ScsGetSalesCatalogueDataRequestStarted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestCompleted.ToEventId()
+                  && call.GetArgument<EventId>(1) == EventIds.ScsGetSalesCatalogueDataRequestCompleted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
@@ -156,14 +156,14 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestStarted.ToEventId()
+                  && call.GetArgument<EventId>(1) == EventIds.ScsGetSalesCatalogueDataRequestStarted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.SCSGetSalesCatalogueDataRequestCompleted.ToEventId()
+                  && call.GetArgument<EventId>(1) == EventIds.ScsGetSalesCatalogueDataRequestCompleted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Get catalogue data from SCS completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
