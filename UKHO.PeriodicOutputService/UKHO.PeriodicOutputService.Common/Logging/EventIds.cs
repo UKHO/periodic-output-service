@@ -546,54 +546,72 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessErrorOccurredWhileDownloadingConfigFromAzureStorage = 809107,
 
         /// <summary>
-        /// 809108 - Bess config frequency due or lapsed
+        /// 809108 - Bess config invalid attributes
         /// </summary>
-        BessConfigFrequencyElapsed = 809108,
+        BessConfigInvalidAttributes = 809108,
 
         /// <summary>
-        /// 809109 - Exception occurred while processing bess config frequency
+        /// 809109 - Bess config duplicate Name attribute
         /// </summary>
-        BessConfigFrequencyProcessingException = 809109,
+        BessConfigDuplicateFileCount = 809109,
 
         /// <summary>
-        /// 809110 - Request to Sales Catalogue Service's catalogue essData endpoint is started.
+        /// 809110 - Bess config validation summary
         /// </summary>
-        SCSGetSalesCatalogueDataRequestStarted = 809110,
+        BessConfigValidationSummary = 809110,
 
         /// <summary>
-        /// 809111 - Request to Sales Catalogue Service's catalogue essData endpoint is completed.
+        /// 809111 - Bess config duplicate records found
         /// </summary>
-        SCSGetSalesCatalogueDataRequestCompleted = 809111,
+        BessConfigsDuplicateRecordsFound = 809111,
 
         /// <summary>
-        /// 809112 - Request to Sales Catalogue Service's catalogue essData endpoint failed due to Non-Ok response.
+        /// 809112 - Bess config frequency due or lapsed
         /// </summary>
-        SalesCatalogueServiceCatalogueDataNonOkResponse = 809112,
+        BessConfigFrequencyElapsed = 809112,
 
         /// <summary>
-        /// 809113 - Request for retrying sales catalogue service endpoint.
+        /// 809113 - Exception occurred while processing bess config frequency
         /// </summary>
-        RetryHttpClientSCSRequest = 809113,
+        BessConfigFrequencyProcessingException = 809113,
 
         /// <summary>
-        /// 809114 - Listed cells or pattern not found in catalog
+        /// 809114 - Request to Sales Catalogue Service's catalogue essData endpoint is started.
         /// </summary>
-        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809114,
+        SCSGetSalesCatalogueDataRequestStarted = 809114,
 
         /// <summary>
-        /// 809115 - All listed cells are not found and neither cell is matching with the pattern
+        /// 809115 - Request to Sales Catalogue Service's catalogue essData endpoint is completed.
         /// </summary>
-        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809115,
+        SCSGetSalesCatalogueDataRequestCompleted = 809115,
 
         /// <summary>
-        /// 809116 - Bess Builder Service Started
+        /// 809116 - Request to Sales Catalogue Service's catalogue essData endpoint failed due to Non-Ok response.
         /// </summary>
-        BessBuilderServiceStarted = 809116,
+        SalesCatalogueServiceCatalogueDataNonOkResponse = 809116,
 
         /// <summary>
-        /// 809117 - Bess Builder Service Completed
+        /// 809117 - Request for retrying sales catalogue service endpoint.
         /// </summary>
-        BessBuilderServiceCompleted = 809117
+        RetryHttpClientSCSRequest = 809117,
+
+        /// <summary>
+        /// 809118 - Bess Builder Service Started
+        /// </summary>
+        BessBuilderServiceStarted = 809118,
+
+        /// <summary>
+        /// 809119 - Bess Builder Service Completed
+        /// </summary>
+        BessBuilderServiceCompleted = 809119,
+        /// <summary>
+        /// 809120 - Listed cells or pattern not found in catalog
+        /// </summary>
+        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809120,
+        /// <summary>
+        /// 809121 - All listed cells are not found and neither cell is matching with the pattern
+        /// </summary>
+        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809121,
     }
 
     public static class EventIdExtensions
