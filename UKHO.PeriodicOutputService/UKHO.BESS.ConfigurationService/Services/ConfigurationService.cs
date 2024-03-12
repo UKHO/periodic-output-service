@@ -207,7 +207,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessConfigFrequencyProcessingException.ToEventId(), "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessConfigFrequencyProcessingException.ToEventId(), "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 return false;
             }
         }
