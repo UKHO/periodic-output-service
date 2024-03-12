@@ -10,6 +10,7 @@ using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
+using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.BESS.ConfigurationService.Services
 {
@@ -18,6 +19,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private readonly IAzureBlobStorageClient azureBlobStorageClient;
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
         private readonly ILogger<ConfigurationService> logger;
+        private readonly ISalesCatalogueService salesCatalogueService;
         private const string UndefinedValue = "undefined";
         private readonly IConfigValidator configValidator;
         private List<string> invalidNameList = new();
@@ -27,10 +29,15 @@ namespace UKHO.BESS.ConfigurationService.Services
         private const string Colon = ": ";
         private const string Hyphen = "- ";
 
-        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient, IAzureTableStorageHelper azureTableStorageHelper, ILogger<ConfigurationService> logger, IConfigValidator configValidator)
+        public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient,
+                                    IAzureTableStorageHelper azureTableStorageHelper,
+                                    ILogger<ConfigurationService> logger,
+                                    IConfigValidator configValidator,
+                                    ISalesCatalogueService salesCatalogueService)
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
+            this.salesCatalogueService = salesCatalogueService ?? throw new ArgumentNullException(nameof(salesCatalogueService));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.configValidator = configValidator ?? throw new ArgumentNullException(nameof(configValidator));
         }
@@ -49,6 +56,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                 logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}", configsInContainer.Keys.Count, CommonHelper.CorrelationID);
 
                 IList<BessConfig> bessConfigs = new List<BessConfig>();
+
+                var salesCatalogueDataResponse = Task.Run(async () => await salesCatalogueService.GetSalesCatalogueData()).Result;
 
                 int configsWithInvalidAttributeCount = 0, deserializedConfigsCount = 0;
 

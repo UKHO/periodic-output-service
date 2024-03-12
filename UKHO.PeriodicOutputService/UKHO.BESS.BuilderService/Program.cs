@@ -48,7 +48,6 @@ namespace UKHO.BESS.BuilderService
                     await Task.Delay(delayTime);
                 }
             }
-
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
