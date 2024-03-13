@@ -546,7 +546,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessErrorOccurredWhileDownloadingConfigFromAzureStorage = 809107,
 
         /// <summary>
-        /// 80908 - Bess config invalid attributes
+        /// 809108 - Bess config invalid attributes
         /// </summary>
         BessConfigInvalidAttributes = 809108,
 
@@ -576,22 +576,42 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessConfigFrequencyProcessingException = 809113,
 
         /// <summary>
-        /// 809114 - Bess Builder Service Started
+        /// 809114 - Request to Sales Catalogue Service's catalogue essData endpoint is started.
         /// </summary>
-        BessBuilderServiceStarted = 809114,
+        ScsGetSalesCatalogueDataRequestStarted = 809114,
 
         /// <summary>
-        /// 809115 - Bess Builder Service Completed
+        /// 809115 - Request to Sales Catalogue Service's catalogue essData endpoint is completed.
         /// </summary>
-        BessBuilderServiceCompleted = 809115,
+        ScsGetSalesCatalogueDataRequestCompleted = 809115,
+
         /// <summary>
-        /// 809116 - Config message added in queue
+        /// 809116 - Request to Sales Catalogue Service's catalogue essData endpoint failed due to Non-Ok response.
         /// </summary>
-        BessConfigPropertiesAddedInQueue = 809116,
+        ScsGetSalesCatalogueDataNonOkResponse = 809116,
+
         /// <summary>
-        /// 809117 - Bess Config Validation Error
+        /// 809117 - Request for retrying sales catalogue service endpoint.
         /// </summary>
-        BessConfigValidationError = 809117
+        RetryHttpClientScsRequest = 809117,
+
+        /// <summary>
+        /// 809118 - Bess Builder Service Started
+        /// </summary>
+        BessBuilderServiceStarted = 809118,
+
+        /// <summary>
+        /// 809119 - Bess Builder Service Completed
+        /// </summary>
+        BessBuilderServiceCompleted = 809119,
+        /// <summary>
+        /// 809120 - Config message added in the queue
+        /// </summary>
+        BessConfigPropertiesAddedInQueue = 809120,
+        /// <summary>
+        /// 809121 - Bess Config Validation Error
+        /// </summary>
+        BessConfigValidationError = 809121
     }
 
     public static class EventIdExtensions
