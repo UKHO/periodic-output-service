@@ -105,7 +105,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 int totalConfigCount = deserializedConfigsCount + configsWithUndefinedValueCount;
                 logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
-"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with undefined value : {filesWithUndefinedValueCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, configsWithUndefinedValueCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with undefined value : {filesWithUndefinedValueCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, configsWithUndefinedValueCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
 
                 if (bessConfigs.Any())
                 {
@@ -210,7 +210,6 @@ namespace UKHO.BESS.ConfigurationService.Services
                          *
                          */
 
-                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
                         azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
                     else
@@ -274,9 +273,10 @@ namespace UKHO.BESS.ConfigurationService.Services
         private IEnumerable<(string, int?)> GetEncCells(IEnumerable<string> encCellNames, IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueProducts)
         {
             #region filter provided prefix patterns
+            const string Pattern = "*";
 
             List<string> ignoreList = new();
-            IEnumerable<string> encCells = encCellNames.Where(i => i.EndsWith("*"));
+            IEnumerable<string> encCells = encCellNames.Where(i => i.EndsWith(Pattern));
 
             foreach (string encCell in encCells)
             {
@@ -294,7 +294,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
             foreach (var prefixPattern in prefixPatterns)
             {
-                IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueDataProducts = prefixPattern.EndsWith('*') ? salesCatalogueProducts.Where(x => x.ProductName.StartsWith(prefixPattern.Remove(prefixPattern.Length - 1)))
+                IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueDataProducts = prefixPattern.EndsWith(Pattern) ? salesCatalogueProducts.Where(x => x.ProductName.StartsWith(prefixPattern.Remove(prefixPattern.Length - 1)))
                                                                                                                         : salesCatalogueProducts.Where(x => x.ProductName.Equals(prefixPattern));
 
                 if (salesCatalogueDataProducts.Any())
