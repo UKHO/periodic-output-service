@@ -30,7 +30,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         public async Task<SalesCatalogueDataResponse> GetSalesCatalogueData()
         {
-            logger.LogInformation(EventIds.SCSGetSalesCatalogueDataRequestStarted.ToEventId(), "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            logger.LogInformation(EventIds.ScsGetSalesCatalogueDataRequestStarted.ToEventId(), "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             var accessToken = await authScsTokenProvider.GetManagedIdentityAuthAsync(salesCatalogueConfig.Value.ResourceId);
 
@@ -40,7 +40,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             var response = await CreateSalesCatalogueDataResponse(httpResponse);
 
-            logger.LogInformation(EventIds.SCSGetSalesCatalogueDataRequestCompleted.ToEventId(), "Get catalogue data from SCS completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            logger.LogInformation(EventIds.ScsGetSalesCatalogueDataRequestCompleted.ToEventId(), "Get catalogue data from SCS completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             return response;
         }
@@ -52,10 +52,10 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             if (httpResponse.StatusCode != HttpStatusCode.OK)
             {
-                logger.LogError(EventIds.SalesCatalogueServiceCatalogueDataNonOkResponse.ToEventId(), "Request to Sales Catalogue Service catalogue end point with uri:{RequestUri} FAILED.| {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponse.RequestMessage.RequestUri, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.ScsGetSalesCatalogueDataNonOkResponse.ToEventId(), "Request to Sales Catalogue Service catalogue end point with uri:{RequestUri} FAILED.| {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponse.RequestMessage.RequestUri, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID);
                 response.ResponseCode = httpResponse.StatusCode;
                 response.ResponseBody = null;
-                throw new FulfilmentException(EventIds.SalesCatalogueServiceCatalogueDataNonOkResponse.ToEventId());
+                throw new FulfilmentException(EventIds.ScsGetSalesCatalogueDataNonOkResponse.ToEventId());
             }
             else
             {

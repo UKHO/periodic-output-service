@@ -746,15 +746,15 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 ResponseCode = HttpStatusCode.OK,
                 ResponseBody = new List<SalesCatalogueDataProductResponse>()
                 {
-                    new SalesCatalogueDataProductResponse
+                    new ()
                     {
-                    ProductName="10000002",
-                    LatestUpdateNumber=5,
-                    FileSize=600,
-                    CellLimitSouthernmostLatitude=24,
-                    CellLimitWesternmostLatitude=119,
-                    CellLimitNorthernmostLatitude=25,
-                    CellLimitEasternmostLatitude=120
+                        ProductName="10000002",
+                        LatestUpdateNumber=5,
+                        FileSize=600,
+                        CellLimitSouthernmostLatitude=24,
+                        CellLimitWesternmostLatitude=119,
+                        CellLimitNorthernmostLatitude=25,
+                        CellLimitEasternmostLatitude=120
                     }
                 }
             };
