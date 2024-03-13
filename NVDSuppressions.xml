@@ -174,4 +174,31 @@
     <cve>CVE-2020-22475</cve>
     <cve>CVE-2022-39349</cve>
   </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.IdentityModel.Abstractions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/Microsoft\.IdentityModel\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2024-21319</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.IdentityModel.Abstractions:6.22.0
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Microsoft\.IdentityModel\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2024-21319</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Newtonsoft.Json.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/Newtonsoft\.Json@.*$</packageUrl>
+    <cve>CVE-2024-21907</cve>
+  </suppress>
 </suppressions>
