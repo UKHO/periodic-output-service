@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using FluentValidation.Results;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using NCrontab;
 using Newtonsoft.Json;
@@ -9,6 +10,7 @@ using UKHO.BESS.ConfigurationService.Validation;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
+using UKHO.PeriodicOutputService.Common.Models.Scs.Response;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
 
@@ -20,6 +22,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
         private readonly ILogger<ConfigurationService> logger;
         private readonly ISalesCatalogueService salesCatalogueService;
+        private readonly IConfiguration configuration;
         private const string UndefinedValue = "undefined";
         private readonly IConfigValidator configValidator;
         private readonly IAzureBlobStorageService azureBlobStorageService;
@@ -35,13 +38,16 @@ namespace UKHO.BESS.ConfigurationService.Services
                                     ILogger<ConfigurationService> logger,
                                     IConfigValidator configValidator,
                                     ISalesCatalogueService salesCatalogueService,
+                                    IConfiguration configuration,
                                     IAzureBlobStorageService azureBlobStorageService)
+
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
-            this.salesCatalogueService = salesCatalogueService ?? throw new ArgumentNullException(nameof(salesCatalogueService));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.configValidator = configValidator ?? throw new ArgumentNullException(nameof(configValidator));
+            this.salesCatalogueService = salesCatalogueService ?? throw new ArgumentNullException(nameof(salesCatalogueService));
+            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.azureBlobStorageService = azureBlobStorageService ?? throw new ArgumentNullException(nameof(azureBlobStorageService));
         }
 
@@ -78,25 +84,25 @@ namespace UKHO.BESS.ConfigurationService.Services
                         {
                             ValidationResult results = configValidator.Validate(deserializedConfig);
 
-                        if (!results.IsValid)
-                        {
-                            configsWithInvalidAttributeCount = configsWithInvalidAttributeCount + 1;
-
-                            var errors = new StringBuilder();
-
-                            foreach (var failure in results.Errors)
+                            if (!results.IsValid)
                             {
-                                errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
+                                configsWithInvalidAttributeCount = configsWithInvalidAttributeCount + 1;
+
+                                var errors = new StringBuilder();
+
+                                foreach (var failure in results.Errors)
+                                {
+                                    errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
+                                }
+
+                                invalidNameList.Add(deserializedConfig.FileName + Hyphen + deserializedConfig.Name);
+
+                                logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}", fileName, errors, CommonHelper.CorrelationID);
                             }
-
-                            invalidNameList.Add(deserializedConfig.FileName + Hyphen + deserializedConfig.Name);
-
-                            logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}", fileName, errors, CommonHelper.CorrelationID);
-                        }
-                        else
-                        {
-                            bessConfigs.Add(deserializedConfig);
-                        }
+                            else
+                            {
+                                bessConfigs.Add(deserializedConfig);
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -109,11 +115,11 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 int totalConfigCount = deserializedConfigsCount + configsWithUndefinedValueCount;
                 logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
-"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with undefined value : {filesWithUndefinedValueCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, configsWithUndefinedValueCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with undefined value : {filesWithUndefinedValueCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, configsWithUndefinedValueCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
 
                 if (bessConfigs.Any())
                 {
-                    CheckConfigFrequencyAndSaveQueueDetails(bessConfigs);
+                    CheckConfigFrequencyAndSaveQueueDetails(bessConfigs, salesCatalogueDataResponse.ResponseBody);
                 }
 
                 logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
@@ -179,8 +185,9 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// Check config frequency and save details to message queue
         /// </summary>
         /// <param name="bessConfigs"></param>
+        /// <param name="salesCatalogueDataProducts"></param>
         /// <returns></returns>
-        public bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs)
+        public bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts)
         {
             try
             {
@@ -195,14 +202,25 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
-                        /* -- save details to message queue -- */
-                        var encCells = new List<(string, int)> { ("US121212", 1), ("GB212121", 2), ("CA545454", 3) };
+                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
+
+                        var encCells = GetEncCells(config.EncCellNames, salesCatalogueDataProducts);
+
+                        if (!encCells.Any()) //If cells are not found then bespoke exchange set will not create
+                        {
+                            logger.LogWarning(EventIds.BessEncCellNamesAndPatternNotFoundInSalesCatalogue.ToEventId(), "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for : {EncCellNames} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", config.EncCellNames), CommonHelper.CorrelationID);
+                            continue;
+                        }
+
+                        int? totalFileSize = encCells.Select(i => i.Item2).Sum();
+
+                        //--save details to message queue --
+                        //var encCells = new List<(string, int)> { ("US121212", 1), ("GB212121", 2), ("CA545454", 3) };
 
                         IEnumerable<string> ENCList = encCells.Select(t => t.Item1).ToList();
 
                         azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, ENCList, 0);
 
-                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
                         azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
                     else
@@ -253,6 +271,60 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
 
             return scheduleDetailEntity;
+        }
+
+        /// <summary>
+        /// Fetched the list of all the ENC cell names from the provided prefix patterns
+        /// AIO cell is excluded
+        /// </summary>
+        /// <param name="encCellNames"></param>
+        /// <param name="salesCatalogueProducts"></param>
+        /// <returns></returns>
+        private IEnumerable<(string, int?)> GetEncCells(IEnumerable<string> encCellNames, IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueProducts)
+        {
+            #region filter provided prefix patterns
+            const string Pattern = "*";
+
+            List<string> ignoreList = new();
+            IEnumerable<string> encCells = encCellNames.Where(i => i.EndsWith(Pattern));
+
+            foreach (string encCell in encCells)
+            {
+                ignoreList.AddRange(encCellNames.Where(x => x.StartsWith(encCell.Remove(encCell.Length - 1)) && !x.Equals(encCell)));
+            }
+
+            IEnumerable<string> prefixPatterns = encCellNames.Where(y => !ignoreList.Any(z => z.Equals(y)));
+
+            #endregion
+
+            #region get enc cell from provided prefix patterns
+
+            List<(string, int?)> filteredEncCell = new();
+            List<string> invalidPatternOrCell = new();
+
+            foreach (var prefixPattern in prefixPatterns)
+            {
+                IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueDataProducts = prefixPattern.EndsWith(Pattern) ? salesCatalogueProducts.Where(x => x.ProductName.StartsWith(prefixPattern.Remove(prefixPattern.Length - 1)))
+                                                                                                                        : salesCatalogueProducts.Where(x => x.ProductName.Equals(prefixPattern));
+
+                if (salesCatalogueDataProducts.Any())
+                {
+                    filteredEncCell.AddRange(salesCatalogueDataProducts.Select(t => (t.ProductName, t.FileSize)));
+                }
+                else //add invalid cells
+                {
+                    invalidPatternOrCell.Add(prefixPattern);
+                }
+            }
+            //Apart from valid, invalid pattern or cell found then log
+            if (invalidPatternOrCell.Any() && filteredEncCell.Any())
+            {
+                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), CommonHelper.CorrelationID);
+            }
+
+            return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1))); //remove aio cells and return all filtered data
+
+            #endregion
         }
     }
 }

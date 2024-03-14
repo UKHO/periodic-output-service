@@ -605,13 +605,21 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BessBuilderServiceCompleted = 809119,
         /// <summary>
-        /// 809120 - Config message added in the queue
+        /// 809120 - Listed cells or pattern not found in catalog
         /// </summary>
-        BessConfigPropertiesAddedInQueue = 809120,
+        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809120,
         /// <summary>
-        /// 809121 - Bess Config Validation Error
+        /// 809121 - All listed cells are not found and neither cell is matching with the pattern
         /// </summary>
-        BessConfigValidationError = 809121
+        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809121,
+        /// <summary>
+        /// 809122 - Config message added in the queue
+        /// </summary>
+        BessConfigPropertiesAddedInQueue = 809122,
+        /// <summary>
+        /// 809123 - Bess Config Validation Error
+        /// </summary>
+        BessConfigValidationError = 809123
     }
 
     public static class EventIdExtensions
