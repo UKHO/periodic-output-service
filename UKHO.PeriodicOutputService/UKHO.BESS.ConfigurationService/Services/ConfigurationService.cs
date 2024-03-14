@@ -65,14 +65,15 @@ namespace UKHO.BESS.ConfigurationService.Services
                 {
                     string content = configsInContainer[fileName];
 
-                    var deserializedConfigs = DeserializeConfig(content, fileName);
+                    var deserializedConfig = DeserializeConfig(content, fileName);
 
-                    foreach (BessConfig deserializedConfig in deserializedConfigs)
+                    if (deserializedConfig.Item2)
                     {
                         deserializedConfigsCount = deserializedConfigsCount + 1;
-                        deserializedConfig.FileName = fileName; //for logging
 
-                        ValidationResult results = configValidator.Validate(deserializedConfig);
+                        deserializedConfig.Item1.FileName = fileName; //for logging
+
+                        ValidationResult results = configValidator.Validate(deserializedConfig.Item1);
 
                         if (!results.IsValid)
                         {
@@ -85,13 +86,13 @@ namespace UKHO.BESS.ConfigurationService.Services
                                 errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
                             }
 
-                            invalidNameList.Add(deserializedConfig.FileName + Hyphen + deserializedConfig.Name);
+                            invalidNameList.Add(deserializedConfig.Item1.FileName + Hyphen + deserializedConfig.Item1.Name);
 
                             logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}", fileName, errors, CommonHelper.CorrelationID);
                         }
                         else
                         {
-                            bessConfigs.Add(deserializedConfig);
+                            bessConfigs.Add(deserializedConfig.Item1);
                         }
                     }
                 }
@@ -116,9 +117,10 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
         }
 
-        private IList<BessConfig> DeserializeConfig(string json, string fileName)
+        private Tuple<BessConfig, bool> DeserializeConfig(string json, string fileName)
         {
-            IList<BessConfig> bessConfig = new List<BessConfig>();
+            BessConfig bessConfig = new BessConfig();
+            bool isValidConfig = false;
             try
             {
                 var token = JToken.Parse(json);
@@ -130,14 +132,15 @@ namespace UKHO.BESS.ConfigurationService.Services
                 }
                 else
                 {
-                    bessConfig = JsonConvert.DeserializeObject<List<BessConfig>>(json)!;
+                    isValidConfig = true;
+                    bessConfig = JsonConvert.DeserializeObject<BessConfig>(json)!;
                 }
-                return bessConfig;
+                return new(bessConfig, isValidConfig);
             }
             catch (Exception ex)
             {
                 logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
-                return bessConfig;
+                return new(bessConfig, isValidConfig);
             }
         }
 
