@@ -9,6 +9,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public interface IAzureBlobStorageService
     {
-        Task<bool> SetConfigQueueMessageModelAndAddToQueue(BessConfig bessConfig, IEnumerable<string> ENCList, long fileSize);
+        Task<bool> SetConfigQueueMessageModelAndAddToQueue(BessConfig bessConfig, IEnumerable<string> encCellNames, int? fileSize);
     }
 }

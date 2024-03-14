@@ -21,7 +21,7 @@ namespace UKHO.PeriodicOutputService.Common.Models.Bess
         public int BatchExpiryInDays { get; set; }
         public string IsEnabled { get; set; }
         public string FileName { get; set; }
-        public long FileSize { get; set; }
+        public int? FileSize { get; set; }
         public string CorrelationId { get; set; }
     }
 }

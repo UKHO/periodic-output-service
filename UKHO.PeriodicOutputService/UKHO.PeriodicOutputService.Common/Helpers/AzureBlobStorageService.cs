@@ -16,7 +16,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureMessageQueueHelper = azureMessageQueueHelper ?? throw new ArgumentNullException(nameof(azureMessageQueueHelper));
         }
-        public async Task<bool> SetConfigQueueMessageModelAndAddToQueue(BessConfig bessConfig, IEnumerable<string> ENCList, long fileSize)
+        public async Task<bool> SetConfigQueueMessageModelAndAddToQueue(BessConfig bessConfig, IEnumerable<string> encCellNames, int? fileSize)
         {
             if (bessConfig == null)
             {
@@ -27,7 +27,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 Name = bessConfig.Name,
                 ExchangeSetStandard = bessConfig.ExchangeSetStandard,
-                EncCellNames = ENCList,
+                EncCellNames = encCellNames,
                 Frequency = bessConfig.Frequency,
                 Type = bessConfig.Type,
                 KeyFileType = bessConfig.KeyFileType,

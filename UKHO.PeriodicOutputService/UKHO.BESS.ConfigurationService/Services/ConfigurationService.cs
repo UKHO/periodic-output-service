@@ -215,11 +215,10 @@ namespace UKHO.BESS.ConfigurationService.Services
                         int? totalFileSize = encCells.Select(i => i.Item2).Sum();
 
                         //--save details to message queue --
-                        //var encCells = new List<(string, int)> { ("US121212", 1), ("GB212121", 2), ("CA545454", 3) };
 
-                        IEnumerable<string> ENCList = encCells.Select(t => t.Item1).ToList();
+                        IEnumerable<string> encCellNames = encCells.Select(i => i.Item1).ToList();
 
-                        azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, ENCList, 0);
+                        azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, encCellNames, totalFileSize);
 
                         azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
