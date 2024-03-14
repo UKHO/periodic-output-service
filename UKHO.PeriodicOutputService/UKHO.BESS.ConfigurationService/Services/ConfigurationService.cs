@@ -139,6 +139,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
             catch (Exception ex)
             {
+                configsWithUndefinedValueCount = configsWithUndefinedValueCount + 1;
                 logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 return new(bessConfig, isValidConfig);
             }
