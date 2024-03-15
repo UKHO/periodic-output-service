@@ -619,7 +619,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809123 - Bess Config Validation Error
         /// </summary>
-        BessConfigValidationError = 809123
+        BessConfigValidationError = 809123,
+        /// <summary>
+        /// 809124 - ES size exceeds threshold 700MB
+        /// </summary>
+        BessSizeExceedsThreshold = 809124
     }
 
     public static class EventIdExtensions

@@ -202,18 +202,34 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
-                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
+                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config file: {FileName}, Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.FileName, config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
 
                         var encCells = GetEncCells(config.EncCellNames, salesCatalogueDataProducts);
 
                         if (!encCells.Any()) //If cells are not found then bespoke exchange set will not create
                         {
-                            logger.LogWarning(EventIds.BessEncCellNamesAndPatternNotFoundInSalesCatalogue.ToEventId(), "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for : {EncCellNames} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", config.EncCellNames), CommonHelper.CorrelationID);
+                            logger.LogWarning(EventIds.BessEncCellNamesAndPatternNotFoundInSalesCatalogue.ToEventId(), "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for file:{FileName} with ENC cells {EncCellNames} | _X-Correlation-ID : {CorrelationId}", config.FileName, string.Join(", ", config.EncCellNames), CommonHelper.CorrelationID);
                             continue;
                         }
 
                         int? totalFileSize = encCells.Select(i => i.Item2).Sum();
 
+                        if (totalFileSize.HasValue && !totalFileSize.Equals(0))
+                        {
+                            double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize.Value);
+
+                            //change to int later
+                            double BESSize = Convert.ToDouble(configuration["BESSizeInMB"]);
+
+                            if (fileSizeInMb > BESSize)
+                            {
+                                logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(),
+                            "Bess config file : {fileName}, ES size is {fileSizeInMb} which is more than threshold : {BESSize} | _X-Correlation-ID : {CorrelationId}",
+                            config.FileName, Math.Round(fileSizeInMb, 2, MidpointRounding.AwayFromZero), BESSize, CommonHelper.CorrelationID);
+
+                                continue;
+                            }
+                        }
                         //--save details to message queue --
 
                         IEnumerable<string> encCellNames = encCells.Select(i => i.Item1).ToList();
@@ -249,6 +265,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             var isSameDay = scheduleDetailEntity.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
 
             return intervalInMinutes <= 0 && isSameDay && bessConfig.IsEnabled.ToLower().Equals("yes");
+            //return true;
         }
 
         [ExcludeFromCodeCoverage]
