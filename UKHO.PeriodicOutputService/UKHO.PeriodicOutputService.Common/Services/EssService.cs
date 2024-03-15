@@ -27,13 +27,15 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _authEssTokenProvider = authEssTokenProvider ?? throw new ArgumentNullException(nameof(authEssTokenProvider));
         }
 
-        public async Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers)
+        public async Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers, string? exchangeSetStandard = null)
         {
             _logger.LogInformation(EventIds.PostProductIdentifiersToEssStarted.ToEventId(), "Request to post {ProductIdentifiersCount} productidentifiers to ESS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productIdentifiers.Count.ToString(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productIdentifiers";
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
 
+            if (exchangeSetStandard != null)
+                uri += $"?exchangeSetStandard={exchangeSetStandard}";
 
             HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(uri, productIdentifiers, accessToken);
 
@@ -58,12 +60,15 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
-        public async Task<ExchangeSetResponseModel?> GetProductDataSinceDateTime(string sinceDateTime)
+        public async Task<ExchangeSetResponseModel?> GetProductDataSinceDateTime(string sinceDateTime, string? exchangeSetStandard = null)
         {
             _logger.LogInformation(EventIds.GetProductDataSinceDateTimeStarted.ToEventId(), "ESS request to create exchange set for data since {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData?sinceDateTime=" + sinceDateTime;
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
+
+            if (exchangeSetStandard != null)
+                uri += $"&exchangeSetStandard={exchangeSetStandard}";
 
             HttpResponseMessage httpResponse = await _essApiClient.GetProductDataSinceDateTime(uri, sinceDateTime, accessToken);
 
@@ -83,12 +88,15 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
-        public async Task<ExchangeSetResponseModel?> GetProductDataProductVersions(ProductVersionsRequest productVersionsRequest)
+        public async Task<ExchangeSetResponseModel?> GetProductDataProductVersions(ProductVersionsRequest productVersionsRequest, string? exchangeSetStandard = null)
         {
             _logger.LogInformation(EventIds.GetProductDataProductVersionStarted.ToEventId(), "ESS request to create exchange set for product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productVersions";
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
+
+            if (exchangeSetStandard != null)
+                uri += $"?exchangeSetStandard={exchangeSetStandard}";
 
             HttpResponseMessage httpResponse = await _essApiClient.GetProductDataProductVersion(uri, productVersionsRequest.ProductVersions, accessToken);
 

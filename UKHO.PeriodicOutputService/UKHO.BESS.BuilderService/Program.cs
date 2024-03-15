@@ -12,6 +12,8 @@ using Serilog;
 using Serilog.Events;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.BESS.BuilderService
 {
@@ -135,9 +137,23 @@ namespace UKHO.BESS.BuilderService
             if (configuration != null)
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
+                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
+                serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
+                serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
             }
 
+            serviceCollection.AddDistributedMemoryCache();
+
             serviceCollection.AddSingleton<BessBuilderServiceJob>();
+            serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
+            serviceCollection.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
+
+            serviceCollection.AddScoped<IEssService, EssService>();
+            serviceCollection.AddScoped<IFssService, FssService>();
+
+            serviceCollection.AddHttpClient();
+            serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
+            serviceCollection.AddTransient<IFssApiClient, FssApiClient>();
         }
     }
 }
