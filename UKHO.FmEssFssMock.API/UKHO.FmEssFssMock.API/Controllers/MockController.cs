@@ -77,7 +77,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 return !string.IsNullOrEmpty(result)
                     ? StatusCode(StatusCodes.Status201Created, result)
                     : StatusCode(StatusCodes.Status500InternalServerError, "Blob Not Created");
-
             }
             catch (Exception ex)
             {

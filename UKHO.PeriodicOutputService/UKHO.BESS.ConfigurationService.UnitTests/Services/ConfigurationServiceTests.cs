@@ -33,7 +33,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
         private const string DuplicateConfigJson = "{\"name\":\"Xyz\",\"exchangeSetStandard\":\"s57\",\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
 
-        private const string InvalidConfigJson = "[{\"name\":\"Xyz\",\"exchangeSetStandard\":\"s57\",\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}]";
+        private const string ConfigWithJsonError = "[{\"name\":\"Xyz\",\"exchangeSetStandard\":\"s57\",\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}]";
 
         private const string ConfigJsonWithIncorrectExchangeSetStandard = "{\"name\":\"Xyz.json\",\"exchangeSetStandard\":\"s\",\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"Yes\"}";
 
@@ -158,9 +158,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenInvalidConfigIsFound_ThenThrowsError()
+        public void WhenConfigWithJsonErrorIsFound_ThenThrowsError()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidConfigFilesJson());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigWithJsonError());
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             configurationService.ProcessConfigs();
 
@@ -324,15 +324,15 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             return dictionary;
         }
 
-        private Dictionary<string, string> GetInvalidConfigFilesJson()
+        private Dictionary<string, string> GetConfigWithJsonError()
         {
-            dictionary.Add("Invalid.json", InvalidConfigJson);
+            dictionary.Add("ConfigWithJsonError.json", ConfigWithJsonError);
             return dictionary;
         }
 
         private Dictionary<string, string> GetUndefinedValuesConfigJson()
         {
-            dictionary.Add("Invalid.json", UndefinedValuesConfigJson);
+            dictionary.Add("UndefinedValuesConfig.json", UndefinedValuesConfigJson);
             return dictionary;
         }
 
