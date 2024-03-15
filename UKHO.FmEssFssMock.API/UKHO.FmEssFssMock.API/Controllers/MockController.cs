@@ -59,25 +59,25 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [HttpPost]
         [ServiceFilter(typeof(SharedKeyAuthFilter))]
         [Route("/mock/bessConfigUpload")]
-        public async Task<IActionResult> UploadConfigFileDataAsync([FromBody] List<BessConfig> bessConfigs)
+        public async Task<IActionResult> UploadConfigFileDataAsync([FromBody] BessConfig bessConfig)
         {
             try
             {
-                if (bessConfigs.Any())
+                if (bessConfig == null || AreAllPropertiesNull(bessConfig))
                 {
-                    string result = await azureStorageService.UploadConfigurationToBlob(bessConfigs);
+                    var error = new List<Error>
+                    {
+                        new() { Source = "requestBody", Description = "Either body is null or malformed." }
+                    };
 
-                    return !string.IsNullOrEmpty(result)
-                        ? StatusCode(StatusCodes.Status201Created, result)
-                        : StatusCode(StatusCodes.Status500InternalServerError, "Blob Not Created");
+                    return BuildBadRequestErrorResponse(error);
                 }
+                string result = await azureStorageService.UploadConfigurationToBlob(bessConfig);
 
-                var error = new List<Error>
-                {
-                    new() { Source = "requestBody", Description = "Either body is null or malformed." }
-                };
+                return !string.IsNullOrEmpty(result)
+                    ? StatusCode(StatusCodes.Status201Created, result)
+                    : StatusCode(StatusCodes.Status500InternalServerError, "Blob Not Created");
 
-                return BuildBadRequestErrorResponse(error);
             }
             catch (Exception ex)
             {
@@ -88,6 +88,14 @@ namespace UKHO.FmEssFssMock.API.Controllers
         protected IActionResult BuildBadRequestErrorResponse(List<Error> errors)
         {
             return new BadRequestObjectResult(errors);
+        }
+
+        private bool AreAllPropertiesNull(BessConfig bessConfig)
+        {
+            return bessConfig.GetType().GetProperties()
+                        .Where(pi => pi.PropertyType == typeof(string))
+                        .Select(pi => (string)pi.GetValue(bessConfig))
+                        .Any(value => string.IsNullOrEmpty(value));
         }
     }
 }
