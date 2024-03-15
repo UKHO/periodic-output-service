@@ -29,7 +29,7 @@
             "Value": "value2"
         }
     ],
-    "ReadMeSearchFilter": "",
+    "ReadMeSearchFilter": "AVCS",
     "BatchExpiryInDays": 30,
     "IsEnabled": "Yes"
 }
