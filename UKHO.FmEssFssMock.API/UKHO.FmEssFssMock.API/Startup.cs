@@ -31,12 +31,14 @@ namespace UKHO.FmEssFssMock.API
             services.Configure<FileShareServiceConfiguration>(Configuration.GetSection("FileShareServiceConfiguration"));
             services.Configure<BessStorageConfiguration>(Configuration.GetSection("BessStorageConfiguration"));
             services.Configure<SharedKeyConfiguration>(Configuration.GetSection("SharedKeyConfiguration"));
+            services.Configure<SalesCatalogueConfiguration>(Configuration.GetSection("SalesCatalogue"));
 
             services.AddScoped<FileShareService>();
             services.AddScoped<ExchangeSetService>();
             services.AddScoped<MockService>();
             services.AddScoped<AzureStorageService>();
             services.AddScoped<SharedKeyAuthFilter>();
+            services.AddScoped<SalesCatalogueService>();
 
             services.AddHealthChecks()
                 .AddCheck<FleetManagerStubHealthCheck>("FleetManagerStubHealthCheck");
@@ -57,6 +59,20 @@ namespace UKHO.FmEssFssMock.API
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.Use(async (ctx, next) =>
+            {
+                // using Microsoft.AspNetCore.Http;
+                var endpoint = ctx.GetEndpoint();
+
+                if (endpoint == null)
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    return;
+                }
+
+                await next();
+            });
 
             app.UseEndpoints(endpoints =>
             {
