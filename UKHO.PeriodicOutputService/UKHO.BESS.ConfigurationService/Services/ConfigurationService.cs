@@ -23,7 +23,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private const string UndefinedValue = "undefined";
         private readonly IConfigValidator configValidator;
         private List<string> invalidNameList = new();
-        private int configsWithUndefinedValueCount;
+        private int filesWithJsonErrorCount;
         private int configsWithDuplicateNameAttributeCount;
         private const string NewLine = "\n";
         private const string Colon = ": ";
@@ -99,9 +99,10 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 RemoveDuplicateConfigs((List<BessConfig>)bessConfigs);
 
-                int totalConfigCount = deserializedConfigsCount + configsWithUndefinedValueCount;
+                int totalConfigCount = deserializedConfigsCount + filesWithJsonErrorCount;
+
                 logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
-"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | invalid configs : {filesWithUndefinedValueCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, configsWithUndefinedValueCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
+"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, filesWithJsonErrorCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
 
                 if (bessConfigs.Any())
                 {
@@ -127,20 +128,20 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (token.ToString().Contains(UndefinedValue))
                 {
-                    configsWithUndefinedValueCount = configsWithUndefinedValueCount + 1;
-                    logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config file : {fileName} is invalid. It might have missing or extra commas, brackets, or other syntax errors. | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+                    filesWithJsonErrorCount = filesWithJsonErrorCount + 1;
+                    logger.LogWarning(EventIds.BessConfigValueNotDefined.ToEventId(), "Bess config file : {fileName} contains undefined values. | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
                 }
                 else
                 {
-                    isValid = true;
                     bessConfig = JsonConvert.DeserializeObject<BessConfig>(json)!;
+                    isValid = true;
                 }
                 return new(bessConfig, isValid);
             }
             catch (Exception ex)
             {
-                configsWithUndefinedValueCount = configsWithUndefinedValueCount + 1;
-                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                filesWithJsonErrorCount = filesWithJsonErrorCount + 1;
+                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file : {fileName}. It might have  missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 return new(bessConfig, isValid);
             }
         }
