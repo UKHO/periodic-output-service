@@ -18,17 +18,17 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
 
         //PBI 140034: BESS CS - Get AVCS catalogue from SCS
         [Test]
-        public async Task WhenICallScsEssDataEndpointWithValidToken_ThenSuccessStatusCode200IsReturned()
+        public async Task WhenICallEssDataEndpointWithValidToken_ThenSuccessStatusCode200IsReturned()
         {
-            HttpResponseMessage apiResponse = await ScsEndpointHelper.ScsEssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl, ScsJwtToken);
+            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl, ScsJwtToken);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
         //PBI 140034: BESS CS - Get AVCS catalogue from SCS
         [Test]
-        public async Task WhenICallInvalidScsEssDataEndpointWithValidTokenAndWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
+        public async Task WhenICallEssDataEndpointWithValidTokenWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
-            HttpResponseMessage apiResponse = await ScsEndpointHelper.ScsEssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl, ScsJwtToken, false);
+            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl, ScsJwtToken, false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
     }
