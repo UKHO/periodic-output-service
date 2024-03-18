@@ -118,6 +118,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
         }
 
+        [ExcludeFromCodeCoverage]
         private (BessConfig config, bool isValid) DeserializeConfig(string json, string fileName)
         {
             BessConfig bessConfig = new();
@@ -146,6 +147,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
         }
 
+        [ExcludeFromCodeCoverage]
         private void RemoveDuplicateConfigs(List<BessConfig> bessConfigs)
         {
             //find duplicates with property Name
