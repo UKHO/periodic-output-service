@@ -487,16 +487,16 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingWithInvalidEncCellAndInvalidPattern(), GetEmptySalesCatalogueDataProductResponses());
 
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
+
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Warning
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
                 "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for file:{FileName} with ENC cells {EncCellNames} | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappened();
-
-            A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustNotHaveHappened();
+            ).MustHaveHappened();            
 
             Assert.That(result, Is.True);
         }

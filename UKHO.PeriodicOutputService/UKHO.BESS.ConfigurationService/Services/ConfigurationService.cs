@@ -204,6 +204,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {
                         logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config file: {FileName}, Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.FileName, config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
 
+                        azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
+
                         var encCells = GetEncCells(config.EncCellNames, salesCatalogueDataProducts);
 
                         if (!encCells.Any()) //If cells are not found then bespoke exchange set will not create
@@ -214,26 +216,21 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         int? totalFileSize = encCells.Select(i => i.Item2).Sum();
 
-                        if (totalFileSize.HasValue && !totalFileSize.Equals(0))
+                        double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize!.Value);
+
+                        int BESSize = Convert.ToInt16(configuration["BESSizeInMB"]);
+
+                        if (fileSizeInMb > BESSize)
                         {
-                            double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize.Value);
+                            logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "ES size {fileSizeInMb}MB which is more than threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", Math.Round(fileSizeInMb, 2), BESSize, config.FileName, CommonHelper.CorrelationID);
 
-                            int BESSize = Convert.ToInt32(configuration["BESSizeInMB"]);
-
-                            if (fileSizeInMb > BESSize)
-                            {
-                                logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "ES size {fileSizeInMb}MB which is more than threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", Math.Round(fileSizeInMb, 2), BESSize, config.FileName, CommonHelper.CorrelationID);
-
-                                continue;
-                            }
+                            continue;
                         }
                         //--save details to message queue --
 
                         IEnumerable<string> encCellNames = encCells.Select(i => i.Item1).ToList();
 
                         azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, encCellNames, totalFileSize);
-
-                        azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
                     }
                     else
                     {   //Update schedule details
