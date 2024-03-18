@@ -7,20 +7,13 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
 {
     public class ScsIntegrationTests
     {
-        private string? ScsJwtToken { get; set; }
         static readonly TestConfiguration testConfiguration = new();
-
-        [OneTimeSetUp]
-        public async Task OneTimeSetupAsync()
-        {
-            ScsJwtToken = await AuthTokenProvider.GetScsToken();
-        }
 
         //PBI 140034: BESS CS - Get AVCS catalogue from SCS
         [Test]
         public async Task WhenICallEssDataEndpointWithValidToken_ThenSuccessStatusCode200IsReturned()
         {
-            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl, ScsJwtToken);
+            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
@@ -28,7 +21,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
         [Test]
         public async Task WhenICallEssDataEndpointWithValidTokenWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
-            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl, ScsJwtToken, false);
+            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl, false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
     }
