@@ -218,14 +218,11 @@ namespace UKHO.BESS.ConfigurationService.Services
                         {
                             double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize.Value);
 
-                            //change to int later
-                            double BESSize = Convert.ToDouble(configuration["BESSizeInMB"]);
+                            int BESSize = Convert.ToInt32(configuration["BESSizeInMB"]);
 
                             if (fileSizeInMb > BESSize)
                             {
-                                logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(),
-                            "Bess config file : {fileName}, ES size is {fileSizeInMb} which is more than threshold : {BESSize} | _X-Correlation-ID : {CorrelationId}",
-                            config.FileName, Math.Round(fileSizeInMb, 2, MidpointRounding.AwayFromZero), BESSize, CommonHelper.CorrelationID);
+                                logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "ES size {fileSizeInMb}MB which is more than threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", Math.Round(fileSizeInMb, 2), BESSize, config.FileName, CommonHelper.CorrelationID);
 
                                 continue;
                             }
@@ -265,7 +262,6 @@ namespace UKHO.BESS.ConfigurationService.Services
             var isSameDay = scheduleDetailEntity.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
 
             return intervalInMinutes <= 0 && isSameDay && bessConfig.IsEnabled.ToLower().Equals("yes");
-            //return true;
         }
 
         [ExcludeFromCodeCoverage]
