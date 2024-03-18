@@ -60,14 +60,13 @@ namespace UKHO.FmEssFssMock.API
 
             app.UseAuthorization();
 
-            app.Use(async (ctx, next) =>
+            app.Use(async (context, next) =>
             {
-                // using Microsoft.AspNetCore.Http;
-                var endpoint = ctx.GetEndpoint();
+                var endpoint = context.GetEndpoint();
 
                 if (endpoint == null)
                 {
-                    ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
                     return;
                 }
 

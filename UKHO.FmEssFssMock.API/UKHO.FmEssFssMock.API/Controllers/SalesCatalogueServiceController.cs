@@ -35,7 +35,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpGet]
-        [Route("v1/productData/encs57/products")]
+        [Route("/scs/v1/productData/encs57/products")]
         public IActionResult ProductsSinceDateTime(string sinceDateTime)
         {
             if (!string.IsNullOrEmpty(sinceDateTime))
@@ -50,7 +50,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpPost]
-        [Route("v1/productData/encs57/products/productIdentifiers")]
+        [Route("/scs/v1/productData/encs57/products/productIdentifiers")]
         public IActionResult ProductIdentifiers(List<string> productIdentifiers)
         {
             if (productIdentifiers != null && productIdentifiers.Any())
@@ -65,7 +65,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpPost]
-        [Route("v1/productData/encs57/products/productVersions")]
+        [Route("/scs/v1/productData/encs57/products/productVersions")]
         public IActionResult ProductVersions(List<ProductVersionRequest> productVersionRequest)
         {
             if (productVersionRequest != null && productVersionRequest.Any())
