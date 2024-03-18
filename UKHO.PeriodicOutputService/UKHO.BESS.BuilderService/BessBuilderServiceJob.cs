@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Azure.Storage.Queues.Models;
-using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Helpers;
