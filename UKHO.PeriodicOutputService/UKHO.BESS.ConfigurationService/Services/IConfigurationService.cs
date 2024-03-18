@@ -1,12 +1,10 @@
 ﻿using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Scs.Response;
 
-namespace UKHO.BESS.ConfigurationService.Services
+namespace UKHO.BESS.ConfigurationService.Services;
+public interface IConfigurationService
 {
-    public interface IConfigurationService
-    {
-        void ProcessConfigs();
+    void ProcessConfigs();
 
-        bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts);
-    }
+    bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts);
 }
