@@ -291,9 +291,8 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <returns></returns>
         private IEnumerable<(string, int?)> GetEncCells(IEnumerable<string> encCellNames, IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueProducts)
         {
-            #region filter provided prefix patterns
+            //filter provided prefix patterns
             const string Pattern = "*";
-
             List<string> ignoreList = new();
             IEnumerable<string> encCells = encCellNames.Where(i => i.EndsWith(Pattern));
 
@@ -304,10 +303,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
             IEnumerable<string> prefixPatterns = encCellNames.Where(y => !ignoreList.Any(z => z.Equals(y)));
 
-            #endregion
-
-            #region get enc cell from provided prefix patterns
-
+            //get enc cells from provided prefix patterns
             List<(string, int?)> filteredEncCell = new();
             List<string> invalidPatternOrCell = new();
 
@@ -325,15 +321,13 @@ namespace UKHO.BESS.ConfigurationService.Services
                     invalidPatternOrCell.Add(prefixPattern);
                 }
             }
-            //Apart from valid, invalid pattern or cell found then log
+            //Apart from valid, if invalid pattern or cell found then log
             if (invalidPatternOrCell.Any() && filteredEncCell.Any())
             {
-                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), CommonHelper.CorrelationID);
+                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | AIO cells excluded : {AIOCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), string.Join(", ", configuration["AioCells"]), CommonHelper.CorrelationID);
             }
 
             return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1))); //remove aio cells and return all filtered data
-
-            #endregion
         }
     }
 }

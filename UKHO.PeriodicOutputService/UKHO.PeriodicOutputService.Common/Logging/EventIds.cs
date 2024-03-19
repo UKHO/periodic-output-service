@@ -605,7 +605,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         BessBuilderServiceCompleted = 809119,
         /// <summary>
-        /// 809120 - Listed cells or pattern not found in catalog
+        /// 809120 - Listed cells or pattern not found in catalogue
         /// </summary>
         BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809120,
         /// <summary>
