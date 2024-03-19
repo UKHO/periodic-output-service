@@ -11,7 +11,7 @@ using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Scs.Response;
 using UKHO.PeriodicOutputService.Common.Services;
 
-namespace UKHO.BESS.ConfigurationService.UnitTests.Services
+namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 {
     public class SalesCatalogueServiceTests
     {

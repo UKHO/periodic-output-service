@@ -25,7 +25,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.BESS.ConfigurationServ
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.BESS.BuilderService", "UKHO.BESS.BuilderService\UKHO.BESS.BuilderService.csproj", "{A7E52563-98E2-4632-9C70-6356F0C0FC79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.API.FunctionalTests", "UKHO.BESS.API.FunctionalTests\UKHO.BESS.API.FunctionalTests.csproj", "{2AAD89BA-ADF9-47F1-9CA0-FBD6DCC7D057}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UKHO.BESS.API.FunctionalTests", "UKHO.BESS.API.FunctionalTests\UKHO.BESS.API.FunctionalTests.csproj", "{2AAD89BA-ADF9-47F1-9CA0-FBD6DCC7D057}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.PeriodicOutputService.Common.UnitTests", "UKHO.PeriodicOutputService.Common.UnitTests\UKHO.PeriodicOutputService.Common.UnitTests.csproj", "{24E9BB0C-BBB6-4479-B3B2-86FBF230C2CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -73,6 +75,10 @@ Global
 		{2AAD89BA-ADF9-47F1-9CA0-FBD6DCC7D057}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AAD89BA-ADF9-47F1-9CA0-FBD6DCC7D057}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AAD89BA-ADF9-47F1-9CA0-FBD6DCC7D057}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24E9BB0C-BBB6-4479-B3B2-86FBF230C2CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24E9BB0C-BBB6-4479-B3B2-86FBF230C2CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24E9BB0C-BBB6-4479-B3B2-86FBF230C2CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24E9BB0C-BBB6-4479-B3B2-86FBF230C2CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,6 +93,7 @@ Global
 		{EED711A7-E420-4AB2-95E3-FB74A4092F0C} = {0316516B-C6E9-47BF-9305-3E566EB1EC55}
 		{A7E52563-98E2-4632-9C70-6356F0C0FC79} = {1592E1AE-C3E7-46D6-B0A6-15785835EBD2}
 		{2AAD89BA-ADF9-47F1-9CA0-FBD6DCC7D057} = {0316516B-C6E9-47BF-9305-3E566EB1EC55}
+		{24E9BB0C-BBB6-4479-B3B2-86FBF230C2CA} = {0316516B-C6E9-47BF-9305-3E566EB1EC55}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3412128A-AFD7-431C-AA35-E39C4668DC9F}

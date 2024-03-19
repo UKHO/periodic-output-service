@@ -7,7 +7,7 @@ using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Services;
 
-namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
+namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 {
     public class CommonHelperTests
     {
