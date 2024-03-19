@@ -24,7 +24,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
         public class SalesCatalogue
         {
-            public string? BaseUrl { get; set; }
+            public string? MockBaseUrl { get; set; }
             public string? ResourceId { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
         }
