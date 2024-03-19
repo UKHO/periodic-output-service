@@ -1,25 +1,25 @@
 {
-    "Name": "BES-1",
-    "ExchangeSetStandard": "s63",
-    "IsEncrypted": false,
-    "EncCellNames": [
+    "name": "BES-1",
+    "exchangeSetStandard": "s63",
+    "isEncrypted": false,
+    "encCellNames": [
         "GB123456",
         "GB234567",
         "GB*",
         "GB1*"
     ],
-    "Frequency": "15 16 2 2 *",
-    "Type": "BASE",
-    "KeyFileType": "NONE",
-    "AllowedUsers": [
+    "frequency": "15 16 2 2 *",
+    "type": "BASE",
+    "keyFileType": "NONE",
+    "allowedUsers": [
         "User1",
         "User2"
     ],
-    "AllowedUserGroups": [
+    "allowedUserGroups": [
         "UG1",
         "UG2"
     ],
-    "Tags": [
+    "tags": [
         {
             "Key": "key1",
             "Value": "value1"
@@ -29,7 +29,7 @@
             "Value": "value2"
         }
     ],
-    "ReadMeSearchFilter": "AVCS",
-    "BatchExpiryInDays": 30,
-    "IsEnabled": "Yes"
+    "readMeSearchFilter": "AVCS",
+    "batchExpiryInDays": 30,
+    "isEnabled": "Yes"
 }
