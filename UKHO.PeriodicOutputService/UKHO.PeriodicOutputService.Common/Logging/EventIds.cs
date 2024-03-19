@@ -623,7 +623,15 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809124 - ES size exceeds threshold 700MB
         /// </summary>
-        BessSizeExceedsThreshold = 809124
+        BessSizeExceedsThreshold = 809124,
+        /// <summary>
+        /// 809125 - Message added in the queue
+        /// </summary>
+        BessMessageAddedInTheQueue = 809125,
+        /// <summary>
+        /// 809126 - Message not added in the queue
+        /// </summary>
+        BessMessageNotAddedInTheQueue = 809126
     }
 
     public static class EventIdExtensions

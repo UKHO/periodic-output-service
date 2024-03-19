@@ -230,7 +230,16 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         IEnumerable<string> encCellNames = encCells.Select(i => i.Item1).ToList();
 
-                        azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, encCellNames, totalFileSize);
+                        Task<bool> success = azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, encCellNames, totalFileSize);
+
+                        if (success.Result)
+                        {
+                            logger.LogWarning(EventIds.BessMessageAddedInTheQueue.ToEventId(), "Message is added in the queue for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                        }
+                        else
+                        {
+                            logger.LogWarning(EventIds.BessMessageNotAddedInTheQueue.ToEventId(), "Message is not added in the queue, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                        }
                     }
                     else
                     {   //Update schedule details

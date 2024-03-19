@@ -370,11 +370,12 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsAddedToQueue_ThenReturnsTrue()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsReturnsFalseAndScheduleDetailsAddedToQueue_ThenLogWithMessagAdded()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
             A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
 
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(true);
             bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
 
@@ -387,8 +388,43 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored))
                 .MustHaveHappened();
 
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Warning
+                && call.GetArgument<EventId>(1) == EventIds.BessMessageAddedInTheQueue.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Message is added in the queue for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+
             Assert.That(result, Is.True);
         }
+
+        [Test]
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsReturnsFalseAndScheduleDetailsAddedToQueue_ThenLogWithMessageNotAdded()
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
+
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(false);
+
+            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+
+
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();            
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Warning
+                && call.GetArgument<EventId>(1) == EventIds.BessMessageNotAddedInTheQueue.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Message is not added in the queue, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+
+            Assert.That(result, Is.True);
+        }
+
         [Test]
         public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsAddedToQueueAndFileSizeIsGreater_ThenReturnsTrue()
         {
@@ -496,7 +532,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
                 "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for file:{FileName} with ENC cells {EncCellNames} | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappened();            
+            ).MustHaveHappened();
 
             Assert.That(result, Is.True);
         }
@@ -593,23 +629,23 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             int todayDay = DateTime.UtcNow.Day;
             List<BessConfig> configurations = new()
-        {
-            new()
             {
-                Name = "BESS-1",
-                ExchangeSetStandard = "s63",
-                EncCellNames = new List<string> { "1U320240", "US*", "US123456", "US78910", "GB*"},
-                Frequency = $"0 * {todayDay} * *",
-                Type = "",
-                KeyFileType = "",
-                AllowedUsers = new List<string>(),
-                AllowedUserGroups = new List<string>(),
-                Tags = new List<Tag>(),
-                ReadMeSearchFilter = "",
-                BatchExpiryInDays = 1,
-                IsEnabled = "Yes"
-            },
-        };
+                new()
+                {
+                    Name = "BESS-1",
+                    ExchangeSetStandard = "s63",
+                    EncCellNames = new List<string> { "1U320240", "US*", "US123456", "US78910", "GB*"},
+                    Frequency = $"0 * {todayDay} * *",
+                    Type = "",
+                    KeyFileType = "",
+                    AllowedUsers = new List<string>(),
+                    AllowedUserGroups = new List<string>(),
+                    Tags = new List<Tag>(),
+                    ReadMeSearchFilter = "",
+                    BatchExpiryInDays = 1,
+                    IsEnabled = "Yes"
+                },
+            };
             return configurations;
         }
 
@@ -707,23 +743,23 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             int todayDay = DateTime.UtcNow.Day;
             List<BessConfig> configurations = new()
-        {
-            new()
             {
-                Name = "BESS-1",
-                ExchangeSetStandard = "s63",
-                EncCellNames = new List<string> { "1U320240", "US*" },
-                Frequency = $"0 * {todayDay} * *",
-                Type = "",
-                KeyFileType = "",
-                AllowedUsers = new List<string>(),
-                AllowedUserGroups = new List<string>(),
-                Tags = new List<Tag>(),
-                ReadMeSearchFilter = "",
-                BatchExpiryInDays = 1,
-                IsEnabled = "No"
-            },
-        };
+                new()
+                {
+                    Name = "BESS-1",
+                    ExchangeSetStandard = "s63",
+                    EncCellNames = new List<string> { "1U320240", "US*" },
+                    Frequency = $"0 * {todayDay} * *",
+                    Type = "",
+                    KeyFileType = "",
+                    AllowedUsers = new List<string>(),
+                    AllowedUserGroups = new List<string>(),
+                    Tags = new List<Tag>(),
+                    ReadMeSearchFilter = "",
+                    BatchExpiryInDays = 1,
+                    IsEnabled = "No"
+                },
+            };
             return configurations;
         }
 
