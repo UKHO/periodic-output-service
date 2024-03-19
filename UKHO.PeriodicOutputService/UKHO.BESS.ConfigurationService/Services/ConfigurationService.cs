@@ -194,6 +194,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {
                         logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
 
+                        azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
+
                         var encCells = GetEncCells(config.EncCellNames, salesCatalogueDataProducts);
 
                         if (!encCells.Any()) //If cells are not found then bespoke exchange set will not create
@@ -210,7 +212,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                          *
                          */
 
-                        azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
+                        
                     }
                     else
                     {   //Update schedule details
@@ -305,7 +307,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             //Apart from valid, if invalid pattern or cell found then log
             if (invalidPatternOrCell.Any() && filteredEncCell.Any())
             {
-                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | AIO cells excluded : {AIOCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), string.Join(", ", configuration["AioCells"]), CommonHelper.CorrelationID);
+                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | AIO cells to be excluded : {AIOCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), string.Join(", ", configuration["AioCells"]), CommonHelper.CorrelationID);
             }
 
             return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1))); //remove aio cells and return all filtered data
