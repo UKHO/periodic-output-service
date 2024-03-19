@@ -309,7 +309,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             //Apart from valid, invalid pattern or cell found then log
             if (invalidPatternOrCell.Any() && filteredEncCell.Any())
             {
-                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), CommonHelper.CorrelationID);
+                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | AIO cells excluded : {AIOCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), string.Join(", ", configuration["AioCells"]) , CommonHelper.CorrelationID);
             }
 
             return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1))); //remove aio cells and return all filtered data
