@@ -390,7 +390,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Warning
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<EventId>(1) == EventIds.BessMessageAddedInTheQueue.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Message is added in the queue for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();

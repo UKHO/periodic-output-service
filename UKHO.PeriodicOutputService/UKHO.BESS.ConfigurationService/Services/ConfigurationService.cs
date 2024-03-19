@@ -234,7 +234,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         if (success.Result)
                         {
-                            logger.LogWarning(EventIds.BessMessageAddedInTheQueue.ToEventId(), "Message is added in the queue for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                            logger.LogInformation(EventIds.BessMessageAddedInTheQueue.ToEventId(), "Message is added in the queue for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
                         }
                         else
                         {
