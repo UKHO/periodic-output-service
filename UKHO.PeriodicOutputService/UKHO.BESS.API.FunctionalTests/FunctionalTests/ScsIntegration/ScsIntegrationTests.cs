@@ -13,7 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
         [Test]
         public async Task WhenICallEssDataEndpointWithValidToken_ThenSuccessStatusCode200IsReturned()
         {
-            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl);
+            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.BaseUrl);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
@@ -21,7 +21,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
         [Test]
         public async Task WhenICallEssDataEndpointWithValidTokenWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
-            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.MockBaseUrl, false);
+            HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.BaseUrl, false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
     }
