@@ -370,7 +370,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsReturnsFalseAndScheduleDetailsAddedToQueue_ThenLogWithMessagAdded()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsReturnsTrueAndScheduleDetailsAddedToQueue_ThenLogWithMessagAdded()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
             A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
@@ -413,7 +413,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 .MustHaveHappened();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();            
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
