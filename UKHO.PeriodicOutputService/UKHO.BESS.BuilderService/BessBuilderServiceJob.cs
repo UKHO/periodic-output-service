@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using UKHO.BESS.BuilderService.Services;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 
@@ -7,10 +8,12 @@ namespace UKHO.BESS.BuilderService
     public class BessBuilderServiceJob
     {
         private readonly ILogger<BessBuilderServiceJob> logger;
+        private readonly IBuilderService builderService;
 
-        public BessBuilderServiceJob(ILogger<BessBuilderServiceJob> logger)
+        public BessBuilderServiceJob(ILogger<BessBuilderServiceJob> logger, IBuilderService builderService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.builderService = builderService ?? throw new ArgumentNullException(nameof(builderService));
         }
 
         public async Task CreateBespokeExchangeSetAsync()
@@ -18,7 +21,7 @@ namespace UKHO.BESS.BuilderService
             logger.LogInformation(EventIds.BessBuilderServiceStarted.ToEventId(),
                 "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-            await Task.CompletedTask; // temporary code
+            await Task.Run(() => builderService.CreateBespokeExchangeSet());
 
             logger.LogInformation(EventIds.BessBuilderServiceCompleted.ToEventId(),
                 "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
