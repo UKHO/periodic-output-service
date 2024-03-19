@@ -11,7 +11,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
 
         //PBI 140034: BESS CS - Get AVCS catalogue from SCS
         [Test]
-        public async Task WhenICallEssDataEndpointWithValidToken_ThenSuccessStatusCode200IsReturned()
+        public async Task WhenICallEssDataEndpoint_ThenSuccessStatusCode200IsReturned()
         {
             HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.BaseUrl);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
@@ -19,7 +19,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
 
         //PBI 140034: BESS CS - Get AVCS catalogue from SCS
         [Test]
-        public async Task WhenICallEssDataEndpointWithValidTokenWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
+        public async Task WhenICallEssDataEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
             HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.BaseUrl, false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
