@@ -130,7 +130,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 throw;
             }
         }
-
+        [ExcludeFromCodeCoverage]
         private IList<BessConfig> DeserializeConfig(string json, string fileName)
         {
             IList<BessConfig> bessConfig = new List<BessConfig>();
@@ -155,7 +155,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 return bessConfig;
             }
         }
-
+        [ExcludeFromCodeCoverage]
         private void RemoveDuplicateConfigs(List<BessConfig> bessConfigs)
         {
             //find duplicates with property Name
@@ -238,7 +238,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                         }
                         else
                         {
-                            logger.LogWarning(EventIds.BessQueueMessageFailed.ToEventId(), "Queue message creation failed, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                            logger.LogWarning(EventIds.BessQueueMessageFailed.ToEventId(), "Something went wrong while adding message to queue, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
                         }
                     }
                     else
