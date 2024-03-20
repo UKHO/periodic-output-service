@@ -627,11 +627,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809125 - Message added in the queue
         /// </summary>
-        BessMessageAddedInTheQueue = 809125,
+        BessQueueMessageSuccessful = 809125,
         /// <summary>
         /// 809126 - Message not added in the queue
         /// </summary>
-        BessMessageNotAddedInTheQueue = 809126
+        BessQueueMessageFailed = 809126
     }
 
     public static class EventIdExtensions

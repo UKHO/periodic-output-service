@@ -234,11 +234,11 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         if (success.Result)
                         {
-                            logger.LogInformation(EventIds.BessMessageAddedInTheQueue.ToEventId(), "Message is added in the queue for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                            logger.LogInformation(EventIds.BessQueueMessageSuccessful.ToEventId(), "Queue message creation successful for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
                         }
                         else
                         {
-                            logger.LogWarning(EventIds.BessMessageNotAddedInTheQueue.ToEventId(), "Message is not added in the queue, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                            logger.LogWarning(EventIds.BessQueueMessageFailed.ToEventId(), "Queue message creation failed, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
                         }
                     }
                     else
