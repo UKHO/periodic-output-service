@@ -603,7 +603,15 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809119 - Bess Builder Service Completed
         /// </summary>
-        BessBuilderServiceCompleted = 809119
+        BessBuilderServiceCompleted = 809119,
+        /// <summary>
+        /// 809120 - Listed cells or pattern not found in catalogue
+        /// </summary>
+        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809120,
+        /// <summary>
+        /// 809121 - All listed cells are not found and neither cell is matching with the pattern
+        /// </summary>
+        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809121
     }
 
     public static class EventIdExtensions
