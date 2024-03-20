@@ -27,7 +27,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private readonly IConfigValidator configValidator;
         private readonly IAzureBlobStorageService azureBlobStorageService;
         private List<string> invalidNameList = new();
-        private int configsWithUndefinedValueCount;
+        private int filesWithJsonErrorCount;
         private int configsWithDuplicateNameAttributeCount;
         private const string NewLine = "\n";
         private const string Colon = ": ";
@@ -74,15 +74,16 @@ namespace UKHO.BESS.ConfigurationService.Services
                 {
                     string content = configsInContainer[fileName];
 
-                    var deserializedConfigs = DeserializeConfig(content, fileName);
+                    var deserializedConfig = DeserializeConfig(content, fileName);
 
-                    foreach (BessConfig deserializedConfig in deserializedConfigs)
+                    if (deserializedConfig.isValid)
                     {
                         deserializedConfigsCount = deserializedConfigsCount + 1;
-                        deserializedConfig.FileName = fileName; //for logging
+
+                        deserializedConfig.config.FileName = fileName; //for logging
                         try
                         {
-                            ValidationResult results = configValidator.Validate(deserializedConfig);
+                            ValidationResult results = configValidator.Validate(deserializedConfig.config);
 
                             if (!results.IsValid)
                             {
@@ -95,13 +96,16 @@ namespace UKHO.BESS.ConfigurationService.Services
                                     errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
                                 }
 
-                                invalidNameList.Add(deserializedConfig.FileName + Hyphen + deserializedConfig.Name);
+                                invalidNameList.Add(deserializedConfig.config.FileName + Hyphen +
+                                                    deserializedConfig.config.Name);
 
-                                logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}", fileName, errors, CommonHelper.CorrelationID);
+                                logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(),
+                                    "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}",
+                                    fileName, errors, CommonHelper.CorrelationID);
                             }
                             else
                             {
-                                bessConfigs.Add(deserializedConfig);
+                                bessConfigs.Add(deserializedConfig.config);
                             }
                         }
                         catch (Exception ex)
@@ -113,9 +117,10 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 RemoveDuplicateConfigs((List<BessConfig>)bessConfigs);
 
-                int totalConfigCount = deserializedConfigsCount + configsWithUndefinedValueCount;
+                int totalConfigCount = deserializedConfigsCount + filesWithJsonErrorCount;
+
                 logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
-                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with undefined value : {filesWithUndefinedValueCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, configsWithUndefinedValueCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
+"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, filesWithJsonErrorCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
 
                 if (bessConfigs.Any())
                 {
@@ -130,31 +135,36 @@ namespace UKHO.BESS.ConfigurationService.Services
                 throw;
             }
         }
+
         [ExcludeFromCodeCoverage]
-        private IList<BessConfig> DeserializeConfig(string json, string fileName)
+        private (BessConfig config, bool isValid) DeserializeConfig(string json, string fileName)
         {
-            IList<BessConfig> bessConfig = new List<BessConfig>();
+            BessConfig bessConfig = new();
+            bool isValid = false;
             try
             {
                 var token = JToken.Parse(json);
 
                 if (token.ToString().Contains(UndefinedValue))
                 {
-                    configsWithUndefinedValueCount = configsWithUndefinedValueCount + 1;
-                    logger.LogWarning(EventIds.BessConfigIsInvalid.ToEventId(), "Bess config file : {fileName} contains undefined values or is invalid | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+                    filesWithJsonErrorCount = filesWithJsonErrorCount + 1;
+                    logger.LogWarning(EventIds.BessConfigValueNotDefined.ToEventId(), "Bess config file : {fileName} contains undefined values. | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
                 }
                 else
                 {
-                    bessConfig = JsonConvert.DeserializeObject<List<BessConfig>>(json)!;
+                    bessConfig = JsonConvert.DeserializeObject<BessConfig>(json)!;
+                    isValid = true;
                 }
-                return bessConfig;
+                return new(bessConfig, isValid);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
-                return bessConfig;
+                filesWithJsonErrorCount = filesWithJsonErrorCount + 1;
+                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                return new(bessConfig, isValid);
             }
         }
+
         [ExcludeFromCodeCoverage]
         private void RemoveDuplicateConfigs(List<BessConfig> bessConfigs)
         {

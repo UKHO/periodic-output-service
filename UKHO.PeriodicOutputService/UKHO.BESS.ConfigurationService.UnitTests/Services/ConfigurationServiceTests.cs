@@ -24,17 +24,21 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         private IAzureBlobStorageService fakeAzureBlobStorageService;
         private ILogger<ConfigurationService.Services.ConfigurationService> fakeLogger;
         private ISalesCatalogueService fakeSalesCatalogueService;
-        private const string InvalidConfigJson = "[{\"Name\":,\"ExchangeSetStandard\":null,\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"no\"}]";
 
-        private const string ValidConfigJson = "[{\"Name\":\"Xyz\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"yes\"}," +
-                                               "{\"Name\":\"Abc\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"yes\"}]";
+        private const string UndefinedValuesConfigJson = "{\"name\":,\"exchangeSetStandard\":null,\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"no\"}";
 
-        private const string InvalidEmptyJson = "[{,,,}]";
+        private const string ValidConfigJson = "{\"NAME\":\"Xyz\",\"exchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
 
-        private const string DuplicateConfigJson = "[{\"Name\":\"Xyz\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"yes\"}," +
-                                                   "{\"Name\":\"Xyz\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"Yes\"}]";
+        private const string AnotherValidConfigJson = "{\"NAME\":\"Abc\",\"exchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
 
-        private const string ConfigJsonWithIncorrectExchangeSetStandard = "[{\"Name\":\"Xyz.json\",\"ExchangeSetStandard\":\"s\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"Yes\"}]";
+        private const string EmptyConfigJson = "{,,,}";
+
+        private const string DuplicateConfigJson = "{\"name\":\"Xyz\",\"exchangeSetStandard\":\"s57\",\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
+
+        private const string ConfigWithJsonError = "[{\"name\":\"Xyz\",\"exchangeSetStandard\":\"s57\",\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}]";
+
+        private const string ConfigJsonWithIncorrectExchangeSetStandard = "{\"name\":\"Xyz.json\",\"exchangeSetStandard\":\"s\",\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"Yes\"}";
+
         private const string InvalidConfigJsonWithInvalidEncCellNames = "[{\"Name\":\"Xyz.json\",\"ExchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\";\"GB234567\":\"GB*\",\"GB1*\"],\"Frequency\":\"15 16 2 2 *\",\"Type\":\"BASE\",\"KeyFileType\":\"NONE\",\"AllowedUsers\":[\"User1\",\"User2\"],\"AllowedUserGroups\":[\"UG1\",\"UG2\"],\"Tags\":[{\"Key\":\"key1\",\"Value\":\"value1\"},{\"Key\":\"key2\",\"Value\":\"value2\"}],\"ReadMeSearchFilter\":\"\",\"BatchExpiryInDays\":30,\"IsEnabled\":\"Yes\"}]";
         private Dictionary<string, string> dictionary;
         private IConfigValidator fakeConfigValidator;
@@ -88,7 +92,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenValidConfigIsFound_ThenConfigIsAddedToList()
+        public void WhenAValidConfigIsFound_ThenConfigIsAddedToList()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigFilesJson());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
@@ -114,9 +118,35 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenInvalidConfigIsFound_ThenThrowsError()
+        public void WhenMoreThanOneValidConfigIsFound_ThenConfigsAreAddedToList()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidEmptyJson());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetMoreThanOneValidConfigFilesJson());
+            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
+            configurationService.ProcessConfigs();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+        }
+
+        [Test]
+        public void WhenEmptyConfigIsFound_ThenThrowsError()
+        {
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetEmptyConfigJson());
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             configurationService.ProcessConfigs();
 
@@ -131,7 +161,36 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigParsingError.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing Bess config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void WhenConfigWithJsonErrorIsFound_ThenThrowsError()
+        {
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigWithJsonError());
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
+            configurationService.ProcessConfigs();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigParsingError.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing Bess config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -161,7 +220,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Error
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigParsingError.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing Bess config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -175,7 +234,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         [Test]
         public void WhenUndefinedValuesFoundInConfig_ThenConfigIsNotAddedToList()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidConfigFilesJson());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetUndefinedValuesConfigJson());
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             configurationService.ProcessConfigs();
 
@@ -189,8 +248,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(fakeLogger).Where(call =>
                  call.Method.Name == "Log"
                  && call.GetArgument<LogLevel>(0) == LogLevel.Warning
-                 && call.GetArgument<EventId>(1) == EventIds.BessConfigIsInvalid.ToEventId()
-                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess config file : {fileName} contains undefined values or is invalid | _X-Correlation-ID : {CorrelationId}"
+                 && call.GetArgument<EventId>(1) == EventIds.BessConfigValueNotDefined.ToEventId()
+                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess config file : {fileName} contains undefined values. | _X-Correlation-ID : {CorrelationId}"
                  ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -270,7 +329,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
-                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with undefined value : {filesWithUndefinedValueCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}"
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -319,16 +378,28 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             dictionary.Add("Valid.json", ValidConfigJson);
             return dictionary;
         }
-
-        private Dictionary<string, string> GetInvalidConfigFilesJson()
+        private Dictionary<string, string> GetMoreThanOneValidConfigFilesJson()
         {
-            dictionary.Add("Invalid.json", InvalidConfigJson);
+            dictionary.Add("Valid.json", ValidConfigJson);
+            dictionary.Add("Valid2.json", AnotherValidConfigJson);
             return dictionary;
         }
 
-        private Dictionary<string, string> GetInvalidEmptyJson()
+        private Dictionary<string, string> GetConfigWithJsonError()
         {
-            dictionary.Add("Empty.json", InvalidEmptyJson);
+            dictionary.Add("ConfigWithJsonError.json", ConfigWithJsonError);
+            return dictionary;
+        }
+
+        private Dictionary<string, string> GetUndefinedValuesConfigJson()
+        {
+            dictionary.Add("UndefinedValuesConfig.json", UndefinedValuesConfigJson);
+            return dictionary;
+        }
+
+        private Dictionary<string, string> GetEmptyConfigJson()
+        {
+            dictionary.Add("Empty.json", EmptyConfigJson);
             return dictionary;
         }
 
@@ -637,7 +708,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 {
                     Name = "BESS-1",
                     ExchangeSetStandard = "s63",
-                    EncCellNames = new List<string> { "1U320240", "US*", "US123456", "US78910", "GB*"},
+                    EncCellNames = new List<string> { "1U320240", "US*", "US123456", "US78910", "GB*" },
                     Frequency = $"0 * {todayDay} * *",
                     Type = "",
                     KeyFileType = "",
@@ -675,7 +746,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     LastUpdateNumberPreviousEdition = null,
                     LatestUpdateNumber = 6,
                     ProductName = "1U320240"
-                },new()
+                },
+                new()
                 {
                     BaseCellEditionNumber = 5,
                     BaseCellIssueDate = DateTime.UtcNow.AddDays(-30),
@@ -694,7 +766,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     LastUpdateNumberPreviousEdition = null,
                     LatestUpdateNumber = 6,
                     ProductName = "US5NY3DD"
-                },new()
+                },
+                new()
                 {
                     BaseCellEditionNumber = 4,
                     BaseCellIssueDate = DateTime.UtcNow.AddDays(-30),
@@ -713,7 +786,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     LastUpdateNumberPreviousEdition = null,
                     LatestUpdateNumber = 6,
                     ProductName = "US4AK3KR"
-                },new()
+                },
+                new()
                 {
                     BaseCellEditionNumber = 4,
                     BaseCellIssueDate = DateTime.UtcNow.AddDays(-30),
@@ -768,7 +842,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
         private Dictionary<string, string> GetDuplicateConfigJson()
         {
-            dictionary.Add("DuplicateConfigName.json", DuplicateConfigJson);
+            dictionary.Add("ValidConfig.json", ValidConfigJson);
+            dictionary.Add("DuplicateConfig.json", DuplicateConfigJson);
             return dictionary;
         }
 
@@ -826,7 +901,6 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             return configurations;
         }
 
-        #region GetSalesCatalogueDataProductResponse
         private SalesCatalogueDataResponse GetSalesCatalogueDataResponse()
         {
             return new SalesCatalogueDataResponse
@@ -847,6 +921,5 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 }
             };
         }
-        #endregion
     }
 }

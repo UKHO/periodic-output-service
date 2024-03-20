@@ -31,9 +31,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// </summary>
         /// <param name="path">Use to pass the correct config</param>
         /// <returns></returns>
-        public static List<BessConfig>? GetPayload(string? path)
+        public static BessConfig? GetPayload(string? path)
         {
-            return path != null ? JsonConvert.DeserializeObject<List<BessConfig>>(File.ReadAllText(path)) : null;
+            return path != null ? JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText(path)) : null;
         }
     }
 }
