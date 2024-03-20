@@ -7,7 +7,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         protected IConfigurationRoot configurationRoot;
         public BessApiConfiguration bessConfig = new();
         public SharedKeyConfiguration sharedKeyConfig = new();
-        public SalesCatalogue scsConfig = new();
+        public SCSApiConfiguration scsConfig = new();
         public ESSApiConfiguration authTokenConfig = new();
 
         public class BessApiConfiguration
@@ -22,9 +22,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? Key { get; set; }
         }
 
-        public class SalesCatalogue
+        public class SCSApiConfiguration
         {
-            public string? MockBaseUrl { get; set; }
+            public string? BaseUrl { get; set; }
             public string? ResourceId { get; set; }
             public bool IsRunningOnLocalMachine { get; set; }
         }
@@ -35,7 +35,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? TenantId { get; set; }
             public string? AutoTestClientId { get; set; }
             public string? AutoTestClientSecret { get; set; }
-            public string? FakeToken { get; set; }
         }
 
         public TestConfiguration()
@@ -46,7 +45,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             configurationRoot.Bind("BESSApiConfiguration", bessConfig);
             configurationRoot.Bind("SharedKeyConfiguration", sharedKeyConfig);
-            configurationRoot.Bind("SalesCatalogue", scsConfig);
+            configurationRoot.Bind("SCSApiConfiguration", scsConfig);
             configurationRoot.Bind("ESSApiConfiguration", authTokenConfig);
         }
     }

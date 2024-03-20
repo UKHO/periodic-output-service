@@ -7,7 +7,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     public class SalesCatalogueClient : ISalesCatalogueClient
     {
         private HttpClient httpClient;
-        private readonly IHttpClientFactory httpClientFactory;
 
         public SalesCatalogueClient(IHttpClientFactory httpClientFactory)
         {
