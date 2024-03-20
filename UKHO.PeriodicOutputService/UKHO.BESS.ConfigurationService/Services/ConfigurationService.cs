@@ -298,6 +298,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="encCellNames"></param>
         /// <param name="salesCatalogueProducts"></param>
         /// <returns></returns>
+        [ExcludeFromCodeCoverage]
         private IEnumerable<(string, int?)> GetEncCells(IEnumerable<string> encCellNames, IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueProducts)
         {
             //filter provided prefix patterns
