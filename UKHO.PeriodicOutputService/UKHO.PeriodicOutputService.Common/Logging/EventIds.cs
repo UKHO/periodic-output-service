@@ -526,9 +526,9 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessConfigsProcessingFailed = 809103,
 
         /// <summary>
-        /// 809104 - Bess config is invalid
+        /// 809104 - Bess config value is not defined
         /// </summary>
-        BessConfigIsInvalid = 809104,
+        BessConfigValueNotDefined = 809104,
 
         /// <summary>
         /// 809105 - Bess config parsing error
