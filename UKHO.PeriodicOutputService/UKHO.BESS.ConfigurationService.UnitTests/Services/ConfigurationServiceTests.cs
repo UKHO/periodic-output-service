@@ -426,10 +426,12 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsAddedToQueueAndFileSizeIsGreater_ThenReturnsTrue()
+        [TestCase("0")] // filesize greater than threshold 
+        [TestCase("1")] // filesize equals to threshold
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsAddedToQueueAndFileSizeIsGreaterOrEqualToThreshold_ThenReturnsTrue(string threshold)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
-            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("0");
+            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns(threshold);
 
             bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
@@ -440,6 +442,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     "{OriginalFormat}"].ToString() ==
                 "ES size {fileSizeInMb}MB which is more than threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(A<BessConfig>.Ignored, A<IEnumerable<string>>.Ignored, A<int>.Ignored)).MustNotHaveHappened();
 
             Assert.That(result, Is.True);
         }
