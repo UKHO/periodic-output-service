@@ -45,6 +45,7 @@ namespace UKHO.BESS.BuilderService
 
             hostBuilder.ConfigureAppConfiguration((hostContext, builder) =>
             {
+                builder.AddJsonFile("appsettings.json");
                 //Add environment specific configuration files.
                 string? environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                 if (!string.IsNullOrWhiteSpace(environmentName))
