@@ -18,7 +18,7 @@ namespace UKHO.BESS.BuilderService
     public static class Program
     {
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
-        private static IConfiguration ConfigurationBuilder;
+        private static IConfiguration configurationBuilder;
 
         public static async Task Main()
         {
@@ -66,11 +66,11 @@ namespace UKHO.BESS.BuilderService
 
                 //Add environment variables
                 builder.AddEnvironmentVariables();
-                ConfigurationBuilder = builder.Build();
+                configurationBuilder = builder.Build();
             })
                  .ConfigureLogging((hostContext, loggingBuilder) =>
                  {
-                     loggingBuilder.AddConfiguration(ConfigurationBuilder.GetSection("Logging"));
+                     loggingBuilder.AddConfiguration(configurationBuilder.GetSection("Logging"));
 #if DEBUG
                      loggingBuilder.AddSerilog(new LoggerConfiguration()
                          .WriteTo.File("Logs/UKHO.BESS.BuilderService-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
@@ -81,7 +81,7 @@ namespace UKHO.BESS.BuilderService
                      loggingBuilder.AddConsole();
                      loggingBuilder.AddDebug();
 
-                     EventHubLoggingConfiguration eventHubConfig = ConfigurationBuilder.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+                     EventHubLoggingConfiguration eventHubConfig = configurationBuilder.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
 
                      if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
                      {
@@ -108,9 +108,9 @@ namespace UKHO.BESS.BuilderService
                  {
                      services.AddApplicationInsightsTelemetryWorkerService();
 
-                     if (ConfigurationBuilder != null)
+                     if (configurationBuilder != null)
                      {
-                         services.AddSingleton<IConfiguration>(ConfigurationBuilder);
+                         services.AddSingleton<IConfiguration>(configurationBuilder);
                      }
                  })
                  .ConfigureWebJobs(b =>
