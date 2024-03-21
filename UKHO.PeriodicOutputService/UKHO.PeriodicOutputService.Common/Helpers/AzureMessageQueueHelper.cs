@@ -12,12 +12,14 @@ public class AzureMessageQueueHelper : IAzureMessageQueueHelper
 {
     private readonly ILogger<AzureMessageQueueHelper> logger;
     private readonly IOptions<BessStorageConfiguration> bessStorageConfiguration;
+
     public AzureMessageQueueHelper(ILogger<AzureMessageQueueHelper> logger, IOptions<BessStorageConfiguration> bessStorageConfiguration)
     {
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         this.bessStorageConfiguration = bessStorageConfiguration ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
     }
-    public async Task AddMessage(string message)
+
+    public async Task AddMessageAsync(string message)
     {
         // Create the queue client.
         var queueClient = new QueueClient(bessStorageConfiguration.Value.ConnectionString, bessStorageConfiguration.Value.QueueName);
@@ -33,4 +35,3 @@ public class AzureMessageQueueHelper : IAzureMessageQueueHelper
         logger.LogInformation(EventIds.BessConfigPropertiesAddedInQueue.ToEventId(), "Added message in Queue:{queue}, QueueMessage: {QueueMessage} and _X-Correlation-ID:{CorrelationId}", bessStorageConfiguration.Value.QueueName, message, CommonHelper.CorrelationID);
     }
 }
-

@@ -240,7 +240,9 @@ namespace UKHO.BESS.ConfigurationService.Services
                         //--save details to message queue --
                         IEnumerable<string> encCellNames = encCells.Select(i => i.Item1).ToList();
 
-                        Task<bool> success = azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, encCellNames, totalFileSize);
+                        var success = Task.Run(async () => await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(config, encCellNames, totalFileSize));
+
+                        //Task<bool> success = azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, encCellNames, totalFileSize);
 
                         if (success.Result)
                         {

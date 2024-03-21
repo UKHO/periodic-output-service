@@ -13,7 +13,8 @@ public class AzureBlobStorageService : IAzureBlobStorageService
     {
         this.azureMessageQueueHelper = azureMessageQueueHelper ?? throw new ArgumentNullException(nameof(azureMessageQueueHelper));
     }
-    public async Task<bool> SetConfigQueueMessageModelAndAddToQueue(BessConfig bessConfig, IEnumerable<string> encCellNames, int? fileSize)
+
+    public async Task<bool> SetConfigQueueMessageModelAndAddToQueueAsync(BessConfig bessConfig, IEnumerable<string> encCellNames, int? fileSize)
     {
         if (bessConfig == null)
         {
@@ -38,10 +39,10 @@ public class AzureBlobStorageService : IAzureBlobStorageService
             FileSize = fileSize,
             CorrelationId = CommonHelper.CorrelationID.ToString()
         };
+
         string configQueueMessageJson = JsonConvert.SerializeObject(configQueueMessage);
-        await azureMessageQueueHelper.AddMessage(configQueueMessageJson);
+        await azureMessageQueueHelper.AddMessageAsync(configQueueMessageJson);
 
         return true;
     }
-
 }
