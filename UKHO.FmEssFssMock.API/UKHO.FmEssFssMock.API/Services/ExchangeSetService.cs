@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using Microsoft.Extensions.Options;
 using UKHO.FmEssFssMock.API.Common;
+using UKHO.FmEssFssMock.API.Enums;
 using UKHO.FmEssFssMock.API.Helpers;
 using UKHO.FmEssFssMock.API.Models.Request;
 using UKHO.FmEssFssMock.API.Models.Response;
@@ -29,7 +30,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
         public ExchangeSetServiceResponse CreateExchangeSetForGetProductDataSinceDateTime(string sinceDateTime, string exchangeSetStandard)
         {
-            CreateBatchRequest batchRequest = CreateBatchRequestModel(false, exchangeSetStandard);
+            CreateBatchRequest batchRequest = CreateBatchRequestModel(EssEndPoints.ProductDataSinceDateTime, exchangeSetStandard);
 
             BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
 
@@ -67,7 +68,7 @@ namespace UKHO.FmEssFssMock.API.Services
             }
             else
             {
-                batchRequest = CreateBatchRequestModel(true, exchangeSetStandard);
+                batchRequest = CreateBatchRequestModel(EssEndPoints.ProductIdentifiers, exchangeSetStandard);
             }
 
 
@@ -106,7 +107,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 }
                 else
                 {
-                    batchRequest = CreateBatchRequestModel(true, exchangeSetStandard);
+                    batchRequest = CreateBatchRequestModel(EssEndPoints.PostProductVersion, exchangeSetStandard);
                 }
 
                 BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
@@ -140,23 +141,38 @@ namespace UKHO.FmEssFssMock.API.Services
             return selectedProductIdentifier;
         }
 
-        private CreateBatchRequest CreateBatchRequestModel(bool isPostProductIdentifiersRequest, string exchangeSetStandard)
+        private CreateBatchRequest CreateBatchRequestModel(EssEndPoints essEndPoints, string exchangeSetStandard)
         {
             PosTestCase currentTestCase = _mockService.GetCurrentPOSTestCase(_homeDirectoryPath);
             string batchType;
 
             if (currentTestCase == PosTestCase.ValidProductIdentifiers)
             {
-                if (exchangeSetStandard == "s63")
-                    batchType = Batch.EssS63ZipBatch.ToString();
+                if (essEndPoints.Equals(EssEndPoints.ProductIdentifiers))
+                {
+                    if (exchangeSetStandard == "s63")
+                        batchType = Batch.EssProductIdentifiersS63ZipBatch.ToString();
 
-                else if (exchangeSetStandard == "s57")
-                    batchType = Batch.EssS57ZipBatch.ToString();
+                    else if (exchangeSetStandard == "s57")
+                        batchType = Batch.EssProductIdentifiersS57ZipBatch.ToString();
 
-                else if (isPostProductIdentifiersRequest)
-                    batchType = Batch.EssFullAvcsZipBatch.ToString();
-                else
+                    else
+                        batchType = Batch.EssFullAvcsZipBatch.ToString();
+                }
+                else if (essEndPoints.Equals(EssEndPoints.PostProductVersion))
+                {
+                    if (exchangeSetStandard == "s63")
+                        batchType = Batch.EssPostProductVersionS63ZipBatch.ToString();
+
+                    else if (exchangeSetStandard == "s57")
+                        batchType = Batch.EssPostProductVersionS57ZipBatch.ToString();
+                    else
+                        batchType = Batch.EssZipBatch.ToString();
+                }
+                else //since datetime
+                {
                     batchType = Batch.EssUpdateZipBatch.ToString();
+                }
             }
             else
             {
