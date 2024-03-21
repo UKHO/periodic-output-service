@@ -11,16 +11,16 @@ namespace UKHO.PeriodicOutputService.Common.Helpers;
 public class AzureMessageQueueHelper : IAzureMessageQueueHelper
 {
     private readonly ILogger<AzureMessageQueueHelper> logger;
-    private readonly BessStorageConfiguration bessStorageConfiguration;
+    private readonly IOptions<BessStorageConfiguration> bessStorageConfiguration;
     public AzureMessageQueueHelper(ILogger<AzureMessageQueueHelper> logger, IOptions<BessStorageConfiguration> bessStorageConfiguration)
     {
-        this.logger = logger;
-        this.bessStorageConfiguration = bessStorageConfiguration.Value ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
+        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        this.bessStorageConfiguration = bessStorageConfiguration ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
     }
     public async Task AddMessage(string message)
     {
         // Create the queue client.
-        var queueClient = new QueueClient(bessStorageConfiguration.ConnectionString, bessStorageConfiguration.QueueName);
+        var queueClient = new QueueClient(bessStorageConfiguration.Value.ConnectionString, bessStorageConfiguration.Value.QueueName);
 
         // Create the queue if it doesn't already exist.
         await queueClient.CreateIfNotExistsAsync();
@@ -30,7 +30,7 @@ public class AzureMessageQueueHelper : IAzureMessageQueueHelper
         // Send a message to the queue
         await queueClient.SendMessageAsync(messageBase64String);
 
-        logger.LogInformation(EventIds.BessConfigPropertiesAddedInQueue.ToEventId(), "Added message in Queue:{queue}, QueueMessage: :{QueueMessage} and _X-Correlation-ID:{CorrelationId}", bessStorageConfiguration.QueueName, message, CommonHelper.CorrelationID);
+        logger.LogInformation(EventIds.BessConfigPropertiesAddedInQueue.ToEventId(), "Added message in Queue:{queue}, QueueMessage: {QueueMessage} and _X-Correlation-ID:{CorrelationId}", bessStorageConfiguration.Value.QueueName, message, CommonHelper.CorrelationID);
     }
 }
 

@@ -530,7 +530,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<EventId>(1) == EventIds.BessSizeExceedsThreshold.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "ES size {fileSizeInMb}MB which is more than threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
+                "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(A<BessConfig>.Ignored, A<IEnumerable<string>>.Ignored, A<int>.Ignored)).MustNotHaveHappened();
 

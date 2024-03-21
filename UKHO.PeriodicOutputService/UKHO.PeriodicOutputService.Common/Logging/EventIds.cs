@@ -626,7 +626,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessConfigValidationError = 809123,
 
         /// <summary>
-        /// 809124 - ES size exceeds threshold 700MB
+        /// 809124 - Bespoke Exchange Set size exceeds threshold 700MB
         /// </summary>
         BessSizeExceedsThreshold = 809124,
 

@@ -232,7 +232,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         if (fileSizeInMb > BESSize)
                         {
-                            logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "ES size {fileSizeInMb}MB which is more than threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", Math.Round(fileSizeInMb, 2), BESSize, config.FileName, CommonHelper.CorrelationID);
+                            logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", Math.Round(fileSizeInMb, 2), BESSize, config.FileName, CommonHelper.CorrelationID);
 
                             continue;
                         }
