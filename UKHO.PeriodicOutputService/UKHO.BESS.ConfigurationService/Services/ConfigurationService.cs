@@ -212,7 +212,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
-                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config file: {FileName}, Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.FileName, config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
+                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
 
                         azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
 
@@ -220,7 +220,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         if (!encCells.Any()) //If cells are not found then bespoke exchange set will not create
                         {
-                            logger.LogWarning(EventIds.BessEncCellNamesAndPatternNotFoundInSalesCatalogue.ToEventId(), "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for file:{FileName} with ENC cells {EncCellNames} | _X-Correlation-ID : {CorrelationId}", config.FileName, string.Join(", ", config.EncCellNames), CommonHelper.CorrelationID);
+                            logger.LogWarning(EventIds.BessEncCellNamesAndPatternNotFoundInSalesCatalogue.ToEventId(), "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for : {EncCellNames} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", config.EncCellNames), CommonHelper.CorrelationID);
                             continue;
                         }
 
@@ -236,8 +236,8 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                             continue;
                         }
-                        //--save details to message queue --
 
+                        //--save details to message queue --
                         IEnumerable<string> encCellNames = encCells.Select(i => i.Item1).ToList();
 
                         Task<bool> success = azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, encCellNames, totalFileSize);
@@ -344,7 +344,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             //Apart from valid, if invalid pattern or cell found then log
             if (invalidPatternOrCell.Any() && filteredEncCell.Any())
             {
-                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | AIO cells excluded : {AIOCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), string.Join(", ", configuration["AioCells"]), CommonHelper.CorrelationID);
+                logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | AIO cells to be excluded : {AIOCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), string.Join(", ", configuration["AioCells"]), CommonHelper.CorrelationID);
             }
 
             return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1))); //remove aio cells and return all filtered data
