@@ -18,7 +18,7 @@ namespace UKHO.BESS.BuilderService
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task ProcessQueueMessage([QueueTrigger("%BessBuilderService:QueueName%")] QueueMessage message)
+        public async Task ProcessQueueMessage([QueueTrigger("bess-fulfillment")] QueueMessage message)
         {
             try
             {
