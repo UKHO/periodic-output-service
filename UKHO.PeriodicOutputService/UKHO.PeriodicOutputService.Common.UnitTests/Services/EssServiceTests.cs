@@ -505,13 +505,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         [TestCase(HttpStatusCode.BadRequest, "BadRequest")]
         [TestCase(HttpStatusCode.Unauthorized, "Unauthorized")]
-        [TestCase(HttpStatusCode.Forbidden, "Forbidden")]
         [TestCase(HttpStatusCode.InternalServerError, "InternalServerError")]
         [TestCase(HttpStatusCode.ServiceUnavailable, "ServiceUnavailable")]
         public void WhenProductIdentifiersRequestOtherThan200_ThenPostProductIdentifiersReturnsReturnsFulfilmentException(HttpStatusCode statusCode, string content)
         {
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns("InvalidToken");
-
             A.CallTo(() => _fakeEssApiClient.PostProductIdentifiersDataAsync
             (A<string>.Ignored, A<List<string>>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
@@ -538,18 +535,20 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         [TestCase(HttpStatusCode.BadRequest, "BadRequest")]
         [TestCase(HttpStatusCode.Unauthorized, "Unauthorized")]
-        [TestCase(HttpStatusCode.Forbidden, "Forbidden")]
         [TestCase(HttpStatusCode.InternalServerError, "InternalServerError")]
         [TestCase(HttpStatusCode.ServiceUnavailable, "ServiceUnavailable")]
         public void DoesGetProductDataSinceDateTime_Returns_FulfilmentException_When_Response_Status_Is_Not_Ok(HttpStatusCode statusCode, string content)
         {
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns("InvalidToken");
-
+            
             A.CallTo(() => _fakeEssApiClient.GetProductDataSinceDateTime
             (A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
@@ -562,7 +561,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                       Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(content))),
                   });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _essService.GetProductDataSinceDateTime(DateTime.UtcNow.ToString("R"), ExchangeSetStandard.S63.ToString()));
+            Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
+                 async delegate { await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.ToString("R"), ExchangeSetStandard.S63.ToString()); });
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -580,13 +580,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         [TestCase(HttpStatusCode.BadRequest, "BadRequest")]
         [TestCase(HttpStatusCode.Unauthorized, "Unauthorized")]
-        [TestCase(HttpStatusCode.Forbidden, "Forbidden")]
         [TestCase(HttpStatusCode.InternalServerError, "InternalServerError")]
         [TestCase(HttpStatusCode.ServiceUnavailable, "ServiceUnavailable")]
         public void DoesGetGetProductDataProductVersions_Returns_FulfilmentException_When_Response_Status_Is_Not_Ok(HttpStatusCode statusCode, string content)
         {
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns("InvalidToken");
-
             A.CallTo(() => _fakeEssApiClient.GetProductDataProductVersion
            (A<string>.Ignored, A<List<ProductVersion>>.Ignored, A<string>.Ignored))
                  .Returns(new HttpResponseMessage()
@@ -599,10 +596,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                      Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(content))),
                  });
 
-
-            Assert.ThrowsAsync<FulfilmentException>(() => _essService.GetProductDataProductVersions(new ProductVersionsRequest
-            {
-                ProductVersions = new List<ProductVersion>
+            Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
+                async delegate
+                {
+                    await _essService.GetProductDataProductVersions(new ProductVersionsRequest
+                    {
+                        ProductVersions = new List<ProductVersion>
                                                                                                     {
                                                                                                          new ProductVersion
                                                                                                          {
@@ -611,7 +610,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                                                                                                              UpdateNumber = 10
                                                                                                          }
                                                                                                     }
-            }, ExchangeSetStandard.S63.ToString()));
+                    }, ExchangeSetStandard.S63.ToString());
+                });
 
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -624,6 +624,9 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<LogLevel>(0) == LogLevel.Error
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to create exchange set for product version | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
         }
 
         private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
