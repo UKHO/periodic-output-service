@@ -46,7 +46,7 @@ namespace UKHO.BESS.ConfigurationService
                 try
                 {
                     var bessConfigurationServiceJob = serviceProvider.GetService<BessConfigurationServiceJob>();
-                    bessConfigurationServiceJob.Start();
+                    await bessConfigurationServiceJob.StartAsync();
                 }
                 finally
                 {

@@ -16,7 +16,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthScsTokenProvider authScsTokenProvider;
         private readonly ISalesCatalogueClient salesCatalogueClient;
 
-
         public SalesCatalogueService(ILogger<SalesCatalogueService> logger,
                                      IOptions<SalesCatalogueConfiguration> salesCatalogueConfig,
                                      IAuthScsTokenProvider authScsTokenProvider,
