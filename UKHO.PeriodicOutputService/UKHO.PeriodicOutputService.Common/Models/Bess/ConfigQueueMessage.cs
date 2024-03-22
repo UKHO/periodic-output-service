@@ -18,4 +18,3 @@ public class ConfigQueueMessage
     public int? FileSize { get; set; }
     public string CorrelationId { get; set; }
 }
-}
