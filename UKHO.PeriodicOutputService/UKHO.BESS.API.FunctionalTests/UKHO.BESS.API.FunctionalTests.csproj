@@ -37,4 +37,9 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="FunctionalTests\EssIntegration\" />
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>

@@ -35,6 +35,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? TenantId { get; set; }
             public string? AutoTestClientId { get; set; }
             public string? AutoTestClientSecret { get; set; }
+            public string? BaseUrl { get; set; }
+            public string? ResourceId { get; set; }
+            public bool IsRunningOnLocalMachine { get; set; }
         }
 
         public TestConfiguration()
