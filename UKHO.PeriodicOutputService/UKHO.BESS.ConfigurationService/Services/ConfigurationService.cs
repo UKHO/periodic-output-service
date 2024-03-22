@@ -51,7 +51,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.azureBlobStorageService = azureBlobStorageService ?? throw new ArgumentNullException(nameof(azureBlobStorageService));
         }
 
-        public void ProcessConfigs()
+        public async Task ProcessConfigsAsync()
         {
             try
             {
@@ -66,7 +66,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 IList<BessConfig> bessConfigs = new List<BessConfig>();
 
-                var salesCatalogueDataResponse = Task.Run(async () => await salesCatalogueService.GetSalesCatalogueData()).Result;
+                var salesCatalogueDataResponse = await salesCatalogueService.GetSalesCatalogueData().ConfigureAwait(false);
 
                 int configsWithInvalidAttributeCount = 0, deserializedConfigsCount = 0;
 
@@ -124,7 +124,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (bessConfigs.Any())
                 {
-                    CheckConfigFrequencyAndSaveQueueDetails(bessConfigs, salesCatalogueDataResponse.ResponseBody);
+                    await CheckConfigFrequencyAndSaveQueueDetails(bessConfigs, salesCatalogueDataResponse.ResponseBody).ConfigureAwait(false);
                 }
 
                 logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
@@ -197,7 +197,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="bessConfigs"></param>
         /// <param name="salesCatalogueDataProducts"></param>
         /// <returns></returns>
-        public bool CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts)
+        public async Task<bool> CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts)
         {
             try
             {
@@ -240,11 +240,9 @@ namespace UKHO.BESS.ConfigurationService.Services
                         //--save details to message queue --
                         IEnumerable<string> encCellNames = encCells.Select(i => i.Item1).ToList();
 
-                        var success = Task.Run(async () => await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(config, encCellNames, totalFileSize));
+                        var success = await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(config, encCellNames, totalFileSize).ConfigureAwait(false);
 
-                        //Task<bool> success = azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, encCellNames, totalFileSize);
-
-                        if (success.Result)
+                        if (success)
                         {
                             logger.LogInformation(EventIds.BessQueueMessageSuccessful.ToEventId(), "Queue message creation successful for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
                         }
