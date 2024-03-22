@@ -21,7 +21,7 @@ namespace UKHO.BESS.BuilderService
             logger.LogInformation(EventIds.BessBuilderServiceStarted.ToEventId(),
                 "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-            await Task.Run(() => builderService.CreateBespokeExchangeSet());
+            await Task.Run(async () => await builderService.CreateBespokeExchangeSet());
 
             logger.LogInformation(EventIds.BessBuilderServiceCompleted.ToEventId(),
                 "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
