@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -113,6 +114,7 @@ namespace UKHO.BESS.BuilderService
                      if (configurationBuilder != null)
                      {
                          services.AddSingleton<IConfiguration>(configurationBuilder);
+                         services.Configure<BessStorageConfiguration>(configurationBuilder.GetSection("BessStorageConfiguration"));
                      }
                  })
                  .ConfigureWebJobs(b =>
