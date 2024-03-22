@@ -40,8 +40,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public TestConfiguration()
         {
             configurationRoot = new ConfigurationBuilder()
-                               .AddJsonFile("appsettings.json", false)
-                               .Build();
+                .AddJsonFile("appsettings.json", false)
+                .Build();
 
             configurationRoot.Bind("BESSApiConfiguration", bessConfig);
             configurationRoot.Bind("SharedKeyConfiguration", sharedKeyConfig);
