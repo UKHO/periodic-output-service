@@ -21,6 +21,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         private IConfigurationService configurationService;
         private IAzureBlobStorageClient fakeAzureBlobStorageClient;
         private IAzureTableStorageHelper fakeAzureTableStorageHelper;
+        private IAzureBlobStorageService fakeAzureBlobStorageService;
         private ILogger<ConfigurationService.Services.ConfigurationService> fakeLogger;
         private ISalesCatalogueService fakeSalesCatalogueService;
 
@@ -52,37 +53,41 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             fakeConfigValidator = A.Fake<IConfigValidator>();
             fakeSalesCatalogueService = A.Fake<ISalesCatalogueService>();
             fakeConfiguration = A.Fake<IConfiguration>();
+            fakeAzureBlobStorageService = A.Fake<IAzureBlobStorageService>();
 
-            configurationService = new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration);
+            configurationService = new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
             dictionary = new Dictionary<string, string>();
         }
 
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration);
+            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
 
             nullAzureBlobStorageClient.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageClient");
 
-            Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration);
+            Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
 
             nullAzureTableHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureTableStorageHelper");
 
-            Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, null, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration);
+            Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, null, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
 
             nullConfigurationServiceLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
 
-            Action nullConfigValidator = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, null, fakeSalesCatalogueService, fakeConfiguration);
+            Action nullConfigValidator = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, null, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
 
             nullConfigValidator.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configValidator");
 
-            Action nullSalesCatalogueService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, null, fakeConfiguration);
-
+            Action nullSalesCatalogueService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, null, fakeConfiguration, fakeAzureBlobStorageService);
             nullSalesCatalogueService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("salesCatalogueService");
 
-            Action nullConfigurationServiceConfiguration = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, null);
+            Action nullConfigurationServiceConfiguration = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, null, fakeAzureBlobStorageService);
 
             nullConfigurationServiceConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
+
+            Action nullAzureBlobStorageService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, null);
+
+            nullAzureBlobStorageService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageService");
         }
 
         [Test]
@@ -91,7 +96,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigFilesJson());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
-            configurationService.ProcessConfigs();
+            configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -117,7 +122,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetMoreThanOneValidConfigFilesJson());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
-            configurationService.ProcessConfigs();
+            configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -142,7 +147,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetEmptyConfigJson());
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
-            configurationService.ProcessConfigs();
+            configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -171,7 +176,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigWithJsonError());
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
-            configurationService.ProcessConfigs();
+            configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -201,7 +206,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidEncCellNameJson());
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
 
-            configurationService.ProcessConfigs();
+            configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -230,7 +235,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetUndefinedValuesConfigJson());
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
-            configurationService.ProcessConfigs();
+            configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -258,7 +263,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenGetConfigsInContainerMethodSendNull_ThenThrowsException()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Throws<Exception>();
-            configurationService.Invoking(x => x.ProcessConfigs()).Should().ThrowExactly<Exception>();
+            configurationService.Invoking(x => x.ProcessConfigsAsync()).Should().ThrowExactlyAsync<Exception>();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -272,7 +277,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenContainerHasNoConfigs_ThenConfigIsNotAddedToList()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(new Dictionary<string, string>());
-            configurationService.ProcessConfigs();
+            configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -302,7 +307,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetDuplicateConfigJson());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
 
-            configurationService.ProcessConfigs();
+            configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -341,7 +346,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure> { validationMessage }));
 
-            configurationService.ProcessConfigs();
+            configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -349,6 +354,22 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidAttributes.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappened();
+        }
+
+        [Test]
+        public void WhenInvalidConfigValidating_ThenValidationThrowsException()
+        {
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
+            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Throws<Exception>();
+
+            configurationService.ProcessConfigsAsync();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationError.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while validating Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
         }
 
         private Dictionary<string, string> GetValidConfigFilesJson()
@@ -389,106 +410,187 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessful_ThenReturnsTrue()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessful_ThenReturnsTrue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
 
-            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
-
-            Assert.That(result, Is.True);
+            result.Should().BeTrue();
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsThrowsException_ThenReturnsFalse()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsThrowsException_ThenReturnsFalse()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Throws<Exception>();
 
-            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigFrequencyProcessingException.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}"
+                "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            Assert.That(result, Is.False);
+            result.Should().BeFalse();
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsAddedToQueue_ThenReturnsTrue()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsReturnsTrueAndScheduleDetailsAddedToQueue_ThenLogWithMessagAdded()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
 
-            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(true);
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored))
+                .MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
-                    "{OriginalFormat}"].ToString() ==
-                "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<EventId>(1) == EventIds.BessQueueMessageSuccessful.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Queue message creation successful for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
-            A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
-
-            Assert.That(result, Is.True);
+            result.Should().BeTrue();
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsNotAddedToQueue_ThenReturnsTrue()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsReturnsFalseAndScheduleDetailsAddedToQueue_ThenLogWithMessageNotAdded()
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
+
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(false);
+
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Warning
+                && call.GetArgument<EventId>(1) == EventIds.BessQueueMessageFailed.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Something went wrong while adding message to queue, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+
+            result.Should().BeTrue();
+        }
+
+        [Test]
+        public async Task WhenCheckConfigFrequencyAndFileSizeIsGreater_ThenMessageNotAddedToQueue()
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
+
+            var fakeScsList = GetEmptySalesCatalogueDataProductResponses();
+            fakeScsList.Add(new()
+            {
+                BaseCellEditionNumber = 6,
+                BaseCellIssueDate = DateTime.UtcNow.AddDays(-30),
+                BaseCellLocation = "M2;B1",
+                BaseCellUpdateNumber = null,
+                CancelledCellReplacements = new(),
+                CellLimitEasternmostLatitude = 121,
+                CellLimitNorthernmostLatitude = 25,
+                CellLimitSouthernmostLatitude = 24,
+                CellLimitWesternmostLatitude = 120,
+                Compression = true,
+                Encryption = false,
+                FileSize = 734108057,
+                IssueDateLatestUpdate = DateTime.UtcNow.AddDays(-60),
+                IssueDatePreviousUpdate = null,
+                LastUpdateNumberPreviousEdition = null,
+                LatestUpdateNumber = 6,
+                ProductName = "1U320240"
+            });
+
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), fakeScsList);
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Warning
+                && call.GetArgument<EventId>(1) == EventIds.BessSizeExceedsThreshold.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
+                    "{OriginalFormat}"].ToString() ==
+                "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<IEnumerable<string>>.Ignored, A<int>.Ignored)).MustNotHaveHappened();
+
+            result.Should().BeTrue();
+        }
+
+        [Test]
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsNotAddedToQueue_ThenReturnsTrue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
 
-            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, false)).MustHaveHappenedOnceOrMore();
 
-            Assert.That(result, Is.True);
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored))
+                .MustNotHaveHappened();
+
+            result.Should().BeTrue();
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsNotAddedToQueueSameDay_ThenReturnsTrue()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsNotAddedToQueueSameDay_ThenReturnsTrue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueueOnSameDay());
 
-            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingNotEnabled(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingNotEnabled(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
-            Assert.That(result, Is.True);
+            result.Should().BeTrue();
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndWhenNextScheduleDetailsIsNull_ThenReturnsTrue()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndWhenNextScheduleDetailsIsNull_ThenReturnsTrue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1"))!.Returns(null);
 
-            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
-            Assert.That(result, Is.True);
+            result.Should().BeTrue();
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndConfigurationSettingsHasInvalidCell_ThenLogDetails()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndConfigurationSettingsHasInvalidCell_ThenLogDetails()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
 
-            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingWithInvalidEncCell(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingWithInvalidEncCell(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigFrequencyElapsed.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
                 "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}"
@@ -497,21 +599,22 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Warning
+                && call.GetArgument<EventId>(1) == EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() == "Invalid pattern or ENC cell names found : {InvalidEncCellName} | AIO cells to be excluded : {AIOCellName} | _X-Correlation-ID : {CorrelationId}").MustHaveHappened();
 
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
-            Assert.That(result, Is.True);
+            result.Should().BeTrue();
         }
 
         [Test]
-        public void WhenConfigurationSettingsHasInvalidCellAndInvalidPattern_ThenScheduleDetailsNotAddedToQueue()
+        public async Task WhenConfigurationSettingsHasInvalidCellAndInvalidPattern_ThenScheduleDetailsNotAddedToQueue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
 
-            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingWithInvalidEncCellAndInvalidPattern(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingWithInvalidEncCellAndInvalidPattern(), GetEmptySalesCatalogueDataProductResponses());
 
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
@@ -519,20 +622,22 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Warning
+                && call.GetArgument<EventId>(1) == EventIds.BessEncCellNamesAndPatternNotFoundInSalesCatalogue.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
                 "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for : {EncCellNames} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
-            Assert.That(result, Is.True);
+            result.Should().BeTrue();
         }
 
         [Test]
-        public void WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScsResponseDataHasAioCell_ThenRemoveAioCell()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScsResponseDataHasAioCell_ThenRemoveAioCell()
         {
             fakeConfiguration["AioCells"] = "GB800001";
 
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
 
             var salesCatalogueDataProductResponse = GetFakeSalesCatalogueDataProductResponse();
             salesCatalogueDataProductResponse.Add(new()
@@ -556,11 +661,12 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 ProductName = fakeConfiguration["AioCells"]!
             });
 
-            bool result = configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), salesCatalogueDataProductResponse);
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), salesCatalogueDataProductResponse);
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigFrequencyElapsed.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
                 "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}"
@@ -569,7 +675,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
 
-            Assert.That(result, Is.True);
+            result.Should().BeTrue();
         }
 
         private ScheduleDetailEntity GetFakeScheduleDetailsToAddInQueue()
@@ -617,23 +723,23 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             int todayDay = DateTime.UtcNow.Day;
             List<BessConfig> configurations = new()
-        {
-            new()
             {
-                Name = "BESS-1",
-                ExchangeSetStandard = "s63",
-                EncCellNames = new List<string> { "1U320240", "US*", "US123456", "US78910", "GB*"},
-                Frequency = $"0 * {todayDay} * *",
-                Type = "",
-                KeyFileType = "",
-                AllowedUsers = new List<string>(),
-                AllowedUserGroups = new List<string>(),
-                Tags = new List<Tag>(),
-                ReadMeSearchFilter = "",
-                BatchExpiryInDays = 1,
-                IsEnabled = "Yes"
-            },
-        };
+                new()
+                {
+                    Name = "BESS-1",
+                    ExchangeSetStandard = "s63",
+                    EncCellNames = new List<string> { "1U320240", "US*", "US123456", "US78910", "GB*" },
+                    Frequency = $"0 * {todayDay} * *",
+                    Type = "",
+                    KeyFileType = "",
+                    AllowedUsers = new List<string>(),
+                    AllowedUserGroups = new List<string>(),
+                    Tags = new List<Tag>(),
+                    ReadMeSearchFilter = "",
+                    BatchExpiryInDays = 1,
+                    IsEnabled = "Yes"
+                },
+            };
             return configurations;
         }
 
@@ -660,7 +766,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     LastUpdateNumberPreviousEdition = null,
                     LatestUpdateNumber = 6,
                     ProductName = "1U320240"
-                },new()
+                },
+                new()
                 {
                     BaseCellEditionNumber = 5,
                     BaseCellIssueDate = DateTime.UtcNow.AddDays(-30),
@@ -679,7 +786,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     LastUpdateNumberPreviousEdition = null,
                     LatestUpdateNumber = 6,
                     ProductName = "US5NY3DD"
-                },new()
+                },
+                new()
                 {
                     BaseCellEditionNumber = 4,
                     BaseCellIssueDate = DateTime.UtcNow.AddDays(-30),
@@ -698,7 +806,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     LastUpdateNumberPreviousEdition = null,
                     LatestUpdateNumber = 6,
                     ProductName = "US4AK3KR"
-                },new()
+                },
+                new()
                 {
                     BaseCellEditionNumber = 4,
                     BaseCellIssueDate = DateTime.UtcNow.AddDays(-30),
@@ -722,27 +831,32 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             return salesCatalogueDataProductResponses;
         }
 
+        private List<SalesCatalogueDataProductResponse> GetEmptySalesCatalogueDataProductResponses()
+        {
+            return new List<SalesCatalogueDataProductResponse>();
+        }
+
         private List<BessConfig> GetFakeConfigurationSettingNotEnabled()
         {
             int todayDay = DateTime.UtcNow.Day;
             List<BessConfig> configurations = new()
-        {
-            new()
             {
-                Name = "BESS-1",
-                ExchangeSetStandard = "s63",
-                EncCellNames = new List<string> { "1U320240", "US*" },
-                Frequency = $"0 * {todayDay} * *",
-                Type = "",
-                KeyFileType = "",
-                AllowedUsers = new List<string>(),
-                AllowedUserGroups = new List<string>(),
-                Tags = new List<Tag>(),
-                ReadMeSearchFilter = "",
-                BatchExpiryInDays = 1,
-                IsEnabled = "No"
-            },
-        };
+                new()
+                {
+                    Name = "BESS-1",
+                    ExchangeSetStandard = "s63",
+                    EncCellNames = new List<string> { "1U320240", "US*" },
+                    Frequency = $"0 * {todayDay} * *",
+                    Type = "",
+                    KeyFileType = "",
+                    AllowedUsers = new List<string>(),
+                    AllowedUserGroups = new List<string>(),
+                    Tags = new List<Tag>(),
+                    ReadMeSearchFilter = "",
+                    BatchExpiryInDays = 1,
+                    IsEnabled = "No"
+                },
+            };
             return configurations;
         }
 

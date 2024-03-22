@@ -604,14 +604,41 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809119 - Bess Builder Service Completed
         /// </summary>
         BessBuilderServiceCompleted = 809119,
+
         /// <summary>
         /// 809120 - Listed cells or pattern not found in catalogue
         /// </summary>
         BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809120,
+
         /// <summary>
         /// 809121 - All listed cells are not found and neither cell is matching with the pattern
         /// </summary>
-        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809121
+        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809121,
+
+        /// <summary>
+        /// 809122 - Config message added in the queue
+        /// </summary>
+        BessConfigPropertiesAddedInQueue = 809122,
+
+        /// <summary>
+        /// 809123 - Bess Config Validation Error
+        /// </summary>
+        BessConfigValidationError = 809123,
+
+        /// <summary>
+        /// 809124 - Bespoke Exchange Set size exceeds threshold 700MB
+        /// </summary>
+        BessSizeExceedsThreshold = 809124,
+
+        /// <summary>
+        /// 809125 - Message added in the queue
+        /// </summary>
+        BessQueueMessageSuccessful = 809125,
+
+        /// <summary>
+        /// 809126 - Message not added in the queue
+        /// </summary>
+        BessQueueMessageFailed = 809126
     }
 
     public static class EventIdExtensions

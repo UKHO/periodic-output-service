@@ -46,7 +46,7 @@ namespace UKHO.BESS.ConfigurationService
                 try
                 {
                     var bessConfigurationServiceJob = serviceProvider.GetService<BessConfigurationServiceJob>();
-                    bessConfigurationServiceJob.Start();
+                    await bessConfigurationServiceJob.StartAsync();
                 }
                 finally
                 {
@@ -167,6 +167,8 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.AddScoped<IConfigValidator, ConfigValidator>();
             serviceCollection.AddScoped<ISalesCatalogueService, SalesCatalogueService>();
             serviceCollection.AddScoped<ISalesCatalogueClient, SalesCatalogueClient>();
+            serviceCollection.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
+            serviceCollection.AddScoped<IAzureMessageQueueHelper, AzureMessageQueueHelper>();
         }
     }
 }
