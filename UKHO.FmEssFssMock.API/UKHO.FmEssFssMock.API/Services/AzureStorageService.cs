@@ -1,9 +1,9 @@
-﻿using Azure.Storage.Blobs.Models;
-using Azure.Storage.Blobs;
-using Newtonsoft.Json;
-using UKHO.FmEssFssMock.API.Models.Bess;
+﻿using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using UKHO.FmEssFssMock.API.Common;
+using UKHO.FmEssFssMock.API.Models.Bess;
 
 namespace UKHO.FmEssFssMock.API.Services
 {
@@ -16,7 +16,7 @@ namespace UKHO.FmEssFssMock.API.Services
             _bessStorageConfiguration = options.Value;
         }
 
-        public async Task<string> UploadConfigurationToBlob(List<BessConfig> bessConfig)
+        public async Task<string> UploadConfigurationToBlob(BessConfig bessConfig)
         {
             string serializeJsonObject = JsonConvert.SerializeObject(bessConfig);
             using var ms = new MemoryStream();
