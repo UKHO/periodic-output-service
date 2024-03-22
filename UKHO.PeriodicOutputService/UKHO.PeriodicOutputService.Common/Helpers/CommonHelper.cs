@@ -65,5 +65,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                     requestType, response.Result.RequestMessage.RequestUri, timespan.Add(TimeSpan.FromMilliseconds(retryAfter)).TotalMilliseconds, retryAttempt, correlationId.Value, response.Result.StatusCode);
                 });
         }
+
+        public static double ConvertBytesToMegabytes(int bytes)
+        {
+            double byteSize = 1024f;
+            return (bytes / byteSize) / byteSize;
+        }
     }
 }

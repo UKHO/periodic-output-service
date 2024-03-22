@@ -25,6 +25,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private readonly IConfiguration configuration;
         private const string UndefinedValue = "undefined";
         private readonly IConfigValidator configValidator;
+        private readonly IAzureBlobStorageService azureBlobStorageService;
         private List<string> invalidNameList = new();
         private int filesWithJsonErrorCount;
         private int configsWithDuplicateNameAttributeCount;
@@ -37,7 +38,9 @@ namespace UKHO.BESS.ConfigurationService.Services
                                     ILogger<ConfigurationService> logger,
                                     IConfigValidator configValidator,
                                     ISalesCatalogueService salesCatalogueService,
-                                    IConfiguration configuration)
+                                    IConfiguration configuration,
+                                    IAzureBlobStorageService azureBlobStorageService)
+
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
@@ -45,6 +48,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.configValidator = configValidator ?? throw new ArgumentNullException(nameof(configValidator));
             this.salesCatalogueService = salesCatalogueService ?? throw new ArgumentNullException(nameof(salesCatalogueService));
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this.azureBlobStorageService = azureBlobStorageService ?? throw new ArgumentNullException(nameof(azureBlobStorageService));
         }
 
         public void ProcessConfigs()
@@ -77,27 +81,36 @@ namespace UKHO.BESS.ConfigurationService.Services
                         deserializedConfigsCount = deserializedConfigsCount + 1;
 
                         deserializedConfig.config.FileName = fileName; //for logging
-
-                        ValidationResult results = configValidator.Validate(deserializedConfig.config);
-
-                        if (!results.IsValid)
+                        try
                         {
-                            configsWithInvalidAttributeCount = configsWithInvalidAttributeCount + 1;
+                            ValidationResult results = configValidator.Validate(deserializedConfig.config);
 
-                            var errors = new StringBuilder();
-
-                            foreach (var failure in results.Errors)
+                            if (!results.IsValid)
                             {
-                                errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
+                                configsWithInvalidAttributeCount = configsWithInvalidAttributeCount + 1;
+
+                                var errors = new StringBuilder();
+
+                                foreach (var failure in results.Errors)
+                                {
+                                    errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
+                                }
+
+                                invalidNameList.Add(deserializedConfig.config.FileName + Hyphen +
+                                                    deserializedConfig.config.Name);
+
+                                logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(),
+                                    "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}",
+                                    fileName, errors, CommonHelper.CorrelationID);
                             }
-
-                            invalidNameList.Add(deserializedConfig.config.FileName + Hyphen + deserializedConfig.config.Name);
-
-                            logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(), "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}", fileName, errors, CommonHelper.CorrelationID);
+                            else
+                            {
+                                bessConfigs.Add(deserializedConfig.config);
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            bessConfigs.Add(deserializedConfig.config);
+                            logger.LogError(EventIds.BessConfigValidationError.ToEventId(), "Error occurred while validating Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                         }
                     }
                 }
@@ -213,13 +226,32 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         int? totalFileSize = encCells.Select(i => i.Item2).Sum();
 
-                        /* -- save details to message queue --
-                         *
-                         *
-                         *
-                         */
+                        double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize!.Value);
 
-                        
+                        int BESSize = Convert.ToInt16(configuration["BESSizeInMB"]);
+
+                        if (fileSizeInMb > BESSize)
+                        {
+                            logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", Math.Round(fileSizeInMb, 2), BESSize, config.FileName, CommonHelper.CorrelationID);
+
+                            continue;
+                        }
+
+                        //--save details to message queue --
+                        IEnumerable<string> encCellNames = encCells.Select(i => i.Item1).ToList();
+
+                        var success = Task.Run(async () => await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(config, encCellNames, totalFileSize));
+
+                        //Task<bool> success = azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueue(config, encCellNames, totalFileSize);
+
+                        if (success.Result)
+                        {
+                            logger.LogInformation(EventIds.BessQueueMessageSuccessful.ToEventId(), "Queue message creation successful for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                        }
+                        else
+                        {
+                            logger.LogWarning(EventIds.BessQueueMessageFailed.ToEventId(), "Something went wrong while adding message to queue, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                        }
                     }
                     else
                     {   //Update schedule details
@@ -229,12 +261,11 @@ namespace UKHO.BESS.ConfigurationService.Services
                         }
                     }
                 }
-
                 return true;
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessConfigFrequencyProcessingException.ToEventId(), "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessConfigFrequencyProcessingException.ToEventId(), "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 return false;
             }
         }
@@ -279,6 +310,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="encCellNames"></param>
         /// <param name="salesCatalogueProducts"></param>
         /// <returns></returns>
+        [ExcludeFromCodeCoverage]
         private IEnumerable<(string, int?)> GetEncCells(IEnumerable<string> encCellNames, IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueProducts)
         {
             //filter provided prefix patterns
