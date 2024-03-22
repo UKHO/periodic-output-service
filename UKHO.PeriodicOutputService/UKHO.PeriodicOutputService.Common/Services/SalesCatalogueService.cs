@@ -16,7 +16,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthScsTokenProvider authScsTokenProvider;
         private readonly ISalesCatalogueClient salesCatalogueClient;
 
-
         public SalesCatalogueService(ILogger<SalesCatalogueService> logger,
                                      IOptions<SalesCatalogueConfiguration> salesCatalogueConfig,
                                      IAuthScsTokenProvider authScsTokenProvider,
@@ -32,7 +31,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
         {
             logger.LogInformation(EventIds.ScsGetSalesCatalogueDataRequestStarted.ToEventId(), "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            var accessToken = await authScsTokenProvider.GetManagedIdentityAuthAsync(salesCatalogueConfig.Value.ResourceId);
+            //var accessToken = await authScsTokenProvider.GetManagedIdentityAuthAsync(salesCatalogueConfig.Value.ResourceId);
+
+            var accessToken = "";
 
             var uri = $"{salesCatalogueConfig.Value.BaseUrl}/{salesCatalogueConfig.Value.Version}/productData/{salesCatalogueConfig.Value.ProductType}/catalogue/{salesCatalogueConfig.Value.CatalogueType}";
 
