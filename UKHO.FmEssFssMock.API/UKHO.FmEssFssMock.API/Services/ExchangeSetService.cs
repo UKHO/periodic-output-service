@@ -111,8 +111,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 }
 
                 BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
-                string productVersion = $"productVersion-{item.ProductName}-*-*";
-                productVersion += !string.IsNullOrEmpty(exchangeSetStandard) ? "-" + exchangeSetStandard : "";
+              string productVersion = !string.IsNullOrEmpty(exchangeSetStandard) ? $"productVersion-{item.ProductName}-{item.EditionNumber}-{item.UpdateNumber}-{exchangeSetStandard}" : $"productVersion-{item.ProductName}-*-*";
 
                 if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
                 {

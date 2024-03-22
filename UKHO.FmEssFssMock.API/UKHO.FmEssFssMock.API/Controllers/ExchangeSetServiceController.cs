@@ -73,7 +73,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
                     exchangeSetStandard = exchangeSetStandard.ToLower();
                 }
 
-                if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals("s63") || exchangeSetStandard.Equals("s57"))
+                if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals("s63") || exchangeSetStandard.Equals("s57") && !productVersionRequest.Any(i => i.EditionNumber == null && i.UpdateNumber == null))
                 {
                     ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductVersion(productVersionRequest, exchangeSetStandard);
                     if (response == null)
