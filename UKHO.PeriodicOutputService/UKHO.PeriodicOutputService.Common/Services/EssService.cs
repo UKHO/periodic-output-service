@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
@@ -31,11 +32,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
         {
             _logger.LogInformation(EventIds.PostProductIdentifiersToEssStarted.ToEventId(), "Request to post {ProductIdentifiersCount} productidentifiers to ESS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productIdentifiers.Count.ToString(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productIdentifiers";
+            string uri = GetProductIdentifierUri(_essApiConfiguration.Value.BaseUrl, exchangeSetStandard);
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
-
-            if (exchangeSetStandard != null)
-                uri += $"?exchangeSetStandard={exchangeSetStandard}";
 
             HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(uri, productIdentifiers, accessToken);
 
@@ -64,11 +62,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
         {
             _logger.LogInformation(EventIds.GetProductDataSinceDateTimeStarted.ToEventId(), "ESS request to create exchange set for data since {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData?sinceDateTime=" + sinceDateTime;
+            string uri = GetSinceDateTimeUri(_essApiConfiguration.Value.BaseUrl, sinceDateTime, exchangeSetStandard);
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
-
-            if (exchangeSetStandard != null)
-                uri += $"&exchangeSetStandard={exchangeSetStandard}";
 
             HttpResponseMessage httpResponse = await _essApiClient.GetProductDataSinceDateTime(uri, sinceDateTime, accessToken);
 
@@ -92,11 +87,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
         {
             _logger.LogInformation(EventIds.GetProductDataProductVersionStarted.ToEventId(), "ESS request to create exchange set for product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productVersions";
+            string uri = GetProductVersionUri(_essApiConfiguration.Value.BaseUrl, exchangeSetStandard);
             string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
-
-            if (exchangeSetStandard != null)
-                uri += $"?exchangeSetStandard={exchangeSetStandard}";
 
             HttpResponseMessage httpResponse = await _essApiClient.GetProductDataProductVersion(uri, productVersionsRequest.ProductVersions, accessToken);
 
@@ -114,5 +106,17 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 throw new FulfilmentException(EventIds.GetProductDataProductVersionFailed.ToEventId());
             }
         }
+
+        [ExcludeFromCodeCoverage]
+        private static string GetProductIdentifierUri(string url, string exchangeSetStandard) =>
+            !string.IsNullOrEmpty(exchangeSetStandard) ? $"{url}/productData/productIdentifiers?exchangeSetStandard={exchangeSetStandard}" : $"{url}/productData/productIdentifiers";
+
+        [ExcludeFromCodeCoverage]
+        private static string GetSinceDateTimeUri(string url, string sinceDateTime, string exchangeSetStandard) =>
+            !string.IsNullOrEmpty(exchangeSetStandard) ? $"{url}/productData?sinceDateTime={sinceDateTime}&exchangeSetStandard={exchangeSetStandard}" : $"{url}/productData?sinceDateTime={sinceDateTime}";
+
+        [ExcludeFromCodeCoverage]
+        private static string GetProductVersionUri(string url, string exchangeSetStandard) =>
+            !string.IsNullOrEmpty(exchangeSetStandard) ? $"{url}/productData/productVersions?exchangeSetStandard={exchangeSetStandard}" : $"{url}/productData/productVersions";
     }
 }
