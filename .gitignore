@@ -379,3 +379,4 @@ terraform_output.json
 /Deployment/src/APIM/.terraform.lock.hcl
 /Deployment/src/APIM/external-notification-service.openApi.yaml
 
+/UKHO.PeriodicOutputService/UKHO.BESS.BuilderService/appsettings.local.overrides.json
