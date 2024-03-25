@@ -204,4 +204,14 @@
     </notes>
     <cve>CVE-2018-8292</cve>
   </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Azure.Identity:various
+   Applies to Azure.Identity < 1.10.2
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Azure\.Identity@.*$</packageUrl>
+    <cve>CVE-2023-36415</cve>
+  </suppress>
 </suppressions>
