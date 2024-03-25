@@ -207,11 +207,10 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: Azure.Identity:various
-   Applies to Azure.Identity < 1.10.2
+   file name: Azure.Identity:1.4.0
    ]]>
     </notes>
     <packageUrl regex="true">^pkg:nuget/Azure\.Identity@.*$</packageUrl>
-    <cve>CVE-2023-36415</cve>
+    <cve>CVE-2023-36414</cve>
   </suppress>
 </suppressions>
