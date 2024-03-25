@@ -25,19 +25,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public class SCSApiConfiguration
         {
             public string? BaseUrl { get; set; }
-            public string? ResourceId { get; set; }
-            public bool IsRunningOnLocalMachine { get; set; }
         }
 
         public class ESSApiConfiguration
         {
-            public string? MicrosoftOnlineLoginUrl { get; set; }
-            public string? TenantId { get; set; }
-            public string? AutoTestClientId { get; set; }
-            public string? AutoTestClientSecret { get; set; }
             public string? BaseUrl { get; set; }
-            public string? ResourceId { get; set; }
-            public bool IsRunningOnLocalMachine { get; set; }
         }
 
         public TestConfiguration()

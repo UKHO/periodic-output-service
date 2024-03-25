@@ -4,7 +4,7 @@
     {
         static readonly HttpClient httpClient = new();
 
-        public static HttpResponseMessage ConfigureFM(string baseUrl, string configurationOption)
+        public static HttpResponseMessage ConfigureFM(string? baseUrl, string configurationOption)
         {
             string uri = $"{baseUrl}/configurefm/{configurationOption}";
 

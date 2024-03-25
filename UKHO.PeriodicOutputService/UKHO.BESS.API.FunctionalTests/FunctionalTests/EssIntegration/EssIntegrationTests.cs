@@ -9,36 +9,35 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
     public class EssIntegrationTests
     {
         static readonly TestConfiguration testConfiguration = new();
-        public DataHelper dataHelper { get; set; }
+        public DataHelper dataHelper = new();
         protected List<string> productIdentifiers = new() { "GB301910" };
         private List<ProductVersionModel>? productVersionData { get; set; }
 
         [OneTimeSetUp]
-        public async Task SetupAsync()
+        public void SetupAsync()
         {
-            dataHelper = new DataHelper();
             productVersionData = new List<ProductVersionModel>();
             HttpResponseMessage apiResponse = Extensions.ConfigureFM(testConfiguration.bessConfig.BaseUrl, "Identifiers");
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
      
         //PBI 140038
-            [Test]
-        public async Task ProductIdentifierEndPointOKRequest()
+        [Test]
+        public async Task WhenICallProductIdentifierEndpoint_ThenSuccessStatusCode200IsReturned()
         {
             HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, "s63");
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
         [Test]
-        public async Task ProductIdentifierEndPointBADRequest()
+        public async Task WhenICallProductIdentifierEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
             HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, "s57", false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
 
         [Test]
-        public async Task ProductVersionEndPointOKRequest()
+        public async Task WhenICallProductVersionEndpoint_ThenSuccessStatusCode200IsReturned()
         {
             productVersionData = new List<ProductVersionModel> {
             dataHelper.GetProductVersionData("GB301910", 1, 0)
@@ -49,7 +48,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         }
 
         [Test]
-        public async Task ProductVersionEndPointBADRequest()
+        public async Task WhenICallProductVersionEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
             productVersionData = new List<ProductVersionModel> {
             dataHelper.GetProductVersionData("GB301910", 1, 0)
