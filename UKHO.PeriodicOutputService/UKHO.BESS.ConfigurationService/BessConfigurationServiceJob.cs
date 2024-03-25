@@ -18,13 +18,13 @@ namespace UKHO.BESS.ConfigurationService
             this.configurationService = configurationService ?? throw new ArgumentNullException(nameof(configurationService));
         }
 
-        public void Start()
+        public async Task StartAsync()
         {
             try
             {
                 logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "Bess Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                configurationService.ProcessConfigs();
+                await configurationService.ProcessConfigsAsync();
 
                 logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "Bess Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
