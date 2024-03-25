@@ -73,6 +73,10 @@ namespace UKHO.BESS.ConfigurationService
                 configBuilder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
             }
 
+#if DEBUG   //Add development overrides configuration
+            configBuilder.AddJsonFile("appsettings.local.overrides.json", true, true);
+#endif
+
             string kvServiceUri = configBuilder.Build()["KeyVaultSettings:ServiceUri"];
             if (!string.IsNullOrWhiteSpace(kvServiceUri))
             {
@@ -80,10 +84,6 @@ namespace UKHO.BESS.ConfigurationService
                                                         new DefaultAzureCredentialOptions()));
                 configBuilder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
             }
-
-#if DEBUG   //Add development overrides configuration
-            configBuilder.AddJsonFile("appsettings.local.overrides.json", true, true);
-#endif
 
             //Add environment variables
             configBuilder.AddEnvironmentVariables();
