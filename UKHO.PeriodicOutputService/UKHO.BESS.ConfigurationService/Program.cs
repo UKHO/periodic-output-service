@@ -78,7 +78,6 @@ namespace UKHO.BESS.ConfigurationService
 #endif
 
             string kvServiceUri = configBuilder.Build()["KeyVaultSettings:ServiceUri"];
-            Console.WriteLine(kvServiceUri);
             if (!string.IsNullOrWhiteSpace(kvServiceUri))
             {
                 var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
@@ -96,11 +95,9 @@ namespace UKHO.BESS.ConfigurationService
         {
             serviceCollection.AddApplicationInsightsTelemetryWorkerService();
 
-            //Add logging
             serviceCollection.AddLogging(loggingBuilder =>
             {
                 loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
-
 #if DEBUG
                 loggingBuilder.AddSerilog(new LoggerConfiguration()
                     .WriteTo.File("Logs/UKHO.BESS.ConfigurationService-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
@@ -108,7 +105,6 @@ namespace UKHO.BESS.ConfigurationService
                     .MinimumLevel.Override("UKHO", LogEventLevel.Debug)
                     .CreateLogger(), dispose: true);
 #endif
-
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
 
