@@ -1,5 +1,4 @@
-﻿using System.Configuration;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -21,40 +20,32 @@ namespace UKHO.BESS.BuilderService
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         private static IConfiguration configurationBuilder;
 
-        public static async Task Main()
+        public static void Main(string[] args)
         {
-            try
-            {
-                HostBuilder hostBuilder = BuildHostConfiguration();
-                IHost host = hostBuilder.Build();
+            HostBuilder hostBuilder = BuildHostConfiguration();
+            IHost host = hostBuilder.Build();
 
-                using (host)
-                {
-                    await host.RunAsync();
-                }
-            }
-            catch (Exception ex)
+            using (host)
             {
-                Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
-                throw;
+                host.Run();
             }
         }
 
         private static HostBuilder BuildHostConfiguration()
         {
             HostBuilder hostBuilder = new();
-
             hostBuilder.ConfigureAppConfiguration((hostContext, builder) =>
             {
                 builder.AddJsonFile("appsettings.json");
                 //Add environment specific configuration files.
-                string? environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+                var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                 if (!string.IsNullOrWhiteSpace(environmentName))
                 {
                     builder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
                 }
 
-#if DEBUG   //Add development overrides configuration
+#if DEBUG
+                //Add development overrides configuration
                 builder.AddJsonFile("appsettings.local.overrides.json", true, true);
 #endif
 
@@ -69,59 +60,59 @@ namespace UKHO.BESS.BuilderService
 
                 //Add environment variables
                 builder.AddEnvironmentVariables();
+
                 configurationBuilder = builder.Build();
             })
-                 .ConfigureLogging((hostContext, loggingBuilder) =>
-                 {
-                     loggingBuilder.AddConfiguration(configurationBuilder.GetSection("Logging"));
+             .ConfigureLogging((hostContext, loggingBuilder) =>
+             {
+                 loggingBuilder.AddConfiguration(configurationBuilder.GetSection("Logging"));
+
 #if DEBUG
-                     loggingBuilder.AddSerilog(new LoggerConfiguration()
-                         .WriteTo.File("Logs/UKHO.BESS.BuilderService-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
-                         .MinimumLevel.Information()
-                         .MinimumLevel.Override("UKHO", LogEventLevel.Debug)
-                         .CreateLogger(), dispose: true);
+                 loggingBuilder.AddSerilog(new LoggerConfiguration()
+                                 .WriteTo.File("Logs/UKHO.BESS.BuilderService-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
+                                 .MinimumLevel.Information()
+                                 .MinimumLevel.Override("UKHO", LogEventLevel.Debug)
+                                 .CreateLogger(), dispose: true);
 #endif
-                     loggingBuilder.AddConsole();
-                     loggingBuilder.AddDebug();
 
-                     EventHubLoggingConfiguration eventHubConfig = configurationBuilder.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+                 loggingBuilder.AddConsole();
+                 loggingBuilder.AddDebug();
 
-                     if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
-                     {
-                         loggingBuilder.AddEventHub(config =>
-                         {
-                             config.Environment = eventHubConfig.Environment;
-                             config.DefaultMinimumLogLevel =
-                                 (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.MinimumLoggingLevel, true);
-                             config.MinimumLogLevels["UKHO"] =
-                                 (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.UkhoMinimumLoggingLevel, true);
-                             config.EventHubConnectionString = eventHubConfig.ConnectionString;
-                             config.EventHubEntityPath = eventHubConfig.EntityPath;
-                             config.System = eventHubConfig.System;
-                             config.Service = eventHubConfig.Service;
-                             config.NodeName = eventHubConfig.NodeName;
-                             config.AdditionalValuesProvider = additionalValues =>
-                             {
-                                 additionalValues["_AssemblyVersion"] = assemblyVersion;
-                             };
-                         });
-                     }
-                 })
-                 .ConfigureServices((hostContext, services) =>
+                 EventHubLoggingConfiguration eventHubConfig = configurationBuilder.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+
+                 if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
                  {
-                     services.AddApplicationInsightsTelemetryWorkerService();
-
-                     if (configurationBuilder != null)
+                     loggingBuilder.AddEventHub(config =>
                      {
-                         services.AddSingleton<IConfiguration>(configurationBuilder);
-                         services.Configure<BessStorageConfiguration>(configurationBuilder.GetSection("BessStorageConfiguration"));
-                     }
-                 })
-                 .ConfigureWebJobs(b =>
-                {
-                    b.AddAzureStorageCoreServices()
-                    .AddAzureStorageQueues();
-                });
+                         config.Environment = eventHubConfig.Environment;
+                         config.DefaultMinimumLogLevel =
+                             (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.MinimumLoggingLevel, true);
+                         config.MinimumLogLevels["UKHO"] =
+                             (LogLevel)Enum.Parse(typeof(LogLevel), eventHubConfig.UkhoMinimumLoggingLevel, true);
+                         config.EventHubConnectionString = eventHubConfig.ConnectionString;
+                         config.EventHubEntityPath = eventHubConfig.EntityPath;
+                         config.System = eventHubConfig.System;
+                         config.Service = eventHubConfig.Service;
+                         config.NodeName = eventHubConfig.NodeName;
+                         config.AdditionalValuesProvider = additionalValues =>
+                         {
+                             additionalValues["_AssemblyVersion"] = assemblyVersion;
+                         };
+                     });
+                 }
+             })
+             .ConfigureServices((hostContext, services) =>
+             {
+                 services.AddApplicationInsightsTelemetryWorkerService();
+                 services.AddSingleton<IConfiguration>(configurationBuilder);
+                 services.Configure<BessStorageConfiguration>(configurationBuilder.GetSection("BessStorageConfiguration"));
+             })
+              .ConfigureWebJobs(b =>
+              {
+                  b.AddAzureStorageCoreServices()
+                  .AddAzureStorageQueues()
+                  .AddAzureStorageBlobs();
+              });
 
             return hostBuilder;
         }
