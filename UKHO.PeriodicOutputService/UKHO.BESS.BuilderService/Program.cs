@@ -20,14 +20,22 @@ namespace UKHO.BESS.BuilderService
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         private static IConfiguration configurationBuilder;
 
-        public static void Main(string[] args)
+        public static async Task Main()
         {
-            HostBuilder hostBuilder = BuildHostConfiguration();
-            IHost host = hostBuilder.Build();
-
-            using (host)
+            try
             {
-                host.Run();
+                HostBuilder hostBuilder = BuildHostConfiguration();
+                IHost host = hostBuilder.Build();
+
+                using (host)
+                {
+                    await host.RunAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine} Stack trace: {ex.StackTrace}");
+                throw;
             }
         }
 
