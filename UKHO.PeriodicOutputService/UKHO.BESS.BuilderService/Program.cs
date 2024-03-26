@@ -58,7 +58,7 @@ namespace UKHO.BESS.BuilderService
 #endif
 
                 string kvServiceUri = builder.Build()["KeyVaultSettings:ServiceUri"];
-                Console.WriteLine(kvServiceUri);
+
                 if (!string.IsNullOrWhiteSpace(kvServiceUri))
                 {
                     var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
