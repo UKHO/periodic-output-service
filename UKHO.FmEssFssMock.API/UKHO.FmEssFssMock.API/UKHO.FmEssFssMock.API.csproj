@@ -11,6 +11,9 @@
     <NoWarn>1701;1702;8618;8602;8604;8600;8603</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="node_modules\test.json" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.19.1" />
     <PackageReference Include="FluentValidation" Version="11.9.0" />
     <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="6.0.27" />
@@ -148,7 +151,6 @@
 
   <ItemGroup>
     <Folder Include="Data\649C902D-5282-4CCF-924A-2B548EF42179\" />
-    <Folder Include="node_modules\" />
   </ItemGroup>
 
 </Project>
