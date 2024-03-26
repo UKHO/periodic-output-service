@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Azure.Storage.Queues.Models;
 using Microsoft.Azure.WebJobs;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -13,24 +12,18 @@ namespace UKHO.BESS.BuilderService
     public class BessBuilderServiceJob
     {
         private readonly ILogger<BessBuilderServiceJob> logger;
-        private IConfiguration configuration;
 
-        public BessBuilderServiceJob(ILogger<BessBuilderServiceJob> logger, IConfiguration configuration)
+        public BessBuilderServiceJob(ILogger<BessBuilderServiceJob> logger)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));   
         }
 
         public async Task ProcessQueueMessage([QueueTrigger("%BessStorageConfiguration:QueueName%")] QueueMessage message)
         {
             try
             {
-                string keyvaultUrl = configuration.GetValue<string>("KeyVaultSettings:ServiceUri");
-
-                string queueName = configuration.GetValue<string>("BessStorageConfiguration:QueueName");
-
                 logger.LogInformation(EventIds.BessBuilderServiceStarted.ToEventId(),
-                    "Bess Builder Service Started, Queuename:{Queuename}, KeyVaultUrl:{KeyVaultUrl} | _X-Correlation-ID : {CorrelationId}", queueName, keyvaultUrl, CommonHelper.CorrelationID);
+                    "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
                 ConfigQueueMessage configQueueMessage = message.Body.ToObjectFromJson<ConfigQueueMessage>();
 

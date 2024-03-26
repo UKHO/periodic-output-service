@@ -58,7 +58,6 @@ namespace UKHO.BESS.BuilderService
 #endif
 
                 string kvServiceUri = builder.Build()["KeyVaultSettings:ServiceUri"];
-                Console.WriteLine(kvServiceUri);
 
                 if (!string.IsNullOrWhiteSpace(kvServiceUri))
                 {
