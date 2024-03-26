@@ -50,7 +50,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 }
 
                 if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals("s63") || exchangeSetStandard.Equals("s57"))
-                {                    
+                {
                     ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductIdentifier(productIdentifiers, exchangeSetStandard);
                     if (response == null)
                     {
@@ -66,24 +66,31 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/ess/productData/productVersions")]
         public IActionResult PostProductVersions([FromBody] List<ProductVersionRequest> productVersionRequest, [FromQuery] string? exchangeSetStandard)
         {
-            if (productVersionRequest != null && productVersionRequest.Any())
+            try
             {
-                if (!string.IsNullOrEmpty(exchangeSetStandard))
+                if (productVersionRequest != null && productVersionRequest.Any())
                 {
-                    exchangeSetStandard = exchangeSetStandard.ToLower();
-                }
-
-                if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals("s63") || exchangeSetStandard.Equals("s57") && !productVersionRequest.Any(i => i.EditionNumber == null && i.UpdateNumber == null))
-                {
-                    ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductVersion(productVersionRequest, exchangeSetStandard);
-                    if (response == null)
+                    if (!string.IsNullOrEmpty(exchangeSetStandard))
                     {
-                        return BadRequest();
+                        exchangeSetStandard = exchangeSetStandard.ToLower();
                     }
-                    return Ok(response.ResponseBody);
+
+                    if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals("s63") || exchangeSetStandard.Equals("s57") && !productVersionRequest.Any(i => i.EditionNumber == null && i.UpdateNumber == null))
+                    {
+                        ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductVersion(productVersionRequest, exchangeSetStandard);
+                        if (response == null)
+                        {
+                            return BadRequest();
+                        }
+                        return Ok(response.ResponseBody);
+                    }
                 }
+                return BadRequest();
             }
-            return BadRequest();
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ToString());
+            }
         }
     }
 }
