@@ -47,6 +47,16 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
 
             HttpResponseMessage apiResponse = await EssEndpointHelper.ProductVersionsEndpoint(testConfiguration.authTokenConfig.BaseUrl, productVersionData, "s63", true);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+        }
+
+        [Test]
+        public async Task WhenICallEssProductVersionEndpoint_ThenSuccessStatusCode200IsReturned_test()
+        {
+            productVersionData = new List<ProductVersionModel> {
+            dataHelper.GetProductVersionData("GB301910", 1, 0)
+            };
+
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductVersionsEndpoint(testConfiguration.authTokenConfig.BaseUrl, productVersionData, "s63", true);
             apiResponse.RequestMessage.Should().Be(testConfiguration.authTokenConfig.BaseUrl);
         }
 
