@@ -18,6 +18,9 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="Data\ESS\ESSResponse.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
