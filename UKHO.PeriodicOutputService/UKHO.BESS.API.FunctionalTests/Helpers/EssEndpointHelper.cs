@@ -14,7 +14,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// </summary>
         /// <param name="baseUrl">Sets the ESS baseUrl</param>
         /// <param name="productIdentifier">Sets the products to get data</param>
-        /// <param name="exchangeSetStandard">Sets the tyoe of ES required</param>
+        /// <param name="exchangeSetStandard">Sets the type of ExchangeStandard required</param>
         /// <param name="validUri">Sets the valid or invalid uri. Default is true</param>
         /// <returns></returns>
         public static async Task<HttpResponseMessage> ProductIdentifiersEndpoint(string? baseUrl, List<string> productIdentifier, string exchangeSetStandard = "s63", bool validUri = true)
@@ -37,7 +37,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// </summary>
         /// <param name="baseUrl">Sets the ESS baseUrl</param>
         /// <param name="productVersion">Sets the product and its version to get data</param>
-        /// <param name="exchangeSetStandard">Sets the tyoe of ES required</param>
+        /// <param name="exchangeSetStandard">Sets the type of ExchangeStandard required</param>
         /// <param name="validUri">Sets the valid or invalid uri. Default is true</param>
         /// <returns></returns>
         public static async Task<HttpResponseMessage> ProductVersionsEndpoint(string? baseUrl, List<ProductVersionModel> productVersion, string exchangeSetStandard = "s63", bool validUri = true )

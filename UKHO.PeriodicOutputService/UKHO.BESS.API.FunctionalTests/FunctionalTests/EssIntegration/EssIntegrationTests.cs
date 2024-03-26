@@ -20,24 +20,26 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
             HttpResponseMessage apiResponse = Extensions.ConfigureFM(testConfiguration.bessConfig.BaseUrl, "Identifiers");
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
-     
-        //PBI 140038
+
+        //Product Backlog Item 140038: BESS BS - AD auth for ESS and FSS API
         [Test]
-        public async Task WhenICallProductIdentifierEndpoint_ThenSuccessStatusCode200IsReturned()
+        public async Task WhenICallEssProductIdentifierEndpoint_ThenSuccessStatusCode200IsReturned()
         {
             HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, "s63");
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
+        //Product Backlog Item 140038: BESS BS - AD auth for ESS and FSS API
         [Test]
-        public async Task WhenICallProductIdentifierEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
+        public async Task WhenICallEssProductIdentifierEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
             HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, "s57", false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
 
+        //Product Backlog Item 140038: BESS BS - AD auth for ESS and FSS API
         [Test]
-        public async Task WhenICallProductVersionEndpoint_ThenSuccessStatusCode200IsReturned()
+        public async Task WhenICallEssProductVersionEndpoint_ThenSuccessStatusCode200IsReturned()
         {
             productVersionData = new List<ProductVersionModel> {
             dataHelper.GetProductVersionData("GB301910", 1, 0)
@@ -47,8 +49,9 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
+        //Product Backlog Item 140038: BESS BS - AD auth for ESS and FSS API
         [Test]
-        public async Task WhenICallProductVersionEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
+        public async Task WhenICallEssProductVersionEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
             productVersionData = new List<ProductVersionModel> {
             dataHelper.GetProductVersionData("GB301910", 1, 0)
