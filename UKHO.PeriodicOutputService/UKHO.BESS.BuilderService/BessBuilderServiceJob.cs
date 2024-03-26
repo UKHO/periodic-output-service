@@ -22,15 +22,15 @@ namespace UKHO.BESS.BuilderService
         {
             try
             {
-                logger.LogInformation(EventIds.BessBuilderServiceStarted.ToEventId(),
-                    "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-
                 ConfigQueueMessage configQueueMessage = message.Body.ToObjectFromJson<ConfigQueueMessage>();
+
+                logger.LogInformation(EventIds.BessBuilderServiceStarted.ToEventId(),
+                    "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", configQueueMessage.CorrelationId);
 
                 await Task.CompletedTask; // temporary code
 
                 logger.LogInformation(EventIds.BessBuilderServiceCompleted.ToEventId(),
-                    "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                    "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", configQueueMessage.CorrelationId);
             }
             catch (Exception ex)
             {
