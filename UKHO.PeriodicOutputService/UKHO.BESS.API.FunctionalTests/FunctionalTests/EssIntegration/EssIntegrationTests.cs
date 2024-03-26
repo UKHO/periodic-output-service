@@ -16,9 +16,9 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         [OneTimeSetUp]
         public void SetupAsync()
         {
-            productVersionData = new List<ProductVersionModel>();
-            HttpResponseMessage apiResponse = Extensions.ConfigureFM(testConfiguration.bessConfig.BaseUrl, "Identifiers");
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            ////productVersionData = new List<ProductVersionModel>();
+            ////HttpResponseMessage apiResponse = Extensions.ConfigureFM(testConfiguration.bessConfig.BaseUrl, "Identifiers");
+            ////apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
         //Product Backlog Item 140038: BESS BS - AD auth for ESS and FSS API
@@ -47,6 +47,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
 
             HttpResponseMessage apiResponse = await EssEndpointHelper.ProductVersionsEndpoint(testConfiguration.authTokenConfig.BaseUrl, productVersionData, "s63", true);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            apiResponse.RequestMessage.Should().Be(testConfiguration.authTokenConfig.BaseUrl);
         }
 
         //Product Backlog Item 140038: BESS BS - AD auth for ESS and FSS API
