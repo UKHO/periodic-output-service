@@ -51,20 +51,20 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.azureBlobStorageService = azureBlobStorageService ?? throw new ArgumentNullException(nameof(azureBlobStorageService));
         }
 
-        public async Task ProcessConfigsAsync()
+        public async Task<string> ProcessConfigsAsync()
         {
-            var configsInContainer = await azureBlobStorageClient.GetConfigsInContainerAsync();
+            var configsInContainer = await azureBlobStorageClient.GetConfigsInContainerAsync().ConfigureAwait(false);
             if (!configsInContainer.Any())
             {
                 logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(), "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-                return;
+                return "Bess configs not found";
             }
 
             logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}", configsInContainer.Keys.Count, CommonHelper.CorrelationID);
 
             IList<BessConfig> bessConfigs = new List<BessConfig>();
 
-            var salesCatalogueDataResponse = await salesCatalogueService.GetSalesCatalogueDataAsync();
+            var salesCatalogueDataResponse = await salesCatalogueService.GetSalesCatalogueDataAsync().ConfigureAwait(false);
 
             int configsWithInvalidAttributeCount = 0, deserializedConfigsCount = 0;
 
@@ -126,6 +126,8 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
 
             logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+
+            return "Bess configs processing completed";
         }
 
         [ExcludeFromCodeCoverage]
@@ -206,7 +208,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {
                         logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
 
-                        await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, true);
+                        await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, true).ConfigureAwait(false);
 
                         var encCells = GetEncCells(config.EncCellNames, salesCatalogueDataProducts);
 
@@ -247,7 +249,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {   //Update schedule details
                         if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
                         {
-                            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, false);
+                            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, false).ConfigureAwait(false);
                         }
                     }
                 }
@@ -275,14 +277,14 @@ namespace UKHO.BESS.ConfigurationService.Services
         [ExcludeFromCodeCoverage]
         private async Task<ScheduleDetailEntity> GetConfigScheduleDetailAsync(DateTime nextOccurrence, BessConfig bessConfig)
         {
-            var existingScheduleDetail = await azureTableStorageHelper.GetScheduleDetailAsync(bessConfig.Name);
+            var existingScheduleDetail = await azureTableStorageHelper.GetScheduleDetailAsync(bessConfig.Name).ConfigureAwait(false);
 
             if (existingScheduleDetail != null)
             {
                 return existingScheduleDetail;
             }
 
-            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, bessConfig, false);
+            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, bessConfig, false).ConfigureAwait(false);
 
             ScheduleDetailEntity scheduleDetailEntity = new();
             {

@@ -5,7 +5,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 {
     public interface IConfigurationService
     {
-        Task ProcessConfigsAsync();
+        Task<string> ProcessConfigsAsync();
 
         Task<bool> CheckConfigFrequencyAndSaveQueueDetailsAsync(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts);
     }
