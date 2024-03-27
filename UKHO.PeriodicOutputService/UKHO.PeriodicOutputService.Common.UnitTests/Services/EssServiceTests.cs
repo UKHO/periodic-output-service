@@ -76,7 +76,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                       Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()))
                   });
 
-
             ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
@@ -109,7 +108,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                       },
                       Content = new StringContent(JsonConvert.SerializeObject(GetInValidExchangeSetGetBatchResponse()))
                   });
-
 
             ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
 
@@ -203,7 +201,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                       Headers = { Date = DateTime.UtcNow }
                   });
 
-
             ExchangeSetResponseModel response = await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"));
 
             Assert.Multiple(() =>
@@ -237,7 +234,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                       Content = new StringContent(JsonConvert.SerializeObject(GetInValidExchangeSetGetBatchResponse())),
                       Headers = { Date = DateTime.UtcNow }
                   });
-
 
             ExchangeSetResponseModel response = await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"));
             Assert.Multiple(() =>
@@ -299,7 +295,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                       Headers = { Date = DateTime.UtcNow }
                   });
 
-
             ExchangeSetResponseModel response = await _essService.GetProductDataProductVersions(new ProductVersionsRequest
             {
                 ProductVersions = new List<ProductVersion>
@@ -349,7 +344,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                      },
                      Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
                  });
-
 
             Assert.ThrowsAsync<FulfilmentException>(() => _essService.GetProductDataProductVersions(new ProductVersionsRequest
             {

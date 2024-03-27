@@ -13,6 +13,7 @@ using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 {
+    [TestFixture]
     public class SalesCatalogueServiceTests
     {
         private ILogger<SalesCatalogueService> fakeLogger;

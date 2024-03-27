@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UKHO.FmEssFssMock.API.Enums;
 using UKHO.FmEssFssMock.API.Models.Request;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.API.Services;
@@ -14,6 +15,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             _exchangeSetService = exchangeSetService;
         }
+
         [HttpPost]
         [Route("/ess/productData")]
         public IActionResult GetProductDataSinceDateTime([FromQuery] string sinceDateTime, [FromQuery] string? exchangeSetStandard)
@@ -25,7 +27,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
                     exchangeSetStandard = exchangeSetStandard.ToLower();
                 }
 
-                if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals("s63") || exchangeSetStandard.Equals("s57"))
+                if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals(ExchangeSetStandard.s63.ToString()) || exchangeSetStandard.Equals(ExchangeSetStandard.s57.ToString()))
                 {
                     ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForGetProductDataSinceDateTime(sinceDateTime, exchangeSetStandard);
                     if (response == null)
@@ -49,8 +51,8 @@ namespace UKHO.FmEssFssMock.API.Controllers
                     exchangeSetStandard = exchangeSetStandard.ToLower();
                 }
 
-                if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals("s63") || exchangeSetStandard.Equals("s57"))
-                {                    
+                if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals(ExchangeSetStandard.s63.ToString()) || exchangeSetStandard.Equals(ExchangeSetStandard.s57.ToString()))
+                {
                     ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductIdentifier(productIdentifiers, exchangeSetStandard);
                     if (response == null)
                     {
@@ -73,7 +75,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
                     exchangeSetStandard = exchangeSetStandard.ToLower();
                 }
 
-                if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals("s63") || exchangeSetStandard.Equals("s57") && !productVersionRequest.Any(i => i.EditionNumber == null && i.UpdateNumber == null))
+                if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals(ExchangeSetStandard.s63.ToString()) || exchangeSetStandard.Equals(ExchangeSetStandard.s57.ToString()) && !productVersionRequest.Any(i => i.EditionNumber == null && i.UpdateNumber == null))
                 {
                     ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductVersion(productVersionRequest, exchangeSetStandard);
                     if (response == null)
