@@ -20,20 +20,20 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public Dictionary<string, string> GetConfigsInContainer()
+        public async Task<Dictionary<string, string>> GetConfigsInContainerAsync()
         {
             Dictionary<string, string> configs = new();
 
             try
             {
-                BlobContainerClient blobContainerClient = GetBlobContainerClient();
+                BlobContainerClient blobContainerClient = await GetBlobContainerClientAsync();
 
-                foreach (BlobItem blobItem in blobContainerClient.GetBlobs())
+                await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
                 {
                     if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                     {
                         BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
-                        configs.Add(blobItem.Name, DownloadBlobContent(blobClient));
+                        configs.Add(blobItem.Name, await DownloadBlobContentAsync(blobClient));
                     }
                 }
             }
@@ -46,31 +46,29 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         //Private Methods
 
-        private BlobContainerClient GetBlobContainerClient()
+        private async Task<BlobContainerClient> GetBlobContainerClientAsync()
         {
             BlobContainerClient blobContainerClient = new(bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName);
 
-            bool isExist = blobContainerClient.Exists();
+            bool isExist = await blobContainerClient.ExistsAsync();
 
             if (!isExist)
             {
-                throw new Exception("Container does not exists");
+                throw new FulfilmentException(EventIds.BessStorageContainerDoesNotExist.ToEventId());
             }
             return blobContainerClient;
         }
 
         private static BlobClient GetBlobClient(BlobContainerClient blobContainerClient, string blobName)
         {
-            BlobClient blobClient = blobContainerClient.GetBlobClient(blobName);
-            return blobClient;
+            return blobContainerClient.GetBlobClient(blobName);
         }
 
-        private static string DownloadBlobContent(BlobClient blobClient)
+        private static async Task<string> DownloadBlobContentAsync(BlobClient blobClient)
         {
-            BlobDownloadInfo response = blobClient.DownloadAsync().Result;
-
+            BlobDownloadInfo response = await blobClient.DownloadAsync();
             using var reader = new StreamReader(response.Content);
-            return reader.ReadToEnd();
+            return await reader.ReadToEndAsync();
         }
     }
 }

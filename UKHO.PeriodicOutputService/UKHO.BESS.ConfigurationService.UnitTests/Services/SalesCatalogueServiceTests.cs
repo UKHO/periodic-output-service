@@ -74,7 +74,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 .Returns(new HttpResponseMessage() { StatusCode = statusCode, RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://abc.com") }, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(content))) });
 
             Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                 async delegate { await salesCatalogueService.GetSalesCatalogueData(); });
+                 async delegate { await salesCatalogueService.GetSalesCatalogueDataAsync(); });
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -102,7 +102,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeSalesCatalogueClient.CallSalesCatalogueServiceApi(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(httpResponse);
 
-            var response = await salesCatalogueService.GetSalesCatalogueData();
+            var response = await salesCatalogueService.GetSalesCatalogueDataAsync();
 
             response.ResponseCode.Should().Be(HttpStatusCode.OK);
             JsonConvert.SerializeObject(response.ResponseBody).Should().Be(jsonString);
@@ -146,7 +146,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 })
                 .Returns(httpResponse);
 
-            var response = await salesCatalogueService.GetSalesCatalogueData();
+            var response = await salesCatalogueService.GetSalesCatalogueDataAsync();
 
             response.ResponseCode.Should().Be(HttpStatusCode.OK);
             httpMethodParam.Should().Be(HttpMethod.Get);

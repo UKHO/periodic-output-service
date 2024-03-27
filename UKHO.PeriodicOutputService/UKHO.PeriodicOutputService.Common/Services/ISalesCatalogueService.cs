@@ -4,6 +4,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
 {
     public interface ISalesCatalogueService
     {
-        public Task<SalesCatalogueDataResponse> GetSalesCatalogueData();
+        public Task<SalesCatalogueDataResponse> GetSalesCatalogueDataAsync();
     }
 }

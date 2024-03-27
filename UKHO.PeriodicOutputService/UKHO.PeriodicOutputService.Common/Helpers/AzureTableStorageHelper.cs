@@ -78,7 +78,15 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return tableClient;
         }
 
-        public void UpsertScheduleDetail(DateTime nextSchedule, BessConfig bessConfig, bool isExecuted)
+        private async Task<TableClient> GetTableClientAsync(string tableName)
+        {
+            var serviceClient = new TableServiceClient(_azureStorageConfig.Value.ConnectionString);
+            TableClient tableClient = serviceClient.GetTableClient(tableName);
+            await tableClient.CreateIfNotExistsAsync();
+            return tableClient;
+        }
+
+        public async Task UpsertScheduleDetailAsync(DateTime nextSchedule, BessConfig bessConfig, bool isExecuted)
         {
             ScheduleDetailEntity scheduleDetailEntity = new()
             {
@@ -89,14 +97,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 IsExecuted = isExecuted
             };
 
-            TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
-            tableJobScheduleEntityClient.UpsertEntity(scheduleDetailEntity);
+            TableClient tableClient = await GetTableClientAsync(BESS_SCHEDULE_DETAILS_TABLE_NAME);
+            await tableClient.UpsertEntityAsync(scheduleDetailEntity);
         }
 
-        public ScheduleDetailEntity GetScheduleDetail(string configName)
+        public async Task<ScheduleDetailEntity> GetScheduleDetailAsync(string configName)
         {
-            TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
-            ScheduleDetailEntity scheduleDetailEntity = tableJobScheduleEntityClient.Query<ScheduleDetailEntity>().FirstOrDefault(i => i.IsEnabled.ToLower().Equals("yes") && i.IsExecuted.Equals(false) && i.RowKey.Equals(configName));
+            TableClient tableClient = await GetTableClientAsync(BESS_SCHEDULE_DETAILS_TABLE_NAME);
+            ScheduleDetailEntity scheduleDetailEntity = tableClient.Query<ScheduleDetailEntity>().FirstOrDefault(i => i.IsEnabled.ToLower().Equals("yes") && i.IsExecuted.Equals(false) && i.RowKey.Equals(configName));
             return scheduleDetailEntity;
         }
     }
