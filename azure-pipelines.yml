@@ -259,7 +259,7 @@ stages:
               command: "publish"
               publishWebProjects: false
               projects: "**/*UKHO.BESS.BuilderService.csproj"
-              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\BESSBuilderServiceWebJob'
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\continuous\BESSBuilderServiceWebJob'
               zipAfterPublish: false
               modifyOutputPath: false
 
