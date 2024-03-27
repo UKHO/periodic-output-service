@@ -6,7 +6,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
     {
         public ProductVersionModel? ProductVersionModel { get; set; }
 
-        public ProductVersionModel GetProductVersionData(string productName, int? editionNumber, int? updateNumber)
+        public ProductVersionModel GetProductVersionData(string? productName, int? editionNumber, int? updateNumber)
         {
             ProductVersionModel = new ProductVersionModel()
             {

@@ -15,6 +15,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? BaseUrl { get; set; }
             public string? ValidConfigPath { get; set; }
             public string? InvalidConfigPath { get; set; }
+            public string? s63ExchangeSetStandard { get; set; }
+            public string? s57ExchangeSetStandard { get; set; }
         }
 
         public class SharedKeyConfiguration
@@ -30,6 +32,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public class ESSApiConfiguration
         {
             public string? BaseUrl { get; set; }
+            public string? ProductName { get; set; }
+            public int? EditionNumber { get; set; }
+            public int? UpdateNumber { get; set; }
         }
 
         public TestConfiguration()

@@ -10,7 +10,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
     {
         static readonly TestConfiguration testConfiguration = new();
         public DataHelper dataHelper = new();
-        protected List<string> productIdentifiers = new() { "GB301910" };
+        protected List<string> productIdentifiers = new() { testConfiguration.authTokenConfig.ProductName };
         private List<ProductVersionModel>? productVersionData { get; set; }
 
         [OneTimeSetUp]
@@ -25,7 +25,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         [Test]
         public async Task WhenICallEssProductIdentifierEndpoint_ThenSuccessStatusCode200IsReturned()
         {
-            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, "s63");
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s63ExchangeSetStandard);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
@@ -33,7 +33,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         [Test]
         public async Task WhenICallEssProductIdentifierEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
-            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, "s57", false);
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s57ExchangeSetStandard, false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
 
@@ -42,10 +42,10 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         public async Task WhenICallEssProductVersionEndpoint_ThenSuccessStatusCode200IsReturned()
         {
             productVersionData = new List<ProductVersionModel> {
-            dataHelper.GetProductVersionData("GB301910", 1, 0)
+            dataHelper.GetProductVersionData(testConfiguration.authTokenConfig.ProductName, testConfiguration.authTokenConfig.EditionNumber, testConfiguration.authTokenConfig.UpdateNumber)
             };
 
-            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductVersionsEndpoint(testConfiguration.authTokenConfig.BaseUrl, productVersionData, "s63", true);
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductVersionsEndpoint(testConfiguration.authTokenConfig.BaseUrl, productVersionData, testConfiguration.bessConfig.s57ExchangeSetStandard, true);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
@@ -54,10 +54,10 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         public async Task WhenICallEssProductVersionEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
             productVersionData = new List<ProductVersionModel> {
-            dataHelper.GetProductVersionData("GB301910", 1, 0)
+            dataHelper.GetProductVersionData(testConfiguration.authTokenConfig.ProductName, testConfiguration.authTokenConfig.EditionNumber, testConfiguration.authTokenConfig.UpdateNumber)
             };
 
-            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductVersionsEndpoint(testConfiguration.authTokenConfig.BaseUrl, productVersionData, "s63", false);
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductVersionsEndpoint(testConfiguration.authTokenConfig.BaseUrl, productVersionData, testConfiguration.bessConfig.s63ExchangeSetStandard, false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
 
