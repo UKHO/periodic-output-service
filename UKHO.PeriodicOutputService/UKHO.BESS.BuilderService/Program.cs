@@ -9,6 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using UKHO.BESS.BuilderService.Services;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -126,6 +127,7 @@ namespace UKHO.BESS.BuilderService
 
                      services.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
                      services.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
+                     services.AddScoped<IBuilderService, Services.BuilderService>();
                      services.AddScoped<IEssService, EssService>();
                      services.AddHttpClient();
                      services.AddTransient<IEssApiClient, EssApiClient>();
