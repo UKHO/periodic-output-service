@@ -27,7 +27,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             this.salesCatalogueClient = salesCatalogueClient;
         }
 
-        public async Task<SalesCatalogueDataResponse> GetSalesCatalogueData()
+        public async Task<SalesCatalogueDataResponse> GetSalesCatalogueDataAsync()
         {
             logger.LogInformation(EventIds.ScsGetSalesCatalogueDataRequestStarted.ToEventId(), "Get catalogue data from SCS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 

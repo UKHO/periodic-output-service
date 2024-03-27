@@ -521,9 +521,9 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessConfigsProcessingCompleted = 809102,
 
         /// <summary>
-        /// 809103 - Bess configs Processing Failed
+        /// 809103 - Bess storage container does not exist.
         /// </summary>
-        BessConfigsProcessingFailed = 809103,
+        BessStorageContainerDoesNotExist = 809103,
 
         /// <summary>
         /// 809104 - Bess config value is not defined

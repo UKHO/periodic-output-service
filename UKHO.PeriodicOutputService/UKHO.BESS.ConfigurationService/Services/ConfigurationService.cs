@@ -53,87 +53,79 @@ namespace UKHO.BESS.ConfigurationService.Services
 
         public async Task ProcessConfigsAsync()
         {
-            try
+            var configsInContainer = await azureBlobStorageClient.GetConfigsInContainerAsync();
+            if (!configsInContainer.Any())
             {
-                var configsInContainer = azureBlobStorageClient.GetConfigsInContainer();
-                if (!configsInContainer.Any())
+                logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(), "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                return;
+            }
+
+            logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}", configsInContainer.Keys.Count, CommonHelper.CorrelationID);
+
+            IList<BessConfig> bessConfigs = new List<BessConfig>();
+
+            var salesCatalogueDataResponse = await salesCatalogueService.GetSalesCatalogueDataAsync();
+
+            int configsWithInvalidAttributeCount = 0, deserializedConfigsCount = 0;
+
+            foreach (string fileName in configsInContainer.Keys.ToList())
+            {
+                string content = configsInContainer[fileName];
+
+                var deserializedConfig = DeserializeConfig(content, fileName);
+
+                if (deserializedConfig.isValid)
                 {
-                    logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(), "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-                    return;
-                }
+                    deserializedConfigsCount = deserializedConfigsCount + 1;
 
-                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}", configsInContainer.Keys.Count, CommonHelper.CorrelationID);
-
-                IList<BessConfig> bessConfigs = new List<BessConfig>();
-
-                var salesCatalogueDataResponse = await salesCatalogueService.GetSalesCatalogueData();
-
-                int configsWithInvalidAttributeCount = 0, deserializedConfigsCount = 0;
-
-                foreach (string fileName in configsInContainer.Keys.ToList())
-                {
-                    string content = configsInContainer[fileName];
-
-                    var deserializedConfig = DeserializeConfig(content, fileName);
-
-                    if (deserializedConfig.isValid)
+                    deserializedConfig.config.FileName = fileName; //for logging
+                    try
                     {
-                        deserializedConfigsCount = deserializedConfigsCount + 1;
+                        ValidationResult results = configValidator.Validate(deserializedConfig.config);
 
-                        deserializedConfig.config.FileName = fileName; //for logging
-                        try
+                        if (!results.IsValid)
                         {
-                            ValidationResult results = configValidator.Validate(deserializedConfig.config);
+                            configsWithInvalidAttributeCount = configsWithInvalidAttributeCount + 1;
 
-                            if (!results.IsValid)
+                            var errors = new StringBuilder();
+
+                            foreach (var failure in results.Errors)
                             {
-                                configsWithInvalidAttributeCount = configsWithInvalidAttributeCount + 1;
-
-                                var errors = new StringBuilder();
-
-                                foreach (var failure in results.Errors)
-                                {
-                                    errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
-                                }
-
-                                invalidNameList.Add(deserializedConfig.config.FileName + Hyphen +
-                                                    deserializedConfig.config.Name);
-
-                                logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(),
-                                    "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}",
-                                    fileName, errors, CommonHelper.CorrelationID);
+                                errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
                             }
-                            else
-                            {
-                                bessConfigs.Add(deserializedConfig.config);
-                            }
+
+                            invalidNameList.Add(deserializedConfig.config.FileName + Hyphen +
+                                                deserializedConfig.config.Name);
+
+                            logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(),
+                                "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}",
+                                fileName, errors, CommonHelper.CorrelationID);
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            logger.LogError(EventIds.BessConfigValidationError.ToEventId(), "Error occurred while validating Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                            bessConfigs.Add(deserializedConfig.config);
                         }
                     }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(EventIds.BessConfigValidationError.ToEventId(), "Error occurred while validating Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                    }
                 }
+            }
 
-                RemoveDuplicateConfigs((List<BessConfig>)bessConfigs);
+            RemoveDuplicateConfigs((List<BessConfig>)bessConfigs);
 
-                int totalConfigCount = deserializedConfigsCount + filesWithJsonErrorCount;
+            int totalConfigCount = deserializedConfigsCount + filesWithJsonErrorCount;
 
-                logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
+            logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
 "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, filesWithJsonErrorCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
 
-                if (bessConfigs.Any())
-                {
-                    await CheckConfigFrequencyAndSaveQueueDetails(bessConfigs, salesCatalogueDataResponse.ResponseBody);
-                }
-
-                logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-            }
-            catch (Exception ex)
+            if (bessConfigs.Any())
             {
-                logger.LogError(EventIds.BessConfigsProcessingFailed.ToEventId(), "Bess configs processing failed with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
-                throw;
+                await CheckConfigFrequencyAndSaveQueueDetailsAsync(bessConfigs, salesCatalogueDataResponse.ResponseBody);
             }
+
+            logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
         }
 
         [ExcludeFromCodeCoverage]
@@ -197,7 +189,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="bessConfigs"></param>
         /// <param name="salesCatalogueDataProducts"></param>
         /// <returns></returns>
-        public async Task<bool> CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts)
+        public async Task<bool> CheckConfigFrequencyAndSaveQueueDetailsAsync(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts)
         {
             try
             {
@@ -208,13 +200,13 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     // Get the next occurrence of the cron expression after the last execution time
                     var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
-                    ScheduleDetailEntity existingScheduleDetail = GetScheduleDetail(nextOccurrence, config);
+                    ScheduleDetailEntity existingScheduleDetail = await GetConfigScheduleDetailAsync(nextOccurrence, config);
 
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
                         logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
 
-                        azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
+                        await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, true);
 
                         var encCells = GetEncCells(config.EncCellNames, salesCatalogueDataProducts);
 
@@ -255,7 +247,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {   //Update schedule details
                         if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
                         {
-                            azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, false);
+                            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, false);
                         }
                     }
                 }
@@ -281,16 +273,16 @@ namespace UKHO.BESS.ConfigurationService.Services
         }
 
         [ExcludeFromCodeCoverage]
-        private ScheduleDetailEntity GetScheduleDetail(DateTime nextOccurrence, BessConfig bessConfig)
+        private async Task<ScheduleDetailEntity> GetConfigScheduleDetailAsync(DateTime nextOccurrence, BessConfig bessConfig)
         {
-            var existingScheduleDetail = azureTableStorageHelper.GetScheduleDetail(bessConfig.Name);
+            var existingScheduleDetail = await azureTableStorageHelper.GetScheduleDetailAsync(bessConfig.Name);
 
             if (existingScheduleDetail != null)
             {
                 return existingScheduleDetail;
             }
 
-            azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, bessConfig, false);
+            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, bessConfig, false);
 
             ScheduleDetailEntity scheduleDetailEntity = new();
             {
