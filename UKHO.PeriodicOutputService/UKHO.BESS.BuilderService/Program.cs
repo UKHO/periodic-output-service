@@ -3,8 +3,6 @@ using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Microsoft.ApplicationInsights.Channel;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,31 +17,19 @@ namespace UKHO.BESS.BuilderService
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static readonly InMemoryChannel aiChannel = new();
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         private static IConfiguration configurationBuilder;
 
         public static async Task Main()
         {
-            int delayTime = 5000;
-
             try
             {
                 HostBuilder hostBuilder = BuildHostConfiguration();
                 IHost host = hostBuilder.Build();
 
-                try
+                using (host)
                 {
-                    using (host)
-                    {
-                        await host.RunAsync();
-                    }
-                }
-                finally
-                {
-                    //Ensure all buffered app insights logs are flushed into Azure
-                    aiChannel.Flush();
-                    await Task.Delay(delayTime);
+                    await host.RunAsync();
                 }
             }
             catch (Exception ex)
@@ -126,12 +112,6 @@ namespace UKHO.BESS.BuilderService
              .ConfigureServices((hostContext, services) =>
              {
                  services.AddApplicationInsightsTelemetryWorkerService();
-                 services.Configure<TelemetryConfiguration>(
-                     (config) =>
-                     {
-                         config.TelemetryChannel = aiChannel;
-                     }
-                 );
 
                  if (configurationBuilder != null)
                  {
