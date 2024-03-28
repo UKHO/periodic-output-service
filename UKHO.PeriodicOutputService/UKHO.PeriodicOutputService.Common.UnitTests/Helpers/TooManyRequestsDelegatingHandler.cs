@@ -1,14 +1,14 @@
 ﻿using System.Net;
 
-namespace UKHO.BESS.ConfigurationService.UnitTests.Helpers
+namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 {
-    public class ServiceUnavailableDelegatingHandler : DelegatingHandler
+    public class TooManyRequestsDelegatingHandler : DelegatingHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var httpResponse = new HttpResponseMessage();
             httpResponse.RequestMessage = new HttpRequestMessage();
-            httpResponse.StatusCode = HttpStatusCode.ServiceUnavailable;
+            httpResponse.StatusCode = HttpStatusCode.TooManyRequests;
             return Task.FromResult(httpResponse);
         }
     }

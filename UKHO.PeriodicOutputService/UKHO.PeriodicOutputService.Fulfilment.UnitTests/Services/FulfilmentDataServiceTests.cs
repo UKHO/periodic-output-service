@@ -53,7 +53,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         {
             jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
             jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
-            
+
             FleetManagerGetCatalogueResponseModel fleetManagerGetCatalogue = new()
             {
                 StatusCode = HttpStatusCode.OK,
@@ -66,10 +66,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
@@ -132,10 +132,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
@@ -175,10 +175,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
@@ -220,10 +220,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
@@ -257,10 +257,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))

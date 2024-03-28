@@ -9,8 +9,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
+using UKHO.BESS.BuilderService.Services;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.BESS.BuilderService
 {
@@ -112,11 +115,23 @@ namespace UKHO.BESS.BuilderService
              .ConfigureServices((hostContext, services) =>
              {
                  services.AddApplicationInsightsTelemetryWorkerService();
-
                  if (configurationBuilder != null)
                  {
                      services.AddSingleton<IConfiguration>(configurationBuilder);
                      services.Configure<BessStorageConfiguration>(configurationBuilder.GetSection("BessStorageConfiguration"));
+                     services.Configure<EssManagedIdentityConfiguration>(configurationBuilder.GetSection("ESSManagedIdentityConfiguration"));
+                     services.Configure<FssApiConfiguration>(configurationBuilder.GetSection("FSSApiConfiguration"));
+                     services.Configure<EssApiConfiguration>(configurationBuilder.GetSection("ESSApiConfiguration"));
+
+                     services.AddDistributedMemoryCache();
+
+                     services.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
+                     services.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
+                     services.AddScoped<IBuilderService, Services.BuilderService>();
+                     services.AddScoped<IEssService, EssService>();
+                     services.AddHttpClient();
+                     services.AddTransient<IEssApiClient, EssApiClient>();
+                     services.AddTransient<IFssApiClient, FssApiClient>();
                  }
              })
               .ConfigureWebJobs(b =>
