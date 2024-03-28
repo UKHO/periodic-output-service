@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using UKHO.BESS.ConfigurationService.Services;
+using UKHO.PeriodicOutputService.Common.Extensions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 
@@ -22,11 +23,20 @@ namespace UKHO.BESS.ConfigurationService
         {
             try
             {
-                logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "Bess Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                await logger.LogStartEndAndElapsedTimeAsync(EventIds.BessConfigurationServiceStarted,
+            EventIds.BessConfigurationServiceCompleted,
+            "Bess Configuration Service Started | _X-Correlation-ID : {CorrelationId}",
+            async () =>
+            {
+                return await configurationService.ProcessConfigsAsync();
+            },
+             CommonHelper.CorrelationID);
 
-                await configurationService.ProcessConfigsAsync();
+                //logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "Bess Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "Bess Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                //await configurationService.ProcessConfigsAsync();
+
+                //logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "Bess Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
