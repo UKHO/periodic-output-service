@@ -14,6 +14,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         private const string WEBJOB_HISTORY_TABLE_NAME = "poswebjobhistory";
         private const string AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME = "aioproductversiondetails";
         private const string BESS_SCHEDULE_DETAILS_TABLE_NAME = "bessconfigscheduledetails";
+        private const string BESS_PRODUCT_VERSION_DETAILS_TABLE_NAME = "bessproductversiondetails";
 
         private readonly IOptions<AzureStorageConfiguration> _azureStorageConfig;
 
@@ -78,6 +79,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return tableClient;
         }
 
+        private async Task<TableClient> GetTableClientAsync(string tableName)
+        {
+            var serviceClient = new TableServiceClient(_azureStorageConfig.Value.ConnectionString);
+            TableClient tableClient = serviceClient.GetTableClient(tableName);
+            await tableClient.CreateIfNotExistsAsync();
+            return tableClient;
+        }
+
         public void UpsertScheduleDetail(DateTime nextSchedule, BessConfig bessConfig, bool isExecuted)
         {
             ScheduleDetailEntity scheduleDetailEntity = new()
@@ -98,6 +107,44 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
             ScheduleDetailEntity scheduleDetailEntity = tableJobScheduleEntityClient.Query<ScheduleDetailEntity>().FirstOrDefault(i => i.IsEnabled.ToLower().Equals("yes") && i.IsExecuted.Equals(false) && i.RowKey.Equals(configName));
             return scheduleDetailEntity;
+        }
+
+        public async Task<List<BessProductVersionEntities>> GetLatestBessProductVersionDetailsAsync()
+        {
+            TableClient tableClient = await GetTableClientAsync(BESS_PRODUCT_VERSION_DETAILS_TABLE_NAME);
+            List<BessProductVersionEntities> bessProductVersionEntities = tableClient.Query<BessProductVersionEntities>().ToList();
+
+            return bessProductVersionEntities;
+        }
+
+        public async Task SaveBessProductVersionDetailsAsync(List<BessProductVersionEntities> bessProductVersions)
+        {
+            TableClient tableClient = await GetTableClientAsync(BESS_PRODUCT_VERSION_DETAILS_TABLE_NAME);
+
+            foreach (var item in bessProductVersions)
+            {
+                BessProductVersionEntities bessProductVersionEntities = tableClient
+                                                                    .Query<BessProductVersionEntities>()
+                                                                    .FirstOrDefault(p => p.Name == item.Name && p.ProductName == item.ProductName &&
+                                                                        p.EditionNumber == item.EditionNumber && p.ExchangeSetStandard == item.ExchangeSetStandard);
+
+                if (bessProductVersionEntities == null)
+                {
+                    long invertedTimeKey = DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks;
+
+                    bessProductVersionEntities = new()
+                    {
+                        PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
+                        RowKey = invertedTimeKey.ToString()
+                    };
+                }
+
+                bessProductVersionEntities.ProductName = item.ProductName;
+                bessProductVersionEntities.EditionNumber = item.EditionNumber;
+                bessProductVersionEntities.UpdateNumber = item.UpdateNumber;
+                bessProductVersionEntities.ExchangeSetStandard = item.ExchangeSetStandard;
+                await tableClient.UpsertEntityAsync(bessProductVersionEntities);
+            }
         }
     }
 }

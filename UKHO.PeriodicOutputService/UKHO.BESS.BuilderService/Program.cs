@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -14,6 +15,7 @@ using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Services;
+using UKHO.PeriodicOutputService.Common.Utilities;
 
 namespace UKHO.BESS.BuilderService
 {
@@ -132,6 +134,10 @@ namespace UKHO.BESS.BuilderService
                      services.AddHttpClient();
                      services.AddTransient<IEssApiClient, EssApiClient>();
                      services.AddTransient<IFssApiClient, FssApiClient>();
+                     services.AddScoped<IFileSystemHelper, FileSystemHelper>();
+                     services.AddScoped<IFileSystem, FileSystem>();
+                     services.AddScoped<IZipHelper, ZipHelper>();
+                     services.AddScoped<IFileUtility, FileUtility>();
                  }
              })
               .ConfigureWebJobs(b =>

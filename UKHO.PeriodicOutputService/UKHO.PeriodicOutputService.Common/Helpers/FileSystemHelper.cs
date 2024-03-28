@@ -119,9 +119,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _fileUtility.CreateXmlFile(fileContent, targetPath);
         }
 
-        public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string aioCellName)
+        public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName)
         {
-            string searchPath = $"ENC_ROOT/GB/{aioCellName}";
+            string searchPath = $"ENC_ROOT/GB/{cellName}";
             string currentPath = Path.Combine(sourcePath, searchPath);
 
             List<ProductVersion> productVersions = new();
@@ -131,7 +131,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 return productVersions;
             }
 
-            var aioFolder = _fileSystem.Directory.GetDirectories(currentPath, aioCellName, SearchOption.AllDirectories).ToList();
+            var aioFolder = _fileSystem.Directory.GetDirectories(currentPath, cellName, SearchOption.AllDirectories).ToList();
 
             if (aioFolder.Count == 0)
             {
@@ -144,7 +144,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 ProductVersion productVersion = new();
 
-                productVersion.ProductName = aioCellName;
+                productVersion.ProductName = cellName;
 
                 productVersion.EditionNumber = Convert.ToInt32(editionFolder);
 

@@ -17,5 +17,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         void UpsertScheduleDetail(DateTime nextSchedule, BessConfig bessConfig, bool isExecuted);
 
         ScheduleDetailEntity GetScheduleDetail(string configName);
+
+        Task<List<BessProductVersionEntities>> GetLatestBessProductVersionDetailsAsync();
+
+        Task SaveBessProductVersionDetailsAsync(List<BessProductVersionEntities> bessProductVersions);
     }
 }
