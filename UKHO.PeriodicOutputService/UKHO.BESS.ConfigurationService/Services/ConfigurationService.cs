@@ -51,7 +51,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.azureBlobStorageService = azureBlobStorageService ?? throw new ArgumentNullException(nameof(azureBlobStorageService));
         }
 
-        public async Task ProcessConfigsAsync()
+        public async Task<string> ProcessConfigsAsync()
         {
             try
             {
@@ -59,7 +59,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 if (!configsInContainer.Any())
                 {
                     logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(), "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-                    return;
+                    return "Bess configs not found";
                 }
 
                 logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}", configsInContainer.Keys.Count, CommonHelper.CorrelationID);
@@ -128,6 +128,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                 }
 
                 logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+
+                return "Bess configs processing completed";
             }
             catch (Exception ex)
             {
