@@ -161,5 +161,33 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             return productVersions;
         }
+
+        public bool CheckFileExists(string filePath)
+        {
+            return _fileSystem.File.Exists(filePath);
+        }
+
+        public string ReadFileText(string filePath)
+        {
+            return _fileSystem.File.ReadAllText(filePath);
+        }
+
+        public bool CreateFileContent(string filePath, string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                return false;
+            }
+            _fileSystem.File.WriteAllText(filePath, content);
+
+            return true;
+        }
+
+        public bool DeleteFile(string filePath)
+        {
+            _fileSystem.File.Delete(filePath);
+
+            return true;
+        }
     }
 }
