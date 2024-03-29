@@ -56,6 +56,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime);
                 batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime);
             }
+            else if (requestType.Equals(RequestType.BESS))
+            {
+                batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForBES);
+                batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTimeForBES);
+            }
             else
             {
                 batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForAIO);

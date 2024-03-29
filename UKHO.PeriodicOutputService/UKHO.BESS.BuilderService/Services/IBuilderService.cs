@@ -4,6 +4,6 @@ namespace UKHO.BESS.BuilderService.Services
 {
     public interface IBuilderService
     {
-        Task<string> CreateBespokeExchangeSet(ConfigQueueMessage message);
+        Task<string> CreateBespokeExchangeSet(ConfigQueueMessage configQueueMessage);
     }
 }

@@ -32,6 +32,12 @@
     <ProjectReference Include="..\UKHO.PeriodicOutputService.Common\UKHO.PeriodicOutputService.Common.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <None Update="appsettings.local.overrides.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="appsettings.local.overrides.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
