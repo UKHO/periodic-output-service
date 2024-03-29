@@ -16,7 +16,6 @@ namespace UKHO.BESS.BuilderService.Services
     {
         private readonly IEssService essService;
         private readonly IFssService fssService;
-        private readonly IConfiguration configuration;
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
 
@@ -26,20 +25,18 @@ namespace UKHO.BESS.BuilderService.Services
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
-            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-            homeDirectoryPath = Path.Combine(configuration["HOME"]);
+            homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["BespokeFolderName"]);
         }
 
-        public async Task<string> CreateBespokeExchangeSet(ConfigQueueMessage configQueueMessage)
+        public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
-            await RequestAndDownloadExchangeSet(configQueueMessage);
+            await RequestAndDownloadExchangeSetAsync(configQueueMessage);
             return "Exchange Set Created Successfully";
         }
 
-        private async Task RequestAndDownloadExchangeSet(ConfigQueueMessage configQueueMessage)
+        private async Task RequestAndDownloadExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
             ExchangeSetResponseModel exchangeSetResponseModel = new();
             if (configQueueMessage.Type == BessType.BASE.ToString())
@@ -54,10 +51,13 @@ namespace UKHO.BESS.BuilderService.Services
             string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
 
             (string essFileDownloadPath, List<FssBatchFile> essFiles) =
-                await DownloadEssExchangeSet(essBatchId, Batch.BesBaseZipBatch);
+                await DownloadEssExchangeSetAsync(essBatchId);
+
+            ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+
         }
 
-        private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId, Batch batchType)
+        private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
         {
             string downloadPath = Path.Combine(homeDirectoryPath, essBatchId);
             List<FssBatchFile> files = new();
@@ -69,7 +69,7 @@ namespace UKHO.BESS.BuilderService.Services
                 if (fssBatchStatus == FssBatchStatus.Committed)
                 {
                     fileSystemHelper.CreateDirectory(downloadPath);
-                    files = await GetBatchFiles(essBatchId);
+                    files = await GetBatchFilesAsync(essBatchId);
                     DownloadFiles(files, downloadPath);
                 }
                 else
@@ -91,7 +91,7 @@ namespace UKHO.BESS.BuilderService.Services
             return request;
         }
 
-        private async Task<List<FssBatchFile>> GetBatchFiles(string essBatchId)
+        private async Task<List<FssBatchFile>> GetBatchFilesAsync(string essBatchId)
         {
             GetBatchResponseModel batchDetail = await fssService.GetBatchDetails(essBatchId);
             List<FssBatchFile> batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href, FileSize = a.FileSize }).ToList();
@@ -110,6 +110,26 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
                 fssService.DownloadFileAsync(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
+            });
+        }
+
+        private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
+        {
+            Parallel.ForEach(fileDetails, file =>
+            {
+                try
+                {
+                    logger.LogInformation(EventIds.ExtractZipFileStarted.ToEventId(), "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                    fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
+
+                    logger.LogInformation(EventIds.ExtractZipFileCompleted.ToEventId(), "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(EventIds.ExtractZipFileFailed.ToEventId(), "Extracting zip file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                    throw;
+                }
             });
         }
     }

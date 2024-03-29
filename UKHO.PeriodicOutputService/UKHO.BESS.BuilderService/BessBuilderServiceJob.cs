@@ -30,7 +30,7 @@ namespace UKHO.BESS.BuilderService
                 logger.LogInformation(EventIds.BessBuilderServiceStarted.ToEventId(),
                     "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", configQueueMessage.CorrelationId);
 
-                await builderService.CreateBespokeExchangeSet(configQueueMessage);
+                await builderService.CreateBespokeExchangeSetAsync(configQueueMessage);
 
                 logger.LogInformation(EventIds.BessBuilderServiceCompleted.ToEventId(),
                     "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", configQueueMessage.CorrelationId);
