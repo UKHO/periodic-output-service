@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Text.RegularExpressions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -18,15 +21,19 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IFssService fssService;
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
+        private readonly IOptions<BessStorageConfiguration> bessStorageConfiguration;
 
         private readonly string homeDirectoryPath;
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IOptions<BessStorageConfiguration> bessStorageConfiguration)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.bessStorageConfiguration = bessStorageConfiguration ??
+                                            throw new ArgumentNullException(nameof(bessStorageConfiguration));
+
             homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["BespokeFolderName"]);
         }
 
@@ -55,6 +62,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
+            await CreateBESAncillaryFiles(essFileDownloadPath, configQueueMessage.Type);
         }
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
@@ -131,6 +139,53 @@ namespace UKHO.BESS.BuilderService.Services
                     throw;
                 }
             });
+        }
+
+        private async Task CreateBESAncillaryFiles(string essFileDownloadPath, string exchangeSetType)
+        {
+            string exchangeSetFolder = bessStorageConfiguration.Value.ExchangeSetFolder;
+            string exchangeSetBasePath = Path.Combine(essFileDownloadPath, exchangeSetFolder, bessStorageConfiguration.Value.EncRoot);
+            string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, exchangeSetFolder, bessStorageConfiguration.Value.Info);
+
+            string serialFilePath = Path.Combine(exchangeSetBasePath, bessStorageConfiguration.Value.SerialFileName);
+            string productFilePath = Path.Combine(exchangeSetInfoPath, bessStorageConfiguration.Value.ProductFileName);
+
+            // check serial.enc exists and do changes
+            await UpdateSerialFile(serialFilePath, exchangeSetType);
+
+            //check products.txt exists and delete, info folder delete??
+
+            await DeleteProductFile(productFilePath);
+        }
+
+        private async Task UpdateSerialFile(string serialFilePath, string exchangeSetType)
+        {
+            if (fileSystemHelper.CheckFileExists(serialFilePath))
+            {
+                string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath); //File.ReadAllText(serialFilePath);
+                string searchText = "UPDATE";
+
+                if (serialFileContent.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
+
+                    fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
+
+                    //File.WriteAllText(serialFilePath, serialFileContent);
+                }
+
+                await Task.CompletedTask;
+            }
+        }
+
+        private async Task DeleteProductFile(string productFilePath)
+        {
+            if (fileSystemHelper.CheckFileExists(productFilePath))
+            {
+                fileSystemHelper.DeleteFile(productFilePath);
+
+                await Task.CompletedTask;
+            }
         }
     }
 }
