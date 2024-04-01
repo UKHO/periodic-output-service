@@ -28,5 +28,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         bool CreateFileContent(string filePath, string content);
 
         bool DeleteFile(string file);
+
+        bool DeleteFolder(string folderPath);
     }
 }

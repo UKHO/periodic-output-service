@@ -231,6 +231,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
                 .MustHaveHappened();
 
         }
+
+        [Test]
+        public void Does_DeleteFolder_Executes_Successfully()
+        {
+            _fileSystemHelper.DeleteFolder(filePath);
+
+            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath))
+                .MustHaveHappened();
+
+        }
     }
 
     public class MockFileSystemStream : FileSystemStream

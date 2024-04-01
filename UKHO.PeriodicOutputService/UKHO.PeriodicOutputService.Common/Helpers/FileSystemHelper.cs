@@ -189,5 +189,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             return true;
         }
+        
+        public bool DeleteFolder(string folderPath)
+        {
+            _fileSystem.Directory.Delete(folderPath);
+
+            return true;
+        }
     }
 }

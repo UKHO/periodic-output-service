@@ -62,7 +62,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-            await CreateBESAncillaryFiles(essFileDownloadPath, configQueueMessage.Type);
+            await PerformBESAncillaryFilesOperations(essFileDownloadPath, configQueueMessage.Type);
         }
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
@@ -141,10 +141,10 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        private async Task CreateBESAncillaryFiles(string essFileDownloadPath, string exchangeSetType)
+        private async Task PerformBESAncillaryFilesOperations(string essFileDownloadPath, string exchangeSetType)
         {
             string exchangeSetFolder = bessStorageConfiguration.Value.ExchangeSetFolder;
-            string exchangeSetBasePath = Path.Combine(essFileDownloadPath, exchangeSetFolder, bessStorageConfiguration.Value.EncRoot);
+            string exchangeSetBasePath = Path.Combine(essFileDownloadPath, exchangeSetFolder);
             string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, exchangeSetFolder, bessStorageConfiguration.Value.Info);
 
             string serialFilePath = Path.Combine(exchangeSetBasePath, bessStorageConfiguration.Value.SerialFileName);
@@ -155,14 +155,14 @@ namespace UKHO.BESS.BuilderService.Services
 
             //check products.txt exists and delete, info folder delete??
 
-            await DeleteProductFile(productFilePath);
+            await DeleteInfoFolderContents(productFilePath, exchangeSetInfoPath);
         }
 
         private async Task UpdateSerialFile(string serialFilePath, string exchangeSetType)
         {
             if (fileSystemHelper.CheckFileExists(serialFilePath))
             {
-                string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath); //File.ReadAllText(serialFilePath);
+                string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
                 string searchText = "UPDATE";
 
                 if (serialFileContent.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) > -1)
@@ -170,19 +170,19 @@ namespace UKHO.BESS.BuilderService.Services
                     serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
 
                     fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
-
-                    //File.WriteAllText(serialFilePath, serialFileContent);
                 }
 
                 await Task.CompletedTask;
             }
         }
 
-        private async Task DeleteProductFile(string productFilePath)
+        private async Task DeleteInfoFolderContents(string productFilePath, string infoFolderPath)
         {
             if (fileSystemHelper.CheckFileExists(productFilePath))
             {
                 fileSystemHelper.DeleteFile(productFilePath);
+
+                fileSystemHelper.DeleteFolder(infoFolderPath);
 
                 await Task.CompletedTask;
             }
