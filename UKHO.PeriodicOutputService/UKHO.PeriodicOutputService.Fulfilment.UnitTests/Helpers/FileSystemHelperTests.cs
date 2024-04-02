@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using FakeItEasy;
 using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -181,6 +180,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             Length = 100000
         };
 
+        [Test]
         public void Does_ReadFileText_Executes_Successfully()
         {
             _fileSystemHelper.ReadFileText(filePath);
