@@ -402,6 +402,26 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     }
                 };
             }
+            else if (batchType == Batch.BesBaseZipBatch || batchType == Batch.BesUpdateZipBatch)
+            {
+                createBatchRequest = new()
+                {
+                    BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
+                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Acl = new Acl()
+                    {
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadUsers) ? new() : _fssApiConfiguration.Value.BessReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new() : _fssApiConfiguration.Value.BessReadGroups.Split(",").ToList(),
+                    },
+                    Attributes = new List<KeyValuePair<string, string>>
+                    {
+                        new("Product Type", "AVCS"),
+                        new("Week Number", currentWeek),
+                        new("Year", currentYear),
+                        new("Year / Week", currentYear + " / " + currentWeek)
+                    }
+                };
+            }
             else
             {
                 createBatchRequest = new()
@@ -466,7 +486,14 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
-
+                case Batch.BesBaseZipBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Bespoke Exchange Set Type", "Base"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    break;
+                case Batch.BesUpdateZipBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    break;
                 default:
                     break;
             };
