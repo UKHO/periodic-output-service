@@ -155,7 +155,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             //check products.txt exists and delete, info folder delete??
 
-            await DeleteInfoFolderContents(productFilePath, exchangeSetInfoPath);
+            await DeleteProductTxtAndInfoFolder(productFilePath, exchangeSetInfoPath);
         }
 
         private async Task UpdateSerialFile(string serialFilePath, string exchangeSetType)
@@ -170,13 +170,22 @@ namespace UKHO.BESS.BuilderService.Services
                     serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
 
                     fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
-                }
 
-                await Task.CompletedTask;
+                    logger.LogInformation(EventIds.BessSerialEncUpdated.ToEventId(), "SERIAL.ENC file updated with Type: {exchangeSetType} | _X-Correlation-ID:{CorrelationId}", exchangeSetType, CommonHelper.CorrelationID);
+                }
+                else
+                {
+                    logger.LogInformation(EventIds.BessSerialEncTypeUpdateNotFound.ToEventId(), "SERIAL.ENC file content does not have keyword 'UPDATE' | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
+                }
             }
+            else
+            {
+                logger.LogInformation(EventIds.BessSerialEncFileNotFound.ToEventId(), "SERIAL.ENC file not found | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
+            }
+            await Task.CompletedTask;
         }
 
-        private async Task DeleteInfoFolderContents(string productFilePath, string infoFolderPath)
+        private async Task DeleteProductTxtAndInfoFolder(string productFilePath, string infoFolderPath)
         {
             if (fileSystemHelper.CheckFileExists(productFilePath))
             {
@@ -184,8 +193,14 @@ namespace UKHO.BESS.BuilderService.Services
 
                 fileSystemHelper.DeleteFolder(infoFolderPath);
 
-                await Task.CompletedTask;
+                logger.LogInformation(EventIds.BessProductTxtAndInfoFolderDeleted.ToEventId(), "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
             }
+            else
+            {
+                logger.LogInformation(EventIds.BessProductTxtNotFound.ToEventId(), "PRODUCT.TXT file not found | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
+            }
+
+            await Task.CompletedTask;
         }
     }
 }

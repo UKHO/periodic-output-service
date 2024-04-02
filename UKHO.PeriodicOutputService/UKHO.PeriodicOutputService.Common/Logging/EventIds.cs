@@ -638,7 +638,32 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809126 - Message not added in the queue
         /// </summary>
-        BessQueueMessageFailed = 809126
+        BessQueueMessageFailed = 809126,
+
+        /// <summary>
+        /// 809127 - Serial.ENC file updated with Type from configuration
+        /// </summary>
+        BessSerialEncUpdated = 809127,
+
+        /// <summary>
+        /// 809128 - Serial.ENC file content does not contain keyword UPDATE
+        /// </summary>
+        BessSerialEncTypeUpdateNotFound = 809128,
+
+        /// <summary>
+        /// 809129 - Serial.ENC file was not found
+        /// </summary>
+        BessSerialEncFileNotFound = 809129,
+
+        /// <summary>
+        /// 809130 - PRODUCT.TXT file and INFO folder deleted
+        /// </summary>
+        BessProductTxtAndInfoFolderDeleted = 809130,
+
+        /// <summary>
+        /// 809131 - PRODUCT.TXT file was not found
+        /// </summary>
+        BessProductTxtNotFound = 809131
     }
 
     public static class EventIdExtensions
