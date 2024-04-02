@@ -21,14 +21,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string aioCellName);
 
-        bool CheckFileExists(string filePath);
-
         string ReadFileText(string filePath);
 
         bool CreateFileContent(string filePath, string content);
 
-        bool DeleteFile(string file);
+        void DeleteFile(string file);
 
-        bool DeleteFolder(string folderPath);
+        void DeleteFolder(string folderPath);
     }
 }

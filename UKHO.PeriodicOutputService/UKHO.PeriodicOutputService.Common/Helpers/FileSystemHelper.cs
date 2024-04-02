@@ -162,11 +162,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return productVersions;
         }
 
-        public bool CheckFileExists(string filePath)
-        {
-            return _fileSystem.File.Exists(filePath);
-        }
-
         public string ReadFileText(string filePath)
         {
             return _fileSystem.File.ReadAllText(filePath);
@@ -183,18 +178,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return true;
         }
 
-        public bool DeleteFile(string filePath)
+        public void DeleteFile(string filePath)
         {
             _fileSystem.File.Delete(filePath);
-
-            return true;
         }
-        
-        public bool DeleteFolder(string folderPath)
+
+        public void DeleteFolder(string folderPath)
         {
             _fileSystem.Directory.Delete(folderPath);
-
-            return true;
         }
     }
 }

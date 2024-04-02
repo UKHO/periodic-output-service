@@ -181,19 +181,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             Length = 100000
         };
 
-
-        [Test]
-        public void Does_CheckFileExists_Executes_Successfully()
-        {
-            A.CallTo(() => _fakefileSystem.File.Exists(filePath)).Returns(true);
-
-            _fileSystemHelper.CheckFileExists(filePath);
-
-            A.CallTo(() => _fakefileSystem.File.Exists(filePath))
-                .MustHaveHappened();
-
-        }
-
         public void Does_ReadFileText_Executes_Successfully()
         {
             _fileSystemHelper.ReadFileText(filePath);

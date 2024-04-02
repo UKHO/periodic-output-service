@@ -646,24 +646,9 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessSerialEncUpdated = 809127,
 
         /// <summary>
-        /// 809128 - Serial.ENC file content does not contain keyword UPDATE
+        /// 809128 - PRODUCT.TXT file and INFO folder deleted
         /// </summary>
-        BessSerialEncTypeUpdateNotFound = 809128,
-
-        /// <summary>
-        /// 809129 - Serial.ENC file was not found
-        /// </summary>
-        BessSerialEncFileNotFound = 809129,
-
-        /// <summary>
-        /// 809130 - PRODUCT.TXT file and INFO folder deleted
-        /// </summary>
-        BessProductTxtAndInfoFolderDeleted = 809130,
-
-        /// <summary>
-        /// 809131 - PRODUCT.TXT file was not found
-        /// </summary>
-        BessProductTxtNotFound = 809131
+        BessProductTxtAndInfoFolderDeleted = 809128
     }
 
     public static class EventIdExtensions

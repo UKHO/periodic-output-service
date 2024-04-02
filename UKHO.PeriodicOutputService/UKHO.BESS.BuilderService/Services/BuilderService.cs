@@ -62,7 +62,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-            await PerformBESAncillaryFilesOperations(essFileDownloadPath, configQueueMessage.Type);
+            await PerformAncillaryFilesOperations(essFileDownloadPath, configQueueMessage.Type);
         }
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
@@ -141,7 +141,7 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        private async Task PerformBESAncillaryFilesOperations(string essFileDownloadPath, string exchangeSetType)
+        private async Task PerformAncillaryFilesOperations(string essFileDownloadPath, string exchangeSetType)
         {
             string exchangeSetFolder = bessStorageConfiguration.Value.ExchangeSetFolder;
             string exchangeSetBasePath = Path.Combine(essFileDownloadPath, exchangeSetFolder);
@@ -150,55 +150,35 @@ namespace UKHO.BESS.BuilderService.Services
             string serialFilePath = Path.Combine(exchangeSetBasePath, bessStorageConfiguration.Value.SerialFileName);
             string productFilePath = Path.Combine(exchangeSetInfoPath, bessStorageConfiguration.Value.ProductFileName);
 
-            // check serial.enc exists and do changes
             await UpdateSerialFile(serialFilePath, exchangeSetType);
-
-            //check products.txt exists and delete, info folder delete??
 
             await DeleteProductTxtAndInfoFolder(productFilePath, exchangeSetInfoPath);
         }
 
         private async Task UpdateSerialFile(string serialFilePath, string exchangeSetType)
         {
-            if (fileSystemHelper.CheckFileExists(serialFilePath))
+            string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
+            const string searchText = "UPDATE";
+
+            if (serialFileContent.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) > -1)
             {
-                string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
-                string searchText = "UPDATE";
+                serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
 
-                if (serialFileContent.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) > -1)
-                {
-                    serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
+                fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
 
-                    fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
-
-                    logger.LogInformation(EventIds.BessSerialEncUpdated.ToEventId(), "SERIAL.ENC file updated with Type: {exchangeSetType} | _X-Correlation-ID:{CorrelationId}", exchangeSetType, CommonHelper.CorrelationID);
-                }
-                else
-                {
-                    logger.LogInformation(EventIds.BessSerialEncTypeUpdateNotFound.ToEventId(), "SERIAL.ENC file content does not have keyword 'UPDATE' | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
-                }
+                logger.LogInformation(EventIds.BessSerialEncUpdated.ToEventId(), "SERIAL.ENC file updated with Type: {exchangeSetType} | _X-Correlation-ID:{CorrelationId}", exchangeSetType, CommonHelper.CorrelationID);
             }
-            else
-            {
-                logger.LogInformation(EventIds.BessSerialEncFileNotFound.ToEventId(), "SERIAL.ENC file not found | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
-            }
+
             await Task.CompletedTask;
         }
 
         private async Task DeleteProductTxtAndInfoFolder(string productFilePath, string infoFolderPath)
         {
-            if (fileSystemHelper.CheckFileExists(productFilePath))
-            {
-                fileSystemHelper.DeleteFile(productFilePath);
+            fileSystemHelper.DeleteFile(productFilePath);
 
-                fileSystemHelper.DeleteFolder(infoFolderPath);
+            fileSystemHelper.DeleteFolder(infoFolderPath);
 
-                logger.LogInformation(EventIds.BessProductTxtAndInfoFolderDeleted.ToEventId(), "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
-            }
-            else
-            {
-                logger.LogInformation(EventIds.BessProductTxtNotFound.ToEventId(), "PRODUCT.TXT file not found | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
-            }
+            logger.LogInformation(EventIds.BessProductTxtAndInfoFolderDeleted.ToEventId(), "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
 
             await Task.CompletedTask;
         }
