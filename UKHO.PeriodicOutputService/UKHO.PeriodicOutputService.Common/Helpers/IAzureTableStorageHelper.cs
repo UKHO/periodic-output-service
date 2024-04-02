@@ -20,6 +20,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         Task<List<BessProductVersionEntities>> GetLatestBessProductVersionDetailsAsync();
 
-        Task SaveBessProductVersionDetailsAsync(List<BessProductVersionEntities> bessProductVersions);
+        Task SaveBessProductVersionDetailsAsync(List<ProductVersion> bessProductVersions, string name, string exchangeSetStandard);
     }
 }

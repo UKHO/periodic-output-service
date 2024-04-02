@@ -117,32 +117,22 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return bessProductVersionEntities;
         }
 
-        public async Task SaveBessProductVersionDetailsAsync(List<BessProductVersionEntities> bessProductVersions)
+        public async Task SaveBessProductVersionDetailsAsync(List<ProductVersion> bessProductVersions, string name, string exchangeSetStandard)
         {
             TableClient tableClient = await GetTableClientAsync(BESS_PRODUCT_VERSION_DETAILS_TABLE_NAME);
 
             foreach (var item in bessProductVersions)
             {
-                BessProductVersionEntities bessProductVersionEntities = tableClient
-                                                                    .Query<BessProductVersionEntities>()
-                                                                    .FirstOrDefault(p => p.Name == item.Name && p.ProductName == item.ProductName &&
-                                                                        p.EditionNumber == item.EditionNumber && p.ExchangeSetStandard == item.ExchangeSetStandard);
+                BessProductVersionEntities bessProductVersionEntities = new();
 
-                if (bessProductVersionEntities == null)
+                bessProductVersionEntities = new()
                 {
-                    long invertedTimeKey = DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks;
-
-                    bessProductVersionEntities = new()
-                    {
-                        PartitionKey = DateTime.UtcNow.ToString("MMyyyy"),
-                        RowKey = invertedTimeKey.ToString()
-                    };
-                }
-
-                bessProductVersionEntities.ProductName = item.ProductName;
-                bessProductVersionEntities.EditionNumber = item.EditionNumber;
-                bessProductVersionEntities.UpdateNumber = item.UpdateNumber;
-                bessProductVersionEntities.ExchangeSetStandard = item.ExchangeSetStandard;
+                    PartitionKey = name,
+                    RowKey = exchangeSetStandard + "|" + item.ProductName,
+                    ProductName = item.ProductName,
+                    EditionNumber = item.EditionNumber,
+                    UpdateNumber = item.UpdateNumber
+                };
                 await tableClient.UpsertEntityAsync(bessProductVersionEntities);
             }
         }

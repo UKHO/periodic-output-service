@@ -10,11 +10,9 @@ namespace UKHO.PeriodicOutputService.Common.Models.TableEntities
         public string PartitionKey { get; set; }
         public string RowKey { get; set; }
         public DateTimeOffset? Timestamp { get; set; } = DateTime.UtcNow;
-        public string Name { get; set; }
         public string ProductName { get; set; }
         public int EditionNumber { get; set; }
         public int UpdateNumber { get; set; }
-        public string ExchangeSetStandard { get; set; }
         public ETag ETag { get; set; }
     }
 }

@@ -36,7 +36,7 @@ namespace UKHO.BESS.BuilderService
                             "Create Bespoke Exchange Set for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",
                             async () =>
                             {
-                                return await builderService.CreateBespokeExchangeSet(configQueueMessage);
+                                return await builderService.CreateBespokeExchangeSetAsync(configQueueMessage);
                             },
                             configQueueMessage.Name, configQueueMessage.CorrelationId);
 

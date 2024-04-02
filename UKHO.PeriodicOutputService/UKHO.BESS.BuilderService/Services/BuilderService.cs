@@ -1,8 +1,13 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
+using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
+using UKHO.PeriodicOutputService.Common.Models.Fss;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
 
@@ -11,40 +16,139 @@ namespace UKHO.BESS.BuilderService.Services
     public class BuilderService : IBuilderService
     {
         private readonly IEssService essService;
-        private readonly IAzureTableStorageHelper azureTableStorageHelper;
-        private readonly ILogger<BuilderService> logger;
-        private readonly IConfiguration configuration;
+        private readonly IFssService fssService;
         private readonly IFileSystemHelper fileSystemHelper;
+        private readonly ILogger<BuilderService> logger;
+        private readonly IAzureTableStorageHelper azureTableStorageHelper;
 
-        public BuilderService(IEssService essService, IAzureTableStorageHelper azureTableStorageHelper, ILogger<BuilderService> logger, IConfiguration configuration, IFileSystemHelper fileSystemHelper)
+        private const string BESPOKE_FILE_NAME = "V01X01";
+        private readonly string homeDirectoryPath;
+
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
-            this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
-            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
+
+            homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
         }
 
-        public async Task<string> CreateBespokeExchangeSet(ConfigQueueMessage message)
+        public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
-            await essService.PostProductIdentifiersData(message.EncCellNames.ToList(), message.ExchangeSetStandard);
-
-            //_logger.LogInformation(EventIds.GetLatestProductVersionDetailsStarted.ToEventId(), "Getting latest product version details started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-            var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
-
-            var productVersions = GetBessProductVersionsFromEntities(productVersionEntities, message.EncCellNames.ToArray());
-
-            string essFileDownloadPath = "";
-
-            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, message.EncCellNames.ToArray());
-
-            //_logger.LogInformation(EventIds.GetLatestProductVersionDetailsCompleted.ToEventId(), "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
+            await RequestAndDownloadExchangeSetAsync(configQueueMessage);
             return "Exchange Set Created Successfully";
         }
 
-        private List<ProductVersion> GetBessProductVersionsFromEntities(List<BessProductVersionEntities> productVersionEntities, string[] cellNames)
+        private async Task RequestAndDownloadExchangeSetAsync(ConfigQueueMessage configQueueMessage)
+        {
+            ExchangeSetResponseModel exchangeSetResponseModel = new();
+            if (configQueueMessage.Type == BessType.BASE.ToString())
+                exchangeSetResponseModel = await essService.PostProductIdentifiersData((List<string>)configQueueMessage.EncCellNames, configQueueMessage.ExchangeSetStandard);
+            else if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
+                     configQueueMessage.Type == BessType.CHANGE.ToString())
+            {
+                var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+
+                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(), configQueueMessage.ExchangeSetStandard);
+
+                exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest()
+                {
+                    ProductVersions = productVersions
+                }, configQueueMessage.ExchangeSetStandard);
+            }
+
+            string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href!);
+
+            (string essFileDownloadPath, List<FssBatchFile> essFiles) =
+                await DownloadEssExchangeSetAsync(essBatchId);
+
+            if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
+            {
+                ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+
+                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+
+                LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+            }
+            else
+            {
+                logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(),
+                            "Batch ID found empty | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                            DateTime.UtcNow, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
+
+            }
+        }
+
+        private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
+        {
+            string downloadPath = Path.Combine(homeDirectoryPath, essBatchId);
+            List<FssBatchFile> files = new();
+
+            if (!string.IsNullOrEmpty(essBatchId))
+            {
+                FssBatchStatus fssBatchStatus = await fssService.CheckIfBatchCommitted(essBatchId, RequestType.BESS);
+
+                if (fssBatchStatus == FssBatchStatus.Committed)
+                {
+                    fileSystemHelper.CreateDirectory(downloadPath);
+                    files = await GetBatchFilesAsync(essBatchId);
+                    DownloadFiles(files, downloadPath);
+                }
+                else
+                {
+                    logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), fssBatchStatus, CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
+                }
+            }
+            return (downloadPath, files);
+        }
+
+        private async Task<List<FssBatchFile>> GetBatchFilesAsync(string essBatchId)
+        {
+            GetBatchResponseModel batchDetail = await fssService.GetBatchDetails(essBatchId);
+            List<FssBatchFile> batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href, FileSize = a.FileSize }).ToList();
+
+            if (!batchFiles.Any() || batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
+            {
+                logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.UtcNow, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.ErrorFileFoundInBatch.ToEventId());
+            }
+            return batchFiles;
+        }
+
+        private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
+        {
+            Parallel.ForEach(fileDetails, file =>
+            {
+                string filePath = Path.Combine(downloadPath, file.FileName);
+                fssService.DownloadFileAsync(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
+            });
+        }
+
+        private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
+        {
+            Parallel.ForEach(fileDetails, file =>
+            {
+                try
+                {
+                    logger.LogInformation(EventIds.ExtractZipFileStarted.ToEventId(), "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                    fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
+
+                    logger.LogInformation(EventIds.ExtractZipFileCompleted.ToEventId(), "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(EventIds.ExtractZipFileFailed.ToEventId(), "Extracting zip file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                    throw;
+                }
+            });
+        }
+
+        private List<ProductVersion> GetProductVersionsFromEntities(List<BessProductVersionEntities> productVersionEntities, string[] cellNames, string exchangeSetStandard)
         {
             List<ProductVersion> productVersions = new();
 
@@ -52,9 +156,9 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 ProductVersion productVersion = new();
 
-                var result = productVersionEntities.Where(p => p.ProductName == cellName);
+                var result = productVersionEntities.Where(p => p.ProductName == cellName && p.RowKey == exchangeSetStandard + "|" + p.ProductName);
 
-                if (result != null && result.Count() > 0)
+                if (result.Any())
                 {
                     productVersion.ProductName = result.FirstOrDefault().ProductName;
                     productVersion.EditionNumber = result.FirstOrDefault().EditionNumber;
@@ -75,19 +179,39 @@ namespace UKHO.BESS.BuilderService.Services
         private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames)
         {
             string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-            string aioInfoFolderPath = string.Format("BespokeESFromNameFromConfig", weekNumber, DateTime.UtcNow.ToString("yy"));
-            string aioExchangeSetInfoPath = Path.Combine(filePath, Path.GetFileNameWithoutExtension(aioInfoFolderPath));
+            string exchangeSetInfoPath = Path.Combine(filePath, BESPOKE_FILE_NAME);
 
-            ProductVersionsRequest productVersionsRequest = new();
-            productVersionsRequest.ProductVersions = new();
+            ProductVersionsRequest productVersionsRequest = new()
+            {
+                ProductVersions = new()
+            };
 
             foreach (var cellName in cellNames)
             {
-                var files = fileSystemHelper.GetProductVersionsFromDirectory(aioExchangeSetInfoPath, cellName);
+                var files = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetInfoPath, cellName);
 
                 productVersionsRequest.ProductVersions.AddRange(files);
             }
             return productVersionsRequest;
+        }
+
+        private void LogProductVersions(ProductVersionsRequest productVersionsRequest, string name, string exchangeSetStandard)
+        {
+            try
+            {
+                logger.LogInformation(EventIds.LoggingProductVersionsStarted.ToEventId(), "Logging product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                azureTableStorageHelper.SaveBessProductVersionDetailsAsync(productVersionsRequest.ProductVersions, name, exchangeSetStandard);
+
+                logger.LogInformation(EventIds.LoggingProductVersionsCompleted.ToEventId(), "Logging product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.LoggingProductVersionsFailed.ToEventId(), "Logging product version failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                throw new Exception($"Logging Product version failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+            }
         }
     }
 }
