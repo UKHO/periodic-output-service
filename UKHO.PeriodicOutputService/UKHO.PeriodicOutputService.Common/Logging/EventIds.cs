@@ -638,7 +638,46 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809126 - Message not added in the queue
         /// </summary>
-        BessQueueMessageFailed = 809126
+        BessQueueMessageFailed = 809126,
+        /// <summary>
+        /// 809127 - Request for searching readme.txt from file share service is started.
+        /// </summary>
+        QueryFileShareServiceReadMeFileRequestStart = 809127,
+
+        /// <summary>
+        /// 809128 - Request for searching readme.txt from file share service is completed.
+        /// </summary>
+        QueryFileShareServiceReadMeFileRequestCompleted = 809128,
+
+        /// <summary>
+        /// 809129 - Request for searching readme.txt from file share service is failed due to non ok response.
+        /// </summary>
+        QueryFileShareServiceReadMeFileNonOkResponse = 809129,
+
+        /// <summary>
+        /// 809130 - Readme.txt file is not found while searching in file share service.
+        /// </summary>
+        ReadMeTextFileNotFound = 809130,
+
+        /// <summary>
+        /// 809131 - Request for downloading readme.txt from file share service is started.
+        /// </summary>
+        DownloadReadMeFileRequestStart = 809131,
+
+        /// <summary>
+        /// 809132 - Request for downloading readme.txt from file share service is completed.
+        /// </summary>
+        DownloadReadMeFileRequestCompleted = 809132,
+
+        /// <summary>
+        /// 809133 - Request for downloading readme.txt from file share service is failed due to non ok response.
+        /// </summary>
+        DownloadReadMeFileNonOkResponse = 809133,
+
+        /// <summary>
+        /// 809134 - Completed download of 307 response README files from the file share service.
+        /// </summary>
+        DownloadReadmeFile307RedirectResponse = 809134
     }
 
     public static class EventIdExtensions

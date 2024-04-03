@@ -15,5 +15,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         public Task<bool> WriteBlockFile(string batchId, string fileName, IEnumerable<string> blockIds);
         public Task<bool> CommitBatch(string batchId, IEnumerable<string> fileNames, Batch batchType);
         Task<IEnumerable<BatchFile>> GetAioInfoFolderFilesAsync(string batchId, string correlationId);
+        Task<string> SearchReadMeFilePathAsync(string batchId, string correlationId, string readMeSearchFilter);
+        Task<bool> DownloadReadMeFileAsync(string readMeFilePath, string batchId, string exchangeSetRootPath, string correlationId);
     }
 }

@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
+using UKHO.PeriodicOutputService.Common.Extensions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
@@ -18,15 +21,17 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IFssService fssService;
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
+        private readonly IOptions<FssApiConfiguration> fssApiConfig;
 
         private readonly string homeDirectoryPath;
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IOptions<FssApiConfiguration> fssApiConfig)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
             homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["BespokeFolderName"]);
         }
 
@@ -55,6 +60,9 @@ namespace UKHO.BESS.BuilderService.Services
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
+            var exchangeSetPath = Path.Combine(homeDirectoryPath, essBatchId, fssApiConfig.Value.BespokeExchangeSetFileFolder);
+
+            await CreateBESAncillaryFilesAsync(essBatchId, exchangeSetPath, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter);
         }
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
@@ -131,6 +139,48 @@ namespace UKHO.BESS.BuilderService.Services
                     throw;
                 }
             });
+        }
+
+        private async Task CreateBESAncillaryFilesAsync(string batchId, string exchangeSetPath, string correlationId, string readMeSearchFilter)
+        {
+            var exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
+
+            if(readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
+                return;
+            if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
+             fileSystemHelper.GetBlankReadmeFile(exchangeSetRootPath);
+            else
+            await DownloadReadMeFileAsync(batchId, exchangeSetRootPath, correlationId, readMeSearchFilter);
+        }
+
+        public async Task<bool> DownloadReadMeFileAsync(string batchId, string exchangeSetRootPath, string correlationId, string readMeSearchFilter)
+        {
+            bool isDownloadReadMeFileSuccess = false;
+            string readMeFilePath = await logger.LogStartEndAndElapsedTimeAsync(EventIds.QueryFileShareServiceReadMeFileRequestStart,
+                  EventIds.QueryFileShareServiceReadMeFileRequestCompleted,
+                  "File share service search query request for readme file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
+                  async () =>
+                  {
+                      return await fssService.SearchReadMeFilePathAsync(batchId, correlationId, readMeSearchFilter);
+                  },
+               batchId, correlationId);
+
+            if (!string.IsNullOrWhiteSpace(readMeFilePath))
+            {
+                DateTime createReadMeFileTaskStartedAt = DateTime.UtcNow;
+                isDownloadReadMeFileSuccess = await logger.LogStartEndAndElapsedTimeAsync(EventIds.DownloadReadMeFileRequestStart,
+                   EventIds.DownloadReadMeFileRequestCompleted,
+                   "File share service download request for readme file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
+                   async () =>
+                   {
+                       return await fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, correlationId);
+                   },
+                batchId, correlationId);
+
+                DateTime createReadMeFileTaskCompletedAt = DateTime.UtcNow;
+            }
+
+            return isDownloadReadMeFileSuccess;
         }
     }
 }
