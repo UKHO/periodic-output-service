@@ -5,7 +5,6 @@ parameters:
     displayName: "Continue even if resources are getting destroyed"
     type: boolean
     default: false
-
   - name: disableStryker
     displayName: "Disable Stryker"
     type: boolean
@@ -45,7 +44,7 @@ variables:
 stages:
   - stage: Stryker_Mutator
     displayName: "Stryker Mutator"
-    condition: and(parameters.disableStryker)
+    condition: ${{ eq(parameters.disableStryker, false) }}
     dependsOn: []
     variables:
     - name: StrykerDotNetVersion
