@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using Microsoft.Extensions.Options;
+using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Helpers;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.Enums;
@@ -7,6 +9,7 @@ namespace UKHO.FmEssFssMock.API.Services
 {
     public class FileShareService
     {
+        private readonly IOptions<FileShareServiceConfiguration> fssConfiguration;
         private readonly string _aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";
         private readonly Dictionary<string, string> mimeTypes = new()
         {
@@ -26,6 +29,12 @@ namespace UKHO.FmEssFssMock.API.Services
                                      };
 
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
+
+        public FileShareService(IOptions<FileShareServiceConfiguration> fssConfig)
+        {
+            fssConfiguration = fssConfig;
+        }
+
         public BatchResponse CreateBatch(IEnumerable<KeyValuePair<string, string>> attributes, string homeDirectoryPath)
         {
             string attributeValue = attributes.FirstOrDefault(a => a.Key.ToLower() == "batch type").Value.ToLower();
@@ -197,10 +206,11 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private static string GetBatchStatus(string path) => File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed";
 
-        public SearchBatchResponse GetBatchResponse(string filter, string filePath, string homeDirectoryPath)
+        public SearchBatchResponse GetBatchResponse(string filter, string homeDirectoryPath)
         {
             if (filter.ToUpper().Contains("AIO CD INFO"))
             {
+                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssInfoResponseFileName);
                 FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, _aioInfoFilesBatchId));
 
                 string path = Path.Combine(Environment.CurrentDirectory, @"Data", _aioInfoFilesBatchId);
@@ -215,8 +225,14 @@ namespace UKHO.FmEssFssMock.API.Services
                         return null;
                     }
                 }
-                return FileHelper.ReadJsonFile<SearchBatchResponse>(filePath);
+                return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
             }
+            else if (filter.ToUpper().Contains("AVCS"))
+            {
+                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssReadMeResponseFileName);
+                return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
+            }
+
             return new SearchBatchResponse()
             {
                 Entries = new List<BatchDetail>(),

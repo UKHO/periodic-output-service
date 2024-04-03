@@ -1,0 +1,45 @@
+{
+    "count": 1,
+    "total": 1,
+    "entries": [
+        {
+            "batchId": "58ee085b-434f-4b6c-a73a-fa7fbb0cd224",
+            "status": "Committed",
+            "allFilesZipSize": 18138,
+            "attributes": [
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2023-06-01T08:10:45.34Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "README.txt",
+                    "fileSize": 51069,
+                    "mimeType": "text/plain",
+                    "hash": "oTOJL1Ll41MS5EJHDaLb8w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/58ee085b-434f-4b6c-a73a-fa7fbb0cd224/files/README.txt"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "_Links": {
+        "self": {
+            "href": "/batch?limit=10&start=0&$filter=%24batch%28Product%20Type%29%20eq%20%27AVCS%27%20and%20fileName%20eq%20%27README.TXT%27%20and%20businessUnit%20eq%20%27ADDS%27"
+        },
+        "first": {
+            "href": "/batch?limit=10&start=0&$filter=%24batch%28Product%20Type%29%20eq%20%27AVCS%27%20and%20fileName%20eq%20%27README.TXT%27%20and%20businessUnit%20eq%20%27ADDS%27"
+        },
+        "last": {
+            "href": "/batch?limit=10&start=0&$filter=%24batch%28Product%20Type%29%20eq%20%27AVCS%27%20and%20fileName%20eq%20%27README.TXT%27%20and%20businessUnit%20eq%20%27ADDS%27"
+        }
+    }
+}
