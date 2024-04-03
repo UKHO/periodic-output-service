@@ -204,4 +204,49 @@
     </notes>
     <cve>CVE-2018-8292</cve>
   </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Azure.Identity:1.4.0
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Azure\.Identity@.*$</packageUrl>
+    <cve>CVE-2023-36414</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+	file name: Microsoft.Extensions.Hosting.Abstractions.dll
+	See https://nvd.nist.gov/vuln/detail/CVE-2020-1147 for details on this CVE.
+	This is a temporary suppression pending a fix being available.
+	Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=58192
+	]]>
+    </notes>
+    <cve>CVE-2020-1147</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Newtonsoft.Json.Bson.dll
+   ]]>
+    </notes>
+    <cve>CVE-2024-21907</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Parallel.dll
+   Vunerability due to permissions on VoiceCommandActivity application component, no applicable.
+   ]]>
+    </notes>
+    <cve>CVE-2020-22475</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Parallel.dll
+   ]]>
+    </notes>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
 </suppressions>

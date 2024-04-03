@@ -18,7 +18,19 @@
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="Data\ESS\ESSResponse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Data\FSS\FssInfoResponse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Data\SalesCatalogueService\SCSCatalogueResponse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Data\SalesCatalogueService\SCSResponse.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -27,10 +39,19 @@
     <None Update="Data\094CDA16-FCC4-41CB-9317-BF4F26991E32\AIO.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\0D91FB1A-CBE2-4443-8F61-E9A925FA00C9\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_WK34_22_Only.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\27067A02-DF4B-49A1-8699-442B265A75D2\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\38EBEB5C-2FAA-47F5-B3AC-B196D411FA75\CommitInProgress.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\5CF9E1D7-207C-4C96-B5E7-5A519F0EA0C0\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\AIO V2 - UKHO letter for inspectors.pdf">
@@ -45,7 +66,13 @@
     <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\End-User-Licence-Agreement-for-ADMIRALTY-digital-data-services.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\7B6EDD6A-7A62-4271-A657-753F4C648531\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\7D302AD3-97C3-4108-BC8A-B19FC4920079\AIO.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\9F349E4F-A4F0-45E8-9A3A-7BAA3C561C7E\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\A1C65857-1E51-4B91-B74E-66B9BEBAF4E8\error.txt">
