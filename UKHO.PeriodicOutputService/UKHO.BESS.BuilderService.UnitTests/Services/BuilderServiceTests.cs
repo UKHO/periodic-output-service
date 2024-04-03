@@ -38,6 +38,22 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
+        public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
+        {
+            Action nullEssSerivce = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger);
+            nullEssSerivce.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("essService");
+
+            Action nullFssSerivce = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger);
+            nullFssSerivce.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fssService");
+
+            Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger);
+            nullFileSystemHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fileSystemHelper");
+
+            Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null);
+            nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
+        }
+
+        [Test]
         [TestCase("s63")]
         [TestCase("s57")]
         public async Task WhenTypeIsBase_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(string exchangeSetStandard)
@@ -128,7 +144,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetBatchResponseModelWithFileNameError());
 
             FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard)))
-                .Should().ThrowAsync<FulfilmentException>();
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -153,7 +169,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetBatchResponseModelWithFileNameError());
 
             FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard)))
-                .Should().ThrowAsync<FulfilmentException>();
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -248,10 +264,11 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(FssBatchStatus.CommitInProgress);
 
             FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard)))
-                .Should().ThrowAsync<FulfilmentException>();
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
+
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<EventId>(1) == EventIds.FssPollingCutOffTimeout.ToEventId()
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}"
@@ -271,7 +288,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(FssBatchStatus.CommitInProgress);
 
             FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard)))
-                .Should().ThrowAsync<FulfilmentException>();
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
