@@ -22,7 +22,7 @@ namespace UKHO.BESS.BuilderService.Services
 
         private readonly string homeDirectoryPath;
 
-        private const string BESSBATCHFILEEXTENSION = "zip";
+        private const string BessBatchFileExtension = "zip";
         private readonly string mimeType = "application/zip";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger)
@@ -45,13 +45,12 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
-            CreateZipFile(essFiles, essFileDownloadPath);
 
             //Temporary Upload Code
-
             #region TemporaryUploadCode
+            CreateZipFile(essFiles, essFileDownloadPath);
 
-            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, Batch.BesBaseZipBatch).Result;
+            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch).Result;
 
             // temporary logs
             if (isBatchCreated)
@@ -162,6 +161,9 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
+        //Temporary Upload Code
+        #region Create Bess Batch temporary code without unit test
+
         private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
@@ -181,9 +183,6 @@ namespace UKHO.BESS.BuilderService.Services
                 }
             });
         }
-
-        //Temporary Upload Code
-        #region Create Bess Batch temporary code without unit test
 
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType)
         {
