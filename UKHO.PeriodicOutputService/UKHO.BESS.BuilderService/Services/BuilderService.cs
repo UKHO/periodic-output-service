@@ -62,7 +62,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-            await PerformAncillaryFilesOperations(essFileDownloadPath, configQueueMessage.Type);
+            await PerformAncillaryFilesOperationsAsync(essFileDownloadPath, configQueueMessage.Type, configQueueMessage.CorrelationId);
         }
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
@@ -141,7 +141,7 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        private async Task PerformAncillaryFilesOperations(string essFileDownloadPath, string exchangeSetType)
+        private async Task PerformAncillaryFilesOperationsAsync(string essFileDownloadPath, string exchangeSetType, string correlationId)
         {
             string exchangeSetFolder = bessStorageConfiguration.Value.ExchangeSetFolder;
             string exchangeSetBasePath = Path.Combine(essFileDownloadPath, exchangeSetFolder);
@@ -150,12 +150,12 @@ namespace UKHO.BESS.BuilderService.Services
             string serialFilePath = Path.Combine(exchangeSetBasePath, bessStorageConfiguration.Value.SerialFileName);
             string productFilePath = Path.Combine(exchangeSetInfoPath, bessStorageConfiguration.Value.ProductFileName);
 
-            await UpdateSerialFile(serialFilePath, exchangeSetType);
+            await UpdateSerialFileAsync(serialFilePath, exchangeSetType, correlationId);
 
-            await DeleteProductTxtAndInfoFolder(productFilePath, exchangeSetInfoPath);
+            await DeleteProductTxtAndInfoFolderAsync(productFilePath, exchangeSetInfoPath, correlationId);
         }
 
-        private async Task UpdateSerialFile(string serialFilePath, string exchangeSetType)
+        private async Task UpdateSerialFileAsync(string serialFilePath, string exchangeSetType, string correlationId)
         {
             string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
             const string searchText = "UPDATE";
@@ -166,19 +166,19 @@ namespace UKHO.BESS.BuilderService.Services
 
                 fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
 
-                logger.LogInformation(EventIds.BessSerialEncUpdated.ToEventId(), "SERIAL.ENC file updated with Type: {exchangeSetType} | _X-Correlation-ID:{CorrelationId}", exchangeSetType, CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessSerialEncUpdated.ToEventId(), "SERIAL.ENC file updated with Type: {exchangeSetType} | _X-Correlation-ID:{CorrelationId}", exchangeSetType, correlationId);
             }
 
             await Task.CompletedTask;
         }
 
-        private async Task DeleteProductTxtAndInfoFolder(string productFilePath, string infoFolderPath)
+        private async Task DeleteProductTxtAndInfoFolderAsync(string productFilePath, string infoFolderPath, string correlationId)
         {
             fileSystemHelper.DeleteFile(productFilePath);
 
             fileSystemHelper.DeleteFolder(infoFolderPath);
 
-            logger.LogInformation(EventIds.BessProductTxtAndInfoFolderDeleted.ToEventId(), "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}", CommonHelper.CorrelationID);
+            logger.LogInformation(EventIds.BessProductTxtAndInfoFolderDeleted.ToEventId(), "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}", correlationId);
 
             await Task.CompletedTask;
         }
