@@ -45,7 +45,7 @@ variables:
 stages:
   - stage: Stryker_Mutator
     displayName: "Stryker Mutator"
-    condition: and(disableStryker)
+    condition: and(parameters.disableStryker)
     dependsOn: []
     variables:
     - name: StrykerDotNetVersion
