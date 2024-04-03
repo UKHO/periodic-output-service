@@ -45,7 +45,7 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
-            //CreateZipFile(essFiles, essFileDownloadPath);
+            CreateZipFile(essFiles, essFileDownloadPath);
 
             //Temporary Upload Code
 
