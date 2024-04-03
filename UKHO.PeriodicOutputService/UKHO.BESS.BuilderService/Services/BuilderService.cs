@@ -36,30 +36,22 @@ namespace UKHO.BESS.BuilderService.Services
 
         public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
-            await RequestAndDownloadExchangeSetAsync(configQueueMessage);
-            return "Exchange Set Created Successfully";
-        }
+            string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
+            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
 
-        private async Task RequestAndDownloadExchangeSetAsync(ConfigQueueMessage configQueueMessage)
-        {
-            ExchangeSetResponseModel exchangeSetResponseModel = new();
-            if (configQueueMessage.Type == BessType.BASE.ToString())
-                exchangeSetResponseModel = await essService.PostProductIdentifiersData((List<string>)configQueueMessage.EncCellNames, configQueueMessage.ExchangeSetStandard);
-            else if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
-                     configQueueMessage.Type == BessType.CHANGE.ToString())
+            if (string.IsNullOrEmpty(essFileDownloadPath) || essFiles.Count == 0)
             {
-                ProductVersionsRequest productVersionsRequest = GetProductVersionDetails(configQueueMessage.EncCellNames);
-                exchangeSetResponseModel = await essService.GetProductDataProductVersions(productVersionsRequest, configQueueMessage.ExchangeSetStandard);
+                return "Exchange Set Not Created";
             }
-            string essBatchId = CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
-            (string essFileDownloadPath, List<FssBatchFile> essFiles) =
-                await DownloadEssExchangeSetAsync(essBatchId);
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+            //CreateZipFile(essFiles, essFileDownloadPath);
 
-            CreateZipFile(essFiles, essFileDownloadPath);
+            //Temporary Upload Code
 
-            var isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, Batch.BesBaseZipBatch).Result;
+            #region TemporaryUploadCode
+
+            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, Batch.BesBaseZipBatch).Result;
 
             // temporary logs
             if (isBatchCreated)
@@ -70,7 +62,26 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Bess Base batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
             }
+
+            #endregion TemporaryUploadCode
+
+            return "Exchange Set Created Successfully";
         }
+
+        private async Task<string> RequestExchangeSetAsync(ConfigQueueMessage configQueueMessage)
+        {
+            ExchangeSetResponseModel exchangeSetResponseModel = new();
+            if (configQueueMessage.Type == BessType.BASE.ToString())
+                exchangeSetResponseModel = await essService.PostProductIdentifiersData((List<string>)configQueueMessage.EncCellNames, configQueueMessage.ExchangeSetStandard);
+            else if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
+                     configQueueMessage.Type == BessType.CHANGE.ToString())
+            {
+                ProductVersionsRequest productVersionsRequest = GetProductVersionDetails(configQueueMessage.EncCellNames);
+                exchangeSetResponseModel = await essService.GetProductDataProductVersions(productVersionsRequest, configQueueMessage.ExchangeSetStandard);
+            }
+            return CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
+        }
+
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
         {
             string downloadPath = Path.Combine(homeDirectoryPath, essBatchId);
@@ -97,7 +108,11 @@ namespace UKHO.BESS.BuilderService.Services
 
         private ProductVersionsRequest GetProductVersionDetails(IEnumerable<string> encCellNames)
         {
-            ProductVersionsRequest request = new();
+            ProductVersionsRequest request = new()
+            {
+                ProductVersions = new List<ProductVersion>()
+            };
+
             foreach (string item in encCellNames)
             {
                 request.ProductVersions.Add(new ProductVersion { ProductName = item, EditionNumber = 0, UpdateNumber = 0 });
@@ -167,7 +182,9 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
+        //Temporary Upload Code
         #region Create Bess Batch temporary code without unit test
+
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType)
         {
             bool isCommitted = false;
