@@ -51,7 +51,7 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
-                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(), configQueueMessage.ExchangeSetStandard);
+                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(), configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
 
                 exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest()
                 {
@@ -148,7 +148,7 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        private List<ProductVersion> GetProductVersionsFromEntities(List<BessProductVersionEntities> productVersionEntities, string[] cellNames, string exchangeSetStandard)
+        private List<ProductVersion> GetProductVersionsFromEntities(List<BessProductVersionEntities> productVersionEntities, string[] cellNames, string configName, string exchangeSetStandard)
         {
             List<ProductVersion> productVersions = new();
 
@@ -156,7 +156,7 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 ProductVersion productVersion = new();
 
-                var result = productVersionEntities.Where(p => p.ProductName == cellName && p.RowKey == exchangeSetStandard + "|" + p.ProductName);
+                var result = productVersionEntities.Where(p => p.PartitionKey == configName && p.ProductName == cellName && p.RowKey == exchangeSetStandard + "|" + p.ProductName);
 
                 if (result.Any())
                 {
@@ -178,8 +178,7 @@ namespace UKHO.BESS.BuilderService.Services
 
         private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames)
         {
-            string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-            string exchangeSetInfoPath = Path.Combine(filePath, BESPOKE_FILE_NAME);
+            string exchangeSetPath = Path.Combine(filePath, BESPOKE_FILE_NAME);
 
             ProductVersionsRequest productVersionsRequest = new()
             {
@@ -188,9 +187,9 @@ namespace UKHO.BESS.BuilderService.Services
 
             foreach (var cellName in cellNames)
             {
-                var files = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetInfoPath, cellName);
+                var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath, cellName);
 
-                productVersionsRequest.ProductVersions.AddRange(files);
+                productVersionsRequest.ProductVersions.AddRange(productVersions);
             }
             return productVersionsRequest;
         }
