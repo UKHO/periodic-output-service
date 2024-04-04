@@ -46,9 +46,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             Action nullFssSerivce = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger);
             nullFssSerivce.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fssService");
 
-            Action nullConfiguration = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, null, fakeFileSystemHelper, fakeLogger);
-            nullConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
-
             Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger);
             nullFileSystemHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fileSystemHelper");
 
@@ -185,6 +182,54 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase("s63")]
         [TestCase("s57")]
+        public void WhenTypeIsBaseAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(string exchangeSetStandard)
+        {
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+                .Returns(GetValidExchangeSetGetBatchResponse());
+            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
+              .Returns(GetBatchResponseModelWithNoBatchFiles());
+
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard)))
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<EventId>(1) == EventIds.ErrorFileFoundInBatch.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Either no files found or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        [TestCase("UPDATE", "s63")]
+        [TestCase("UPDATE", "s57")]
+        [TestCase("CHANGE", "s63")]
+        [TestCase("CHANGE", "s57")]
+        public void WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(string type, string exchangeSetStandard)
+        {
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
+            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
+              .Returns(GetBatchResponseModelWithNoBatchFiles());
+
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard)))
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<EventId>(1) == EventIds.ErrorFileFoundInBatch.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Either no files found or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        [TestCase("s63")]
+        [TestCase("s57")]
         public void WhenTypeIsBaseAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(string exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
@@ -196,7 +241,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
             FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard)))
-                .Should().ThrowAsync<Exception>();
+                .Should().ThrowAsync<Exception>().WithMessage("Extracting zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}");
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -234,7 +279,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
             FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard)))
-                .Should().ThrowAsync<Exception>();
+                .Should().ThrowAsync<Exception>().WithMessage("Extracting zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}");
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -387,6 +432,12 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                    }
                }
             }
+        };
+
+        private static GetBatchResponseModel GetBatchResponseModelWithNoBatchFiles() => new()
+        {
+            BatchId = Guid.NewGuid().ToString(),
+            Files = new List<BatchFile>()
         };
         #endregion PrivateMethods
     }
