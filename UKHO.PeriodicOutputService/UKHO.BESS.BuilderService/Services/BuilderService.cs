@@ -91,7 +91,10 @@ namespace UKHO.BESS.BuilderService.Services
 
         private ProductVersionsRequest GetProductVersionDetails(IEnumerable<string> encCellNames)
         {
-            ProductVersionsRequest request = new();
+            ProductVersionsRequest request = new()
+            {
+                ProductVersions = new List<ProductVersion>()
+            };
             foreach (string item in encCellNames)
             {
                 request.ProductVersions.Add(new ProductVersion { ProductName = item, EditionNumber = 0, UpdateNumber = 0 });
