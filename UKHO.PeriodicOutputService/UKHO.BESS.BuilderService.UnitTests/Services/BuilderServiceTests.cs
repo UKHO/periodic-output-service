@@ -73,7 +73,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                .MustHaveHappenedOnceOrMore();
             A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
-            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
+            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>

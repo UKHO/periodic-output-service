@@ -1,8 +1,8 @@
-﻿using System.IO.Abstractions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
-using UKHO.PeriodicOutputService.Common.Extensions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
@@ -158,7 +158,7 @@ namespace UKHO.BESS.BuilderService.Services
 
         //Temporary Upload Code
         #region Create Bess Batch temporary code
-
+        [ExcludeFromCodeCoverage]
         private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
@@ -199,6 +199,7 @@ namespace UKHO.BESS.BuilderService.Services
             return isCommitted;
         }
 
+        [ExcludeFromCodeCoverage]
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
         {
             Parallel.ForEach(filePaths, filePath =>
