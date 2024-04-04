@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
+using UKHO.PeriodicOutputService.Common.Extensions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
@@ -38,11 +39,6 @@ namespace UKHO.BESS.BuilderService.Services
         {
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
-
-            if (string.IsNullOrEmpty(essFileDownloadPath) || essFiles.Count == 0)
-            {
-                return "Exchange Set Not Created";
-            }
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
@@ -84,24 +80,22 @@ namespace UKHO.BESS.BuilderService.Services
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
         {
             string downloadPath = Path.Combine(homeDirectoryPath, essBatchId);
-            List<FssBatchFile> files = new();
+            List<FssBatchFile> files;
 
-            if (!string.IsNullOrEmpty(essBatchId))
+            FssBatchStatus fssBatchStatus = await fssService.CheckIfBatchCommitted(essBatchId, RequestType.BESS);
+
+            if (fssBatchStatus == FssBatchStatus.Committed)
             {
-                FssBatchStatus fssBatchStatus = await fssService.CheckIfBatchCommitted(essBatchId, RequestType.BESS);
-
-                if (fssBatchStatus == FssBatchStatus.Committed)
-                {
-                    fileSystemHelper.CreateDirectory(downloadPath);
-                    files = await GetBatchFilesAsync(essBatchId);
-                    DownloadFiles(files, downloadPath);
-                }
-                else
-                {
-                    logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), fssBatchStatus, CommonHelper.CorrelationID);
-                    throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
-                }
+                fileSystemHelper.CreateDirectory(downloadPath);
+                files = await GetBatchFilesAsync(essBatchId);
+                DownloadFiles(files, downloadPath);
             }
+            else
+            {
+                logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), fssBatchStatus, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
+            }
+
             return (downloadPath, files);
         }
 
@@ -124,12 +118,13 @@ namespace UKHO.BESS.BuilderService.Services
             GetBatchResponseModel batchDetail = await fssService.GetBatchDetails(essBatchId);
             List<FssBatchFile> batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href, FileSize = a.FileSize }).ToList();
 
-            if (!batchFiles.Any() || batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
+            if (batchFiles.Any() && !batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
             {
-                logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.UtcNow, CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.ErrorFileFoundInBatch.ToEventId());
+                return batchFiles;
             }
-            return batchFiles;
+
+            logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.UtcNow, CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.ErrorFileFoundInBatch.ToEventId());
         }
 
         private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
@@ -156,13 +151,13 @@ namespace UKHO.BESS.BuilderService.Services
                 catch (Exception ex)
                 {
                     logger.LogError(EventIds.ExtractZipFileFailed.ToEventId(), "Extracting zip file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
-                    throw;
+                    throw new Exception($"Extracting zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
                 }
             });
         }
 
         //Temporary Upload Code
-        #region Create Bess Batch temporary code without unit test
+        #region Create Bess Batch temporary code
 
         private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
         {
@@ -186,20 +181,18 @@ namespace UKHO.BESS.BuilderService.Services
 
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType)
         {
-            bool isCommitted = false;
-
+            bool isCommitted;
             try
             {
                 string batchId = await fssService.CreateBatch(batchType);
-                IEnumerable<string> filePaths =
-                    fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                IEnumerable<string> filePaths = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePaths, batchId, batchType);
                 isCommitted = await fssService.CommitBatch(batchId, filePaths, batchType);
                 logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Batch added to FSS. BatchId: {batchId} and status: {isCommitted}", batchId, isCommitted);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Batch create failed.");
+                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Batch create failed with Exception : {ex}", ex);
                 throw;
             }
 

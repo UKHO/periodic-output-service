@@ -638,7 +638,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809126 - Message not added in the queue
         /// </summary>
-        BessQueueMessageFailed = 809126
+        BessQueueMessageFailed = 809126,
+
+        /// <summary>
+        /// 809127 - Create bespoke exchange set is started.
+        /// </summary>
+        CreateBespokeExchangeSetRequestStart = 809127,
+
+        /// <summary>
+        /// 809128 - Create bespoke exchange set is completed.
+        /// </summary>
+        CreateBespokeExchangeSetRequestCompleted = 809128
     }
 
     public static class EventIdExtensions
