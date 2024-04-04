@@ -37,6 +37,7 @@ namespace UKHO.BESS.BuilderService.Services
 
         public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
+            CommonHelper.CorrelationID = Guid.Parse(configQueueMessage.CorrelationId);
             await RequestAndDownloadExchangeSetAsync(configQueueMessage);
             return "Exchange Set Created Successfully";
         }
@@ -62,7 +63,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             var exchangeSetPath = Path.Combine(homeDirectoryPath, essBatchId, fssApiConfig.Value.BespokeExchangeSetFileFolder);
 
-            await CreateBESAncillaryFilesAsync(essBatchId, exchangeSetPath, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter);
+            await PerformAncillaryFilesOperationsAsync(essBatchId, exchangeSetPath, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter);
         }
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
@@ -141,16 +142,17 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        private async Task CreateBESAncillaryFilesAsync(string batchId, string exchangeSetPath, string correlationId, string readMeSearchFilter)
+        private async Task PerformAncillaryFilesOperationsAsync(string batchId, string exchangeSetPath, string correlationId, string readMeSearchFilter)
         {
             var exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
+            var readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
 
-            if(readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
+            if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
                 return;
-            if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
-             fileSystemHelper.GetBlankReadmeFile(exchangeSetRootPath);
+            else if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
+                fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
             else
-            await DownloadReadMeFileAsync(batchId, exchangeSetRootPath, correlationId, readMeSearchFilter);
+                await DownloadReadMeFileAsync(batchId, exchangeSetRootPath, correlationId, readMeSearchFilter);
         }
 
         public async Task<bool> DownloadReadMeFileAsync(string batchId, string exchangeSetRootPath, string correlationId, string readMeSearchFilter)

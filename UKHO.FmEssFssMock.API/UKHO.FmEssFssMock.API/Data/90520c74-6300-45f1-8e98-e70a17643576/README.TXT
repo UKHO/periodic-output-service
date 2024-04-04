@@ -1,16 +1,14 @@
 AVCS README
-File date: 2024-04-04 09:59:14Z
-This file Version 20230531-01 was last updated 31-May-2023
+File date: 2024-03-19 06:07:31Z
+This file Version 20220818-01 was last updated 18-Aug-2022
 
 Latest significant changes:
-31-May-2023  COMPLIANCE STATEMENT ADDED TO SECTION 1; ADDED D2 INFORMATION
-26-Jan-2023  NUMBER OF PERMITTED INSTALLATIONS UPDATED
-08-Dec-2022  ADDED RECENT NEW PRODUCERS TO PERMITTED INSTALLATIONS LIST
-20-Oct-2022  ALBANIAN ENCs ADVICE FOR JRC USERS IS RESOLVED
 18-Aug-2022  EXTRA CONTOURS IN HIGH DENSITY ENCs
 21-Jul-2022  DISPLAY ISSUE WITH ALBANIAN AL ENCs ON JRC ECDIS
 05-May-2022  COMBINED AVCS AND AIO README FILES AND GENERAL UPDATES
-
+18-Mar-2022  INFORMATION IN UKRAINE WATERS
+07-Jan-2022  DISPLAY OF PG AND SB ENCS ON ONE TRANSAS ECDIS
+25-Nov-2021  NEW HEADER FORMAT AND INFORMATION ABOUT ADMIRALTY DIGITAL DELIVERY SERVICE
 
 ---------------------
 
@@ -26,18 +24,20 @@ Later versions of the README.TXT file and later date/time stamps may be included
 ---------------------
 
 CONTENTS:
-SECTION 1 - IMPORTANT GENERAL INFORMATION - Updated 31-May-2023
-SECTION 2 - HYDROGRAPHIC OFFICES¬¥ INFORMATION - Updated 31-May-2023
+SECTION 1 - IMPORTANT GENERAL INFORMATION - Updated 18-Aug-2022
+SECTION 2 - HYDROGRAPHIC OFFICES¥ INFORMATION - Updated 18-Mar-2022
 SECTION 3 - WITHDRAWN CELLS - Updated 07-May-2020
 SECTION 4 - MISCELLANEOUS INFORMATION - Updated 07-May-2020
 =============
 
 SECTION 1 - IMPORTANT GENERAL INFORMATION
---------------------------------------- 
+---------------------------------------
 
-COMPLIANCE
------------
-ENC Data only meets SOLAS chart carriage requirements if it is kept up to date and is used on an ECDIS with a suitable back up arrangement.
+DISPLAY ISSUE WITH ALBANIAN AL ENCs ON JRC ECDIS
+------------------------------------------------
+Mariners should be aware that some editions of Albanian AL ENCs do not currently load on JRC ECDIS. The JRC ECDIS displays an error and needs to be restarted. 
+
+We are working with the data supplier to correct the issue. In the meantime, please contact your ADMIRALTY Distributor for advice if you wish to load and display Albanian AL ENCs on JRC ECDIS. 
 
 
 DISPLAY ANOMALIES 
@@ -52,7 +52,7 @@ UKHO has been made aware of a safety issue where the Isolated Danger symbol is n
 This issue results from the way some ECDIS are processing some ENC updates. It will be resolved by issuing a New Edition of the affected ENCs and software upgrades to affected ECDIS. ENC Producers and Regional ENC Coordination Centres have been made aware of the issue and the affected ENCs will be updated by New Edition as soon as possible. 
 
 The display issue does not affect the detection of isolated dangers in route checks or monitoring/anti-grounding checks. The ECDIS Pick Report is able to access the information about the hazard as normal.
-The correct symbol will display if the ECDIS is in display mode ‚ÄòALL OTHER‚Äô.
+The correct symbol will display if the ECDIS is in display mode ëALL OTHERí.
 
 Until the measures above have taken effect, mariners should continue to respond to alerts and indications as normal but be aware that, in rare situations, an Isolated Danger symbol may not be showing on the display as would have been expected. If the yellow hazard highlight box is observed without a symbol, a manual update can be applied to insert the feature.
 
@@ -67,22 +67,15 @@ HD contours are drawn from high quality surveys with the appropriate CATZOC appl
 NUMBER OF PERMITTED INSTALLATIONS
 ----------------
 
-The End User Licence Agreement (EULA) governing the use of AVCS data permits its installation on an unlimited number of workstations on any licensed vessel.  It further recognises that some parts of the data may be installed on fewer workstations.  ENCs with the following producer codes may be installed on the maximum number of workstations indicated:
+The End User Licence Agreement (EULA) governing the use of AVCS data permits its installation on a maximum of 5 workstations on any licensed vessel.  It further recognises that some parts of the data may be installed on more or fewer workstations.  ENCs with the following producer codes may be installed on the maximum number of workstations indicated:
+
+Unlimited workstations on a single vessel or 5 workstations at a single shore-based location
+AL, AR, AU, BD, BE, BH, BR, CL, CO, CU, DE, DK, EC, EE, EG, ES, FI, FR, GB, GE, GR, HR, I1, IR, IS, IT, LT, LV, ME, MX, MY, NG, NL, NO, NU, NZ, OM, PA, PE, PG, PH, PK, PL, PT, RO, RU, SB, SE, SI, SR, TN, TO, TR, UA, US, UY, V1, V2, VE, VN, ZA
+
+Also: additional datasets from 1U
 
 Up to 3 workstations
 C2, MS, SG, TH
-
-Up to 5 workstations
-C1, C3, CN, EA, ID, IN, JP, KH, KR, UA, GBV, LK, MM, 
-
-Up to 10 workstations
-CA
-
-Unlimited workstations on a single vessel or 5 workstations at a single shore-based location
-AL, AR, AU, BD, BE, BH, BR, CK, CL, CO, CU, D2, DE, DK, EC, EE, EG, ES, FI, FR, GB, GE, GR, HR, I1, IR, IS, IT, LB, LT, LV, ME, MT, MX, MY, NG, NL, NO, NU, NZ, OM, PA, PE, PG, PH, PK, PL, PT, RO, RU, S1, SB, SE, SI, SR, TK, TN, TO, TR, US, UY, V1, VE, VN, WS, ZA
-Also: additional datasets from 1U
-
-Shorebased licences allow up to 5 workstations. 
 
 ---------------------
 
@@ -104,7 +97,7 @@ The Admiralty Information Overlay (AIO) is an aid to navigators for use during p
 
 The T&P NMs shown in the Overlay relate specifically to ADMIRALTY paper charts and may not include all T&P NMs issued by the ENC producer.  There may also be a time delay between the publication or cancellation of T&P NMs by the ENC producer and the publication or removal of the equivalent ADMIRALTY T&P NMs.  Many ENC producers include some or all of their T&P NMs in their ENCs and care should be taken to understand what has already been included in the ENCs in use.  A list of ENC producers whose policy is to include T&P NM information in their ENCs can be found at www.admiralty.co.uk/AVCS.
 
-Areas where the UKHO does not publish T&P NMs at the visible scale are highlighted with a ‚ÄòNo Overlay‚Äô feature.  Additional information, such as national T&P NMs, may be available in these areas from other sources and mariners should ensure that all appropriate sources of information have been consulted.
+Areas where the UKHO does not publish T&P NMs at the visible scale are highlighted with a ëNo Overlayí feature.  Additional information, such as national T&P NMs, may be available in these areas from other sources and mariners should ensure that all appropriate sources of information have been consulted.
 
 Please note that official ENCs remain the primary source of information for navigation at all times.  Whilst AIO is not a formal requirement of Port State Control, many mariners find that it is a useful way of demonstrating that they are taking note of and managing temporary information in their ENCs.
 
@@ -118,7 +111,7 @@ Managing Temporary & Preliminary Notices with ADMIRALTY INFORMATION OVERLAY (AIO
 
 To comply with SOLAS Chapter V, the vessel should consider all available navigational information relevant to the passage. Appropriate scale, accurate and up-to-date charts are to be used for the intended passage, as well as any relevant temporary Notices to Mariners.
 
-The AIO is an additional digital dataset that is provided to ADMIRALTY Vector Chart Service (AVCS) customers. It is designed to display temporary and preliminary information over ENCs in ECDIS and other chart display systems to assist with passage planning. Most countries now include temporary information in their ENCs and it is received on the vessel as a normal ENC update or new edition. Some nations do not describe the information as ‚Äòtemporary‚Äô or ‚Äòpreliminary‚Äô in the ENCs; they simply issue updates as required. The T&P policies of AVCS countries can be found on the Support tab at admiralty.co.uk/avcs and in the INFO folder of AIO discs.
+The AIO is an additional digital dataset that is provided to ADMIRALTY Vector Chart Service (AVCS) customers. It is designed to display temporary and preliminary information over ENCs in ECDIS and other chart display systems to assist with passage planning. Most countries now include temporary information in their ENCs and it is received on the vessel as a normal ENC update or new edition. Some nations do not describe the information as ëtemporaryí or ëpreliminaryí in the ENCs; they simply issue updates as required. The T&P policies of AVCS countries can be found on the Support tab at admiralty.co.uk/avcs and in the INFO folder of AIO discs.
 
 The ECDIS Route Assessment tools will automatically assess the temporary information in ENCs because it appears as standard ENC objects and can be accessed from the ECDIS pick reports. Where the information is encoded in the ENC, digital chart users do not need to refer to ADMIRALTY T&P NMs that have been issued for paper charts. For the benefit of the navigator, AIO provides extra information in the form of ADMIRALTY T&Ps where the ENCs do not contain temporary information, and where there is ADMIRALTY paper chart coverage. To avoid duplication, AIO does not show ADMIRALTY paper T&Ps where the producer nation includes temporary information in their ENCs.
 
@@ -146,11 +139,11 @@ These assessments are based on original survey accuracies and on expectations of
 
 OVERLAPPING ENCS IN THE SAME USAGE BAND
 
-Some data providers issue ENCs which contain overlapping data coverage, both internally and with adjoining nation‚Äôs coverage. This may make them difficult to use in certain ECDIS systems which default to displaying both overlapping cells. Caution should therefore be exercised when using such overlapping data. Mariners should be aware that there will be a possibility that items of significance may be present only in one data set within an area of overlap. They should therefore take care to examine both data sets when planning a voyage through such an area.
+Some data providers issue ENCs which contain overlapping data coverage, both internally and with adjoining nationís coverage. This may make them difficult to use in certain ECDIS systems which default to displaying both overlapping cells. Caution should therefore be exercised when using such overlapping data. Mariners should be aware that there will be a possibility that items of significance may be present only in one data set within an area of overlap. They should therefore take care to examine both data sets when planning a voyage through such an area.
 
 =============
 
-SECTION 2 - HYDROGRAPHIC OFFICES¬¥ INFORMATION
+SECTION 2 - HYDROGRAPHIC OFFICES¥ INFORMATION
 
 ---------------------
 
@@ -158,13 +151,13 @@ AU (Australia), PG (Papua New Guinea) and SB (Solomon Islands) ENC (published by
 
 Australian Hydrographic Office (AHO) publishes AU, PG and SB ENCs covering Australian, Australian Antarctic Territory, Papua New Guinea and Solomon Islands waters.
 
-CONVERSION OF AU or SB-CODED ENCS TO PG-CODED ENCS ‚Äì Updated 07 January 2022
+CONVERSION OF AU or SB-CODED ENCS TO PG-CODED ENCS ñ Updated 07 January 2022
 
 A programme of work is underway to convert certain AU and SB-coded ENCs to PG-coded ENCs. As part of the testing of these new ENCs, it has been identified that there is the potential for a small number of ECDIS users to experience display problems with the adjusted AU / SB-coded ENCs on ECDIS Transas version 3.0.340 Build 5225. Users are advised to use caution and examine these ENCs at the voyage planning stage. 
 The ENCs are: PG407156/SB407156, PG407155/SB407155, PG408155/SB408155, PG308154/SB308154, PG311145/AU311145, PG311144/AU311144, PG310144/AU310144, PG410143/AU410143, PG410142/AU410142, PG410141/AU410141, PG411141/AU411141, PG411140/AU411140, PG310140/AU310140.
 
 
-GUIDANCE ON ECDIS FOR SHIPS CALLING AT AUSTRALIAN PORTS ‚Äì 9 April 2020 
+GUIDANCE ON ECDIS FOR SHIPS CALLING AT AUSTRALIAN PORTS ñ 9 April 2020 
 
 When entering Australian Ports please be reminded of the AMSA Marine Notice 7/2017 (https://www.amsa.gov.au/vessels-operators/regulations-and-standards-vessels/marine-notices) which highlights areas relevant to the safe and proper operation of ECDIS for ships visiting Australian ports and provides information on AMSA's expectations for ECDIS compliance during Port State Control (PSC) inspections.  
 
@@ -188,7 +181,7 @@ AMSA are concerned with software quality assurance in ECDIS and detection of ope
 DATA APPEARANCE - Updated 26 Jan 2021
 
 Australian published ENCS contain either the same or greater levels of detail than the corresponding paper chart.  In particular ENCs may contain 1-metre contours that are not available in the paper chart.  This will enable the full benefits of ECDIS and particularly its safety depth alarm function to be used most effectively.  
-The geographical limits of individual ENCs are likely to differ from the geographical limits of corresponding paper charts.  To interpret geographical locations of AHO published ENC from their file numbers, see the Guide to the AHO‚Äôs ENC Numbering System fact sheet at https://www.hydro.gov.au/factsheets/factsheets.htm
+The geographical limits of individual ENCs are likely to differ from the geographical limits of corresponding paper charts.  To interpret geographical locations of AHO published ENC from their file numbers, see the Guide to the AHOís ENC Numbering System fact sheet at https://www.hydro.gov.au/factsheets/factsheets.htm
 
 UPDATES - Updated 9 April 2020 
 
@@ -198,7 +191,7 @@ IMPORTANT NOTICE - Updated 9 April 2020
 
 All AU, PG and SB ENCs published by the Australian Hydrographic Office include all significant hydrographic information assessed as suitable for use (including data which may be of known or unknown quality) at date of compilation.  Significant changes are promulgated via ENC Update or ENC New Edition as appropriate, as well as by Australian Notices to Mariners.   All reasonable efforts have been made to ensure the accuracy and completeness of the information, including third party information, incorporated in this product.   The AHO regards third parties from which it receives information as reliable, however the AHO cannot verify all such information and errors may therefore exist.   Where possible, indications regarding the reliability of information are noted or symbolised in the product.   Users should familiarise themselves with the meaning of any notes or symbols, including those described in AHP20 Mariners Handbook for Australian Waters.   The AHO does not accept liability for errors in third party information or the inappropriate use of Australian published ENCs. 
 
-COPYRIGHT ‚Äì Updated 9 April 2020 
+COPYRIGHT ñ Updated 9 April 2020 
 
 Certain hydrographic information in this product is Copyright Commonwealth of Australia; and is used under licence with the permission of the Australian Hydrographic Office.  All rights reserved.  Apart from the uses permitted to the licensee under the user licence agreement, the information may not be copied, reproduced, translated or reduced to any electronic medium or machine readable form, in whole or part, without the prior written consent of the Australian Hydrographic Office. 
 
@@ -231,11 +224,6 @@ Mariners should be aware that the China Navy Hydrographic Office (CNHO) announce
 
 ---------------------
 
-D2 (Faroe Islands) - Updated 31 May 2023
-
-Known Issue: It has been identified that some ECDIS which have not been updated to the latest version of S-62 will flag that there is no ENC data available. ENCs coded by IC-ENC have passed S-58 validation checks, the D2 code was added to S-62 in June 2021. When navigating on Faroese coded ENCs and this issue is experienced, mariners are advised to contact their ECDIS provider and update their systems. 
-
----------------------
 FI (FINLAND) - Added 11 Jun 2020
 
 According to the SOLAS convention (IMO Marine Safety Committee Resolution 99(73) which came 
@@ -283,13 +271,13 @@ Phone +358 295 34 3000
 ---------------------
 
 FR (France) - Added 11 Jun 2020
-Les ENC du service hydrographique et oc√©anographique de la marine (SHOM), num√©rot√©es FRXXXXXX.YYY, sont d√©riv√©es des cartes marines papier et archives du SHOM. 
-Elles sont con√ßues pour √™tre utilis√©es conjointement avec d'autres documents publi√©s par le SHOM : Le Guide du Navigateur (en particulier le Volume 1 pour les informations concernant les cartes marines, leur pr√©cision et leurs limitations), les Instructions Nautiques, les Livres des Feux et Signaux de brume, les Ouvrages de radiosignaux, les annuaires des mar√©es, les atlas de courants de mar√©e. 
-Le Groupe d'Avis aux Navigateurs permet la tenue √† jour de ces documents. 
-Utilisez toujours l'ENC ou la carte marine papier appropri√©e la plus d√©taill√©e et tenez √† jour les ENC, les cartes marine papiers et les ouvrages nautiques en votre possession.
-Pour toute demande d'information ou remarque relative au contenu des ENC du SHOM, vous pouvez vous adresser √† : SHOM, 13 rue du Chatellier - CS 92803 - 29228 BREST CEDEX 2, FRANCE ou √† cartesel@shom.fr.
+Les ENC du service hydrographique et ocÈanographique de la marine (SHOM), numÈrotÈes FRXXXXXX.YYY, sont dÈrivÈes des cartes marines papier et archives du SHOM. 
+Elles sont conÁues pour Ítre utilisÈes conjointement avec d'autres documents publiÈs par le SHOM : Le Guide du Navigateur (en particulier le Volume 1 pour les informations concernant les cartes marines, leur prÈcision et leurs limitations), les Instructions Nautiques, les Livres des Feux et Signaux de brume, les Ouvrages de radiosignaux, les annuaires des marÈes, les atlas de courants de marÈe. 
+Le Groupe d'Avis aux Navigateurs permet la tenue ‡ jour de ces documents. 
+Utilisez toujours l'ENC ou la carte marine papier appropriÈe la plus dÈtaillÈe et tenez ‡ jour les ENC, les cartes marine papiers et les ouvrages nautiques en votre possession.
+Pour toute demande d'information ou remarque relative au contenu des ENC du SHOM, vous pouvez vous adresser ‡ : SHOM, 13 rue du Chatellier - CS 92803 - 29228 BREST CEDEX 2, FRANCE ou ‡ cartesel@shom.fr.
 
-Ce produit contient des √©l√©ments soumis au copyright, provenant du SHOM ou d'autres organismes. Les demandes de reproduction doivent √™tre adress√©es √† : SHOM, 13 rue du Chatellier - CS 92803 - 29228 BREST CEDEX 2, FRANCE.
+Ce produit contient des ÈlÈments soumis au copyright, provenant du SHOM ou d'autres organismes. Les demandes de reproduction doivent Ítre adressÈes ‡ : SHOM, 13 rue du Chatellier - CS 92803 - 29228 BREST CEDEX 2, FRANCE.
 
 The ENC produced by the French Hydrographic Office (SHOM), numbered FRXXXXXX.YYY, are derived from paper charts and archives of SHOM.
 These ENC are to be used in conjunction with other SHOM publications : "Guide du Navigateur" (especially Volume 1 for information on the use of charts, their accuracy and limitations), sailing directions, lists of lights, lists of radiosignals, tide tables, and tidal streams atlases. 
@@ -303,7 +291,7 @@ French ENCs include information protected by copyright and property of SHOM or o
 
 GB (United Kingdom) - Updated 15 April 2021
 
-¬© Crown Copyright 2021. All Rights Reserved. This product is protected by Crown copyright and international copyright law. It is derived from Crown copyright information and copyright information published by other organisations. No part of this product may be reproduced either in whole or in part, except as specifically required by the host system, without the prior permission of the copyright holders. The product may not be sold, hired, stored in a retrieval system, or transmitted in any form or by any means, electronic, mechanical, photocopying, recording or otherwise without the prior permission of the copyright holders. Applications for the copyright holders' permission to reproduce any part of the product should be directed in the first instance to the Licensing Manager, UK Hydrographic Office, Taunton, Somerset TA1 2DN, United Kingdom.
+© Crown Copyright 2021. All Rights Reserved. This product is protected by Crown copyright and international copyright law. It is derived from Crown copyright information and copyright information published by other organisations. No part of this product may be reproduced either in whole or in part, except as specifically required by the host system, without the prior permission of the copyright holders. The product may not be sold, hired, stored in a retrieval system, or transmitted in any form or by any means, electronic, mechanical, photocopying, recording or otherwise without the prior permission of the copyright holders. Applications for the copyright holders' permission to reproduce any part of the product should be directed in the first instance to the Licensing Manager, UK Hydrographic Office, Taunton, Somerset TA1 2DN, United Kingdom.
 
 While the UKHO has made all reasonable efforts to ensure the ENC data supplied is accurate, it may not always be complete, up to date or positioned to modern surveying standards and therefore no warranty can be given as to its accuracy. The mariner must be the final judge of the reliance placed on the information given, bearing in mind the particular circumstances, the needs of safe and prudent navigation, local pilotage guidance and available navigational aids.
 
@@ -320,7 +308,7 @@ The boundaries between Quality of Data (M_QUAL) areas with different CATZOC valu
 For these M_QUAL areas, the CATZOC values are based on the simplified summary provided in the SD and therefore represent the lowest categorisation assigned to any survey in each defined group of surveys.
 The degree of simplification also means that it has not been possible to identify minor gaps within survey coverage and mariners should be aware that such gaps (where lower quality survey data has been used in the compilation of the chart) may exist. 
 
-Some ENCs are based on small scale planning charts that do not have a Source Diagram. The UKHO has adopted a policy of allocating a CATZOC value of ‚ÄòD‚Äô to all Quality of Data (M_QUAL) areas of such charts though it recognizes that many of these areas are based on higher quality data.
+Some ENCs are based on small scale planning charts that do not have a Source Diagram. The UKHO has adopted a policy of allocating a CATZOC value of ëDí to all Quality of Data (M_QUAL) areas of such charts though it recognizes that many of these areas are based on higher quality data.
 
 All interim CATZOC values will be replaced by definitive ones in due course.
 
@@ -355,10 +343,10 @@ IT (Italy) - Added 18 Jun 2020
 
 GENERAL WARNING - Only official ENCs and nautical publications should be used, provided by authorized distributors, as listed in the Italian HO website. The IIM is not responsible for Nautical Charts, Electronic Charts and Publications that have not been acquired at or through its authorized distribution channels. 
 All Italian charts and ENCs have to be used in conjunction with other Italian Nautical Publications, such as Introduction to Italian Sailing Directions (I.I. 3146), Italian Sailing Directions (I.I. 3201 - 3208, 8 volumes), Italian List of Lights and Fog Signals (I.I. 3134), List of Radio signals (I.I. 3128 and I.I. 3130) and other IIM publications.
-Attention is drawn to the statement in A.N. n¬∞ 16 of the Introduction to Italian Sailing Directions (I.I. 3146) concerning the use of navigational information provided by the IIM. This includes the following caution which applies to all charts, paper and electronic: "Finally, mariners must never forget that a nautical chart can never be perfectly coincident with reality, being only one of its possible representations; they must always consider the possible presence of particular dangers, prescriptions and regulations, especially near the coast, and therefore consult all the relevant Nautical Documentation as well as general and local regulations.
+Attention is drawn to the statement in A.N. n∞ 16 of the Introduction to Italian Sailing Directions (I.I. 3146) concerning the use of navigational information provided by the IIM. This includes the following caution which applies to all charts, paper and electronic: "Finally, mariners must never forget that a nautical chart can never be perfectly coincident with reality, being only one of its possible representations; they must always consider the possible presence of particular dangers, prescriptions and regulations, especially near the coast, and therefore consult all the relevant Nautical Documentation as well as general and local regulations.
 An incorrect or improper use of Nautical Documentation does not guarantee the adequate and necessary levels of safety, especially when sailing near the coast".
 
-COPYRIGHT - All the Italian cells included in the present exchange set are Official Nautical Charts as per Italian Law 2.2.1960. They include information protected by Copyright. Reproduction is prohibited without the Istituto Idrografico della Marina‚Äôs explicit consent.
+COPYRIGHT - All the Italian cells included in the present exchange set are Official Nautical Charts as per Italian Law 2.2.1960. They include information protected by Copyright. Reproduction is prohibited without the Istituto Idrografico della Marinaís explicit consent.
 
 UPDATES - Updates for IT ENCs are generally issued every two weeks. Updates are issued for all Permanent Chart-Correcting and Preliminary Notices to Mariners. Mariners should consult the Italian Notices to Mariners (pdf format) at http://www.marina.difesa.it/conosciamoci/organizzazione/comandienti/scientifici/idrografico/Pagine/home.aspx
 
@@ -381,7 +369,7 @@ NZ (New Zealand)  - Added 18 Jun 2020
 NZ (NEW ZEALAND) ENCs
 
 Published by the New Zealand Hydrographic Authority
-Toitu Te Whenua Land Information New Zealand (LINZ)
+Land Information New Zealand (LINZ)
 155 The Terrace
 PO Box 5501
 Wellington 6145
@@ -412,7 +400,7 @@ New Zealand ENCs are owned by LINZ and protected under the NZ Copyright Act 1994
 ---------------------
 
 SG (Singapore)  - Added 10 Dec 2020
-¬© MARITIME AND PORT AUTHORITY OF SINGAPORE, SINGAPORE 
+© MARITIME AND PORT AUTHORITY OF SINGAPORE, SINGAPORE 
 All rights reserved. No part of the ENC data produced by the Singapore Maritime and Port Authority (MPA) may be reproduced, stored in a retrieval system, or transmitted, in any form or by any means, electronic, mechanical, photocopying, recording or other-wise, without the prior written permission of Maritime and Port Authority of Singapore. 
 Limited warranty 
 With respect to any end-user of ENC data produced by the Singapore Maritime and Port Authority (MPA) (the MPA Data) neither the UKHO nor the MPA warrants that the MPA Data will meet your requirements or be free from error. To the fullest extent permitted under applicable law, in respect of MPA Data the UKHO and the MPA hereby exclude all other warranties, whether express or implied, including but not limited to implied warranties of merchantable quality and fitness for purpose. The UKHO and the MPA offer no warranty as to the accuracy of MPA Data or any other materials associated with it and supplied pursuant to this Agreement.  
@@ -430,7 +418,7 @@ Mariners are therefore advised to exercise particular caution when navigating in
 
 US (United States of America) - Added 18 Jun 2020
 
-The NOAA electronic navigational chart (NOAA ENC¬Æ) files that may be downloaded from the National Oceanic and Atmospheric Administration (NOAA) are official products. Official ENCs are suitable for navigation under the following regulations and policies, and in the following circumstances:
+The NOAA electronic navigational chart (NOAA ENCÆ) files that may be downloaded from the National Oceanic and Atmospheric Administration (NOAA) are official products. Official ENCs are suitable for navigation under the following regulations and policies, and in the following circumstances:
 
 1. On May 2, 2001, the United States Coast Guard amended the chart carriage regulations to permit government vessels to use electronic charting and navigation systems in lieu of paper charts.
 
@@ -444,11 +432,11 @@ c. Foreign-flag ships to which SOLAS, Chapter V, applies that are operating on t
 
 This policy is not applicable to U.S.-flag ships engaged only on domestic voyages. These ships must continue to comply with existing navigation equipment requirements until the chart carriage regulations are formally amended.
 
-The NOAA ENC¬Æ files available from this site are updated for Notices to Mariners on at least a monthly basis. Users are encouraged to check the site frequently and download the latest versions of the files. Updates are currently available as incremental updates (also called ENC Revision or "ER" files).
+The NOAA ENCÆ files available from this site are updated for Notices to Mariners on at least a monthly basis. Users are encouraged to check the site frequently and download the latest versions of the files. Updates are currently available as incremental updates (also called ENC Revision or "ER" files).
 
-Copying, reproduction of the NOAA ENC¬Æs to any other server or location for further reproduction or redistribution is discouraged unless the following guidelines are followed: 1) the NOAA ENC¬Æs and supplementary files including the CATALOG.031 and README.TXT are included in their entirety, 2) this disclaimer is displayed to and accepted by anyone who accesses the NOAA ENC¬Æs, and 3) a reference to this Web site is included so that anyone accessing the NOAA ENC¬Æs is advised of where they originated. 
+Copying, reproduction of the NOAA ENCÆs to any other server or location for further reproduction or redistribution is discouraged unless the following guidelines are followed: 1) the NOAA ENCÆs and supplementary files including the CATALOG.031 and README.TXT are included in their entirety, 2) this disclaimer is displayed to and accepted by anyone who accesses the NOAA ENCÆs, and 3) a reference to this Web site is included so that anyone accessing the NOAA ENCÆs is advised of where they originated. 
 
-If these NOAA ENC¬Æs are incorporated into any other product in a form other than as provided by NOAA, the producer of that product assumes full liability and must adhere to conditions 2 and 3 described in the paragraph above concerning copying or reproduction.
+If these NOAA ENCÆs are incorporated into any other product in a form other than as provided by NOAA, the producer of that product assumes full liability and must adhere to conditions 2 and 3 described in the paragraph above concerning copying or reproduction.
 
 ---------------------
 
@@ -470,21 +458,21 @@ The Oceanographic, Hydrographic and Meteorological Office of the Navy of the Eas
 The SOHMA is not responsible for Nautical Charts and Publications that have not been acquired at its local sales, or through their authorized agents or the Maritime Authority of the area.
 
 
-Se solicita a los Navegantes, Pr√°cticos, Organismos del Estado, Entes Aut√≥nomos, Compa√±√≠as Navieras, Empresas de Obras Portuarias y toda otra persona relacionada con el √°mbito mar√≠timo, comuniquen cualquier alteraci√≥n o irregularidad que pueda afectar la seguridad de la navegaci√≥n al: 
+Se solicita a los Navegantes, Pr·cticos, Organismos del Estado, Entes AutÛnomos, CompaÒÌas Navieras, Empresas de Obras Portuarias y toda otra persona relacionada con el ·mbito marÌtimo, comuniquen cualquier alteraciÛn o irregularidad que pueda afectar la seguridad de la navegaciÛn al: 
 
-Servicio de Oceanograf√≠a, Hidrograf√≠a y Meteorolog√≠a de la Armada.
-Direcci√≥n: Capurro 980 - Montevideo - URUGUAY - Casilla de Correos: 1381 - C√≥digo Postal: 11700
-Tel√©fonos: (+598) 2307 1777 / 2309 3775 / 2309 3861 - Tel./Fax: (598) 2309 9220
+Servicio de OceanografÌa, HidrografÌa y MeteorologÌa de la Armada.
+DirecciÛn: Capurro 980 - Montevideo - URUGUAY - Casilla de Correos: 1381 - CÛdigo Postal: 11700
+TelÈfonos: (+598) 2307 1777 / 2309 3775 / 2309 3861 - Tel./Fax: (598) 2309 9220
            (+598) 99679071 Marea en tiempo real BAHIA DE MONTEVIDEO
 
-E-mail: sohma@armada.mil.uy √≥ a la Autoridad Mar√≠tima m√°s pr√≥xima.
+E-mail: sohma@armada.mil.uy Û a la Autoridad MarÌtima m·s prÛxima.
 NOTA: Consulte el sitio web del SOHMA ingresando desde el sitio de la Armada Nacional: www.armada.mil.uy/sohma/web/index.html
 
 
 "NAVEGUEMOS SEGUROS"
-ADQUIERA SUS CARTAS Y PUBLICACIONES N√ÅUTICAS EN NUESTRA OFICINA CENTRAL O EN NUESTROS AGENTES DE VENTAS AUTORIZADOS.
-El Servicio de Oceanograf√≠a, Hidrograf√≠a y Meteorolog√≠a de la Armada de la Rep√∫blica Oriental del Uruguay, mantiene su cartograf√≠a permanentemente actualizada, por lo que recomienda su empleo en Buques Nacionales y Extranjeros cuando naveguen aguas uruguayas.
-El SOHMA no se responsabiliza por Cartas N√°uticas y Publicaciones que no hayan sido adquiridas en su local de ventas, o a trav√©s de sus Agentes autorizados o de la Autoridad Mar√≠tima de la zona.
+ADQUIERA SUS CARTAS Y PUBLICACIONES N¡UTICAS EN NUESTRA OFICINA CENTRAL O EN NUESTROS AGENTES DE VENTAS AUTORIZADOS.
+El Servicio de OceanografÌa, HidrografÌa y MeteorologÌa de la Armada de la Rep˙blica Oriental del Uruguay, mantiene su cartografÌa permanentemente actualizada, por lo que recomienda su empleo en Buques Nacionales y Extranjeros cuando naveguen aguas uruguayas.
+El SOHMA no se responsabiliza por Cartas N·uticas y Publicaciones que no hayan sido adquiridas en su local de ventas, o a travÈs de sus Agentes autorizados o de la Autoridad MarÌtima de la zona.
 
 ---------------------
 

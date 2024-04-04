@@ -1,6 +1,6 @@
 {
-    "count": 1,
-    "total": 1,
+    "count": 3,
+    "total": 3,
     "entries": [
         {
             "batchId": "58ee085b-434f-4b6c-a73a-fa7fbb0cd224",
@@ -25,6 +25,62 @@
                     "links": {
                         "get": {
                             "href": "/batch/58ee085b-434f-4b6c-a73a-fa7fbb0cd224/files/README.txt"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "6406712f-c6f0-4a2f-96d9-ee8158242697",
+            "status": "Committed",
+            "allFilesZipSize": 18138,
+            "attributes": [
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2021-11-08T15:12:05.483Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "README.TXT",
+                    "fileSize": 44788,
+                    "mimeType": "text/plain",
+                    "hash": "+aL87S+7ynM9IOAxZ+rWtw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/6406712f-c6f0-4a2f-96d9-ee8158242697/files/README.TXT"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "90520c74-6300-45f1-8e98-e70a17643576",
+            "status": "Committed",
+            "allFilesZipSize": 18138,
+            "attributes": [
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2021-09-16T09:21:52.14Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "README.TXT",
+                    "fileSize": 44788,
+                    "mimeType": "text/plain",
+                    "hash": "+aL87S+7ynM9IOAxZ+rWtw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/90520c74-6300-45f1-8e98-e70a17643576/files/README.TXT"
                         }
                     }
                 }

@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System.Net;
 using System.Text;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
@@ -163,42 +164,50 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return productVersions;
         }
 
-        public bool GetBlankReadmeFile(string filePath)
+        public bool CreateEmptyFileContent(string filePath)
         {
-            var extendedAsciiEncoding = Encoding.GetEncoding("iso-8859-1");
-            var text = File.ReadAllText(filePath, extendedAsciiEncoding);
-            //_fileSystem.
-            text.Replace(text, string.Empty);
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return false;
+            }
+            _fileSystem.File.WriteAllText(filePath, string.Empty);
             return true;
         }
 
-        public bool DownloadReadmeFile(string filePath, Stream stream, string lineToWrite)
+        public bool DownloadReadmeFile(string filePath, Stream stream, string lineToWrite, string latestReadmePath)
         {
             if (stream != null)
             {
-                var extendedAsciiEncoding = Encoding.GetEncoding("iso-8859-1");
-                CreateFileCopy(filePath, stream);
-                var text = File.ReadAllText(filePath, extendedAsciiEncoding);
-                var secondLineText = GetLine(filePath);
-                text = secondLineText.Length == 0 ? lineToWrite : text.Replace(secondLineText, lineToWrite);
-                if (!string.IsNullOrWhiteSpace(text))
-                    File.WriteAllText(filePath, text, extendedAsciiEncoding);
+                ////var extendedAsciiEncoding = Encoding.GetEncoding("iso-8859-1");
+                ////CreateFileCopy(filePath, stream);
+
+                using (WebClient client = new())
+                {
+                    client.DownloadFile(latestReadmePath, filePath);
+                }
+                ////var text = File.ReadAllText(filePath, extendedAsciiEncoding);
+
+                ////var secondLineText = GetLine(filePath);
+                ////text = secondLineText.Length == 0 ? lineToWrite : text.Replace(secondLineText, lineToWrite);
+                ////if (!string.IsNullOrWhiteSpace(text))
+                ////    File.WriteAllText(filePath, text, extendedAsciiEncoding);
+
                 return true;
             }
             return false;
         }
 
-        private static string GetLine(string filePath)
-        {
-            int lineFound = 2;
-            string secondLine = string.Empty;
-            using (var sr = new StreamReader(filePath))
-            {
-                for (int i = 1; i < lineFound; i++)
-                    sr.ReadLine();
-                secondLine = sr.ReadLine();
-            }
-            return secondLine ?? string.Empty;
-        }
+        ////private static string GetLine(string filePath)
+        ////{
+        ////    int lineFound = 2;
+        ////    string secondLine = string.Empty;
+        ////    using (var sr = new StreamReader(filePath))
+        ////    {
+        ////        for (int i = 1; i < lineFound; i++)
+        ////            sr.ReadLine();
+        ////        secondLine = sr.ReadLine();
+        ////    }
+        ////    return secondLine ?? string.Empty;
+        ////}
     }
 }
