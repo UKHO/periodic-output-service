@@ -67,7 +67,9 @@ namespace UKHO.BESS.BuilderService.Services
         {
             ExchangeSetResponseModel exchangeSetResponseModel = new();
             if (configQueueMessage.Type == BessType.BASE.ToString())
+            {
                 exchangeSetResponseModel = await essService.PostProductIdentifiersData((List<string>)configQueueMessage.EncCellNames, configQueueMessage.ExchangeSetStandard);
+            }
             else if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                      configQueueMessage.Type == BessType.CHANGE.ToString())
             {
