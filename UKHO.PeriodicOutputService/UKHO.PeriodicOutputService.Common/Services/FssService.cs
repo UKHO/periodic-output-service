@@ -414,9 +414,10 @@ namespace UKHO.PeriodicOutputService.Common.Services
             string lineToWrite = string.Concat("File date: ", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ssZ", CultureInfo.InvariantCulture));
             HttpResponseMessage httpReadMeFileResponse;
             httpReadMeFileResponse = await _fssApiClient.DownloadFile(readMeFilePath.TrimStart('/'), accessToken);
+            string latestReadmePath = httpReadMeFileResponse.RequestMessage.RequestUri.ToString();
 
             var requestUri = new Uri(httpReadMeFileResponse.RequestMessage.RequestUri.ToString()).GetLeftPart(UriPartial.Path);
-
+         
             if (httpReadMeFileResponse.IsSuccessStatusCode)
             {
                 var serverValue = httpReadMeFileResponse.Headers.Server.ToString().Split('/').First();
@@ -426,12 +427,12 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     {
                         _logger.LogInformation(EventIds.DownloadReadmeFile307RedirectResponse.ToEventId(), "File share service download readme.txt redirected with uri:{requestUri} responded with 307 code for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", requestUri, batchId, correlationId);
                     }
-                    return _fileSystemHelper.DownloadReadmeFile(filePath, stream, lineToWrite);
+                    return await _fileSystemHelper.DownloadReadmeFile(filePath, stream, lineToWrite, latestReadmePath);
                 }
             }
             else
             {
-                _logger.LogError(EventIds.DownloadReadMeFileNonOkResponse.ToEventId(), "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId} ", requestUri, httpReadMeFileResponse.StatusCode, batchId, correlationId);
+                _logger.LogError(EventIds.DownloadReadMeFileNonOkResponse.ToEventId(), "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", requestUri, httpReadMeFileResponse.StatusCode, batchId, correlationId);
                 throw new FulfilmentException(EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
             }
         }
