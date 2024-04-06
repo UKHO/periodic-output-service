@@ -3,10 +3,11 @@
     "exchangeSetStandard": "s63",
     "isEncrypted": false,
     "encCellNames": [
-        "GB123456",
-        "GB234567",
-        "GB*",
-        "GB1*"
+        //"GB123456",
+        //"GB234567",
+        //"GB*",
+        //"GB1*"
+        "GB301910"
     ],
     "frequency": "15 16 2 2 *",
     "type": "BASE",

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using FluentAssertions;
 using Newtonsoft.Json;
 using UKHO.BESS.API.FunctionalTests.Models;
 
@@ -8,6 +9,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
     {
         static readonly HttpClient httpClient = new();
         private static string? uri;
+        private static TestConfiguration configs = new();
 
         /// <summary>
         /// This Method is used to execute ESS Product Identifier endpoint
@@ -52,6 +54,24 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             {
                 return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
             }
+        }
+
+        /// <summary>
+        /// This Method is used to check the Batch Status and Download ES
+        /// </summary>
+        /// <param name="batchId">Provide the BatchId of the requested Product</param>
+        /// <returns></returns>
+        public static async Task<string> CreateExchangeSetFile(string batchId)
+        {
+            string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
+            string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
+            
+            batchStatus.Contains("Committed").Should().Be(true);
+            string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.ExchangeSetFileName}";
+
+            string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolder(downloadFileUrl.ToString());
+
+            return extractDownloadedFolder;
         }
     }
 }
