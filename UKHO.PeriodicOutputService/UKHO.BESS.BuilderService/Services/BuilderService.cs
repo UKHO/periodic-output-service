@@ -247,16 +247,24 @@ namespace UKHO.BESS.BuilderService.Services
 
         private async Task UpdateSerialFileAsync(string serialFilePath, string exchangeSetType, string correlationId)
         {
-            string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
+            string serialFileContent = String.Empty;
             const string searchText = "UPDATE";
-
-            if (serialFileContent.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) > -1)
+            try
             {
-                serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
+                serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
+                if (serialFileContent.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
 
-                fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
+                    fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
 
-                logger.LogInformation(EventIds.BessSerialEncUpdated.ToEventId(), "SERIAL.ENC file updated with Type: {exchangeSetType} | _X-Correlation-ID:{CorrelationId}", exchangeSetType, correlationId);
+                    logger.LogInformation(EventIds.BessSerialEncUpdated.ToEventId(), "SERIAL.ENC file updated with Type: {exchangeSetType} | _X-Correlation-ID:{CorrelationId}", exchangeSetType, correlationId);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.SerialEncUpdateFailed.ToEventId(), "SERIAL.ENC file update operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                throw new Exception($"SERIAL.ENC file update operation failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
             }
 
             await Task.CompletedTask;
@@ -264,11 +272,19 @@ namespace UKHO.BESS.BuilderService.Services
 
         private async Task DeleteProductTxtAndInfoFolderAsync(string productFilePath, string infoFolderPath, string correlationId)
         {
-            fileSystemHelper.DeleteFile(productFilePath);
+            try
+            {
+                fileSystemHelper.DeleteFile(productFilePath);
 
-            fileSystemHelper.DeleteFolder(infoFolderPath);
+                fileSystemHelper.DeleteFolder(infoFolderPath);
 
-            logger.LogInformation(EventIds.BessProductTxtAndInfoFolderDeleted.ToEventId(), "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}", correlationId);
+                logger.LogInformation(EventIds.BessProductTxtAndInfoFolderDeleted.ToEventId(), "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}", correlationId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.ProductTxtDeleteFailed.ToEventId(), "PRODUCT.TXT file and INFO folder delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                throw new Exception($"PRODUCT.TXT file and INFO folder delete operation failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+            }
 
             await Task.CompletedTask;
         }

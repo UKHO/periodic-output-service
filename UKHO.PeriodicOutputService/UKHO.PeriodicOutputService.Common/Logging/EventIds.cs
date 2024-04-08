@@ -658,7 +658,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809130 - PRODUCT.TXT file and INFO folder deleted
         /// </summary>
-        BessProductTxtAndInfoFolderDeleted = 809130
+        BessProductTxtAndInfoFolderDeleted = 809130,
+
+        /// <summary>
+        /// 809131 - SERIAL.ENC file update operation failed
+        /// </summary>
+        SerialEncUpdateFailed = 809131,
+
+        /// <summary>
+        /// 809132 - PRODUCT.TXT file and INFO folder delete operation failed
+        /// </summary>
+        ProductTxtDeleteFailed = 809132,
     }
 
     public static class EventIdExtensions
