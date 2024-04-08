@@ -648,7 +648,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809128 - Create bespoke exchange set is completed.
         /// </summary>
-        CreateBespokeExchangeSetRequestCompleted = 809128,
+        CreateBespokeExchangeSetRequestCompleted = 809128
     }
 
     public static class EventIdExtensions

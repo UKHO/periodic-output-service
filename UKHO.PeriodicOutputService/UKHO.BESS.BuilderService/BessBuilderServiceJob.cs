@@ -27,21 +27,19 @@ namespace UKHO.BESS.BuilderService
             try
             {
                 ConfigQueueMessage configQueueMessage = message.Body.ToObjectFromJson<ConfigQueueMessage>();
+                CommonHelper.CorrelationID = Guid.Parse(configQueueMessage.CorrelationId);
 
                 logger.LogInformation(EventIds.BessBuilderServiceStarted.ToEventId(),
-                    "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", configQueueMessage.CorrelationId);
+                    "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
                 await logger.LogStartEndAndElapsedTimeAsync(EventIds.CreateBespokeExchangeSetRequestStart,
-                            EventIds.CreateBespokeExchangeSetRequestCompleted,
-                            "Create Bespoke Exchange Set for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",
-                            async () =>
-                            {
-                                return await builderService.CreateBespokeExchangeSetAsync(configQueueMessage);
-                            },
-                            configQueueMessage.Name, configQueueMessage.CorrelationId);
+                    EventIds.CreateBespokeExchangeSetRequestCompleted,
+                    "Create Bespoke Exchange Set for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",
+                    async () => await builderService.CreateBespokeExchangeSetAsync(configQueueMessage),
+                    configQueueMessage.Name, CommonHelper.CorrelationID);
 
                 logger.LogInformation(EventIds.BessBuilderServiceCompleted.ToEventId(),
-                    "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", configQueueMessage.CorrelationId);
+                    "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {

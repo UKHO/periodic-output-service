@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.PeriodicOutputService.Common.Extensions
 {
+    [ExcludeFromCodeCoverage]
     public static class LoggerExtensions
     {
         public static R LogStartEndAndElapsedTime<T, R>(this ILogger<T> logger,
