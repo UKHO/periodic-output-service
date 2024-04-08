@@ -129,7 +129,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 {
                     PartitionKey = name,
                     RowKey = exchangeSetStandard + "|" + item.ProductName,
-                    ProductName = item.ProductName,
                     EditionNumber = item.EditionNumber,
                     UpdateNumber = item.UpdateNumber
                 };

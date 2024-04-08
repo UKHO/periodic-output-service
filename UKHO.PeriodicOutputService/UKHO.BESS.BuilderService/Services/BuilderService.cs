@@ -46,7 +46,7 @@ namespace UKHO.BESS.BuilderService.Services
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
-            
+
             //Temporary Upload Code
             #region TemporaryUploadCode
             CreateZipFile(essFiles, essFileDownloadPath);
@@ -232,11 +232,11 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 ProductVersion productVersion = new();
 
-                var result = productVersionEntities.Where(p => p.PartitionKey == configName && p.ProductName == cellName && p.RowKey == exchangeSetStandard + "|" + p.ProductName);
+                var result = productVersionEntities.Where(p => p.PartitionKey == configName && p.RowKey == exchangeSetStandard + "|" + cellName);
 
                 if (result.Any())
                 {
-                    productVersion.ProductName = result.FirstOrDefault().ProductName;
+                    productVersion.ProductName = result.FirstOrDefault().RowKey.Split("|")[1];
                     productVersion.EditionNumber = result.FirstOrDefault().EditionNumber;
                     productVersion.UpdateNumber = result.FirstOrDefault().UpdateNumber;
                 }
