@@ -76,6 +76,11 @@ namespace UKHO.BESS.BuilderService.Services
                 ProductVersionsRequest productVersionsRequest = GetProductVersionDetails(configQueueMessage.EncCellNames);
                 exchangeSetResponseModel = await essService.GetProductDataProductVersions(productVersionsRequest, configQueueMessage.ExchangeSetStandard);
             }
+
+            logger.LogInformation(EventIds.ProductsFetchedFromESS.ToEventId(),
+                "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                configQueueMessage.EncCellNames.Count(), exchangeSetResponseModel.ExchangeSetCellCount, exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
             return CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
         }
 
@@ -190,7 +195,7 @@ namespace UKHO.BESS.BuilderService.Services
                 IEnumerable<string> filePath = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePath, batchId, batchType);
                 isCommitted = await fssService.CommitBatch(batchId, filePath, batchType);
-                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Batch added to FSS. BatchId: {batchId} and status: {isCommitted}", batchId, isCommitted);
+                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Batch is created and added to FSS. BatchId: {batchId} and status: {isCommitted}", batchId, isCommitted);
             }
             catch (Exception ex)
             {
