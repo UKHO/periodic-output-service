@@ -195,7 +195,7 @@ namespace UKHO.BESS.BuilderService.Services
                 isCommitted = await fssService.CommitBatch(batchId, filePaths, batchType);
                 logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Batch added to FSS. BatchId: {batchId} and status: {isCommitted}", batchId, isCommitted);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Batch create failed with Exception : {ex}", ex);
                 throw;
