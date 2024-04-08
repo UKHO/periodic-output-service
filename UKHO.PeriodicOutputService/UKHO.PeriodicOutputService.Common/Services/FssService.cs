@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Net;
 using Microsoft.Extensions.Configuration;
@@ -375,6 +376,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         }
 
         //Private Methods
+        [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
         {
 
@@ -504,6 +506,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return createBatchRequest;
         }
 
+        [ExcludeFromCodeCoverage]
         private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName, Batch batchType)
         {
             AddFileToBatchRequestModel addFileToBatchRequestModel = new()
@@ -517,6 +520,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return addFileToBatchRequestModel;
         }
 
+        [ExcludeFromCodeCoverage]
         private async Task UploadFileBlock(UploadFileBlockRequestModel uploadBlockMetaData)
         {
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{uploadBlockMetaData.BatchId}/files/{uploadBlockMetaData.FileName}/{uploadBlockMetaData.BlockId}";
@@ -538,6 +542,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
+        [ExcludeFromCodeCoverage]
         private static async Task<SearchBatchResponse> SearchBatchResponseAsync(HttpResponseMessage httpResponse)
         {
             string body = await httpResponse.Content.ReadAsStringAsync();
