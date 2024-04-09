@@ -27,6 +27,7 @@
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.3" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.IO.Abstractions" Version="19.2.91" />
+    <PackageReference Include="UKHO.WeekNumberUtils" Version="1.5.22270.11" />
   </ItemGroup>
 
 </Project>
