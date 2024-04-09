@@ -14,7 +14,7 @@ using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Services;
 using Attribute = UKHO.PeriodicOutputService.Common.Models.Fss.Response.Attribute;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
+namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 {
     [TestFixture]
     public class FssServiceTests
@@ -39,6 +39,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 BatchStatusPollingDelayTime = "20000",
                 BatchStatusPollingCutoffTimeForAIO = "1",
                 BatchStatusPollingDelayTimeForAIO = "20000",
+                BatchStatusPollingCutoffTimeForBES = "1",
+                BatchStatusPollingDelayTimeForBES = "20000",
                 PosReadUsers = "",
                 PosReadGroups = "public",
                 BlockSizeInMultipleOfKBs = 4096
@@ -91,6 +93,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         [TestCase(RequestType.POS)]
         [TestCase(RequestType.AIO)]
+        [TestCase(RequestType.BESS)]
         public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus_If_ValidRequest(RequestType requestType)
         {
             A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
@@ -104,7 +107,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"Committed\"}")))
                 });
 
-            FssBatchStatus result = await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType);
+            FssBatchStatus result = await _fssService.CheckIfBatchCommitted("4c5397d5-8a05-43fa-9009-9c38b2007f81", requestType);
 
             Assert.That(result, Is.AnyOf(FssBatchStatus.Incomplete, FssBatchStatus.Committed));
 
@@ -136,6 +139,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         [TestCase(RequestType.POS)]
         [TestCase(RequestType.AIO)]
+        [TestCase(RequestType.BESS)]
         public void DoesCheckIfBatchCommitted_Throws_Exception_If_InvalidRequest(RequestType requestType)
         {
             A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
@@ -163,6 +167,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [Test]
         [TestCase(RequestType.POS)]
         [TestCase(RequestType.AIO)]
+        [TestCase(RequestType.BESS)]
         public void DoesCheckIfBatchCommitted_Returns_Error_If_TimedOut(RequestType requestType)
         {
             A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
@@ -445,6 +450,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         [TestCase(Batch.PosCatalogueBatch)]
         [TestCase(Batch.PosEncUpdateBatch)]
         [TestCase(Batch.EssUpdateZipBatch)]
+        [TestCase(Batch.BesBaseZipBatch)]
+        [TestCase(Batch.BesUpdateZipBatch)]
         public async Task DoesCreateBatch_Returns_BatchId_If_ValidRequest(Batch batchType)
         {
             _fakeconfiguration["IsFTRunning"] = "true";

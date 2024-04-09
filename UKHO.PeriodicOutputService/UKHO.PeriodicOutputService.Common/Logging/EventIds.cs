@@ -641,14 +641,19 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessQueueMessageFailed = 809126,
 
         /// <summary>
-        /// 809127 - Create bespoke exchange set is started.
+        /// 809127 - Creation of bespoke exchange set is started.
         /// </summary>
         CreateBespokeExchangeSetRequestStart = 809127,
 
         /// <summary>
-        /// 809128 - Create bespoke exchange set is completed.
+        /// 809128 - Creation of bespoke exchange set is completed.
         /// </summary>
-        CreateBespokeExchangeSetRequestCompleted = 809128
+        CreateBespokeExchangeSetRequestCompleted = 809128,
+
+        /// <summary>
+        /// 809129 - Products Fetched from ESS.
+        /// </summary>
+        ProductsFetchedFromESS = 809129
     }
 
     public static class EventIdExtensions

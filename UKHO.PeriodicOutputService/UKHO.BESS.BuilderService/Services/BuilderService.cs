@@ -93,7 +93,11 @@ namespace UKHO.BESS.BuilderService.Services
                 }, configQueueMessage.ExchangeSetStandard);
             }
 
-            return CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href!);
+            logger.LogInformation(EventIds.ProductsFetchedFromESS.ToEventId(),
+                "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                configQueueMessage.EncCellNames.Count(), exchangeSetResponseModel.ExchangeSetCellCount, exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            return CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
         }
 
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
@@ -128,7 +132,7 @@ namespace UKHO.BESS.BuilderService.Services
                 return batchFiles;
             }
 
-            logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.UtcNow, CommonHelper.CorrelationID);
+            logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found in batch or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.UtcNow, CommonHelper.CorrelationID);
             throw new FulfilmentException(EventIds.ErrorFileFoundInBatch.ToEventId());
         }
 
@@ -190,14 +194,14 @@ namespace UKHO.BESS.BuilderService.Services
             try
             {
                 string batchId = await fssService.CreateBatch(batchType);
-                IEnumerable<string> filePaths = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
-                UploadBatchFiles(filePaths, batchId, batchType);
-                isCommitted = await fssService.CommitBatch(batchId, filePaths, batchType);
-                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Batch added to FSS. BatchId: {batchId} and status: {isCommitted}", batchId, isCommitted);
+                IEnumerable<string> filePath = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                UploadBatchFiles(filePath, batchId, batchType);
+                isCommitted = await fssService.CommitBatch(batchId, filePath, batchType);
+                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Batch is created and added to FSS. BatchId: {batchId} and status: {isCommitted}", batchId, isCommitted);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Batch create failed with Exception : {ex}", ex);
+                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Batch creation failed with Exception : {ex}", ex);
                 throw;
             }
 
@@ -208,19 +212,19 @@ namespace UKHO.BESS.BuilderService.Services
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
         {
             Parallel.ForEach(filePaths, filePath =>
-            {
-                IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
+        {
+            IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
 
-                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeType, batchType).Result;
-                if (isFileAdded)
+            bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeType, batchType).Result;
+            if (isFileAdded)
+            {
+                List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
+                if (blockIds.Count > 0)
                 {
-                    List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
-                    if (blockIds.Count > 0)
-                    {
-                        bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
-                    }
+                    bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
                 }
-            });
+            }
+        });
         }
         #endregion
 
