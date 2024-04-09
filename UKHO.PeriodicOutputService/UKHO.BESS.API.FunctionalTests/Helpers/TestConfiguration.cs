@@ -17,6 +17,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public string ExchangeSetCatalogueType;
         public string ExchangeSetEncRootFolder;
         public string ExchangeSetCatalogueFile;
+        public string AzureWebJobsStorage;
 
 
         public BessApiConfiguration bessConfig = new();
@@ -24,6 +25,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public SCSApiConfiguration scsConfig = new();
         public ESSApiConfiguration authTokenConfig = new();
         public FSSApiConfiguration fssConfig = new();
+        public BessStorageConfiguration bessStorageConfig = new();
 
         public class BessApiConfiguration
         {
@@ -33,6 +35,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? s63ExchangeSetStandard { get; set; }
             public string? s57ExchangeSetStandard { get; set; }
             public string? TempFolderName { get; set; }
+            public List<string>? ProductsName { get; set; }
         }
 
         public class SharedKeyConfiguration
@@ -56,9 +59,12 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public class FSSApiConfiguration    
         {
             public string? BaseUrl { get; set; }
-            public string ResourceId { get; set; }
-            public bool IsRunningOnLocalMachine { get; set; }
             public int BatchCommitWaitTime { get; set; }
+        }
+
+        public class BessStorageConfiguration
+        {
+            public string? QueueName { get; set; }
         }
 
         public TestConfiguration()
@@ -66,7 +72,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             configurationRoot = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", false)
                 .Build();
-
 
             EssStorageAccountConnectionString = configurationRoot.GetSection("EssStorageAccountConnectionString").Value;
             EssBaseAddress = configurationRoot.GetSection("EssApiUrl").Value;
@@ -80,11 +85,13 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             ExchangeSetCatalogueType = configurationRoot.GetSection("ExchangeSetCatalogueType").Value;
             ExchangeSetEncRootFolder = configurationRoot.GetSection("ExchangeSetEncRootFolder").Value;
             ExchangeSetCatalogueFile = configurationRoot.GetSection("ExchangeSetCatalogueFile").Value;
+            AzureWebJobsStorage = configurationRoot.GetSection("AzureWebJobsStorage").Value;
             configurationRoot.Bind("BESSApiConfiguration", bessConfig);
             configurationRoot.Bind("SharedKeyConfiguration", sharedKeyConfig);
             configurationRoot.Bind("SCSApiConfiguration", scsConfig);
             configurationRoot.Bind("ESSApiConfiguration", authTokenConfig);
             configurationRoot.Bind("FSSApiConfiguration", fssConfig);
+            configurationRoot.Bind("BessStorageConfiguration", bessStorageConfig);
         }
     }
 }

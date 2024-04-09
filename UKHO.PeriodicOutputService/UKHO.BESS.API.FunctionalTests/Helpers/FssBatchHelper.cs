@@ -1,17 +1,9 @@
 ﻿using Newtonsoft.Json;
-using NUnit.Framework;
-using System;
-using System.IO;
 using System.IO.Compression;
-using System.Threading.Tasks;
 using UKHO.ExchangeSetService.API.FunctionalTests.Models;
-using UKHO.BESS.API.FunctionalTests.Helpers;
 using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 using System.Net;
 using FluentAssertions;
-using Microsoft.AspNetCore.Http;
-using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
-using UKHO.PeriodicOutputService.Common.Enums;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -49,7 +41,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public static async Task<string> ExtractDownloadedFolder(string downloadFileUrl)
         {
             //Mock api fullfillment process takes more time to upload file for the cancellation product and tests are intermittently failing,therefore we have added delay 'Task.Delay()' to avoid intermittent failure in the pipe.
-            await Task.Delay(40000);
+            //await Task.Delay(40000);
             string batchId = downloadFileUrl.Split('/')[5];
             string fileName = downloadFileUrl.Split('/')[7];
             string tempFilePath = Path.Combine(Path.GetTempPath(), bessConfig.TempFolderName);
@@ -118,16 +110,23 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             checkFile.Should().Be(true);
 
             //Checking for the FOLDER OF REQUESTED PRODUCT in the downloaded zip
-            checkFile = CheckforFolderExist(downloadFolderPath, "ENC_ROOT//GB//GB301910");
-            checkFile.Should().Be(true);
+            foreach (var productName in testConfiguration.bessConfig.ProductsName)
+            {
+                var countryCode = productName.Substring(0, 2);
+                checkFile = CheckforFolderExist(downloadFolderPath, "ENC_ROOT//"+ countryCode +"//" + productName);
+                checkFile.Should().Be(true);
+            }
 
             //Checking the value of the Encyrption Flag in the PRODUCTS.TXT file based on the ExchangeSet Standard
             string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath, testConfiguration.ExchangeSetProductFilePath, testConfiguration.ExchangeSetProductFile));
-            int rowNumber = new Random().Next(4, fileContent.Length);
+            int rowNumber = new Random().Next(4, fileContent.Length-1);
             var productData = fileContent[rowNumber].Split(",").Reverse();
             string encryptionFlag = productData.ToList()[4];
             string expectedEncryptionFlag = "1";
-            if (exchangeSetStandard == "s57") { expectedEncryptionFlag = "0"; }
+            if (exchangeSetStandard == "s57")
+            {
+                expectedEncryptionFlag = "0";
+            }
             expectedEncryptionFlag.Should().Be(encryptionFlag);
             
             return checkFile;
