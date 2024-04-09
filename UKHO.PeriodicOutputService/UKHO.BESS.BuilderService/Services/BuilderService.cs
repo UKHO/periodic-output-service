@@ -65,9 +65,12 @@ namespace UKHO.BESS.BuilderService.Services
 
             #endregion TemporaryUploadCode
 
-            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
-
-            LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+            if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
+                     configQueueMessage.Type == BessType.CHANGE.ToString())
+            {
+                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+                LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+            }
 
             return "Exchange Set Created Successfully";
         }
@@ -228,6 +231,7 @@ namespace UKHO.BESS.BuilderService.Services
         }
         #endregion
 
+        [ExcludeFromCodeCoverage]
         private List<ProductVersion> GetProductVersionsFromEntities(List<BessProductVersionEntities> productVersionEntities, string[] cellNames, string configName, string exchangeSetStandard)
         {
             List<ProductVersion> productVersions = new();
