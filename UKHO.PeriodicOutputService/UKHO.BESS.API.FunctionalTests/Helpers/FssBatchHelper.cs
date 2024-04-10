@@ -29,9 +29,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 batchStatusResponse.StatusCode.Should().Be((HttpStatusCode)200);
                 
                 var batchStatusResponseObj = JsonConvert.DeserializeObject<ResponseBatchStatusModel>(await batchStatusResponse.Content.ReadAsStringAsync());
-                batchStatus = batchStatusResponseObj.Status;
+                batchStatus = batchStatusResponseObj!.Status!;
 
-                if (batchStatus.Equals("Committed"))
+                if (batchStatus!.Equals("Committed"))
                     break;
             }
 
@@ -42,7 +42,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             string batchId = downloadFileUrl.Split('/')[5];
             string fileName = downloadFileUrl.Split('/')[7];
-            string tempFilePath = Path.Combine(Path.GetTempPath(), bessConfig.TempFolderName);
+            string tempFilePath = Path.Combine(Path.GetTempPath(), bessConfig.TempFolderName!);
             if (!Directory.Exists(tempFilePath))
             {
                 Directory.CreateDirectory(tempFilePath);
@@ -83,7 +83,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             return fileName;
         }
 
-        public static bool CheckforFileExist(string filePath, string fileName)
+        public static bool CheckforFileExist(string? filePath, string fileName)
         {
             return (Directory.Exists(filePath) && File.Exists(Path.Combine(filePath, fileName)));
         }
@@ -96,27 +96,27 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63")
         {
             //Checking for the PRODUCTS.TXT file in the downloaded zip
-            var checkFile = CheckforFileExist(Path.Combine(downloadFolderPath, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath), testConfiguration.exchangeSetDetails.ExchangeSetProductFile);
+            var checkFile = CheckforFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!), testConfiguration.exchangeSetDetails.ExchangeSetProductFile!);
             checkFile.Should().Be(true);
 
             //Checking for the README.TXT file in the downloaded zip
-            checkFile = CheckforFileExist(Path.Combine(downloadFolderPath, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder), testConfiguration.exchangeSetDetails.ExchangeReadMeFile);
+            checkFile = CheckforFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
             checkFile.Should().Be(true);
 
             //Checking for the CATALOG file in the downloaded zip
-            checkFile = CheckforFileExist(Path.Combine(downloadFolderPath, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder), testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile);
+            checkFile = CheckforFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile!);
             checkFile.Should().Be(true);
 
             //Checking for the FOLDER OF REQUESTED PRODUCT in the downloaded zip
-            foreach (var productName in testConfiguration.bessConfig.ProductsName)
+            foreach (var productName in testConfiguration.bessConfig.ProductsName!)
             {
                 var countryCode = productName.Substring(0, 2);
-                checkFile = CheckforFolderExist(downloadFolderPath, "ENC_ROOT//"+ countryCode +"//" + productName);
+                checkFile = CheckforFolderExist(downloadFolderPath!, "ENC_ROOT//"+ countryCode +"//" + productName);
                 checkFile.Should().Be(true);
             }
 
             //Checking the value of the Encyrption Flag in the PRODUCTS.TXT file based on the ExchangeSet Standard
-            string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath, testConfiguration.exchangeSetDetails.ExchangeSetProductFile));
+            string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFile!));
             int rowNumber = new Random().Next(4, fileContent.Length-1);
             var productData = fileContent[rowNumber].Split(",").Reverse();
             string encryptionFlag = productData.ToList()[4];

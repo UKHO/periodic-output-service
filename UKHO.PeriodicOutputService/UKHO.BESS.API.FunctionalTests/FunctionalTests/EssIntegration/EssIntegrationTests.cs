@@ -10,7 +10,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
     {
         static readonly TestConfiguration testConfiguration = new();
         public DataHelper dataHelper = new();
-        protected List<string> productIdentifiers = new() { testConfiguration.authTokenConfig.ProductName };
+        protected List<string> productIdentifiers = new() { testConfiguration.authTokenConfig.ProductName! };
         private List<ProductVersionModel>? productVersionData { get; set; }
 
         [OneTimeSetUp]

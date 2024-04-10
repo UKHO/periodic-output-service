@@ -2,7 +2,7 @@
 {
     public static class FileContentHelper
     {
-        public static void DeleteTempDirectory(string tempFolder)
+        public static void DeleteTempDirectory(string? tempFolder)
         {
             string path = Path.GetTempPath() + tempFolder;
 
