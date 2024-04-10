@@ -12,6 +12,8 @@ namespace UKHO.PeriodicOutputService.Common.Configuration
         public string BatchStatusPollingDelayTime { get; set; }
         public string BatchStatusPollingCutoffTimeForAIO { get; set; }
         public string BatchStatusPollingDelayTimeForAIO { get; set; }
+        public string BatchStatusPollingCutoffTimeForBES { get; set; }
+        public string BatchStatusPollingDelayTimeForBES { get; set; }
         public int BlockSizeInMultipleOfKBs { get; set; }
         public int ParallelUploadThreadCount { get; set; }
         public string BusinessUnit { get; set; }
@@ -22,6 +24,9 @@ namespace UKHO.PeriodicOutputService.Common.Configuration
         public string AioReadGroups { get; set; }
         public string Content { get; set; }
         public string ProductType { get; set; }
+        public string BessBusinessUnit { get; set; }
+        public string BessReadUsers { get; set; }
+        public string BessReadGroups { get; set; }
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }
