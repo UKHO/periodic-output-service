@@ -629,6 +629,9 @@ stages:
         displayName: "Dev BESS Functional Automated Tests"
         workspace:
          clean: all
+        variables:
+          - name: AzureWebJobsStorage
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.AzureWebJobsStorage']  ]
         steps:
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download BESS Functional test Artifact"
