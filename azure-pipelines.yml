@@ -631,7 +631,7 @@ stages:
          clean: all
         variables:
           - name: AzureWebJobsStorage
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.AzureWebJobsStorage']  ]
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
         steps:
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download BESS Functional test Artifact"
