@@ -10,7 +10,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
     public static class FssBatchHelper
     {
         private static FssEndPointHelper FssApiClient { get; set; }
-        static FSSApiConfiguration Config = new TestConfiguration().fssConfig;
+        static FssApiConfiguration Config = new TestConfiguration().fssConfig;
         static BessApiConfiguration bessConfig = new TestConfiguration().bessConfig;
         static readonly TestConfiguration testConfiguration = new();
 
@@ -40,8 +40,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
         public static async Task<string> ExtractDownloadedFolder(string downloadFileUrl)
         {
-            //Mock api fullfillment process takes more time to upload file for the cancellation product and tests are intermittently failing,therefore we have added delay 'Task.Delay()' to avoid intermittent failure in the pipe.
-            //await Task.Delay(40000);
             string batchId = downloadFileUrl.Split('/')[5];
             string fileName = downloadFileUrl.Split('/')[7];
             string tempFilePath = Path.Combine(Path.GetTempPath(), bessConfig.TempFolderName);

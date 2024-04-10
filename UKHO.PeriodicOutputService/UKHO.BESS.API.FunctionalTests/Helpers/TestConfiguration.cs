@@ -8,9 +8,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public string AzureWebJobsStorage;
         public BessApiConfiguration bessConfig = new();
         public SharedKeyConfiguration sharedKeyConfig = new();
-        public SCSApiConfiguration scsConfig = new();
-        public ESSApiConfiguration authTokenConfig = new();
-        public FSSApiConfiguration fssConfig = new();
+        public ScsApiConfiguration scsConfig = new();
+        public EssApiConfiguration authTokenConfig = new();
+        public FssApiConfiguration fssConfig = new();
         public BessStorageConfiguration bessStorageConfig = new();
         public ExchangeSetDetails exchangeSetDetails = new();
 
@@ -30,12 +30,12 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? Key { get; set; }
         }
 
-        public class SCSApiConfiguration
+        public class ScsApiConfiguration
         {
             public string? BaseUrl { get; set; }
         }
 
-        public class ESSApiConfiguration
+        public class EssApiConfiguration
         {
             public string? BaseUrl { get; set; }
             public string? ProductName { get; set; }
@@ -43,7 +43,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public int? UpdateNumber { get; set; }
         }
 
-        public class FSSApiConfiguration    
+        public class FssApiConfiguration    
         {
             public string? BaseUrl { get; set; }
             public int BatchCommitWaitTime { get; set; }

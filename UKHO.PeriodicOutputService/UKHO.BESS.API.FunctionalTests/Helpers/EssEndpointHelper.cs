@@ -5,7 +5,7 @@ using UKHO.BESS.API.FunctionalTests.Models;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
-    public class EssEndpointHelper
+    public static class EssEndpointHelper
     {
         static readonly HttpClient httpClient = new();
         private static string? uri;
