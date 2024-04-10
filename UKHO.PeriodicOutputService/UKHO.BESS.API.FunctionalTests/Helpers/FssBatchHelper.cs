@@ -98,15 +98,15 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63")
         {
             //Checking for the PRODUCTS.TXT file in the downloaded zip
-            var checkFile = CheckforFileExist(Path.Combine(downloadFolderPath, testConfiguration.ExchangeSetProductFilePath), testConfiguration.ExchangeSetProductFile);
+            var checkFile = CheckforFileExist(Path.Combine(downloadFolderPath, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath), testConfiguration.exchangeSetDetails.ExchangeSetProductFile);
             checkFile.Should().Be(true);
 
             //Checking for the README.TXT file in the downloaded zip
-            checkFile = CheckforFileExist(Path.Combine(downloadFolderPath, testConfiguration.ExchangeSetEncRootFolder), testConfiguration.ExchangeReadMeFile);
+            checkFile = CheckforFileExist(Path.Combine(downloadFolderPath, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder), testConfiguration.exchangeSetDetails.ExchangeReadMeFile);
             checkFile.Should().Be(true);
 
             //Checking for the CATALOG file in the downloaded zip
-            checkFile = CheckforFileExist(Path.Combine(downloadFolderPath, testConfiguration.ExchangeSetEncRootFolder), testConfiguration.ExchangeSetCatalogueFile);
+            checkFile = CheckforFileExist(Path.Combine(downloadFolderPath, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder), testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile);
             checkFile.Should().Be(true);
 
             //Checking for the FOLDER OF REQUESTED PRODUCT in the downloaded zip
@@ -118,7 +118,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
 
             //Checking the value of the Encyrption Flag in the PRODUCTS.TXT file based on the ExchangeSet Standard
-            string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath, testConfiguration.ExchangeSetProductFilePath, testConfiguration.ExchangeSetProductFile));
+            string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath, testConfiguration.exchangeSetDetails.ExchangeSetProductFile));
             int rowNumber = new Random().Next(4, fileContent.Length-1);
             var productData = fileContent[rowNumber].Split(",").Reverse();
             string encryptionFlag = productData.ToList()[4];

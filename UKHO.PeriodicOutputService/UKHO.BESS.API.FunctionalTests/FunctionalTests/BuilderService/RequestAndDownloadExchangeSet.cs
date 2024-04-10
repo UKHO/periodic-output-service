@@ -14,15 +14,16 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
 
         [Test]
         [TestCase("7b6edd6a-7a62-4271-a657-753f4c648531", "s57", "CHANGE")]
-        [TestCase("7b6edd6a-7a62-4271-a657-753f4c648531", "s63", "CHANGE")]
-        [TestCase("9f349e4f-a4f0-45e8-9a3a-7baa3c561c7e", "s57", "BASE")]
-        [TestCase("0d91fb1a-cbe2-4443-8f61-e9a925fa00c9", "s63", "BASE")]
-        [TestCase("27067a02-df4b-49a1-8699-442b265a75d2", "s57", "UPDATE")]
-        [TestCase("27067a02-df4b-49a1-8699-442b265a75d2", "s63", "UPDATE")]
+        [TestCase("0f13a253-db5d-4b77-a165-643f4b4a77fc", "s63", "CHANGE")]
+        [TestCase("f8fd2fb4-3dd6-425d-b34f-3059e262feed", "s57", "BASE")]
+        [TestCase("4bc70797-7ee6-407f-bafe-cae49a5b5f91", "s63", "BASE")]
+        [TestCase("7b6edd6a-7a62-4271-a657-753f4c648531", "s57", "UPDATE")]
+        [TestCase("0f13a253-db5d-4b77-a165-643f4b4a77fc", "s63", "UPDATE")]
         public async Task WhenICheckDownloadedZipForTypesInConfigFile_ThenZipIsCreatedForRequestedProduct(string batchId, string exchangeSetStandard, string Type)
         {
             var queueMessage = JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText("./TestData/BSQueueMessage.txt")) ;
             queueMessage.Type = Type;
+            queueMessage.ExchangeSetStandard = exchangeSetStandard;
             string jsonString = JsonConvert.SerializeObject(queueMessage);
 
             QueueClientOptions queueOptions = new() { MessageEncoding = QueueMessageEncoding.Base64 };
