@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Net;
 using Microsoft.Extensions.Configuration;
@@ -55,6 +56,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime);
                 batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime);
+            }
+            else if (requestType.Equals(RequestType.BESS))
+            {
+                batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForBES);
+                batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTimeForBES);
             }
             else
             {
@@ -370,6 +376,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         }
 
         //Private Methods
+        [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
         {
 
@@ -397,6 +404,28 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     }
                 };
             }
+            //Temporary Upload Code Start
+            else if (batchType == Batch.BesBaseZipBatch || batchType == Batch.BesUpdateZipBatch)
+            {
+                createBatchRequest = new()
+                {
+                    BusinessUnit = _fssApiConfiguration.Value.BessBusinessUnit,
+                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Acl = new Acl()
+                    {
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadUsers) ? new() : _fssApiConfiguration.Value.BessReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new() : _fssApiConfiguration.Value.BessReadGroups.Split(",").ToList(),
+                    },
+                    Attributes = new List<KeyValuePair<string, string>>
+                    {
+                        new("Product Type", "AVCS"),
+                        new("Week Number", currentWeek),
+                        new("Year", currentYear),
+                        new("Year / Week", currentYear + " / " + currentWeek)
+                    }
+                };
+            }
+            //Temporary Upload Code End
             else
             {
                 createBatchRequest = new()
@@ -461,13 +490,23 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
-
+                //Temporary Upload Code Start
+                case Batch.BesBaseZipBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Bespoke Exchange Set Type", "Base"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    break;
+                case Batch.BesUpdateZipBatch:
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Bespoke Exchange Set Type", "Update"));
+                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+                    break;
+                //Temporary Upload Code End
                 default:
                     break;
             };
             return createBatchRequest;
         }
 
+        [ExcludeFromCodeCoverage]
         private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName, Batch batchType)
         {
             AddFileToBatchRequestModel addFileToBatchRequestModel = new()
@@ -481,6 +520,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return addFileToBatchRequestModel;
         }
 
+        [ExcludeFromCodeCoverage]
         private async Task UploadFileBlock(UploadFileBlockRequestModel uploadBlockMetaData)
         {
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{uploadBlockMetaData.BatchId}/files/{uploadBlockMetaData.FileName}/{uploadBlockMetaData.BlockId}";
@@ -502,6 +542,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
+        [ExcludeFromCodeCoverage]
         private static async Task<SearchBatchResponse> SearchBatchResponseAsync(HttpResponseMessage httpResponse)
         {
             string body = await httpResponse.Content.ReadAsStringAsync();

@@ -3,6 +3,7 @@ using Azure.Storage.Queues.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using UKHO.BESS.BuilderService.Services;
+using UKHO.PeriodicOutputService.Common.Extensions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
@@ -26,14 +27,19 @@ namespace UKHO.BESS.BuilderService
             try
             {
                 ConfigQueueMessage configQueueMessage = message.Body.ToObjectFromJson<ConfigQueueMessage>();
+                CommonHelper.CorrelationID = Guid.Parse(configQueueMessage.CorrelationId);
 
                 logger.LogInformation(EventIds.BessBuilderServiceStarted.ToEventId(),
-                    "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", configQueueMessage.CorrelationId);
+                    "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-                await builderService.CreateBespokeExchangeSet(configQueueMessage);
+                await logger.LogStartEndAndElapsedTimeAsync(EventIds.CreateBespokeExchangeSetRequestStart,
+                    EventIds.CreateBespokeExchangeSetRequestCompleted,
+                    "Create Bespoke Exchange Set for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",
+                    async () => await builderService.CreateBespokeExchangeSetAsync(configQueueMessage),
+                    configQueueMessage.Name, CommonHelper.CorrelationID);
 
                 logger.LogInformation(EventIds.BessBuilderServiceCompleted.ToEventId(),
-                    "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", configQueueMessage.CorrelationId);
+                    "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {

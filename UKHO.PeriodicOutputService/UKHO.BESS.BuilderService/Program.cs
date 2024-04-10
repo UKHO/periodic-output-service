@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
@@ -14,6 +15,7 @@ using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Services;
+using UKHO.PeriodicOutputService.Common.Utilities;
 
 namespace UKHO.BESS.BuilderService
 {
@@ -21,7 +23,7 @@ namespace UKHO.BESS.BuilderService
     public static class Program
     {
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
-        private static IConfiguration configurationBuilder;
+        private static IConfiguration configuration;
 
         public static async Task Main()
         {
@@ -47,7 +49,7 @@ namespace UKHO.BESS.BuilderService
             HostBuilder hostBuilder = new();
             hostBuilder.ConfigureAppConfiguration((hostContext, builder) =>
             {
-                builder.AddJsonFile("appsettings.json");
+                builder.AddJsonFile("appsettings.json", true, true);
                 //Add environment specific configuration files.
                 var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                 if (!string.IsNullOrWhiteSpace(environmentName))
@@ -72,11 +74,11 @@ namespace UKHO.BESS.BuilderService
                 //Add environment variables
                 builder.AddEnvironmentVariables();
 
-                configurationBuilder = builder.Build();
+                configuration = builder.Build();
             })
              .ConfigureLogging((hostContext, loggingBuilder) =>
              {
-                 loggingBuilder.AddConfiguration(configurationBuilder.GetSection("Logging"));
+                 loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
 
 #if DEBUG
                  loggingBuilder.AddSerilog(new LoggerConfiguration()
@@ -89,7 +91,7 @@ namespace UKHO.BESS.BuilderService
                  loggingBuilder.AddConsole();
                  loggingBuilder.AddDebug();
 
-                 EventHubLoggingConfiguration eventHubConfig = configurationBuilder.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+                 EventHubLoggingConfiguration eventHubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
 
                  if (!string.IsNullOrWhiteSpace(eventHubConfig.ConnectionString))
                  {
@@ -112,27 +114,42 @@ namespace UKHO.BESS.BuilderService
                      });
                  }
              })
-             .ConfigureServices((hostContext, services) =>
+             .ConfigureServices((hostContext, serviceCollection) =>
              {
-                 services.AddApplicationInsightsTelemetryWorkerService();
-                 if (configurationBuilder != null)
+                 serviceCollection.AddApplicationInsightsTelemetryWorkerService();
+                 var fssApiConfiguration = new FssApiConfiguration();
+                 if (configuration != null)
                  {
-                     services.AddSingleton<IConfiguration>(configurationBuilder);
-                     services.Configure<BessStorageConfiguration>(configurationBuilder.GetSection("BessStorageConfiguration"));
-                     services.Configure<EssManagedIdentityConfiguration>(configurationBuilder.GetSection("ESSManagedIdentityConfiguration"));
-                     services.Configure<FssApiConfiguration>(configurationBuilder.GetSection("FSSApiConfiguration"));
-                     services.Configure<EssApiConfiguration>(configurationBuilder.GetSection("ESSApiConfiguration"));
-
-                     services.AddDistributedMemoryCache();
-
-                     services.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
-                     services.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
-                     services.AddScoped<IBuilderService, Services.BuilderService>();
-                     services.AddScoped<IEssService, EssService>();
-                     services.AddHttpClient();
-                     services.AddTransient<IEssApiClient, EssApiClient>();
-                     services.AddTransient<IFssApiClient, FssApiClient>();
+                     serviceCollection.AddSingleton(configuration);
+                     serviceCollection.Configure<BessStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
+                     serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
+                     serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
+                     serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+                     configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
                  }
+
+                 serviceCollection.AddDistributedMemoryCache();
+
+                 serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
+                 serviceCollection.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
+                 serviceCollection.AddScoped<IBuilderService, Services.BuilderService>();
+                 serviceCollection.AddScoped<IEssService, EssService>();
+                 serviceCollection.AddScoped<IFssService, FssService>();
+                 serviceCollection.AddHttpClient();
+                 serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
+                 serviceCollection.AddTransient<IFssApiClient, FssApiClient>();
+
+                 serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
+                 serviceCollection.AddScoped<IFileSystem, FileSystem>();
+                 serviceCollection.AddScoped<IZipHelper, ZipHelper>();
+                 serviceCollection.AddScoped<IFileUtility, FileUtility>();
+
+                 serviceCollection.AddHttpClient("DownloadClient",
+                         httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
+                     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
+                     {
+                         AllowAutoRedirect = false
+                     }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
              })
               .ConfigureWebJobs(b =>
               {
