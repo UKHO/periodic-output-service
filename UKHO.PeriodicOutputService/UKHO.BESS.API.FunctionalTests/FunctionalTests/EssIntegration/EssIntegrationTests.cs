@@ -25,7 +25,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         [Test]
         public async Task WhenICallEssProductIdentifierEndpoint_ThenSuccessStatusCode200IsReturned()
         {
-            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s63ExchangeSetStandard);
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s57ExchangeSetStandard);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
@@ -33,7 +33,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         [Test]
         public async Task WhenICallEssProductIdentifierEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
-            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s57ExchangeSetStandard, false);
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s63ExchangeSetStandard, false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
 
