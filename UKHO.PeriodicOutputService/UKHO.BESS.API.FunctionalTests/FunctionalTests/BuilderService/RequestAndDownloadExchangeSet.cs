@@ -21,7 +21,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         [TestCase("0f13a253-db5d-4b77-a165-643f4b4a77fc", "s63", "UPDATE")]
         public async Task WhenICheckDownloadedZipForTypesInConfigFile_ThenZipIsCreatedForRequestedProduct(string batchId, string exchangeSetStandard, string Type)
         {
-            var queueMessage = JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText("./TestData/BSQueueMessage.txt")) ;
+            var queueMessage = JsonConvert.DeserializeObject<ConfigQueueMessage>(File.ReadAllText("./TestData/BSQueueMessage.txt")) ;
             queueMessage!.Type = Type;
             queueMessage.ExchangeSetStandard = exchangeSetStandard;
             string jsonString = JsonConvert.SerializeObject(queueMessage);
@@ -35,7 +35,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
             expectedResulted.Should().Be(true);
         }
 
-        [OneTimeTearDown]
+        [TearDown]
         public void GlobalTearDown()
         {
             //cleaning up the downloaded files from temp folder
