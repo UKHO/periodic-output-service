@@ -1,5 +1,5 @@
 name: $(BuildDefinitionName)_$(SourceBranchName)_$(Date:yy)$(DayOfYear).$(BuildCounter)
-
+ 
 parameters:
   - name: ContinueEvenIfResourcesAreGettingDestroyed
     displayName: "Continue even if resources are getting destroyed"
@@ -9,16 +9,21 @@ parameters:
     displayName: "Disable Stryker"
     type: boolean
     default: false
-
+ 
 trigger:
   - main
   - release/*
   - develop
-
+ 
+resources:
+  containers:
+    - container: wiremock
+      image: wiremock/wiremock
+ 
 pool: 
     name: NautilusBuild
     demands: vs_16 -equals 1 #exclude agents 13 and 14 as code coverage report fails
-
+ 
 variables:
   - name: BuildConfiguration
     value: "release"
@@ -40,7 +45,7 @@ variables:
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.1.9"
   - name: WindowPool
     value: "NautilusBuild"
-
+ 
 stages:
   
   - stage: PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
@@ -52,6 +57,7 @@ stages:
           clean: all
         displayName: "DockerImagePullName"
         pool: $(DeploymentPool)
+        container: wiremock
         steps:
           - task: PowerShell@2
             inputs:
@@ -59,6 +65,4 @@ stages:
               targetType: 'inline'
               script: |
                 # Write your PowerShell commands here.
-                docker pull wiremock/wiremock
                 Write-Host "Hello World"
-          
