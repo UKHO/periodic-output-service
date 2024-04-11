@@ -24,10 +24,9 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
 
         private const string BESPOKE_FILE_NAME = "V01X01";
-        private readonly string homeDirectoryPath;
-
         private const string BessBatchFileExtension = "zip";
         private readonly string mimeType = "application/zip";
+        private readonly string homeDirectoryPath;
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper)
         {
