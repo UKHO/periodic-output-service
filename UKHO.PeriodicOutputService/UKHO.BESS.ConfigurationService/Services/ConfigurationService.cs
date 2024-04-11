@@ -26,9 +26,11 @@ namespace UKHO.BESS.ConfigurationService.Services
         private const string UndefinedValue = "undefined";
         private readonly IConfigValidator configValidator;
         private readonly IAzureBlobStorageService azureBlobStorageService;
+        private readonly IMacroTransformer macroTransformer;
         private List<string> invalidNameList = new();
         private int filesWithJsonErrorCount;
         private int configsWithDuplicateNameAttributeCount;
+        private int configsWithInvalidMacrosCount;
         private const string NewLine = "\n";
         private const string Colon = ": ";
         private const string Hyphen = "- ";
@@ -39,7 +41,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                                     IConfigValidator configValidator,
                                     ISalesCatalogueService salesCatalogueService,
                                     IConfiguration configuration,
-                                    IAzureBlobStorageService azureBlobStorageService)
+                                    IAzureBlobStorageService azureBlobStorageService,
+                                    IMacroTransformer macroTransformer)
 
         {
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
@@ -49,6 +52,7 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.salesCatalogueService = salesCatalogueService ?? throw new ArgumentNullException(nameof(salesCatalogueService));
             this.configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             this.azureBlobStorageService = azureBlobStorageService ?? throw new ArgumentNullException(nameof(azureBlobStorageService));
+            this.macroTransformer = macroTransformer ?? throw new ArgumentNullException(nameof(macroTransformer));
         }
 
         public async Task ProcessConfigsAsync()
@@ -117,10 +121,22 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 RemoveDuplicateConfigs((List<BessConfig>)bessConfigs);
 
+                if (bessConfigs.Any())
+                {
+                    IList<BessConfig> configsWithInvalidMacros = await TransformMacros(bessConfigs);
+
+                    configsWithInvalidMacrosCount = configsWithInvalidMacros.Count;
+
+                    foreach (BessConfig config in configsWithInvalidMacros)
+                    {
+                        bessConfigs.Remove(config);
+                    }
+                }
+
                 int totalConfigCount = deserializedConfigsCount + filesWithJsonErrorCount;
 
                 logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
-"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, filesWithJsonErrorCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
+"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, filesWithJsonErrorCount, configsWithDuplicateNameAttributeCount, configsWithInvalidMacrosCount, CommonHelper.CorrelationID);
 
                 if (bessConfigs.Any())
                 {
@@ -348,6 +364,40 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
 
             return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1))); //remove aio cells and return all filtered data
+        }
+
+        public async Task<List<BessConfig>> TransformMacros(IList<BessConfig> bessConfigs)
+        {
+            List<BessConfig> configsWithInvalidMacros = new();
+            foreach (BessConfig config in bessConfigs)
+            {
+                try
+                {
+                    foreach (Tag tag in config.Tags.Where(tag => tag.Value.StartsWith('$')))
+                    {
+                        string transformedValue = macroTransformer.ExpandMacros(tag.Value);
+                        if (tag.Value.Equals(transformedValue))
+                        {
+                            configsWithInvalidMacros.Add(config);
+
+                            logger.LogError(EventIds.MacroInvalidOrUnavailable.ToEventId(), "Macro is invalid or not available, Bespoke Exchange Set will not be created for config file: {fileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+
+                            break;
+                        }
+                        else
+                        {
+                            tag.Value = transformedValue;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(EventIds.MacroTransformationFailed.ToEventId(), "Exception occurred while transforming macros {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                }
+            }
+            await Task.CompletedTask;
+
+            return configsWithInvalidMacros;
         }
     }
 }

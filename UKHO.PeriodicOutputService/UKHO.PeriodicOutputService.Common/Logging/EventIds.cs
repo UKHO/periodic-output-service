@@ -653,7 +653,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809129 - Products Fetched from ESS.
         /// </summary>
-        ProductsFetchedFromESS = 809129
+        ProductsFetchedFromESS = 809129,
+
+        /// <summary>
+        /// 809132 - Macro is invalid or unavailable.
+        /// </summary>
+        MacroInvalidOrUnavailable = 809132,
+
+        /// <summary>
+        /// 809133 - Exception occurred while transforming macros.
+        /// </summary>
+        MacroTransformationFailed = 809133
     }
 
     public static class EventIdExtensions
