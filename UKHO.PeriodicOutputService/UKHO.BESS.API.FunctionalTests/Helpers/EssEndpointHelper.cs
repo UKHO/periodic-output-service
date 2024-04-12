@@ -63,7 +63,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static async Task<string> CreateExchangeSetFile(string batchId)
         {
-            Thread.Sleep(300000);
+            Thread.Sleep(60000);
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
             
