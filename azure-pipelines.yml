@@ -552,14 +552,6 @@ stages:
         workspace:
          clean: all
         variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: mockWebAppName
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
-          - name: mockWebAppResourceGroup
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
-          - name: RGName
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: POSWebjobApiConfiguration.UserName
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.webJobUsername']  ]
           - name: POSWebjobApiConfiguration.Password
@@ -597,26 +589,7 @@ stages:
                     arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
                     testRunTitle: "Dev-POSAutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
-
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download Terraform Artifact"
-                  condition: always()
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'devterraformartifact'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
-                - task: AzureCLI@2
-                  displayName: "Swap Stub and Webjob Configuration"
-                  condition: always()
-                  inputs:
-                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                    scriptType: 'pscore'
-                    scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/set_stub_webjob_configuration.ps1"
-                    arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME) -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'                          
-
+                          
       - job: BESSFunctionalTests
         dependsOn:
         - DevDeployApp
@@ -632,6 +605,14 @@ stages:
         variables:
           - name: AzureWebJobsStorage
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
+          - name: WEB_APP_NAME
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.WEBAPP']  ]
+          - name: mockWebAppName
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
+          - name: mockWebAppResourceGroup
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+          - name: RGName
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
         steps:
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download BESS Functional test Artifact"
@@ -664,6 +645,25 @@ stages:
                       !**/obj/**
                     testRunTitle: "Dev-BESSAutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download Terraform Artifact"
+                  condition: always()
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'devterraformartifact'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: AzureCLI@2
+                  displayName: "Swap Stub and Webjob Configuration"
+                  condition: always()
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/set_stub_webjob_configuration.ps1"
+                    arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME) -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
   - stage: QAdeploy
     dependsOn: Devdeploy
