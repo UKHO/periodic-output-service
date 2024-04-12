@@ -63,13 +63,13 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static async Task<string> CreateExchangeSetFile(string batchId)
         {
-            Thread.Sleep(60000);
+            Thread.Sleep(120000);
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
+            Console.WriteLine(finalBatchStatusUrl);
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
             
             batchStatus.Contains("Committed").Should().Be(true);
             string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetFileName}";
-
             string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolder(downloadFileUrl.ToString());
 
             return extractDownloadedFolder;
