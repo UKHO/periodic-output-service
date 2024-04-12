@@ -24,10 +24,9 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
 
         private const string BESPOKE_FILE_NAME = "V01X01";
-        private readonly string homeDirectoryPath;
-
         private const string BessBatchFileExtension = "zip";
         private readonly string mimeType = "application/zip";
+        private readonly string homeDirectoryPath;
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper)
         {
@@ -56,21 +55,22 @@ namespace UKHO.BESS.BuilderService.Services
             // temporary logs
             if (isBatchCreated)
             {
-                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Bess Base batch created {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Bess batch created {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+
+                if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
+                         configQueueMessage.Type == BessType.CHANGE.ToString())
+                {
+                    var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+                    LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                }
             }
             else
             {
-                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Bess Base batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Bess batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
             }
 
             #endregion TemporaryUploadCode
-
-            if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
-                     configQueueMessage.Type == BessType.CHANGE.ToString())
-            {
-                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
-                LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
-            }
 
             return "Exchange Set Created Successfully";
         }
