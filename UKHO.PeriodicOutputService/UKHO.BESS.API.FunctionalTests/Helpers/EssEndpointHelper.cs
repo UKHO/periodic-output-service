@@ -65,6 +65,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             Thread.Sleep(300000);
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
+            Console.WriteLine(finalBatchStatusUrl);
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
             
             batchStatus.Contains("Committed").Should().Be(true);
