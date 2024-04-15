@@ -653,7 +653,20 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809129 - Products Fetched from ESS.
         /// </summary>
-        ProductsFetchedFromESS = 809129
+        ProductsFetchedFromESS = 809129,
+        /// <summary>
+        /// 809130 - Post product data to PKS started.
+        /// </summary>
+        PostProductKeyDataToPksStarted = 809130,
+        /// <summary>
+        /// 809131 - Post product data to PKS completed.
+        /// </summary>
+        PostProductKeyDataToPksCompleted = 809131,
+        /// <summary>
+        /// 809132 - Post product data to PKS failed.
+        /// </summary>
+        PostProductKeyDataToPksFailed = 809132
+
     }
 
     public static class EventIdExtensions

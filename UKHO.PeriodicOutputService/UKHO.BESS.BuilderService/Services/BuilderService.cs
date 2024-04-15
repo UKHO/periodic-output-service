@@ -22,19 +22,21 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
+        private readonly IPksService pksService;
 
         private const string BESPOKE_FILE_NAME = "V01X01";
         private const string BessBatchFileExtension = "zip";
         private readonly string mimeType = "application/zip";
         private readonly string homeDirectoryPath;
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IPksService pksService)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
+            this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
 
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
         }
@@ -57,11 +59,29 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Bess batch created {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
 
+                ProductVersionsRequest? latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+
                 if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                          configQueueMessage.Type == BessType.CHANGE.ToString())
                 {
-                    var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
                     LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                }
+
+                if (configQueueMessage.KeyFileType != KeyFileType.NONE.ToString())
+                {
+                    List<ProductKeyServiceRequest> productKeyServiceRequest = new();
+
+                    if (latestProductVersions.ProductVersions.Any())
+                    {
+                        productKeyServiceRequest.AddRange(latestProductVersions.ProductVersions.Select(
+                            item => new ProductKeyServiceRequest()
+                            {
+                                ProductName = item.ProductName,
+                                Edition = item.EditionNumber.ToString()
+                            }));
+                    }
+
+                    List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
                 }
             }
             else
