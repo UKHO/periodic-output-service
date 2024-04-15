@@ -25,12 +25,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             string payloadJson = JsonConvert.SerializeObject(productIdentifier);
 
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
-
-            { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") })
-            {
-                return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-            }
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
+                { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
         /// <summary>
@@ -47,12 +44,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             string payloadJson = JsonConvert.SerializeObject(productVersion);
 
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
-
-            { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") })                                                        
-            {
-                return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-            }
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
+                { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
         /// <summary>
@@ -62,6 +56,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static async Task<string> CreateExchangeSetFile(string batchId)
         {
+            // The below sleep is to give time to BuilderService to download the required zip
             Thread.Sleep(60000);
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
             Console.WriteLine(finalBatchStatusUrl);
@@ -69,7 +64,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             
             batchStatus.Contains("Committed").Should().Be(true);
             string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetFileName}";
-            string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolder(downloadFileUrl.ToString());
+            string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolder(downloadFileUrl);
 
             return extractDownloadedFolder;
         }

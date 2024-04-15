@@ -17,7 +17,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         public void SetupAsync()
         {
             productVersionData = new List<ProductVersionModel>();
-            HttpResponseMessage apiResponse = Extensions.ConfigureFM(testConfiguration.bessConfig.BaseUrl, "Identifiers");
+            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, "Identifiers");
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 

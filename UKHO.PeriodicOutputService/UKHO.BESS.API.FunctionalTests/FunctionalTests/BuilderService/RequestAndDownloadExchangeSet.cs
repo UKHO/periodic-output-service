@@ -19,15 +19,15 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         [TestCase("4bc70797-7ee6-407f-bafe-cae49a5b5f91", "s63", "BASE")]
         [TestCase("7b6edd6a-7a62-4271-a657-753f4c648531", "s57", "UPDATE")]
         [TestCase("0f13a253-db5d-4b77-a165-643f4b4a77fc", "s63", "UPDATE")]
-        public async Task WhenICheckDownloadedZipForTypesInConfigFile_ThenZipIsCreatedForRequestedProduct(string batchId, string exchangeSetStandard, string Type)
+        public async Task WhenICheckDownloadedZipForTypesInConfigFile_ThenZipIsCreatedForRequestedProduct(string batchId, string exchangeSetStandard, string type)
         {
             var queueMessage = JsonConvert.DeserializeObject<ConfigQueueMessage>(File.ReadAllText("./TestData/BSQueueMessage.txt")) ;
-            queueMessage!.Type = Type;
+            queueMessage!.Type = type;
             queueMessage.ExchangeSetStandard = exchangeSetStandard;
             string jsonString = JsonConvert.SerializeObject(queueMessage);
 
             QueueClientOptions queueOptions = new() { MessageEncoding = QueueMessageEncoding.Base64 };
-            QueueClient queue = new QueueClient(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName, queueOptions);
+            QueueClient queue = new(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName, queueOptions);
             queue.SendMessage(jsonString);
 
             string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);

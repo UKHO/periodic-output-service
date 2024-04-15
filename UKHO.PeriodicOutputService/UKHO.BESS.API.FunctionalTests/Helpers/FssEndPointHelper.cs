@@ -1,6 +1,6 @@
 ﻿namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
-    public class FssEndPointHelper
+    public static class FssEndPointHelper
     {
         static readonly HttpClient httpClient = new();
 
@@ -9,12 +9,10 @@
         /// </summary>
         /// <param name="uri"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> GetBatchStatusAsync(string uri)
+        public static async Task<HttpResponseMessage> GetBatchStatusAsync(string uri)
         {
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
-            {
-                return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-            }
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
         /// <summary>
@@ -23,18 +21,14 @@
         /// <param name="uri"></param>
         /// <param name="fileRangeHeader"></param>
         /// <returns></returns>
-        public async Task<HttpResponseMessage> GetFileDownloadAsync(string uri, string? fileRangeHeader = null)
+        public static async Task<HttpResponseMessage> GetFileDownloadAsync(string uri, string? fileRangeHeader = null)
         {
-
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+            if (fileRangeHeader != null)
             {
-                if (fileRangeHeader != null)
-                {
-                    httpRequestMessage.Headers.Add("Range", fileRangeHeader);
-                }
-
-                return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+                httpRequestMessage.Headers.Add("Range", fileRangeHeader);
             }
+            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
     }
 }

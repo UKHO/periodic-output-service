@@ -10,7 +10,7 @@
         /// <param name="baseUrl"></param>
         /// <param name="configurationOption"></param>
         /// <returns></returns>
-        public static HttpResponseMessage ConfigureFM(string? baseUrl, string configurationOption)
+        public static HttpResponseMessage ConfigureFt(string? baseUrl, string configurationOption)
         {
             string uri = $"{baseUrl}/configurefm/{configurationOption}";
 
