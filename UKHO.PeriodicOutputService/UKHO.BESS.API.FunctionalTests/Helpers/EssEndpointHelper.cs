@@ -57,10 +57,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public static async Task<string> CreateExchangeSetFile(string batchId)
         {
             // The below sleep is to give time to BuilderService to download the required zip
-            Thread.Sleep(120000);
+            Thread.Sleep(90000);
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
-            
+
             batchStatus.Contains("Committed").Should().Be(true);
             string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetFileName}";
             string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolder(downloadFileUrl);
