@@ -59,7 +59,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             // The below sleep is to give time to BuilderService to download the required zip
             Thread.Sleep(120000);
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
-            Console.WriteLine(finalBatchStatusUrl);
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
             
             batchStatus.Contains("Committed").Should().Be(true);
