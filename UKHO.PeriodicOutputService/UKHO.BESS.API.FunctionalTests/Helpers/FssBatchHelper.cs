@@ -19,6 +19,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             FssApiClient = new FssEndPointHelper();
         }
 
+        /// <summary>
+        /// This method is used to check the batch status.
+        /// </summary>
+        /// <param name="batchStatusUri"></param>
+        /// <returns></returns>
         public static async Task<string> CheckBatchIsCommitted(string batchStatusUri)
         {
             string batchStatus = "";
@@ -38,6 +43,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             return batchStatus;
         }
 
+        /// <summary>
+        /// This method is used to extract & download the exchangeSet.
+        /// </summary>
+        /// <param name="downloadFileUrl"></param>
+        /// <returns></returns>
         public static async Task<string> ExtractDownloadedFolder(string downloadFileUrl)
         {
             string batchId = downloadFileUrl.Split('/')[5];
@@ -72,6 +82,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             return extractPath;
         }
 
+        /// <summary>
+        /// This method is used to rename the folder.
+        /// </summary>
+        /// <param name="pathInput"></param>
+        /// <returns></returns>
         public static string RenameFolder(string pathInput)
         {
             string fileName = Path.GetFileName(pathInput);
@@ -83,16 +98,34 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             return fileName;
         }
 
+        /// <summary>
+        /// This method is used to check the file existence.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public static bool CheckforFileExist(string? filePath, string fileName)
         {
             return (Directory.Exists(filePath) && File.Exists(Path.Combine(filePath, fileName)));
         }
 
+        /// <summary>
+        /// This method is used to check the folder existence.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="folderName"></param>
+        /// <returns></returns>
         public static bool CheckforFolderExist(string filePath, string folderName)
         {
             return Directory.Exists(Path.Combine(filePath, folderName));
         }
 
+        /// <summary>
+        /// This method is used to check the existence of files and folders in the downloaded exchange set
+        /// </summary>
+        /// <param name="downloadFolderPath"></param>
+        /// <param name="exchangeSetStandard"></param>
+        /// <returns></returns>
         public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63")
         {
             //Checking for the PRODUCTS.TXT file in the downloaded zip
@@ -129,6 +162,5 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             
             return checkFile;
         }
-
     }
 }

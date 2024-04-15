@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace UKHO.BESS.API.FunctionalTests.Helpers
+﻿namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
     public class FssEndPointHelper
     {
         static readonly HttpClient httpClient = new();
 
+        /// <summary>
+        /// This method is used to get the batch status endpoint response.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
         public async Task<HttpResponseMessage> GetBatchStatusAsync(string uri)
         {
             using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
@@ -18,6 +17,12 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
         }
 
+        /// <summary>
+        /// This method is used to get the file download endpoint response
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <param name="fileRangeHeader"></param>
+        /// <returns></returns>
         public async Task<HttpResponseMessage> GetFileDownloadAsync(string uri, string? fileRangeHeader = null)
         {
 
@@ -29,7 +34,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 }
 
                 return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-
             }
         }
     }

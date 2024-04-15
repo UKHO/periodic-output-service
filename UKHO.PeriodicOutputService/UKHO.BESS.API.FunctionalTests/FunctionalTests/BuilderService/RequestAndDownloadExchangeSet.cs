@@ -39,7 +39,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         public void GlobalTearDown()
         {
             //cleaning up the downloaded files from temp folder
-            FileContentHelper.DeleteTempDirectory(testConfiguration.bessConfig.TempFolderName);
+            Extensions.DeleteTempDirectory(testConfiguration.bessConfig.TempFolderName);
         }
     }
 }
