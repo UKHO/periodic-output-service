@@ -1,6 +1,6 @@
 ﻿namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
-    public static class FssEndPointHelper
+    public class FssEndPointHelper
     {
         static readonly HttpClient httpClient = new();
 
@@ -9,7 +9,7 @@
         /// </summary>
         /// <param name="uri"></param>
         /// <returns></returns>
-        public static async Task<HttpResponseMessage> GetBatchStatusAsync(string uri)
+        public async Task<HttpResponseMessage> GetBatchStatusAsync(string uri)
         {
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
             return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
@@ -21,7 +21,7 @@
         /// <param name="uri"></param>
         /// <param name="fileRangeHeader"></param>
         /// <returns></returns>
-        public static async Task<HttpResponseMessage> GetFileDownloadAsync(string uri, string? fileRangeHeader = null)
+        public async Task<HttpResponseMessage> GetFileDownloadAsync(string uri, string? fileRangeHeader = null)
         {
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
             if (fileRangeHeader != null)
