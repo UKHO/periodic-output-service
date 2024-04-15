@@ -540,7 +540,7 @@ stages:
               scriptPath: '$(Build.SourcesDirectory)/DevDeployment/set_qa_subnet_configuration.ps1'
               arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -qasubscriptionid $(POSESSQASubscriptionId) -qavnetresourcegroup $(spokeRG) -qavnetname $(POSESSQAspokeVnetName) -qasubnetname $(POSESSspokeSubnetName)'
 
-       - job: POSFunctionalTests
+      - job: POSFunctionalTests
          dependsOn:
          - DevDeployApp
          - CheckInfra
