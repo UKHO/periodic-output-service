@@ -1,4 +1,5 @@
-﻿using Azure.Storage.Queues;
+﻿using System.Net;
+using Azure.Storage.Queues;
 using FluentAssertions;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -11,6 +12,13 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
     public class RequestAndDownloadExchangeSet 
     {
         static readonly TestConfiguration testConfiguration = new();
+
+        [OneTimeSetUp]
+        public void SetupAsync()
+        {
+            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, "Identifiers");
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+        }
 
         [Test]
         [TestCase("7b6edd6a-7a62-4271-a657-753f4c648531", "s57", "CHANGE")]
