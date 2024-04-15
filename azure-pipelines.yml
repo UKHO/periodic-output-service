@@ -595,15 +595,6 @@ stages:
                     testRunTitle: "Dev-BESSAutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
 
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download Terraform Artifact"
-                  condition: always()
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'devterraformartifact'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
       - job: POSFunctionalTests
         dependsOn:
          - DevDeployApp
@@ -654,6 +645,15 @@ stages:
               arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
               testRunTitle: "Dev-POSAutomationTests"
               workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
+
+          - task: DownloadBuildArtifacts@0
+            displayName: "Download Terraform Artifact"
+            condition: always()
+            inputs:
+              buildType: 'current'
+              downloadType: 'single'
+              artifactName: 'devterraformartifact'
+              downloadPath: '$(Build.SourcesDirectory)'
 
           - task: AzureCLI@2
             displayName: "Swap Stub and Webjob Configuration"
