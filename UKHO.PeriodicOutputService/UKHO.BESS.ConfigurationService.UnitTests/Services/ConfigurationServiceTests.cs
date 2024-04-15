@@ -24,10 +24,19 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         private IAzureBlobStorageService fakeAzureBlobStorageService;
         private ILogger<ConfigurationService.Services.ConfigurationService> fakeLogger;
         private ISalesCatalogueService fakeSalesCatalogueService;
+        private IMacroTransformer fakeMacroTransformer;
 
         private const string UndefinedValuesConfigJson = "{\"name\":,\"exchangeSetStandard\":null,\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"no\"}";
 
-        private const string ValidConfigJson = "{\"NAME\":\"Xyz\",\"exchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
+        private const string ValidConfigWithoutMacroJson = "{\"NAME\":\"Xyz\",\"exchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"Year\",\"value\":\"2025\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
+
+        private const string ValidConfigWithEmptyOrNullKeyInTagsJson = "{\"NAME\":\"Xyz\",\"exchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\" \",\"value\":\"2025\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
+
+        private const string ValidConfigWithNullMacroValueJson = "{\"NAME\":\"Xyz\",\"exchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"Year\",\"value\":null},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
+
+        private const string ValidConfigWithValidMacroJson = "{\"name\":\"Xyz\",\"exchangeSetStandard\":\"s63\",\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"Year\",\"value\":\"$(now.Year)\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
+
+        private const string ValidConfigWithInvalidMacroJson = "{\"name\":\"Xyz\",\"exchangeSetStandard\":\"s63\",\"encCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"Year\",\"value\":\"$(now.Yea)\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
 
         private const string AnotherValidConfigJson = "{\"NAME\":\"Abc\",\"exchangeSetStandard\":\"s63\",\"EncCellNames\":[\"GB123456\",\"GB234567\",\"GB*\",\"GB1*\"],\"frequency\":\"15 16 2 2 *\",\"type\":\"BASE\",\"keyFileType\":\"NONE\",\"allowedUsers\":[\"User1\",\"User2\"],\"allowedUserGroups\":[\"UG1\",\"UG2\"],\"tags\":[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}],\"readMeSearchFilter\":\"\",\"batchExpiryInDays\":30,\"isEnabled\":\"yes\"}";
 
@@ -54,48 +63,53 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             fakeSalesCatalogueService = A.Fake<ISalesCatalogueService>();
             fakeConfiguration = A.Fake<IConfiguration>();
             fakeAzureBlobStorageService = A.Fake<IAzureBlobStorageService>();
+            fakeMacroTransformer = A.Fake<IMacroTransformer>();
 
-            configurationService = new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
+            configurationService = new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
             dictionary = new Dictionary<string, string>();
         }
 
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
+            Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
             nullAzureBlobStorageClient.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageClient");
 
-            Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
+            Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
             nullAzureTableHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureTableStorageHelper");
 
-            Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, null, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
+            Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, null, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
             nullConfigurationServiceLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
 
-            Action nullConfigValidator = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, null, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService);
+            Action nullConfigValidator = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, null, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
             nullConfigValidator.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configValidator");
 
-            Action nullSalesCatalogueService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, null, fakeConfiguration, fakeAzureBlobStorageService);
+            Action nullSalesCatalogueService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, null, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
             nullSalesCatalogueService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("salesCatalogueService");
 
-            Action nullConfigurationServiceConfiguration = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, null, fakeAzureBlobStorageService);
+            Action nullConfigurationServiceConfiguration = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, null, fakeAzureBlobStorageService, fakeMacroTransformer);
 
             nullConfigurationServiceConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
 
-            Action nullAzureBlobStorageService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, null);
+            Action nullAzureBlobStorageService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, null, fakeMacroTransformer);
 
             nullAzureBlobStorageService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageService");
+
+            Action nullMacroTransformer = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, null);
+            nullMacroTransformer.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("macroTransformer");
         }
 
         [Test]
-        public void WhenAValidConfigIsFound_ThenConfigIsAddedToList()
+        public void WhenAValidConfigIsFound_ThenConfigIsAddedToListAndProcessedFurther()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigFilesJson());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
+
             configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -104,6 +118,14 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -117,11 +139,13 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenMoreThanOneValidConfigIsFound_ThenConfigsAreAddedToList()
+        public void WhenAValidConfigWithValidMacroIsFound_ThenConfigIsFurtherProcessed()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetMoreThanOneValidConfigFilesJson());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithValidMacroJson));
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
+            A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Returns("2024");
+
             configurationService.ProcessConfigsAsync();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -130,6 +154,207 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+        }
+
+        [Test]
+        public void WhenAValidConfigWithInvalidOrUnavailableMacroIsFound_ThenConfigIsNotFurtherProcessed()
+        {
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithInvalidMacroJson));
+            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
+            A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Returns("$(now.Yea)");
+
+            configurationService.ProcessConfigsAsync();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                  && call.GetArgument<EventId>(1) == EventIds.MacroInvalidOrUnavailable.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Macro is invalid or not available, Bespoke Exchange Set will not be created for config file: {fileName} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void WhenValueOfKeyInTagsIsNullOrEmpty_ThenThrowsValidationError()
+        {
+            var validationMessage = new ValidationFailure("Tags", "Key or Value not provided");
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithNullMacroValueJson));
+            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure> { validationMessage }));
+
+            configurationService.ProcessConfigsAsync();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidAttributes.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void WhenKeyInTagsIsNullOrEmpty_ThenThrowsValidationError()
+        {
+            var validationMessage = new ValidationFailure("Tags", "Key or Value not provided");
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithEmptyOrNullKeyInTagsJson));
+            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure> { validationMessage }));
+
+            configurationService.ProcessConfigsAsync();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidAttributes.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void WhenAValidConfigWithValidMacroIsNotTransformed_ThenTransformMacrosThrowsException()
+        {
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithValidMacroJson));
+            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
+            A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Throws<Exception>();
+
+            configurationService.ProcessConfigsAsync();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                  && call.GetArgument<EventId>(1) == EventIds.MacroTransformationFailed.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Exception occurred while transforming macros {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void WhenMoreThanOneValidConfigIsFound_ThenConfigsAreAddedToList()
+        {
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetMoreThanOneValidConfigFilesJson());
+            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
+            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
+
+            configurationService.ProcessConfigsAsync();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -328,7 +553,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
-                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}"
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -374,13 +599,19 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
         private Dictionary<string, string> GetValidConfigFilesJson()
         {
-            dictionary.Add("Valid.json", ValidConfigJson);
+            dictionary.Add("Valid.json", ValidConfigWithoutMacroJson);
+            return dictionary;
+        }
+
+        private Dictionary<string, string> GetValidConfigsWithMacroExpressionJson(string configWithMacro)
+        {
+            dictionary.Add($"{configWithMacro}.json", configWithMacro);
             return dictionary;
         }
 
         private Dictionary<string, string> GetMoreThanOneValidConfigFilesJson()
         {
-            dictionary.Add("Valid.json", ValidConfigJson);
+            dictionary.Add("Valid.json", ValidConfigWithoutMacroJson);
             dictionary.Add("Valid2.json", AnotherValidConfigJson);
             return dictionary;
         }
@@ -862,7 +1093,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
         private Dictionary<string, string> GetDuplicateConfigJson()
         {
-            dictionary.Add("ValidConfig.json", ValidConfigJson);
+            dictionary.Add("ValidConfig.json", ValidConfigWithoutMacroJson);
             dictionary.Add("DuplicateConfig.json", DuplicateConfigJson);
             return dictionary;
         }
