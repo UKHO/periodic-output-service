@@ -123,14 +123,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (bessConfigs.Any())
                 {
-                    IList<BessConfig> configsWithInvalidMacros = await TransformMacros(bessConfigs);
-
-                    configsWithInvalidMacrosCount = configsWithInvalidMacros.Count;
-
-                    foreach (BessConfig config in configsWithInvalidMacros)
-                    {
-                        bessConfigs.Remove(config);
-                    }
+                    configsWithInvalidMacrosCount = await TransformMacros(bessConfigs);
                 }
 
                 int totalConfigCount = deserializedConfigsCount + filesWithJsonErrorCount;
@@ -366,9 +359,10 @@ namespace UKHO.BESS.ConfigurationService.Services
             return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1))); //remove aio cells and return all filtered data
         }
 
-        public async Task<List<BessConfig>> TransformMacros(IList<BessConfig> bessConfigs)
+        public async Task<int> TransformMacros(IList<BessConfig> bessConfigs)
         {
             List<BessConfig> configsWithInvalidMacros = new();
+
             foreach (BessConfig config in bessConfigs)
             {
                 try
@@ -380,7 +374,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                         {
                             configsWithInvalidMacros.Add(config);
 
-                            logger.LogError(EventIds.MacroInvalidOrUnavailable.ToEventId(), "Macro is invalid or not available, Bespoke Exchange Set will not be created for config file: {fileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                            logger.LogError(EventIds.MacroInvalidOrUnavailable.ToEventId(), "Macro {macro} is invalid or not available, Bespoke Exchange Set will not be created for config file: {fileName} | _X-Correlation-ID : {CorrelationId}", tag.Value, config.FileName, CommonHelper.CorrelationID);
 
                             break;
                         }
@@ -395,9 +389,14 @@ namespace UKHO.BESS.ConfigurationService.Services
                     logger.LogError(EventIds.MacroTransformationFailed.ToEventId(), "Exception occurred while transforming macros {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 }
             }
+
+            foreach (BessConfig config in configsWithInvalidMacros)
+            {
+                bessConfigs.Remove(config);
+            }
             await Task.CompletedTask;
 
-            return configsWithInvalidMacros;
+            return configsWithInvalidMacros.Count;
         }
     }
 }
