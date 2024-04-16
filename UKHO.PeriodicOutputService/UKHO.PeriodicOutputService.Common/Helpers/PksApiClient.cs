@@ -12,12 +12,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
 
-        public async Task<HttpResponseMessage> PostPksDataAsync(HttpMethod method, string requestBody, string accessToken, string uri, string correlationId = "")
+        public async Task<HttpResponseMessage> PostPksDataAsync( string uri, string requestBody, string accessToken, string correlationId = "")
         {
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
             httpRequestMessage.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
-            if (!string.IsNullOrWhiteSpace(accessToken))
+            if (accessToken != null)
             {
                 httpRequestMessage.SetBearerToken(accessToken);
                 httpRequestMessage.AddHeader("X-Correlation-ID", CommonHelper.CorrelationID.ToString());

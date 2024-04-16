@@ -67,22 +67,7 @@ namespace UKHO.BESS.BuilderService.Services
                     LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
                 }
 
-                if (configQueueMessage.KeyFileType != KeyFileType.NONE.ToString())
-                {
-                    List<ProductKeyServiceRequest> productKeyServiceRequest = new();
-
-                    if (latestProductVersions.ProductVersions.Any())
-                    {
-                        productKeyServiceRequest.AddRange(latestProductVersions.ProductVersions.Select(
-                            item => new ProductKeyServiceRequest()
-                            {
-                                ProductName = item.ProductName,
-                                Edition = item.EditionNumber.ToString()
-                            }));
-                    }
-
-                    List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
-                }
+                var productKeyResponse = GetProductKeyServiceResponse(configQueueMessage.KeyFileType, latestProductVersions.ProductVersions);
             }
             else
             {
@@ -315,6 +300,28 @@ namespace UKHO.BESS.BuilderService.Services
 
                 throw new Exception($"Logging Product version failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
             }
+        }
+
+        [ExcludeFromCodeCoverage]
+        private async Task<List<ProductKeyServiceResponse>> GetProductKeyServiceResponse(string keyFileType, List<ProductVersion> versions)
+        {
+            List<ProductKeyServiceResponse> productKeyServiceResponse = new();
+
+            if (!string.Equals(keyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                List<ProductKeyServiceRequest> productKeyServiceRequest = new();
+
+                productKeyServiceRequest.AddRange(versions.Select(
+                    item => new ProductKeyServiceRequest()
+                    {
+                        ProductName = item.ProductName, Edition = item.EditionNumber.ToString()
+                    }));
+
+                 productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
+                 return productKeyServiceResponse;
+            }
+
+            return new List<ProductKeyServiceResponse>();
         }
     }
 }

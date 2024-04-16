@@ -5,6 +5,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public interface IPksApiClient
     {
-        Task<HttpResponseMessage> PostPksDataAsync(HttpMethod httpMethod, string payloadJson, string accessToken, string uri, string correlationId = "");
+        Task<HttpResponseMessage> PostPksDataAsync(string uri, string requestBody, string accessToken,
+            string correlationId = "");
     }
 }
