@@ -1,0 +1,17 @@
+{
+    "Priority": 100,
+    "Request": {
+        "Path": {
+            "Matchers" : [
+                {
+                    "Name" : "ExactMatcher",
+                    "Pattern" : "/my_stub_endpoint"
+                }
+            ]
+        },
+        "Methods": ["POST"]
+    },
+    "Response": {
+        "StatusCode": 200
+    }
+} 

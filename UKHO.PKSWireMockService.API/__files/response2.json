@@ -1,0 +1,9 @@
+{
+  "correlationId": "3ef111f2-918a-437b-cda9-g12345e8ef22",
+  "errors": [
+    {
+      "source": "GetProductKey",
+      "description": "Key not found for ProductName: AU319115 and Edition: 1."
+    }
+  ]
+}

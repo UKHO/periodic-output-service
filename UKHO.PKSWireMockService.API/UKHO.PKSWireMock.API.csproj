@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="__admin\mappings\mapping-default.json" />
+    <Content Remove="__admin\mappings\mapping-delay.json" />
+    <Content Remove="__admin\mappings\mapping-error.json" />
+    <Content Remove="__files\blankResponse.json" />
+    <Content Remove="__files\request1.json" />
+    <Content Remove="__files\request2.json" />
+    <Content Remove="__files\request3.json" />
+    <Content Remove="__files\request4.json" />
+    <Content Remove="__files\response1.json" />
+    <Content Remove="__files\response2.json" />
+    <Content Remove="__files\response3.json" />
+    <Content Remove="__files\response4.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="__admin\mappings\mapping-default.json" />
+    <None Include="__admin\mappings\mapping-delay.json" />
+    <None Include="__admin\mappings\mapping-error.json" />
+    <None Include="__files\blankResponse.json" />
+    <None Include="__files\request1.json" />
+    <None Include="__files\request2.json" />
+    <None Include="__files\request3.json" />
+    <None Include="__files\request4.json" />
+    <None Include="__files\response1.json" />
+    <None Include="__files\response2.json" />
+    <None Include="__files\response3.json" />
+    <None Include="__files\response4.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="6.0.29" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="WireMock.Net" Version="1.5.52" />
+  </ItemGroup>
+
+</Project>
