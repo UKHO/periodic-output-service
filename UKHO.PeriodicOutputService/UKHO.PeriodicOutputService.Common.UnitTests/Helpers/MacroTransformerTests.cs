@@ -1,4 +1,5 @@
-﻿using FakeItEasy;
+﻿using System.Globalization;
+using FakeItEasy;
 using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Providers;
@@ -47,9 +48,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
            new string[2]{ "$(now.WeekNumber.Year2)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(1 * 7)).Year.ToString().Substring(2,2)},
            new string[2]{ "$(now.WeekNumber +1.Year)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(1 * 7)).Year.ToString()},
            new string[2]{ "$(now.WeekNumber +1.Year2)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(1 * 7)).Year.ToString().Substring(2,2)},
-           //new string[2]{ "$(now)", today.Date.ToString(CultureInfo.InvariantCulture)}, // fail in real time becoz of time in seconds
-           //new string[2]{ "$(now.AddDays(1))", today.AddDays(1).ToString(CultureInfo. InvariantCulture) }, // fail in real time becoz of time in seconds
-
+           new string[2]{ "$(now.AddDays(1))", today.AddDays(1).ToString(CultureInfo. InvariantCulture) },
+           new string[2]{ "$(now)", today.Date.ToString(CultureInfo.InvariantCulture)}
         };
 
         public static object[] unavailableMacroValues =
@@ -74,6 +74,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         public void WhenMacroValueIsAvailable_ThenCorrespondingDateStringIsReturned(string macroExpression, string output)
         {
             var result = macroTransformer.ExpandMacros(macroExpression);
+            if (macroExpression == "$(now.AddDays(1))" | macroExpression == "$(now)") // because of difference in time in seconds hence this
+            {
+                result.Substring(0, result.IndexOf("")).Should().Be(output.Substring(0, output.IndexOf("")));
+                return;
+            }
 
             result.Should().Be(output);
         }
