@@ -766,14 +766,10 @@ stages:
         workspace:
          clean: all
         variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
           - name: mockWebAppName
             value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
           - name: mockWebAppResourceGroup
             value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
-          - name: RGName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: POSWebjobApiConfiguration.UserName
             value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobUsername']  ]
           - name: POSWebjobApiConfiguration.Password
@@ -823,35 +819,6 @@ stages:
                     testRunTitle: "QA-POSAutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
 
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download Terraform Artifact"
-                  condition: always()
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'qaliveterraformartifact'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
-                - task: AzureCLI@2
-                  displayName: "Swap Webjob Configuration"
-                  condition: always()
-                  inputs:
-                    azureSubscription: "Exchange-Set-Service-QA-A-008-02"
-                    scriptType: 'pscore'
-                    scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_webjob_configuration.ps1"
-                    arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
-                - task: AzureCLI@2
-                  displayName: "Swap Stub Configuration"
-                  condition: always()
-                  inputs:
-                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                    scriptType: 'pscore'
-                    scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_stub_configuration.ps1"
-                    arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
-
       - job: BESSFunctionalTests
         dependsOn:
         - QADeployApp
@@ -864,6 +831,17 @@ stages:
         displayName: "QA BESS Functional Automated Tests"
         workspace:
          clean: all
+        variables:
+          - name: AzureWebJobsStorage
+            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
+          - name: WEB_APP_NAME
+            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
+          - name: mockWebAppName
+            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
+          - name: mockWebAppResourceGroup
+            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+          - name: RGName
+            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
         steps:
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download BESS Functional test Artifact"
@@ -896,6 +874,35 @@ stages:
                       !**/obj/**
                     testRunTitle: "QA-BESSAutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download Terraform Artifact"
+                  condition: always()
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'qaliveterraformartifact'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: AzureCLI@2
+                  displayName: "Swap Webjob Configuration"
+                  condition: always()
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-QA-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_webjob_configuration.ps1"
+                    arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
+                - task: AzureCLI@2
+                  displayName: "Swap Stub Configuration"
+                  condition: always()
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_stub_configuration.ps1"
+                    arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
   - stage: Livedeploy
     displayName: "Livedeploy (inc terraform, webapp deploy)"
