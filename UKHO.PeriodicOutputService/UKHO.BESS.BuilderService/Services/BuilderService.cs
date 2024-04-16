@@ -61,7 +61,14 @@ namespace UKHO.BESS.BuilderService.Services
                          configQueueMessage.Type == BessType.CHANGE.ToString())
                 {
                     var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
-                    LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                    if (latestProductVersions.ProductVersions.Count > 0)
+                    {
+                        LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                    }
+                    else
+                    {
+                        logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    }
                 }
             }
             else
