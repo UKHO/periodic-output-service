@@ -249,4 +249,10 @@
     </notes>
     <cve>CVE-2022-39349</cve>
   </suppress>
+  <suppress>
+   <notes><![CDATA[
+   file name: Azure.Identity:1.10.4
+   ]]></notes>
+   <vulnerabilityName>CVE-2024-29992</vulnerabilityName>
+</suppress>
 </suppressions>
