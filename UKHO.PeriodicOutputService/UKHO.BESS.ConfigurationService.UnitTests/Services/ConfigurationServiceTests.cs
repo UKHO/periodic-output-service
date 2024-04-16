@@ -195,7 +195,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.MacroInvalidOrUnavailable.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Macro is invalid or not available, Bespoke Exchange Set will not be created for config file: {fileName} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Macro {macro} is invalid or not available, Bespoke Exchange Set will not be created for config file: {fileName} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
