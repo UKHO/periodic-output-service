@@ -44,56 +44,12 @@ variables:
 stages:
   - stage: Stryker_Mutator
     displayName: "Stryker Mutator"
-    condition: ${{ eq(parameters.disableStryker, false) }}
-    dependsOn: 
-      - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+    dependsOn: []
     variables:
     - name: StrykerDotNetVersion
       value: 8.0.x
     jobs:
-    - job: Stryker
-      steps:
-        - task: UseDotNet@2
-          displayName: 'Use .NET SDK'
-          inputs:
-            packageType: sdk
-            useGlobalJson: true
-            workingDirectory: '$(Build.SourcesDirectory)'
-
-        - task: UseDotNet@2
-          displayName: 'Use .NET SDK for Stryker'
-          inputs:
-            packageType: sdk
-            version: $(StrykerDotNetVersion)
-
-        - task: PowerShell@1
-          displayName: "Create global.json for .NET"
-          inputs:
-            scriptType: inlineScript
-            workingFolder: $(Agent.TempDirectory)
-            inlineScript: |
-              dotnet new globaljson --sdk-version $(StrykerDotNetVersion)
-
-        - task: DotNetCoreCLI@2
-          displayName: "Install Stryker"
-          inputs:
-            command: custom
-            custom: tool
-            workingDirectory: $(Agent.TempDirectory)
-            arguments: install dotnet-stryker --version 3.7.1 --tool-path $(Agent.BuildDirectory)/tools
-
-        - task: Powershell@2
-          displayName: "Run Stryker"
-          inputs:
-            workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
-            targetType: 'inline'
-            pwsh: true
-            script: $(Agent.BuildDirectory)/tools/dotnet-stryker
-
-        - task: PublishMutationReport@0
-          displayName: 'Publish Stryker Mutator Report'
-          inputs:
-            reportPattern: '**/mutation-report.html'
+    
 
   - stage: PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     displayName: "Build (inc DependencyChecker, Dotnet Build , dotnet test and publish artifact )"
@@ -431,7 +387,53 @@ stages:
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\MockWebAPI'
               ArtifactName: MockWebAPI 
-     
+              
+      - job: Stryker
+        displayName: "Generate Stryker Report"
+        condition: ${{ eq(parameters.disableStryker, false) }}
+        steps:
+          - task: UseDotNet@2
+            displayName: 'Use .NET SDK'
+            inputs:
+              packageType: sdk
+              useGlobalJson: true
+              workingDirectory: '$(Build.SourcesDirectory)'
+  
+          - task: UseDotNet@2
+            displayName: 'Use .NET SDK for Stryker'
+            inputs:
+              packageType: sdk
+              version: $(StrykerDotNetVersion)
+  
+          - task: PowerShell@1
+            displayName: "Create global.json for .NET"
+            inputs:
+              scriptType: inlineScript
+              workingFolder: $(Agent.TempDirectory)
+              inlineScript: |
+                dotnet new globaljson --sdk-version $(StrykerDotNetVersion)
+  
+          - task: DotNetCoreCLI@2
+            displayName: "Install Stryker"
+            inputs:
+              command: custom
+              custom: tool
+              workingDirectory: $(Agent.TempDirectory)
+              arguments: install dotnet-stryker --version 3.7.1 --tool-path $(Agent.BuildDirectory)/tools
+  
+          - task: Powershell@2
+            displayName: "Run Stryker"
+            inputs:
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+              targetType: 'inline'
+              pwsh: true
+              script: $(Agent.BuildDirectory)/tools/dotnet-stryker
+  
+          - task: PublishMutationReport@0
+            displayName: 'Publish Stryker Mutator Report'
+            inputs:
+              reportPattern: '**/mutation-report.html'
+
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
     variables:
