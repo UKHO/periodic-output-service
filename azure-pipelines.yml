@@ -45,7 +45,8 @@ stages:
   - stage: Stryker_Mutator
     displayName: "Stryker Mutator"
     condition: ${{ eq(parameters.disableStryker, false) }}
-    dependsOn: []
+    dependsOn: 
+      - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     variables:
     - name: StrykerDotNetVersion
       value: 8.0.x
