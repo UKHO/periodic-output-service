@@ -48,8 +48,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
            new string[2]{ "$(now.WeekNumber.Year2)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(1 * 7)).Year.ToString().Substring(2,2)},
            new string[2]{ "$(now.WeekNumber +1.Year)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(1 * 7)).Year.ToString()},
            new string[2]{ "$(now.WeekNumber +1.Year2)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(1 * 7)).Year.ToString().Substring(2,2)},
-           new string[2]{ "$(now.AddDays(1))", today.AddDays(1).ToString(CultureInfo. InvariantCulture) },
-           new string[2]{ "$(now)", today.Date.ToString(CultureInfo.InvariantCulture)}
+           new string[2]{ "$(now.AddDays(1))", today.ToUniversalTime().AddDays(1).ToString(CultureInfo. InvariantCulture) },
+           new string[2]{ "$(now)", today.ToUniversalTime().ToString(CultureInfo.InvariantCulture)}
         };
 
         public static object[] unavailableMacroValues =
