@@ -386,14 +386,21 @@ namespace UKHO.PeriodicOutputService.Common.Services
             if (httpResponse.IsSuccessStatusCode)
             {
                 SearchBatchResponse searchBatchResponse = await SearchBatchResponseAsync(httpResponse);
-                if (searchBatchResponse.Entries.Count > 0)
+                if (searchBatchResponse.Entries.Any())
                 {
                     var batchResult = searchBatchResponse.Entries.FirstOrDefault();
-                    filePath = batchResult.Files.FirstOrDefault()?.Links.Get.Href;
+                    if (batchResult.Files.Count() == 1 && batchResult.Files.Where(x => x.Filename.ToUpper() == "README.TXT").Any())
+                    {
+                        filePath = batchResult.Files.FirstOrDefault().Links.Get.Href;
+                        return filePath;
+                    }
+
+                    _logger.LogError(EventIds.MultipleFilesFoundForReadmeFile.ToEventId(), "Error in file share service while searching readme.txt, multiple files are found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
+                    throw new FulfilmentException(EventIds.MultipleFilesFoundForReadmeFile.ToEventId());
                 }
                 else
                 {
-                    _logger.LogError(EventIds.ReadMeTextFileNotFound.ToEventId(), "Error in file share service readme.txt not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
+                    _logger.LogError(EventIds.ReadMeTextFileNotFound.ToEventId(), "Error in file share service while searching readme.txt not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
                     throw new FulfilmentException(EventIds.ReadMeTextFileNotFound.ToEventId());
                 }
             }
@@ -402,7 +409,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _logger.LogError(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId(), "Error in file share service while searching ReadMe file with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", httpResponse.RequestMessage.RequestUri, httpResponse.StatusCode, batchId, correlationId);
                 throw new FulfilmentException(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
             }
-            return filePath;
         }
 
         public async Task<bool> DownloadReadMeFileAsync(string readMeFilePath, string batchId, string exchangeSetRootPath, string correlationId)
@@ -411,13 +417,12 @@ namespace UKHO.PeriodicOutputService.Common.Services
             string fileName = _fssApiConfiguration.Value.ReadMeFileName;
             string filePath = Path.Combine(exchangeSetRootPath, fileName);
 
-            string lineToWrite = string.Concat("File date: ", DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ssZ", CultureInfo.InvariantCulture));
             HttpResponseMessage httpReadMeFileResponse;
             httpReadMeFileResponse = await _fssApiClient.DownloadFile(readMeFilePath.TrimStart('/'), accessToken);
             string latestReadmePath = httpReadMeFileResponse.RequestMessage.RequestUri.ToString();
 
             var requestUri = new Uri(httpReadMeFileResponse.RequestMessage.RequestUri.ToString()).GetLeftPart(UriPartial.Path);
-         
+
             if (httpReadMeFileResponse.IsSuccessStatusCode)
             {
                 var serverValue = httpReadMeFileResponse.Headers.Server.ToString().Split('/').First();
@@ -427,7 +432,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     {
                         _logger.LogInformation(EventIds.DownloadReadmeFile307RedirectResponse.ToEventId(), "File share service download readme.txt redirected with uri:{requestUri} responded with 307 code for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", requestUri, batchId, correlationId);
                     }
-                    return await _fileSystemHelper.DownloadReadmeFile(filePath, stream, lineToWrite, latestReadmePath);
+                    return await _fileSystemHelper.DownloadReadmeFile(filePath, stream, latestReadmePath);
                 }
             }
             else

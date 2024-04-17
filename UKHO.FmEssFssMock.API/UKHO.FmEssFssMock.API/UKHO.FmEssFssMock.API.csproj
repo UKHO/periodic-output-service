@@ -27,7 +27,10 @@
     <Content Update="Data\FSS\FssInfoResponse.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="Data\FSS\FssReadMeResponse.json">
+    <Content Update="Data\FSS\ValidFssReadMeResponse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Data\FSS\InvalidFssReadMeResponse.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="Data\SalesCatalogueService\SCSCatalogueResponse.json">

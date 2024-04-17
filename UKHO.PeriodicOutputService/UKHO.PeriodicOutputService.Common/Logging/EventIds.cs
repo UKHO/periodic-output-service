@@ -677,7 +677,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809134 - Completed download of 307 response README files from the file share service.
         /// </summary>
-        DownloadReadmeFile307RedirectResponse = 809134
+        DownloadReadmeFile307RedirectResponse = 809134,
+
+        /// <summary>
+        /// 809135 - Multiple files found for README files from the file share service.
+        /// </summary>
+        MultipleFilesFoundForReadmeFile = 809135
     }
 
     public static class EventIdExtensions

@@ -4,6 +4,7 @@
     {
         public string FssDataDirectoryPath { get; set; }
         public string FssInfoResponseFileName { get; set; }
-        public string FssReadMeResponseFileName { get; set; }   
+        public string ValidFssReadMeResponseFileName { get; set; }
+        public string InvalidFssReadMeResponseFileName { get; set; }    
     }
 }

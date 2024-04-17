@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO.Abstractions;
-using System.Net;
-using System.Text;
+﻿using System.IO.Abstractions;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Utilities;
@@ -167,55 +164,32 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public bool CreateEmptyFileContent(string filePath)
         {
-            if (string.IsNullOrEmpty(filePath))
+            if (!string.IsNullOrEmpty(filePath))
             {
-                return false;
-            }
-            _fileSystem.File.WriteAllText(filePath, string.Empty);
-            return true;
-        }
-
-        public async Task<bool> DownloadReadmeFile(string filePath, Stream stream, string lineToWrite, string latestReadmePath)
-        {
-            if (stream != null)
-            {
-                ////var extendedAsciiEncoding = Encoding.GetEncoding("iso-8859-1");
-                ////CreateFileCopy(filePath, stream);
-
-                using (HttpClient client = new())
-                {
-                    HttpResponseMessage response = await client.GetAsync(latestReadmePath);
-                    using (Stream streamToReadFrom =  await response.Content.ReadAsStreamAsync())
-                    {
-                        using (FileStream fileStream = File.Create(filePath))
-                        {
-                           await streamToReadFrom.CopyToAsync(fileStream);
-                        }
-                    }
-                }
-                ////var text = File.ReadAllText(filePath, extendedAsciiEncoding);
-
-                ////var secondLineText = GetLine(filePath);
-                ////text = secondLineText.Length == 0 ? lineToWrite : text.Replace(secondLineText, lineToWrite);
-                ////if (!string.IsNullOrWhiteSpace(text))
-                ////    File.WriteAllText(filePath, text, extendedAsciiEncoding);
-
+                _fileSystem.File.WriteAllText(filePath, string.Empty);
                 return true;
             }
             return false;
         }
 
-        ////private static string GetLine(string filePath)
-        ////{
-        ////    int lineFound = 2;
-        ////    string secondLine = string.Empty;
-        ////    using (var sr = new StreamReader(filePath))
-        ////    {
-        ////        for (int i = 1; i < lineFound; i++)
-        ////            sr.ReadLine();
-        ////        secondLine = sr.ReadLine();
-        ////    }
-        ////    return secondLine ?? string.Empty;
-        ////}
+        public async Task<bool> DownloadReadmeFile(string filePath, Stream stream, string latestReadmePath)
+        {
+            if (stream != null)
+            {
+                using (HttpClient client = new())
+                {
+                    HttpResponseMessage response = await client.GetAsync(latestReadmePath);
+                    using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync())
+                    {
+                        using (FileStream fileStream = File.Create(filePath))
+                        {
+                            await streamToReadFrom.CopyToAsync(fileStream);
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
     }
 }
