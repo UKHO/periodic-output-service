@@ -259,15 +259,35 @@
    file name: WireMock.Net.Abstractions.dll
    ]]></notes>
    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
-   <cve>CVE-2020-27853</cve>
-</suppress>
+   <cve>CVE-2020-27853</cve>    
+    <cve>CVE-2018-9116</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: WireMock.Org.Abstractions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Org\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2023-41329</cve>
+  </suppress>
   <suppress>
     <notes>
       <![CDATA[
    file name: WireMock.Net.OpenApiParser.dll
    ]]>
     </notes>
-    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.OpenApiParser@.*$</packageUrl>
-    <cve>CVE-2020-27853</cve>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.OpenApiParser@.*$</packageUrl>    
+    <cve>CVE-2021-41093</cve>
+    <cve>CVE-2020-15258</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: JsonConverter.Newtonsoft.Json.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/JsonConverter\.Newtonsoft\.Json@.*$</packageUrl>
+    <cve>CVE-2020-12762</cve>
   </suppress>
 </suppressions>
