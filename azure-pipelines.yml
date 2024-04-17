@@ -52,8 +52,6 @@ stages:
       value: 8.0.x
     jobs:
     - job: Stryker
-      workspace:
-        clean: all
       steps:
         - task: UseDotNet@2
           displayName: 'Use .NET SDK'
