@@ -50,17 +50,18 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             _logger.LogInformation(EventIds.GetNewAccessTokenStarted.ToEventId(), "Generating new access token to call external endpoint started | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            var tokenCredential = new DefaultAzureCredential();
-            AccessToken accessToken = await tokenCredential.GetTokenAsync(
-                new TokenRequestContext(scopes: new string[] { resource + "/.default" }) { }
-            );
+            //var tokenCredential = new DefaultAzureCredential();
+            //AccessToken accessToken = await tokenCredential.GetTokenAsync(
+            //    new TokenRequestContext(scopes: new string[] { resource + "/.default" }) { }
+            //);
 
             _logger.LogInformation(EventIds.GetNewAccessTokenCompleted.ToEventId(), "New access token to call external endpoint generated successfully | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             return new AccessTokenItem
             {
-                ExpiresIn = accessToken.ExpiresOn.UtcDateTime,
-                AccessToken = accessToken.Token
+                ExpiresIn = DateTime.Now.AddHours(1),
+                AccessToken = !string.IsNullOrWhiteSpace(resource) ? ""
+                    : resource
             };
         }
 

@@ -1,0 +1,15 @@
+{
+    "stryker-config": {
+        "reporters": [
+            "html",
+            "progress"
+        ],
+        "thresholds": {
+            "high": 0,
+            "low": 0,
+            "break": 0
+        },
+        "project": "UKHO.BESS.ConfigurationService.csproj",
+        "solution": "D:/UK-HO/Development/periodic-output-service/UKHO.PeriodicOutputService/UKHO.PeriodicOutputService.sln"
+    }
+}
