@@ -38,6 +38,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="6.0.29" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="WireMock.Net" Version="1.5.52" />
   </ItemGroup>
