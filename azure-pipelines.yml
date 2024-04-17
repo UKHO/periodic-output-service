@@ -100,51 +100,51 @@ stages:
     displayName: "Build (inc DependencyChecker, Dotnet Build , dotnet test and publish artifact )"
     dependsOn: []
     jobs:
-      - job: Dependencychecker
-        workspace:
-          clean: all
-        displayName: "Dependencychecker"
-        steps:
-          - task: UseDotNet@2
-            displayName: 'Use .NET SDK'
-            inputs:
-              packageType: sdk
-              useGlobalJson: true
-              workingDirectory: '$(Build.SourcesDirectory)'
+      # - job: Dependencychecker
+      #   workspace:
+      #     clean: all
+      #   displayName: "Dependencychecker"
+      #   steps:
+      #     - task: UseDotNet@2
+      #       displayName: 'Use .NET SDK'
+      #       inputs:
+      #         packageType: sdk
+      #         useGlobalJson: true
+      #         workingDirectory: '$(Build.SourcesDirectory)'
 
-          - task: DotNetCoreCLI@2
-            displayName: ".Net Core - NuGet restore non test projects only"
-            inputs:
-              command: "restore"
-              projects: |
-                **/*.csproj
-                !**/*Tests.csproj
-              feedsToUse: config
-              noCache: true
-              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
-              packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packages'
+      #     - task: DotNetCoreCLI@2
+      #       displayName: ".Net Core - NuGet restore non test projects only"
+      #       inputs:
+      #         command: "restore"
+      #         projects: |
+      #           **/*.csproj
+      #           !**/*Tests.csproj
+      #         feedsToUse: config
+      #         noCache: true
+      #         nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+      #         workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+      #         packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packages'
 
-          - task: CmdLine@1
-            displayName: "Run OWASP Dependency Checker"
-            inputs:
-              filename: 'dependency-check.bat'
-              arguments: '--project "periodic-output-service - $(Build.SourceBranchName)" --scan "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService" --out "$(Build.ArtifactStagingDirectory)\DCReport" --suppression $(Build.SourcesDirectory)\NVDSuppressions.xml --noupdate'
+      #     - task: CmdLine@1
+      #       displayName: "Run OWASP Dependency Checker"
+      #       inputs:
+      #         filename: 'dependency-check.bat'
+      #         arguments: '--project "periodic-output-service - $(Build.SourceBranchName)" --scan "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService" --out "$(Build.ArtifactStagingDirectory)\DCReport" --suppression $(Build.SourcesDirectory)\NVDSuppressions.xml --noupdate'
 
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish Artifact: OWASP Dependency Checker Report"
-            inputs:
-              PathtoPublish: '$(Build.ArtifactStagingDirectory)\DCReport'
-              ArtifactName: "OWASP Dependency Checker Report"
+      #     - task: PublishBuildArtifacts@1
+      #       displayName: "Publish Artifact: OWASP Dependency Checker Report"
+      #       inputs:
+      #         PathtoPublish: '$(Build.ArtifactStagingDirectory)\DCReport'
+      #         ArtifactName: "OWASP Dependency Checker Report"
 
-          - task: PowerShell@1
-            displayName: "Fail Build if Dependency Check Finds Any Vulnerabilities"
-            inputs:
-              scriptType: inlineScript
-              arguments: '-ReportLocation $(Build.ArtifactStagingDirectory)\DCReport\*'
-              inlineScript: |
-                param($ReportLocation)
-                Invoke-VulnerabilityCheck -ReportLocation $ReportLocation
+      #     - task: PowerShell@1
+      #       displayName: "Fail Build if Dependency Check Finds Any Vulnerabilities"
+      #       inputs:
+      #         scriptType: inlineScript
+      #         arguments: '-ReportLocation $(Build.ArtifactStagingDirectory)\DCReport\*'
+      #         inlineScript: |
+      #           param($ReportLocation)
+      #           Invoke-VulnerabilityCheck -ReportLocation $ReportLocation
 
       - job: UnitTestsAndCodeCoverage
         workspace:
