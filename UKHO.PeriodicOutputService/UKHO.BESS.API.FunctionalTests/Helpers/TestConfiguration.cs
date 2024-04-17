@@ -53,6 +53,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             public string? QueueName { get; set; }
         }
+
         public class ExchangeSetDetails
         {
             public string? ExchangeSetFileName { get; set; }
