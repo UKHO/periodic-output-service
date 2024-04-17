@@ -261,4 +261,13 @@
    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
    <cve>CVE-2020-27853</cve>
 </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: WireMock.Net.OpenApiParser.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.OpenApiParser@.*$</packageUrl>
+    <cve>CVE-2020-27853</cve>
+  </suppress>
 </suppressions>
