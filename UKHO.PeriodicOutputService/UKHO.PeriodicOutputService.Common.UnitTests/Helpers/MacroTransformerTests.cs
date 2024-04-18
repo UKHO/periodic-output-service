@@ -37,8 +37,22 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
            new string[2]{ "$(now.AddDays(1).WeekNumber.Year2)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(1)).Year.ToString().Substring(2,2) },
            new string[2]{ "$(now.AddDays(1).Month)", today.AddDays(1).Month.ToString() },
            new string[2]{ "$(now.AddDays(1).Month2)", today.AddDays(1).Month.ToString().PadLeft(2,'0') },
-           new string[2]{ "$(now.AddDays(1).MonthName)", today.ToString("MMMM")},
-           new string[2]{ "$(now.AddDays(1).MonthShortName)", today.ToString("MMM")},
+           new string[2]{ "$(now.AddDays(1).MonthName)", today.AddDays(1).ToString("MMMM")},
+           new string[2]{ "$(now.AddDays(1).MonthShortName)", today.AddDays(1).ToString("MMM")},
+
+           new string[2]{ "$(now.AddDays(-1).Day)", today.AddDays(-1).Day.ToString() },
+           new string[2]{ "$(now.AddDays(-1).Day2)", today.AddDays(-1).Day.ToString().PadLeft(2,'0') },
+           new string[2]{ "$(now.AddDays(-1).DayName)", today.AddDays(-1).ToString("dddd") },
+           new string[2]{ "$(now.AddDays(-1).DayShortName)", today.AddDays(-1).ToString("ddd") },
+           new string[2]{ "$(now.AddDays(-1).WeekNumber)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(-1)).Week.ToString() },
+           new string[2]{ "$(now.AddDays(-1).WeekNumber2)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(-1)).Week.ToString().PadLeft(2,'0') },
+           new string[2]{ "$(now.AddDays(-1).WeekNumber.Year)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(-1)).Year.ToString() },
+           new string[2]{ "$(now.AddDays(-1).WeekNumber.Year2)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(-1)).Year.ToString().Substring(2,2) },
+           new string[2]{ "$(now.AddDays(-1).Month)", today.AddDays(-1).Month.ToString() },
+           new string[2]{ "$(now.AddDays(-1).Month2)", today.AddDays(-1).Month.ToString().PadLeft(2,'0') },
+           new string[2]{ "$(now.AddDays(-1).MonthName)", today.AddDays(-1).ToString("MMMM")},
+           new string[2]{ "$(now.AddDays(-1).MonthShortName)", today.AddDays(-1).ToString("MMM")},
+
            new string[2]{ "$(now.WeekNumber)", WeekNumber.GetUKHOWeekFromDateTime(today).Week.ToString()},
            new string[2]{ "$(now.WeekNumber2)", WeekNumber.GetUKHOWeekFromDateTime(today).Week.ToString().PadLeft(2,'0')},
            new string[2]{ "$(now.WeekNumber.Year)", WeekNumber.GetUKHOWeekFromDateTime(today).Year.ToString()},
@@ -48,7 +62,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
            new string[2]{ "$(now.WeekNumber +1.Year)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(1 * 7)).Year.ToString()},
            new string[2]{ "$(now.WeekNumber +1.Year2)", WeekNumber.GetUKHOWeekFromDateTime(today.AddDays(1 * 7)).Year.ToString().Substring(2,2)},
            new string[2]{ "$(now.AddDays(1))", today.ToUniversalTime().AddDays(1).ToString(CultureInfo. InvariantCulture) },
-           new string[2]{ "$(now)", today.ToUniversalTime().ToString(CultureInfo.InvariantCulture)}
+           new string[2]{ "$(now)", today.ToUniversalTime().ToString(CultureInfo.InvariantCulture)},
+           new string[2]{ "$(now.WeekNumber.Year)/$(now.WeekNumber2)" , WeekNumber.GetUKHOWeekFromDateTime(today).Year.ToString() + "/" + WeekNumber.GetUKHOWeekFromDateTime(today).Week.ToString().PadLeft(2, '0') }
         };
 
         public static object[] unavailableMacroValues =
