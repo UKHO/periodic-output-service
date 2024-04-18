@@ -1,5 +1,3 @@
-
-using UKHO.PKSWireMock.API;
 using WireMock.Settings;
 
 namespace UKHO.PKSWireMock.API
