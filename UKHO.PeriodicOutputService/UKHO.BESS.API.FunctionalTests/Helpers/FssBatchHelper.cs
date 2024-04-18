@@ -37,7 +37,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 batchStatus = batchStatusResponseObj!.Status!;
 
                 if (batchStatus!.Equals("Committed"))
+                {
                     break;
+                }
             }
             return batchStatus;
         }

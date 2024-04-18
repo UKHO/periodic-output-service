@@ -31,5 +31,14 @@
                 Directory.Delete(path, true);
             }
         }
+
+        /// <summary>
+        /// This method is use to give time to BuilderService to download the exchangeSet.
+        /// </summary>
+        public static void WaitForDownloadExchangeSet()
+        {
+            //The below sleep is to give time to BuilderService to download the exchangeSet.
+            Thread.Sleep(90000);
+        }
     }
 }

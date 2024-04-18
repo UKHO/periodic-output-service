@@ -37,7 +37,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
             QueueClientOptions queueOptions = new() { MessageEncoding = QueueMessageEncoding.Base64 };
             QueueClient queue = new(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName, queueOptions);
             queue.SendMessage(jsonString);
-
+            Extensions.WaitForDownloadExchangeSet();
             string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
             bool expectedResulted = FssBatchHelper.CheckFilesInDownloadedZip(downloadFolderPath, exchangeSetStandard);
             expectedResulted.Should().Be(true);
