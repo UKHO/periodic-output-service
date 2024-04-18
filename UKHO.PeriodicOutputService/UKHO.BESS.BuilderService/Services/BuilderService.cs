@@ -71,11 +71,6 @@ namespace UKHO.BESS.BuilderService.Services
                     }
                 }
             }
-            else
-            {
-                logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Bess batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
-                throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
-            }
 
             #endregion TemporaryUploadCode
 
