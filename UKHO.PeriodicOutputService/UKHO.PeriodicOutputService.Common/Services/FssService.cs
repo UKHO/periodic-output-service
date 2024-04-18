@@ -45,7 +45,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        private (double, int) setBatchPollingCutOffAndDelayTime(RequestType requestType)
+        private (double, int) SetBatchPollingCutOffAndDelayTime(RequestType requestType)
         {
             switch (requestType)
             {
@@ -68,7 +68,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             FssBatchStatus batchStatus = FssBatchStatus.Incomplete;
             DateTime startTime = DateTime.UtcNow;
             (double batchStatusPollingCutoffTime, int batchStatusPollingDelayTime) =
-                setBatchPollingCutOffAndDelayTime(requestType);
+                SetBatchPollingCutOffAndDelayTime(requestType);
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/status";
 
