@@ -27,10 +27,10 @@
     <Content Update="Data\FSS\FssInfoResponse.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="Data\FSS\ValidFssReadMeResponse.json">
+    <Content Update="Data\FSS\FssSingleReadMeResponse.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="Data\FSS\InvalidFssReadMeResponse.json">
+    <Content Update="Data\FSS\FssMultipleFilesReadMeResponse.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="Data\SalesCatalogueService\SCSCatalogueResponse.json">
@@ -48,6 +48,12 @@
     <None Update="Data\0D91FB1A-CBE2-4443-8F61-E9A925FA00C9\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\10d40dd5-ddfb-497a-bb67-d99fb1658320\ACCatalogs.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\10d40dd5-ddfb-497a-bb67-d99fb1658320\distributors.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_WK34_22_Only.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -57,13 +63,13 @@
     <None Update="Data\38EBEB5C-2FAA-47F5-B3AC-B196D411FA75\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\58ee085b-434f-4b6c-a73a-fa7fbb0cd224\README.TXT">
+    <None Update="Data\ab4a692d-6e3b-48a3-bd37-d232c60dd75d\README.TXT">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\5CF9E1D7-207C-4C96-B5E7-5A519F0EA0C0\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\6406712f-c6f0-4a2f-96d9-ee8158242697\README.TXT">
+    <None Update="Data\10d40dd5-ddfb-497a-bb67-d99fb1658320\ADC_README.TXT">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\AIO V2 - UKHO letter for inspectors.pdf">
@@ -82,9 +88,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\7D302AD3-97C3-4108-BC8A-B19FC4920079\AIO.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\90520c74-6300-45f1-8e98-e70a17643576\README.TXT">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\9F349E4F-A4F0-45E8-9A3A-7BAA3C561C7E\V01X01.zip">
@@ -190,7 +193,6 @@
 
   <ItemGroup>
     <Folder Include="Data\649C902D-5282-4CCF-924A-2B548EF42179\" />
-    <Folder Include="Data\90520c74-6300-45f1-8e98-e70a17643576\" />
   </ItemGroup>
 
 </Project>

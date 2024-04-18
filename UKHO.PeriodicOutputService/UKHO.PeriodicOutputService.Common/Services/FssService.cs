@@ -396,8 +396,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
                         return filePath;
                     }
 
-                    _logger.LogError(EventIds.MultipleFilesFoundForReadmeFile.ToEventId(), "Error in file share service while searching readme.txt, multiple files are found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
-                    throw new FulfilmentException(EventIds.MultipleFilesFoundForReadmeFile.ToEventId());
+                    _logger.LogError(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId(), "Error in file share service while searching readme.txt, multiple files are found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
+                    throw new FulfilmentException(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId());
                 }
                 else
                 {

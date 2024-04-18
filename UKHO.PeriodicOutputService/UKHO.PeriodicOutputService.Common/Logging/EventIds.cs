@@ -697,7 +697,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809138 - Multiple files found for README files from the file share service.
         /// </summary>
-        MultipleFilesFoundForReadmeFile = 809138
+        QueryFileShareServiceMultipleFilesFound = 809138
     }
 
     public static class EventIdExtensions

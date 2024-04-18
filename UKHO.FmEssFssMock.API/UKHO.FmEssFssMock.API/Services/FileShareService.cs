@@ -229,12 +229,12 @@ namespace UKHO.FmEssFssMock.API.Services
             }
             else if (filter.ToUpper().Contains("AVCS"))
             {
-                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.ValidFssReadMeResponseFileName);
+                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName);
                 return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
             }
             else if (filter.ToUpper().Contains("INVALID"))
             {
-                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.InvalidFssReadMeResponseFileName);
+                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssMultipleFilesReadMeResponseFileName);
                 return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
             }
 

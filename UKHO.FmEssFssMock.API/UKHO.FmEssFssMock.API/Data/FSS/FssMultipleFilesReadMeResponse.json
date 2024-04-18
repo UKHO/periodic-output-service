@@ -1,0 +1,1217 @@
+{
+    "count": 8,
+    "total": 8,
+    "entries": [
+        {
+            "batchId": "10d40dd5-ddfb-497a-bb67-d99fb1658320",
+            "status": "Committed",
+            "allFilesZipSize": 14576585,
+            "attributes": [
+                {
+                    "key": "Catalogue Type",
+                    "value": "ADC"
+                },
+                {
+                    "key": "Content",
+                    "value": "Catalogue"
+                },
+                {
+                    "key": "Frequency",
+                    "value": "Weekly"
+                },
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                },
+                {
+                    "key": "Week Number",
+                    "value": "15"
+                },
+                {
+                    "key": "Year",
+                    "value": "2024"
+                },
+                {
+                    "key": "Year / Week",
+                    "value": "2024 / 15"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2024-04-12T10:20:09.65Z",
+            "expiryDate": "2024-05-10T10:19:16Z",
+            "files": [
+                {
+                    "filename": "ADC_README.TXT",
+                    "fileSize": 760,
+                    "mimeType": "text/plain",
+                    "hash": "k9wcCnV3aBXLh2PZFFYiZw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/ADC_README.TXT"
+                        }
+                    }
+                },
+                {
+                    "filename": "ACCatalogs.zip",
+                    "fileSize": 1800,
+                    "mimeType": "application/zip",
+                    "hash": "Yf5ZK01oqJiRip14rxQM5Q==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/ACCatalogs.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "distributors.zip",
+                    "fileSize": 76497,
+                    "mimeType": "application/zip",
+                    "hash": "WUCxlu0CE7XRtgNe8GdA8w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/distributors.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "tpnms.zip",
+                    "fileSize": 422317,
+                    "mimeType": "application/zip",
+                    "hash": "ur7+UWFSgn4zihxyPhuXXQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/tpnms.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "TPNMS Diagrams.zip",
+                    "fileSize": 1646408,
+                    "mimeType": "application/zip",
+                    "hash": "218BLbULr+qqtsTipLNf/w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/TPNMS%20Diagrams.zip"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "ab4a692d-6e3b-48a3-bd37-d232c60dd75d",
+            "status": "Committed",
+            "allFilesZipSize": 18957,
+            "attributes": [
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2024-04-11T09:01:18.027Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "README.txt",
+                    "fileSize": 55092,
+                    "mimeType": "text/plain",
+                    "hash": "C2DI95LYetdIO6q1baIHBA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/ab4a692d-6e3b-48a3-bd37-d232c60dd75d/files/README.txt"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "a9ca8292-17a2-4920-9814-ed9ff32f601e",
+            "status": "Committed",
+            "allFilesZipSize": 14568512,
+            "attributes": [
+                {
+                    "key": "Catalogue Type",
+                    "value": "ADC"
+                },
+                {
+                    "key": "Content",
+                    "value": "Catalogue"
+                },
+                {
+                    "key": "Frequency",
+                    "value": "Weekly"
+                },
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                },
+                {
+                    "key": "Week Number",
+                    "value": "14"
+                },
+                {
+                    "key": "Year",
+                    "value": "2024"
+                },
+                {
+                    "key": "Year / Week",
+                    "value": "2024 / 14"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2024-04-05T07:55:53.197Z",
+            "expiryDate": "2024-05-03T07:55:16Z",
+            "files": [
+                {
+                    "filename": "ADC_README.TXT",
+                    "fileSize": 760,
+                    "mimeType": "text/plain",
+                    "hash": "k9wcCnV3aBXLh2PZFFYiZw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ADC_README.TXT"
+                        }
+                    }
+                },
+                {
+                    "filename": "ACCatalogs.zip",
+                    "fileSize": 1787,
+                    "mimeType": "application/zip",
+                    "hash": "2rhIm4X+QBNUwGR5i95kpw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ACCatalogs.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "TPNMs.cat",
+                    "fileSize": 2645,
+                    "mimeType": "application/binary",
+                    "hash": "m+QCnDnq+HCfpFxRPpniCw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/TPNMs.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADRS2.cat",
+                    "fileSize": 3415,
+                    "mimeType": "application/binary",
+                    "hash": "kyBBlK+hyyzChvw3kiGCVQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ADRS2.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADRS1345.cat",
+                    "fileSize": 3471,
+                    "mimeType": "application/binary",
+                    "hash": "6ITHT2YSiZx2tOswTaN3kQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ADRS1345.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "TotalTide.cat",
+                    "fileSize": 4530,
+                    "mimeType": "application/binary",
+                    "hash": "zBhPQdg33P46TTUassMywg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/TotalTide.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADLL.cat",
+                    "fileSize": 4609,
+                    "mimeType": "application/binary",
+                    "hash": "a+54MDmkTNsKVtRSfFJFUA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ADLL.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADRS6.cat",
+                    "fileSize": 4782,
+                    "mimeType": "application/binary",
+                    "hash": "oNBku/HKOQ50AzbysYZRDg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ADRS6.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ATT.cat",
+                    "fileSize": 5386,
+                    "mimeType": "application/binary",
+                    "hash": "efnkvW6duBsufcfvOxrHnQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ATT.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ALRS.cat",
+                    "fileSize": 6552,
+                    "mimeType": "application/binary",
+                    "hash": "1nCgsbdbreWg5DUeGO1lfw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ALRS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ALL.cat",
+                    "fileSize": 7926,
+                    "mimeType": "application/binary",
+                    "hash": "YPBNwzBQgjLz6q8YQo9mng==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ALL.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "SDs.cat",
+                    "fileSize": 17938,
+                    "mimeType": "application/binary",
+                    "hash": "gRqQa8DcfUMA5LA9noGfZw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/SDs.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "e-NP SDs.cat",
+                    "fileSize": 18861,
+                    "mimeType": "application/binary",
+                    "hash": "Fl8px7T5MHFa0SEVTGJK9g==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/e-NP%20SDs.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "distributors.zip",
+                    "fileSize": 76497,
+                    "mimeType": "application/zip",
+                    "hash": "WUCxlu0CE7XRtgNe8GdA8w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/distributors.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "Other.cat",
+                    "fileSize": 100893,
+                    "mimeType": "application/binary",
+                    "hash": "P4qW8qGsgjGvobalGTNuXw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/Other.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "objects.zip",
+                    "fileSize": 131379,
+                    "mimeType": "application/zip",
+                    "hash": "hwXRSrkaT+x/LCopfgmmxg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/objects.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "ECDIS.cat",
+                    "fileSize": 223413,
+                    "mimeType": "application/binary",
+                    "hash": "baMHFUXzv6btCYVN1KgSGg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ECDIS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "tpnms.zip",
+                    "fileSize": 422444,
+                    "mimeType": "application/zip",
+                    "hash": "gAjiZNFObLtuSH2dH3m4Yw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/tpnms.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "Paper Charts.cat",
+                    "fileSize": 1042263,
+                    "mimeType": "application/binary",
+                    "hash": "4VpGMtFbCJlrhpihJrUvcQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/Paper%20Charts.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ARCS.cat",
+                    "fileSize": 1052345,
+                    "mimeType": "application/binary",
+                    "hash": "ohtkdJ5G0hmZkLyNgI494w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ARCS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "TPNMS Diagrams.zip",
+                    "fileSize": 1646408,
+                    "mimeType": "application/zip",
+                    "hash": "nrHaWIjBJWoJmynbvRgodg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/TPNMS%20Diagrams.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "AVCS.cat",
+                    "fileSize": 5294442,
+                    "mimeType": "application/binary",
+                    "hash": "NNhugDIKuyl3XqGQPk8czA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/AVCS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ENC Units.cat",
+                    "fileSize": 5393455,
+                    "mimeType": "application/binary",
+                    "hash": "NAvSlnPo1VKtO82RS0GJ9A==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ENC%20Units.cat"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "5c289e01-b1f3-43b7-b220-b99514cb45c6",
+            "status": "Committed",
+            "allFilesZipSize": 14560673,
+            "attributes": [
+                {
+                    "key": "Catalogue Type",
+                    "value": "ADC"
+                },
+                {
+                    "key": "Content",
+                    "value": "Catalogue"
+                },
+                {
+                    "key": "Frequency",
+                    "value": "Weekly"
+                },
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                },
+                {
+                    "key": "Week Number",
+                    "value": "13"
+                },
+                {
+                    "key": "Year",
+                    "value": "2024"
+                },
+                {
+                    "key": "Year / Week",
+                    "value": "2024 / 13"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2024-03-28T15:35:35.027Z",
+            "expiryDate": "2024-04-25T15:34:17Z",
+            "files": [
+                {
+                    "filename": "ADC_README.TXT",
+                    "fileSize": 760,
+                    "mimeType": "text/plain",
+                    "hash": "k9wcCnV3aBXLh2PZFFYiZw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ADC_README.TXT"
+                        }
+                    }
+                },
+                {
+                    "filename": "ACCatalogs.zip",
+                    "fileSize": 1793,
+                    "mimeType": "application/zip",
+                    "hash": "Bs8WG2Cu2DSq61Avi02QLg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ACCatalogs.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "TPNMs.cat",
+                    "fileSize": 2649,
+                    "mimeType": "application/binary",
+                    "hash": "sFefbG6j7GXd1Fuy9OnkbA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/TPNMs.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADRS2.cat",
+                    "fileSize": 3414,
+                    "mimeType": "application/binary",
+                    "hash": "e8Vh0YaMZ53GQcqchOQtDA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ADRS2.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADRS1345.cat",
+                    "fileSize": 3470,
+                    "mimeType": "application/binary",
+                    "hash": "Yxuy9fjt9AXxngnjzwsEPw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ADRS1345.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "TotalTide.cat",
+                    "fileSize": 4537,
+                    "mimeType": "application/binary",
+                    "hash": "XKKfTrSJgxXXhkI/FdEVKg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/TotalTide.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADLL.cat",
+                    "fileSize": 4604,
+                    "mimeType": "application/binary",
+                    "hash": "/zhi12bnhyTkBx+Oo9uqNg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ADLL.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADRS6.cat",
+                    "fileSize": 4797,
+                    "mimeType": "application/binary",
+                    "hash": "IYv4vEHb/lrsTPx/UPaReg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ADRS6.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ATT.cat",
+                    "fileSize": 5383,
+                    "mimeType": "application/binary",
+                    "hash": "AU7rEsnDl+i2RArN3O1s8A==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ATT.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ALRS.cat",
+                    "fileSize": 6554,
+                    "mimeType": "application/binary",
+                    "hash": "mV5VG0Ow0J2N6XbqjKGPKg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ALRS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ALL.cat",
+                    "fileSize": 7933,
+                    "mimeType": "application/binary",
+                    "hash": "6E2fNF20wzwH/JcyyE9gVQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ALL.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "SDs.cat",
+                    "fileSize": 17939,
+                    "mimeType": "application/binary",
+                    "hash": "Hk3DgfXy/9D/rRv5+mRJOw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/SDs.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "e-NP SDs.cat",
+                    "fileSize": 18862,
+                    "mimeType": "application/binary",
+                    "hash": "Oi8XlUTiIVqvXh/qVHyzAA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/e-NP%20SDs.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "distributors.zip",
+                    "fileSize": 76497,
+                    "mimeType": "application/zip",
+                    "hash": "WUCxlu0CE7XRtgNe8GdA8w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/distributors.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "Other.cat",
+                    "fileSize": 100902,
+                    "mimeType": "application/binary",
+                    "hash": "nUTK4NLJjY6gUXf/JO7vgg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/Other.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "objects.zip",
+                    "fileSize": 131379,
+                    "mimeType": "application/zip",
+                    "hash": "scsmpE2yvwycSxX0k7V4OQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/objects.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "ECDIS.cat",
+                    "fileSize": 223497,
+                    "mimeType": "application/binary",
+                    "hash": "LvBRor/YtINytYpBMusjXQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ECDIS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "tpnms.zip",
+                    "fileSize": 422690,
+                    "mimeType": "application/zip",
+                    "hash": "wtK4t9bZOQ5TKqe8aA2DPw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/tpnms.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "Paper Charts.cat",
+                    "fileSize": 1042301,
+                    "mimeType": "application/binary",
+                    "hash": "qX8lJ20rYwfYnAuX+y/Vnw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/Paper%20Charts.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ARCS.cat",
+                    "fileSize": 1052418,
+                    "mimeType": "application/binary",
+                    "hash": "TyjwCOjWaL2Vsnvoyncq1g==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ARCS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "TPNMS Diagrams.zip",
+                    "fileSize": 1646408,
+                    "mimeType": "application/zip",
+                    "hash": "DLLSFhnmTGPa3DEFleJCUA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/TPNMS%20Diagrams.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "AVCS.cat",
+                    "fileSize": 5289033,
+                    "mimeType": "application/binary",
+                    "hash": "Uvp1NIzXU+Ew/lYttVd9/Q==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/AVCS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ENC Units.cat",
+                    "fileSize": 5388879,
+                    "mimeType": "application/binary",
+                    "hash": "jf7GIiTHt2DOjB/nzde2pQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/5c289e01-b1f3-43b7-b220-b99514cb45c6/files/ENC%20Units.cat"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "898a9c7b-10db-46ea-8763-2fa22eecffe2",
+            "status": "Committed",
+            "allFilesZipSize": 14527670,
+            "attributes": [
+                {
+                    "key": "Catalogue Type",
+                    "value": "ADC"
+                },
+                {
+                    "key": "Content",
+                    "value": "Catalogue"
+                },
+                {
+                    "key": "Frequency",
+                    "value": "Weekly"
+                },
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                },
+                {
+                    "key": "Week Number",
+                    "value": "12"
+                },
+                {
+                    "key": "Year",
+                    "value": "2024"
+                },
+                {
+                    "key": "Year / Week",
+                    "value": "2024 / 12"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2024-03-22T09:10:15.597Z",
+            "expiryDate": "2024-04-19T09:09:31Z",
+            "files": [
+                {
+                    "filename": "ADC_README.TXT",
+                    "fileSize": 760,
+                    "mimeType": "text/plain",
+                    "hash": "k9wcCnV3aBXLh2PZFFYiZw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ADC_README.TXT"
+                        }
+                    }
+                },
+                {
+                    "filename": "ACCatalogs.zip",
+                    "fileSize": 1800,
+                    "mimeType": "application/zip",
+                    "hash": "HJ9RWFAZO+I+dL4mhgzOXQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ACCatalogs.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "TPNMs.cat",
+                    "fileSize": 2647,
+                    "mimeType": "application/binary",
+                    "hash": "3kpp/Hkttf1alUN42MAabQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/TPNMs.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADRS2.cat",
+                    "fileSize": 3408,
+                    "mimeType": "application/binary",
+                    "hash": "InY5Eq2k7MDOaytEguIFIw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ADRS2.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADRS1345.cat",
+                    "fileSize": 3461,
+                    "mimeType": "application/binary",
+                    "hash": "a2bt/MOXyX1NZEUob83g+A==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ADRS1345.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "TotalTide.cat",
+                    "fileSize": 4541,
+                    "mimeType": "application/binary",
+                    "hash": "26sbevqiPBAX6OvE/4RX9g==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/TotalTide.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADLL.cat",
+                    "fileSize": 4605,
+                    "mimeType": "application/binary",
+                    "hash": "I9GR+6QnkBwtLH3OJxOApg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ADLL.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ADRS6.cat",
+                    "fileSize": 4786,
+                    "mimeType": "application/binary",
+                    "hash": "yJCtU3O0sKhZ2AHCoR+bUQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ADRS6.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ATT.cat",
+                    "fileSize": 5378,
+                    "mimeType": "application/binary",
+                    "hash": "W2Ax4JhZUkXaxBKz/z3wog==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ATT.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ALRS.cat",
+                    "fileSize": 6555,
+                    "mimeType": "application/binary",
+                    "hash": "5Nyq94CB6+OYVW/HSSahGg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ALRS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ALL.cat",
+                    "fileSize": 7925,
+                    "mimeType": "application/binary",
+                    "hash": "DP3i4Q9fSGJvPIgK6glnsQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ALL.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "SDs.cat",
+                    "fileSize": 17936,
+                    "mimeType": "application/binary",
+                    "hash": "FJXhFNj9r6l24tTNbrC6dA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/SDs.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "e-NP SDs.cat",
+                    "fileSize": 18857,
+                    "mimeType": "application/binary",
+                    "hash": "AQrsAxjJwyWlaaA+mEr09Q==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/e-NP%20SDs.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "distributors.zip",
+                    "fileSize": 76497,
+                    "mimeType": "application/zip",
+                    "hash": "WUCxlu0CE7XRtgNe8GdA8w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/distributors.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "Other.cat",
+                    "fileSize": 100891,
+                    "mimeType": "application/binary",
+                    "hash": "yQ34gF4zEF/Me50rOFTT+Q==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/Other.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "objects.zip",
+                    "fileSize": 131379,
+                    "mimeType": "application/zip",
+                    "hash": "F4WTVMl2u+V9FOu54IDMzg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/objects.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "ECDIS.cat",
+                    "fileSize": 223538,
+                    "mimeType": "application/binary",
+                    "hash": "f8wPZT23lyA8BVfYSlkShA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ECDIS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "tpnms.zip",
+                    "fileSize": 399424,
+                    "mimeType": "application/zip",
+                    "hash": "OMK1RcLUNLcaQduJ/yddhQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/tpnms.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "Paper Charts.cat",
+                    "fileSize": 1042243,
+                    "mimeType": "application/binary",
+                    "hash": "FMy4xwiVCPSLZOV4jdnMtg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/Paper%20Charts.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ARCS.cat",
+                    "fileSize": 1052502,
+                    "mimeType": "application/binary",
+                    "hash": "2yJOWwxnD28NYl9up91DAw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ARCS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "TPNMS Diagrams.zip",
+                    "fileSize": 1646408,
+                    "mimeType": "application/zip",
+                    "hash": "WsGoKLnymy/NfDgBQURrTw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/TPNMS%20Diagrams.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "AVCS.cat",
+                    "fileSize": 5284468,
+                    "mimeType": "application/binary",
+                    "hash": "tUG1X13XZQ0ozLbyW/lmBA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/AVCS.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "ENC Units.cat",
+                    "fileSize": 5383447,
+                    "mimeType": "application/binary",
+                    "hash": "BXQETrI2pKSryAaXT3kE1g==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/898a9c7b-10db-46ea-8763-2fa22eecffe2/files/ENC%20Units.cat"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "f22569f8-9aa7-4ced-8c8d-2c0cf94a39c5",
+            "status": "Committed",
+            "allFilesZipSize": 1078438,
+            "attributes": [
+                {
+                    "key": "Content",
+                    "value": "DVD INFO"
+                },
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2024-02-15T09:51:54.6Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "End-User-Licence-Agreement-for-ADMIRALTY-digital-data-services.pdf",
+                    "fileSize": 96924,
+                    "mimeType": "application/pdf",
+                    "hash": "gZW0xUMhqrFqoF7dOGFwmw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/f22569f8-9aa7-4ced-8c8d-2c0cf94a39c5/files/End-User-Licence-Agreement-for-ADMIRALTY-digital-data-services.pdf"
+                        }
+                    }
+                },
+                {
+                    "filename": "Important Information for AVCS users.pdf",
+                    "fileSize": 155722,
+                    "mimeType": "application/pdf",
+                    "hash": "umt53neIG2Cd/d7VlZJQrw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/f22569f8-9aa7-4ced-8c8d-2c0cf94a39c5/files/Important%20Information%20for%20AVCS%20users.pdf"
+                        }
+                    }
+                },
+                {
+                    "filename": "ENC TandP NM status.pdf",
+                    "fileSize": 286932,
+                    "mimeType": "application/pdf",
+                    "hash": "ZIhodH041288pdo8Vu3wQA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/f22569f8-9aa7-4ced-8c8d-2c0cf94a39c5/files/ENC%20TandP%20NM%20status.pdf"
+                        }
+                    }
+                },
+                {
+                    "filename": "AVCS User Guide.pdf",
+                    "fileSize": 745481,
+                    "mimeType": "application/pdf",
+                    "hash": "Vrtt4szeMbfNrdvO6vE+WQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/f22569f8-9aa7-4ced-8c8d-2c0cf94a39c5/files/AVCS%20User%20Guide.pdf"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "fbc3b496-30fb-45da-8bd4-6d5c1c5b719b",
+            "status": "Committed",
+            "allFilesZipSize": 454,
+            "attributes": [
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2023-07-26T15:09:47.237Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "IHO.PUB",
+                    "fileSize": 578,
+                    "mimeType": "text/plain",
+                    "hash": "xGFli2nSUM9gbU/fNtbAjQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/fbc3b496-30fb-45da-8bd4-6d5c1c5b719b/files/IHO.PUB"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "822f623b-ab5b-4a17-9aa4-f581676dc5eb",
+            "status": "Committed",
+            "allFilesZipSize": 626,
+            "attributes": [
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                }
+            ],
+            "businessUnit": "ADDS",
+            "batchPublishedDate": "2023-07-26T15:08:55.463Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "IHO.CRT",
+                    "fileSize": 761,
+                    "mimeType": "text/plain",
+                    "hash": "qw5f2djw1qpXQ8K3BwIJzQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/822f623b-ab5b-4a17-9aa4-f581676dc5eb/files/IHO.CRT"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "_Links": {
+        "self": {
+            "href": "/batch?limit=10&start=0&$filter=%24batch%28Product%20Type%29%20eq%20%27AVCS%27%20and%20businessUnit%20eq%20%27ADDS%27"
+        },
+        "first": {
+            "href": "/batch?limit=10&start=0&$filter=%24batch%28Product%20Type%29%20eq%20%27AVCS%27%20and%20businessUnit%20eq%20%27ADDS%27"
+        },
+        "last": {
+            "href": "/batch?limit=10&start=0&$filter=%24batch%28Product%20Type%29%20eq%20%27AVCS%27%20and%20businessUnit%20eq%20%27ADDS%27"
+        }
+    }
+}
