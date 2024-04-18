@@ -58,7 +58,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 default:
                     return (double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForAIO),
                         int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTimeForAIO));
-                    break;
             }
         }
 
