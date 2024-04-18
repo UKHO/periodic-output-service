@@ -36,7 +36,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 var batchStatusResponseObj = JsonConvert.DeserializeObject<ResponseBatchStatusModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                 batchStatus = batchStatusResponseObj!.Status!;
 
-                if (batchStatus!.Equals("Committed"))
+                if (batchStatus.Equals("Committed"))
                 {
                     break;
                 }
