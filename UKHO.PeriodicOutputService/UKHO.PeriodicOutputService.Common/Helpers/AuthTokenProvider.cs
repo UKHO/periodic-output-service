@@ -81,12 +81,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         }
         private AccessTokenItem GetAuthTokenFromCache(string key)
         {
-            string? item;
             lock (_lock)
             {
+                string? item;
                 item = _cache.GetString(key);
+                return item != null ? JsonConvert.DeserializeObject<AccessTokenItem>(item) : null;
             }
-            return item != null ? JsonConvert.DeserializeObject<AccessTokenItem>(item) : null;
         }
     }
 }
