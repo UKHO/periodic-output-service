@@ -84,15 +84,6 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: Microsoft.Identity.Client.dll
-   ]]>
-    </notes>
-    <cve>CVE-2019-20138</cve>
-    <cve>CVE-2023-36415</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: Various Azure.
    Refers to Azure CLI.
    ]]>
@@ -207,15 +198,6 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: Azure.Identity:1.4.0
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:nuget/Azure\.Identity@.*$</packageUrl>
-    <cve>CVE-2023-36414</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
 	file name: Microsoft.Extensions.Hosting.Abstractions.dll
 	See https://nvd.nist.gov/vuln/detail/CVE-2020-1147 for details on this CVE.
 	This is a temporary suppression pending a fix being available.
@@ -249,10 +231,4 @@
     </notes>
     <cve>CVE-2022-39349</cve>
   </suppress>
-  <suppress>
-   <notes><![CDATA[
-   file name: Azure.Identity:1.10.4
-   ]]></notes>
-   <vulnerabilityName>CVE-2024-29992</vulnerabilityName>
-</suppress>
 </suppressions>
