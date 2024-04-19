@@ -265,18 +265,9 @@
     <cve>CVE-2022-43673</cve>
     <cve>CVE-2021-21301</cve>
     <cve>CVE-2021-32755</cve>
-  </suppress>  
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: Handlebars.Net.Helpers.dll
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/Handlebars\.Net\.Helpers@.*$</packageUrl>
-    <cve>CVE-2020-7661</cve>
-    <cve>CVE-2022-21195</cve>
   </suppress>
-  <suppress>
+  
+  <!--<suppress>
     <notes>
       <![CDATA[
    file name: WireMock.Net.dll
@@ -299,5 +290,14 @@
     <cve>CVE-2022-43673</cve>
     <cve>CVE-2021-21301</cve>
     <cve>CVE-2021-32755</cve>
+  </suppress>-->
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: WireMock.Net.OpenApiParser.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.OpenApiParser@.*$</packageUrl>
+    <cpe>cpe:/a:wire:wire</cpe>
   </suppress>
 </suppressions>
