@@ -19,11 +19,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             var uri = $"{baseUrl}/bessConfigUpload?Key={value}";
             var payloadJson = JsonConvert.SerializeObject(GetPayload(path));
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
-            { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") })
-            {
-                return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-            }
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
+                { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
         /// <summary>
