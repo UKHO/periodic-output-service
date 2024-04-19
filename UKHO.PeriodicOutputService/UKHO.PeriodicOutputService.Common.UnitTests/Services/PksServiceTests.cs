@@ -116,7 +116,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Error
                 && call.GetArgument<EventId>(1) == EventIds.PostProductKeyDataToPksFailed.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post product key data | StatusCode : {StatusCode}| Errors : {ErrorDetails} | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post product key data | StatusCode : {StatusCode}| Errors : {ErrorDetails}"
             ).MustHaveHappenedOnceExactly();
         }
 
@@ -124,6 +124,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(HttpStatusCode.Unauthorized, "Unauthorized")]
         [TestCase(HttpStatusCode.InternalServerError, "InternalServerError")]
         [TestCase(HttpStatusCode.ServiceUnavailable, "ServiceUnavailable")]
+        [TestCase(HttpStatusCode.UnsupportedMediaType, "UnsupportedMediaType")]
         public async Task WhenProductKeyServiceResponseOtherThanOkAndBadRequest_ThenReturnsFulfilmentException(HttpStatusCode statusCode, string content)
         {
             A.CallTo(() => fakePksApiClient.PostPksDataAsync
