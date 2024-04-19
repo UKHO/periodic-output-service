@@ -14,7 +14,7 @@ namespace UKHO.PeriodicOutputService.Common.Models.Bess
         public cellkeys cellkeys { get; set; }
 
         [XmlAttribute(AttributeName = "noNamespaceSchemaLocation", Namespace = "http://www.w3.org/2001/XMLSchema-instance")]
-        public string noNamespaceSchemaLocation = ".\\UKHO.PeriodicOutputService\\UKHO.PeriodicOutputService.Common\\Helpers\\CellPermitExchange.xsd";
+        public string noNamespaceSchemaLocation = ".\\UKHO.PeriodicOutputService\\UKHO.PeriodicOutputService.Common\\XmlSchema\\CellPermitExchange.xsd";
     }
 
     [ExcludeFromCodeCoverage]
