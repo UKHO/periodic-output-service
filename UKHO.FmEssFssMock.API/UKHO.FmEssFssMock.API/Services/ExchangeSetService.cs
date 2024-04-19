@@ -111,8 +111,19 @@ namespace UKHO.FmEssFssMock.API.Services
                 }
 
                 BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
-              string productVersion = !string.IsNullOrEmpty(exchangeSetStandard) ? $"productVersion-{item.ProductName}-{item.EditionNumber}-{item.UpdateNumber}-{exchangeSetStandard}" : $"productVersion-{item.ProductName}-*-*";
-
+                string productVersion = $"productVersion";
+                if (productVersionsRequest.Count > 1)
+                {
+                    foreach (ProductVersionRequest items in productVersionsRequest)
+                    {
+                        productVersion += $"-{items.ProductName}-{items.EditionNumber}-{items.UpdateNumber}";
+                    }
+                    productVersion += !string.IsNullOrEmpty(exchangeSetStandard) ? "-" + exchangeSetStandard : "";
+                }
+                else
+                {
+                    productVersion += !string.IsNullOrEmpty(exchangeSetStandard) ? $"-{item.ProductName}-{item.EditionNumber}-{item.UpdateNumber}-{exchangeSetStandard}" : $"-{item.ProductName}-*-*";
+                }
                 if (!string.IsNullOrEmpty(createBatchResponse.BatchId.ToString()))
                 {
                     string path = Path.Combine(Environment.CurrentDirectory, @"Data", createBatchResponse.BatchId.ToString());
