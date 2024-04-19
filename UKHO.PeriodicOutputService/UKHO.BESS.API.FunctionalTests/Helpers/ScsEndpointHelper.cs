@@ -1,8 +1,6 @@
-﻿using Azure.Storage.Blobs.Specialized;
-
-namespace UKHO.BESS.API.FunctionalTests.Helpers
+﻿namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
-    public class ScsEndpointHelper
+    public static class ScsEndpointHelper
     {
         static readonly HttpClient httpClient = new();
         private static string? uri;

@@ -204,7 +204,7 @@
    ]]>
     </notes>
     <cve>CVE-2018-8292</cve>
-  </suppress>
+  </suppress>  
   <suppress>
     <notes>
       <![CDATA[
@@ -242,63 +242,10 @@
     <cve>CVE-2022-39349</cve>
   </suppress>
   <suppress>
-    <notes>
-      <![CDATA[
-   file name: GetDocument.Insider.dll
-   CVE-2024-21386 - fixed by latest dotnet
-   CVE-2024-21404 - only applies to non-Windows environments (https://msrc.microsoft.com/update-guide/vulnerability/CVE-2024-21404)
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/GetDocument\.Insider@.*$</packageUrl>
-    <cve>CVE-2024-21386</cve>
-    <cve>CVE-2024-21404</cve>
-    <cve>CVE-2023-36558</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: dotnet-getdocument.dll
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/dotnet\-getdocument@.*$</packageUrl>
-    <cve>CVE-2024-21386</cve>
-  </suppress>
-  <suppress>
    <notes><![CDATA[
-   file name: WireMock.Net.Abstractions.dll
+   file name: Azure.Identity:1.11.0
+   Low level vulnerability. Package is set to latest version, when next fix is released must be updated to resolved CVE.
    ]]></notes>
-   <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
-   <cve>CVE-2020-27853</cve>    
-    <cve>CVE-2018-9116</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: WireMock.Org.Abstractions.dll
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/WireMock\.Org\.Abstractions@.*$</packageUrl>
-    <cve>CVE-2023-41329</cve>
-    <cve>CVE-2020-27853</cve>
-    <cve>CVE-2018-9116</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: WireMock.Net.OpenApiParser.dll
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.OpenApiParser@.*$</packageUrl>    
-    <cve>CVE-2021-41093</cve>
-    <cve>CVE-2020-15258</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: JsonConverter.Newtonsoft.Json.dll
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/JsonConverter\.Newtonsoft\.Json@.*$</packageUrl>
-    <cve>CVE-2020-12762</cve>
-  </suppress>
+   <vulnerabilityName>CVE-2024-29992</vulnerabilityName>
+</suppress>
 </suppressions>
