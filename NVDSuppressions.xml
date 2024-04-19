@@ -10,6 +10,9 @@
     </notes>
     <cve>CVE-2020-1108</cve>
     <cve>CVE-2023-44487</cve>
+    <cve>CVE-2024-21386</cve>
+    <cve>CVE-2024-21404</cve>
+    <cve>CVE-2023-36558</cve>
   </suppress>
   <suppress>
     <notes>
@@ -242,10 +245,22 @@
     <cve>CVE-2022-39349</cve>
   </suppress>
   <suppress>
-   <notes><![CDATA[
-   file name: Azure.Identity:1.11.0
-   Low level vulnerability. Package is set to latest version, when next fix is released must be updated to resolved CVE.
-   ]]></notes>
-   <vulnerabilityName>CVE-2024-29992</vulnerabilityName>
-</suppress>
+    <notes>
+      <![CDATA[
+   file name: WireMock.Net.Abstractions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2020-15258</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Handlebars.Net.Helpers.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/Handlebars\.Net\.Helpers@.*$</packageUrl>
+    <cve>CVE-2020-7661</cve>
+    <cve>CVE-2022-21195</cve>
+  </suppress>
 </suppressions>
