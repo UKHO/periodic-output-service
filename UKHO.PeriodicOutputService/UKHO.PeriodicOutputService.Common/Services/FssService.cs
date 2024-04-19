@@ -10,6 +10,7 @@ using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 
@@ -178,6 +179,31 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading of file {fileName} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             return true;
         }
+
+        public async Task<string> CreateBatch(Batch batchType, ConfigQueueMessage configQueueMessage)
+        {
+            _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+
+            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(batchType, configQueueMessage);
+            string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
+            HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                CreateBatchResponseModel? createBatchResponse = JsonConvert.DeserializeObject<CreateBatchResponseModel>(await httpResponse.Content.ReadAsStringAsync());
+                _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse!.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                return createBatchResponse.BatchId;
+            }
+            else
+            {
+                _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
+            }
+        }
+
 
         public async Task<string> CreateBatch(Batch batchType)
         {
@@ -403,29 +429,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                         new("Year / Week", currentYear + " / " + currentWeek)
                     }
                 };
-            }
-            //Temporary Upload Code Start
-            else if (batchType == Batch.BesBaseZipBatch || batchType == Batch.BesUpdateZipBatch)
-            {
-                createBatchRequest = new()
-                {
-                    BusinessUnit = _fssApiConfiguration.Value.BessBusinessUnit,
-                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl()
-                    {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadUsers) ? new() : _fssApiConfiguration.Value.BessReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new() : _fssApiConfiguration.Value.BessReadGroups.Split(",").ToList(),
-                    },
-                    Attributes = new List<KeyValuePair<string, string>>
-                    {
-                        new("Product Type", "AVCS"),
-                        new("Week Number", currentWeek),
-                        new("Year", currentYear),
-                        new("Year / Week", currentYear + " / " + currentWeek)
-                    }
-                };
-            }
-            //Temporary Upload Code End
+            }            
             else
             {
                 createBatchRequest = new()
@@ -490,19 +494,58 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
-                //Temporary Upload Code Start
-                case Batch.BesBaseZipBatch:
-                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Bespoke Exchange Set Type", "Base"));
-                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
-                    break;
-                case Batch.BesUpdateZipBatch:
-                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Bespoke Exchange Set Type", "Update"));
-                    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
-                    break;
-                //Temporary Upload Code End
+                
                 default:
                     break;
             };
+            return createBatchRequest;
+        }
+
+        //Private Methods
+        [ExcludeFromCodeCoverage]
+        private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType, ConfigQueueMessage configQueueMessage)
+        {
+            CreateBatchRequestModel createBatchRequest;
+            List<KeyValuePair<string, string>> attributes = new();
+
+            foreach (Tag tag in configQueueMessage.Tags)
+            {               
+                attributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
+            }
+
+            createBatchRequest = new()
+            {
+                BusinessUnit = _fssApiConfiguration.Value.BessBusinessUnit,
+                ExpiryDate = DateTime.UtcNow.AddDays(configQueueMessage.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Acl = new Acl()
+                {
+                    ReadUsers = configQueueMessage.AllowedUsers,
+                    ReadGroups = configQueueMessage.AllowedUserGroups,
+                },
+                Attributes = attributes
+            };
+
+            ////This batch attribute is added for fss stub.
+            //if (bool.Parse(_configuration["IsFTRunning"]))
+            //{
+            //    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", batchType.ToString()));
+            //}
+
+            //switch (batchType)
+            //{
+            //    //Temporary Upload Code Start
+            //    case Batch.BesBaseZipBatch:
+            //        createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Bespoke Exchange Set Type", "Base"));
+            //        createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+            //        break;
+            //    case Batch.BesUpdateZipBatch:
+            //        createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Bespoke Exchange Set Type", "Update"));
+            //        createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
+            //        break;
+            //    //Temporary Upload Code End
+            //    default:
+            //        break;
+            //};
             return createBatchRequest;
         }
 

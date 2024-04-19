@@ -46,7 +46,7 @@ namespace UKHO.BESS.BuilderService.Services
             #region TemporaryUploadCode
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch).Result;
+            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch, configQueueMessage).Result;
 
             // temporary logs
             if (isBatchCreated)
@@ -186,12 +186,12 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType)
+        private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType, ConfigQueueMessage configQueueMessage)
         {
             bool isCommitted;
             try
             {
-                string batchId = await fssService.CreateBatch(batchType);
+                string batchId = await fssService.CreateBatch(batchType, configQueueMessage);
                 IEnumerable<string> filePath = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePath, batchId, batchType);
                 isCommitted = await fssService.CommitBatch(batchId, filePath, batchType);
