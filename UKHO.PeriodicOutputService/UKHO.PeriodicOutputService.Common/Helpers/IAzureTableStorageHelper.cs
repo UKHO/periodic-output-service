@@ -18,7 +18,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         ScheduleDetailEntity GetScheduleDetail(string configName);
 
-        Task<List<BessProductVersionEntities>> GetLatestBessProductVersionDetailsAsync();
+        Task<List<ProductVersionEntities>> GetLatestBessProductVersionDetailsAsync();
 
         Task SaveBessProductVersionDetailsAsync(List<ProductVersion> bessProductVersions, string name, string exchangeSetStandard);
     }

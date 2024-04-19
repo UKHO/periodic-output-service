@@ -109,10 +109,10 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return scheduleDetailEntity;
         }
 
-        public async Task<List<BessProductVersionEntities>> GetLatestBessProductVersionDetailsAsync()
+        public async Task<List<ProductVersionEntities>> GetLatestBessProductVersionDetailsAsync()
         {
             TableClient tableClient = await GetTableClientAsync(BESS_PRODUCT_VERSION_DETAILS_TABLE_NAME);
-            List<BessProductVersionEntities> bessProductVersionEntities = tableClient.Query<BessProductVersionEntities>().ToList();
+            List<ProductVersionEntities> bessProductVersionEntities = tableClient.Query<ProductVersionEntities>().ToList();
 
             return bessProductVersionEntities;
         }
@@ -123,7 +123,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             foreach (var item in bessProductVersions)
             {
-                BessProductVersionEntities bessProductVersionEntities = new();
+                ProductVersionEntities bessProductVersionEntities = new();
 
                 bessProductVersionEntities = new()
                 {
