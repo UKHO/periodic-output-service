@@ -506,11 +506,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType, ConfigQueueMessage configQueueMessage)
         {
             CreateBatchRequestModel createBatchRequest;
-            List<KeyValuePair<string, string>> attributes = new();
+            List<KeyValuePair<string, string>> batchAttributes = new();
 
             foreach (Tag tag in configQueueMessage.Tags)
-            {               
-                attributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
+            {
+                batchAttributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
             }
 
             createBatchRequest = new()
@@ -522,7 +522,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     ReadUsers = configQueueMessage.AllowedUsers,
                     ReadGroups = configQueueMessage.AllowedUserGroups,
                 },
-                Attributes = attributes
+                Attributes = batchAttributes
             };
 
             ////This batch attribute is added for fss stub.

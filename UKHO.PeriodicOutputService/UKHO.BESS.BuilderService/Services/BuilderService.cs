@@ -42,20 +42,18 @@ namespace UKHO.BESS.BuilderService.Services
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-            //Temporary Upload Code
             #region TemporaryUploadCode
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch, configQueueMessage).Result;
+            (bool isBatchCreated, string besBatchId) = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch, configQueueMessage).Result;
 
-            // temporary logs
             if (isBatchCreated)
             {
-                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Bess Base batch created {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "BES created with batchId {batchId} on {DateTime} | {CorrelationId}", besBatchId, DateTime.UtcNow, configQueueMessage.CorrelationId);
             }
             else
             {
-                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Bess Base batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "BES batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
             }
 
             #endregion TemporaryUploadCode
@@ -186,12 +184,13 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType, ConfigQueueMessage configQueueMessage)
+        private async Task<(bool, string)> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType, ConfigQueueMessage configQueueMessage)
         {
             bool isCommitted;
+            string batchId;
             try
             {
-                string batchId = await fssService.CreateBatch(batchType, configQueueMessage);
+                batchId = await fssService.CreateBatch(batchType, configQueueMessage);
                 IEnumerable<string> filePath = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePath, batchId, batchType);
                 isCommitted = await fssService.CommitBatch(batchId, filePath, batchType);
@@ -203,7 +202,7 @@ namespace UKHO.BESS.BuilderService.Services
                 throw;
             }
 
-            return isCommitted;
+            return (isCommitted, batchId);
         }
 
         [ExcludeFromCodeCoverage]
