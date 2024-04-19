@@ -1,15 +1,21 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO.Abstractions;
+using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.PermitDecryption;
 using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.BESS.BuilderService.Services
@@ -20,18 +26,19 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IFssService fssService;
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
-
+        private readonly IPermitDecryption permitDecryption;
         private readonly string homeDirectoryPath;
 
         private const string BessBatchFileExtension = "zip";
         private readonly string mimeType = "application/zip";
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IPermitDecryption permitDecryption)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
             homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["BespokeFolderName"]);
         }
 
@@ -59,6 +66,8 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             #endregion TemporaryUploadCode
+
+            CreateKeyFile(configQueueMessage, essFileDownloadPath);
 
             return "Exchange Set Created Successfully";
         }
@@ -223,6 +232,65 @@ namespace UKHO.BESS.BuilderService.Services
                 }
             }
         });
+        }
+
+        private void CreateKeyFile(ConfigQueueMessage configQueueMessage, string filePath)
+        {
+            // Get PKS from server
+
+            List<PKSResponse> pksResponses = new()
+            {
+
+            };
+
+            if (configQueueMessage.KeyFileType == "KEY_TEXT")
+            {
+                CreatePermitTextFile(pksResponses, filePath);
+            }
+            else if (configQueueMessage.KeyFileType == "PERMIT_XML")
+            {
+                CreatePermitXmlFile(pksResponses, filePath);
+            }
+        }
+
+        private void CreatePermitXmlFile(List<PKSResponse> pksResponses, string filePath)
+        {
+            PKSXml pKSXml = new()
+            {
+                date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                cellkeys = new()
+                {
+                    response = pksResponses,
+                }
+            };
+
+            var serializer = new XmlSerializer(typeof(PKSXml));
+            var namespaces = new XmlSerializerNamespaces();
+            namespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+
+            using (var fileStream = new FileStream(Path.Combine(filePath, "Avcs Cell Keys.xml"), FileMode.Create))
+            {
+                using (var xmlTextWriter = new XmlTextWriter(fileStream, Encoding.UTF8) { Formatting = Formatting.Indented })
+                {
+                    serializer.Serialize(xmlTextWriter, pKSXml, namespaces);
+                }
+            }
+        }
+
+        private void CreatePermitTextFile(List<PKSResponse> pksResponses, string filePath)
+        {
+            using (StreamWriter writer = new(Path.Combine(filePath, "Keys.txt")))
+            {
+                int i = 0;
+
+                writer.WriteLine("Key ID,Key,Name,Edition,Created,Issued,Expired,Status");
+                foreach (var pksResponse in pksResponses)
+                {
+                    PermitKey permitKey = permitDecryption.GetPermitKeys(pksResponse.key);
+                    writer.WriteLine($"{i++},{permitKey.ActiveKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active");
+                    writer.WriteLine($"{i++},{permitKey.NextKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next");
+                };
+            }
         }
         #endregion
     }

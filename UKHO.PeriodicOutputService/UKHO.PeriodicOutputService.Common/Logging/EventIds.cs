@@ -653,7 +653,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809129 - Products Fetched from ESS.
         /// </summary>
-        ProductsFetchedFromESS = 809129
+        ProductsFetchedFromESS = 809129,
+
+        /// <summary>
+        /// 809130 - Permit Decryption Exception
+        /// </summary>
+        PermitDecryptionException = 809130
     }
 
     public static class EventIdExtensions
