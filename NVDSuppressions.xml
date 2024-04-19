@@ -251,8 +251,21 @@
    ]]>
     </notes>
     <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2020-27853</cve>
     <cve>CVE-2020-15258</cve>
-  </suppress>
+    <cve>CVE-2021-41093</cve>
+    <cve>CVE-2018-9116</cve>
+    <cve>CVE-2023-41329</cve>
+    <cve>CVE-2018-8909</cve>
+    <cve>CVE-2021-32666</cve>
+    <cve>CVE-2022-23625</cve>
+    <cve>CVE-2022-31009</cve>
+    <cve>CVE-2023-22737</cve>
+    <cve>CVE-2018-9117</cve>
+    <cve>CVE-2022-43673</cve>
+    <cve>CVE-2021-21301</cve>
+    <cve>CVE-2021-32755</cve>
+  </suppress>  
   <suppress>
     <notes>
       <![CDATA[
@@ -262,5 +275,29 @@
     <packageUrl regex="true">^pkg:generic/Handlebars\.Net\.Helpers@.*$</packageUrl>
     <cve>CVE-2020-7661</cve>
     <cve>CVE-2022-21195</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: WireMock.Net.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net@.*$</packageUrl>
+    <cve>CVE-2020-27853</cve>
+    <cve>CVE-2021-41093</cve>
+    <cve>CVE-2021-41100</cve>
+    <cve>CVE-2018-9116</cve>
+    <cve>CVE-2022-23610</cve>
+    <cve>CVE-2022-31122</cve>
+    <cve>CVE-2020-15258</cve>
+    <cve>CVE-2018-8909</cve>
+    <cve>CVE-2021-41119</cve>
+    <cve>CVE-2023-41329</cve>
+    <cve>CVE-2021-32665</cve>
+    <cve>CVE-2021-32666</cve>
+    <cve>CVE-2022-23625</cve>
+    <cve>CVE-2022-43673</cve>
+    <cve>CVE-2021-21301</cve>
+    <cve>CVE-2021-32755</cve>
   </suppress>
 </suppressions>
