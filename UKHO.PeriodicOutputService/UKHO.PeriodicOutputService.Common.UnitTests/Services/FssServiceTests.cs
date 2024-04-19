@@ -1017,7 +1017,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 Entries = new List<GetBatchResponseModel>() {
                     new GetBatchResponseModel {
                         BatchId ="63d38bde-5191-4a59-82d5-aa22ca1cc6dc",
-                        Files= new List<BatchFile>(){ new BatchFile { Filename = "test.TXT", FileSize = 400, Links = new Links { Get = new Link { Href = "" }}}},
+                        Files= new List<BatchFile>(){ new BatchFile { Filename = "test.TXT", FileSize = 400, Links = new Links { Get = new Link { Href = "" }}},
+                                                       new BatchFile { Filename = "test1.TXT", FileSize = 400, Links = new Links { Get = new Link { Href = "" }}}},
                         Attributes = new List<Attribute> { new Attribute { Key= "Content", Value= "AIO CD INFO" } ,
                                                            new Attribute { Key= "Product Type", Value= "AIO" }
                                                          },

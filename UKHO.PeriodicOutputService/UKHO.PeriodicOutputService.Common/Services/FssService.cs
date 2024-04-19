@@ -472,7 +472,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 };
             }
             //Temporary Upload Code Start
-            else if (batchType == Batch.BesBaseZipBatch || batchType == Batch.BesUpdateZipBatch)
+            else if (batchType == Batch.BesBaseZipBatch || batchType == Batch.BesUpdateZipBatch || batchType == Batch.BesValidReadmeBatch)
             {
                 createBatchRequest = new()
                 {
