@@ -62,7 +62,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase("s63")]
         [TestCase("s57")]
-        public async Task WhenTypeIsBase_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(string exchangeSetStandard)
+        public async Task WhenTypeIsBase_ThenPostProductIdentifiersEndpointIsCalledAndBespokeExchangeSetIsCreated(string exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -103,7 +103,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase("UPDATE", "s57")]
         [TestCase("CHANGE", "s63")]
         [TestCase("CHANGE", "s57")]
-        public async Task WhenTypeIsUpdateOrChange_ThenGetProductVersionEndpointIsCalledAndBespokeExchangeSetIsCreated(string type, string exchangeSetStandard)
+        public async Task WhenTypeIsUpdateOrChange_ThenGetProductVersionsEndpointIsCalledAndBespokeExchangeSetIsCreated(string type, string exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -468,7 +468,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase("UPDATE", "s57")]
         [TestCase("CHANGE", "s63")]
         [TestCase("CHANGE", "s57")]
-        public async Task WhenTypeIsUpdateOrChange_ThenGetProductVersionEndpointIsCalledAndProductIsNotAvailableOnAzureTableBespokeExchangeSetIsCreatedWithZeroEditionAndUpdate(string type, string exchangeSetStandard)
+        public async Task WhenTypeIsUpdateOrChange_ThenGetProductVersionsEndpointIsCalledAndProductIsNotAvailableOnAzureTableBespokeExchangeSetIsCreatedWithZeroEditionAndUpdate(string type, string exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(new List<ProductVersionEntities>() { });
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
