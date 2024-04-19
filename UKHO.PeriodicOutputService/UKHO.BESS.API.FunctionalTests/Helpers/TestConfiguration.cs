@@ -13,6 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public FssApiConfiguration fssConfig = new();
         public BessStorageConfiguration bessStorageConfig = new();
         public ExchangeSetDetails exchangeSetDetails = new();
+        public PKSApiConfiguration pksConfig = new();
 
         public class BessApiConfiguration
         {
@@ -64,6 +65,13 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? ExchangeSetCatalogueFile { get; set; }
         }
 
+        public class PKSApiConfiguration
+        {
+            public string? BaseUrl { get; set; }
+            public string? ProductName { get; set; }
+            public int? EditionNumber { get; set; }
+        }
+
         public TestConfiguration()
         {
             configurationRoot = new ConfigurationBuilder()
@@ -77,6 +85,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             configurationRoot.Bind("FSSApiConfiguration", fssConfig);
             configurationRoot.Bind("BessStorageConfiguration", bessStorageConfig);
             configurationRoot.Bind("ExchangeSetDetails", exchangeSetDetails);
+            configurationRoot.Bind("PKSApiConfiguration", pksConfig);
         }
     }
 }
