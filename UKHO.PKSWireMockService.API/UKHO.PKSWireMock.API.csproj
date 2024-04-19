@@ -47,11 +47,13 @@
     <PackageReference Include="JsonConverter.Newtonsoft.Json" Version="0.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="6.0.29" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NJsonSchema.Extensions" Version="0.1.0" />
     <PackageReference Include="ProtoBufJsonConverter" Version="0.3.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
     <PackageReference Include="WireMock.Net" Version="1.5.52" />
     <PackageReference Include="WireMock.Net.Abstractions" Version="1.5.52" />
     <PackageReference Include="WireMock.Org.Abstractions" Version="1.5.52" />
+    <PackageReference Include="YamlDotNet" Version="15.1.2" />
   </ItemGroup>
 
 </Project>

@@ -244,7 +244,7 @@
     </notes>
     <cve>CVE-2022-39349</cve>
   </suppress>
-  <suppress>
+  <!--<suppress>
     <notes>
       <![CDATA[
    file name: WireMock.Net.Abstractions.dll
@@ -265,8 +265,7 @@
     <cve>CVE-2022-43673</cve>
     <cve>CVE-2021-21301</cve>
     <cve>CVE-2021-32755</cve>
-  </suppress>
-  
+  </suppress>-->  
   <!--<suppress>
     <notes>
       <![CDATA[
@@ -291,7 +290,7 @@
     <cve>CVE-2021-21301</cve>
     <cve>CVE-2021-32755</cve>
   </suppress>-->
-  <suppress>
+  <!--<suppress>
     <notes>
       <![CDATA[
    file name: WireMock.Net.OpenApiParser.dll
@@ -299,5 +298,5 @@
     </notes>
     <packageUrl regex="true">^pkg:generic/WireMock\.Net\.OpenApiParser@.*$</packageUrl>
     <cpe>cpe:/a:wire:wire</cpe>
-  </suppress>
+  </suppress>-->
 </suppressions>
