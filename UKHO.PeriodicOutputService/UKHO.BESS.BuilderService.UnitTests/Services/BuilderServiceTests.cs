@@ -2,7 +2,9 @@
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using UKHO.BESS.BuilderService.Services;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -24,33 +26,55 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         private ILogger<BuilderService.Services.BuilderService> fakeLogger;
         private IConfiguration fakeConfiguration;
         private ConfigQueueMessage configQueueMessage;
+        private IOptions<FssApiConfiguration> fakeFssApiConfiguration;
 
         [SetUp]
         public void Setup()
         {
+            fakeFssApiConfiguration = Options.Create(new FssApiConfiguration()
+            {
+                BaseUrl = "http://test.com",
+                FssClientId = "8YFGEFI78TYIUGH78YGHR5",
+                BatchStatusPollingCutoffTime = "1",
+                BatchStatusPollingDelayTime = "20000",
+                BatchStatusPollingCutoffTimeForAIO = "1",
+                BatchStatusPollingDelayTimeForAIO = "20000",
+                BatchStatusPollingCutoffTimeForBES = "1",
+                BatchStatusPollingDelayTimeForBES = "20000",
+                PosReadUsers = "",
+                PosReadGroups = "public",
+                BlockSizeInMultipleOfKBs = 4096,
+                BespokeExchangeSetFileFolder = "V01X01",
+                EncRoot = "ENC_ROOT",
+                ReadMeFileName = "README.TXT"
+            });
+
             fakeEssService = A.Fake<IEssService>();
             fakeFssService = A.Fake<IFssService>();
             fakeFileSystemHelper = A.Fake<IFileSystemHelper>();
             fakeLogger = A.Fake<ILogger<BuilderService.Services.BuilderService>>();
             fakeConfiguration = A.Fake<IConfiguration>();
 
-            builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger);
+            builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeFssApiConfiguration);
         }
 
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullEssSerivce = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger);
+            Action nullEssSerivce = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeFssApiConfiguration);
             nullEssSerivce.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("essService");
 
-            Action nullFssSerivce = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger);
+            Action nullFssSerivce = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeFssApiConfiguration);
             nullFssSerivce.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fssService");
 
-            Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger);
+            Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger, fakeFssApiConfiguration);
             nullFileSystemHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fileSystemHelper");
 
-            Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null);
+            Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null, fakeFssApiConfiguration);
             nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
+
+            Action nullFssApiConfiguration = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, null);
+            nullFssApiConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fssApiConfig");
         }
 
         [Test]

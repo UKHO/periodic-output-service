@@ -232,7 +232,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName);
                 return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
             }
-            else if (filter.ToUpper().Contains("INVALID"))
+            else if (filter.ToUpper().Contains("MULTIPLE"))
             {
                 string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssMultipleFilesReadMeResponseFileName);
                 return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);

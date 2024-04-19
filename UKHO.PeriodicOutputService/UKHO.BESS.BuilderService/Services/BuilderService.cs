@@ -248,7 +248,7 @@ namespace UKHO.BESS.BuilderService.Services
                 await DownloadReadMeFileAsync(batchId, exchangeSetRootPath, correlationId, readMeSearchFilter);
         }
 
-        public async Task<bool> DownloadReadMeFileAsync(string batchId, string exchangeSetRootPath, string correlationId, string readMeSearchFilter)
+        private async Task<bool> DownloadReadMeFileAsync(string batchId, string exchangeSetRootPath, string correlationId, string readMeSearchFilter)
         {
             bool isDownloadReadMeFileSuccess = false;
             string readMeFilePath = await logger.LogStartEndAndElapsedTimeAsync(EventIds.QueryFileShareServiceReadMeFileRequestStart,

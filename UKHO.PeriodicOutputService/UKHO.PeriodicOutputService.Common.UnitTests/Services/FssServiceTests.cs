@@ -45,7 +45,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 BatchStatusPollingDelayTimeForBES = "20000",
                 PosReadUsers = "",
                 PosReadGroups = "public",
-                BlockSizeInMultipleOfKBs = 4096
+                BlockSizeInMultipleOfKBs = 4096,
+                BespokeExchangeSetFileFolder = "V01X01",
+                EncRoot = "ENC_ROOT",
+                ReadMeFileName = "README.TXT"
             });
 
             _fakeLogger = A.Fake<ILogger<FssService>>();
@@ -834,7 +837,36 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service readme.txt not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching readme.txt not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public void WhenMultipleFilesSearchReadMeFileRequest_ThenReturnFulfilmentException()
+        {
+            string batchId = "a07537ff-ffa2-4565-8f0e-96e61e70a9fc";
+            var searchBatchResponse = GetMultipleFilesSearchBatchResponse();
+            var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))),
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                });
+
+            Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
+                  async delegate { await _fssService.SearchReadMeFilePathAsync(batchId, string.Empty, "invalidquery"); });
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching readme.txt, multiple files are found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
@@ -846,7 +878,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             string batchId = "a07537ff-ffa2-4565-8f0e-96e61e70a9fc";
             var searchReadMeFileName = @"batch/a07537ff-ffa2-4565-8f0e-96e61e70a9fc/files/README.TXT";
 
-            var searchBatchResponse = GetSearchBatchResponse();
+            var searchBatchResponse = GetReadmeSearchBatchResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))) };
@@ -946,6 +978,46 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     new GetBatchResponseModel {
                         BatchId ="63d38bde-5191-4a59-82d5-aa22ca1cc6dc",
                         Files= new List<BatchFile>(){ new BatchFile { Filename = "test.txt", FileSize = 400, Links = new Links { Get = new Link { Href = "" }}}},
+                        Attributes = new List<Attribute> { new Attribute { Key= "Content", Value= "AIO CD INFO" } ,
+                                                           new Attribute { Key= "Product Type", Value= "AIO" }
+                                                         },
+                        BatchPublishedDate = DateTime.UtcNow
+                    } },
+                Links = new PagingLinks(),
+                Count = 1,
+                Total = 1,
+            };
+        }
+        #endregion
+
+        #region GetReadmeSearchBatchResponse
+        private static SearchBatchResponse GetReadmeSearchBatchResponse()
+        {
+            return new SearchBatchResponse()
+            {
+                Entries = new List<GetBatchResponseModel>() {
+                    new GetBatchResponseModel {
+                        BatchId ="63d38bde-5191-4a59-82d5-aa22ca1cc6dc",
+                        Files= new List<BatchFile>(){ new BatchFile { Filename = "README.TXT", FileSize = 400, Links = new Links { Get = new Link { Href = "" }}}},
+                        Attributes = new List<Attribute> { new Attribute { Key= "Content", Value= "AIO CD INFO" } ,
+                                                           new Attribute { Key= "Product Type", Value= "AIO" }
+                                                         },
+                        BatchPublishedDate = DateTime.UtcNow
+                    } },
+                Links = new PagingLinks(),
+                Count = 1,
+                Total = 1,
+            };
+        }
+
+        private static SearchBatchResponse GetMultipleFilesSearchBatchResponse()
+        {
+            return new SearchBatchResponse()
+            {
+                Entries = new List<GetBatchResponseModel>() {
+                    new GetBatchResponseModel {
+                        BatchId ="63d38bde-5191-4a59-82d5-aa22ca1cc6dc",
+                        Files= new List<BatchFile>(){ new BatchFile { Filename = "test.TXT", FileSize = 400, Links = new Links { Get = new Link { Href = "" }}}},
                         Attributes = new List<Attribute> { new Attribute { Key= "Content", Value= "AIO CD INFO" } ,
                                                            new Attribute { Key= "Product Type", Value= "AIO" }
                                                          },

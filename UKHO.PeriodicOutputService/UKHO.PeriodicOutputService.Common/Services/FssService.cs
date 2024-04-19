@@ -390,7 +390,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 if (searchBatchResponse.Entries.Any())
                 {
                     var batchResult = searchBatchResponse.Entries.FirstOrDefault();
-                    if (batchResult.Files.Count() == 1 && batchResult.Files.Where(x => x.Filename.ToUpper() == "README.TXT").Any())
+                    if (batchResult.Files.Count() == 1 && batchResult.Files.Where(x => x.Filename.ToUpper() == _fssApiConfiguration.Value.ReadMeFileName).Any())
                     {
                         filePath = batchResult.Files.FirstOrDefault().Links.Get.Href;
                         return filePath;
