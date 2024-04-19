@@ -21,6 +21,7 @@ namespace UKHO.BESS.BuilderService.Services
     {
         private readonly IEssService essService;
         private readonly IFssService fssService;
+        private readonly IConfiguration configuration;
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
         private readonly IOptions<FssApiConfiguration> fssApiConfig;
@@ -34,6 +35,7 @@ namespace UKHO.BESS.BuilderService.Services
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
+            this.configuration = configuration;
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
@@ -55,7 +57,15 @@ namespace UKHO.BESS.BuilderService.Services
             #region TemporaryUploadCode
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch).Result;
+            bool isBatchCreated = false;
+            if (bool.Parse(configuration["IsFTRunning"]))
+            {
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesValidReadmeBatch).Result;
+            }
+            else
+            {
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch : Batch.BesUpdateZipBatch).Result;
+            }
 
             // temporary logs
             if (isBatchCreated)
