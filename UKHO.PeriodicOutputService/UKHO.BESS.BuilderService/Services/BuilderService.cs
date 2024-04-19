@@ -23,7 +23,7 @@ namespace UKHO.BESS.BuilderService.Services
 
         private readonly string homeDirectoryPath;
 
-        private const string BessBatchFileExtension = "zip";
+        private const string BessBatchFileExtension = "zip;xml;txt;csv";
         private readonly string mimeType = "application/zip";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger)
