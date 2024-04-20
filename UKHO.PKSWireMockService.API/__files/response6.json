@@ -1,0 +1,9 @@
+{
+  "correlationId": "3ef111f2-118a-437b-cda9-g12548e0kf22",
+  "errors": [
+    {
+        "source": "GetProductKey",
+        "description": "Key not found for ProductName: CN484220 and Edition: 6."
+    }
+  ]
+}

@@ -91,10 +91,24 @@ namespace UKHO.PKSWireMock.API
                     .WithHeader("Content-Type", "application/json")
                     .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "blankResponse.json")));
 
+            _server.Given(Request.Create().WithPath(PksUrl)
+                    .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "request5.json"))))
+                    .UsingPost())
+                .RespondWith(Response.Create().WithStatusCode(200)
+                    .WithHeader("Content-Type", "application/json")
+                    .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "response5.json")));
+
+            _server.Given(Request.Create().WithPath(PksUrl)
+                    .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "request6.json"))))
+                    .UsingPost())
+                .RespondWith(Response.Create().WithStatusCode(400)
+                    .WithHeader("Content-Type", "application/json")
+                    .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "response6.json")));
+
             _logger.LogInformation($"WireMock.Net server settings {JsonConvert.SerializeObject(_settings)}");
         }
 
-        private string GetJsonData(string filePath)
+        private static string GetJsonData(string filePath)
         {            
             using (var r = new StreamReader(filePath))
             {
