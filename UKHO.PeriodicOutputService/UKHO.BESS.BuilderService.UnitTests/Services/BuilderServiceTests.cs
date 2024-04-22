@@ -36,6 +36,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             fakeLogger = A.Fake<ILogger<BuilderService.Services.BuilderService>>();
             fakeConfiguration = A.Fake<IConfiguration>();
             fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
+            fakeConfiguration["IsFTRunning"] = "false";
 
             builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper);
         }
