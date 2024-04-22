@@ -530,22 +530,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
             //{
             //    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", batchType.ToString()));
             //}
-
-            //switch (batchType)
-            //{
-            //    //Temporary Upload Code Start
-            //    case Batch.BesBaseZipBatch:
-            //        createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Bespoke Exchange Set Type", "Base"));
-            //        createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
-            //        break;
-            //    case Batch.BesUpdateZipBatch:
-            //        createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Bespoke Exchange Set Type", "Update"));
-            //        createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
-            //        break;
-            //    //Temporary Upload Code End
-            //    default:
-            //        break;
-            //};
             return createBatchRequest;
         }
 
