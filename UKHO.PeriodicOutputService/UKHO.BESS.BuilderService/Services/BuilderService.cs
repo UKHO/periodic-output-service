@@ -59,7 +59,19 @@ namespace UKHO.BESS.BuilderService.Services
 
             bool isBatchCreated = false;
             if (bool.Parse(configuration["IsFTRunning"]))
-            {
+            {   
+                if (configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.AVCS.ToString()))
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesAvcsReadmeBatch).Result;
+                }
+                else if (configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.BLANK.ToString()))
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBlankReadmeBatch).Result;
+                }
+                else if (configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.NONE.ToString()))
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesNoneReadmeBatch).Result;
+                }
                 isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesValidReadmeBatch).Result;
             }
             else

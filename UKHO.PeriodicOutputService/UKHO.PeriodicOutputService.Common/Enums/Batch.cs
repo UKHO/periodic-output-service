@@ -15,6 +15,9 @@
         AioUpdateZipBatch = 11,
         BesBaseZipBatch = 12,
         BesUpdateZipBatch = 13,
-        BesValidReadmeBatch = 14
+        BesValidReadmeBatch = 14,
+        BesBlankReadmeBatch = 15,
+        BesAvcsReadmeBatch = 16,
+        BesNoneReadmeBatch = 17
     }
 }
