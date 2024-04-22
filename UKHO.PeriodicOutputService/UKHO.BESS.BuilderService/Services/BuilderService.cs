@@ -87,23 +87,18 @@ namespace UKHO.BESS.BuilderService.Services
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
         {
             string downloadPath = Path.Combine(homeDirectoryPath, essBatchId);
-            List<FssBatchFile> files;
 
             FssBatchStatus fssBatchStatus = await fssService.CheckIfBatchCommitted(essBatchId, RequestType.BESS);
 
             if (fssBatchStatus == FssBatchStatus.Committed)
             {
                 fileSystemHelper.CreateDirectory(downloadPath);
-                files = await GetBatchFilesAsync(essBatchId);
+                List<FssBatchFile> files = await GetBatchFilesAsync(essBatchId);
                 DownloadFiles(files, downloadPath);
+                return (downloadPath, files);
             }
-            else
-            {
-                logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), fssBatchStatus, CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
-            }
-
-            return (downloadPath, files);
+            logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), fssBatchStatus, CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
         }
 
         private ProductVersionsRequest GetProductVersionDetails(IEnumerable<string> encCellNames)
@@ -188,22 +183,20 @@ namespace UKHO.BESS.BuilderService.Services
 
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType)
         {
-            bool isCommitted;
             try
             {
                 string batchId = await fssService.CreateBatch(batchType);
                 IEnumerable<string> filePath = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePath, batchId, batchType);
-                isCommitted = await fssService.CommitBatch(batchId, filePath, batchType);
+                bool isCommitted = await fssService.CommitBatch(batchId, filePath, batchType);
                 logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Batch is created and added to FSS. BatchId: {batchId} and status: {isCommitted}", batchId, isCommitted);
+                return isCommitted;
             }
             catch (Exception ex)
             {
                 logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Batch creation failed with Exception : {ex}", ex);
                 throw;
             }
-
-            return isCommitted;
         }
 
         [ExcludeFromCodeCoverage]
