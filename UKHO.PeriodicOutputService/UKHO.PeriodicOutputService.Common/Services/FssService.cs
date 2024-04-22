@@ -29,6 +29,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                                             Batch.AioUpdateZipBatch
                                       };
 
+        private readonly Enum[] bessBatchTypes = new Enum[] { Batch.BesBaseZipBatch, Batch.BesUpdateZipBatch, Batch.EssEmptyBatch };
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
@@ -405,7 +406,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 };
             }
             //Temporary Upload Code Start
-            else if (batchType == Batch.BesBaseZipBatch || batchType == Batch.BesUpdateZipBatch)
+            else if (bessBatchTypes.Contains(batchType))
             {
                 createBatchRequest = new()
                 {

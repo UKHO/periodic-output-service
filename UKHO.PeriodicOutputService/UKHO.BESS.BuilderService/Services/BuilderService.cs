@@ -19,6 +19,7 @@ namespace UKHO.BESS.BuilderService.Services
     {
         private readonly IEssService essService;
         private readonly IFssService fssService;
+        private readonly IConfiguration configuration;
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
@@ -32,6 +33,7 @@ namespace UKHO.BESS.BuilderService.Services
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
+            this.configuration = configuration;
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
@@ -50,7 +52,26 @@ namespace UKHO.BESS.BuilderService.Services
             #region TemporaryUploadCode
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch : Batch.BesUpdateZipBatch).Result;
+            bool isBatchCreated = false;
+            if (bool.Parse(configuration["IsFTRunning"]))
+            {
+                var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+
+                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(), configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                var product = productVersions.FirstOrDefault(x => x.EditionNumber == 9 && x.UpdateNumber == 2);
+                if (product != null)
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.EssEmptyBatch).Result;
+                }
+                else
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch : Batch.BesUpdateZipBatch).Result;
+                }
+            }
+            else
+            {
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch : Batch.BesUpdateZipBatch).Result;
+            }
 
             // temporary logs
             if (isBatchCreated)
