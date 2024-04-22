@@ -194,7 +194,7 @@
    ]]>
     </notes>
     <cve>CVE-2018-8292</cve>
-  </suppress>
+  </suppress>  
   <suppress>
     <notes>
       <![CDATA[
