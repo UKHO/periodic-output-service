@@ -20,5 +20,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         void CreateZipFile(string sourceDirectoryName, string destinationArchiveFileName, bool deleteOldArchive = false);
 
         IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string aioCellName);
+        Task CreateXmlFromObject<T>(T obj, string filePath, string fileName);
+        void CreateTextFile(string filePath, string fileName, string content);
     }
 }

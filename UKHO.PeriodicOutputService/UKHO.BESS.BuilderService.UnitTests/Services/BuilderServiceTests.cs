@@ -10,6 +10,7 @@ using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.PermitDecryption;
 using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.BESS.BuilderService.UnitTests.Services
@@ -23,6 +24,8 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         private IFileSystemHelper fakeFileSystemHelper;
         private ILogger<BuilderService.Services.BuilderService> fakeLogger;
         private IConfiguration fakeConfiguration;
+        private IPermitDecryption fakePermitDecryption;
+
         private ConfigQueueMessage configQueueMessage;
 
         [SetUp]
@@ -33,24 +36,28 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             fakeFileSystemHelper = A.Fake<IFileSystemHelper>();
             fakeLogger = A.Fake<ILogger<BuilderService.Services.BuilderService>>();
             fakeConfiguration = A.Fake<IConfiguration>();
+            fakePermitDecryption = A.Fake<IPermitDecryption>();
 
-            builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger);
+            builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakePermitDecryption);
         }
 
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullEssSerivce = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger);
+            Action nullEssSerivce = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakePermitDecryption);
             nullEssSerivce.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("essService");
 
-            Action nullFssSerivce = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger);
+            Action nullFssSerivce = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakePermitDecryption);
             nullFssSerivce.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fssService");
 
-            Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger);
+            Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger, fakePermitDecryption);
             nullFileSystemHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fileSystemHelper");
 
-            Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null);
+            Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null, fakePermitDecryption);
             nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
+
+            Action nullPermitDecryption = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, null);
+            nullPermitDecryption.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("permitDecryption");
         }
 
         [Test]
@@ -65,7 +72,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
 
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard));
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, "PERMIT_XML"));
 
             result.Should().Be("Exchange Set Created Successfully");
 
@@ -74,6 +81,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => fakeFileSystemHelper.CreateXmlFromObject(A<PKSXml>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -105,7 +115,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
 
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard));
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, "PERMIT_XML"));
 
             result.Should().Be("Exchange Set Created Successfully");
 
@@ -114,6 +124,50 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => fakeFileSystemHelper.CreateXmlFromObject(A<PKSXml>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileStarted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileCompleted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        [TestCase("s63")]
+        [TestCase("s57")]
+        public async Task WhenTypeIsBaseAndKeyFileTypeIsText_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(string exchangeSetStandard)
+        {
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+                .Returns(GetValidExchangeSetGetBatchResponse());
+            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
+              .Returns(GetValidBatchResponseModel());
+
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, "KEY_TEXT"));
+
+            result.Should().Be("Exchange Set Created Successfully");
+
+            A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceOrMore();
+            A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => fakeFileSystemHelper.CreateTextFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -143,7 +197,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithFileNameError());
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard)))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, "PERMIT_XML")))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -168,7 +222,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithFileNameError());
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard)))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, "PERMIT_XML")))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -191,7 +245,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithNoBatchFiles());
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard)))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, "PERMIT_XML")))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -216,7 +270,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithNoBatchFiles());
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard)))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, "PERMIT_XML")))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -240,7 +294,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard)))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, "PERMIT_XML")))
                 .Should().ThrowAsync<Exception>().WithMessage("Extracting zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}");
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
@@ -278,7 +332,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard)))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, "PERMIT_XML")))
                 .Should().ThrowAsync<Exception>().WithMessage("Extracting zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}");
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
@@ -311,7 +365,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard)))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, "PERMIT_XML")))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -335,7 +389,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard)))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, "PERMIT_XML")))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -348,7 +402,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
         #region PrivateMethods
 
-        private ConfigQueueMessage GetConfigQueueMessage(string type, string exchangeSetStandard)
+        private ConfigQueueMessage GetConfigQueueMessage(string type, string exchangeSetStandard, string KeyFileType)
         {
             configQueueMessage = new ConfigQueueMessage()
             {
@@ -357,7 +411,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 EncCellNames = type == BessType.BASE.ToString() ? new List<string> { "testcell" } : new string[] { "testcellforversion" },
                 Frequency = "30 13 * * *",
                 Type = type,
-                KeyFileType = "NONE",
+                KeyFileType = KeyFileType,
                 AllowedUsers = new string[] { "testuser" },
                 AllowedUserGroups = new string[] { "testgroup" },
                 Tags = new List<Tag> { new() { Key = "key1", Value = "value1" }, new() { Key = "key2", Value = "value2" } },
@@ -400,8 +454,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             BatchId = Guid.NewGuid().ToString(),
             Files = new List<BatchFile>
             {
-               new BatchFile
-               {
+               new() {
                    Filename = "V01X01.zip",
                    Links = new PeriodicOutputService.Common.Models.Fss.Response.Links
                    {
@@ -420,8 +473,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             BatchId = Guid.NewGuid().ToString(),
             Files = new List<BatchFile>
             {
-               new BatchFile
-               {
+               new() {
                    Filename = "Error.txt",
                    Links = new PeriodicOutputService.Common.Models.Fss.Response.Links
                    {

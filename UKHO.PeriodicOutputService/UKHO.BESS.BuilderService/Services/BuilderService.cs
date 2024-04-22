@@ -1,9 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.Abstractions;
-using System.Text;
-using System.Xml;
-using System.Xml.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
@@ -39,6 +36,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
+
             homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["BespokeFolderName"]);
         }
 
@@ -236,7 +234,7 @@ namespace UKHO.BESS.BuilderService.Services
 
         private void CreateKeyFile(ConfigQueueMessage configQueueMessage, string filePath)
         {
-            // Get PKS from server
+            // Get PKS details from PKS server
 
             List<PKSResponse> pksResponses = new()
             {
@@ -245,51 +243,33 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (configQueueMessage.KeyFileType == "KEY_TEXT")
             {
-                CreatePermitTextFile(pksResponses, filePath);
-            }
-            else if (configQueueMessage.KeyFileType == "PERMIT_XML")
-            {
-                CreatePermitXmlFile(pksResponses, filePath);
-            }
-        }
-
-        private void CreatePermitXmlFile(List<PKSResponse> pksResponses, string filePath)
-        {
-            PKSXml pKSXml = new()
-            {
-                date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
-                cellkeys = new()
-                {
-                    response = pksResponses,
-                }
-            };
-
-            var serializer = new XmlSerializer(typeof(PKSXml));
-            var namespaces = new XmlSerializerNamespaces();
-            namespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-
-            using (var fileStream = new FileStream(Path.Combine(filePath, "Avcs Cell Keys.xml"), FileMode.Create))
-            {
-                using (var xmlTextWriter = new XmlTextWriter(fileStream, Encoding.UTF8) { Formatting = Formatting.Indented })
-                {
-                    serializer.Serialize(xmlTextWriter, pKSXml, namespaces);
-                }
-            }
-        }
-
-        private void CreatePermitTextFile(List<PKSResponse> pksResponses, string filePath)
-        {
-            using (StreamWriter writer = new(Path.Combine(filePath, "Keys.txt")))
-            {
                 int i = 0;
+                string permitTextFileContent = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
 
-                writer.WriteLine("Key ID,Key,Name,Edition,Created,Issued,Expired,Status");
                 foreach (var pksResponse in pksResponses)
                 {
                     PermitKey permitKey = permitDecryption.GetPermitKeys(pksResponse.key);
-                    writer.WriteLine($"{i++},{permitKey.ActiveKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active");
-                    writer.WriteLine($"{i++},{permitKey.NextKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next");
+
+                    permitTextFileContent += Environment.NewLine;
+                    permitTextFileContent += $"{i++},{permitKey.ActiveKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active";
+                    permitTextFileContent += Environment.NewLine;
+                    permitTextFileContent += $"{i++},{permitKey.NextKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next";
                 };
+
+                fileSystemHelper.CreateTextFile(filePath, "Keys.txt", permitTextFileContent);
+            }
+            else if (configQueueMessage.KeyFileType == "PERMIT_XML")
+            {
+                PKSXml pKSXml = new()
+                {
+                    date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                    cellkeys = new()
+                    {
+                        response = pksResponses,
+                    }
+                };
+
+                fileSystemHelper.CreateXmlFromObject(pKSXml, filePath, "Avcs Cell Keys.xml");
             }
         }
         #endregion

@@ -1,8 +1,9 @@
-﻿using System.IO;
+﻿using System.Globalization;
 using System.IO.Abstractions;
 using FakeItEasy;
 using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Utilities;
 
@@ -92,7 +93,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             IFileInfo fileInfo = _fakefileSystem.FileInfo.New(fileName);
             A.CallTo(() => fileInfo.Name).Returns(fileName);
-            A.CallTo(() => fileInfo.OpenRead()).Returns(new MockFileSystemStream(new MemoryStream(new byte[10]), "Test", default)); 
+            A.CallTo(() => fileInfo.OpenRead()).Returns(new MockFileSystemStream(new MemoryStream(new byte[10]), "Test", default));
             A.CallTo(() => _fakefileSystem.FileInfo.New(A<string>.Ignored)).Returns(fileInfo);
 
             List<FileDetail>? result = _fileSystemHelper.GetFileMD5(fileNames);
@@ -142,11 +143,48 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         }
 
         [Test]
+        public void Does_CreateXmlFromObject_Executes_Successfully()
+        {
+            PKSXml pKSXml = new()
+            {
+                date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                cellkeys = new()
+                {
+                    response = new List<PKSResponse>()
+                    {
+                        new()
+                        {
+                            edition = 10,
+                            productName = "test",
+                            key = "12345"
+                        }
+                    },
+                }
+            };
+
+            A.CallTo(() => _fakefileSystem.File.OpenWrite(A<string>.Ignored))
+                           .Returns(new MockFileSystemStream(new MemoryStream(), "C:\\Test.xml", false));
+
+            var result = _fileSystemHelper.CreateXmlFromObject(pKSXml, "C:\\Test", "test.txt");
+
+            result.Should().Be(Task.CompletedTask);
+        }
+
+        [Test]
+        public void Does_CreateTextFile_Executes_Successfully()
+        {
+            _fileSystemHelper.CreateTextFile("C:\\Test", "test.txt", "test");
+
+            A.CallTo(() => _fakefileSystem.File.AppendAllText(A<string>.Ignored, A<string>.Ignored))
+                           .MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
         public void Does_GetFileInBytes_Returns_Bytes_Passing_Stream()
         {
             Stream stream = new MemoryStream(new byte[10]);
 
-            
+
             A.CallTo(() => _fakefileSystem.FileInfo.New(A<string>.Ignored))
                             .Returns(_fakeFileInfo);
 
