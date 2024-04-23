@@ -4,6 +4,7 @@ using UKHO.ExchangeSetService.API.FunctionalTests.Models;
 using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 using System.Net;
 using FluentAssertions;
+using Microsoft.IdentityModel.Tokens;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -159,6 +160,24 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             expectedEncryptionFlag.Should().Be(encryptionFlag);
             
             return checkFile;
+        }
+
+        public static bool CheckReadMeInCustomExchangeSet(string? downloadFolderPath, string? readMeSearchFilter)
+        {
+            string[] readMeFileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
+
+            if (readMeSearchFilter == "AVCS")
+            {
+                string readMeType = (readMeFileContent[0].Split(" ")[0]);
+                return readMeType.Equals("AVCS");
+            }
+
+            else if (readMeSearchFilter == "BLANK")
+            {
+                return readMeFileContent.IsNullOrEmpty();
+            }
+
+            return false;
         }
     }
 }

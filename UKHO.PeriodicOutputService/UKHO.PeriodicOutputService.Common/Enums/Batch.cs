@@ -17,7 +17,6 @@
         BesUpdateZipBatch = 13,
         BesValidReadmeBatch = 14,
         BesBlankReadmeBatch = 15,
-        BesAvcsReadmeBatch = 16,
-        BesNoneReadmeBatch = 17
+        BesAvcsReadmeBatch = 16
     }
 }
