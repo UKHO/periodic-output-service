@@ -1,23 +1,24 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
+﻿using System.Globalization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models;
 
 namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 {
-    [ExcludeFromCodeCoverage]
     public class PermitDecryption : IPermitDecryption
     {
         private readonly ILogger<PermitDecryption> _logger;
         private readonly IOptions<PermitConfiguration> _permitConfiguration;
+        private readonly IS63Crypt _s63Crypt;
 
-        public PermitDecryption(ILogger<PermitDecryption> logger, IOptions<PermitConfiguration> permitConfiguration)
+        public PermitDecryption(ILogger<PermitDecryption> logger, IOptions<PermitConfiguration> permitConfiguration, IS63Crypt s63Crypt)
         {
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _permitConfiguration = permitConfiguration ?? throw new ArgumentNullException(nameof(permitConfiguration));
-            _logger = logger;
+            _s63Crypt = s63Crypt ?? throw new ArgumentNullException(nameof(s63Crypt));
         }
 
         public PermitKey GetPermitKeys(string permit)
@@ -26,15 +27,19 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             try
             {
                 byte[] hardwareIds = GetHardwareIds();
-                byte[] firstCellKey = null;
-                byte[] secondCellKey = null;
 
-                S63Crypt.GetEncKeysFromPermit(permit, hardwareIds, ref firstCellKey, ref secondCellKey);
+                var cryptResult = _s63Crypt.GetEncKeysFromPermit(permit, hardwareIds);
+
+                if (cryptResult.Item1 != CryptResult.Ok)
+                {
+                    _logger.LogError(EventIds.PermitDecryptionException.ToEventId(), "Permit decryption failed.");
+                    return null;
+                }
 
                 var keys = new PermitKey
                 {
-                    ActiveKey = Convert.ToHexString(firstCellKey),
-                    NextKey = Convert.ToHexString(secondCellKey)
+                    ActiveKey = Convert.ToHexString(cryptResult.Item2),
+                    NextKey = Convert.ToHexString(cryptResult.Item3)
                 };
                 return keys;
             }

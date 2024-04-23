@@ -1,47 +1,17 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Text;
+using UKHO.PeriodicOutputService.Common.Enums;
 
 namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 {
     [ExcludeFromCodeCoverage]
-    public static class S63Crypt
-    {
-        public enum CryptResult { HWIDFmtErr = 0, CRCErr = 1, Ok = 2 };
-
-        public static void Dword2Byte(uint i, byte[] arr, int offset)
-        {
-            arr[offset + 3] = (byte)(i & 0xFF);
-            arr[offset + 2] = (byte)((i >> 8) & 0xFF);
-            arr[offset + 1] = (byte)((i >> 16) & 0xFF);
-            arr[offset] = (byte)((i >> 24) & 0xFF);
-        }
-
-        public static uint Byte2Dword(byte[] arr, int offset)
-        {
-            return (((uint)arr[offset] << 24) + ((uint)arr[offset + 1] << 16) + ((uint)arr[offset + 2] << 8) + arr[offset + 3]);
-        }
-
-        private static string ToHex(this byte[] data)
-        {
-            if (data == null)
-                return null;
-            char[] c = new char[data.Length * 2];
-            int b;
-            for (int i = 0; i < data.Length; i++)
-            {
-                b = data[i] >> 4;
-                c[i * 2] = (char)(55 + b + (((b - 10) >> 31) & -7));
-                b = data[i] & 0xF;
-                c[i * 2 + 1] = (char)(55 + b + (((b - 10) >> 31) & -7));
-            }
-            return new string(c);
-        }
-
-        public static CryptResult GetEncKeysFromPermit(string permit, byte[] hwIdBytes, ref byte[] ck1, ref byte[] ck2)
+    public class S63Crypt : IS63Crypt
+    {        
+        public (CryptResult, byte[], byte[]) GetEncKeysFromPermit(string permit, byte[] hwIdBytes)
         {
             if (hwIdBytes.Length < 5)
-                return CryptResult.HWIDFmtErr;
+                return (CryptResult.HWIDFmtErr, Array.Empty<byte>(), Array.Empty<byte>());
 
             //prepare HW_ID
             var hwId = new byte[6];
@@ -65,14 +35,14 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             bf.Encrypt(bcrc32);
 
             //convert the result of crc encryption to hexadecimal string presentation
-            var hexcrc = bcrc32.ToHex();
+            var hexcrc = ToHex(bcrc32);
 
             //check permnit validity
             if (hexcrc != permit.Substring(48, 16))
-                return CryptResult.CRCErr; // Cell Permit is invalid (checksum is incorrect)
+                return (CryptResult.CRCErr, Array.Empty<byte>(), Array.Empty<byte>()); // Cell Permit is invalid (checksum is incorrect)
 
-            ck1 = new byte[8];
-            ck2 = new byte[8];
+            byte[] ck1 = new byte[8];
+            byte[] ck2 = new byte[8];
 
             int i;
             int j;
@@ -89,7 +59,37 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             Array.Resize(ref ck1, 5);
             Array.Resize(ref ck2, 5);
 
-            return CryptResult.Ok;
+            return (CryptResult.Ok, ck1, ck2);
         }
+
+        public void Dword2Byte(uint i, byte[] arr, int offset)
+        {
+            arr[offset + 3] = (byte)(i & 0xFF);
+            arr[offset + 2] = (byte)((i >> 8) & 0xFF);
+            arr[offset + 1] = (byte)((i >> 16) & 0xFF);
+            arr[offset] = (byte)((i >> 24) & 0xFF);
+        }
+
+        public uint Byte2Dword(byte[] arr, int offset)
+        {
+            return (((uint)arr[offset] << 24) + ((uint)arr[offset + 1] << 16) + ((uint)arr[offset + 2] << 8) + arr[offset + 3]);
+        }
+
+        private string ToHex(byte[] data)
+        {
+            if (data == null)
+                return null;
+            char[] c = new char[data.Length * 2];
+            int b;
+            for (int i = 0; i < data.Length; i++)
+            {
+                b = data[i] >> 4;
+                c[i * 2] = (char)(55 + b + (((b - 10) >> 31) & -7));
+                b = data[i] & 0xF;
+                c[i * 2 + 1] = (char)(55 + b + (((b - 10) >> 31) & -7));
+            }
+            return new string(c);
+        }
+
     }
 }

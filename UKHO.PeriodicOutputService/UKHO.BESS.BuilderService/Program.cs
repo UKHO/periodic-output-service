@@ -149,6 +149,8 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddScoped<IFileUtility, FileUtility>();
                  serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
                  serviceCollection.AddScoped<IPermitDecryption, PermitDecryption>();
+                 serviceCollection.AddScoped<IS63Crypt, S63Crypt>();
+
                  serviceCollection.AddHttpClient("DownloadClient",
                          httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
                      .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()

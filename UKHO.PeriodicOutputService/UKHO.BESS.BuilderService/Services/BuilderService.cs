@@ -27,6 +27,9 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly string homeDirectoryPath;
 
         private const string BessBatchFileExtension = "zip";
+        private const string KeyTextFile = "Keys.txt";
+        private const string PermitXmlFile = "Avcs Cell Keys.xml";
+        private const string PermitTextFileHeader = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
         private readonly string mimeType = "application/zip";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IPermitDecryption permitDecryption)
@@ -41,7 +44,7 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
-        {
+        {           
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
 
@@ -244,7 +247,7 @@ namespace UKHO.BESS.BuilderService.Services
             if (configQueueMessage.KeyFileType == "KEY_TEXT")
             {
                 int i = 0;
-                string permitTextFileContent = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
+                string permitTextFileContent = PermitTextFileHeader;
 
                 foreach (var pksResponse in pksResponses)
                 {
@@ -256,7 +259,7 @@ namespace UKHO.BESS.BuilderService.Services
                     permitTextFileContent += $"{i++},{permitKey.NextKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next";
                 };
 
-                fileSystemHelper.CreateTextFile(filePath, "Keys.txt", permitTextFileContent);
+                fileSystemHelper.CreateTextFile(filePath, KeyTextFile, permitTextFileContent);
             }
             else if (configQueueMessage.KeyFileType == "PERMIT_XML")
             {
@@ -269,7 +272,7 @@ namespace UKHO.BESS.BuilderService.Services
                     }
                 };
 
-                fileSystemHelper.CreateXmlFromObject(pKSXml, filePath, "Avcs Cell Keys.xml");
+                fileSystemHelper.CreateXmlFromObject(pKSXml, filePath, PermitXmlFile);
             }
         }
         #endregion

@@ -7,9 +7,12 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
     {
         readonly uint[] _P;
         readonly uint[,] _S;
+        readonly IS63Crypt _s63Crypt;
 
         public BlowfishAlgorithm(byte[] passwd)
         {
+            _s63Crypt = new S63Crypt();
+
             _P = new uint[18]{
             0x243f6a88, 0x85a308d3, 0x13198a2e, 0x03707344,
             0xa4093822, 0x299f31d0, 0x082efa98, 0xec4e6c89,
@@ -292,7 +295,7 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
                 Work[1] = passwd[(j++) % len];
                 Work[2] = passwd[(j++) % len];
                 Work[3] = passwd[(j++) % len];
-                _P[i] ^= S63Crypt.Byte2Dword(Work, 0);
+                _P[i] ^= _s63Crypt.Byte2Dword(Work, 0);
             }
             for (i = 0; i < _P.Length; i += 2)
             {
@@ -365,11 +368,11 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 
             for (int i = 0; i < buf.Length; i += 8)
             {
-                uint word0 = S63Crypt.Byte2Dword(buf, i);
-                uint word1 = S63Crypt.Byte2Dword(buf, i + 4);
+                uint word0 = _s63Crypt.Byte2Dword(buf, i);
+                uint word1 = _s63Crypt.Byte2Dword(buf, i + 4);
                 BF_En(ref word0, ref word1);
-                S63Crypt.Dword2Byte(word0, buf, i);
-                S63Crypt.Dword2Byte(word1, buf, i + 4);
+                _s63Crypt.Dword2Byte(word0, buf, i);
+                _s63Crypt.Dword2Byte(word1, buf, i + 4);
             }
             return true;
         }
@@ -384,13 +387,13 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 
             for (int i = 0; i < buf.Length; i += 8)
             {
-                uint word0 = S63Crypt.Byte2Dword(buf, i);
-                uint word1 = S63Crypt.Byte2Dword(buf, i + 4);
+                uint word0 = _s63Crypt.Byte2Dword(buf, i);
+                uint word1 = _s63Crypt.Byte2Dword(buf, i + 4);
                 BF_De(ref word0, ref word1);
-                S63Crypt.Dword2Byte(word0, buf, i);
-                S63Crypt.Dword2Byte(word1, buf, i + 4);
+                _s63Crypt.Dword2Byte(word0, buf, i);
+                _s63Crypt.Dword2Byte(word1, buf, i + 4);
             }
             return true;
-        }
+        }        
     }
 }
