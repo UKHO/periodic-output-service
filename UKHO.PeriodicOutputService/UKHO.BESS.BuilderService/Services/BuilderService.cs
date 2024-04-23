@@ -70,10 +70,7 @@ namespace UKHO.BESS.BuilderService.Services
                 {
                     isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesTypeChangeBlankReadmeBatch).Result;
                 }
-                else if (configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.NONE.ToString()))
-                {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesNoneReadmeBatch).Result;
-                }
+             
                 else //configQueueMessage.Type == BessType.BASE
                 {
                     isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesTypeBaseValidReadmeBatch).Result;

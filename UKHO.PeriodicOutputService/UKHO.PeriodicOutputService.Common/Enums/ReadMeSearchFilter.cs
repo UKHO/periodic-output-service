@@ -4,6 +4,7 @@
     {
         AVCS,
         BLANK,
+        NONE,
         BESVALIDREADMEBATCH
     }
 }
