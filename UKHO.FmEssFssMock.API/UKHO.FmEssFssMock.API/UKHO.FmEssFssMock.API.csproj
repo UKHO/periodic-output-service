@@ -42,6 +42,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Data\06583fac-dbce-4ea6-b67b-870392dcb7ab\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\094CDA16-FCC4-41CB-9317-BF4F26991E32\AIO.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
