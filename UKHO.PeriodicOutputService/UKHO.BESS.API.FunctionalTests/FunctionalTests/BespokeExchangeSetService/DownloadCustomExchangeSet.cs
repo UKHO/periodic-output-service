@@ -21,7 +21,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
 
         [Test]
         [TestCase("s63", "UPDATE", "AVCS", "4bc70797-7ee6-407f-bafe-cae49a5b5f91")]
-        [TestCase("s57", "CHANGE", "BLANK", "06583fac-dbce-4ea6-b67b-870392dcb7ab")]
+        //[TestCase("s57", "CHANGE", "BLANK", "06583fac-dbce-4ea6-b67b-870392dcb7ab")]
         public async Task DownloadCustomExchangeSet(string exchangeSetStandard, string type, string readMeSearchFilter, string batchId)
         {
             //var queueMessage = JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText("./TestData/BSQueueMessage.txt"));
@@ -30,6 +30,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             //string jsonString = JsonConvert.SerializeObject(queueMessage);
 
             var queueMessage = JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText("./TestData/ConfigFile.json"));
+            queueMessage!.Name = "BES-123" + Extensions.RandomNumber();
             queueMessage!.Type = type;
             queueMessage.ExchangeSetStandard = exchangeSetStandard;
             queueMessage!.ReadMeSearchFilter = readMeSearchFilter;

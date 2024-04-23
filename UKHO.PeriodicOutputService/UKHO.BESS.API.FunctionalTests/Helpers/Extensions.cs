@@ -40,5 +40,11 @@
             //The below sleep is to give time to BuilderService to download the exchangeSet.
             Thread.Sleep(240000);
         }
+
+        public static int RandomNumber()
+        {
+            Random rnd = new Random();
+            return rnd.Next(00000, 99999);
+        }
     }
 }
