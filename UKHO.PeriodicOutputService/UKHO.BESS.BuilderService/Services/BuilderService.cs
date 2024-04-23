@@ -24,7 +24,15 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly string homeDirectoryPath;
 
         private const string BessBatchFileExtension = "zip;xml;txt;csv";
-        private readonly string mimeType = "application/zip";
+
+        private readonly Dictionary<string, string> mimeTypes = new()
+        {
+            { ".zip", "application/zip" },
+            { ".xml", "text/xml" },
+            { ".csv", "text/csv" },
+            { ".txt", "text/plain" }
+        };
+        private readonly string DEFAULTMIMETYPE = "application/octet-stream";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger)
         {
@@ -42,10 +50,9 @@ namespace UKHO.BESS.BuilderService.Services
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-            #region TemporaryUploadCode
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            (bool isBatchCreated, string besBatchId) = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch, configQueueMessage).Result;
+            (bool isBatchCreated, string besBatchId) = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage).Result;
 
             if (isBatchCreated)
             {
@@ -55,8 +62,6 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "BES batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
             }
-
-            #endregion TemporaryUploadCode
 
             return "Exchange Set Created Successfully";
         }
@@ -161,8 +166,6 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        //Temporary Upload Code
-        #region Create Bess Batch temporary code
         [ExcludeFromCodeCoverage]
         private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
         {
@@ -184,12 +187,23 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        private async Task<(bool, string)> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType, ConfigQueueMessage configQueueMessage)
+        private async Task<(bool, string)> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
         {
             bool isCommitted;
             string batchId;
+            Batch batchType = Batch.BesBaseZipBatch;
+
             try
             {
+                if (configQueueMessage.Type.ToUpper().Equals(BessType.UPDATE.ToString()))
+                {
+                    batchType = Batch.BesUpdateZipBatch;
+                }
+                else if (configQueueMessage.Type.ToUpper().Equals(BessType.CHANGE.ToString()))
+                {
+                    batchType = Batch.BesChangeZipBatch;
+                }
+
                 batchId = await fssService.CreateBatch(batchType, configQueueMessage);
                 IEnumerable<string> filePath = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePath, batchId, batchType);
@@ -212,7 +226,7 @@ namespace UKHO.BESS.BuilderService.Services
         {
             IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
 
-            bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeType, batchType).Result;
+            bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
             if (isFileAdded)
             {
                 List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
@@ -223,6 +237,5 @@ namespace UKHO.BESS.BuilderService.Services
             }
         });
         }
-        #endregion
     }
 }
