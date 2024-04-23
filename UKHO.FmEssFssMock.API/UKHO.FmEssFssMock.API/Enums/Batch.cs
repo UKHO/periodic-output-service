@@ -68,12 +68,12 @@ namespace UKHO.FmEssFssMock.Enums
         BesUpdateZipBatch = 21,
 
         [Description("4bc70797-7ee6-407f-bafe-cae49a5b5f91")]
-        BesAvcsReadmeBatch = 22,
+        BesTypeUpdateAvcsReadmeBatch = 22,
 
         [Description("06583fac-dbce-4ea6-b67b-870392dcb7ab")]
-        BesBlankReadmeBatch = 23,
+        BesTypeChangeBlankReadmeBatch = 23,
 
-        [Description("4bc70797-7ee6-407f-bafe-cae49a5b5f91")]
-        BesQueryReadmeBatch = 24
+        //[Description("4bc70797-7ee6-407f-bafe-cae49a5b5f91")]
+        //BesQueryReadmeBatch = 24
     }
 }
