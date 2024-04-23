@@ -54,25 +54,30 @@ namespace UKHO.BESS.BuilderService.Services
             await PerformAncillaryFilesOperationsAsync(essBatchId, exchangeSetPath, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter);
 
             //Temporary Upload Code
+
             #region TemporaryUploadCode
+
             CreateZipFile(essFiles, essFileDownloadPath);
 
             bool isBatchCreated = false;
             if (bool.Parse(configuration["IsFTRunning"]))
-            {   
-                if (configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.AVCS.ToString()))
+            {
+                if (configQueueMessage.Type == BessType.UPDATE.ToString() && configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.AVCS.ToString()))
                 {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesAvcsReadmeBatch).Result;
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesTypeUpdateAvcsReadmeBatch).Result;
                 }
-                else if (configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.BLANK.ToString()))
+                else if (configQueueMessage.Type == BessType.CHANGE.ToString() && configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.BLANK.ToString()))
                 {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBlankReadmeBatch).Result;
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesTypeChangeBlankReadmeBatch).Result;
                 }
                 else if (configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.NONE.ToString()))
                 {
                     isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesNoneReadmeBatch).Result;
                 }
-                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesValidReadmeBatch).Result;
+                else //configQueueMessage.Type == BessType.BASE
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesTypeBaseValidReadmeBatch).Result;
+                }
             }
             else
             {
@@ -195,7 +200,9 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         //Temporary Upload Code
+
         #region Create Bess Batch temporary code
+
         [ExcludeFromCodeCoverage]
         private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
         {
@@ -255,7 +262,8 @@ namespace UKHO.BESS.BuilderService.Services
             }
         });
         }
-        #endregion
+
+        #endregion Create Bess Batch temporary code
 
         private async Task PerformAncillaryFilesOperationsAsync(string batchId, string exchangeSetPath, string correlationId, string readMeSearchFilter)
         {
