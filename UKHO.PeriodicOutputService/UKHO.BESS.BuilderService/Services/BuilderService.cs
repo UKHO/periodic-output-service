@@ -55,18 +55,7 @@ namespace UKHO.BESS.BuilderService.Services
             bool isBatchCreated = false;
             if (bool.Parse(configuration["IsFTRunning"]))
             {
-                var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
-
-                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(), configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
-                var product = productVersions.FirstOrDefault(x => x.EditionNumber == 9 && x.UpdateNumber == 2);
-                if (product != null)
-                {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.EssEmptyBatch).Result;
-                }
-                else
-                {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch : Batch.BesUpdateZipBatch).Result;
-                }
+                isBatchCreated = await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
             }
             else
             {
@@ -318,6 +307,34 @@ namespace UKHO.BESS.BuilderService.Services
 
                 throw new Exception($"Logging Product version failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
             }
+        }
+
+        // This method is for mock only
+        [ExcludeFromCodeCoverage]
+        private async Task<bool> IsBatchCreatedForMock(ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
+        {
+            bool isBatchCreated;
+            if (configQueueMessage.Type == BessType.BASE.ToString())
+            {
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch).Result;
+            }
+            else
+            {
+                var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+
+                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(),
+                    configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                var product = productVersions.Any(x => x.EditionNumber > 0);
+                if (product)
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.EssEmptyBatch).Result;
+                }
+                else
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesUpdateZipBatch).Result;
+                }
+            }
+            return isBatchCreated;
         }
     }
 }

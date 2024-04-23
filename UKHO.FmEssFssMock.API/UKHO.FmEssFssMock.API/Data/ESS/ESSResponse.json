@@ -255,27 +255,6 @@
         }
     },
     {
-        "id": "productIdentifier-GB301910-s63",
-        "responseBody": {
-            "_links": {
-                "exchangeSetBatchStatusUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/0d91fb1a-cbe2-4443-8f61-e9a925fa00c9/status"
-                },
-                "exchangeSetBatchDetailsUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/0d91fb1a-cbe2-4443-8f61-e9a925fa00c9"
-                },
-                "exchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/0d91fb1a-cbe2-4443-8f61-e9a925fa00c9/files/V01X01.zip"
-                }
-            },
-            "exchangeSetUrlExpiryDateTime": "",
-            "requestedProductCount": 1,
-            "exchangeSetCellCount": 1,
-            "requestedProductsAlreadyUpToDateCount": 0,
-            "requestedProductsNotInExchangeSet": []
-        }
-    },
-    {
         "id": "productIdentifier-AU220150-AU5PTL01-CA570182-CA570226-CN484220-GB301910-s63",
         "responseBody": {
             "_links": {
@@ -313,27 +292,6 @@
             "exchangeSetUrlExpiryDateTime": "",
             "requestedProductCount": 6,
             "exchangeSetCellCount": 6,
-            "requestedProductsAlreadyUpToDateCount": 0,
-            "requestedProductsNotInExchangeSet": []
-        }
-    },
-    {
-        "id": "productIdentifier-GB301910-s57",
-        "responseBody": {
-            "_links": {
-                "exchangeSetBatchStatusUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/9f349e4f-a4f0-45e8-9a3a-7baa3c561c7e/status"
-                },
-                "exchangeSetBatchDetailsUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/9f349e4f-a4f0-45e8-9a3a-7baa3c561c7e"
-                },
-                "exchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/9f349e4f-a4f0-45e8-9a3a-7baa3c561c7e/files/V01X01.zip"
-                }
-            },
-            "exchangeSetUrlExpiryDateTime": "",
-            "requestedProductCount": 1,
-            "exchangeSetCellCount": 1,
             "requestedProductsAlreadyUpToDateCount": 0,
             "requestedProductsNotInExchangeSet": []
         }
@@ -444,7 +402,7 @@
         }
     },
     {
-        "id": "productVersion-GB301910-9-2-s63",
+        "id": "productVersion-AU220150-8-1-AU5PTL01-1-5-CA570182-3-1-CA570226-3-6-CN484220-6-3-GB301910-10-0-s63",
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
@@ -465,7 +423,7 @@
         }
     },
     {
-        "id": "productVersion-GB301910-9-2-s57",
+        "id": "productVersion-AU220150-8-1-AU5PTL01-1-5-CA570182-3-1-CA570226-3-6-CN484220-6-3-GB301910-10-0-s57",
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
