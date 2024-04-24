@@ -244,7 +244,7 @@ namespace UKHO.BESS.BuilderService.Services
         #endregion
 
         [ExcludeFromCodeCoverage]
-        private List<ProductVersion> GetProductVersionsFromEntities(List<BessProductVersionEntities> productVersionEntities, string[] cellNames, string configName, string exchangeSetStandard)
+        private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, string[] cellNames, string configName, string exchangeSetStandard)
         {
             List<ProductVersion> productVersions = new();
 
