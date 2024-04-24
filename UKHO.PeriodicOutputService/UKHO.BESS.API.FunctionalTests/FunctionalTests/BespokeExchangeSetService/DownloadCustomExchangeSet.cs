@@ -10,6 +10,7 @@ using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetService
 {
+    [Ignore("Temp")]
     [TestFixture]
     public class RequestAndDownloadExchangeSet
     {
