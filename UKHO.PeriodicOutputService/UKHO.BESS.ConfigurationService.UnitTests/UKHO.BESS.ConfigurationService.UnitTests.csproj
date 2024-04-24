@@ -36,7 +36,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UKHO.BESS.ConfigurationService\UKHO.BESS.ConfigurationService.csproj" />
-    <ProjectReference Include="..\UKHO.PeriodicOutputService.Common\UKHO.PeriodicOutputService.Common.csproj" />
   </ItemGroup>
 
 </Project>

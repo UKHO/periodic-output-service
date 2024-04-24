@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UKHO.BESS.BuilderService\UKHO.BESS.BuilderService.csproj" />
-    <ProjectReference Include="..\UKHO.PeriodicOutputService.Common\UKHO.PeriodicOutputService.Common.csproj" />
   </ItemGroup>
 
 </Project>
