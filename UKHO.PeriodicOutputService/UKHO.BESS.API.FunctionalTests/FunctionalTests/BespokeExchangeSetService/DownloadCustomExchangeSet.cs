@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Net;
+using FluentAssertions;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -22,6 +23,8 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
         public void Setup()
         {
              azureBlobStorageClient = new AzureBlobStorageClient(test);
+            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, "Identifiers");
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
         [Test]
