@@ -10,10 +10,12 @@ namespace UKHO.FmEssFssMock.API.Controllers
     public class ExchangeSetServiceController : ControllerBase
     {
         private readonly ExchangeSetService _exchangeSetService;
+        private readonly ILogger<ExchangeSetServiceController> _logger;
 
-        public ExchangeSetServiceController(ExchangeSetService exchangeSetService)
+        public ExchangeSetServiceController(ExchangeSetService exchangeSetService, ILogger<ExchangeSetServiceController> logger)
         {
             _exchangeSetService = exchangeSetService;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -53,12 +55,22 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
                 if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals(ExchangeSetStandard.s63.ToString()) || exchangeSetStandard.Equals(ExchangeSetStandard.s57.ToString()))
                 {
-                    ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductIdentifier(productIdentifiers, exchangeSetStandard);
-                    if (response == null)
+                    try
                     {
-                        return BadRequest();
+                        ExchangeSetServiceResponse? response =
+                            _exchangeSetService.CreateExchangeSetForPostProductIdentifier(productIdentifiers, exchangeSetStandard);
+                        if (response == null)
+                        {
+                            return BadRequest();
+                        }
+                        return Ok(response.ResponseBody);
                     }
-                    return Ok(response.ResponseBody);
+                    catch (Exception ex)
+                    {
+                        _logger.LogError("Failed : {message}", ex.Message);
+                        throw;
+                    }
+
                 }
             }
             return BadRequest();
@@ -77,12 +89,21 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
                 if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals(ExchangeSetStandard.s63.ToString()) || exchangeSetStandard.Equals(ExchangeSetStandard.s57.ToString()) && !productVersionRequest.Any(i => i.EditionNumber == null && i.UpdateNumber == null))
                 {
-                    ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductVersion(productVersionRequest, exchangeSetStandard);
-                    if (response == null)
+                    try
                     {
-                        return BadRequest();
+                        ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductVersion(productVersionRequest, exchangeSetStandard);
+                        if (response == null)
+                        {
+                            return BadRequest();
+                        }
+                        return Ok(response.ResponseBody);
                     }
-                    return Ok(response.ResponseBody);
+                    catch (Exception e)
+                    {
+                        _logger.LogError("Failed : {message}", e.Message);
+                        throw;
+                    }
+
                 }
             }
             return BadRequest();
