@@ -254,7 +254,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenKeyInTagsIsNullOrEmpty_ThenThrowsValidationError()
+        public void WhenKeyInTagsIsNullOrEmpty_ThenThrowValidationError()
         {
             var validationMessage = new ValidationFailure("Tags", "Key or Value not provided");
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithEmptyOrNullKeyInTagsJson));
