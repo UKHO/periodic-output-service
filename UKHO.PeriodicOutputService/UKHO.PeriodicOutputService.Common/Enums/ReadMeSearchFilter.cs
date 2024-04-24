@@ -3,8 +3,6 @@
     public enum ReadMeSearchFilter
     {
         AVCS,
-        BLANK,
-        NONE,
-        BESVALIDREADMEBATCH
+        BLANK
     }
 }

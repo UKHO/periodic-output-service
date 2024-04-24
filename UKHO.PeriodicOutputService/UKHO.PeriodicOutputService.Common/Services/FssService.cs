@@ -453,14 +453,14 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             if (_aioBatchTypes.Contains(batchType))
             {
-                createBatchRequest = new()
+                createBatchRequest = new CreateBatchRequestModel
                 {
                     BusinessUnit = _fssApiConfiguration.Value.AioBusinessUnit,
                     ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl()
+                    Acl = new Acl
                     {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new() : _fssApiConfiguration.Value.AioReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new() : _fssApiConfiguration.Value.AioReadGroups.Split(",").ToList(),
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new List<string>() : _fssApiConfiguration.Value.AioReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new List<string>() : _fssApiConfiguration.Value.AioReadGroups.Split(",").ToList(),
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {
@@ -472,16 +472,16 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 };
             }
             //Temporary Upload Code Start
-            else if (batchType == Batch.BesBaseZipBatch || batchType == Batch.BesUpdateZipBatch || batchType == Batch.BesTypeUpdateAvcsReadmeBatch || batchType == Batch.BesTypeChangeBlankReadmeBatch)
+            else if (batchType is Batch.BesBaseZipBatch or Batch.BesUpdateZipBatch)
             {
-                createBatchRequest = new()
+                createBatchRequest = new CreateBatchRequestModel
                 {
                     BusinessUnit = _fssApiConfiguration.Value.BessBusinessUnit,
                     ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl()
+                    Acl = new Acl
                     {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadUsers) ? new() : _fssApiConfiguration.Value.BessReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new() : _fssApiConfiguration.Value.BessReadGroups.Split(",").ToList(),
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadUsers) ? new List<string>() : _fssApiConfiguration.Value.BessReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new List<string>() : _fssApiConfiguration.Value.BessReadGroups.Split(",").ToList(),
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {
@@ -495,14 +495,14 @@ namespace UKHO.PeriodicOutputService.Common.Services
             //Temporary Upload Code End
             else
             {
-                createBatchRequest = new()
+                createBatchRequest = new CreateBatchRequestModel
                 {
                     BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
                     ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl()
+                    Acl = new Acl
                     {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new List<string>() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new List<string>() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {

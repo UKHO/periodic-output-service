@@ -227,7 +227,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 }
                 return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
             }
-            else if (filter.ToUpper().Contains("AVCS"))
+            else if (filter.ToUpper().Contains("Bespoke README"))
             {
                 string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName);
                 return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);

@@ -14,10 +14,6 @@
         AioBaseCDZipIsoSha1Batch = 10,
         AioUpdateZipBatch = 11,
         BesBaseZipBatch = 12,
-        BesUpdateZipBatch = 13,
-        BesTypeBaseValidReadmeBatch = 14,
-        BesTypeChangeBlankReadmeBatch = 15,
-        BesTypeUpdateAvcsReadmeBatch = 16,
-        BesNoneReadmeBatch = 17
+        BesUpdateZipBatch = 13
     }
 }

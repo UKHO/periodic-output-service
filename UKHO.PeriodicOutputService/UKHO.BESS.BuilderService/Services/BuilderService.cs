@@ -59,28 +59,8 @@ namespace UKHO.BESS.BuilderService.Services
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            bool isBatchCreated = false;
-            if (bool.Parse(configuration["IsFTRunning"]))
-            {
-                if (configQueueMessage.Type == BessType.UPDATE.ToString() && configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.AVCS.ToString()))
-                {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesTypeUpdateAvcsReadmeBatch).Result;
-                }
-                else if (configQueueMessage.Type == BessType.CHANGE.ToString() && configQueueMessage.ReadMeSearchFilter.Contains(ReadMeSearchFilter.BLANK.ToString()))
-                {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesTypeChangeBlankReadmeBatch).Result;
-                }
-             
-                else //configQueueMessage.Type == BessType.BASE
-                {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesTypeBaseValidReadmeBatch).Result;
-                }
-            }
-            else
-            {
-                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch : Batch.BesUpdateZipBatch).Result;
-            }
-
+            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch : Batch.BesUpdateZipBatch).Result;
+            
             // temporary logs
             if (isBatchCreated)
             {
@@ -269,7 +249,8 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
                 return;
-            else if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
+
+            if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
                 fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
             else
                 await DownloadReadMeFileAsync(batchId, exchangeSetRootPath, correlationId, readMeSearchFilter);
