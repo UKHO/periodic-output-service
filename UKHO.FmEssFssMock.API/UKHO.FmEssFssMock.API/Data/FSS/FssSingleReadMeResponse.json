@@ -5,26 +5,30 @@
         {
             "batchId": "ab4a692d-6e3b-48a3-bd37-d232c60dd75d",
             "status": "Committed",
-            "allFilesZipSize": 18957,
+            "allFilesZipSize": 911,
             "attributes": [
                 {
-                    "key": "Product Type",
-                    "value": "AVCS"
+                    "key": "Audience",
+                    "value": "Port of London"
+                },
+                {
+                    "key": "Content",
+                    "value": "Bespoke README"
                 }
             ],
-            "businessUnit": "ADDS",
-            "batchPublishedDate": "2024-04-11T09:01:18.027Z",
+            "businessUnit": "AVCS-BespokeExchangeSets",
+            "batchPublishedDate": "2024-04-18T09:05:38.93Z",
             "expiryDate": null,
             "files": [
                 {
-                    "filename": "README.txt",
-                    "fileSize": 55092,
+                    "filename": "README.TXT",
+                    "fileSize": 1498,
                     "mimeType": "text/plain",
-                    "hash": "C2DI95LYetdIO6q1baIHBA==",
+                    "hash": "RJbZFFTi+TWLUwSnemycPw==",
                     "attributes": [],
                     "links": {
                         "get": {
-                            "href": "/batch/ab4a692d-6e3b-48a3-bd37-d232c60dd75d/files/README.txt"
+                            "href": "/batch/ab4a692d-6e3b-48a3-bd37-d232c60dd75d/files/README.TXT"
                         }
                     }
                 }
@@ -33,13 +37,13 @@
     ],
     "_Links": {
         "self": {
-            "href": "/batch?limit=10&start=0&$filter=%24batch%28Product%20Type%29%20eq%20%27AVCS%27%20%20%20and%20fileName%20eq%20%27README.TXT%27%20and%20businessUnit%20eq%20%27ADDS%27%20"
+            "href": "/batch?limit=10&start=0&$filter=businessUnit%20eq%20%27AVCS-BespokeExchangeSets%27%20and%20filename%20eq%20%27README.TXT%27%20and%20%24batch%28Content%29%20eq%20%27Bespoke%20README%27%20and%20%24batch%28Audience%29%20eq%20%27Port%20of%20London%27%20"
         },
         "first": {
-            "href": "/batch?limit=10&start=0&$filter=%24batch%28Product%20Type%29%20eq%20%27AVCS%27%20%20%20and%20fileName%20eq%20%27README.TXT%27%20and%20businessUnit%20eq%20%27ADDS%27%20"
+            "href": "/batch?limit=10&start=0&$filter=businessUnit%20eq%20%27AVCS-BespokeExchangeSets%27%20and%20filename%20eq%20%27README.TXT%27%20and%20%24batch%28Content%29%20eq%20%27Bespoke%20README%27%20and%20%24batch%28Audience%29%20eq%20%27Port%20of%20London%27%20"
         },
         "last": {
-            "href": "/batch?limit=10&start=0&$filter=%24batch%28Product%20Type%29%20eq%20%27AVCS%27%20%20%20and%20fileName%20eq%20%27README.TXT%27%20and%20businessUnit%20eq%20%27ADDS%27%20"
+            "href": "/batch?limit=10&start=0&$filter=businessUnit%20eq%20%27AVCS-BespokeExchangeSets%27%20and%20filename%20eq%20%27README.TXT%27%20and%20%24batch%28Content%29%20eq%20%27Bespoke%20README%27%20and%20%24batch%28Audience%29%20eq%20%27Port%20of%20London%27%20"
         }
     }
 }

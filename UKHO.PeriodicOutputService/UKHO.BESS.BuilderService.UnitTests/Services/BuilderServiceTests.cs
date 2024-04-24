@@ -491,84 +491,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase("s63")]
         [TestCase("s57")]
-        public async Task WhenTypeIsBaseAndReadmeSearchFilterIsAVCS_ThenBespokeExchangeSetIsCreated(string exchangeSetStandard)
-        {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
-                .Returns(GetValidExchangeSetGetBatchResponse());
-            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
-              .Returns(FssBatchStatus.Committed);
-            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
-              .Returns(GetValidBatchResponseModel());
-
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString()));
-
-            result.Should().Be("Exchange Set Created Successfully");
-
-            A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
-               .MustHaveHappenedOnceOrMore();
-            A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
-              .MustHaveHappenedOnceExactly();
-            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true))
-                .MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-            call.Method.Name == "Log"
-            && call.GetArgument<LogLevel>(0) == LogLevel.Information
-            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileStarted.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-            call.Method.Name == "Log"
-            && call.GetArgument<LogLevel>(0) == LogLevel.Information
-            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileCompleted.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
-        }
-
-        [Test]
-        [TestCase("UPDATE", "s63")]
-        [TestCase("UPDATE", "s57")]
-        [TestCase("CHANGE", "s63")]
-        [TestCase("CHANGE", "s57")]
-        public async Task WhenTypeIsUpdateOrChangeAndReadmeSearchFilterIsAVCS_ThenBespokeExchangeSetIsCreated(string type, string exchangeSetStandard)
-        {
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
-             .Returns(GetValidExchangeSetGetBatchResponse());
-            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
-              .Returns(FssBatchStatus.Committed);
-            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
-              .Returns(GetValidBatchResponseModel());
-
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString()));
-
-            result.Should().Be("Exchange Set Created Successfully");
-
-            A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
-               .MustHaveHappenedOnceOrMore();
-            A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
-              .MustHaveHappenedOnceExactly();
-            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
-                .MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-            call.Method.Name == "Log"
-            && call.GetArgument<LogLevel>(0) == LogLevel.Information
-            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileStarted.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-            call.Method.Name == "Log"
-            && call.GetArgument<LogLevel>(0) == LogLevel.Information
-            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileCompleted.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
-        }
-
-        [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
         public async Task WhenTypeIsBaseAndReadmeSearchFilterIsBLANK_ThenBespokeExchangeSetIsCreatedAndBlankReadmeReplaced(string exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
@@ -612,7 +534,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase("UPDATE", "s57")]
         [TestCase("CHANGE", "s63")]
         [TestCase("CHANGE", "s57")]
-        public async Task WhenTypeIsUpdateOrChangeAndReadmeSearchFilterIsAVCS_ThenBespokeExchangeSetIsCreatedAndBlankReadmeReplaced(string type, string exchangeSetStandard)
+        public async Task WhenTypeIsUpdateOrChangeAndReadmeSearchFilterIsBLANK_ThenBespokeExchangeSetIsCreatedAndBlankReadmeReplaced(string type, string exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
