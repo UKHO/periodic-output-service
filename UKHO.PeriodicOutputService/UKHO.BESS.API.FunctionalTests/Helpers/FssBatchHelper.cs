@@ -171,7 +171,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 string readMeType = (readMeFileContent[0].Split(" ")[0]);
                 return readMeType.Equals("AVCS");
             }
-
             else if (readMeSearchFilter == "BLANK")
             {
                 return readMeFileContent.IsNullOrEmpty();

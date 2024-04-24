@@ -20,6 +20,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
+        // Constructer added to use in FT.
+        public AzureBlobStorageClient(IOptions<BessStorageConfiguration> bessStorageConfiguration)
+        {
+            this.bessStorageConfiguration = bessStorageConfiguration.Value ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
+        }
+
         public Dictionary<string, string> GetConfigsInContainer()
         {
             Dictionary<string, string> configs = new();
@@ -71,6 +77,30 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             using var reader = new StreamReader(response.Content);
             return reader.ReadToEnd();
+        }
+
+        public Dictionary<string, string> DeleteConfigsInContainer()
+        {
+            Dictionary<string, string> configs = new();
+
+            try
+            {
+                BlobContainerClient blobContainerClient = GetBlobContainerClient();
+
+                foreach (BlobItem blobItem in blobContainerClient.GetBlobs())
+                {
+                    if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                    {
+                        BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
+                        blobClient.DeleteIfExistsAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.BessErrorOccurredWhileDownloadingConfigFromAzureStorage.ToEventId(), "Exception occurred while downloading configs from azure storage with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+            }
+            return configs;
         }
     }
 }

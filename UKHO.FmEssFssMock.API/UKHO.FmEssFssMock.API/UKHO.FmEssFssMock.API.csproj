@@ -72,6 +72,9 @@
     <None Update="Data\4BC70797-7EE6-407F-BAFE-CAE49A5B5F91\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\ab4a692d-6e3b-48a3-bd37-d232c60dd75d\README.TXT">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -121,6 +124,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\F8FD2FB4-3DD6-425D-B34F-3059E262FEED\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\FullAvcsPollingTimeOut\avcs_catalogue_ft.xml">
