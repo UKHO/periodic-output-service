@@ -144,9 +144,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _fileSystem.File.AppendAllText(Path.Combine(filePath, fileName), content);
         }
 
-        public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string aioCellName)
+        public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName)
         {
-            string searchPath = $"ENC_ROOT/GB/{aioCellName}";
+            string searchPath = $"ENC_ROOT/{cellName[..2]}";
             string currentPath = Path.Combine(sourcePath, searchPath);
 
             List<ProductVersion> productVersions = new();
@@ -156,24 +156,24 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 return productVersions;
             }
 
-            var aioFolder = _fileSystem.Directory.GetDirectories(currentPath, aioCellName, SearchOption.AllDirectories).ToList();
+            var folders = _fileSystem.Directory.GetDirectories(currentPath, cellName, SearchOption.AllDirectories).ToList();
 
-            if (aioFolder.Count == 0)
+            if (folders.Count == 0)
             {
                 return productVersions;
             }
 
-            var editionFolders = _fileSystem.Directory.GetDirectories(aioFolder[0]).Select(Path.GetFileName).ToList();
+            var editionFolders = _fileSystem.Directory.GetDirectories(folders[0]).Select(Path.GetFileName).ToList();
 
             foreach (var editionFolder in editionFolders)
             {
                 ProductVersion productVersion = new();
 
-                productVersion.ProductName = aioCellName;
+                productVersion.ProductName = cellName;
 
                 productVersion.EditionNumber = Convert.ToInt32(editionFolder);
 
-                var updateNumberFolders = _fileSystem.Directory.GetDirectories(Path.Combine(currentPath, editionFolder));
+                var updateNumberFolders = _fileSystem.Directory.GetDirectories(Path.Combine(currentPath, cellName, editionFolder));
 
                 var maxDirectory = updateNumberFolders.Select(d => new { Path = d, Number = int.Parse(Path.GetFileName(d)) })
                                                .OrderByDescending(d => d.Number)

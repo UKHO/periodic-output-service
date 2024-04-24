@@ -12,6 +12,7 @@ using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.PermitDecryption;
 using UKHO.PeriodicOutputService.Common.Services;
 
@@ -23,24 +24,27 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IFssService fssService;
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
+        private readonly IAzureTableStorageHelper azureTableStorageHelper;
         private readonly IPermitDecryption permitDecryption;
-        private readonly string homeDirectoryPath;
 
+        private const string BESPOKE_FILE_NAME = "V01X01";
         private const string BessBatchFileExtension = "zip";
         private const string KeyTextFile = "Keys.txt";
         private const string PermitXmlFile = "Avcs Cell Keys.xml";
         private const string PermitTextFileHeader = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
         private readonly string mimeType = "application/zip";
+        private readonly string homeDirectoryPath;
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IPermitDecryption permitDecryption)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IPermitDecryption permitDecryption)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
 
-            homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["BespokeFolderName"]);
+            homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
         }
 
         public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
@@ -59,11 +63,14 @@ namespace UKHO.BESS.BuilderService.Services
             // temporary logs
             if (isBatchCreated)
             {
-                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Bess Base batch created {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
-            }
-            else
-            {
-                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Bess Base batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Bess batch created {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+
+                if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
+                         configQueueMessage.Type == BessType.CHANGE.ToString())
+                {
+                    var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+                    LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                }
             }
 
             #endregion TemporaryUploadCode
@@ -83,8 +90,15 @@ namespace UKHO.BESS.BuilderService.Services
             else if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                      configQueueMessage.Type == BessType.CHANGE.ToString())
             {
-                ProductVersionsRequest productVersionsRequest = GetProductVersionDetails(configQueueMessage.EncCellNames);
-                exchangeSetResponseModel = await essService.GetProductDataProductVersions(productVersionsRequest, configQueueMessage.ExchangeSetStandard);
+
+                var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+
+                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(), configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+
+                exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest()
+                {
+                    ProductVersions = productVersions
+                }, configQueueMessage.ExchangeSetStandard);
             }
 
             logger.LogInformation(EventIds.ProductsFetchedFromESS.ToEventId(),
@@ -114,20 +128,6 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             return (downloadPath, files);
-        }
-
-        private ProductVersionsRequest GetProductVersionDetails(IEnumerable<string> encCellNames)
-        {
-            ProductVersionsRequest request = new()
-            {
-                ProductVersions = new List<ProductVersion>()
-            };
-
-            foreach (string item in encCellNames)
-            {
-                request.ProductVersions.Add(new ProductVersion { ProductName = item, EditionNumber = 0, UpdateNumber = 0 });
-            }
-            return request;
         }
 
         private async Task<List<FssBatchFile>> GetBatchFilesAsync(string essBatchId)
@@ -276,5 +276,71 @@ namespace UKHO.BESS.BuilderService.Services
             }
         }
         #endregion
+
+        [ExcludeFromCodeCoverage]
+        private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, string[] cellNames, string configName, string exchangeSetStandard)
+        {
+            List<ProductVersion> productVersions = new();
+
+            foreach (var cellName in cellNames)
+            {
+                ProductVersion productVersion = new();
+
+                var result = productVersionEntities.Where(p => p.PartitionKey == configName && p.RowKey == exchangeSetStandard + "|" + cellName);
+
+                if (result.Any())
+                {
+                    productVersion.ProductName = result.FirstOrDefault().RowKey.Split("|")[1];
+                    productVersion.EditionNumber = result.FirstOrDefault().EditionNumber;
+                    productVersion.UpdateNumber = result.FirstOrDefault().UpdateNumber;
+                }
+                else
+                {
+                    productVersion.ProductName = cellName;
+                    productVersion.EditionNumber = 0;
+                    productVersion.UpdateNumber = 0;
+                }
+                productVersions.Add(productVersion);
+            }
+
+            return productVersions;
+        }
+
+        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames)
+        {
+            string exchangeSetPath = Path.Combine(filePath, BESPOKE_FILE_NAME);
+
+            ProductVersionsRequest productVersionsRequest = new()
+            {
+                ProductVersions = new()
+            };
+
+            foreach (var cellName in cellNames)
+            {
+                var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath, cellName);
+
+                productVersionsRequest.ProductVersions.AddRange(productVersions);
+            }
+            return productVersionsRequest;
+        }
+
+        private void LogProductVersions(ProductVersionsRequest productVersionsRequest, string name, string exchangeSetStandard)
+        {
+            try
+            {
+                logger.LogInformation(EventIds.LoggingProductVersionsStarted.ToEventId(), "Logging product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                azureTableStorageHelper.SaveBessProductVersionDetailsAsync(productVersionsRequest.ProductVersions, name, exchangeSetStandard);
+
+                logger.LogInformation(EventIds.LoggingProductVersionsCompleted.ToEventId(), "Logging product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.LoggingProductVersionsFailed.ToEventId(), "Logging product version failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                throw new Exception($"Logging Product version failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+            }
+        }
     }
 }
