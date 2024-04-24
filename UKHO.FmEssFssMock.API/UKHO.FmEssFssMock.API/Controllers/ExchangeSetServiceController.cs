@@ -10,12 +10,10 @@ namespace UKHO.FmEssFssMock.API.Controllers
     public class ExchangeSetServiceController : ControllerBase
     {
         private readonly ExchangeSetService _exchangeSetService;
-        private readonly ILogger<ExchangeSetServiceController> _logger;
 
-        public ExchangeSetServiceController(ExchangeSetService exchangeSetService, ILogger<ExchangeSetServiceController> logger)
+        public ExchangeSetServiceController(ExchangeSetService exchangeSetService)
         {
             _exchangeSetService = exchangeSetService;
-            _logger = logger;
         }
 
         [HttpPost]
@@ -67,8 +65,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError("Failed : {message}", ex.Message);
-                        throw;
+                        return BadRequest(ex.StackTrace);
                     }
 
                 }
@@ -100,8 +97,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
                     }
                     catch (Exception e)
                     {
-                        _logger.LogError("Failed : {message}", e.Message);
-                        throw;
+                        return BadRequest(e.StackTrace);
                     }
 
                 }

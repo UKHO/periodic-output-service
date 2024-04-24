@@ -57,6 +57,9 @@
     <None Update="Data\4BC70797-7EE6-407F-BAFE-CAE49A5B5F91\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\5331f8c2-9085-4083-9a1e-9f99953be122\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\5CF9E1D7-207C-4C96-B5E7-5A519F0EA0C0\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
