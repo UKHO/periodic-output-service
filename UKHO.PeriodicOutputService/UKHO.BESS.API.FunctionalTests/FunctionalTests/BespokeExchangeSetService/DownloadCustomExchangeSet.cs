@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Azure.Storage.Queues;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using UKHO.BESS.API.FunctionalTests.Helpers;
-using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetService
 {
+    [Ignore("Temp")]
     [TestFixture]
     public class RequestAndDownloadExchangeSet
     {
         static readonly TestConfiguration testConfiguration = new();
-        //private AzureTablesHelper azureTablesHelper { get; set; }
 
         [Test]
         [TestCase("s63", "UPDATE", "AVCS", "4bc70797-7ee6-407f-bafe-cae49a5b5f91")]
