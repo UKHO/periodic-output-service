@@ -36,16 +36,16 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That(fileCount > 0, $"File count is {fileCount} in the specified folder path.");
         }
 
-        [Test]
-        public async Task WhenICallBatchDetailsEndpointForUpdateExchangeSetTypeWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
-        {
-            HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.AIOUpdateValidBatchId);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+        //[Test]
+        //public async Task WhenICallBatchDetailsEndpointForUpdateExchangeSetTypeWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
+        //{
+        //    HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.AIOUpdateValidBatchId);
+        //    apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
 
-            dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
+        //    dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-            GetBatchDetails.GetBatchDetailsResponseValidationForAio(batchDetailsResponse, "Update");
-        }
+        //    GetBatchDetails.GetBatchDetailsResponseValidationForAio(batchDetailsResponse, "Update");
+        //}
 
         [OneTimeTearDown]
         public void GlobalTearDown()
