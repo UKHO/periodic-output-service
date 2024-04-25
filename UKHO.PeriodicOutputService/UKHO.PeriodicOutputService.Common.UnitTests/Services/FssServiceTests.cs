@@ -28,7 +28,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         private IFileSystemHelper _fileSystemHelper;
         private IFileSystem _fakeFileSystem;
         private IConfiguration _fakeconfiguration;
-        public string fulfilmentExceptionMessage = "There has been a problem in creating your exchange set, so we are unable to fulfil your request at this time. Please contact UKHO Customer Services quoting error code : {0} and correlation ID : {1}";
+        private string fulfilmentExceptionMessage = "There has been a problem in creating your exchange set, so we are unable to fulfil your request at this time. Please contact UKHO Customer Services quoting error code : {0} and correlation ID : {1}";
+        private const string readMeSearchFilterQuery = "$batch(Product Type) eq 'AVCS' and businessUnit eq 'ADDS'";
 
         [SetUp]
         public void Setup()
@@ -789,6 +790,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             SearchBatchResponse searchBatchResponse = new();
             string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
+            string invalidReadMeSearchFilterQuery = "$batch(Product Type) eq 'AVCS nd businessUnit eq 'ADDS'";
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
             A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
@@ -802,9 +804,9 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                 async delegate { await _fssService.SearchReadMeFilePathAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "8k0997d5-8905-43fa-9009-9c38b2007f81", "Atuk"); });
-
+            FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "8k0997d5-8905-43fa-9009-9c38b2007f81", invalidReadMeSearchFilterQuery))
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
+            
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -829,11 +831,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     {
                         RequestUri = new Uri("http://test.com")
                     },
-                }); 
+                });
 
-            Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                  async delegate { await _fssService.SearchReadMeFilePathAsync(batchId, string.Empty, "invalidquery"); });
-
+            FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync(batchId, string.Empty, readMeSearchFilterQuery))
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ReadMeTextFileNotFound.ToEventId());
+            
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -860,8 +862,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                  async delegate { await _fssService.SearchReadMeFilePathAsync(batchId, string.Empty, "invalidquery"); });
+            FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync(batchId, string.Empty, readMeSearchFilterQuery))
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ReadMeTextFileNotFound.ToEventId());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -892,7 +894,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                })
                .Returns(httpResponse);
 
-            var response = await _fssService.SearchReadMeFilePathAsync(batchId, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc", "validquery");
+            var response = await _fssService.SearchReadMeFilePathAsync(batchId, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc", readMeSearchFilterQuery);
             string expectedReadMeFilePath = @"batch/a07537ff-ffa2-4565-8f0e-96e61e70a9fc/files/README.TXT";
             response.Should().NotBeNull();
             expectedReadMeFilePath.Should().Be(searchReadMeFileName);
@@ -924,7 +926,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                    uriParam = uri;
                })
                .Returns(httpResponse);
-            A.CallTo(() => _fileSystemHelper.DownloadReadmeFile(A<string>.Ignored, A<Stream>.Ignored, A<string>.Ignored)).Returns(true);
+            A.CallTo(() => _fileSystemHelper.DownloadReadmeFile(A<string>.Ignored, A<Stream>.Ignored)).Returns(true);
 
             var response = await _fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc");
 
@@ -958,8 +960,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                })
                .Returns(httpResponse);
 
-            Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                 async delegate { await _fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc"); });
+            FluentActions.Invoking(async () => await _fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc"))
+                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"

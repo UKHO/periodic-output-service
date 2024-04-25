@@ -420,8 +420,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             HttpResponseMessage httpReadMeFileResponse;
             httpReadMeFileResponse = await _fssApiClient.DownloadFile(readMeFilePath.TrimStart('/'), accessToken);
-            string latestReadmePath = httpReadMeFileResponse.RequestMessage.RequestUri.ToString();
-
+          
             var requestUri = new Uri(httpReadMeFileResponse.RequestMessage.RequestUri.ToString()).GetLeftPart(UriPartial.Path);
 
             if (httpReadMeFileResponse.IsSuccessStatusCode)
@@ -433,7 +432,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     {
                         _logger.LogInformation(EventIds.DownloadReadmeFile307RedirectResponse.ToEventId(), "File share service download readme.txt redirected with uri:{requestUri} responded with 307 code for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", requestUri, batchId, correlationId);
                     }
-                    return await _fileSystemHelper.DownloadReadmeFile(filePath, stream, latestReadmePath);
+                    return _fileSystemHelper.DownloadReadmeFile(filePath, stream);
                 }
             }
             else

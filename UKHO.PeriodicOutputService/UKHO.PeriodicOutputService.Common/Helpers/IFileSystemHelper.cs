@@ -21,6 +21,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string aioCellName);
         bool CreateEmptyFileContent(string filePath);
-        Task<bool> DownloadReadmeFile(string filePath, Stream stream, string latestReadmePath);
+        bool DownloadReadmeFile(string filePath, Stream stream);
     }
 }
