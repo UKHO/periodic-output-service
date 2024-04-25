@@ -614,6 +614,26 @@ stages:
           - name: RGName
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
         steps:
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download Terraform Artifact"
+                  condition: always()
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'devterraformartifact'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: AzureCLI@2
+                  displayName: "Swap Storage Container Configuration"
+                  condition: always()
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
+                    arguments: '-containername $(BessStorageConfiguration.ContainerName) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download BESS Functional test Artifact"
                   inputs:
@@ -646,14 +666,15 @@ stages:
                     testRunTitle: "Dev-BESSAutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
 
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download Terraform Artifact"
+                - task: AzureCLI@2
+                  displayName: "Swap Storage Container Configuration"
                   condition: always()
                   inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'devterraformartifact'
-                    downloadPath: '$(Build.SourcesDirectory)'
+                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
+                    arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
                 - task: AzureCLI@2
                   displayName: "Swap Stub and Webjob Configuration"
