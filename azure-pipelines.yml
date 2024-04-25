@@ -597,7 +597,7 @@ stages:
         - CheckFSS
         - CheckESS
         - CheckFM
-        - POSFunctionalTests 
+#        - POSFunctionalTests 
         pool: NautilusBuild
         displayName: "Dev BESS Functional Automated Tests"
         workspace:
