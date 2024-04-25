@@ -6,6 +6,7 @@ using UKHO.BESS.BuilderService.Services;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
@@ -140,7 +141,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => fakeFileSystemHelper.CreateXmlFromObject(A<PKSXml>.Ignored, A<string>.Ignored, A<string>.Ignored))
-                .MustHaveHappenedOnceExactly();            
+                .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -202,6 +203,8 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
              .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(GetProductVersions);
+
+            A.CallTo(() => fakePermitDecryption.GetPermitKeys(A<string>.Ignored)).Returns(new PermitKey() { ActiveKey = "12345", NextKey = "12345" }) ;
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, "KEY_TEXT"));
 

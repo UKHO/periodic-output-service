@@ -7,7 +7,7 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 {
     [ExcludeFromCodeCoverage]
     public class S63Crypt : IS63Crypt
-    {        
+    {
         public (CryptResult, byte[], byte[]) GetEncKeysFromPermit(string permit, byte[] hwIdBytes)
         {
             if (hwIdBytes.Length < 5)
@@ -34,10 +34,10 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             var bf = (new BlowfishFactory()).Get(hwId, CachingOptions.Cache);
             bf.Encrypt(bcrc32);
 
-            //convert the result of crc encryption to hexadecimal string presentation
+            //convert the result of crc encryption to hexadecimal string presentation   
             var hexcrc = ToHex(bcrc32);
 
-            //check permnit validity
+            //check permit validity
             if (hexcrc != permit.Substring(48, 16))
                 return (CryptResult.CRCErr, Array.Empty<byte>(), Array.Empty<byte>()); // Cell Permit is invalid (checksum is incorrect)
 

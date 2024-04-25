@@ -10,15 +10,15 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 {
     public class PermitDecryption : IPermitDecryption
     {
-        private readonly ILogger<PermitDecryption> _logger;
-        private readonly IOptions<PermitConfiguration> _permitConfiguration;
-        private readonly IS63Crypt _s63Crypt;
+        private readonly ILogger<PermitDecryption> logger;
+        private readonly IOptions<PermitConfiguration> permitConfiguration;
+        private readonly IS63Crypt s63Crypt;
 
         public PermitDecryption(ILogger<PermitDecryption> logger, IOptions<PermitConfiguration> permitConfiguration, IS63Crypt s63Crypt)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _permitConfiguration = permitConfiguration ?? throw new ArgumentNullException(nameof(permitConfiguration));
-            _s63Crypt = s63Crypt ?? throw new ArgumentNullException(nameof(s63Crypt));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.permitConfiguration = permitConfiguration ?? throw new ArgumentNullException(nameof(permitConfiguration));
+            this.s63Crypt = s63Crypt ?? throw new ArgumentNullException(nameof(s63Crypt));
         }
 
         public PermitKey GetPermitKeys(string permit)
@@ -28,31 +28,30 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             {
                 byte[] hardwareIds = GetHardwareIds();
 
-                var cryptResult = _s63Crypt.GetEncKeysFromPermit(permit, hardwareIds);
+                var cryptResult = s63Crypt.GetEncKeysFromPermit(permit, hardwareIds);
 
                 if (cryptResult.Item1 != CryptResult.Ok)
                 {
-                    _logger.LogError(EventIds.PermitDecryptionException.ToEventId(), "Permit decryption failed.");
+                    logger.LogError(EventIds.PermitDecryptionException.ToEventId(), $"Permit decryption failed with Error : {cryptResult.Item1}");
                     return null;
                 }
 
-                var keys = new PermitKey
+                return new PermitKey
                 {
                     ActiveKey = Convert.ToHexString(cryptResult.Item2),
                     NextKey = Convert.ToHexString(cryptResult.Item3)
                 };
-                return keys;
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventIds.PermitDecryptionException.ToEventId(), ex, "An error occurred while decrypting the permit string.");
+                logger.LogError(EventIds.PermitDecryptionException.ToEventId(), ex, "An error occurred while decrypting the permit string.");
                 return null;
             }
         }
 
         private byte[] GetHardwareIds()
         {
-            var permitHardwareIds = _permitConfiguration.Value.PermitDecryptionHardwareId.Split(',').ToList();
+            var permitHardwareIds = permitConfiguration.Value.PermitDecryptionHardwareId.Split(',').ToList();
             int i = 0;
             byte[] hardwareIds = new byte[6];
             foreach (string? hardwareId in permitHardwareIds)

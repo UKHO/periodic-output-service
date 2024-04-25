@@ -48,7 +48,7 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
-        {           
+        {
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
 
@@ -253,10 +253,13 @@ namespace UKHO.BESS.BuilderService.Services
                 {
                     PermitKey permitKey = permitDecryption.GetPermitKeys(pksResponse.key);
 
-                    permitTextFileContent += Environment.NewLine;
-                    permitTextFileContent += $"{i++},{permitKey.ActiveKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active";
-                    permitTextFileContent += Environment.NewLine;
-                    permitTextFileContent += $"{i++},{permitKey.NextKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next";
+                    if (permitKey != null)
+                    {
+                        permitTextFileContent += Environment.NewLine;
+                        permitTextFileContent += $"{i++},{permitKey.ActiveKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active";
+                        permitTextFileContent += Environment.NewLine;
+                        permitTextFileContent += $"{i++},{permitKey.NextKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next";
+                    }
                 };
 
                 fileSystemHelper.CreateTextFile(filePath, KeyTextFile, permitTextFileContent);

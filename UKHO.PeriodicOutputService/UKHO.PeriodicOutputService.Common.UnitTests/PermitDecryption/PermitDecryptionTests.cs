@@ -71,7 +71,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         public void WhenInValidPermitKeyPassed_Then_GetPermitKeys_Returns_Null()
         {
             A.CallTo(() => fakeS63Crypt.GetEncKeysFromPermit(A<string>.Ignored, A<byte[]>.Ignored))
-                                        .Returns((CryptResult.HWIDFmtErr, new byte[5] { 1, 2, 3, 4, 5 }, new byte[5] { 1, 2, 3, 4, 5 }));
+                                        .Returns((CryptResult.HWIDFmtErr, Array.Empty<byte>(), Array.Empty<byte>()));
 
             var result = permitDecryption.GetPermitKeys("ID12");
 
@@ -81,12 +81,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<EventId>(1) == EventIds.PermitDecryptionException.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit decryption failed."
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit decryption failed with Error : HWIDFmtErr"
             ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
-        public void WhenExceptionOccuredThenGetPermitKeysReturnsNull()
+        public void WhenExceptionOccurred_Then_GetPermitKeys_Returns_Null()
         {
             A.CallTo(() => fakeS63Crypt.GetEncKeysFromPermit(A<string>.Ignored, A<byte[]>.Ignored))
                                         .Throws<Exception>();
