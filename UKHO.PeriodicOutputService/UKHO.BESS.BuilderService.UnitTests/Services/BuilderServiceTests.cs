@@ -80,9 +80,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
-        public async Task WhenTypeIsBase_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(string exchangeSetStandard)
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsBase_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -91,7 +91,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
 
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString()));
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString()));
 
             result.Should().Be("Exchange Set Created Successfully");
 
@@ -118,11 +118,11 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("UPDATE", "s63")]
-        [TestCase("UPDATE", "s57")]
-        [TestCase("CHANGE", "s63")]
-        [TestCase("CHANGE", "s57")]
-        public async Task WhenTypeIsUpdateOrChange_ThenGetProductVersionEndpointIsCalledAndBespokeExchangeSetIsCreated(string type, string exchangeSetStandard)
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsUpdateOrChange_ThenGetProductVersionEndpointIsCalledAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -131,7 +131,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
 
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString()));
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString()));
 
             result.Should().Be("Exchange Set Created Successfully");
 
@@ -158,9 +158,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
-        public void WhenTypeIsBaseAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(string exchangeSetStandard)
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public void WhenTypeIsBaseAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -169,7 +169,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithFileNameError());
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString())))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -181,11 +181,11 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("UPDATE", "s63")]
-        [TestCase("UPDATE", "s57")]
-        [TestCase("CHANGE", "s63")]
-        [TestCase("CHANGE", "s57")]
-        public void WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(string type, string exchangeSetStandard)
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public void WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -194,7 +194,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithFileNameError());
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString())))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -206,9 +206,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
-        public void WhenTypeIsBaseAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(string exchangeSetStandard)
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public void WhenTypeIsBaseAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -217,7 +217,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithNoBatchFiles());
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString())))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -229,11 +229,11 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("UPDATE", "s63")]
-        [TestCase("UPDATE", "s57")]
-        [TestCase("CHANGE", "s63")]
-        [TestCase("CHANGE", "s57")]
-        public void WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(string type, string exchangeSetStandard)
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public void WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -242,7 +242,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithNoBatchFiles());
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString())))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -254,9 +254,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
-        public void WhenTypeIsBaseAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(string exchangeSetStandard)
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public void WhenTypeIsBaseAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -266,7 +266,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString())))
                 .Should().ThrowAsync<Exception>().WithMessage("Extracting zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}");
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
@@ -290,11 +290,11 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("UPDATE", "s63")]
-        [TestCase("UPDATE", "s57")]
-        [TestCase("CHANGE", "s63")]
-        [TestCase("CHANGE", "s57")]
-        public void WhenTypeIsUpdateOrChangeAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(string type, string exchangeSetStandard)
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public void WhenTypeIsUpdateOrChangeAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -304,7 +304,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString())))
                 .Should().ThrowAsync<Exception>().WithMessage("Extracting zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}");
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
@@ -328,16 +328,16 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
-        public void WhenTypeIsBaseAndBatchStatusIsNotCommited_ThenCreateBespokeExchangeSetAsyncThrowsError(string exchangeSetStandard)
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public void WhenTypeIsBaseAndBatchStatusIsNotCommited_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString())))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -350,18 +350,18 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("UPDATE", "s63")]
-        [TestCase("UPDATE", "s57")]
-        [TestCase("CHANGE", "s63")]
-        [TestCase("CHANGE", "s57")]
-        public void WhenTypeIsUpdateOrChangeAndBatchStatusIsNotCommited_ThenCreateBespokeExchangeSetAsyncThrowsError(string type, string exchangeSetStandard)
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public void WhenTypeIsUpdateOrChangeAndBatchStatusIsNotCommited_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
+            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.AVCS.ToString())))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -373,9 +373,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
-        public async Task WhenTypeIsBaseAndValidReadmeSearchFilter_BespokeExchangeSetIsCreated_ThenStandardReadmeIsReplaced(string exchangeSetStandard)
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsBaseAndValidReadmeSearchFilter_BespokeExchangeSetIsCreated_ThenStandardReadmeIsReplaced(ExchangeSetStandard exchangeSetStandard)
         {
             string filePath = @"D:\\Downloads";
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
@@ -387,7 +387,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.SearchReadMeFilePathAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(filePath);
                 
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, readMeSearchFilterQuery));
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard.ToString(), readMeSearchFilterQuery));
 
             result.Should().Be("Exchange Set Created Successfully");
 
@@ -430,11 +430,11 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("UPDATE", "s63")]
-        [TestCase("UPDATE", "s57")]
-        [TestCase("CHANGE", "s63")]
-        [TestCase("CHANGE", "s57")]
-        public async Task WhenTypeIsUpdateOrChangeAndValidReadmeSearchFilter_BespokeExchangeSetIsCreated_ThenStandardReadmeIsReplaced(string type, string exchangeSetStandard)
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsUpdateOrChangeAndValidReadmeSearchFilter_BespokeExchangeSetIsCreated_ThenStandardReadmeIsReplaced(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             string filePath = @"D:\\Downloads";
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -446,7 +446,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.SearchReadMeFilePathAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                .Returns(filePath);
 
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, readMeSearchFilterQuery));
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type.ToString(), exchangeSetStandard.ToString(), readMeSearchFilterQuery));
 
             result.Should().Be("Exchange Set Created Successfully");
 
@@ -489,9 +489,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
        
         [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
-        public async Task WhenTypeIsBaseAndReadmeSearchFilterIsBLANK_ThenBespokeExchangeSetIsCreatedAndBlankReadmeReplaced(string exchangeSetStandard)
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsBaseAndReadmeSearchFilterIsBLANK_ThenBespokeExchangeSetIsCreatedAndBlankReadmeReplaced(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -500,7 +500,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
        
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ReadMeSearchFilter.BLANK.ToString()));
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.BLANK.ToString()));
 
             result.Should().Be("Exchange Set Created Successfully");
 
@@ -530,11 +530,11 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("UPDATE", "s63")]
-        [TestCase("UPDATE", "s57")]
-        [TestCase("CHANGE", "s63")]
-        [TestCase("CHANGE", "s57")]
-        public async Task WhenTypeIsUpdateOrChangeAndReadmeSearchFilterIsBLANK_ThenBespokeExchangeSetIsCreatedAndBlankReadmeReplaced(string type, string exchangeSetStandard)
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsUpdateOrChangeAndReadmeSearchFilterIsBLANK_ThenBespokeExchangeSetIsCreatedAndBlankReadmeReplaced(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -543,7 +543,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
 
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.BLANK.ToString()));
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type.ToString(), exchangeSetStandard.ToString(), ReadMeSearchFilter.BLANK.ToString()));
 
             result.Should().Be("Exchange Set Created Successfully");
 

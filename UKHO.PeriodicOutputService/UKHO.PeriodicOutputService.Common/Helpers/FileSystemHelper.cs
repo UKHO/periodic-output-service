@@ -172,20 +172,13 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return false;
         }
 
-        public async Task<bool> DownloadReadmeFile(string filePath, Stream stream, string latestReadmePath)
+        public bool DownloadReadmeFile(string filePath, Stream stream)
         {
             if (stream != null)
             {
-                using (HttpClient client = new())
+                using (var outputFileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite))
                 {
-                    HttpResponseMessage response = await client.GetAsync(latestReadmePath);
-                    using (Stream streamToReadFrom = await response.Content.ReadAsStreamAsync())
-                    {
-                        using (FileStream fileStream = File.Create(filePath))
-                        {
-                            await streamToReadFrom.CopyToAsync(fileStream);
-                        }
-                    }
+                    stream.CopyTo(outputFileStream);
                 }
                 return true;
             }
