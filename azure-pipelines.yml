@@ -592,12 +592,12 @@ stages:
 
       - job: BESSFunctionalTests
         dependsOn:
-        - DevDeployApp
-        - CheckInfra
-        - CheckFSS
-        - CheckESS
-        - CheckFM
-       - POSFunctionalTests 
+         - DevDeployApp
+         - CheckInfra
+         - CheckFSS
+         - CheckESS
+         - CheckFM
+         - POSFunctionalTests 
         pool: NautilusBuild
         displayName: "Dev BESS Functional Automated Tests"
         workspace:
