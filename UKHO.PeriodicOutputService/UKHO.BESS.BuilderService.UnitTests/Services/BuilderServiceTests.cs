@@ -566,7 +566,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase("s63")]
         [TestCase("s57")]
-        public async Task WhenTypeIsBaseAndCreationOfBatchFails_ThenCreateBespokeExchangeSetAsyncThrowsError(string exchangeSetStandard)
+        public void WhenTypeIsBaseAndCreationOfBatchFails_ThenCreateBespokeExchangeSetAsyncThrowsError(string exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
