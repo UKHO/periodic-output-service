@@ -162,7 +162,13 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             return checkFile;
         }
 
-        public static bool CheckReadMeInCustomExchangeSet(string? downloadFolderPath, string? readMeSearchFilter)
+        /// <summary>
+        /// This method is used to check the README.TXT
+        /// </summary>
+        /// <param name="downloadFolderPath"></param>
+        /// <param name="readMeSearchFilter"></param>
+        /// <returns></returns>
+        public static bool CheckReadMeInBessExchangeSet(string? downloadFolderPath, string? readMeSearchFilter)
         {
             string[] readMeFileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
 
@@ -177,6 +183,35 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// This method is used to check the info folder and serial.enc file content
+        /// </summary>
+        /// <param name="downloadFolderPath"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public static bool CheckInfoFolderAndSerialEncInBessExchangeSet(string? downloadFolderPath, string? type)
+        {
+            bool checkFolder = CheckForFolderExist(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!);
+            checkFolder.Should().Be(false);
+
+            string[] serialEncfileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetSerialEncFile!));
+            string serialENCType = (serialEncfileContent[0].Split("   ")[1]).Substring(8);
+            switch (type)
+            {
+                case "BASE":
+                    return serialENCType.Equals("BASE");
+
+                case "UPDATE":
+                    return serialENCType.Equals("UPDATE");
+
+                case "CHANGE":
+                    return serialENCType.Equals("CHANGE");
+
+                default:
+                    return false;
+            }
         }
     }
 }

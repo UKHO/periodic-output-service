@@ -11,36 +11,38 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is use to upload the config file to storage.
         /// </summary>
-        /// <param name="baseUrl">Sets the baseUrl of the endpoint</param>
-        /// <param name="path">Use to pass the correct config</param>
-        /// <param name="value">Sets the Authorization value</param>
+        /// <param name="baseUrl"></param>
+        /// <param name="path"></param>
+        /// <param name="value"></param>
+        /// <param name="exchangeSetStandard"></param>
+        /// <param name="type"></param>
+        /// <param name="readMeSearchFilter"></param>
         /// <returns></returns>
-        public static async Task<HttpResponseMessage> UploadConfigFile(string? baseUrl, string? path, string? value)
+        public static async Task<HttpResponseMessage> UploadConfigFile(string? baseUrl, string? path, string? value, string exchangeSetStandard, string type, string readMeSearchFilter)
         {
             var uri = $"{baseUrl}/bessConfigUpload?Key={value}";
-            var payloadJson = JsonConvert.SerializeObject(GetPayload(path));
+            var configDetails = JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText(path!));
+            string payloadJson = GetPayload(configDetails!, exchangeSetStandard, type, readMeSearchFilter);
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
                 { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
             return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
         /// <summary>
-        /// This method is to deserialize the payload
+        ///  This method is to deserialize the payload
         /// </summary>
-        /// <param name="path">Use to pass the correct config</param>
+        /// <param name="configDetails"></param>
+        /// <param name="exchangeSetStandard"></param>
+        /// <param name="type"></param>
+        /// <param name="readMeSearchFilter"></param>
         /// <returns></returns>
-        public static BessConfig? GetPayload(string? path)
+        public static string GetPayload(dynamic configDetails, string exchangeSetStandard, string type, string readMeSearchFilter)
         {
-            return path != null ? JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText(path)) : null;
-        }
-
-        public static async Task<HttpResponseMessage> UploadConfigFileTest(string? baseUrl, string payload, string? value)
-        {
-            var uri = $"{baseUrl}/bessConfigUpload?Key={value}";
-            //var payloadJson = JsonConvert.SerializeObject(GetPayload(path));
-            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
-            { Content = new StringContent(payload, Encoding.UTF8, "application/json") };
-            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            configDetails!.Name = "BES-123" + Extensions.RandomNumber();
+            configDetails!.Type = type;
+            configDetails.ExchangeSetStandard = exchangeSetStandard;
+            configDetails!.ReadMeSearchFilter = readMeSearchFilter;
+            return JsonConvert.SerializeObject(configDetails);
         }
     }
 }

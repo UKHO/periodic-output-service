@@ -1,5 +1,4 @@
-﻿
-namespace UKHO.ExchangeSetService.API.FunctionalTests.Models
+﻿namespace UKHO.ExchangeSetService.API.FunctionalTests.Models
 {
     public class ResponseBatchStatusModel
     {

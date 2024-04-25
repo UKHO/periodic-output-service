@@ -98,7 +98,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessErrorOccurredWhileDownloadingConfigFromAzureStorage.ToEventId(), "Exception occurred while downloading configs from azure storage with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError("Exception occurred while deleting configs from azure storage");
             }
             return configs;
         }

@@ -16,7 +16,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         [OneTimeSetUp]
         public void SetupAsync()
         {
-            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, "Identifiers");
+            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.Identifiers);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 

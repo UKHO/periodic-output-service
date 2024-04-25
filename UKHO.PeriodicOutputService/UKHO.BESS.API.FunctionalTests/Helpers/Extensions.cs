@@ -10,7 +10,7 @@
         /// <param name="baseUrl"></param>
         /// <param name="configurationOption"></param>
         /// <returns></returns>
-        public static HttpResponseMessage ConfigureFt(string? baseUrl, string configurationOption)
+        public static HttpResponseMessage ConfigureFt(string? baseUrl, string? configurationOption)
         {
             string uri = $"{baseUrl}/configurefm/{configurationOption}";
 
@@ -38,9 +38,13 @@
         public static void WaitForDownloadExchangeSet()
         {
             //The below sleep is to give time to BuilderService to download the exchangeSet.
-            Thread.Sleep(240000);
+            Thread.Sleep(180000);
         }
 
+        /// <summary>
+        /// This method is used to generate random number
+        /// </summary>
+        /// <returns></returns>
         public static int RandomNumber()
         {
             Random rnd = new Random();

@@ -1,11 +1,9 @@
 ﻿using System.Net;
 using FluentAssertions;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using NUnit.Framework;
 using UKHO.BESS.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Common.Models.Bess;
 using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetService
@@ -16,47 +14,36 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
         static readonly TestConfiguration testConfiguration = new();
         static BessStorageConfiguration bessStorageConfiguration = testConfiguration.bessStorageConfig;
         AzureBlobStorageClient azureBlobStorageClient;
-        readonly dynamic test = Options.Create(new PeriodicOutputService.Common.Configuration.BessStorageConfiguration { ConnectionString = bessStorageConfiguration.ConnectionString,
-        ContainerName = bessStorageConfiguration.ContainerName });
-    
+        readonly dynamic config = Options.Create(new PeriodicOutputService.Common.Configuration.BessStorageConfiguration
+        {
+            ConnectionString = bessStorageConfiguration.ConnectionString!,
+            ContainerName = bessStorageConfiguration.ContainerName!
+        });
+
         [OneTimeSetUp]
         public void Setup()
         {
-             azureBlobStorageClient = new AzureBlobStorageClient(test);
-            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, "Identifiers");
+            azureBlobStorageClient = new AzureBlobStorageClient(config);
+            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.Identifiers);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
+        //PBI 140039 : BESS BS - Dealing with ancillary files : Get ReadMe.txt from FSS based on config
+        //PBI 147178: BESS BS - Dealing with ancillary files : Delete PRODUCT.TXT file, INFO folder and update SERIAL.ENC
         [Test]
         [TestCase("s57", "UPDATE", "AVCS", "fa741049-7a78-4ec3-8737-1b3fb8d1cc3f")]
         [TestCase("s63", "BASE", "BLANK", "a7fb95f0-b3ff-4ef2-9b76-a74c7d3c3c8f")]
         public async Task DownloadCustomExchangeSet(string exchangeSetStandard, string type, string readMeSearchFilter, string batchId)
         {
-            //var queueMessage = JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText("./TestData/BSQueueMessage.txt"));
-            //queueMessage!.ReadMeSearchFilter = readMeSearchFilter;
-            //queueMessage.ExchangeSetStandard = exchangeSetStandard;
-            //string jsonString = JsonConvert.SerializeObject(queueMessage);
-
-            var configDetails = JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText("./TestData/ConfigFile.json"));
-            configDetails!.Name = "BES-123" + Extensions.RandomNumber();
-            configDetails!.Type = type;
-            configDetails.ExchangeSetStandard = exchangeSetStandard;
-            configDetails!.ReadMeSearchFilter = readMeSearchFilter;
-            string jsonString = JsonConvert.SerializeObject(configDetails);
-            HttpResponseMessage response = await BessUploadFileHelper.UploadConfigFileTest(testConfiguration.bessConfig.BaseUrl, jsonString, testConfiguration.sharedKeyConfig.Key);
-            //fileName = await response.Content.ReadAsStringAsync();
-            //QueueClientOptions queueOptions = new() { MessageEncoding = QueueMessageEncoding.Base64 };
-            //QueueClient queue = new QueueClient(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName, queueOptions);
-            //queue.SendMessage(jsonString);
-
-            ////bool expectedResult = FssBatchHelper.CheckInfoFolderAndSerialENCInCustomExchangeSet("D://HOME//BESS//f8fd2fb4-3dd6-425d-b34f-3059e262feed//V01X01", type);
-            ////expectedResult.Should().Be(true);
+            HttpResponseMessage response = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, exchangeSetStandard, type, readMeSearchFilter);
+            response.StatusCode.Should().Be((HttpStatusCode)201);
             Extensions.WaitForDownloadExchangeSet();
-            string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
-            var expectedResult = FssBatchHelper.CheckReadMeInCustomExchangeSet(downloadFolderPath, readMeSearchFilter);
-            expectedResult.Should().Be(true);
+            var downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
+            var expectedResultReadme = FssBatchHelper.CheckReadMeInBessExchangeSet(downloadFolderPath, readMeSearchFilter);
+            expectedResultReadme.Should().Be(true);
+            var expectedResultSerial = FssBatchHelper.CheckInfoFolderAndSerialEncInBessExchangeSet(downloadFolderPath, type);
+            expectedResultSerial.Should().Be(true);
         }
-
 
         [TearDown]
         public void TearDown()
