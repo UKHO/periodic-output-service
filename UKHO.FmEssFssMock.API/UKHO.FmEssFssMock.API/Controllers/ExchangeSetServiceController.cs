@@ -53,21 +53,13 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
                 if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals(ExchangeSetStandard.s63.ToString()) || exchangeSetStandard.Equals(ExchangeSetStandard.s57.ToString()))
                 {
-                    try
-                    {
-                        ExchangeSetServiceResponse? response =
+                    ExchangeSetServiceResponse? response =
                             _exchangeSetService.CreateExchangeSetForPostProductIdentifier(productIdentifiers, exchangeSetStandard);
-                        if (response == null)
-                        {
-                            return BadRequest();
-                        }
-                        return Ok(response.ResponseBody);
-                    }
-                    catch (Exception ex)
+                    if (response == null)
                     {
-                        return BadRequest(ex.StackTrace);
+                        return BadRequest();
                     }
-
+                    return Ok(response.ResponseBody);
                 }
             }
             return BadRequest();
@@ -86,20 +78,12 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
                 if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals(ExchangeSetStandard.s63.ToString()) || exchangeSetStandard.Equals(ExchangeSetStandard.s57.ToString()) && !productVersionRequest.Any(i => i.EditionNumber == null && i.UpdateNumber == null))
                 {
-                    try
+                    ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductVersion(productVersionRequest, exchangeSetStandard);
+                    if (response == null)
                     {
-                        ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductVersion(productVersionRequest, exchangeSetStandard);
-                        if (response == null)
-                        {
-                            return BadRequest();
-                        }
-                        return Ok(response.ResponseBody);
+                        return BadRequest();
                     }
-                    catch (Exception e)
-                    {
-                        return BadRequest(e.StackTrace);
-                    }
-
+                    return Ok(response.ResponseBody);
                 }
             }
             return BadRequest();
