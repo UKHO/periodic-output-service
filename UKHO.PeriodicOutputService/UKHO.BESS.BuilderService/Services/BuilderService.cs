@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.IO.Abstractions;
+﻿using System.IO.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
@@ -166,7 +165,6 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        [ExcludeFromCodeCoverage]
         private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
@@ -219,7 +217,6 @@ namespace UKHO.BESS.BuilderService.Services
             return (isCommitted, batchId);
         }
 
-        [ExcludeFromCodeCoverage]
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
         {
             Parallel.ForEach(filePaths, filePath =>
@@ -230,7 +227,7 @@ namespace UKHO.BESS.BuilderService.Services
             if (isFileAdded)
             {
                 List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
-                if (blockIds.Count > 0)
+                if (blockIds.Any())
                 {
                     bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
                 }
