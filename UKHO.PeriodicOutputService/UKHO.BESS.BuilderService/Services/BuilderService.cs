@@ -233,51 +233,7 @@ namespace UKHO.BESS.BuilderService.Services
                 }
             }
         });
-        }
-
-        private void CreateKeyFile(ConfigQueueMessage configQueueMessage, string filePath)
-        {
-            // Get PKS details from PKS server
-
-            List<PKSResponse> pksResponses = new()
-            {
-
-            };
-
-            if (configQueueMessage.KeyFileType == "KEY_TEXT")
-            {
-                int i = 0;
-                string permitTextFileContent = PermitTextFileHeader;
-
-                foreach (var pksResponse in pksResponses)
-                {
-                    PermitKey permitKey = permitDecryption.GetPermitKeys(pksResponse.key);
-
-                    if (permitKey != null)
-                    {
-                        permitTextFileContent += Environment.NewLine;
-                        permitTextFileContent += $"{i++},{permitKey.ActiveKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active";
-                        permitTextFileContent += Environment.NewLine;
-                        permitTextFileContent += $"{i++},{permitKey.NextKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next";
-                    }
-                };
-
-                fileSystemHelper.CreateTextFile(filePath, KeyTextFile, permitTextFileContent);
-            }
-            else if (configQueueMessage.KeyFileType == "PERMIT_XML")
-            {
-                PKSXml pKSXml = new()
-                {
-                    date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
-                    cellkeys = new()
-                    {
-                        response = pksResponses,
-                    }
-                };
-
-                fileSystemHelper.CreateXmlFromObject(pKSXml, filePath, PermitXmlFile);
-            }
-        }
+        }        
         #endregion
 
         [ExcludeFromCodeCoverage]
@@ -343,6 +299,50 @@ namespace UKHO.BESS.BuilderService.Services
                 logger.LogError(EventIds.LoggingProductVersionsFailed.ToEventId(), "Logging product version failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
                 throw new Exception($"Logging Product version failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+            }
+        }
+
+        private void CreateKeyFile(ConfigQueueMessage configQueueMessage, string filePath)
+        {
+            // Get PKS details from PKS server
+
+            List<PKSResponse> pksResponses = new()
+            {
+
+            };
+
+            if (configQueueMessage.KeyFileType == "KEY_TEXT")
+            {
+                int i = 0;
+                string permitTextFileContent = PermitTextFileHeader;
+
+                foreach (var pksResponse in pksResponses)
+                {
+                    PermitKey permitKey = permitDecryption.GetPermitKeys(pksResponse.key);
+
+                    if (permitKey != null)
+                    {
+                        permitTextFileContent += Environment.NewLine;
+                        permitTextFileContent += $"{i++},{permitKey.ActiveKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active";
+                        permitTextFileContent += Environment.NewLine;
+                        permitTextFileContent += $"{i++},{permitKey.NextKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next";
+                    }
+                };
+
+                fileSystemHelper.CreateTextFile(filePath, KeyTextFile, permitTextFileContent);
+            }
+            else if (configQueueMessage.KeyFileType == "PERMIT_XML")
+            {
+                PKSXml pKSXml = new()
+                {
+                    date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                    cellkeys = new()
+                    {
+                        response = pksResponses,
+                    }
+                };
+
+                fileSystemHelper.CreateXmlFromObject(pKSXml, filePath, PermitXmlFile);
             }
         }
     }
