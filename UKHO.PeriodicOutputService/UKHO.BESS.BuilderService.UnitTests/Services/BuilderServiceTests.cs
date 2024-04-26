@@ -24,7 +24,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         private IFileSystemHelper fakeFileSystemHelper;
         private ILogger<BuilderService.Services.BuilderService> fakeLogger;
         private IConfiguration fakeConfiguration;
-        private ConfigQueueMessage configQueueMessage;
+        private ConfigQueueMessage? configQueueMessage;
         private IAzureTableStorageHelper fakeAzureTableStorageHelper;
 
         [SetUp]
