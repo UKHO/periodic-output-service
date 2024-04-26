@@ -181,6 +181,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             {
                 return readMeFileContent.IsNullOrEmpty();
             }
+            else if(readMeSearchFilter.Contains("Bespoke README"))
+            {
+                string readMeType = (readMeFileContent[0].Split(" ")[0]);
+                return readMeType.Equals("DISCLAIMER");
+            }
 
             return false;
         }

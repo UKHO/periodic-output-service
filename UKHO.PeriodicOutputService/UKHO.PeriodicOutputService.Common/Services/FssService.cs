@@ -471,7 +471,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 };
             }
             //Temporary Upload Code Start
-            else if (batchType is Batch.BesBaseZipBatch or Batch.BesUpdateZipBatch)
+            else if (batchType is Batch.BesBaseZipBatch or Batch.BesUpdateZipBatch or Batch.BesChangeZipBatch)
             {
                 createBatchRequest = new CreateBatchRequestModel
                 {
