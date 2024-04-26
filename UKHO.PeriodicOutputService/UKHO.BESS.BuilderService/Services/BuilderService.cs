@@ -61,7 +61,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (isBatchCreated)
             {
-                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "BES created with batchId {batchId} on {DateTime} | {CorrelationId}", besBatchId, DateTime.UtcNow, configQueueMessage.CorrelationId);
+                //logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "BES created with batchId {batchId} on {DateTime} | {CorrelationId}", besBatchId, DateTime.UtcNow, configQueueMessage.CorrelationId);
                 if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                          configQueueMessage.Type == BessType.CHANGE.ToString())
                 {
@@ -170,7 +170,6 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        [ExcludeFromCodeCoverage]
         private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
@@ -223,7 +222,6 @@ namespace UKHO.BESS.BuilderService.Services
             return (isCommitted, batchId);
         }
 
-        [ExcludeFromCodeCoverage]
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
         {
             Parallel.ForEach(filePaths, filePath =>
@@ -234,7 +232,7 @@ namespace UKHO.BESS.BuilderService.Services
             if (isFileAdded)
             {
                 List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
-                if (blockIds.Count > 0)
+                if (blockIds.Any())
                 {
                     bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
                 }
