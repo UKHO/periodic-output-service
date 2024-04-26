@@ -62,7 +62,9 @@ namespace UKHO.BESS.BuilderService.Services
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch : Batch.BesUpdateZipBatch).Result;
+            Batch batch = configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch
+                : configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch;
+            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, batch).Result;
 
             // temporary logs
             if (isBatchCreated)
