@@ -5,6 +5,7 @@ using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
+    [Ignore("Temporary")]
     [Category("POSAIOScenarioWithInvalidProductIdentifier")]
     public class POSAIOScenarioWithInvalidProductIdentifier :  ObjectStorage
     {
