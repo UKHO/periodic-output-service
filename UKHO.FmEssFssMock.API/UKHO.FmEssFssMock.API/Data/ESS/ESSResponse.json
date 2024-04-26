@@ -255,6 +255,48 @@
         }
     },
     {
+        "id": "productIdentifier-GB301910-s63",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-vne/batch/4bc70797-7ee6-407f-bafe-cae49a5b5f91/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-vne/batch/4bc70797-7ee6-407f-bafe-cae49a5b5f91"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-vne/batch/4bc70797-7ee6-407f-bafe-cae49a5b5f91/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 1,
+            "exchangeSetCellCount": 1,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
+    },
+    {
+        "id": "productIdentifier-GB301910-s57",
+        "responseBody": {
+            "_links": {
+                "exchangeSetBatchStatusUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-vne/batch/f8fd2fb4-3dd6-425d-b34f-3059e262feed/status"
+                },
+                "exchangeSetBatchDetailsUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-vne/batch/f8fd2fb4-3dd6-425d-b34f-3059e262feed"
+                },
+                "exchangeSetFileUri": {
+                    "href": "https://uatadmiralty.azure-api.net/fss-vne/batch/f8fd2fb4-3dd6-425d-b34f-3059e262feed/files/V01X01.zip"
+                }
+            },
+            "exchangeSetUrlExpiryDateTime": "",
+            "requestedProductCount": 1,
+            "exchangeSetCellCount": 1,
+            "requestedProductsAlreadyUpToDateCount": 0,
+            "requestedProductsNotInExchangeSet": []
+        }
+    },
+    {
         "id": "productIdentifier-AU220150-AU5PTL01-CA570182-CA570226-CN484220-GB301910-s63",
         "responseBody": {
             "_links": {
