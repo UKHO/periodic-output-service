@@ -641,34 +641,39 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessQueueMessageFailed = 809126,
 
         /// <summary>
-        /// 809127 - Create bespoke exchange set is started.
+        /// 809127 - Creation of bespoke exchange set is started.
         /// </summary>
         CreateBespokeExchangeSetRequestStart = 809127,
 
         /// <summary>
-        /// 809128 - Create bespoke exchange set is completed.
+        /// 809128 - Creation of bespoke exchange set is completed.
         /// </summary>
-        CreateBespokeExchangeSetRequestCompleted = 809128,        
+        CreateBespokeExchangeSetRequestCompleted = 809128,
 
         /// <summary>
-        /// 809129 - Serial.ENC file updated with Type from configuration
+        /// 809129 - Products Fetched from ESS.
         /// </summary>
-        BessSerialEncUpdated = 809129,
+        ProductsFetchedFromESS = 809129,
 
         /// <summary>
-        /// 809130 - PRODUCT.TXT file and INFO folder deleted
+        /// 809130 - Serial.ENC file updated with Type from configuration
         /// </summary>
-        BessProductTxtAndInfoFolderDeleted = 809130,
+        BessSerialEncUpdated = 809130,
 
         /// <summary>
-        /// 809131 - SERIAL.ENC file update operation failed
+        /// 809131 - PRODUCT.TXT file and INFO folder deleted
         /// </summary>
-        SerialEncUpdateFailed = 809131,
+        BessProductTxtAndInfoFolderDeleted = 809131,
 
         /// <summary>
-        /// 809132 - PRODUCT.TXT file and INFO folder delete operation failed
+        /// 809132 - SERIAL.ENC file update operation failed
         /// </summary>
-        ProductTxtDeleteFailed = 809132,
+        SerialEncUpdateFailed = 809132,
+
+        /// <summary>
+        /// 809133 - PRODUCT.TXT file and INFO folder delete operation failed
+        /// </summary>
+        ProductTxtDeleteFailed = 809133,
     }
 
     public static class EventIdExtensions

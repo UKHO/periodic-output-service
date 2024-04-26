@@ -10,14 +10,14 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
     {
         static readonly TestConfiguration testConfiguration = new();
         public DataHelper dataHelper = new();
-        protected List<string> productIdentifiers = new() { testConfiguration.authTokenConfig.ProductName };
+        protected List<string> productIdentifiers = new() { testConfiguration.authTokenConfig.ProductName! };
         private List<ProductVersionModel>? productVersionData { get; set; }
 
         [OneTimeSetUp]
         public void SetupAsync()
         {
             productVersionData = new List<ProductVersionModel>();
-            HttpResponseMessage apiResponse = Extensions.ConfigureFM(testConfiguration.bessConfig.BaseUrl, "Identifiers");
+            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, "Identifiers");
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
@@ -25,7 +25,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         [Test]
         public async Task WhenICallEssProductIdentifierEndpoint_ThenSuccessStatusCode200IsReturned()
         {
-            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s63ExchangeSetStandard);
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s57ExchangeSetStandard);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
@@ -33,7 +33,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         [Test]
         public async Task WhenICallEssProductIdentifierEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
-            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s57ExchangeSetStandard, false);
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductIdentifiersEndpoint(testConfiguration.authTokenConfig.BaseUrl, productIdentifiers, testConfiguration.bessConfig.s63ExchangeSetStandard, false);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
         }
 

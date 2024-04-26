@@ -67,5 +67,6 @@ Write-Host "##vso[task.setvariable variable=EventHubLoggingConfiguration.Connect
 Write-Host "##vso[task.setvariable variable=EventHubLoggingConfiguration.EntityPath;issecret=true]$($terraformOutput.entity_path.value)"
 Write-Host "##vso[task.setvariable variable=ApplicationInsights.ConnectionString;issecret=true]$($terraformOutput.connection_string.value)"
 Write-Host "##vso[task.setvariable variable=AzureWebJobsStorage;issecret=true]$($terraformOutput.bess_storage_connection_string.value)"
+Write-Host "##vso[task.setvariable variable=AzureWebJobsStorageName;issecret=true;isOutput=true]$($terraformOutput.bess_storage_connection_string.value)"
 
 $terraformOutput | ConvertTo-Json -Depth 5 > $terraformJsonOutputFile
