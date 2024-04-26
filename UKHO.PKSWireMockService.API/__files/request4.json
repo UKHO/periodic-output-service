@@ -1,22 +1,22 @@
 [
     {
-        "productName": "AU319115",
+        "productName": "AU220150",
+        "edition": "8"
+    },
+    {
+        "productName": "CN484220",
+        "edition": "8"
+    },   
+    {
+        "productName": "AU220150",
+        "edition": "8"
+    },
+    {
+        "productName": "CA570182",
         "edition": "3"
     },
     {
-        "productName": "1U318210",
+        "productName": "AU5PTL01",
         "edition": "1"
-    },
-    {
-        "productName": "US4MN1CD",
-        "edition": "2"
-    },
-    {
-        "productName": "JP20ODCG",
-        "edition": "4"
-    },
-    {
-        "productName": "GB402343",
-        "edition": "4"
     }
 ]

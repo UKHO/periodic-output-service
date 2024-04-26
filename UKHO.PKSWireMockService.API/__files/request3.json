@@ -4,7 +4,23 @@
         "edition": "8"
     },
     {
+        "productName": "AU5PTL01",
+        "edition": "1"
+    },
+    {
         "productName": "CA570182",
         "edition": "3"
+    },
+    {
+        "productName": "CN484220",
+        "edition": "6"
+    },
+    {
+        "productName": "CA570226",
+        "edition": "3"
+    },
+    {
+        "productName": "CN484220",
+        "edition": "1"
     }
 ]

@@ -18,27 +18,29 @@
     <Content Remove="__files\blankResponse.json" />
     <Content Remove="__files\request1.json" />
     <Content Remove="__files\request2.json" />
-    <Content Remove="__files\request3.json" />
-    <Content Remove="__files\request4.json" />
     <Content Remove="__files\response1.json" />
     <Content Remove="__files\response2.json" />
-    <Content Remove="__files\response3.json" />
-    <Content Remove="__files\response4.json" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="__admin\mappings\mapping-default.json" />
     <None Include="__admin\mappings\mapping-delay.json" />
     <None Include="__admin\mappings\mapping-error.json" />
-    <None Include="__files\blankResponse.json" />
-    <None Include="__files\request1.json" />
-    <None Include="__files\request2.json" />
-    <None Include="__files\request3.json" />
-    <None Include="__files\request4.json" />
-    <None Include="__files\response1.json" />
-    <None Include="__files\response2.json" />
-    <None Include="__files\response3.json" />
-    <None Include="__files\response4.json" />
+    <None Include="__files\blankResponse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="__files\Request1.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="__files\Request2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="__files\Response1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="__files\Response2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -54,6 +56,21 @@
     <PackageReference Include="WireMock.Net.Abstractions" Version="1.5.52" />
     <PackageReference Include="WireMock.Org.Abstractions" Version="1.5.52" />
     <PackageReference Include="YamlDotNet" Version="15.1.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="__files\Request3.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="__files\Request4.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="__files\Response3.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="__files\Response4.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
