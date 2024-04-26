@@ -1135,6 +1135,8 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
+      - name: "PermitConfiguration.PermitDecryptionHardwareId"
+        value: $(PermitDecryptionHardwareId)
     jobs:
       - deployment: vNextE2EDeployApp
         displayName: "vNextE2E - Deploy Terraform and Dotnet App"
