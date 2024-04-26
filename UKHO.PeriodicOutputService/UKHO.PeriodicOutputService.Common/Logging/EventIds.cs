@@ -653,7 +653,22 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809129 - Products Fetched from ESS.
         /// </summary>
-        ProductsFetchedFromESS = 809129
+        ProductsFetchedFromESS = 809129,
+
+        /// <summary>
+        /// 809130 - BES batch creation started
+        /// </summary>
+        BESBatchCreationStarted = 809130,
+
+        /// <summary>
+        /// 809131 - BES batch creation completed
+        /// </summary>
+        BESBatchCreationCompleted = 809131,
+
+        /// <summary>
+        /// 809132 - BES batch creation failed
+        /// </summary>
+        BESBatchCreationFailed = 809132,
     }
 
     public static class EventIdExtensions

@@ -89,7 +89,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard));
 
-            result.Should().Be("Exchange Set Created Successfully");
+            result.Should().Be(true);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -180,7 +180,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard));
 
-            result.Should().Be("Exchange Set Created Successfully");
+            result.Should().Be(true);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -589,7 +589,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard));
 
-            result.Should().Be("Exchange Set Created Successfully");
+            result.Should().Be(true);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();

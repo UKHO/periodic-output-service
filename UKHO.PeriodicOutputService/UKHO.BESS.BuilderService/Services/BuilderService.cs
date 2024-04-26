@@ -48,7 +48,7 @@ namespace UKHO.BESS.BuilderService.Services
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
         }
 
-        public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
+        public async Task<bool> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
@@ -57,24 +57,17 @@ namespace UKHO.BESS.BuilderService.Services
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            (bool isBatchCreated, string besBatchId) = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage).Result;
+            if (!CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage).Result)
+                return false;
 
-            if (isBatchCreated)
+            if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
+                     configQueueMessage.Type == BessType.CHANGE.ToString())
             {
-                //logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "BES created with batchId {batchId} on {DateTime} | {CorrelationId}", besBatchId, DateTime.UtcNow, configQueueMessage.CorrelationId);
-                if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
-                         configQueueMessage.Type == BessType.CHANGE.ToString())
-                {
-                    var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
-                    LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
-                }
-            }
-            else
-            {
-                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Bess Base batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+                LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
             }
 
-            return "Exchange Set Created Successfully";
+            return true;
         }
 
         private async Task<string> RequestExchangeSetAsync(ConfigQueueMessage configQueueMessage)
@@ -184,20 +177,22 @@ namespace UKHO.BESS.BuilderService.Services
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(EventIds.ZipFileCreationFailed.ToEventId(), "Creating zip file of directory {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                    logger.LogError(EventIds.ZipFileCreationFailed.ToEventId(), "Creating zip file of directory {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID: {CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
                     throw new Exception($"Creating zip file {file.FileName} failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
                 }
             });
         }
 
-        private async Task<(bool, string)> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
+        private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
         {
             bool isCommitted;
-            string batchId;
+            string besBatchId;
             Batch batchType = Batch.BesBaseZipBatch;
 
             try
             {
+                logger.LogInformation(EventIds.BESBatchCreationStarted.ToEventId(), "BES batch creation started at {DateTime} | _X-Correlation-ID: {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
                 if (configQueueMessage.Type.ToUpper().Equals(BessType.UPDATE.ToString()))
                 {
                     batchType = Batch.BesUpdateZipBatch;
@@ -207,19 +202,24 @@ namespace UKHO.BESS.BuilderService.Services
                     batchType = Batch.BesChangeZipBatch;
                 }
 
-                batchId = await fssService.CreateBatch(batchType, configQueueMessage);
+                besBatchId = await fssService.CreateBatch(batchType, configQueueMessage);
+
                 IEnumerable<string> filePath = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
-                UploadBatchFiles(filePath, batchId, batchType);
-                isCommitted = await fssService.CommitBatch(batchId, filePath, batchType);
-                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Batch is created and added to FSS. BatchId: {batchId} and status: {isCommitted}", batchId, isCommitted);
+
+                UploadBatchFiles(filePath, besBatchId, batchType);
+
+                isCommitted = await fssService.CommitBatch(besBatchId, filePath, batchType);
+
+                logger.LogInformation(EventIds.BESBatchCreationCompleted.ToEventId(), "BES batch {besBatchId} is created and added to FSS with status: {isCommitted} at {DateTime} | _X-Correlation-ID: {CorrelationId}", besBatchId, isCommitted, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Batch creation failed with Exception : {ex}", ex);
-                throw;
+                logger.LogError(EventIds.BESBatchCreationFailed.ToEventId(), "BES batch creation failed with Exception: {ex} at {DateTime} | _X-Correlation-ID : {CorrelationId}", ex, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                throw new FulfilmentException(EventIds.BESBatchCreationFailed.ToEventId());
             }
 
-            return (isCommitted, batchId);
+            return isCommitted;
         }
 
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
