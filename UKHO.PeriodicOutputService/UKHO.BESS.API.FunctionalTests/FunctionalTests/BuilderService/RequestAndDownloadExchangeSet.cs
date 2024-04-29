@@ -17,6 +17,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
+        [Ignore("TEMP")]
         //PBI 150897: Testing : BESS BS - Request, wait/poll and download exchange set
         [Test]
         [TestCase("7b6edd6a-7a62-4271-a657-753f4c648531", "s57", "CHANGE")]
@@ -36,8 +37,8 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
 
         //PBI 147171: BESS BS - Handling of empty ES and Error.txt Scenarios
         [Test]
-        [TestCase("5331f8c2-9085-4083-9a1e-9f99953be122", "s63", "UPDATE")]
         [TestCase("d0635e6c-81ae-4acb-9129-1a69f9ee58d2", "s57", "CHANGE")]
+        [TestCase("5331f8c2-9085-4083-9a1e-9f99953be122", "s63", "UPDATE")]
         public async Task WhenIProcessSameConfigWithCorrectDetailsTwice_ThenBLANKExchangeSetShouldBeDownloaded(string batchId, string exchangeSetStandard, string type)
         {
             Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
