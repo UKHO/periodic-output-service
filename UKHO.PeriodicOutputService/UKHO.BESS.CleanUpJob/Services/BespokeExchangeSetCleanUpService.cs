@@ -31,16 +31,16 @@ namespace UKHO.BESS.CleanUpJob.Services
             {
                 var historicDateTimeInUtc = DateTime.UtcNow.AddDays(-cleanUpConfig.Value.NumberOfDays);
                 var historicDate = new DateTime(historicDateTimeInUtc.Year, historicDateTimeInUtc.Month, historicDateTimeInUtc.Day);
-                Parallel.ForEach(directories, d =>
+                Parallel.ForEach(directories, directory =>
                  {
-                     var directoryInfo = new DirectoryInfo(d);
+                     var directoryInfo = new DirectoryInfo(directory);
                      try
                      {
                          DateTime directoryLastModifiedDate = directoryInfo.LastWriteTimeUtc;
                          DateTime directoryDate = new DateTime(directoryLastModifiedDate.Year, directoryLastModifiedDate.Month, directoryLastModifiedDate.Day);
                          if (directoryDate <= historicDate)
                          {
-                             fileSystem.Directory.Delete(d, true);
+                             fileSystem.Directory.Delete(directory, true);
                          }
                      }
                      catch (Exception ex)
