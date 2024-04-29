@@ -159,7 +159,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
         {
             if (context.InstanceToValidate.IsEnabled?.ToLower() == "no")
             {
-                result.Errors.Add(new ValidationFailure("IsEnabled", "Bess config for file - " + context.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no”."));
+                result.Errors.Add(new ValidationFailure("IsEnabled", "BESS config for file - " + context.InstanceToValidate.FileName + ", will be skipped for exchange set creation since the attribute value is set to “no”."));
                 return false;
             }
             else if (context.InstanceToValidate.IsEnabled?.ToLower() != "yes")

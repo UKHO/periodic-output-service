@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using UKHO.BESS.ConfigurationService.Services;
+using UKHO.PeriodicOutputService.Common.Extensions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 
@@ -22,15 +23,15 @@ namespace UKHO.BESS.ConfigurationService
         {
             try
             {
-                logger.LogInformation(EventIds.BessConfigurationServiceStarted.ToEventId(), "Bess Configuration Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-
-                await configurationService.ProcessConfigsAsync();
-
-                logger.LogInformation(EventIds.BessConfigurationServiceCompleted.ToEventId(), "Bess Configuration Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                await logger.LogStartEndAndElapsedTimeAsync(EventIds.BessConfigurationServiceStarted,
+                            EventIds.BessConfigurationServiceCompleted,
+                            "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}",
+                            async () => await configurationService.ProcessConfigsAsync(),
+                             CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing Bess Configuration Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing BESS Configuration Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
                 throw;
             }
         }

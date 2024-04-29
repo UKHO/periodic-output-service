@@ -26,12 +26,10 @@ namespace UKHO.BESS.ConfigurationService.Services
         private const string UndefinedValue = "undefined";
         private readonly IConfigValidator configValidator;
         private readonly IAzureBlobStorageService azureBlobStorageService;
-        private List<string> invalidNameList = new();
         private int filesWithJsonErrorCount;
         private int configsWithDuplicateNameAttributeCount;
         private const string NewLine = "\n";
         private const string Colon = ": ";
-        private const string Hyphen = "- ";
 
         public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient,
                                     IAzureTableStorageHelper azureTableStorageHelper,
@@ -51,22 +49,24 @@ namespace UKHO.BESS.ConfigurationService.Services
             this.azureBlobStorageService = azureBlobStorageService ?? throw new ArgumentNullException(nameof(azureBlobStorageService));
         }
 
-        public async Task ProcessConfigsAsync()
+        /// <summary>
+        /// Process config from azure container, validate and add config details to queue message
+        /// </summary>
+        /// <returns></returns>
+        public async Task<string> ProcessConfigsAsync()
         {
             try
             {
-                var configsInContainer = azureBlobStorageClient.GetConfigsInContainer();
+                var configsInContainer = await azureBlobStorageClient.GetConfigsInContainerAsync();
                 if (!configsInContainer.Any())
                 {
-                    logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(), "Bess configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-                    return;
+                    logger.LogWarning(EventIds.BessConfigsNotFound.ToEventId(), "BESS configs not found | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                    return "BESS configs not found";
                 }
 
-                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}", configsInContainer.Keys.Count, CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigsProcessingStarted.ToEventId(), "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}", configsInContainer.Keys.Count, CommonHelper.CorrelationID);
 
                 IList<BessConfig> bessConfigs = new List<BessConfig>();
-
-                var salesCatalogueDataResponse = await salesCatalogueService.GetSalesCatalogueData();
 
                 int configsWithInvalidAttributeCount = 0, deserializedConfigsCount = 0;
 
@@ -78,7 +78,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     if (deserializedConfig.isValid)
                     {
-                        deserializedConfigsCount = deserializedConfigsCount + 1;
+                        deserializedConfigsCount++;
 
                         deserializedConfig.config.FileName = fileName; //for logging
                         try
@@ -87,21 +87,32 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                             if (!results.IsValid)
                             {
-                                configsWithInvalidAttributeCount = configsWithInvalidAttributeCount + 1;
+                                configsWithInvalidAttributeCount++;
 
                                 var errors = new StringBuilder();
+                                var warnings = new StringBuilder();
 
                                 foreach (var failure in results.Errors)
                                 {
-                                    errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
+                                    if (failure.PropertyName == "IsEnabled")
+                                    {
+                                        warnings.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
+                                    }
+                                    else
+                                    {
+                                        errors.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
+                                    }
                                 }
 
-                                invalidNameList.Add(deserializedConfig.config.FileName + Hyphen +
-                                                    deserializedConfig.config.Name);
+                                if(!string.IsNullOrEmpty(errors.ToString()))
+                                    logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(),
+                                        "BESS config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}",
+                                        fileName, errors, CommonHelper.CorrelationID);
 
-                                logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(),
-                                    "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}",
-                                    fileName, errors, CommonHelper.CorrelationID);
+                                if (!string.IsNullOrEmpty(warnings.ToString()))
+                                    logger.LogWarning(EventIds.BessConfigInvalidAttributes.ToEventId(),
+                                        "BESS config file : {fileName} will be skipped for exchange set creation since the attribute value for IsEnabled is not yes | _X-Correlation-ID : {CorrelationId}",
+                                        fileName, CommonHelper.CorrelationID);
                             }
                             else
                             {
@@ -110,7 +121,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                         }
                         catch (Exception ex)
                         {
-                            logger.LogError(EventIds.BessConfigValidationError.ToEventId(), "Error occurred while validating Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                            logger.LogError(EventIds.BessConfigValidationError.ToEventId(), "Error occurred while validating BESS config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                            return "Error occurred while validating BESS config file";
                         }
                     }
                 }
@@ -120,14 +132,20 @@ namespace UKHO.BESS.ConfigurationService.Services
                 int totalConfigCount = deserializedConfigsCount + filesWithJsonErrorCount;
 
                 logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
-"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, filesWithJsonErrorCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | " +
+                "configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | " +
+                " configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | _X-Correlation-ID : {CorrelationId}",
+                totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, filesWithJsonErrorCount, configsWithDuplicateNameAttributeCount, CommonHelper.CorrelationID);
 
                 if (bessConfigs.Any())
                 {
-                    await CheckConfigFrequencyAndSaveQueueDetails(bessConfigs, salesCatalogueDataResponse.ResponseBody);
+                    var salesCatalogueDataResponse = await salesCatalogueService.GetSalesCatalogueData();
+
+                    await CheckConfigFrequencyAndSaveQueueDetailsAsync(bessConfigs, salesCatalogueDataResponse.ResponseBody);
                 }
 
-                logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessConfigsProcessingCompleted.ToEventId(), "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                return "BESS configs processing completed";
             }
             catch (Exception ex)
             {
@@ -136,6 +154,12 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
         }
 
+        /// <summary>
+        /// Deserialize config
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         [ExcludeFromCodeCoverage]
         private (BessConfig config, bool isValid) DeserializeConfig(string json, string fileName)
         {
@@ -147,24 +171,27 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (token.ToString().Contains(UndefinedValue))
                 {
-                    filesWithJsonErrorCount = filesWithJsonErrorCount + 1;
-                    logger.LogWarning(EventIds.BessConfigValueNotDefined.ToEventId(), "Bess config file : {fileName} contains undefined values. | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
+                    filesWithJsonErrorCount++;
+                    logger.LogWarning(EventIds.BessConfigValueNotDefined.ToEventId(), "BESS config file : {fileName} contains undefined values. | _X-Correlation-ID : {CorrelationId}", fileName, CommonHelper.CorrelationID);
                 }
                 else
                 {
                     bessConfig = JsonConvert.DeserializeObject<BessConfig>(json)!;
                     isValid = true;
                 }
-                return new(bessConfig, isValid);
+                return new ValueTuple<BessConfig, bool>(bessConfig, isValid);
             }
             catch (Exception ex)
             {
-                filesWithJsonErrorCount = filesWithJsonErrorCount + 1;
-                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing Bess config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
-                return new(bessConfig, isValid);
+                filesWithJsonErrorCount++;
+                logger.LogError(EventIds.BessConfigParsingError.ToEventId(), "Error occurred while parsing BESS config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                return new ValueTuple<BessConfig, bool>(bessConfig, isValid);
             }
         }
-
+        /// <summary>
+        /// Remove duplicate configs
+        /// </summary>
+        /// <param name="bessConfigs"></param>
         [ExcludeFromCodeCoverage]
         private void RemoveDuplicateConfigs(List<BessConfig> bessConfigs)
         {
@@ -176,17 +203,14 @@ namespace UKHO.BESS.ConfigurationService.Services
             {
                 configsWithDuplicateNameAttributeCount = duplicateRecords.Select(record => record.Count()).Sum();
 
-                foreach (var duplicateRecord in duplicateRecords)
+                foreach (var duplicateConfig in duplicateRecords.SelectMany(duplicateRecord => duplicateRecord.ToList()))
                 {
-                    foreach (BessConfig? duplicateConfig in duplicateRecord.ToList())
-                    {
-                        logger.LogWarning(EventIds.BessConfigsDuplicateRecordsFound.ToEventId(),
-                            "Bess config file : {fileName} found with duplicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}",
-                            duplicateConfig.FileName, duplicateConfig.Name, CommonHelper.CorrelationID);
+                    logger.LogWarning(EventIds.BessConfigsDuplicateRecordsFound.ToEventId(),
+                        "BESS config file : {fileName} found with duplicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}",
+                        duplicateConfig.FileName, duplicateConfig.Name, CommonHelper.CorrelationID);
 
-                        bessConfigs.RemoveAll(x =>
-                            x.FileName.Equals(duplicateConfig.FileName, StringComparison.OrdinalIgnoreCase));
-                    }
+                    bessConfigs.RemoveAll(x =>
+                        x.FileName.Equals(duplicateConfig.FileName, StringComparison.OrdinalIgnoreCase));
                 }
             }
         }
@@ -197,7 +221,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="bessConfigs"></param>
         /// <param name="salesCatalogueDataProducts"></param>
         /// <returns></returns>
-        public async Task<bool> CheckConfigFrequencyAndSaveQueueDetails(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts)
+        public async Task<bool> CheckConfigFrequencyAndSaveQueueDetailsAsync(IList<BessConfig> bessConfigs, IList<SalesCatalogueDataProductResponse> salesCatalogueDataProducts)
         {
             try
             {
@@ -208,19 +232,22 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                     // Get the next occurrence of the cron expression after the last execution time
                     var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
-                    ScheduleDetailEntity existingScheduleDetail = GetScheduleDetail(nextOccurrence, config);
+                    ScheduleDetailEntity existingScheduleDetail = await GetScheduleDetailAsync(nextOccurrence, config);
 
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
                     {
-                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
+                        logger.LogInformation(EventIds.BessConfigFrequencyElapsed.ToEventId(), "BESS Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}," +
+                            " Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}", config.Name, config.Frequency, existingScheduleDetail.NextScheduleTime, DateTime.UtcNow, CommonHelper.CorrelationID);
 
-                        azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, true);
+                        await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, true);
 
                         var encCells = GetEncCells(config.EncCellNames, salesCatalogueDataProducts);
 
                         if (!encCells.Any()) //If cells are not found then bespoke exchange set will not create
                         {
-                            logger.LogWarning(EventIds.BessEncCellNamesAndPatternNotFoundInSalesCatalogue.ToEventId(), "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for : {EncCellNames} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", config.EncCellNames), CommonHelper.CorrelationID);
+                            logger.LogWarning(EventIds.BessEncCellNamesAndPatternNotFoundInSalesCatalogue.ToEventId(), "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for : {EncCellNames} |" +
+                                " _X-Correlation-ID : {CorrelationId}", string.Join(", ", config.EncCellNames), CommonHelper.CorrelationID);
+
                             continue;
                         }
 
@@ -232,7 +259,8 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         if (fileSizeInMb > BESSize)
                         {
-                            logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", Math.Round(fileSizeInMb, 2), BESSize, config.FileName, CommonHelper.CorrelationID);
+                            logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file : {FileName} |" +
+                                " _X-Correlation-ID : {CorrelationId}", Math.Round(fileSizeInMb, 2), BESSize, config.FileName, CommonHelper.CorrelationID);
 
                             continue;
                         }
@@ -248,14 +276,14 @@ namespace UKHO.BESS.ConfigurationService.Services
                         }
                         else
                         {
-                            logger.LogWarning(EventIds.BessQueueMessageFailed.ToEventId(), "Something went wrong while adding message to queue, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
+                            logger.LogWarning(EventIds.BessQueueMessageFailed.ToEventId(), "Something went wrong while adding message to queue, Bespoke Exchange Set will not be created for file : {FileName} | _X-Correlation-ID : {CorrelationId}", config.FileName, CommonHelper.CorrelationID);
                         }
                     }
                     else
                     {   //Update schedule details
                         if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
                         {
-                            azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, config, false);
+                            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, false);
                         }
                     }
                 }
@@ -263,34 +291,53 @@ namespace UKHO.BESS.ConfigurationService.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessConfigFrequencyProcessingException.ToEventId(), "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
-                return false;
+                logger.LogError(EventIds.BessConfigFrequencyProcessingException.ToEventId(), "Exception occurred while processing BESS config {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.BessConfigFrequencyProcessingException.ToEventId());
             }
         }
 
+        /// <summary>
+        /// If schedule details is different from table then update details
+        /// </summary>
+        /// <param name="scheduleDetailEntity"></param>
+        /// <param name="nextOccurrence"></param>
+        /// <param name="bessConfig"></param>
+        /// <returns></returns>
         [ExcludeFromCodeCoverage]
         private static bool IsScheduleRefreshed(ScheduleDetailEntity scheduleDetailEntity, DateTime nextOccurrence, BessConfig bessConfig) => scheduleDetailEntity.NextScheduleTime != nextOccurrence || scheduleDetailEntity.IsEnabled != bessConfig.IsEnabled;
 
+        /// <summary>
+        /// Check schedule interval arrives
+        /// </summary>
+        /// <param name="bessConfig"></param>
+        /// <param name="scheduleDetailEntity"></param>
+        /// <returns></returns>
         [ExcludeFromCodeCoverage]
         private static bool CheckSchedule(BessConfig bessConfig, ScheduleDetailEntity scheduleDetailEntity)
         {
-            var intervalInMinutes = ((int)scheduleDetailEntity.NextScheduleTime.Subtract(DateTime.UtcNow).TotalSeconds);
-            var isSameDay = scheduleDetailEntity.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
+            int intervalInMinutes = ((int)scheduleDetailEntity.NextScheduleTime.Subtract(DateTime.UtcNow).TotalSeconds);
+            bool isSameDay = scheduleDetailEntity.NextScheduleTime.Date.Subtract(DateTime.UtcNow.Date).Days == 0;
 
             return intervalInMinutes <= 0 && isSameDay && bessConfig.IsEnabled.ToLower().Equals("yes");
         }
 
+        /// <summary>
+        /// Get Schedule details
+        /// </summary>
+        /// <param name="nextOccurrence"></param>
+        /// <param name="bessConfig"></param>
+        /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        private ScheduleDetailEntity GetScheduleDetail(DateTime nextOccurrence, BessConfig bessConfig)
+        private async Task<ScheduleDetailEntity> GetScheduleDetailAsync(DateTime nextOccurrence, BessConfig bessConfig)
         {
-            var existingScheduleDetail = azureTableStorageHelper.GetScheduleDetail(bessConfig.Name);
+            var existingScheduleDetail = await azureTableStorageHelper.GetScheduleDetailAsync(bessConfig.Name);
 
             if (existingScheduleDetail != null)
             {
                 return existingScheduleDetail;
             }
 
-            azureTableStorageHelper.UpsertScheduleDetail(nextOccurrence, bessConfig, false);
+            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, bessConfig, false);
 
             ScheduleDetailEntity scheduleDetailEntity = new();
             {
@@ -314,14 +361,14 @@ namespace UKHO.BESS.ConfigurationService.Services
             //filter provided prefix patterns
             const string Pattern = "*";
             List<string> ignoreList = new();
-            IEnumerable<string> encCells = encCellNames.Where(i => i.EndsWith(Pattern));
+            var encCells = encCellNames.Where(i => i.EndsWith(Pattern));
 
             foreach (string encCell in encCells)
             {
                 ignoreList.AddRange(encCellNames.Where(x => x.StartsWith(encCell.Remove(encCell.Length - 1)) && !x.Equals(encCell)));
             }
 
-            IEnumerable<string> prefixPatterns = encCellNames.Where(y => !ignoreList.Any(z => z.Equals(y)));
+            var prefixPatterns = encCellNames.Where(y => !ignoreList.Any(z => z.Equals(y)));
 
             //get enc cells from provided prefix patterns
             List<(string, int?)> filteredEncCell = new();
@@ -329,7 +376,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
             foreach (var prefixPattern in prefixPatterns)
             {
-                IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueDataProducts = prefixPattern.EndsWith(Pattern) ? salesCatalogueProducts.Where(x => x.ProductName.StartsWith(prefixPattern.Remove(prefixPattern.Length - 1)))
+                var salesCatalogueDataProducts = prefixPattern.EndsWith(Pattern) ? salesCatalogueProducts.Where(x => x.ProductName.StartsWith(prefixPattern.Remove(prefixPattern.Length - 1)))
                                                                                                                         : salesCatalogueProducts.Where(x => x.ProductName.Equals(prefixPattern));
 
                 if (salesCatalogueDataProducts.Any())
@@ -347,7 +394,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                 logger.LogWarning(EventIds.BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue.ToEventId(), "Invalid pattern or ENC cell names found : {InvalidEncCellName} | AIO cells to be excluded : {AIOCellName} | _X-Correlation-ID : {CorrelationId}", string.Join(", ", invalidPatternOrCell), string.Join(", ", configuration["AioCells"]), CommonHelper.CorrelationID);
             }
 
-            return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1))); //remove aio cells and return all filtered data
+            //remove aio cells and return all filtered data
+            return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1)));
         }
     }
 }
