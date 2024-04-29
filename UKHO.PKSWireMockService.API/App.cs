@@ -1,6 +1,4 @@
-﻿using UKHO.PKSWireMock.API;
-
-namespace UKHO.PKSWireMock.API
+﻿namespace UKHO.PKSWireMock.API
 {
     public class App :IHostedService
     {

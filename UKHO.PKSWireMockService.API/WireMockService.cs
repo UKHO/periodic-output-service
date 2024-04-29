@@ -16,6 +16,9 @@ namespace UKHO.PKSWireMock.API
         private readonly ILogger _logger;
         private readonly WireMockServerSettings _settings;
         public const string PksUrl = "/keys/ENC-S63";
+        public const string ContentType = "Content-Type";
+        public const string ApplicationType = "application/json";
+
         private class Logger : IWireMockLogger
         {
             private readonly ILogger _logger;
@@ -57,45 +60,46 @@ namespace UKHO.PKSWireMock.API
             _server = WireMockServer.Start(_settings);
 
             _server.Given(Request.Create().WithPath(PksUrl)
+                        .WithBody(string.Empty)
+                        .UsingPost())
+                    .RespondWith(Response.Create().WithStatusCode(415)
+                        .WithHeader(ContentType, ApplicationType)
+                        .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "blankResponse.json")));
+          
+
+            _server.Given(Request.Create().WithPath(PksUrl)
                     .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Request1.json"))))
                     .UsingPost())
                 .RespondWith(Response.Create().WithStatusCode(200)
-                    .WithHeader("Content-Type", "application/json")
+                    .WithHeader(ContentType, ApplicationType)
                     .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Response1.json")));
-
-            _server.Given(Request.Create().WithPath(PksUrl)
-                    .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Request2.json"))))
-                    .UsingPost())
-                .RespondWith(Response.Create().WithStatusCode(400)
-                    .WithHeader("Content-Type", "application/json")
-                    .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Response2.json")));
-
-            _server.Given(Request.Create().WithPath(PksUrl)
-                    .WithBody(string.Empty)
-                    .UsingPost())
-                .RespondWith(Response.Create().WithStatusCode(415)
-                    .WithHeader("Content-Type", "application/json")
-                    .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "blankResponse.json")));
 
             _server.Given(Request.Create().WithPath(PksUrl)
                     .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Request3.json"))))
                     .UsingPost())
                 .RespondWith(Response.Create().WithStatusCode(200)
-                    .WithHeader("Content-Type", "application/json")
+                    .WithHeader(ContentType, ApplicationType)
                     .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Response3.json")));
 
             _server.Given(Request.Create().WithPath(PksUrl)
-                    .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Request4.json"))))
+                    .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Request2.json"))))
                     .UsingPost())
                 .RespondWith(Response.Create().WithStatusCode(400)
-                    .WithHeader("Content-Type", "application/json")
-                    .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Response4.json")));
+                    .WithHeader(ContentType, ApplicationType)
+                    .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Response2.json")));
+
+            _server.Given(Request.Create().WithPath(PksUrl)
+                   .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Request4.json"))))
+                   .UsingPost())
+               .RespondWith(Response.Create().WithStatusCode(400)
+                   .WithHeader(ContentType, ApplicationType)
+                   .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Response4.json")));
 
             _logger.LogInformation($"WireMock.Net server settings {JsonConvert.SerializeObject(_settings)}");
         }
 
         private static string GetJsonData(string filePath)
-        {            
+        {
             using (var r = new StreamReader(filePath))
             {
                 string jsonFile = r.ReadToEnd();

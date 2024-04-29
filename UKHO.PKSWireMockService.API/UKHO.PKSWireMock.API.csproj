@@ -15,32 +15,12 @@
     <Content Remove="__admin\mappings\mapping-default.json" />
     <Content Remove="__admin\mappings\mapping-delay.json" />
     <Content Remove="__admin\mappings\mapping-error.json" />
-    <Content Remove="__files\blankResponse.json" />
-    <Content Remove="__files\request1.json" />
-    <Content Remove="__files\request2.json" />
-    <Content Remove="__files\response1.json" />
-    <Content Remove="__files\response2.json" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="__admin\mappings\mapping-default.json" />
     <None Include="__admin\mappings\mapping-delay.json" />
     <None Include="__admin\mappings\mapping-error.json" />
-    <None Include="__files\blankResponse.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="__files\Request1.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="__files\Request2.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="__files\Response1.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="__files\Response2.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -59,10 +39,25 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="__files\blankResponse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="__files\Request1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="__files\Request2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="__files\Request3.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="__files\Request4.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="__files\Response1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="__files\response2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="__files\Response3.json">
