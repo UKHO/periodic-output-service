@@ -29,7 +29,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         [TestCase("0f13a253-db5d-4b77-a165-643f4b4a77fc", "s63", "UPDATE")]
         public async Task WhenICheckDownloadedZipForTypesInConfigFile_ThenZipIsCreatedForRequestedProduct(string batchId, string exchangeSetStandard, string type)
         {
-            var queueMessage = JsonConvert.DeserializeObject<ConfigQueueMessage>(File.ReadAllText("./TestData/BSQueueMessage.txt")) ;
+            var queueMessage = JsonConvert.DeserializeObject<ConfigQueueMessage>(await File.ReadAllTextAsync("./TestData/BSQueueMessage.txt")) ;
             queueMessage!.Type = type;
             queueMessage.ExchangeSetStandard = exchangeSetStandard;
             string jsonString = JsonConvert.SerializeObject(queueMessage);

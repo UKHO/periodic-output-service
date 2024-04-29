@@ -13,7 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
     {
         static readonly TestConfiguration testConfiguration = new();
         static BessStorageConfiguration bessStorageConfiguration = testConfiguration.bessStorageConfig;
-        AzureBlobStorageClient azureBlobStorageClient;
+        AzureBlobStorageClient? azureBlobStorageClient;
         readonly dynamic config = Options.Create(new PeriodicOutputService.Common.Configuration.BessStorageConfiguration
         {
             ConnectionString = bessStorageConfiguration.ConnectionString!,
@@ -50,7 +50,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
         public void TearDown()
         {
             // Cleaning up config files from container.
-            azureBlobStorageClient.DeleteConfigsInContainer();
+            azureBlobStorageClient?.DeleteConfigsInContainer();
 
             //cleaning up the downloaded files from temp folder
             Extensions.DeleteTempDirectory(testConfiguration.bessConfig.TempFolderName);

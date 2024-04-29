@@ -53,9 +53,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public class BessStorageConfiguration
         {
             public string? ConnectionString { get; set; }
-
             public string? ContainerName { get; set; }
-
             public string? QueueName { get; set; }
         }
 

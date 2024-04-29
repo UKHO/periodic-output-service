@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System.IO.Compression;
-using UKHO.ExchangeSetService.API.FunctionalTests.Models;
 using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 using System.Net;
 using FluentAssertions;
 using Microsoft.IdentityModel.Tokens;
+using UKHO.BESS.API.FunctionalTests.Models;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -172,22 +172,28 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             string[] readMeFileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
 
-            if (readMeSearchFilter == "AVCS")
+            switch (readMeSearchFilter)
             {
-                string readMeType = (readMeFileContent[0].Split(" ")[0]);
-                return readMeType.Equals("AVCS");
+                case null:
+                    return false;
+                case "AVCS":
+                    {
+                        string readMeType = (readMeFileContent[0].Split(" ")[0]);
+                        return readMeType.Equals("AVCS");
+                    }
+                case "BLANK":
+                    return readMeFileContent.IsNullOrEmpty();
             }
-            else if (readMeSearchFilter == "BLANK")
+
+            if (!readMeSearchFilter.Contains("Bespoke README"))
             {
-                return readMeFileContent.IsNullOrEmpty();
+                return false;
             }
-            else if(readMeSearchFilter.Contains("Bespoke README"))
+
             {
                 string readMeType = (readMeFileContent[0].Split(" ")[0]);
                 return readMeType.Equals("DISCLAIMER");
             }
-
-            return false;
         }
 
         /// <summary>

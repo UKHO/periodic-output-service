@@ -38,10 +38,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static string GetPayload(dynamic configDetails, string exchangeSetStandard, string type, string readMeSearchFilter)
         {
-            configDetails!.Name = "BES-123" + Extensions.RandomNumber();
-            configDetails!.Type = type;
+            configDetails.Name = "BES-123" + Extensions.RandomNumber();
+            configDetails.Type = type;
             configDetails.ExchangeSetStandard = exchangeSetStandard;
-            configDetails!.ReadMeSearchFilter = readMeSearchFilter;
+            configDetails.ReadMeSearchFilter = readMeSearchFilter;
             return JsonConvert.SerializeObject(configDetails);
         }
     }
