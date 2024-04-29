@@ -658,12 +658,16 @@ namespace UKHO.PeriodicOutputService.Common.Logging
           /// <summary>
         /// 809130 - Bespoke exchange set cleanup web job is started.
         /// </summary>
-        BESSCleanUpJobRequestStart = 809130,
+        BESSCleanUpJobRequestStarted = 809130,
 
         /// <summary>
         /// 809131 - Bespoke exchange set cleanup web job is completed.
         /// </summary>
-        BESSCleanUpJobRequestCompleted = 809131
+        BESSCleanUpJobRequestCompleted = 809131,
+        /// <summary>
+        /// 809132 - Deletion of directory failed.
+        /// </summary>
+        DirectoryDeletionFailed = 809132
     }
 
     public static class EventIdExtensions

@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using UKHO.BESS.CleanUpJob.Services;
 using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.BESS.CleanUpJob
@@ -6,16 +7,18 @@ namespace UKHO.BESS.CleanUpJob
     public class BespokeExchangeSetCleanUpJob
     {
         private readonly ILogger<BespokeExchangeSetCleanUpJob> logger;
+        private readonly IBespokeExchangeSetCleanUpService bespokeExchangeSetCleanUpService;
 
-        public BespokeExchangeSetCleanUpJob(ILogger<BespokeExchangeSetCleanUpJob> logger)
+        public BespokeExchangeSetCleanUpJob(ILogger<BespokeExchangeSetCleanUpJob> logger, IBespokeExchangeSetCleanUpService bespokeExchangeSetCleanUpService)
         {
-            this.logger = logger;
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.bespokeExchangeSetCleanUpService = bespokeExchangeSetCleanUpService ?? throw new ArgumentNullException(nameof(bespokeExchangeSetCleanUpService));
         }
         public async Task ProcessCleanUp()
         {
-            logger.LogInformation(EventIds.BESSCleanUpJobRequestStart.ToEventId(), "Bespoke Exchange set service clean up web job started at " + DateTime.Now);
+            logger.LogInformation(EventIds.BESSCleanUpJobRequestStarted.ToEventId(), "Bespoke Exchange set service clean up web job started at " + DateTime.Now);
 
-            await Task.CompletedTask;
+            await bespokeExchangeSetCleanUpService.DeleteHistoricFoldersAndFiles();
 
             logger.LogInformation(EventIds.BESSCleanUpJobRequestCompleted.ToEventId(), "Bespoke Exchange set service clean up web job completed at " + DateTime.Now);
         }

@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Abstractions;
 using System.Reflection;
 using Elastic.Apm;
 using Elastic.Apm.Api;
@@ -9,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using UKHO.BESS.CleanUpJob;
+using UKHO.BESS.CleanUpJob.Configuration;
+using UKHO.BESS.CleanUpJob.Services;
 
 namespace UKHO.ExchangeSetService.CleanUpJob
 {
@@ -104,9 +107,12 @@ namespace UKHO.ExchangeSetService.CleanUpJob
             if (configuration != null)
             {
                 serviceCollection.AddSingleton<IConfiguration>(configuration);
+                serviceCollection.Configure<CleanUpConfiguration>(configuration.GetSection("CleanUpConfiguration"));
             }
 
             serviceCollection.AddSingleton<BespokeExchangeSetCleanUpJob>();
+            serviceCollection.AddScoped<IBespokeExchangeSetCleanUpService, BespokeExchangeSetCleanUpService>();
+            serviceCollection.AddScoped<IFileSystem, FileSystem>();
         }
     }
 }
