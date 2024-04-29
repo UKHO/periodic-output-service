@@ -164,25 +164,19 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public bool CreateEmptyFileContent(string filePath)
         {
-            if (!string.IsNullOrEmpty(filePath))
+            if (string.IsNullOrEmpty(filePath))
             {
-                _fileSystem.File.WriteAllText(filePath, string.Empty);
-                return true;
+                return false;
             }
-            return false;
+            _fileSystem.File.WriteAllText(filePath, string.Empty);
+            return true;
         }
 
         public bool DownloadReadmeFile(string filePath, Stream stream)
         {
-            if (stream != null)
-            {
-                using (var outputFileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite))
-                {
-                    stream.CopyTo(outputFileStream);
-                }
-                return true;
-            }
-            return false;
+            using var outputFileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
+            stream.CopyTo(outputFileStream);
+            return true;
         }
     }
 }

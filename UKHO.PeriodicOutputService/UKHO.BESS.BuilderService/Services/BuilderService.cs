@@ -303,16 +303,20 @@ namespace UKHO.BESS.BuilderService.Services
 
         private async Task PerformAncillaryFilesOperationsAsync(string batchId, string exchangeSetPath, string correlationId, string readMeSearchFilter)
         {
-            var exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
-            var readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
-
+            string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
+            string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
             if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
+            {
                 return;
-
+            }
             if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
+            {
                 fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
+            }
             else
+            {
                 await DownloadReadMeFileAsync(batchId, exchangeSetRootPath, correlationId, readMeSearchFilter);
+            }
         }
 
         private async Task<bool> DownloadReadMeFileAsync(string batchId, string exchangeSetRootPath, string correlationId, string readMeSearchFilter)
@@ -320,11 +324,8 @@ namespace UKHO.BESS.BuilderService.Services
             bool isDownloadReadMeFileSuccess = false;
             string readMeFilePath = await logger.LogStartEndAndElapsedTimeAsync(EventIds.QueryFileShareServiceReadMeFileRequestStart,
                   EventIds.QueryFileShareServiceReadMeFileRequestCompleted,
-                  "File share service search query request for readme file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
-                  async () =>
-                  {
-                      return await fssService.SearchReadMeFilePathAsync(batchId, correlationId, readMeSearchFilter);
-                  },
+                  "File share service search query request for readme.txt file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
+                  async () => await fssService.SearchReadMeFilePathAsync(batchId, correlationId, readMeSearchFilter),
                batchId, correlationId);
 
             if (!string.IsNullOrWhiteSpace(readMeFilePath))
@@ -332,7 +333,7 @@ namespace UKHO.BESS.BuilderService.Services
                 DateTime createReadMeFileTaskStartedAt = DateTime.UtcNow;
                 isDownloadReadMeFileSuccess = await logger.LogStartEndAndElapsedTimeAsync(EventIds.DownloadReadMeFileRequestStart,
                    EventIds.DownloadReadMeFileRequestCompleted,
-                   "File share service download request for readme file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
+                   "File share service download request for readme.txt file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
                    async () =>
                    {
                        return await fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, correlationId);
