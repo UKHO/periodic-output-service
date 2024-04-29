@@ -678,16 +678,6 @@ stages:
                     scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
                     arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
-                # - task: AzureCLI@2
-                #   displayName: "Swap Stub and Webjob Configuration"
-                #   condition: always()
-                #   inputs:
-                #     azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                #     scriptType: 'pscore'
-                #     scriptLocation: 'scriptPath'
-                #     scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/set_stub_webjob_configuration.ps1"
-                #     arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME) -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
-
   - stage: QAdeploy
     dependsOn: Devdeploy
     displayName: "QAdeploy (inc terraform, webapp deploy)"
@@ -930,26 +920,6 @@ stages:
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/swap_container_config.ps1"
                     arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
-                # - task: AzureCLI@2
-                #   displayName: "Swap Webjob Configuration"
-                #   condition: always()
-                #   inputs:
-                #     azureSubscription: "Exchange-Set-Service-QA-A-008-02"
-                #     scriptType: 'pscore'
-                #     scriptLocation: 'scriptPath'
-                #     scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_webjob_configuration.ps1"
-                #     arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
-                # - task: AzureCLI@2
-                #   displayName: "Swap Stub Configuration"
-                #   condition: always()
-                #   inputs:
-                #     azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                #     scriptType: 'pscore'
-                #     scriptLocation: 'scriptPath'
-                #     scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_stub_configuration.ps1"
-                #     arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
 
   - stage: Livedeploy
     displayName: "Livedeploy (inc terraform, webapp deploy)"
