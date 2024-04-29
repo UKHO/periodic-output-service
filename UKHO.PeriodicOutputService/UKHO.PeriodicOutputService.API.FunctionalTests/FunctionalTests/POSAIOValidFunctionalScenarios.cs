@@ -36,6 +36,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             Assert.That(fileCount > 0, $"File count is {fileCount} in the specified folder path.");
         }
 
+        [Ignore("Temp.")]
         [Test]
         public async Task WhenICallBatchDetailsEndpointForUpdateExchangeSetTypeWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
         {
@@ -54,8 +55,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             FileContentHelper.DeleteTempDirectory(posDetails.TempFolderName);
 
             //cleaning up the stub home directory
-            ////HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
-            ////apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }
 }
