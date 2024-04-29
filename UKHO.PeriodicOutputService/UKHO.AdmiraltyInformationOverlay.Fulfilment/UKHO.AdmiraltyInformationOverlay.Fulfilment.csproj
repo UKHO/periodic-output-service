@@ -28,7 +28,7 @@
     <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
-    <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.23242.1" />
+    <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.24067.2" />
   </ItemGroup>
 
   <ItemGroup>
