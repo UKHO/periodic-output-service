@@ -1,4 +1,9 @@
-﻿namespace UKHO.BESS.API.FunctionalTests.Helpers
+﻿using Azure.Data.Tables;
+using Azure.Storage.Queues;
+using Newtonsoft.Json;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
+
+namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
     public static class Extensions
     {
@@ -39,6 +44,50 @@
         {
             //The below sleep is to give time to BuilderService to download the exchangeSet.
             Thread.Sleep(90000);
+        }
+
+        /// <summary>
+        /// This Method is use to delete bessproductversiondetails azure table.
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="tableName"></param>
+        public static async Task DeleteTable(string? connectionString, string? tableName)
+        {
+            TableClient tableClient = new TableClient(connectionString, tableName);
+            await tableClient.DeleteAsync();
+        }
+
+        /// <summary>
+        /// This method is use to add the queue message.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="exchangeSetStandard"></param>
+        /// <param name="webjobConnectionString"></param>
+        /// <param name="queueName"></param>
+        public static void AddQueueMessage(string type, string? exchangeSetStandard, string? webjobConnectionString, string? queueName)
+        {
+            var queueMessage = JsonConvert.DeserializeObject<ConfigQueueMessage>(File.ReadAllText("./TestData/BSQueueMessage.txt"));
+            queueMessage!.Type = type;
+            queueMessage.ExchangeSetStandard = exchangeSetStandard!;
+            string jsonString = JsonConvert.SerializeObject(queueMessage);
+
+            QueueClientOptions queueOptions = new() { MessageEncoding = QueueMessageEncoding.Base64 };
+            QueueClient queue = new(webjobConnectionString, queueName, queueOptions);
+            queue.SendMessage(jsonString);
+        }
+
+        /// <summary>
+        /// This method is use to clean the POS folder.
+        /// </summary>
+        /// <param name="baseUrl"></param>
+        /// <returns></returns>
+        public static HttpResponseMessage Cleanup(string? baseUrl)
+        {
+            string uri = $"{baseUrl}/cleanUp";
+
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+
+            return httpClient.Send(httpRequestMessage, CancellationToken.None);
         }
     }
 }

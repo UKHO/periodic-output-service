@@ -90,6 +90,9 @@
     <None Update="Data\CurrentTestCase.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\D2B46C4F-415A-4CA3-B844-6577254F39E5\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -187,6 +190,7 @@
 
   <ItemGroup>
     <Folder Include="Data\649C902D-5282-4CCF-924A-2B548EF42179\" />
+    <Folder Include="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\" />
   </ItemGroup>
 
 </Project>

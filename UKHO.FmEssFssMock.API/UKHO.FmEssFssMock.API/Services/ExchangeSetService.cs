@@ -111,14 +111,22 @@ namespace UKHO.FmEssFssMock.API.Services
                 }
 
                 // this will set attributes for empty ess
-                if (item.EditionNumber > 0 && (exchangeSetStandard.ToLower() == "s63" || exchangeSetStandard.ToLower() == "s57"))
+                if (item.EditionNumber > 0)
                 {
-                    batchRequest.Attributes = new List<KeyValuePair<string, string>>()
+                    if (exchangeSetStandard.Equals("s63"))
                     {
-                        new("Exchange Set Type", "Update"),
-                        new("Media Type", "Zip"),
+                        batchRequest.Attributes = new List<KeyValuePair<string, string>>()
+                        {
                         new("Batch Type", Batch.EssEmptyBatch.ToString())
-                    };
+                        };
+                    }
+                    else
+                    {
+                        batchRequest.Attributes = new List<KeyValuePair<string, string>>()
+                        {
+                        new("Batch Type", Batch.EssEmptyBatchs57.ToString())
+                        };
+                    }
                 }
 
                 BatchResponse createBatchResponse = _fssService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);

@@ -68,7 +68,10 @@ namespace UKHO.FmEssFssMock.Enums
         BesUpdateZipBatch = 21,
 
         [Description("5331f8c2-9085-4083-9a1e-9f99953be122")]
-        EssEmptyBatch = 22
+        EssEmptyBatch = 22,
+
+        [Description("d0635e6c-81ae-4acb-9129-1a69f9ee58d2")]
+        EssEmptyBatchs57 = 23
 
     }
 }

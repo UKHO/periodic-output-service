@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.IO.Compression;
-using UKHO.ExchangeSetService.API.FunctionalTests.Models;
+using UKHO.BESS.API.FunctionalTests.Models;
 using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 using System.Net;
 using FluentAssertions;
@@ -32,7 +32,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             {
                 HttpResponseMessage batchStatusResponse = await FssApiClient.GetBatchStatusAsync(batchStatusUri);
                 batchStatusResponse.StatusCode.Should().Be((HttpStatusCode)200);
-                
+
                 var batchStatusResponseObj = JsonConvert.DeserializeObject<ResponseBatchStatusModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                 batchStatus = batchStatusResponseObj!.Status!;
 
@@ -67,7 +67,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl);
             response.StatusCode.Should().Be((HttpStatusCode)200);
-            
+
             Stream stream = await response.Content.ReadAsStreamAsync();
 
             await using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, fileName), FileMode.Create))
@@ -124,7 +124,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <param name="downloadFolderPath"></param>
         /// <param name="exchangeSetStandard"></param>
         /// <returns></returns>
-        public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63")
+        public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63", bool emptyZip = false)
         {
             //Checking for the PRODUCTS.TXT file in the downloaded zip
             var checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!), testConfiguration.exchangeSetDetails.ExchangeSetProductFile!);
@@ -142,13 +142,20 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             foreach (var productName in testConfiguration.bessConfig.ProductsName!)
             {
                 var countryCode = productName.Substring(0, 2);
-                checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//"+ countryCode +"//" + productName);
-                checkFile.Should().Be(true);
+                checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//" + countryCode + "//" + productName);
+                if (emptyZip)
+                {
+                    checkFile.Should().Be(false);
+                }
+                else
+                {
+                    checkFile.Should().Be(true);
+                }
             }
 
             //Checking the value of the Encryption Flag in the PRODUCTS.TXT file based on the ExchangeSet Standard
             string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFile!));
-            int rowNumber = new Random().Next(4, fileContent.Length-1);
+            int rowNumber = new Random().Next(4, fileContent.Length - 1);
             var productData = fileContent[rowNumber].Split(",").Reverse();
             string encryptionFlag = productData.ToList()[4];
             string expectedEncryptionFlag = "1";
@@ -157,7 +164,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 expectedEncryptionFlag = "0";
             }
             expectedEncryptionFlag.Should().Be(encryptionFlag);
-            
+
             return checkFile;
         }
     }
