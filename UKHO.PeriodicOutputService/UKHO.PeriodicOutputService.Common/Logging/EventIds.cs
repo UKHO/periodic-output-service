@@ -653,7 +653,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809129 - Products Fetched from ESS.
         /// </summary>
-        ProductsFetchedFromESS = 809129
+        ProductsFetchedFromESS = 809129,
+
+          /// <summary>
+        /// 809130 - Bespoke exchange set cleanup web job is started.
+        /// </summary>
+        BESSCleanUpJobRequestStart = 809130,
+
+        /// <summary>
+        /// 809131 - Bespoke exchange set cleanup web job is completed.
+        /// </summary>
+        BESSCleanUpJobRequestCompleted = 809131
     }
 
     public static class EventIdExtensions
