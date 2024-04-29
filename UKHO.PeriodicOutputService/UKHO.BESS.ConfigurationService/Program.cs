@@ -17,6 +17,7 @@ using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Providers;
 using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.BESS.ConfigurationService
@@ -169,6 +170,8 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.AddScoped<ISalesCatalogueClient, SalesCatalogueClient>();
             serviceCollection.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
             serviceCollection.AddScoped<IAzureMessageQueueHelper, AzureMessageQueueHelper>();
+            serviceCollection.AddScoped<IMacroTransformer, MacroTransformer>();
+            serviceCollection.AddScoped<ICurrentDateTimeProvider, CurrentDateTimeProvider>();
         }
     }
 }
