@@ -28,7 +28,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         private IFileSystemHelper _fileSystemHelper;
         private IFileSystem _fakeFileSystem;
         private IConfiguration _fakeconfiguration;
-        private string fulfilmentExceptionMessage = "There has been a problem in creating your exchange set, so we are unable to fulfil your request at this time. Please contact UKHO Customer Services quoting error code : {0} and correlation ID : {1}";
         private const string readMeSearchFilterQuery = "$batch(Product Type) eq 'AVCS' and businessUnit eq 'ADDS'";
 
         [SetUp]
@@ -785,7 +784,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         #region SearchReadMeFilePath
-        [Test] 
+        [Test]
         public void WhenReadMeFileNotFound_ThenReturnFulfilmentException()
         {
             SearchBatchResponse searchBatchResponse = new();
@@ -806,7 +805,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "8k0997d5-8905-43fa-9009-9c38b2007f81", invalidReadMeSearchFilterQuery))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
-            
+
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -820,7 +819,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             string batchId = "a07537ff-ffa2-4565-8f0e-96e61e70a9fc";
             var searchBatchResponse = GetSearchBatchEmptyResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
-    
+
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
             A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -835,7 +834,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync(batchId, string.Empty, readMeSearchFilterQuery))
                 .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ReadMeTextFileNotFound.ToEventId());
-            
+
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -912,7 +911,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             _fakeFssApiConfiguration.Value.ReadMeFileName = "ReadMe.txt";
             string readMeFilePath = @"batch/c4af46f5-1b41-4294-93f9-dda87bf8ab96/files/README.TXT";
             string exchangeSetRootPath = @"C:\\HOME";
-      
+
             var searchBatchResponse = GetReadMeFileDetails();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))), RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://test.com") } };
@@ -930,7 +929,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var response = await _fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc");
 
-            response.Should().Be(true);  
+            response.Should().Be(true);
         }
 
         [Test]
