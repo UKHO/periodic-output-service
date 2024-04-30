@@ -453,8 +453,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                     Acl = new Acl
                     {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new List<string>() : _fssApiConfiguration.Value.AioReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new List<string>() : _fssApiConfiguration.Value.AioReadGroups.Split(",").ToList()
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new List<string>() : _fssApiConfiguration.Value.AioReadUsers.Split(","),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new List<string>() : _fssApiConfiguration.Value.AioReadGroups.Split(",")
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {
@@ -474,8 +474,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                     Acl = new Acl
                     {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadUsers) ? new List<string>() : _fssApiConfiguration.Value.BessReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new List<string>() : _fssApiConfiguration.Value.BessReadGroups.Split(",").ToList()
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadUsers) ? new List<string>() : _fssApiConfiguration.Value.BessReadUsers.Split(","),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new List<string>() : _fssApiConfiguration.Value.BessReadGroups.Split(",")
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {
@@ -495,8 +495,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                     Acl = new Acl
                     {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new List<string>() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new List<string>() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList()
+                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new List<string>() : _fssApiConfiguration.Value.PosReadUsers.Split(","),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new List<string>() : _fssApiConfiguration.Value.PosReadGroups.Split(",")
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {

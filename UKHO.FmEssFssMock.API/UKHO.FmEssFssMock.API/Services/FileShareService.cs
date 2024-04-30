@@ -33,7 +33,6 @@ namespace UKHO.FmEssFssMock.API.Services
         private readonly string besMultipleFilesBatchId = "10D40DD5-DDFB-497A-BB67-D99FB1658320";
         private const string BESPOKEREADME = "BESPOKE README";
         private const string MULTIPLEFILES = "MULTIPLE";
-        private const string READMEFILENAME = "README.TXT";
 
         public FileShareService(IOptions<FileShareServiceConfiguration> fssConfig)
         {
@@ -215,58 +214,15 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             if (filter.ToUpper().Contains("AIO CD INFO"))
             {
-                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssInfoResponseFileName);
-                FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, aioInfoFilesBatchId));
-
-                string path = Path.Combine(Environment.CurrentDirectory, @"Data", aioInfoFilesBatchId);
-                foreach (string fullfilePath in Directory.GetFiles(path))
-                {
-                    FileInfo file = new(fullfilePath);
-
-                    bool isFileAdded = AddFile(aioInfoFilesBatchId, file.Name, homeDirectoryPath);
-
-                    if (!isFileAdded)
-                    {
-                        return null;
-                    }
-                }
-                return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssInfoResponseFileName, aioInfoFilesBatchId);
             }
             else if (filter.ToUpper().Contains(BESPOKEREADME))
             {
-                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName);
-                FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, besSingleReadmeFileBatchId));
-
-                string path = Path.Combine(Environment.CurrentDirectory, @"Data", besSingleReadmeFileBatchId);               
-                string filePath = Path.Combine(path, READMEFILENAME);          
-                FileInfo file = new(filePath);
-
-                bool isFileAdded = AddFile(besSingleReadmeFileBatchId, file.Name, homeDirectoryPath);
-
-                if (!isFileAdded)
-                {
-                   return null;
-                }     
-                return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName, besSingleReadmeFileBatchId);
             }
             else if (filter.ToUpper().Contains(MULTIPLEFILES))
             {
-                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName);
-                FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, besMultipleFilesBatchId));
-
-                string path = Path.Combine(Environment.CurrentDirectory, @"Data", besMultipleFilesBatchId);
-                foreach (string filePath in Directory.GetFiles(path))
-                {
-                    FileInfo file = new(filePath);
-
-                    bool isFileAdded = AddFile(besMultipleFilesBatchId, file.Name, homeDirectoryPath);
-
-                    if (!isFileAdded)
-                    {
-                        return null;
-                    }
-                }
-                return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName, besMultipleFilesBatchId);
             }
 
             return new SearchBatchResponse()
@@ -280,6 +236,26 @@ namespace UKHO.FmEssFssMock.API.Services
                     },
                 }
             };
+        }
+
+        private SearchBatchResponse GetSearchBatchResponse(string homeDirectoryPath, string responseFileName, string batchId)
+        {
+            string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, responseFileName);
+            FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, batchId));
+
+            string path = Path.Combine(Environment.CurrentDirectory, @"Data", batchId);
+            foreach (string filePath in Directory.GetFiles(path))
+            {
+                FileInfo file = new(filePath);
+
+                bool isFileAdded = AddFile(batchId, file.Name, homeDirectoryPath);
+
+                if (!isFileAdded)
+                {
+                    return null;
+                }
+            }
+            return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
         }
     }
 }
