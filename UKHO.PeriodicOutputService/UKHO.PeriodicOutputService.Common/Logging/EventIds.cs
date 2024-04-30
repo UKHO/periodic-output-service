@@ -658,7 +658,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809130 - Empty batch response from ESS.
         /// </summary>
-        EmptyBatchResponse = 809130
+        EmptyBatchResponse = 809130,
+
+        /// <summary>
+        /// 809130 - Macro is invalid or unavailable.
+        /// </summary>
+        MacroInvalidOrUnavailable = 809131,
+
+        /// <summary>
+        /// 809131 - Exception occurred while transforming macros.
+        /// </summary>
+        MacroTransformationFailed = 809132
     }
 
     public static class EventIdExtensions

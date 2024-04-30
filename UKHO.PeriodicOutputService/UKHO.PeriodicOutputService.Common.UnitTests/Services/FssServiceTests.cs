@@ -57,7 +57,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         [Test]
-        public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
+        public void When_Paramter_Is_Null_Then_Constructor_Throws_ArgumentNullException_()
         {
             Assert.Throws<ArgumentNullException>(
                 () => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
