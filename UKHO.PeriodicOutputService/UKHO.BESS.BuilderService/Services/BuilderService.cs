@@ -336,14 +336,11 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (!string.IsNullOrWhiteSpace(readMeFilePath))
             {
-                DateTime createReadMeFileTaskStartedAt = DateTime.UtcNow;
                 isDownloadReadMeFileSuccess = await logger.LogStartEndAndElapsedTimeAsync(EventIds.DownloadReadMeFileRequestStart,
                    EventIds.DownloadReadMeFileRequestCompleted,
                    "File share service download request for readme.txt file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
                    async () => await fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, correlationId),
                 batchId, correlationId);
-
-                DateTime createReadMeFileTaskCompletedAt = DateTime.UtcNow;
             }
 
             return isDownloadReadMeFileSuccess;
