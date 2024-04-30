@@ -50,7 +50,10 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 BlockSizeInMultipleOfKBs = 4096,
                 BespokeExchangeSetFileFolder = "V01X01",
                 EncRoot = "ENC_ROOT",
-                ReadMeFileName = "README.TXT"
+                ReadMeFileName = "README.TXT",
+                SerialFileName = "SERIAL.ENC",
+                ProductFileName = "PRODUCT.TXT",
+                Info = "INFO"
             });
 
             fakeEssService = A.Fake<IEssService>();
@@ -63,11 +66,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             fakeBessStorageConfiguration = A.Fake<IOptions<BessStorageConfiguration>>();
 
             builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakeBessStorageConfiguration);
-
-            fakeBessStorageConfiguration.Value.ExchangeSetFolder = "V01X01";
-            fakeBessStorageConfiguration.Value.SerialFileName = "SERIAL.ENC";
-            fakeBessStorageConfiguration.Value.ProductFileName = "PRODUCT.TXT";
-            fakeBessStorageConfiguration.Value.Info = "INFO";
         }
 
         [Test]

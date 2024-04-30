@@ -43,17 +43,18 @@ namespace UKHO.BESS.BuilderService.Services
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
-            this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));           
+            this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
             this.bessStorageConfiguration = bessStorageConfiguration ??
                                             throw new ArgumentNullException(nameof(bessStorageConfiguration));
 
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
-            
+
         }
 
         public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
+
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
@@ -313,12 +314,11 @@ namespace UKHO.BESS.BuilderService.Services
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
             await CreateReadMeFileAsync(batchId, correlationId, readMeSearchFilter, exchangeSetRootPath, readMeFilePath);
 
-            string exchangeSetFolder = bessStorageConfiguration.Value.ExchangeSetFolder;
+            string exchangeSetFolder = fssApiConfig.Value.BespokeExchangeSetFileFolder;
             string exchangeSetBasePath = Path.Combine(essFileDownloadPath, exchangeSetFolder);
-            string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, exchangeSetFolder, bessStorageConfiguration.Value.Info);
-
-            string serialFilePath = Path.Combine(exchangeSetBasePath, bessStorageConfiguration.Value.SerialFileName);
-            string productFilePath = Path.Combine(exchangeSetInfoPath, bessStorageConfiguration.Value.ProductFileName);
+            string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, exchangeSetFolder, fssApiConfig.Value.Info);
+            string serialFilePath = Path.Combine(exchangeSetBasePath, fssApiConfig.Value.SerialFileName);
+            string productFilePath = Path.Combine(exchangeSetInfoPath, fssApiConfig.Value.ProductFileName);
 
             await UpdateSerialFileAsync(serialFilePath, exchangeSetType, correlationId);
 
