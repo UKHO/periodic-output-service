@@ -678,7 +678,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809134 - Deletion of directory failed.
         /// </summary>
-        DirectoryDeletionFailed = 809134
+        DirectoryDeletionFailed = 809134,
+        /// <summary>
+        /// 809135 - No archive directory found.
+        /// </summary>
+        NoArchiveDirectoryFound = 809135
     }
 
     public static class EventIdExtensions
