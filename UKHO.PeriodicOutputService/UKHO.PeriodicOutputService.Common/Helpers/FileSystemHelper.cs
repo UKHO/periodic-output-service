@@ -172,10 +172,10 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return true;
         }
 
-        public bool DownloadReadmeFile(string filePath, Stream stream)
+        public bool DownloadReadmeFile(string filePath, Stream fileStream)
         {
             using var outputFileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
-            stream.CopyTo(outputFileStream);
+            fileStream.CopyTo(outputFileStream);
             return true;
         }
     }

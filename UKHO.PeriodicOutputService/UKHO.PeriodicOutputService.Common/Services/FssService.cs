@@ -496,7 +496,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     Acl = new Acl
                     {
                         ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new List<string>() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new List<string>() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new List<string>() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList()
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {

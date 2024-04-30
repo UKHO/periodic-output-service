@@ -251,7 +251,7 @@ namespace UKHO.FmEssFssMock.API.Services
             }
             else if (filter.ToUpper().Contains(MULTIPLEFILES))
             {
-                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssMultipleFilesReadMeResponseFileName);
+                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName);
                 FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, besMultipleFilesBatchId));
 
                 string path = Path.Combine(Environment.CurrentDirectory, @"Data", besMultipleFilesBatchId);

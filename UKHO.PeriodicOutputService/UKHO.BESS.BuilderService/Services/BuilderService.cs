@@ -305,10 +305,16 @@ namespace UKHO.BESS.BuilderService.Services
         {
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
+            await CreateReadMeFileAsync(batchId, correlationId, readMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+        }
+
+        private async Task CreateReadMeFileAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
+        {
             if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
             {
                 return;
             }
+
             if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
             {
                 fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
