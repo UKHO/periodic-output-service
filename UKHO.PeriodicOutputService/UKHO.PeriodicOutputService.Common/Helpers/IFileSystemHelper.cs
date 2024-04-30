@@ -37,5 +37,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         void DeleteFolder(string folderPath);
         IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName);
+
+        bool CreateEmptyFileContent(string filePath);
+
+        bool DownloadReadmeFile(string filePath, Stream fileStream);
     }
 }

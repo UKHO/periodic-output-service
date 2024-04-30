@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using Microsoft.Extensions.Options;
+using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Helpers;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.Enums;
@@ -7,7 +9,8 @@ namespace UKHO.FmEssFssMock.API.Services
 {
     public class FileShareService
     {
-        private readonly string _aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";
+        private readonly IOptions<FileShareServiceConfiguration> fssConfiguration;
+        private readonly string aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";  
         private readonly Dictionary<string, string> mimeTypes = new()
         {
             { ".zip", "application/zip" },
@@ -26,6 +29,17 @@ namespace UKHO.FmEssFssMock.API.Services
                                      };
 
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
+        private readonly string besSingleReadmeFileBatchId = "AB4A692D-6E3B-48A3-BD37-D232C60DD75D";
+        private readonly string besMultipleFilesBatchId = "10D40DD5-DDFB-497A-BB67-D99FB1658320";
+        private const string BESPOKEREADME = "BESPOKE README";
+        private const string MULTIPLEFILES = "MULTIPLE";
+        private const string READMEFILENAME = "README.TXT";
+
+        public FileShareService(IOptions<FileShareServiceConfiguration> fssConfig)
+        {
+            fssConfiguration = fssConfig;
+        }
+
         public BatchResponse CreateBatch(IEnumerable<KeyValuePair<string, string>> attributes, string homeDirectoryPath)
         {
             string attributeValue = attributes.FirstOrDefault(a => a.Key.ToLower() == "batch type").Value.ToLower();
@@ -197,26 +211,64 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private static string GetBatchStatus(string path) => File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed";
 
-        public SearchBatchResponse GetBatchResponse(string filter, string filePath, string homeDirectoryPath)
+        public SearchBatchResponse GetBatchResponse(string filter, string homeDirectoryPath)
         {
             if (filter.ToUpper().Contains("AIO CD INFO"))
             {
-                FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, _aioInfoFilesBatchId));
+                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssInfoResponseFileName);
+                FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, aioInfoFilesBatchId));
 
-                string path = Path.Combine(Environment.CurrentDirectory, @"Data", _aioInfoFilesBatchId);
+                string path = Path.Combine(Environment.CurrentDirectory, @"Data", aioInfoFilesBatchId);
                 foreach (string fullfilePath in Directory.GetFiles(path))
                 {
                     FileInfo file = new(fullfilePath);
 
-                    bool isFileAdded = AddFile(_aioInfoFilesBatchId, file.Name, homeDirectoryPath);
+                    bool isFileAdded = AddFile(aioInfoFilesBatchId, file.Name, homeDirectoryPath);
 
                     if (!isFileAdded)
                     {
                         return null;
                     }
                 }
-                return FileHelper.ReadJsonFile<SearchBatchResponse>(filePath);
+                return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
             }
+            else if (filter.ToUpper().Contains(BESPOKEREADME))
+            {
+                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName);
+                FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, besSingleReadmeFileBatchId));
+
+                string path = Path.Combine(Environment.CurrentDirectory, @"Data", besSingleReadmeFileBatchId);               
+                string filePath = Path.Combine(path, READMEFILENAME);          
+                FileInfo file = new(filePath);
+
+                bool isFileAdded = AddFile(besSingleReadmeFileBatchId, file.Name, homeDirectoryPath);
+
+                if (!isFileAdded)
+                {
+                   return null;
+                }     
+                return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
+            }
+            else if (filter.ToUpper().Contains(MULTIPLEFILES))
+            {
+                string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName);
+                FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, besMultipleFilesBatchId));
+
+                string path = Path.Combine(Environment.CurrentDirectory, @"Data", besMultipleFilesBatchId);
+                foreach (string filePath in Directory.GetFiles(path))
+                {
+                    FileInfo file = new(filePath);
+
+                    bool isFileAdded = AddFile(besMultipleFilesBatchId, file.Name, homeDirectoryPath);
+
+                    if (!isFileAdded)
+                    {
+                        return null;
+                    }
+                }
+                return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
+            }
+
             return new SearchBatchResponse()
             {
                 Entries = new List<BatchDetail>(),
