@@ -656,24 +656,34 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         ProductsFetchedFromESS = 809129,
 
         /// <summary>
-        /// 809130 - Serial.ENC file updated with Type from configuration
+        /// 809130 - Macro is invalid or unavailable.
         /// </summary>
-        BessSerialEncUpdated = 809130,
+        MacroInvalidOrUnavailable = 809130,
 
         /// <summary>
-        /// 809131 - PRODUCT.TXT file and INFO folder deleted
+        /// 809131 - Exception occurred while transforming macros.
         /// </summary>
-        BessProductTxtAndInfoFolderDeleted = 809131,
+        MacroTransformationFailed = 809131,
 
         /// <summary>
-        /// 809132 - SERIAL.ENC file update operation failed
+        /// 809132 - Serial.ENC file updated with Type from configuration
         /// </summary>
-        SerialEncUpdateFailed = 809132,
+        BessSerialEncUpdated = 809132,
 
         /// <summary>
-        /// 809133 - PRODUCT.TXT file and INFO folder delete operation failed
+        /// 809133 - PRODUCT.TXT file and INFO folder deleted
         /// </summary>
-        ProductTxtDeleteFailed = 809133,
+        BessProductTxtAndInfoFolderDeleted = 809133,
+
+        /// <summary>
+        /// 809134 - SERIAL.ENC file update operation failed
+        /// </summary>
+        SerialEncUpdateFailed = 809134,
+
+        /// <summary>
+        /// 809135 - PRODUCT.TXT file and INFO folder delete operation failed
+        /// </summary>
+        ProductTxtDeleteFailed = 809135
     }
 
     public static class EventIdExtensions

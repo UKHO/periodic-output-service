@@ -27,7 +27,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         private ILogger<BuilderService.Services.BuilderService> fakeLogger;
         private IConfiguration fakeConfiguration;
         private IOptions<BessStorageConfiguration> fakeBessStorageConfiguration;
-        private ConfigQueueMessage configQueueMessage;
+        private ConfigQueueMessage? configQueueMessage;
         private IAzureTableStorageHelper fakeAzureTableStorageHelper;
 
         [SetUp]
@@ -455,7 +455,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase("UPDATE", "s57")]
         [TestCase("CHANGE", "s63")]
         [TestCase("CHANGE", "s57")]
-        public async Task Does_CreateBespokeExchangeSets_Throws_Error_When_Logging_Product_Version_Details_In_Azure_Fails(string type, string exchangeSetStandard)
+        public async Task WhenLoggingProductVersionDetailsInAzureFails_ThenCreateBespokeExchangeSetsThrowsError(string type, string exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
