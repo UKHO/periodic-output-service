@@ -171,29 +171,25 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public static bool CheckReadMeInBessExchangeSet(string? downloadFolderPath, string? readMeSearchFilter)
         {
             string[] readMeFileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
-
+            string readMeType;
             switch (readMeSearchFilter)
             {
                 case null:
                     return false;
                 case "AVCS":
                     {
-                        string readMeType = (readMeFileContent[0].Split(" ")[0]);
+                        readMeType = (readMeFileContent[0].Split(" ")[0]);
                         return readMeType.Equals("AVCS");
                     }
                 case "BLANK":
                     return readMeFileContent.IsNullOrEmpty();
             }
-
             if (!readMeSearchFilter.Contains("Bespoke README"))
             {
                 return false;
             }
-
-            {
-                string readMeType = (readMeFileContent[0].Split(" ")[0]);
-                return readMeType.Equals("DISCLAIMER");
-            }
+            readMeType = (readMeFileContent[0].Split(" ")[0]);
+            return readMeType.Equals("DISCLAIMER");
         }
 
         /// <summary>
@@ -208,7 +204,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             checkFolder.Should().Be(false);
 
             string[] serialEncfileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetSerialEncFile!));
-            string serialENCType = (serialEncfileContent[0].Split("   ")[1]).Substring(8);
+            string serialENCType = serialEncfileContent[0].Split("   ")[1][8..];
             switch (type)
             {
                 case "BASE":
