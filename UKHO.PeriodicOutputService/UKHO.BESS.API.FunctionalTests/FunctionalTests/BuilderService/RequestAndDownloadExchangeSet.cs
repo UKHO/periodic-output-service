@@ -39,7 +39,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         [Test]
         [TestCase("d0635e6c-81ae-4acb-9129-1a69f9ee58d2", "s57", "CHANGE")]
         [TestCase("5331f8c2-9085-4083-9a1e-9f99953be122", "s63", "UPDATE")]
-        public async Task WhenIProcessSameConfigWithCorrectDetailsTwice_ThenBLANKExchangeSetShouldBeDownloaded(string batchId, string exchangeSetStandard, string type)
+        public async Task WhenIProcessSameConfigWithCorrectDetailsTwice_ThenEmptyExchangeSetShouldBeDownloaded(string batchId, string exchangeSetStandard, string type)
         {
             Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
             Extensions.WaitForDownloadExchangeSet();
