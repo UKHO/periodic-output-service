@@ -178,7 +178,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                     return false;
                 case "AVCS":
                     {
-                        readMeType = (readMeFileContent[0].Split(" ")[0]);
+                        readMeType = readMeFileContent[0].Split(" ")[0];
                         return readMeType.Equals("AVCS");
                     }
                 case "BLANK":
@@ -188,7 +188,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             {
                 return false;
             }
-            readMeType = (readMeFileContent[0].Split(" ")[0]);
+            readMeType = readMeFileContent[0].Split(" ")[0];
             return readMeType.Equals("DISCLAIMER");
         }
 
