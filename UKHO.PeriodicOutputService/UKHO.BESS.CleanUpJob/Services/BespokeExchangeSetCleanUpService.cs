@@ -23,34 +23,41 @@ namespace UKHO.BESS.CleanUpJob.Services
             homeDirectoryPath = configuration.Equals(null) ? throw new ArgumentNullException(nameof(configuration))
                                 : Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
         }
-        public async Task DeleteHistoricFoldersAndFiles()
+        public async Task CleanUpHistoricFoldersAndFiles()
         {
-            var directories = fileSystem.Directory.GetDirectories(homeDirectoryPath);
-            if (directories.Any())
+            var folderPaths = fileSystem.Directory.GetDirectories(homeDirectoryPath);
+            if (!folderPaths.Any())
             {
-                var historicDateTimeInUtc = DateTime.UtcNow.AddDays(-cleanUpConfig.Value.NumberOfDays);
-                var historicDate = new DateTime(historicDateTimeInUtc.Year, historicDateTimeInUtc.Month, historicDateTimeInUtc.Day);
-
-                directories = directories.Where(directory => fileSystem.Directory.GetLastWriteTimeUtc(directory) <= historicDate).ToArray();
-                if (!directories.Any())
-                {
-                    logger.LogInformation(EventIds.NoArchiveDirectoryFound.ToEventId(), "No directories found older to date - {historicDate} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}", historicDate, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                    return;
-                }
-
-                Parallel.ForEach(directories, directory =>
-                 {
-                     var directoryInfo = new DirectoryInfo(directory);
-                     try
-                     {
-                         fileSystem.Directory.Delete(directory, true);
-                     }
-                     catch (Exception ex)
-                     {
-                         logger.LogError(EventIds.DirectoryDeletionFailed.ToEventId(), "Could not delete directory: {directory}. Either could not find the directory or unauthorized access to the directory | DateTime: {DateTime} | Error Message: {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", directoryInfo.Name, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
-                     }
-                 });
+                logger.LogInformation(EventIds.NoFoldersFound.ToEventId(), "No folders to delete | DateTime: {DateTime} | Correlation ID: {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                return;
             }
+            var historicDateTimeInUtc = DateTime.UtcNow.AddDays(-cleanUpConfig.Value.NumberOfDays);
+            var historicDate = new DateTime(historicDateTimeInUtc.Year, historicDateTimeInUtc.Month, historicDateTimeInUtc.Day);
+
+            // Filter folders based on last write time
+            var foldersToDelete = folderPaths.Where(folderPath => fileSystem.Directory.GetLastWriteTimeUtc(folderPath) <= historicDate).ToList();
+            if (!foldersToDelete.Any())
+            {
+                logger.LogInformation(EventIds.NoFoldersFound.ToEventId(), "No folders to delete based on the cleanup configured date - {historicDate} | DateTime: {DateTime} | Correlation ID: {CorrelationId}", historicDate, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                return;
+            }
+
+            // Use parallel processing to delete folders
+            string folderName = string.Empty;
+            Parallel.ForEach(foldersToDelete, folderPath =>
+            {
+                try
+                {
+                    folderName = new DirectoryInfo(folderPath).Name;
+                    fileSystem.Directory.Delete(folderPath, true);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(EventIds.FoldersDeletionFailed.ToEventId(), "Could not delete folder: {folderName}. Either could not find the folder or unauthorized access to the folder | DateTime: {DateTime} | Error Message: {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", folderName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                }
+            });
+
+            logger.LogInformation(EventIds.CleanUpSuccessful.ToEventId(), "Successfully cleaned the folder | DateTime: {DateTime} | Correlation ID: {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             await Task.CompletedTask;
         }
     }

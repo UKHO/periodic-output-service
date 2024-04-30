@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.BESS.CleanUpJob.Services;
+using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.BESS.CleanUpJob
@@ -19,7 +19,7 @@ namespace UKHO.BESS.CleanUpJob
         {
             logger.LogInformation(EventIds.BESSCleanUpJobRequestStarted.ToEventId(), "Bespoke Exchange set service clean up web job started at " + DateTime.Now + "| _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-            await bespokeExchangeSetCleanUpService.DeleteHistoricFoldersAndFiles();
+            await bespokeExchangeSetCleanUpService.CleanUpHistoricFoldersAndFiles();
 
             logger.LogInformation(EventIds.BESSCleanUpJobRequestCompleted.ToEventId(), "Bespoke Exchange set service clean up web job completed at " + DateTime.Now + "| _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
         }

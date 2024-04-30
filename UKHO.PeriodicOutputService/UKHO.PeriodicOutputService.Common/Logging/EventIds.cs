@@ -676,13 +676,19 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BESSCleanUpJobRequestCompleted = 809133,
 
         /// <summary>
-        /// 809134 - Deletion of directory failed.
+        /// 809134 - Deletion of folders failed.
         /// </summary>
-        DirectoryDeletionFailed = 809134,
+        FoldersDeletionFailed = 809134,
+
         /// <summary>
-        /// 809135 - No archive directory found.
+        /// 809135 - No folders found.
         /// </summary>
-        NoArchiveDirectoryFound = 809135
+        NoFoldersFound = 809135,
+
+        /// <summary>
+        /// 809136 - CleanUp successful.
+        /// </summary>
+        CleanUpSuccessful = 809136
     }
 
     public static class EventIdExtensions

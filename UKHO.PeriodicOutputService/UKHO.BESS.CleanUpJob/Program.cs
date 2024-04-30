@@ -4,8 +4,6 @@ using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Elastic.Apm;
-using Elastic.Apm.Api;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
@@ -15,10 +13,10 @@ using Microsoft.Extensions.Logging.Configuration;
 using Serilog;
 using Serilog.Events;
 using UKHO.BESS.CleanUpJob;
-using UKHO.Logging.EventHubLogProvider;
-using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.BESS.CleanUpJob.Configuration;
 using UKHO.BESS.CleanUpJob.Services;
+using UKHO.Logging.EventHubLogProvider;
+using UKHO.PeriodicOutputService.Common.Configuration;
 
 namespace UKHO.ExchangeSetService.CleanUpJob
 {
@@ -48,13 +46,8 @@ namespace UKHO.ExchangeSetService.CleanUpJob
                 try
                 {
                     var cleanUpJob = serviceProvider.GetService<BespokeExchangeSetCleanUpJob>();
-                    string transactionName = $"{System.Environment.GetEnvironmentVariable("WEBSITE_SITE_NAME")}-cleanup-transaction";
 
-                    await Agent.Tracer.CaptureTransaction(transactionName, ApiConstants.TypeRequest, async () =>
-                    {
-                        //application code that is captured as a transaction
-                        await cleanUpJob.ProcessCleanUp();
-                    });
+                    await cleanUpJob.ProcessCleanUp();
                 }
                 finally
                 {
@@ -66,7 +59,6 @@ namespace UKHO.ExchangeSetService.CleanUpJob
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception: {ex.Message}{Environment.NewLine}Stack trace: {ex.StackTrace}");
-                Agent.Tracer.CurrentTransaction.CaptureException(ex);
                 throw;
             }
         }
@@ -82,17 +74,16 @@ namespace UKHO.ExchangeSetService.CleanUpJob
                 configBuilder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
             }
 
-            #if DEBUG
+#if DEBUG
             //Add development overrides configuration
             configBuilder.AddJsonFile("appsettings.local.overrides.json", true, true);
-            #endif
+#endif
 
             var tempConfig = configBuilder.Build();
             string kvServiceUri = tempConfig["KeyVaultSettings:ServiceUri"];
             if (!string.IsNullOrWhiteSpace(kvServiceUri))
             {
-                var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
-                                                    new DefaultAzureCredentialOptions { ManagedIdentityClientId = tempConfig["ESSManagedIdentity:ClientId"] }));
+                var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(new DefaultAzureCredentialOptions()));
                 configBuilder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
             }
 
@@ -111,13 +102,13 @@ namespace UKHO.ExchangeSetService.CleanUpJob
             {
                 loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
 
-                #if DEBUG
+#if DEBUG
                 loggingBuilder.AddSerilog(new LoggerConfiguration()
                                 .WriteTo.File("Logs/UKHO.BespokeExchangeSetService.CleanUpLogs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
                                 .MinimumLevel.Information()
                                 .MinimumLevel.Override("UKHO", LogEventLevel.Debug)
                                 .CreateLogger(), dispose: true);
-                #endif
+#endif
 
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();

@@ -2,6 +2,6 @@
 {
     public interface IBespokeExchangeSetCleanUpService
     {
-        Task DeleteHistoricFoldersAndFiles();
+        Task CleanUpHistoricFoldersAndFiles();
     }
 }
