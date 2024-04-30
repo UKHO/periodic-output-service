@@ -13,7 +13,6 @@ using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
 
-
 namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 {
     public class FulfilmentDataService : IFulfilmentDataService
