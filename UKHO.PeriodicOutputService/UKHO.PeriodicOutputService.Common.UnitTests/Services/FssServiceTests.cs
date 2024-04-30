@@ -40,8 +40,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 BatchStatusPollingDelayTime = "20000",
                 BatchStatusPollingCutoffTimeForAIO = "1",
                 BatchStatusPollingDelayTimeForAIO = "20000",
-                BatchStatusPollingCutoffTimeForBES = "1",
-                BatchStatusPollingDelayTimeForBES = "20000",
+                BatchStatusPollingCutoffTimeForBESS = "1",
+                BatchStatusPollingDelayTimeForBESS = "20000",
                 PosReadUsers = "",
                 PosReadGroups = "public",
                 BlockSizeInMultipleOfKBs = 4096

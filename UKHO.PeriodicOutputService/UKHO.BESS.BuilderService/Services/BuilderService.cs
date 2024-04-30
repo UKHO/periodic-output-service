@@ -3,6 +3,7 @@ using System.IO.Abstractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
+using UKHO.PeriodicOutputService.Common.Extensions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
@@ -45,7 +46,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
 
-            homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
+            homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BESSFolderName"]!);
         }
 
         public async Task<bool> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
@@ -61,10 +62,10 @@ namespace UKHO.BESS.BuilderService.Services
                 return false;
 
             if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
-                     configQueueMessage.Type == BessType.CHANGE.ToString())
+                configQueueMessage.Type == BessType.CHANGE.ToString())
             {
                 var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
-                LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                await LogProductVersionsAsync(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
             }
 
             return true;
@@ -286,22 +287,20 @@ namespace UKHO.BESS.BuilderService.Services
             return productVersionsRequest;
         }
 
-        private void LogProductVersions(ProductVersionsRequest productVersionsRequest, string name, string exchangeSetStandard)
+        private async Task LogProductVersionsAsync(ProductVersionsRequest productVersionsRequest, string configName, string exchangeSetStandard)
         {
             try
             {
-                logger.LogInformation(EventIds.LoggingProductVersionsStarted.ToEventId(), "Logging product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-                azureTableStorageHelper.SaveBessProductVersionDetailsAsync(productVersionsRequest.ProductVersions, name, exchangeSetStandard);
-
-                logger.LogInformation(EventIds.LoggingProductVersionsCompleted.ToEventId(), "Logging product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
+                await logger.LogStartEndAndElapsedTime(EventIds.LoggingProductVersionsStarted,
+                    EventIds.LoggingProductVersionsCompleted,
+                    "Logging product version details for Config Name:{configName} | {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                    async () => await azureTableStorageHelper.SaveBessProductVersionDetailsAsync(productVersionsRequest.ProductVersions, configName, exchangeSetStandard),
+                    configName, DateTime.UtcNow, CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
                 logger.LogError(EventIds.LoggingProductVersionsFailed.ToEventId(), "Logging product version failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-                throw new Exception($"Logging Product version failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+                throw new Exception($"Logging Product version failed for Config Name:{configName} at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
             }
         }
     }

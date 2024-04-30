@@ -60,8 +60,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
             else if (requestType.Equals(RequestType.BESS))
             {
-                batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForBES);
-                batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTimeForBES);
+                batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForBESS);
+                batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTimeForBESS);
             }
             else
             {
@@ -515,7 +515,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             createBatchRequest = new()
             {
-                BusinessUnit = _fssApiConfiguration.Value.BessBusinessUnit,
+                BusinessUnit = _fssApiConfiguration.Value.BESSBusinessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(configQueueMessage.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl()
                 {
