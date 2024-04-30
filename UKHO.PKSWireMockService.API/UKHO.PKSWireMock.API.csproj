@@ -5,12 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;8618;8602;8604;8600;8603</NoWarn>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;8618;8602;8604;8600;8603</NoWarn>
-  </PropertyGroup>
+  
   <ItemGroup>
     <Content Remove="__admin\mappings\mapping-default.json" />
     <Content Remove="__admin\mappings\mapping-delay.json" />
