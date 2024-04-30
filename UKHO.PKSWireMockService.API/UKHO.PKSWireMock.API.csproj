@@ -15,6 +15,7 @@
     <PackageReference Include="WireMock.Net" Version="1.5.52" />
     <PackageReference Include="WireMock.Net.Abstractions" Version="1.5.52" />
     <PackageReference Include="WireMock.Org.Abstractions" Version="1.5.52" />
+    <PackageReference Include="YamlDotNet" Version="15.1.2" />
   </ItemGroup>
 
   <ItemGroup>
