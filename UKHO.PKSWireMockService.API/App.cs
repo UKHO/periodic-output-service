@@ -1,23 +1,23 @@
 ﻿namespace UKHO.PKSWireMock.API
 {
-    public class App :IHostedService
+    public class App : IHostedService
     {
-        private readonly IWireMockService _service;
+        private readonly IWireMockService service;
 
         public App(IWireMockService service)
         {
-            _service = service;
+            this.service = service;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
         {
-            _service.Start();
+            service.Start();
             return Task.CompletedTask;
         }
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            _service.Stop();
+            service.Stop();
             return Task.CompletedTask;
         }
     }

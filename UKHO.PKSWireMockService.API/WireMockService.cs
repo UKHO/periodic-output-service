@@ -99,11 +99,8 @@ namespace UKHO.PKSWireMock.API
 
         private static string GetJsonData(string filePath)
         {
-            using (var r = new StreamReader(filePath))
-            {
-                string jsonFile = r.ReadToEnd();
-                return jsonFile;
-            }
+            using var fileStream = new StreamReader(filePath);
+            return fileStream.ReadToEnd();
         }
 
         public void Stop()
