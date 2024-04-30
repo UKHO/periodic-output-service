@@ -53,8 +53,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
 
                 if (string.IsNullOrEmpty(exchangeSetStandard) || exchangeSetStandard.Equals(ExchangeSetStandard.s63.ToString()) || exchangeSetStandard.Equals(ExchangeSetStandard.s57.ToString()))
                 {
-                    ExchangeSetServiceResponse? response =
-                            _exchangeSetService.CreateExchangeSetForPostProductIdentifier(productIdentifiers, exchangeSetStandard);
+                    ExchangeSetServiceResponse? response = _exchangeSetService.CreateExchangeSetForPostProductIdentifier(productIdentifiers, exchangeSetStandard);
                     if (response == null)
                     {
                         return BadRequest();

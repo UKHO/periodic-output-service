@@ -32,11 +32,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             string DownloadedFolderPath = await FileContentHelper.DownloadAndExtractAioZip(FssJwtToken, posDetails.AioExchangeSetBatchId);
 
-            int fileCount = Directory.GetFiles(Path.Combine(DownloadedFolderPath, posDetails.AioFolderName,posDetails.InfoFolderName), "*.*", SearchOption.TopDirectoryOnly).Length;
+            int fileCount = Directory.GetFiles(Path.Combine(DownloadedFolderPath, posDetails.AioFolderName, posDetails.InfoFolderName), "*.*", SearchOption.TopDirectoryOnly).Length;
             Assert.That(fileCount > 0, $"File count is {fileCount} in the specified folder path.");
         }
 
-        [Ignore("Temp.")]
         [Test]
         public async Task WhenICallBatchDetailsEndpointForUpdateExchangeSetTypeWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
         {
