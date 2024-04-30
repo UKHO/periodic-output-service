@@ -28,14 +28,13 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly ILogger<BuilderService> logger;
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
         private readonly IOptions<FssApiConfiguration> fssApiConfig;
-        private readonly IOptions<BessStorageConfiguration> bessStorageConfiguration;
 
         private const string BESPOKE_FILE_NAME = "V01X01";
         private const string BessBatchFileExtension = "zip";
         private readonly string mimeType = "application/zip";
         private readonly string homeDirectoryPath;
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IOptions<BessStorageConfiguration> bessStorageConfiguration)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
@@ -44,8 +43,6 @@ namespace UKHO.BESS.BuilderService.Services
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
             this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
-            this.bessStorageConfiguration = bessStorageConfiguration ??
-                                            throw new ArgumentNullException(nameof(bessStorageConfiguration));
 
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
 
