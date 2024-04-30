@@ -654,50 +654,61 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809129 - Products Fetched from ESS.
         /// </summary>
         ProductsFetchedFromESS = 809129,
-        /// <summary>
-        /// 809130 - Request for searching readme.txt from file share service is started.
-        /// </summary>
-        QueryFileShareServiceReadMeFileRequestStart = 809130,
 
         /// <summary>
-        /// 809131 - Request for searching readme.txt from file share service is completed.
+        /// 809130 - Macro is invalid or unavailable.
         /// </summary>
-        QueryFileShareServiceReadMeFileRequestCompleted = 809131,
+        MacroInvalidOrUnavailable = 809130,
 
         /// <summary>
-        /// 809132 - Request for searching readme.txt from file share service is failed due to non ok response.
+        /// 809131 - Exception occurred while transforming macros.
         /// </summary>
-        QueryFileShareServiceReadMeFileNonOkResponse = 809132,
+        MacroTransformationFailed = 809131,
 
         /// <summary>
-        /// 809133 - Readme.txt file is not found while searching in file share service.
+        /// 809132 - Request for searching readme.txt from file share service is started.
         /// </summary>
-        ReadMeTextFileNotFound = 809133,
+        QueryFileShareServiceReadMeFileRequestStart = 809132,
 
         /// <summary>
-        /// 809134 - Request for downloading readme.txt from file share service is started.
+        /// 809133 - Request for searching readme.txt from file share service is completed.
         /// </summary>
-        DownloadReadMeFileRequestStart = 809134,
+        QueryFileShareServiceReadMeFileRequestCompleted = 809133,
 
         /// <summary>
-        /// 809135 - Request for downloading readme.txt from file share service is completed.
+        /// 809134 - Request for searching readme.txt from file share service is failed due to non ok response.
         /// </summary>
-        DownloadReadMeFileRequestCompleted = 809135,
+        QueryFileShareServiceReadMeFileNonOkResponse = 809134,
 
         /// <summary>
-        /// 809136 - Request for downloading readme.txt from file share service is failed due to non ok response.
+        /// 809135 - Readme.txt file is not found while searching in file share service.
         /// </summary>
-        DownloadReadMeFileNonOkResponse = 809136,
+        ReadMeTextFileNotFound = 809135,
 
         /// <summary>
-        /// 809137 - Completed download of 307 response README files from the file share service.
+        /// 809136 - Request for downloading readme.txt from file share service is started.
         /// </summary>
-        DownloadReadmeFile307RedirectResponse = 809137,
+        DownloadReadMeFileRequestStart = 809136,
 
         /// <summary>
-        /// 809138 - Multiple files found for README files from the file share service.
+        /// 809137 - Request for downloading readme.txt from file share service is completed.
         /// </summary>
-        QueryFileShareServiceMultipleFilesFound = 809138
+        DownloadReadMeFileRequestCompleted = 809137,
+
+        /// <summary>
+        /// 809138 - Request for downloading readme.txt from file share service is failed due to non ok response.
+        /// </summary>
+        DownloadReadMeFileNonOkResponse = 809138,
+
+        /// <summary>
+        /// 809139 - Completed download of 307 response README files from the file share service.
+        /// </summary>
+        DownloadReadmeFile307RedirectResponse = 809139,
+
+        /// <summary>
+        /// 809140 - Multiple files found for README files from the file share service.
+        /// </summary>
+        QueryFileShareServiceMultipleFilesFound = 809140
     }
 
     public static class EventIdExtensions
