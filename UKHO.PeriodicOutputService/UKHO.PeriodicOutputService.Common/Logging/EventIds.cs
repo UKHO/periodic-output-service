@@ -664,6 +664,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809131 - Bespoke exchange set cleanup web job is completed.
         /// </summary>
         BESSCleanUpJobRequestCompleted = 809131,
+
         /// <summary>
         /// 809132 - Deletion of directory failed.
         /// </summary>

@@ -1,6 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Reflection;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using Elastic.Apm;
 using Elastic.Apm.Api;
 using Microsoft.ApplicationInsights.Channel;
@@ -9,7 +12,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
+using Serilog;
+using Serilog.Events;
 using UKHO.BESS.CleanUpJob;
+using UKHO.Logging.EventHubLogProvider;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.BESS.CleanUpJob.Configuration;
 using UKHO.BESS.CleanUpJob.Services;
 
@@ -75,9 +82,19 @@ namespace UKHO.ExchangeSetService.CleanUpJob
                 configBuilder.AddJsonFile($"appsettings.{environmentName}.json", optional: true);
             }
 
-#if DEBUG   //Add development overrides configuration
+            #if DEBUG
+            //Add development overrides configuration
             configBuilder.AddJsonFile("appsettings.local.overrides.json", true, true);
-#endif
+            #endif
+
+            var tempConfig = configBuilder.Build();
+            string kvServiceUri = tempConfig["KeyVaultSettings:ServiceUri"];
+            if (!string.IsNullOrWhiteSpace(kvServiceUri))
+            {
+                var secretClient = new SecretClient(new Uri(kvServiceUri), new DefaultAzureCredential(
+                                                    new DefaultAzureCredentialOptions { ManagedIdentityClientId = tempConfig["ESSManagedIdentity:ClientId"] }));
+                configBuilder.AddAzureKeyVault(secretClient, new KeyVaultSecretManager());
+            }
 
             //Add environment variables
             configBuilder.AddEnvironmentVariables();
@@ -93,8 +110,40 @@ namespace UKHO.ExchangeSetService.CleanUpJob
             serviceCollection.AddLogging(loggingBuilder =>
             {
                 loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
+
+                #if DEBUG
+                loggingBuilder.AddSerilog(new LoggerConfiguration()
+                                .WriteTo.File("Logs/UKHO.BespokeExchangeSetService.CleanUpLogs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
+                                .MinimumLevel.Information()
+                                .MinimumLevel.Override("UKHO", LogEventLevel.Debug)
+                                .CreateLogger(), dispose: true);
+                #endif
+
                 loggingBuilder.AddConsole();
                 loggingBuilder.AddDebug();
+
+                EventHubLoggingConfiguration eventhubConfig = configuration.GetSection("EventHubLoggingConfiguration").Get<EventHubLoggingConfiguration>();
+
+                if (!string.IsNullOrWhiteSpace(eventhubConfig.ConnectionString))
+                {
+                    loggingBuilder.AddEventHub(config =>
+                    {
+                        config.Environment = eventhubConfig.Environment;
+                        config.DefaultMinimumLogLevel =
+                            (LogLevel)Enum.Parse(typeof(LogLevel), eventhubConfig.MinimumLoggingLevel, true);
+                        config.MinimumLogLevels["UKHO"] =
+                            (LogLevel)Enum.Parse(typeof(LogLevel), eventhubConfig.UkhoMinimumLoggingLevel, true);
+                        config.EventHubConnectionString = eventhubConfig.ConnectionString;
+                        config.EventHubEntityPath = eventhubConfig.EntityPath;
+                        config.System = eventhubConfig.System;
+                        config.Service = eventhubConfig.Service;
+                        config.NodeName = eventhubConfig.NodeName;
+                        config.AdditionalValuesProvider = additionalValues =>
+                        {
+                            additionalValues["_AssemblyVersion"] = AssemblyVersion;
+                        };
+                    });
+                }
             });
 
             serviceCollection.Configure<TelemetryConfiguration>(
