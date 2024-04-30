@@ -56,9 +56,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-            var exchangeSetPath = Path.Combine(homeDirectoryPath, essBatchId, fssApiConfig.Value.BespokeExchangeSetFileFolder);
-
-            await PerformAncillaryFilesOperationsAsync(essBatchId, exchangeSetPath, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, essFileDownloadPath, configQueueMessage.Type);
+            await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath);
 
             //Temporary Upload Code
 
@@ -305,21 +303,20 @@ namespace UKHO.BESS.BuilderService.Services
             }
         }
 
-        private async Task PerformAncillaryFilesOperationsAsync(string batchId, string exchangeSetPath, string correlationId, string readMeSearchFilter, string essFileDownloadPath, string exchangeSetType)
+        private async Task PerformAncillaryFilesOperationsAsync(string batchId, ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
         {
+            string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, fssApiConfig.Value.BespokeExchangeSetFileFolder);
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
-            await CreateReadMeFileAsync(batchId, correlationId, readMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+            await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
 
-            string exchangeSetFolder = fssApiConfig.Value.BespokeExchangeSetFileFolder;
-            string exchangeSetBasePath = Path.Combine(essFileDownloadPath, exchangeSetFolder);
-            string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, exchangeSetFolder, fssApiConfig.Value.Info);
-            string serialFilePath = Path.Combine(exchangeSetBasePath, fssApiConfig.Value.SerialFileName);
-            string productFilePath = Path.Combine(exchangeSetInfoPath, fssApiConfig.Value.ProductFileName);
+            string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.Info);
+            string serialFilePath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.SerialFileName);
+            string productFilePath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);
 
-            await UpdateSerialFileAsync(serialFilePath, exchangeSetType, correlationId);
+            await UpdateSerialFileAsync(serialFilePath, configQueueMessage.Type, configQueueMessage.CorrelationId);
 
-            await DeleteProductTxtAndInfoFolderAsync(productFilePath, exchangeSetInfoPath, correlationId);
+            await DeleteProductTxtAndInfoFolderAsync(productFilePath, exchangeSetInfoPath, configQueueMessage.CorrelationId);
         }
 
         private async Task CreateReadMeFileAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
