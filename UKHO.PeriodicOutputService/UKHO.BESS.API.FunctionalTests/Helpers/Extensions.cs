@@ -47,14 +47,19 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         }
 
         /// <summary>
-        /// This Method is use to delete bessproductversiondetails azure table.
+        /// This Method is use to delete bessproductversiondetails azure table entries.
         /// </summary>
         /// <param name="connectionString"></param>
         /// <param name="tableName"></param>
-        public static async Task DeleteTable(string? connectionString, string? tableName)
+        public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? Products, string? exchangeSetStandard)
         {
             TableClient tableClient = new TableClient(connectionString, tableName);
-            await tableClient.DeleteAsync();
+            //await tableClient.DeleteAsync();
+
+            foreach(string product in Products!)
+            {
+                await tableClient.DeleteEntityAsync("config9",exchangeSetStandard+"|"+product);
+            }
         }
 
         /// <summary>

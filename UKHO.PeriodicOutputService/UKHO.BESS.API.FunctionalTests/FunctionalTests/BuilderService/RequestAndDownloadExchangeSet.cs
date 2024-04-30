@@ -17,7 +17,6 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
-        [Ignore("TEMP")]
         //PBI 150897: Testing : BESS BS - Request, wait/poll and download exchange set
         [Test]
         [TestCase("7b6edd6a-7a62-4271-a657-753f4c648531", "s57", "CHANGE")]
@@ -33,6 +32,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
             string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
             bool expectedResulted = FssBatchHelper.CheckFilesInDownloadedZip(downloadFolderPath, exchangeSetStandard);
             expectedResulted.Should().Be(true);
+            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
 
         //PBI 147171: BESS BS - Handling of empty ES and Error.txt Scenarios
@@ -47,14 +47,12 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
             Extensions.WaitForDownloadExchangeSet();
             string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
             FssBatchHelper.CheckFilesInDownloadedZip(downloadFolderPath, exchangeSetStandard, true);
+            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
 
         [TearDown]
-        public async Task TearDown()
+        public void TearDown()
         {
-            //Delete the bessproductversiondetails table.
-            await Extensions.DeleteTable(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName);
-
             //cleaning up the downloaded files from temp folder
             Extensions.DeleteTempDirectory(testConfiguration.bessConfig.TempFolderName);
         }
