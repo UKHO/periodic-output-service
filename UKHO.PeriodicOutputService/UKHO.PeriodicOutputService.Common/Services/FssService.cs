@@ -454,7 +454,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     Acl = new Acl
                     {
                         ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new List<string>() : _fssApiConfiguration.Value.AioReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new List<string>() : _fssApiConfiguration.Value.AioReadGroups.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new List<string>() : _fssApiConfiguration.Value.AioReadGroups.Split(",").ToList()
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {
@@ -475,7 +475,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     Acl = new Acl
                     {
                         ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadUsers) ? new List<string>() : _fssApiConfiguration.Value.BessReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new List<string>() : _fssApiConfiguration.Value.BessReadGroups.Split(",").ToList(),
+                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new List<string>() : _fssApiConfiguration.Value.BessReadGroups.Split(",").ToList()
                     },
                     Attributes = new List<KeyValuePair<string, string>>
                     {
