@@ -42,10 +42,10 @@ namespace UKHO.BESS.CleanUpJob.Services
                 return;
             }
 
-            // Use parallel processing to delete folders
-            string folderName = string.Empty;
+            // Use parallel processing to delete folders            
             Parallel.ForEach(foldersToDelete, folderPath =>
             {
+                string folderName = string.Empty;
                 try
                 {
                     folderName = new DirectoryInfo(folderPath).Name;

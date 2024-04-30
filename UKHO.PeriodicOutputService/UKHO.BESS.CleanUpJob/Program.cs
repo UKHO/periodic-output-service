@@ -23,8 +23,8 @@ namespace UKHO.ExchangeSetService.CleanUpJob
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static string AssemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
-        static InMemoryChannel aiChannel = new InMemoryChannel();
+        private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
+        private static readonly InMemoryChannel aiChannel = new();
 
         static async Task Main()
         {
@@ -131,7 +131,7 @@ namespace UKHO.ExchangeSetService.CleanUpJob
                         config.NodeName = eventhubConfig.NodeName;
                         config.AdditionalValuesProvider = additionalValues =>
                         {
-                            additionalValues["_AssemblyVersion"] = AssemblyVersion;
+                            additionalValues["_AssemblyVersion"] = assemblyVersion;
                         };
                     });
                 }
