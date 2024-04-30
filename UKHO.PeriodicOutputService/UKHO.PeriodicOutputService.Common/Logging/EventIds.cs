@@ -655,20 +655,30 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         ProductsFetchedFromESS = 809129,
 
-          /// <summary>
-        /// 809130 - Bespoke exchange set cleanup web job is started.
+        /// <summary>
+        /// 809130 - Macro is invalid or unavailable.
         /// </summary>
-        BESSCleanUpJobRequestStarted = 809130,
+        MacroInvalidOrUnavailable = 809130,
 
         /// <summary>
-        /// 809131 - Bespoke exchange set cleanup web job is completed.
+        /// 809131 - Exception occurred while transforming macros.
         /// </summary>
-        BESSCleanUpJobRequestCompleted = 809131,
+        MacroTransformationFailed = 809131,
 
         /// <summary>
-        /// 809132 - Deletion of directory failed.
+        /// 809132 - Bespoke exchange set cleanup web job is started.
         /// </summary>
-        DirectoryDeletionFailed = 809132
+        BESSCleanUpJobRequestStarted = 809132,
+
+        /// <summary>
+        /// 809133 - Bespoke exchange set cleanup web job is completed.
+        /// </summary>
+        BESSCleanUpJobRequestCompleted = 809133,
+
+        /// <summary>
+        /// 809134 - Deletion of directory failed.
+        /// </summary>
+        DirectoryDeletionFailed = 809134
     }
 
     public static class EventIdExtensions
