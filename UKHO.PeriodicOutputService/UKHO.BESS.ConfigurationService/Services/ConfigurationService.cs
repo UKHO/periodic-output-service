@@ -93,8 +93,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                             {
                                 configsWithInvalidAttributeCount++;
 
-                                var errors = new StringBuilder();
-                                var warnings = new StringBuilder();
+                                StringBuilder errors = new();
+                                StringBuilder warnings = new();
 
                                 foreach (var failure in results.Errors)
                                 {
@@ -108,7 +108,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                                     }
                                 }
 
-                                if(!string.IsNullOrEmpty(errors.ToString()))
+                                if (!string.IsNullOrEmpty(errors.ToString()))
                                     logger.LogError(EventIds.BessConfigInvalidAttributes.ToEventId(),
                                         "BESS config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}",
                                         fileName, errors, CommonHelper.CorrelationID);
@@ -141,7 +141,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 int totalConfigCount = deserializedConfigsCount + filesWithJsonErrorCount;
 
                 logger.LogInformation(EventIds.BessConfigValidationSummary.ToEventId(),
-"Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, filesWithJsonErrorCount, configsWithDuplicateNameAttributeCount, configsWithInvalidMacrosCount, CommonHelper.CorrelationID);
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}", totalConfigCount, bessConfigs.Count, configsWithInvalidAttributeCount, filesWithJsonErrorCount, configsWithDuplicateNameAttributeCount, configsWithInvalidMacrosCount, CommonHelper.CorrelationID);
 
                 if (bessConfigs.Any())
                 {
@@ -237,7 +237,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     var schedule = CrontabSchedule.Parse(config.Frequency);
 
                     // Get the next occurrence of the cron expression after the last execution time
-                    var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
+                    DateTime nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
                     ScheduleDetailEntity existingScheduleDetail = await GetScheduleDetailAsync(nextOccurrence, config);
 
                     if (CheckSchedule(config, existingScheduleDetail)) //Check if config schedule is missed or if it's due for the same day.
@@ -272,9 +272,9 @@ namespace UKHO.BESS.ConfigurationService.Services
                         }
 
                         //--save details to message queue --
-                        IEnumerable<string> encCellNames = encCells.Select(i => i.Item1).ToList();
+                        var encCellNames = encCells.Select(i => i.Item1).ToList();
 
-                        var success = await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(config, encCellNames, totalFileSize);
+                        bool success = await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(config, encCellNames, totalFileSize);
 
                         if (success)
                         {
@@ -404,6 +404,11 @@ namespace UKHO.BESS.ConfigurationService.Services
             return filteredEncCell.Where(x => !configuration["AioCells"].Split(",").Any(i => i.Equals(x.Item1)));
         }
 
+        /// <summary>
+        /// Transform Macros
+        /// </summary>
+        /// <param name="bessConfigs"></param>
+        /// <returns></returns>
         public async Task<int> TransformMacros(IList<BessConfig> bessConfigs)
         {
             List<BessConfig> configsWithInvalidMacros = new();

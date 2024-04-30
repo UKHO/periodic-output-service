@@ -47,7 +47,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private async Task<SalesCatalogueDataResponse> CreateSalesCatalogueDataResponse(HttpResponseMessage httpResponse)
         {
             var response = new SalesCatalogueDataResponse();
-            var body = await httpResponse.Content.ReadAsStringAsync();
+            string body = await httpResponse.Content.ReadAsStringAsync();
 
             if (httpResponse.StatusCode != HttpStatusCode.OK)
             {
@@ -62,7 +62,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 var lastModified = httpResponse.Content.Headers.LastModified;
                 if (httpResponse.StatusCode == HttpStatusCode.OK)
                 {
-                    response.ResponseBody = JsonConvert.DeserializeObject<List<SalesCatalogueDataProductResponse>>(body);
+                    response.ResponseBody = JsonConvert.DeserializeObject<List<SalesCatalogueDataProductResponse>>(body)!;
                 }
                 if (lastModified != null)
                 {

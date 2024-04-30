@@ -18,7 +18,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             int offsetCapture(Match match)
             {
-                var capturedNumber = match.Groups[1].Value;
+                string capturedNumber = match.Groups[1].Value;
                 return int.Parse(capturedNumber.Replace(" ", ""));
             }
 
@@ -27,7 +27,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_Year(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).Year.ToString();
             };
 
@@ -39,31 +39,31 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string now_WeekNumberPlusWeeks(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return WeekNumber.GetUKHOWeekFromDateTime(currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset * 7)).Week.ToString();
             }
 
             string now_WeekNumberPlusWeeksYear(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return WeekNumber.GetUKHOWeekFromDateTime(currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset * 7)).Year.ToString();
             };
 
             string nowAddDays_WeekNumber(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return WeekNumber.GetUKHOWeekFromDateTime(currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset)).Week.ToString();
             };
 
             string nowAddDays_WeekYear(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return WeekNumber.GetUKHOWeekFromDateTime(currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset)).Year.ToString();
             };
 
             string nowAddDays_Date(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString(CultureInfo.InvariantCulture);
             };
 
@@ -75,7 +75,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_Day(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).Day.ToString();
             };
 
@@ -84,7 +84,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_Month(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).Month.ToString();
             };
 
@@ -93,7 +93,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_MonthName(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString("MMMM");
             };
 
@@ -102,7 +102,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_MonthShortName(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString("MMM");
             };
 
@@ -111,7 +111,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_DayName(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString("dddd");
             };
 
@@ -120,7 +120,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_DayShortName(Match match)
             {
-                var dayOffset = offsetCapture(match);
+                int dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString("ddd");
             };
 
@@ -180,7 +180,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                     var match = Regex.Match(input, kv.Key, RegexOptions.IgnoreCase);
                     while (match.Success)
                     {
-                        var end = Math.Min(match.Index + match.Length, input.Length);
+                        int end = Math.Min(match.Index + match.Length, input.Length);
                         input = input[..match.Index] +
                                 match.Result(kv.Value(match)) +
                                 input[end..];
