@@ -20,7 +20,7 @@ using UKHO.PeriodicOutputService.Common.Utilities;
 namespace UKHO.BESS.BuilderService
 {
     [ExcludeFromCodeCoverage]
-    public static class Program
+    public class Program
     {
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         private static IConfiguration configuration;
