@@ -7,7 +7,6 @@ using Azure.Security.KeyVault.Secrets;
 using Elastic.Apm.Azure.Storage;
 using Elastic.Apm.DiagnosticSource;
 using Elastic.Apm;
-using Elastic.Apm.Api;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
