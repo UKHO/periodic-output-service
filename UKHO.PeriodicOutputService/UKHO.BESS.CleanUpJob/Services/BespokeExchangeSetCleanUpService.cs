@@ -42,10 +42,10 @@ namespace UKHO.BESS.CleanUpJob.Services
                 return;
             }
 
-            // Use parallel processing to delete folders            
-            Parallel.ForEach(foldersToDelete, folderPath =>
+            // Deletes all the folders that satisfy the above filter
+            string folderName = string.Empty;
+            foreach (var folderPath in foldersToDelete)
             {
-                string folderName = string.Empty;
                 try
                 {
                     folderName = new DirectoryInfo(folderPath).Name;
@@ -55,7 +55,7 @@ namespace UKHO.BESS.CleanUpJob.Services
                 {
                     logger.LogError(EventIds.FoldersDeletionFailed.ToEventId(), "Could not delete folder: {folderName}. Either could not find the folder or unauthorized access to the folder | DateTime: {DateTime} | Error Message: {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", folderName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
                 }
-            });
+            }
 
             logger.LogInformation(EventIds.CleanUpSuccessful.ToEventId(), "Successfully cleaned the folder | DateTime: {DateTime} | Correlation ID: {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             await Task.CompletedTask;
