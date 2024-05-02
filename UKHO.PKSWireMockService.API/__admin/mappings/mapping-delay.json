@@ -1,0 +1,24 @@
+{
+    "Priority": 50,
+    "Request": {
+        "Path": {
+            "Matchers" : [
+                {
+                    "Name" : "ExactMatcher",
+                    "Pattern" : "/my_stub_endpoint"
+                }
+            ]
+        },
+        "Methods": ["POST"],
+        "Body": {
+            "Matcher": {
+                "Name": "XPathMatcher",
+                "Pattern": "//PRODUCTNAME[contains(text(),'XX0')]"
+            }
+        }
+    },
+    "Response": {
+        "StatusCode": 200,
+        "Delay": 10000
+    }
+}
