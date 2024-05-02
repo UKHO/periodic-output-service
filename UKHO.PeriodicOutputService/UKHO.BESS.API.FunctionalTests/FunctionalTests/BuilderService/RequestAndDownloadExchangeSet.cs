@@ -64,6 +64,5 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
             HttpResponseMessage apiResponse = Extensions.Cleanup(testConfiguration.bessConfig.BaseUrl);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
-
     }
 }
