@@ -72,7 +72,7 @@ stages:
               scriptType: inlineScript
               workingFolder: $(Agent.TempDirectory)
               inlineScript: |
-                dotnet new globaljson --version 3.10.0 --sdk-version $(StrykerDotNetVersion)
+                dotnet new globaljson --sdk-version $(StrykerDotNetVersion)
   
           - task: DotNetCoreCLI@2
             displayName: "Install Stryker"
@@ -80,7 +80,7 @@ stages:
               command: custom
               custom: tool
               workingDirectory: $(Agent.TempDirectory)
-              arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools
+              arguments: install dotnet-stryker --version 3.10.0 --tool-path $(Agent.BuildDirectory)/tools
   
           - task: Powershell@2
             displayName: "Run Stryker"
