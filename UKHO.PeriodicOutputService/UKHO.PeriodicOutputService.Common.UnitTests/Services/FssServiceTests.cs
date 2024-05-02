@@ -36,12 +36,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             {
                 BaseUrl = "http://test.com",
                 FssClientId = "8YFGEFI78TYIUGH78YGHR5",
-                BatchStatusPollingCutoffTime = "1",
-                BatchStatusPollingDelayTime = "20000",
-                BatchStatusPollingCutoffTimeForAIO = "1",
-                BatchStatusPollingDelayTimeForAIO = "20000",
-                BatchStatusPollingCutoffTimeForBESS = "1",
-                BatchStatusPollingDelayTimeForBESS = "20000",
+                BatchStatusPollingCutoffTime = "0.1",
+                BatchStatusPollingDelayTime = "20",
+                BatchStatusPollingCutoffTimeForAIO = "0.1",
+                BatchStatusPollingDelayTimeForAIO = "20",
+                BatchStatusPollingCutoffTimeForBESS = "0.1",
+                BatchStatusPollingDelayTimeForBESS = "20",
                 PosReadUsers = "",
                 PosReadGroups = "public",
                 BlockSizeInMultipleOfKBs = 4096
@@ -181,9 +181,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"CommitInProgress\"}")))
                 });
-
-            _fakeFssApiConfiguration.Value.BatchStatusPollingCutoffTime = "1";
-            _fakeFssApiConfiguration.Value.BatchStatusPollingDelayTime = "500";
 
             Assert.ThrowsAsync<FulfilmentException>(
                 () => _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType));

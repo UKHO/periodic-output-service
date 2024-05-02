@@ -86,7 +86,7 @@ namespace UKHO.BESS.BuilderService.Services
 
                 var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(), configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
 
-                exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest()
+                exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest
                 {
                     ProductVersions = productVersions
                 }, configQueueMessage.ExchangeSetStandard);
