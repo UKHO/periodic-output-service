@@ -26,10 +26,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 {
                     IPublicClientApplication debugApp = PublicClientApplicationBuilder.Create(EssauthConfig.EssClientId).
                                                         WithRedirectUri("http://localhost").Build();
-
+                    
                     //Acquiring token through user interaction
                     AuthenticationResult tokenTask = await debugApp.AcquireTokenInteractive(scopes)
-                                                            .WithAuthority($"{EssauthConfig.MicrosoftOnlineLoginUrl}{EssauthConfig.TenantId}", true)
+                                                            .WithTenantIdFromAuthority(new Uri($"{EssauthConfig.MicrosoftOnlineLoginUrl}{EssauthConfig.TenantId}"))
                                                             .ExecuteAsync();
                     Token = tokenTask.AccessToken;
                 }
@@ -66,7 +66,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
                     //Acquiring token through user interaction
                     AuthenticationResult tokenTask = await debugApp.AcquireTokenInteractive(scopes)
-                                                            .WithAuthority($"{EssauthConfig.MicrosoftOnlineLoginUrl}{EssauthConfig.TenantId}", true)
+                                                            .WithTenantIdFromAuthority(new Uri($"{EssauthConfig.MicrosoftOnlineLoginUrl}{EssauthConfig.TenantId}"))
                                                             .ExecuteAsync();
                     Token = tokenTask.AccessToken;
                 }

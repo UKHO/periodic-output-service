@@ -125,6 +125,8 @@ namespace UKHO.BESS.BuilderService
                      serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
                      serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                      serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+                     serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
+
                      configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
                  }
 
@@ -143,12 +145,13 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddScoped<IFileSystem, FileSystem>();
                  serviceCollection.AddScoped<IZipHelper, ZipHelper>();
                  serviceCollection.AddScoped<IFileUtility, FileUtility>();
+                 serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
 
                  serviceCollection.AddHttpClient("DownloadClient",
                          httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
                      .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
                      {
-                         AllowAutoRedirect = false
+                         AllowAutoRedirect = true
                      }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
              })
               .ConfigureWebJobs(b =>

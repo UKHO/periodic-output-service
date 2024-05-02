@@ -129,9 +129,9 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             string actualAccessToken = "notRequiredDuringTesting";
             string postBodyParam = "This should be replace by actual value when param passed to api call";
 
-            string accessTokenParam = null;
-            string uriParam = null;
-            HttpMethod httpMethodParam = null;
+            string? accessTokenParam = null;
+            string? uriParam = null;
+            HttpMethod? httpMethodParam = null;
             var scsResponse = new List<SalesCatalogueDataResponse>();
             var jsonString = JsonConvert.SerializeObject(scsResponse);
 

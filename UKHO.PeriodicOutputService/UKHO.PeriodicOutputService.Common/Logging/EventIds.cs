@@ -653,7 +653,62 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809129 - Products Fetched from ESS.
         /// </summary>
-        ProductsFetchedFromESS = 809129
+        ProductsFetchedFromESS = 809129,
+
+        /// <summary>
+        /// 809130 - Macro is invalid or unavailable.
+        /// </summary>
+        MacroInvalidOrUnavailable = 809130,
+
+        /// <summary>
+        /// 809131 - Exception occurred while transforming macros.
+        /// </summary>
+        MacroTransformationFailed = 809131,
+
+        /// <summary>
+        /// 809132 - Request for searching readme.txt file from file share service is started.
+        /// </summary>
+        QueryFileShareServiceReadMeFileRequestStart = 809132,
+
+        /// <summary>
+        /// 809133 - Request for searching readme.txt from file share service is completed.
+        /// </summary>
+        QueryFileShareServiceReadMeFileRequestCompleted = 809133,
+
+        /// <summary>
+        /// 809134 - Request for searching readme.txt file from file share service is failed due to non ok response.
+        /// </summary>
+        QueryFileShareServiceReadMeFileNonOkResponse = 809134,
+
+        /// <summary>
+        /// 809135 - Readme.txt file is not found while searching in file share service.
+        /// </summary>
+        ReadMeTextFileNotFound = 809135,
+
+        /// <summary>
+        /// 809136 - Request for downloading readme.txt file from file share service is started.
+        /// </summary>
+        DownloadReadMeFileRequestStart = 809136,
+
+        /// <summary>
+        /// 809137 - Request for downloading readme.txt file from file share service is completed.
+        /// </summary>
+        DownloadReadMeFileRequestCompleted = 809137,
+
+        /// <summary>
+        /// 809138 - Request for downloading readme.txt file from file share service is failed due to non ok response.
+        /// </summary>
+        DownloadReadMeFileNonOkResponse = 809138,
+
+        /// <summary>
+        /// 809139 - Completed download of 307 response readme.txt file from the file share service.
+        /// </summary>
+        DownloadReadmeFile307RedirectResponse = 809139,
+
+        /// <summary>
+        /// 809140 - Multiple files found while searching readme.txt file from the file share service.
+        /// </summary>
+        QueryFileShareServiceMultipleFilesFound = 809140
     }
 
     public static class EventIdExtensions
