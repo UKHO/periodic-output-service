@@ -20,7 +20,7 @@ namespace UKHO.BESS.CleanUpJob.Services
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.cleanUpConfig = cleanUpConfig ?? throw new ArgumentNullException(nameof(cleanUpConfig));
             this.fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            homeDirectoryPath = configuration.Equals(null) ? throw new ArgumentNullException(nameof(configuration))
+            homeDirectoryPath = configuration == null ? throw new ArgumentNullException(nameof(configuration))
                                 : Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
         }
         public async Task CleanUpHistoricFoldersAndFiles()
