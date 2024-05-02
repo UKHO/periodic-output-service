@@ -666,29 +666,74 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         MacroTransformationFailed = 809131,
 
         /// <summary>
-        /// 809132 - Bespoke exchange set cleanup web job is started.
+        /// 809132 - Request for searching readme.txt file from file share service is started.
         /// </summary>
-        BESSCleanUpJobRequestStarted = 809132,
+        QueryFileShareServiceReadMeFileRequestStart = 809132,
 
         /// <summary>
-        /// 809133 - Bespoke exchange set cleanup web job is completed.
+        /// 809133 - Request for searching readme.txt from file share service is completed.
         /// </summary>
-        BESSCleanUpJobRequestCompleted = 809133,
+        QueryFileShareServiceReadMeFileRequestCompleted = 809133,
 
         /// <summary>
-        /// 809134 - Deletion of folders failed.
+        /// 809134 - Request for searching readme.txt file from file share service is failed due to non ok response.
         /// </summary>
-        FoldersDeletionFailed = 809134,
+        QueryFileShareServiceReadMeFileNonOkResponse = 809134,
 
         /// <summary>
-        /// 809135 - No folders found.
+        /// 809135 - Readme.txt file is not found while searching in file share service.
         /// </summary>
-        NoFoldersFound = 809135,
+        ReadMeTextFileNotFound = 809135,
 
         /// <summary>
-        /// 809136 - CleanUp successful.
+        /// 809136 - Request for downloading readme.txt file from file share service is started.
         /// </summary>
-        CleanUpSuccessful = 809136
+        DownloadReadMeFileRequestStart = 809136,
+
+        /// <summary>
+        /// 809137 - Request for downloading readme.txt file from file share service is completed.
+        /// </summary>
+        DownloadReadMeFileRequestCompleted = 809137,
+
+        /// <summary>
+        /// 809138 - Request for downloading readme.txt file from file share service is failed due to non ok response.
+        /// </summary>
+        DownloadReadMeFileNonOkResponse = 809138,
+
+        /// <summary>
+        /// 809139 - Completed download of 307 response readme.txt file from the file share service.
+        /// </summary>
+        DownloadReadmeFile307RedirectResponse = 809139,
+
+        /// <summary>
+        /// 809140 - Multiple files found while searching readme.txt file from the file share service.
+        /// </summary>
+        QueryFileShareServiceMultipleFilesFound = 809140,
+
+        /// <summary>
+        /// 809141 - Bespoke exchange set cleanup web job is started.
+        /// </summary>
+        BESSCleanUpJobRequestStarted = 809141,
+
+        /// <summary>
+        /// 809142 - Bespoke exchange set cleanup web job is completed.
+        /// </summary>
+        BESSCleanUpJobRequestCompleted = 809142,
+
+        /// <summary>
+        /// 809143 - Deletion of folders failed.
+        /// </summary>
+        FoldersDeletionFailed = 809143,
+
+        /// <summary>
+        /// 809144 - No folders found.
+        /// </summary>
+        NoFoldersFound = 809144,
+
+        /// <summary>
+        /// 809145 - CleanUp successful.
+        /// </summary>
+        CleanUpSuccessful = 809145
     }
 
     public static class EventIdExtensions
