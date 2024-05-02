@@ -24,7 +24,7 @@ using UKHO.PeriodicOutputService.Fulfilment.Services;
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
     [ExcludeFromCodeCoverage]
-    public class Program
+    public static class Program
     {
         private static readonly InMemoryChannel s_aIChannel = new();
         private static readonly string s_assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;

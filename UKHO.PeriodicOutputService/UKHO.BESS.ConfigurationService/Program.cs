@@ -23,7 +23,7 @@ using UKHO.PeriodicOutputService.Common.Services;
 namespace UKHO.BESS.ConfigurationService
 {
     [ExcludeFromCodeCoverage]
-    public class Program
+    public static class Program
     {
         private static readonly InMemoryChannel aiChannel = new();
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
