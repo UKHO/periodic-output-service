@@ -47,6 +47,7 @@ module "eventhub" {
 module "mock_webapp_service" {
   source              = "./Modules/MockWebApp"
   name                = local.mock_web_app_name
+  pks_name            = local.pks_mock_web_app_name
   env_name            = local.env_name
   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
   service_plan_id     = data.azurerm_app_service_plan.essft_asp.id
