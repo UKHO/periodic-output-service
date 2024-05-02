@@ -441,7 +441,61 @@ stages:
             displayName: "Publish WebAPI Artifact"
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\MockWebAPI'
-              ArtifactName: MockWebAPI 
+              ArtifactName: MockWebAPI
+
+      - job: BuildAndPublishPKSWireMockAPI
+        workspace:
+          clean: all
+        displayName: "Build and Publish PKSWireMock API"
+        steps:
+          - task: PowerShell@2
+            displayName: "Set assembly version numbers based on build ID"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
+              arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.PKSWireMockService.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
+
+          - task: UseDotNet@2
+            displayName: 'Use .NET SDK'
+            inputs:
+              packageType: sdk
+              useGlobalJson: true
+              workingDirectory: '$(Build.SourcesDirectory)'
+
+          - task: DotNetCoreCLI@2
+            displayName: ".Net Core - NuGet restore"
+            inputs:
+              command: restore
+              projects: |
+                **/*.csproj
+              feedsToUse: config
+              noCache: true
+              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PKSWireMockService.API'
+
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet build task"
+            inputs:
+              command: "build"
+              projects: "**/*UKHO.PKSWireMock.API.csproj"
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PKSWireMockService.API'
+
+          - task: DotNetCoreCLI@2
+            displayName: "Publish PKSWireMock WebAPI"
+            inputs:
+              command: "publish"
+              publishWebProjects: false
+              projects: '**/*UKHO.PKSWireMock.API.csproj'
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PKSWireMockWebAPI'
+              zipAfterPublish: true
+              modifyOutputPath: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish PKSWireMock WebAPI Artifact"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)\PKSWireMockWebAPI'
+              ArtifactName: PKSWireMockWebAPI
      
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
