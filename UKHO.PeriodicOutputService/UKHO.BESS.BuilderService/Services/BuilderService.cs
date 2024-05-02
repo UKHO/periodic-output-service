@@ -385,7 +385,7 @@ namespace UKHO.BESS.BuilderService.Services
                 }
                 else
                 {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesUpdateZipBatch).Result;
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch).Result;
                 }
             }
             return isBatchCreated;
