@@ -33,7 +33,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         bool CreateFileContent(string filePath, string content);
 
-        void DeleteFile(string file);
+        void DeleteFile(string filePath);
 
         void DeleteFolder(string folderPath);
         IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName);

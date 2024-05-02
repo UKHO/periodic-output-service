@@ -723,12 +723,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809143 - SERIAL.ENC file update operation failed
         /// </summary>
-        SerialEncUpdateFailed = 809143,
+        BessSerialEncUpdateFailed = 809143,
 
         /// <summary>
         /// 809144 - PRODUCT.TXT file and INFO folder delete operation failed
         /// </summary>
-        ProductTxtDeleteFailed = 809144
+        BessProductTxtAndInfoFolderDeleteFailed = 809144
     }
 
     public static class EventIdExtensions

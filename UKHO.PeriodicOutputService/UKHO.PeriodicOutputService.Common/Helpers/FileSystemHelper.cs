@@ -181,12 +181,16 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public string ReadFileText(string filePath)
         {
-            return _fileSystem.File.ReadAllText(filePath);
+            if (_fileSystem.Directory.Exists(filePath))
+            {
+                return _fileSystem.File.ReadAllText(filePath);
+            }
+            return string.Empty;
         }
 
         public bool CreateFileContent(string filePath, string content)
         {
-            if (string.IsNullOrWhiteSpace(content))
+            if (string.IsNullOrWhiteSpace(content) || !_fileSystem.Directory.Exists(filePath))
             {
                 return false;
             }
@@ -197,12 +201,18 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public void DeleteFile(string filePath)
         {
-            _fileSystem.File.Delete(filePath);
+            if (_fileSystem.Directory.Exists(filePath))
+            {
+                _fileSystem.File.Delete(filePath);
+            }
         }
 
         public void DeleteFolder(string folderPath)
         {
-            _fileSystem.Directory.Delete(folderPath);
+            if (_fileSystem.Directory.Exists(folderPath))
+            {
+                _fileSystem.Directory.Delete(folderPath);
+            }
         }
     }
 }

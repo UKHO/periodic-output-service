@@ -359,11 +359,11 @@ namespace UKHO.BESS.BuilderService.Services
 
         private async Task UpdateSerialFileAsync(string serialFilePath, string exchangeSetType, string correlationId)
         {
-            string serialFileContent = String.Empty;
-            const string searchText = "UPDATE";
             try
             {
-                serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
+                string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
+                const string searchText = "UPDATE";
+
                 if (serialFileContent.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) > -1)
                 {
                     serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
@@ -375,8 +375,8 @@ namespace UKHO.BESS.BuilderService.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.SerialEncUpdateFailed.ToEventId(), "SERIAL.ENC file update operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
-                throw new Exception($"SERIAL.ENC file update operation failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+                logger.LogError(EventIds.BessSerialEncUpdateFailed.ToEventId(), "SERIAL.ENC file update operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.BessSerialEncUpdateFailed.ToEventId());
             }
 
             await Task.CompletedTask;
@@ -394,8 +394,8 @@ namespace UKHO.BESS.BuilderService.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.ProductTxtDeleteFailed.ToEventId(), "PRODUCT.TXT file and INFO folder delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
-                throw new Exception($"PRODUCT.TXT file and INFO folder delete operation failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+                logger.LogError(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId(), "PRODUCT.TXT file and INFO folder delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId());
             }
 
             await Task.CompletedTask;
