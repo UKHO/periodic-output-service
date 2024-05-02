@@ -161,5 +161,22 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             return productVersions;
         }
+
+        public bool CreateEmptyFileContent(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return false;
+            }
+            _fileSystem.File.WriteAllText(filePath, string.Empty);
+            return true;
+        }
+
+        public bool DownloadReadmeFile(string filePath, Stream fileStream)
+        {
+            using var outputFileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
+            fileStream.CopyTo(outputFileStream);
+            return true;
+        }
     }
 }

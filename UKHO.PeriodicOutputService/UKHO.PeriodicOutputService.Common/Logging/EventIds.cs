@@ -666,19 +666,64 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         MacroTransformationFailed = 809131,
 
         /// <summary>
-        /// 809132 - Post product data to PKS started.
+        /// 809132 - Request for searching readme.txt file from file share service is started.
         /// </summary>
-        PostProductKeyDataToPksStarted = 809132,
+        QueryFileShareServiceReadMeFileRequestStart = 809132,
 
         /// <summary>
-        /// 809133 - Post product data to PKS completed.
+        /// 809133 - Request for searching readme.txt from file share service is completed.
         /// </summary>
-        PostProductKeyDataToPksCompleted = 809133,
+        QueryFileShareServiceReadMeFileRequestCompleted = 809133,
 
         /// <summary>
-        /// 809134 - Post product data to PKS failed.
+        /// 809134 - Request for searching readme.txt file from file share service is failed due to non ok response.
         /// </summary>
-        PostProductKeyDataToPksFailed = 809134
+        QueryFileShareServiceReadMeFileNonOkResponse = 809134,
+
+        /// <summary>
+        /// 809135 - Readme.txt file is not found while searching in file share service.
+        /// </summary>
+        ReadMeTextFileNotFound = 809135,
+
+        /// <summary>
+        /// 809136 - Request for downloading readme.txt file from file share service is started.
+        /// </summary>
+        DownloadReadMeFileRequestStart = 809136,
+
+        /// <summary>
+        /// 809137 - Request for downloading readme.txt file from file share service is completed.
+        /// </summary>
+        DownloadReadMeFileRequestCompleted = 809137,
+
+        /// <summary>
+        /// 809138 - Request for downloading readme.txt file from file share service is failed due to non ok response.
+        /// </summary>
+        DownloadReadMeFileNonOkResponse = 809138,
+
+        /// <summary>
+        /// 809139 - Completed download of 307 response readme.txt file from the file share service.
+        /// </summary>
+        DownloadReadmeFile307RedirectResponse = 809139,
+
+        /// <summary>
+        /// 809140 - Multiple files found while searching readme.txt file from the file share service.
+        /// </summary>
+        QueryFileShareServiceMultipleFilesFound = 809140,
+
+        /// <summary>
+        /// 809141 - Post product data to PKS started.
+        /// </summary>
+        PostProductKeyDataToPksStarted = 809141,
+
+        /// <summary>
+        /// 809142 - Post product data to PKS completed.
+        /// </summary>
+        PostProductKeyDataToPksCompleted = 809142,
+
+        /// <summary>
+        /// 809143 - Post product data to PKS failed.
+        /// </summary>
+        PostProductKeyDataToPksFailed = 809140
     }
 
     public static class EventIdExtensions
