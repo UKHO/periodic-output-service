@@ -13,7 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         [OneTimeSetUp]
         public void SetupAsync()
         {
-            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, "Identifiers");
+            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.Identifiers);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
@@ -25,7 +25,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         [TestCase("4bc70797-7ee6-407f-bafe-cae49a5b5f91", "s63", "BASE")]
         [TestCase("7b6edd6a-7a62-4271-a657-753f4c648531", "s57", "UPDATE")]
         [TestCase("0f13a253-db5d-4b77-a165-643f4b4a77fc", "s63", "UPDATE")]
-        public async Task WhenICheckDownloadedZipForTypesInConfigFile_ThenZipIsCreatedForRequestedProduct(string batchId, string exchangeSetStandard, string type)
+        public async Task WhenIAddAQueueMessageWithCorrectDetails_ThenExchangeSetShouldBeCreatedForRequestedProduct(string batchId, string exchangeSetStandard, string type)
         {
             Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
             Extensions.WaitForDownloadExchangeSet();

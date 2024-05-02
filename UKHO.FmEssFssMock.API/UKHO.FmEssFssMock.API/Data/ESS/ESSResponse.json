@@ -385,13 +385,13 @@
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/27067a02-df4b-49a1-8699-442b265a75d2/status"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/0f13a253-db5d-4b77-a165-643f4b4a77fc/status"
                 },
                 "exchangeSetBatchDetailsUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/27067a02-df4b-49a1-8699-442b265a75d2"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/0f13a253-db5d-4b77-a165-643f4b4a77fc"
                 },
                 "exchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/27067a02-df4b-49a1-8699-442b265a75d2/files/V01X01.zip"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/0f13a253-db5d-4b77-a165-643f4b4a77fc/files/V01X01.zip"
                 }
             },
             "exchangeSetUrlExpiryDateTime": "",
@@ -406,13 +406,13 @@
         "responseBody": {
             "_links": {
                 "exchangeSetBatchStatusUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/27067a02-df4b-49a1-8699-442b265a75d2/status"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/7b6edd6a-7a62-4271-a657-753f4c648531/status"
                 },
                 "exchangeSetBatchDetailsUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/27067a02-df4b-49a1-8699-442b265a75d2"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/7b6edd6a-7a62-4271-a657-753f4c648531"
                 },
                 "exchangeSetFileUri": {
-                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/27067a02-df4b-49a1-8699-442b265a75d2/files/V01X01.zip"
+                    "href": "https://uatadmiralty.azure-api.net/fss-qa/batch/7b6edd6a-7a62-4271-a657-753f4c648531/files/V01X01.zip"
                 }
             },
             "exchangeSetUrlExpiryDateTime": "",

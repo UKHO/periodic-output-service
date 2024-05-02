@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
@@ -27,6 +27,12 @@
     <Content Update="Data\FSS\FssInfoResponse.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Update="Data\FSS\FssSingleReadMeResponse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="Data\FSS\FssMultipleFilesReadMeResponse.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Update="Data\SalesCatalogueService\SCSCatalogueResponse.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -36,6 +42,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Data\06583FAC-DBCE-4EA6-B67B-870392DCB7AB\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\094CDA16-FCC4-41CB-9317-BF4F26991E32\AIO.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -43,6 +52,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\0F13A253-DB5D-4B77-A165-643F4B4A77FC\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\10D40DD5-DDFB-497A-BB67-D99FB1658320\ACCatalogs.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\10D40DD5-DDFB-497A-BB67-D99FB1658320\distributors.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_WK34_22_Only.zip">
@@ -57,10 +72,22 @@
     <None Update="Data\4BC70797-7EE6-407F-BAFE-CAE49A5B5F91\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\AB4A692D-6E3B-48A3-BD37-D232C60DD75D\README.TXT">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\5331f8c2-9085-4083-9a1e-9f99953be122\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\5CF9E1D7-207C-4C96-B5E7-5A519F0EA0C0\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\10D40DD5-DDFB-497A-BB67-D99FB1658320\ADC_README.TXT">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\AIO V2 - UKHO letter for inspectors.pdf">
@@ -106,6 +133,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\F8FD2FB4-3DD6-425D-B34F-3059E262FEED\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\FullAvcsPollingTimeOut\avcs_catalogue_ft.xml">

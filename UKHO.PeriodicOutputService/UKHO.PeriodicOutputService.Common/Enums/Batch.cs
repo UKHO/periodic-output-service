@@ -15,6 +15,7 @@
         AioUpdateZipBatch = 11,
         BesBaseZipBatch = 12,
         BesUpdateZipBatch = 13,
-        EssEmptyBatch = 14
+        BesChangeZipBatch = 14,
+        EssEmptyBatch = 15
     }
 }

@@ -29,5 +29,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         void CreateZipFile(string sourceDirectoryName, string destinationArchiveFileName, bool deleteOldArchive = false);
 
         IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName);
+
+        bool CreateEmptyFileContent(string filePath);
+
+        bool DownloadReadmeFile(string filePath, Stream fileStream);
     }
 }
