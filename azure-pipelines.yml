@@ -51,7 +51,7 @@ stages:
         condition: ${{ eq(parameters.disableStryker, false) }}
         variables:
           - name: StrykerDotNetVersion
-            value: 8.0.x
+            value: 6.0.x
         steps:
           - task: UseDotNet@2
             displayName: 'Use .NET SDK'
@@ -72,7 +72,7 @@ stages:
               scriptType: inlineScript
               workingFolder: $(Agent.TempDirectory)
               inlineScript: |
-                dotnet new globaljson --sdk-version $(StrykerDotNetVersion)
+                dotnet new globaljson --version 3.10.0 --sdk-version $(StrykerDotNetVersion)
   
           - task: DotNetCoreCLI@2
             displayName: "Install Stryker"
