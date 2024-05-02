@@ -46,4 +46,6 @@
     </None>
   </ItemGroup>
 
+  <ProjectExtensions><VisualStudio><UserProperties settings_1job__JsonSchema="" /></VisualStudio></ProjectExtensions>
+
 </Project>
