@@ -371,7 +371,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         ExchangeSetNotModified = 809072,
 
         /// <summary>
-        /// 809073 - Cancelled products found in ESS repsonse
+        /// 809073 - Cancelled products found in ESS response
         /// </summary>
         CancelledProductsFound = 809073,
 
@@ -551,119 +551,114 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessConfigInvalidAttributes = 809108,
 
         /// <summary>
-        /// 809109 - Bess config duplicate Name attribute
-        /// </summary>
-        BessConfigDuplicateFileCount = 809109,
-
-        /// <summary>
         /// 809110 - Bess config validation summary
         /// </summary>
-        BessConfigValidationSummary = 809110,
+        BessConfigValidationSummary = 809109,
 
         /// <summary>
         /// 809111 - Bess config duplicate records found
         /// </summary>
-        BessConfigsDuplicateRecordsFound = 809111,
+        BessConfigsDuplicateRecordsFound = 809110,
 
         /// <summary>
         /// 809112 - Bess config frequency due or lapsed
         /// </summary>
-        BessConfigFrequencyElapsed = 809112,
+        BessConfigFrequencyElapsed = 809111,
 
         /// <summary>
         /// 809113 - Exception occurred while processing bess config frequency
         /// </summary>
-        BessConfigFrequencyProcessingException = 809113,
+        BessConfigFrequencyProcessingException = 809112,
 
         /// <summary>
         /// 809114 - Request to Sales Catalogue Service's catalogue essData endpoint is started.
         /// </summary>
-        ScsGetSalesCatalogueDataRequestStarted = 809114,
+        ScsGetSalesCatalogueDataRequestStarted = 809113,
 
         /// <summary>
         /// 809115 - Request to Sales Catalogue Service's catalogue essData endpoint is completed.
         /// </summary>
-        ScsGetSalesCatalogueDataRequestCompleted = 809115,
+        ScsGetSalesCatalogueDataRequestCompleted = 809114,
 
         /// <summary>
         /// 809116 - Request to Sales Catalogue Service's catalogue essData endpoint failed due to Non-Ok response.
         /// </summary>
-        ScsGetSalesCatalogueDataNonOkResponse = 809116,
+        ScsGetSalesCatalogueDataNonOkResponse = 809115,
 
         /// <summary>
         /// 809117 - Request for retrying sales catalogue service endpoint.
         /// </summary>
-        RetryHttpClientScsRequest = 809117,
+        RetryHttpClientScsRequest = 809116,
 
         /// <summary>
         /// 809118 - Bess Builder Service Started
         /// </summary>
-        BessBuilderServiceStarted = 809118,
+        BessBuilderServiceStarted = 809117,
 
         /// <summary>
         /// 809119 - Bess Builder Service Completed
         /// </summary>
-        BessBuilderServiceCompleted = 809119,
+        BessBuilderServiceCompleted = 809118,
 
         /// <summary>
         /// 809120 - Listed cells or pattern not found in catalogue
         /// </summary>
-        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809120,
+        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809119,
 
         /// <summary>
         /// 809121 - All listed cells are not found and neither cell is matching with the pattern
         /// </summary>
-        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809121,
+        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809120,
 
         /// <summary>
         /// 809122 - Config message added in the queue
         /// </summary>
-        BessConfigPropertiesAddedInQueue = 809122,
+        BessConfigPropertiesAddedInQueue = 809121,
 
         /// <summary>
         /// 809123 - Bess Config Validation Error
         /// </summary>
-        BessConfigValidationError = 809123,
+        BessConfigValidationError = 809122,
 
         /// <summary>
         /// 809124 - Bespoke Exchange Set size exceeds threshold 700MB
         /// </summary>
-        BessSizeExceedsThreshold = 809124,
+        BessSizeExceedsThreshold = 809123,
 
         /// <summary>
         /// 809125 - Message added in the queue
         /// </summary>
-        BessQueueMessageSuccessful = 809125,
+        BessQueueMessageSuccessful = 809124,
 
         /// <summary>
         /// 809126 - Message not added in the queue
         /// </summary>
-        BessQueueMessageFailed = 809126,
+        BessQueueMessageFailed = 809125,
 
         /// <summary>
         /// 809127 - Creation of bespoke exchange set is started.
         /// </summary>
-        CreateBespokeExchangeSetRequestStart = 809127,
+        CreateBespokeExchangeSetRequestStart = 809126,
 
         /// <summary>
         /// 809128 - Creation of bespoke exchange set is completed.
         /// </summary>
-        CreateBespokeExchangeSetRequestCompleted = 809128,
+        CreateBespokeExchangeSetRequestCompleted = 809127,
 
         /// <summary>
         /// 809129 - Products Fetched from ESS.
         /// </summary>
-        ProductsFetchedFromESS = 809129,
+        ProductsFetchedFromESS = 809128,
 
         /// <summary>
         /// 809130 - Macro is invalid or unavailable.
         /// </summary>
-        MacroInvalidOrUnavailable = 809130,
+        MacroInvalidOrUnavailable = 809129,
 
         /// <summary>
         /// 809131 - Exception occurred while transforming macros.
         /// </summary>
-        MacroTransformationFailed = 809131
+        MacroTransformationFailed = 809130
     }
 
     public static class EventIdExtensions

@@ -115,7 +115,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                                 if (!string.IsNullOrEmpty(warnings.ToString()))
                                     logger.LogWarning(EventIds.BessConfigInvalidAttributes.ToEventId(),
-                                        "BESS config file : {fileName} will be skipped for exchange set creation since the attribute value for IsEnabled is not yes | _X-Correlation-ID : {CorrelationId}",
+                                        "BESS config file : {fileName} will be skipped for exchange set creation since the attribute value for IsEnabled is not Yes | _X-Correlation-ID : {CorrelationId}",
                                         fileName, CommonHelper.CorrelationID);
                             }
                             else
@@ -263,6 +263,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         int BESSize = Convert.ToInt16(configuration["BESSizeInMB"]);
 
+                        //Bespoke will not create if size is large
                         if (fileSizeInMb > BESSize)
                         {
                             logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file : {FileName} |" +
@@ -313,7 +314,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private static bool IsScheduleRefreshed(ScheduleDetailEntity scheduleDetailEntity, DateTime nextOccurrence, BessConfig bessConfig) => scheduleDetailEntity.NextScheduleTime != nextOccurrence || scheduleDetailEntity.IsEnabled != bessConfig.IsEnabled;
 
         /// <summary>
-        /// Check schedule interval arrives
+        /// Check schedule interval arrives for same day
         /// </summary>
         /// <param name="bessConfig"></param>
         /// <param name="scheduleDetailEntity"></param>
