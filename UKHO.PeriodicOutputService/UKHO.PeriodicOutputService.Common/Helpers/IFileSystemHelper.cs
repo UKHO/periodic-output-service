@@ -30,6 +30,10 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName);
 
+        bool CreateEmptyFileContent(string filePath);
+
+        bool DownloadReadmeFile(string filePath, Stream fileStream);
+
         Task CreateXmlFromObject<T>(T obj, string filePath, string fileName);
 
         void CreateTextFile(string filePath, string fileName, string content);

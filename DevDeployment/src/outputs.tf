@@ -2,6 +2,10 @@ output "mock_webappname" {
   value = local.mock_web_app_name
 }
 
+output "pks_mock_webappname" {
+  value = local.pks_mock_web_app_name
+}
+
 output "fm_mock_web_app_url" {
 value = "https://${module.mock_webapp_service.default_site_hostname}"
 }

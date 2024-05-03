@@ -27,6 +27,9 @@ namespace UKHO.PeriodicOutputService.Common.Configuration
         public string BessBusinessUnit { get; set; }
         public string BessReadUsers { get; set; }
         public string BessReadGroups { get; set; }
+        public string BespokeExchangeSetFileFolder { get; set; }
+        public string EncRoot { get; set; }
+        public string ReadMeFileName { get; set; }
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

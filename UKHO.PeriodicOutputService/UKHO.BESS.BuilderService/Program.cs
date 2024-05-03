@@ -160,7 +160,7 @@ namespace UKHO.BESS.BuilderService
                          httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
                      .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
                      {
-                         AllowAutoRedirect = false
+                         AllowAutoRedirect = true
                      }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
              })
               .ConfigureWebJobs(b =>
