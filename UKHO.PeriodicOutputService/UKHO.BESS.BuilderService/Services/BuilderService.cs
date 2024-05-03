@@ -75,6 +75,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             Batch batch = configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch
                 : configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch;
+
             bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, batch).Result;
 
             // temporary logs
@@ -105,11 +106,6 @@ namespace UKHO.BESS.BuilderService.Services
 
                     CreateKeyFile(configQueueMessage, essFileDownloadPath, productKeyServiceResponse);
                 }
-            }
-            else
-            {
-                logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Bess batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
-                throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
             }
 
             #endregion TemporaryUploadCode
