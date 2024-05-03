@@ -2,7 +2,7 @@
 {
     public class ProductKeyServiceModel
     {
-        public string? ProductName { get; set; }
-        public int? EditionNumber { get; set; }
+        public string? productName { get; set; }
+        public string? edition { get; set; }
     }
 }

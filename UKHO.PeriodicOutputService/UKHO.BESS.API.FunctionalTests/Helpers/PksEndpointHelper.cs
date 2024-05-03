@@ -10,11 +10,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         private static string? uri;
 
         /// <summary>
-        /// This method is used to generate the permits.
+        /// This method is used to get the response from pks endpoint.
         /// </summary>
         /// <param name="baseUrl"></param>
-        /// <param name="productName"></param>
-        /// <param name="editionNumber"></param>
+        /// <param name="pksData"></param>
         /// <returns></returns>
         public static async Task<HttpResponseMessage> PermitKeysEndpoint(string? baseUrl, List<ProductKeyServiceModel> pksData)
         {
@@ -22,12 +21,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             string payloadJson = JsonConvert.SerializeObject(pksData);
 
-            using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
+            using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
 
-            { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") })
-            {
-                return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
-            }
+                { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
     }
 }
