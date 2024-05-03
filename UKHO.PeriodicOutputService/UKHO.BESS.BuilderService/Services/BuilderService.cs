@@ -35,7 +35,7 @@ namespace UKHO.BESS.BuilderService.Services
             { ".csv", "text/csv" },
             { ".txt", "text/plain" }
         };
-        private readonly string DEFAULTMIMETYPE = "application/octet-stream";
+        private const string DEFAULTMIMETYPE = "application/octet-stream";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper)
         {
