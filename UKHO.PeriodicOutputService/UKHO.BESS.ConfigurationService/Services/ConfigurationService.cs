@@ -32,6 +32,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private int configsWithInvalidMacrosCount;
         private const string NewLine = "\n";
         private const string Colon = ": ";
+        private const string IsEnabled = "IsEnabled";
 
         public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient,
                                     IAzureTableStorageHelper azureTableStorageHelper,
@@ -98,7 +99,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                                 foreach (var failure in results.Errors)
                                 {
-                                    if (failure.PropertyName == "IsEnabled")
+                                    if (failure.PropertyName == IsEnabled)
                                     {
                                         warnings.AppendLine(NewLine + failure.PropertyName + Colon + failure.ErrorMessage);
                                     }
