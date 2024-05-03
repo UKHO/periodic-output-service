@@ -183,7 +183,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_ReadFileText_Executes_Successfully()
         {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.File.Exists(filePath)).Returns(true);
 
             _fileSystemHelper.ReadFileText(filePath);
 
@@ -195,7 +195,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_CreateFileContent_Executes_Successfully_WhenContentIsPresent()
         {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.File.Exists(filePath)).Returns(true);
 
             _fileSystemHelper.CreateFileContent(filePath, content);
 
@@ -219,7 +219,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_DeleteFile_Executes_Successfully()
         {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.File.Exists(filePath)).Returns(true);
 
             _fileSystemHelper.DeleteFile(filePath);
 

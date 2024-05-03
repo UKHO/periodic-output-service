@@ -181,7 +181,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public string ReadFileText(string filePath)
         {
-            if (_fileSystem.Directory.Exists(filePath))
+            if (_fileSystem.File.Exists(filePath))
             {
                 return _fileSystem.File.ReadAllText(filePath);
             }
@@ -190,7 +190,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public bool CreateFileContent(string filePath, string content)
         {
-            if (string.IsNullOrWhiteSpace(content) || !_fileSystem.Directory.Exists(filePath))
+            if (string.IsNullOrWhiteSpace(content) || !_fileSystem.File.Exists(filePath))
             {
                 return false;
             }
@@ -201,7 +201,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public void DeleteFile(string filePath)
         {
-            if (_fileSystem.Directory.Exists(filePath))
+            if (_fileSystem.File.Exists(filePath))
             {
                 _fileSystem.File.Delete(filePath);
             }
