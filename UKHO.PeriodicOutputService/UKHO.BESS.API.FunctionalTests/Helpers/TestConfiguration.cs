@@ -24,6 +24,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? s57ExchangeSetStandard { get; set; }
             public string? TempFolderName { get; set; }
             public List<string>? ProductsName { get; set; }
+            public List<string>? EditionNumber { get; set; }
             public string? Identifiers { get; set; }
         }
 
@@ -72,8 +73,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public class PKSApiConfiguration
         {
             public string? BaseUrl { get; set; }
-            public string? ProductName { get; set; }
-            public int? EditionNumber { get; set; }
         }
 
         public TestConfiguration()

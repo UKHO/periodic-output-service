@@ -160,8 +160,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
              .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(GetProductVersions);
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
-              .Returns(GetProductKeyServiceResponse());
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), "PERMIT_XML"));
 
@@ -223,11 +221,11 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("UPDATE", "s63")]
-        [TestCase("UPDATE", "s57")]
-        [TestCase("CHANGE", "s63")]
-        [TestCase("CHANGE", "s57")]
-        public async Task WhenTypeIsUpdateChangeAndKeyFileTypeIsText_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(string type, string exchangeSetStandard)
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsUpdateChangeAndKeyFileTypeIsText_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -305,9 +303,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
-        public async Task WhenTypeIsBaseAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(string exchangeSetStandard)
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsBaseAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -316,7 +314,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
               .Returns(GetBatchResponseModelWithFileNameError());
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), "PERMIT_XML")); };
+            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), "PERMIT_XML")); };
             await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
 
 
@@ -351,13 +349,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
-             ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-            call.Method.Name == "Log"
-             && call.GetArgument<LogLevel>(0) == LogLevel.Information
-             && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -414,13 +405,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
-             ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-            call.Method.Name == "Log"
-             && call.GetArgument<LogLevel>(0) == LogLevel.Information
-             && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -516,14 +500,14 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
         [TestCase(ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsBaseAndBatchStatusIsNotCommited_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
+        public async Task WhenTypeIsBaseAndBatchStatusIsNotCommitted_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), "PERMIT_XML")); };
+            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), "PERMIT_XML")); };
             await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
@@ -539,7 +523,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndBatchStatusIsNotCommited_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public async Task WhenTypeIsUpdateOrChangeAndBatchStatusIsNotCommitted_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -555,13 +539,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
-             ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-            call.Method.Name == "Log"
-             && call.GetArgument<LogLevel>(0) == LogLevel.Information
-             && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -889,9 +866,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
-        [TestCase("s63")]
-        [TestCase("s57")]
-        public async Task WhenTypeIsBaseAndKeyFileTypeIsNone_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(string exchangeSetStandard)
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsBaseAndKeyFileTypeIsNone_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -903,7 +880,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
              .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(new List<ProductVersion>());
 
-            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE.ToString(), exchangeSetStandard, ""));
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString()));
 
             result.Should().Be("Exchange Set Created Successfully");
 
@@ -932,9 +909,50 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             ).MustHaveHappenedOnceExactly();
         }
 
+        [Test]
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsBaseAndKeyFileTypeIsKey_Text_ThenPostProductIdentifiersEndpointIsCalledAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
+        {
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+                .Returns(GetValidExchangeSetGetBatchResponse());
+            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
+              .Returns(GetValidBatchResponseModel());
+            A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
+             .Returns(true);
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+             .Returns(GetProductKeyServiceResponse());
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), "KEY_TEXT"));
+
+            result.Should().Be("Exchange Set Created Successfully");
+
+            A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceOrMore();
+            A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true))
+                .MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileStarted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileCompleted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+        }
+
         #region PrivateMethods
 
-        private ConfigQueueMessage GetConfigQueueMessage(BessType type, ExchangeSetStandard exchangeSetStandard, string readMeSearchFilter, string KeyFileType)
+        private ConfigQueueMessage GetConfigQueueMessage(BessType type, ExchangeSetStandard exchangeSetStandard, string readMeSearchFilter, string keyFileType = "NONE")
         {
             configQueueMessage = new ConfigQueueMessage()
             {
@@ -942,8 +960,8 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 ExchangeSetStandard = exchangeSetStandard.ToString(),
                 EncCellNames = type == BessType.BASE ? new List<string> { "testcell" } : new string[] { "testcellforversion" },
                 Frequency = "30 13 * * *",
-                Type = type,
-                KeyFileType = !string.IsNullOrEmpty(KeyFileType) ? KeyFileType : "NONE",
+                Type = type.ToString(),
+                KeyFileType = keyFileType,
                 AllowedUsers = new string[] { "testuser" },
                 AllowedUserGroups = new string[] { "testgroup" },
                 Tags = new List<Tag> { new() { Key = "key1", Value = "value1" }, new() { Key = "key2", Value = "value2" } },

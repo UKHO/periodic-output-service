@@ -31,12 +31,12 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <param name="productName"></param>
         /// <param name="edition"></param>
         /// <returns></returns>
-        public ProductKeyServiceModel GetProductKeyServiceData(string? productName, int? edition)
+        public ProductKeyServiceModel GetProductKeyServiceData(string? productName, string? edition)
         {
             ProductKeyServiceModel = new ProductKeyServiceModel()
             {
-                ProductName = productName,
-                EditionNumber = edition,
+                productName = productName,
+                edition = edition,
             };
             return ProductKeyServiceModel;
         }

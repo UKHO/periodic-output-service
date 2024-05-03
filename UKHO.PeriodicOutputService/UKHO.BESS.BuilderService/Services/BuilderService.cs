@@ -67,6 +67,22 @@ namespace UKHO.BESS.BuilderService.Services
 
             await PerformAncillaryFilesOperationsAsync(essBatchId, exchangeSetPath, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter);
 
+            ProductVersionsRequest? latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+
+            if (!string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                List<ProductKeyServiceRequest> productKeyServiceRequest = new();
+
+                productKeyServiceRequest.AddRange(latestProductVersions.ProductVersions.Select(
+                    item => new ProductKeyServiceRequest()
+                    {
+                        ProductName = item.ProductName,
+                        Edition = item.EditionNumber.ToString()
+                    }));
+
+                List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
+            }
+
             //Temporary Upload Code
 
             #region TemporaryUploadCode
@@ -82,8 +98,6 @@ namespace UKHO.BESS.BuilderService.Services
             if (isBatchCreated)
             {
                 logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Bess batch created {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
-
-                ProductVersionsRequest? latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
 
                 if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                          configQueueMessage.Type == BessType.CHANGE.ToString())
@@ -250,19 +264,19 @@ namespace UKHO.BESS.BuilderService.Services
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
         {
             Parallel.ForEach(filePaths, filePath =>
-        {
-            IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
-
-            bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeType, batchType).Result;
-            if (isFileAdded)
             {
-                List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
-                if (blockIds.Count > 0)
+                IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
+
+                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeType, batchType).Result;
+                if (isFileAdded)
                 {
-                    bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
+                    List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
+                    if (blockIds.Count > 0)
+                    {
+                        bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
+                    }
                 }
-            }
-        });
+            });
         }
 
         [ExcludeFromCodeCoverage]
