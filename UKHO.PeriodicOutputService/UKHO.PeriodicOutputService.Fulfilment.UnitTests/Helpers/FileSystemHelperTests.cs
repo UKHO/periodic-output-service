@@ -150,13 +150,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
                 date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
                 cellkeys = new()
                 {
-                    response = new List<PKSResponse>()
+                    response = new List<ProductKeyServiceResponse>()
                     {
                         new()
                         {
-                            edition = 10,
-                            productName = "test",
-                            key = "12345"
+                            Edition = "10",
+                            ProductName = "test",
+                            Key = "12345"
                         }
                     },
                 }

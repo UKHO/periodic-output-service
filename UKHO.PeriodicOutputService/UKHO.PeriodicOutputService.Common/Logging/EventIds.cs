@@ -656,9 +656,34 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         ProductsFetchedFromESS = 809129,
 
         /// <summary>
+        /// 809130 - Macro is invalid or unavailable.
+        /// </summary>
+        MacroInvalidOrUnavailable = 809130,
+
+        /// <summary>
+        /// 809131 - Exception occurred while transforming macros.
+        /// </summary>
+        MacroTransformationFailed = 809131,
+
+        /// <summary>
+        /// 809132 - Post product data to PKS started.
+        /// </summary>
+        PostProductKeyDataToPksStarted = 809132,
+
+        /// <summary>
+        /// 809133 - Post product data to PKS completed.
+        /// </summary>
+        PostProductKeyDataToPksCompleted = 809133,
+
+        /// <summary>
+        /// 809134 - Post product data to PKS failed.
+        /// </summary>
+        PostProductKeyDataToPksFailed = 809134,
+
+        /// <summary>
         /// 809130 - Permit Decryption Exception
         /// </summary>
-        PermitDecryptionException = 809130
+        PermitDecryptionException = 809135
     }
 
     public static class EventIdExtensions

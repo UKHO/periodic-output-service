@@ -25,6 +25,7 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
+        private readonly IPksService pksService;
         private readonly IPermitDecryption permitDecryption;
 
         private const string BESPOKE_FILE_NAME = "V01X01";
@@ -35,13 +36,14 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly string mimeType = "application/zip";
         private readonly string homeDirectoryPath;
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IPermitDecryption permitDecryption)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IPksService pksService, IPermitDecryption permitDecryption)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
+            this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
 
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
@@ -65,18 +67,38 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Bess batch created {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
 
+                ProductVersionsRequest? latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+
                 if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                          configQueueMessage.Type == BessType.CHANGE.ToString())
                 {
-                    var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
                     LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
                 }
+
+                if (!string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    List<ProductKeyServiceRequest> productKeyServiceRequest = new();
+
+                    productKeyServiceRequest.AddRange(latestProductVersions.ProductVersions.Select(
+                        item => new ProductKeyServiceRequest()
+                        {
+                            ProductName = item.ProductName,
+                            Edition = item.EditionNumber.ToString()
+                        }));
+
+                    List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
+
+                    CreateKeyFile(configQueueMessage, essFileDownloadPath, productKeyServiceResponse);
+                }
+            }
+            else
+            {
+                logger.LogError(EventIds.EmptyBatchIdFound.ToEventId(), "Bess batch failed {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                throw new FulfilmentException(EventIds.EmptyBatchIdFound.ToEventId());
             }
 
             #endregion TemporaryUploadCode
-
-            CreateKeyFile(configQueueMessage, essFileDownloadPath);
-
+            
             return "Exchange Set Created Successfully";
         }
 
@@ -302,30 +324,23 @@ namespace UKHO.BESS.BuilderService.Services
             }
         }
 
-        private void CreateKeyFile(ConfigQueueMessage configQueueMessage, string filePath)
+        private void CreateKeyFile(ConfigQueueMessage configQueueMessage, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses)
         {
-            // Get PKS details from PKS server
-
-            List<PKSResponse> pksResponses = new()
-            {
-
-            };
-
             if (configQueueMessage.KeyFileType == "KEY_TEXT")
             {
                 int i = 0;
                 string permitTextFileContent = PermitTextFileHeader;
 
-                foreach (var pksResponse in pksResponses)
+                foreach (var productKeyServiceResponse in productKeyServiceResponses)
                 {
-                    PermitKey permitKey = permitDecryption.GetPermitKeys(pksResponse.key);
+                    PermitKey permitKey = permitDecryption.GetPermitKeys(productKeyServiceResponse.Key);
 
                     if (permitKey != null)
                     {
                         permitTextFileContent += Environment.NewLine;
-                        permitTextFileContent += $"{i++},{permitKey.ActiveKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active";
+                        permitTextFileContent += $"{i++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active";
                         permitTextFileContent += Environment.NewLine;
-                        permitTextFileContent += $"{i++},{permitKey.NextKey},{pksResponse.productName},{pksResponse.edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next";
+                        permitTextFileContent += $"{i++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next";
                     }
                 };
 
@@ -338,7 +353,7 @@ namespace UKHO.BESS.BuilderService.Services
                     date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
                     cellkeys = new()
                     {
-                        response = pksResponses,
+                        response = productKeyServiceResponses,
                     }
                 };
 

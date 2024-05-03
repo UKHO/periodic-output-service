@@ -22,6 +22,6 @@ namespace UKHO.PeriodicOutputService.Common.Models.Bess
     public class cellkeys
     {
         [XmlElement(ElementName = "cell")]
-        public List<PKSResponse> response { get; set; }
+        public List<ProductKeyServiceResponse> response { get; set; }
     }
 }

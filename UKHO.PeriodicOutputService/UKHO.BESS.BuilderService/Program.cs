@@ -127,6 +127,7 @@ namespace UKHO.BESS.BuilderService
                      serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                      serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
                      serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
+                     serviceCollection.Configure<PksApiConfiguration>(configuration.GetSection("PksApiConfiguration"));
                      serviceCollection.Configure<PermitConfiguration>(configuration.GetSection("PermitConfiguration"));
 
                      configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
@@ -150,6 +151,10 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
                  serviceCollection.AddScoped<IPermitDecryption, PermitDecryption>();
                  serviceCollection.AddScoped<IS63Crypt, S63Crypt>();
+
+                 serviceCollection.AddTransient<IPksApiClient, PksApiClient>();
+                 serviceCollection.AddSingleton<IAuthPksTokenProvider, AuthTokenProvider>();
+                 serviceCollection.AddScoped<IPksService, PksService>();
 
                  serviceCollection.AddHttpClient("DownloadClient",
                          httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
