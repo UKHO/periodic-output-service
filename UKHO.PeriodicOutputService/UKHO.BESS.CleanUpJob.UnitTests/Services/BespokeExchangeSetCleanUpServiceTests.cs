@@ -6,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.BESS.CleanUpJob.Configuration;
 using UKHO.BESS.CleanUpJob.Services;
-using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.BESS.CleanUpJob.UnitTests.Services
@@ -32,7 +31,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
             { NumberOfDays = 5 });
             fakeDateTime = DateTime.UtcNow.AddDays(-6);
 
-        bespokeExchangeSetCleanUpService = new BespokeExchangeSetCleanUpService(fakeConfiguration, fakeLogger, fakeCleanUpConfig, fakeFileSystem);
+            bespokeExchangeSetCleanUpService = new BespokeExchangeSetCleanUpService(fakeConfiguration, fakeLogger, fakeCleanUpConfig, fakeFileSystem);
         }
 
         [Test]
@@ -72,8 +71,8 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         [Test]
         public async Task WhenFolderPathsNotFound_ThenCleanupProcessIsNotRunned()
         {
-            A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(new string[] {});
-       
+            A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(new string[] { });
+
             await bespokeExchangeSetCleanUpService.CleanUpHistoricFoldersAndFiles();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -85,7 +84,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenHistoricFoldersAndFilesNotFound_ThenCleanupJobLogsError()
+        public async Task WhenHistoricFoldersAndFilesNotFound_ThenCleanupProcessIsNotRunned()
         {
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(fakeFilePath);
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(DateTime.UtcNow);
@@ -98,6 +97,23 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
             && call.GetArgument<EventId>(1) == EventIds.NoFoldersFound.ToEventId()
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No folders to delete based on the cleanup configured date - {historicDate} | DateTime: {DateTime} | Correlation ID: {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public async Task WhenHistoricFoldersDeletionFailed_ThenCleanupJobThrowsExceptionAndLogsError()
+        {
+            A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(fakeFilePath);
+            A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(fakeDateTime);
+            A.CallTo(() => fakeFileSystem.Directory.Delete(A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
+
+            await bespokeExchangeSetCleanUpService.CleanUpHistoricFoldersAndFiles();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<EventId>(1) == EventIds.FoldersDeletionFailed.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Could not delete folder: {folderName}. Either could not find the folder or unauthorized access to the folder | DateTime: {DateTime} | Error Message: {ErrorMessage} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappened();
         }
     }
 }
