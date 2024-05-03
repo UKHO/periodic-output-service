@@ -1,10 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using UKHO.BESS.CleanUpJob.Services;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.BESS.CleanUpJob
 {
+    [ExcludeFromCodeCoverage]
     public class BespokeExchangeSetCleanUpJob
     {
         private readonly ILogger<BespokeExchangeSetCleanUpJob> logger;
