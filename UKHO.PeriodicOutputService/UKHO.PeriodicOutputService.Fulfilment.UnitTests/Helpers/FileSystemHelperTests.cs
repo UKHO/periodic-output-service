@@ -183,6 +183,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_ReadFileText_Executes_Successfully()
         {
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+
             _fileSystemHelper.ReadFileText(filePath);
 
             A.CallTo(() => _fakefileSystem.File.ReadAllText(filePath))
@@ -193,6 +195,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_CreateFileContent_Executes_Successfully_WhenContentIsPresent()
         {
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+
             _fileSystemHelper.CreateFileContent(filePath, content);
 
             A.CallTo(() => _fakefileSystem.File.WriteAllText(filePath, content))
@@ -203,6 +207,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         public void Does_CreateFileContent_Execution_Fails_WhenContentIsNotPresent()
         {
             content = "";
+
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+
             _fileSystemHelper.CreateFileContent(filePath, content);
 
             A.CallTo(() => _fakefileSystem.File.WriteAllText(filePath, content))
@@ -212,6 +219,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_DeleteFile_Executes_Successfully()
         {
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+
             _fileSystemHelper.DeleteFile(filePath);
 
             A.CallTo(() => _fakefileSystem.File.Delete(filePath))
@@ -222,6 +231,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_DeleteFolder_Executes_Successfully()
         {
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
+
             _fileSystemHelper.DeleteFolder(filePath);
 
             A.CallTo(() => _fakefileSystem.Directory.Delete(filePath))
