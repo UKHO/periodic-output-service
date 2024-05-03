@@ -47,25 +47,17 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         }
 
         /// <summary>
-        /// This method is used to generate random number
-        /// </summary>
-        /// <returns></returns>
-        public static int RandomNumber()
-        {
-            Random rnd = new Random();
-            return rnd.Next(00000, 99999);
-        }
-
-        /// <summary>
         /// This Method is use to delete bessproductversiondetails azure table entries.
         /// </summary>
         /// <param name="connectionString"></param>
         /// <param name="tableName"></param>
-        public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? Products, string? exchangeSetStandard)
+        /// <param name="products"></param>
+        /// <param name="exchangeSetStandard"></param>
+        public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products, string? exchangeSetStandard)
         {
-            TableClient tableClient = new TableClient(connectionString, tableName);
+            TableClient tableClient = new(connectionString, tableName);
 
-            foreach(string product in Products!)
+            foreach(string product in products!)
             {
                 await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard+"|"+product);
             }

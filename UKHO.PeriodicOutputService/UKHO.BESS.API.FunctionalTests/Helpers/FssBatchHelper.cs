@@ -124,6 +124,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// </summary>
         /// <param name="downloadFolderPath"></param>
         /// <param name="exchangeSetStandard"></param>
+        /// <param name="emptyZip"></param>
         /// <returns></returns>
         public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63", bool emptyZip = false)
         {
