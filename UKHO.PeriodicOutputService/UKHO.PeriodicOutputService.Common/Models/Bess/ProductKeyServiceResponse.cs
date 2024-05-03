@@ -9,6 +9,7 @@ namespace UKHO.PeriodicOutputService.Common.Models.Bess
         [JsonProperty("productName")]
         public string ProductName { get; set; }
 
+        [XmlElement(ElementName = "edition")]
         [JsonProperty("edition")]
         public string Edition { get; set; }
 

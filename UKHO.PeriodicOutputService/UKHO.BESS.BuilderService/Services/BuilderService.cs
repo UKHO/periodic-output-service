@@ -98,7 +98,7 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             #endregion TemporaryUploadCode
-            
+
             return "Exchange Set Created Successfully";
         }
 
@@ -255,7 +255,7 @@ namespace UKHO.BESS.BuilderService.Services
                 }
             }
         });
-        }        
+        }
         #endregion
 
         [ExcludeFromCodeCoverage]
@@ -337,10 +337,12 @@ namespace UKHO.BESS.BuilderService.Services
 
                     if (permitKey != null)
                     {
+                        string date = DateTime.UtcNow.ToString("yyyy/MM/dd", CultureInfo.InvariantCulture);
+
                         permitTextFileContent += Environment.NewLine;
-                        permitTextFileContent += $"{i++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,1:Active";
+                        permitTextFileContent += $"{i++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,1:Active";
                         permitTextFileContent += Environment.NewLine;
-                        permitTextFileContent += $"{i++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{DateTime.UtcNow:yyyy/MM/dd},{DateTime.UtcNow:yyyy/MM/dd},,2:Next";
+                        permitTextFileContent += $"{i++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,2:Next";
                     }
                 };
 
