@@ -1,8 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
+using UKHO.PeriodicOutputService.Common.Extensions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
@@ -19,9 +23,11 @@ namespace UKHO.BESS.BuilderService.Services
     {
         private readonly IEssService essService;
         private readonly IFssService fssService;
+        private readonly IConfiguration configuration;
         private readonly IFileSystemHelper fileSystemHelper;
         private readonly ILogger<BuilderService> logger;
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
+        private readonly IOptions<FssApiConfiguration> fssApiConfig;
 
         private const string BESPOKE_FILE_NAME = "V01X01";
         private readonly string homeDirectoryPath;
@@ -37,23 +43,29 @@ namespace UKHO.BESS.BuilderService.Services
         };
         private const string DEFAULTMIMETYPE = "application/octet-stream";
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
+            this.configuration = configuration;
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
+            this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
 
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
+
         }
 
         public async Task<bool> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
+
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+
+            await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath);
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
@@ -80,7 +92,6 @@ namespace UKHO.BESS.BuilderService.Services
             else if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                      configQueueMessage.Type == BessType.CHANGE.ToString())
             {
-
                 var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
                 var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(), configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
@@ -225,8 +236,8 @@ namespace UKHO.BESS.BuilderService.Services
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
         {
             Parallel.ForEach(filePaths, filePath =>
-        {
-            IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
+            {
+                IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
 
             bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
             if (isFileAdded)
@@ -295,7 +306,6 @@ namespace UKHO.BESS.BuilderService.Services
                 azureTableStorageHelper.SaveBessProductVersionDetailsAsync(productVersionsRequest.ProductVersions, name, exchangeSetStandard);
 
                 logger.LogInformation(EventIds.LoggingProductVersionsCompleted.ToEventId(), "Logging product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
             }
             catch (Exception ex)
             {
@@ -303,6 +313,104 @@ namespace UKHO.BESS.BuilderService.Services
 
                 throw new Exception($"Logging Product version failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
             }
+        }
+
+        private async Task PerformAncillaryFilesOperationsAsync(string batchId, ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
+        {
+            string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, fssApiConfig.Value.BespokeExchangeSetFileFolder);
+            string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
+            string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
+            await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+
+            string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.Info);
+            string serialFilePath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.SerialFileName);
+            string productFilePath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);
+
+            await UpdateSerialFileAsync(serialFilePath, configQueueMessage.Type, configQueueMessage.CorrelationId);
+
+            await DeleteProductTxtAndInfoFolderAsync(productFilePath, exchangeSetInfoPath, configQueueMessage.CorrelationId);
+        }
+
+        private async Task CreateReadMeFileAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
+        {
+            if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
+            {
+                return;
+            }
+
+            if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
+            {
+                fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
+            }
+            else
+            {
+                await DownloadReadMeFileAsync(batchId, exchangeSetRootPath, correlationId, readMeSearchFilter);
+            }
+        }
+
+        private async Task<bool> DownloadReadMeFileAsync(string batchId, string exchangeSetRootPath, string correlationId, string readMeSearchFilter)
+        {
+            bool isDownloadReadMeFileSuccess = false;
+            string readMeFilePath = await logger.LogStartEndAndElapsedTimeAsync(EventIds.QueryFileShareServiceReadMeFileRequestStart,
+                  EventIds.QueryFileShareServiceReadMeFileRequestCompleted,
+                  "File share service search query request for readme.txt file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
+                  async () => await fssService.SearchReadMeFilePathAsync(batchId, correlationId, readMeSearchFilter),
+               batchId, correlationId);
+
+            if (!string.IsNullOrWhiteSpace(readMeFilePath))
+            {
+                isDownloadReadMeFileSuccess = await logger.LogStartEndAndElapsedTimeAsync(EventIds.DownloadReadMeFileRequestStart,
+                   EventIds.DownloadReadMeFileRequestCompleted,
+                   "File share service download request for readme.txt file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
+                   async () => await fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, correlationId),
+                batchId, correlationId);
+            }
+
+            return isDownloadReadMeFileSuccess;
+        }
+
+        private async Task UpdateSerialFileAsync(string serialFilePath, string exchangeSetType, string correlationId)
+        {
+            try
+            {
+                string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
+                const string searchText = "UPDATE";
+
+                if (serialFileContent.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
+
+                    fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
+
+                    logger.LogInformation(EventIds.BessSerialEncUpdated.ToEventId(), "SERIAL.ENC file updated with Type: {exchangeSetType} | _X-Correlation-ID:{CorrelationId}", exchangeSetType, correlationId);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.BessSerialEncUpdateFailed.ToEventId(), "SERIAL.ENC file update operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.BessSerialEncUpdateFailed.ToEventId());
+            }
+
+            await Task.CompletedTask;
+        }
+
+        private async Task DeleteProductTxtAndInfoFolderAsync(string productFilePath, string infoFolderPath, string correlationId)
+        {
+            try
+            {
+                fileSystemHelper.DeleteFile(productFilePath);
+
+                fileSystemHelper.DeleteFolder(infoFolderPath);
+
+                logger.LogInformation(EventIds.BessProductTxtAndInfoFolderDeleted.ToEventId(), "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}", correlationId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId(), "PRODUCT.TXT file and INFO folder delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId());
+            }
+
+            await Task.CompletedTask;
         }
     }
 }

@@ -79,7 +79,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
             Assert.Multiple(() =>
             {
-                Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
+                Assert.That(response?.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
                 Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
                 Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
             });
@@ -113,8 +113,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             Assert.Multiple(() =>
             {
-                Assert.That(response.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
-                Assert.That(response.RequestedProductsNotInExchangeSet, !Is.Null);
+                Assert.That(response?.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
+                Assert.That(response?.RequestedProductsNotInExchangeSet, !Is.Null);
             });
 
             A.CallTo(_fakeLogger).Where(call =>
@@ -238,8 +238,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             ExchangeSetResponseModel response = await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"));
             Assert.Multiple(() =>
             {
-                Assert.That(response.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
-                Assert.That(response.RequestedProductsNotInExchangeSet, !Is.Null);
+                Assert.That(response?.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
+                Assert.That(response?.RequestedProductsNotInExchangeSet, !Is.Null);
             });
 
             A.CallTo(_fakeLogger).Where(call =>

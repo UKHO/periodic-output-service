@@ -431,7 +431,61 @@ stages:
             displayName: "Publish WebAPI Artifact"
             inputs:
               PathtoPublish: '$(Build.ArtifactStagingDirectory)\MockWebAPI'
-              ArtifactName: MockWebAPI 
+              ArtifactName: MockWebAPI
+
+      - job: BuildAndPublishPKSWireMockAPI
+        workspace:
+          clean: all
+        displayName: "Build and Publish PKSWireMock API"
+        steps:
+          - task: PowerShell@2
+            displayName: "Set assembly version numbers based on build ID"
+            inputs:
+              targetType: filePath
+              filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
+              arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.PKSWireMockService.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
+
+          - task: UseDotNet@2
+            displayName: 'Use .NET SDK'
+            inputs:
+              packageType: sdk
+              useGlobalJson: true
+              workingDirectory: '$(Build.SourcesDirectory)'
+
+          - task: DotNetCoreCLI@2
+            displayName: ".Net Core - NuGet restore"
+            inputs:
+              command: restore
+              projects: |
+                **/*.csproj
+              feedsToUse: config
+              noCache: true
+              nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PKSWireMockService.API'
+
+          - task: DotNetCoreCLI@2
+            displayName: "dotnet build task"
+            inputs:
+              command: "build"
+              projects: "**/*UKHO.PKSWireMock.API.csproj"
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
+              workingDirectory: '$(Build.SourcesDirectory)\UKHO.PKSWireMockService.API'
+
+          - task: DotNetCoreCLI@2
+            displayName: "Publish PKSWireMock WebAPI"
+            inputs:
+              command: "publish"
+              publishWebProjects: false
+              projects: '**/*UKHO.PKSWireMock.API.csproj'
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PKSWireMockWebAPI'
+              zipAfterPublish: true
+              modifyOutputPath: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: "Publish PKSWireMock WebAPI Artifact"
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)\PKSWireMockWebAPI'
+              ArtifactName: PKSWireMockWebAPI
      
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
@@ -592,12 +646,12 @@ stages:
 
       - job: BESSFunctionalTests
         dependsOn:
-        - DevDeployApp
-        - CheckInfra
-        - CheckFSS
-        - CheckESS
-        - CheckFM
-        - POSFunctionalTests 
+         - DevDeployApp
+         - CheckInfra
+         - CheckFSS
+         - CheckESS
+         - CheckFM
+         - POSFunctionalTests 
         pool: NautilusBuild
         displayName: "Dev BESS Functional Automated Tests"
         workspace:
@@ -613,7 +667,29 @@ stages:
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
           - name: RGName
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
+          - name: BessStorageConfiguration.ConnectionString
+            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
         steps:
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download Terraform Artifact"
+                  condition: always()
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'devterraformartifact'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: AzureCLI@2
+                  displayName: "Swap Storage Container Configuration"
+                  condition: always()
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
+                    arguments: '-containername $(BessStorageConfiguration.ContainerName) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download BESS Functional test Artifact"
                   inputs:
@@ -646,24 +722,15 @@ stages:
                     testRunTitle: "Dev-BESSAutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
 
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download Terraform Artifact"
-                  condition: always()
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'devterraformartifact'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
                 - task: AzureCLI@2
-                  displayName: "Swap Stub and Webjob Configuration"
+                  displayName: "Swap Storage Container Configuration"
                   condition: always()
                   inputs:
                     azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/set_stub_webjob_configuration.ps1"
-                    arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME) -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
+                    arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
   - stage: QAdeploy
     dependsOn: Devdeploy
@@ -842,7 +909,30 @@ stages:
             value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
           - name: RGName
             value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
+          - name: BessStorageConfiguration.ConnectionString
+            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
+
         steps:
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download Terraform Artifact"
+                  condition: always()
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'qaliveterraformartifact'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: AzureCLI@2
+                  displayName: "Swap Storage Container Configuration"
+                  condition: always()
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-QA-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/swap_container_config.ps1"
+                    arguments: '-containername $(BessStorageConfiguration.ContainerName) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download BESS Functional test Artifact"
                   inputs:
@@ -875,34 +965,15 @@ stages:
                     testRunTitle: "QA-BESSAutomationTests"
                     workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
 
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download Terraform Artifact"
-                  condition: always()
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'qaliveterraformartifact'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
                 - task: AzureCLI@2
-                  displayName: "Swap Webjob Configuration"
+                  displayName: "Swap Storage Container Configuration"
                   condition: always()
                   inputs:
                     azureSubscription: "Exchange-Set-Service-QA-A-008-02"
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_webjob_configuration.ps1"
-                    arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl_PostFT) -fssapibaseurl $(FSSApiConfiguration.BaseUrl_PostFT) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl_PostFT) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime_PostFT) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
-                - task: AzureCLI@2
-                  displayName: "Swap Stub Configuration"
-                  condition: always()
-                  inputs:
-                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                    scriptType: 'pscore'
-                    scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/set_stub_configuration.ps1"
-                    arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath_PostFT) -ftrunning "false" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
+                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/swap_container_config.ps1"
+                    arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
   - stage: Livedeploy
     displayName: "Livedeploy (inc terraform, webapp deploy)"
@@ -1061,6 +1132,25 @@ stages:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
 
+      - job: vNextIATSetup
+        displayName: "Set Webjob Configuration For vNextIAT"
+        dependsOn: vNextIATDeployApp
+        variables:
+          - name: WEB_APP_NAME
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.WEBAPP']  ]
+          - name: RGName
+            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.ResourceGroup']  ]
+        steps:
+          - task: AzureCLI@2
+            displayName: "Swap Webjob Configuration"
+            condition: always()
+            inputs:
+              azureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: "$(Build.SourcesDirectory)/vNextIATDeployment/set_webjob_configuration.ps1"
+              arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
       - job: CheckInfra
         displayName: "Check Infrastructure Health"
         dependsOn: vNextIATDeployApp
@@ -1149,6 +1239,25 @@ stages:
                   parameters:
                     ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
                     AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+
+      - job: vNextE2ESetup
+        displayName: "Set Webjob Configuration For vNextE2E"
+        dependsOn: vNextE2EDeployApp
+        variables:
+          - name: WEB_APP_NAME
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.WEBAPP']  ]
+          - name: RGName
+            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.ResourceGroup']  ]
+        steps:
+          - task: AzureCLI@2
+            displayName: "Swap Webjob Configuration"
+            condition: always()
+            inputs:
+              azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+              scriptType: 'pscore'
+              scriptLocation: 'scriptPath'
+              scriptPath: "$(Build.SourcesDirectory)/vNextE2EDeployment/set_webjob_configuration.ps1"
+              arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
       - job: CheckInfra
         displayName: "Check Infrastructure Health"

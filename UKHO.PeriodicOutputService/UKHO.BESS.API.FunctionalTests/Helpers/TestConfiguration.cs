@@ -23,6 +23,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? s57ExchangeSetStandard { get; set; }
             public string? TempFolderName { get; set; }
             public List<string>? ProductsName { get; set; }
+            public string? Identifiers { get; set; }
         }
 
         public class SharedKeyConfiguration
@@ -51,6 +52,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
         public class BessStorageConfiguration
         {
+            public string? ConnectionString { get; set; }
+            public string? ContainerName { get; set; }
             public string? QueueName { get; set; }
         }
 
@@ -62,6 +65,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? ExchangeSetProductFilePath { get; set; }
             public string? ExchangeSetEncRootFolder { get; set; }
             public string? ExchangeSetCatalogueFile { get; set; }
+            public string? ExchangeSetSerialEncFile { get; set; }
         }
 
         public TestConfiguration()
