@@ -711,19 +711,39 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         QueryFileShareServiceMultipleFilesFound = 809140,
 
         /// <summary>
-        /// 809141 - Post product data to PKS started.
+        /// 809141 - Serial.ENC file updated with Type from configuration
         /// </summary>
-        PostProductKeyDataToPksStarted = 809141,
+        BessSerialEncUpdated = 809141,
 
         /// <summary>
-        /// 809142 - Post product data to PKS completed.
+        /// 809142 - PRODUCT.TXT file and INFO folder deleted
         /// </summary>
-        PostProductKeyDataToPksCompleted = 809142,
+        BessProductTxtAndInfoFolderDeleted = 809142,
 
         /// <summary>
-        /// 809143 - Post product data to PKS failed.
+        /// 809143 - SERIAL.ENC file update operation failed
         /// </summary>
-        PostProductKeyDataToPksFailed = 809140
+        BessSerialEncUpdateFailed = 809143,
+
+        /// <summary>
+        /// 809144 - PRODUCT.TXT file and INFO folder delete operation failed
+        /// </summary>
+        BessProductTxtAndInfoFolderDeleteFailed = 809144,
+
+        /// <summary>
+        /// 809145 - Post product data to PKS started.
+        /// </summary>
+        PostProductKeyDataToPksStarted = 809145,
+
+        /// <summary>
+        /// 809146 - Post product data to PKS completed.
+        /// </summary>
+        PostProductKeyDataToPksCompleted = 809146,
+
+        /// <summary>
+        /// 809147 - Post product data to PKS failed.
+        /// </summary>
+        PostProductKeyDataToPksFailed = 809147
     }
 
     public static class EventIdExtensions
