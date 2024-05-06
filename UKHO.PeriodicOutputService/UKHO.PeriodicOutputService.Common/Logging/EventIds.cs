@@ -711,29 +711,48 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         QueryFileShareServiceMultipleFilesFound = 809140,
 
         /// <summary>
-        /// 809141 - Bespoke exchange set cleanup web job is started.
+        /// 809141 - Serial.ENC file updated with Type from configuration
         /// </summary>
-        BESSCleanUpJobRequestStarted = 809141,
+        BessSerialEncUpdated = 809141,
 
         /// <summary>
-        /// 809142 - Bespoke exchange set cleanup web job is completed.
+        /// 809142 - PRODUCT.TXT file and INFO folder deleted
         /// </summary>
-        BESSCleanUpJobRequestCompleted = 809142,
+        BessProductTxtAndInfoFolderDeleted = 809142,
 
         /// <summary>
-        /// 809143 - Deletion of folders failed.
+        /// 809143 - SERIAL.ENC file update operation failed
         /// </summary>
-        FoldersDeletionFailed = 809143,
+        BessSerialEncUpdateFailed = 809143,
 
         /// <summary>
-        /// 809144 - No folders found.
+        /// 809144 - PRODUCT.TXT file and INFO folder delete operation failed
         /// </summary>
-        NoFoldersFound = 809144,
+        BessProductTxtAndInfoFolderDeleteFailed = 809144,
+        /// <summary>
+        /// 809145 - Bespoke exchange set cleanup web job is started.
+        /// </summary>
+        BESSCleanUpJobRequestStarted = 809145,
 
         /// <summary>
-        /// 809145 - CleanUp successful.
+        /// 809146 - Bespoke exchange set cleanup web job is completed.
         /// </summary>
-        CleanUpSuccessful = 809145
+        BESSCleanUpJobRequestCompleted = 809146,
+
+        /// <summary>
+        /// 809147 - Deletion of folders failed.
+        /// </summary>
+        FoldersDeletionFailed = 809147,
+
+        /// <summary>
+        /// 809148 - No folders found.
+        /// </summary>
+        NoFoldersFound = 809148,
+
+        /// <summary>
+        /// 809149 - CleanUp successful.
+        /// </summary>
+        CleanUpSuccessful = 809149
     }
 
     public static class EventIdExtensions

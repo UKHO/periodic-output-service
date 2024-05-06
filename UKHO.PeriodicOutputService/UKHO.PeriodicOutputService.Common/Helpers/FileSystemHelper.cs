@@ -178,5 +178,41 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             fileStream.CopyTo(outputFileStream);
             return true;
         }
+
+        public string ReadFileText(string filePath)
+        {
+            if (_fileSystem.File.Exists(filePath))
+            {
+                return _fileSystem.File.ReadAllText(filePath);
+            }
+            return string.Empty;
+        }
+
+        public bool CreateFileContent(string filePath, string content)
+        {
+            if (string.IsNullOrWhiteSpace(content) || !_fileSystem.File.Exists(filePath))
+            {
+                return false;
+            }
+            _fileSystem.File.WriteAllText(filePath, content);
+
+            return true;
+        }
+
+        public void DeleteFile(string filePath)
+        {
+            if (_fileSystem.File.Exists(filePath))
+            {
+                _fileSystem.File.Delete(filePath);
+            }
+        }
+
+        public void DeleteFolder(string folderPath)
+        {
+            if (_fileSystem.Directory.Exists(folderPath))
+            {
+                _fileSystem.Directory.Delete(folderPath);
+            }
+        }
     }
 }
