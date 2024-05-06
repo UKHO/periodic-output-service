@@ -17,7 +17,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
         public void SetupAsync()
         {
             productVersionData = new List<ProductVersionModel>();
-            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, "Identifiers");
+            HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.Identifiers);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 
@@ -45,7 +45,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.EssIntegration
             dataHelper.GetProductVersionData(testConfiguration.authTokenConfig.ProductName, testConfiguration.authTokenConfig.EditionNumber, testConfiguration.authTokenConfig.UpdateNumber)
             };
 
-            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductVersionsEndpoint(testConfiguration.authTokenConfig.BaseUrl, productVersionData, testConfiguration.bessConfig.s57ExchangeSetStandard, true);
+            HttpResponseMessage apiResponse = await EssEndpointHelper.ProductVersionsEndpoint(testConfiguration.authTokenConfig.BaseUrl, productVersionData, testConfiguration.bessConfig.s57ExchangeSetStandard);
             apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
 

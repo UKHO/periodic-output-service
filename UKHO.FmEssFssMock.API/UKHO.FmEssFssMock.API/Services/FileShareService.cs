@@ -1,4 +1,6 @@
 ﻿using System.Globalization;
+using Microsoft.Extensions.Options;
+using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Helpers;
 using UKHO.FmEssFssMock.API.Models.Response;
 using UKHO.FmEssFssMock.Enums;
@@ -7,15 +9,24 @@ namespace UKHO.FmEssFssMock.API.Services
 {
     public class FileShareService
     {
-        private readonly string _aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";
+        private readonly IOptions<FileShareServiceConfiguration> fssConfiguration;
+        private readonly string aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";  
         private readonly Dictionary<string, string> mimeTypes = new()
         {
             { ".zip", "application/zip" },
             { ".xml", "text/xml" },
             { ".csv", "text/csv" },
             { ".iso", "application/x-raw-disk-image" },
-            { ".sha1", "text/plain" }
+            { ".sha1", "text/plain" },
+            { ".txt", "text/plain" }
         };
+
+        private readonly Enum[] besBatchTypes = new Enum[]
+                                     {
+                                            Batch.BesBaseZipBatch,
+                                            Batch.BesChangeZipBatch,
+                                            Batch.BesUpdateZipBatch
+                                     };
 
         private readonly Enum[] aioBatchTypes = new Enum[]
                                      {
@@ -26,6 +37,16 @@ namespace UKHO.FmEssFssMock.API.Services
                                      };
 
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
+        private readonly string besSingleReadmeFileBatchId = "AB4A692D-6E3B-48A3-BD37-D232C60DD75D";
+        private readonly string besMultipleFilesBatchId = "10D40DD5-DDFB-497A-BB67-D99FB1658320";
+        private const string BESPOKEREADME = "BESPOKE README";
+        private const string MULTIPLEFILES = "MULTIPLE";
+
+        public FileShareService(IOptions<FileShareServiceConfiguration> fssConfig)
+        {
+            fssConfiguration = fssConfig;
+        }
+
         public BatchResponse CreateBatch(IEnumerable<KeyValuePair<string, string>> attributes, string homeDirectoryPath)
         {
             string attributeValue = attributes.FirstOrDefault(a => a.Key.ToLower() == "batch type").Value.ToLower();
@@ -72,6 +93,44 @@ namespace UKHO.FmEssFssMock.API.Services
                     }
                 });
             }
+
+            //BES - batch attributes from Queue message - start
+
+            if (besBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)))
+            {
+                ConfigQueueMessage message = new()
+                {
+                    AllowedUserGroups = new List<string> { "FSS/BESS-Port of London" },
+                    AllowedUsers = new List<string> { "FSS/BESS-Port of London" },
+                    BatchExpiryInDays = 7,
+                    Tags = new List<Tag> {
+                            new() { Key = "Audience", Value = "Port of London" },
+                            new() { Key = "Frequency",Value="Weekly" },
+                            new() { Key = "Year", Value = "2024" },
+                            new() { Key = "Week Number", Value = "16" },
+                            new() { Key = "Year / Week", Value = "2024 / 16" }
+                }
+                };
+
+                List<KeyValuePair<string, string>> batchAttributes = new();
+
+                foreach (Tag tag in message.Tags)
+                {
+                    batchAttributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
+                }
+
+                return new BatchDetail
+                {
+                    BatchId = batchId,
+                    Status = GetBatchStatus(path),
+                    BusinessUnit = "AVCSCustomExchangeSets",
+                    ExpiryDate = DateTime.UtcNow.AddDays(message.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Attributes = batchAttributes,
+                    Files = files
+                };
+            }
+
+            //BES - batch attributes from Queue message - end
 
             List<KeyValuePair<string, string>> attributes = new()
             {
@@ -197,26 +256,21 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private static string GetBatchStatus(string path) => File.Exists(Path.Combine(path, "CommitInProgress.txt")) ? "CommitInProgress" : "Committed";
 
-        public SearchBatchResponse GetBatchResponse(string filter, string filePath, string homeDirectoryPath)
+        public SearchBatchResponse GetBatchResponse(string filter, string homeDirectoryPath)
         {
             if (filter.ToUpper().Contains("AIO CD INFO"))
             {
-                FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, _aioInfoFilesBatchId));
-
-                string path = Path.Combine(Environment.CurrentDirectory, @"Data", _aioInfoFilesBatchId);
-                foreach (string fullfilePath in Directory.GetFiles(path))
-                {
-                    FileInfo file = new(fullfilePath);
-
-                    bool isFileAdded = AddFile(_aioInfoFilesBatchId, file.Name, homeDirectoryPath);
-
-                    if (!isFileAdded)
-                    {
-                        return null;
-                    }
-                }
-                return FileHelper.ReadJsonFile<SearchBatchResponse>(filePath);
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssInfoResponseFileName, aioInfoFilesBatchId);
             }
+            else if (filter.ToUpper().Contains(BESPOKEREADME))
+            {
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName, besSingleReadmeFileBatchId);
+            }
+            else if (filter.ToUpper().Contains(MULTIPLEFILES))
+            {
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName, besMultipleFilesBatchId);
+            }
+
             return new SearchBatchResponse()
             {
                 Entries = new List<BatchDetail>(),
@@ -228,6 +282,26 @@ namespace UKHO.FmEssFssMock.API.Services
                     },
                 }
             };
+        }
+
+        private SearchBatchResponse GetSearchBatchResponse(string homeDirectoryPath, string responseFileName, string batchId)
+        {
+            string responseFilePath = Path.Combine(fssConfiguration.Value.FssDataDirectoryPath, responseFileName);
+            FileHelper.CheckAndCreateFolder(Path.Combine(homeDirectoryPath, batchId));
+
+            string path = Path.Combine(Environment.CurrentDirectory, @"Data", batchId);
+            foreach (string filePath in Directory.GetFiles(path))
+            {
+                FileInfo file = new(filePath);
+
+                bool isFileAdded = AddFile(batchId, file.Name, homeDirectoryPath);
+
+                if (!isFileAdded)
+                {
+                    return null;
+                }
+            }
+            return FileHelper.ReadJsonFile<SearchBatchResponse>(responseFilePath);
         }
     }
 }
