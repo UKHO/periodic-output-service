@@ -713,7 +713,27 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809140 - Multiple files found while searching readme.txt file from the file share service.
         /// </summary>
-        QueryFileShareServiceMultipleFilesFound = 809140
+        QueryFileShareServiceMultipleFilesFound = 809140,
+
+        /// <summary>
+        /// 809141 - Serial.ENC file updated with Type from configuration
+        /// </summary>
+        BessSerialEncUpdated = 809141,
+
+        /// <summary>
+        /// 809142 - PRODUCT.TXT file and INFO folder deleted
+        /// </summary>
+        BessProductTxtAndInfoFolderDeleted = 809142,
+
+        /// <summary>
+        /// 809143 - SERIAL.ENC file update operation failed
+        /// </summary>
+        BessSerialEncUpdateFailed = 809143,
+
+        /// <summary>
+        /// 809144 - PRODUCT.TXT file and INFO folder delete operation failed
+        /// </summary>
+        BessProductTxtAndInfoFolderDeleteFailed = 809144
     }
 
     public static class EventIdExtensions
