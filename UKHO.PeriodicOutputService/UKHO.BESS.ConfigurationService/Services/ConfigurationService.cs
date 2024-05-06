@@ -33,6 +33,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         private const string NewLine = "\n";
         private const string Colon = ": ";
         private const string IsEnabled = "IsEnabled";
+        private const bool IsExecuted = false;
 
         public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient,
                                     IAzureTableStorageHelper azureTableStorageHelper,
@@ -167,7 +168,6 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="json"></param>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         private (BessConfig config, bool isValid) DeserializeConfig(string json, string fileName)
         {
             BessConfig bessConfig = new();
@@ -199,7 +199,6 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// Remove duplicate configs
         /// </summary>
         /// <param name="bessConfigs"></param>
-        [ExcludeFromCodeCoverage]
         private void RemoveDuplicateConfigs(List<BessConfig> bessConfigs)
         {
             //find duplicates with property Name
@@ -291,7 +290,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {   //Update schedule details
                         if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
                         {
-                            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, false);
+                            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, IsExecuted);
                         }
                     }
                 }
@@ -311,7 +310,6 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="nextOccurrence"></param>
         /// <param name="bessConfig"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         private static bool IsScheduleRefreshed(ScheduleDetailEntity scheduleDetailEntity, DateTime nextOccurrence, BessConfig bessConfig) => scheduleDetailEntity.NextScheduleTime != nextOccurrence || scheduleDetailEntity.IsEnabled != bessConfig.IsEnabled;
 
         /// <summary>
@@ -320,7 +318,6 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="bessConfig"></param>
         /// <param name="scheduleDetailEntity"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         private static bool CheckSchedule(BessConfig bessConfig, ScheduleDetailEntity scheduleDetailEntity)
         {
             int intervalInMinutes = ((int)scheduleDetailEntity.NextScheduleTime.Subtract(DateTime.UtcNow).TotalSeconds);
@@ -335,7 +332,6 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="nextOccurrence"></param>
         /// <param name="bessConfig"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         private async Task<ScheduleDetailEntity> GetScheduleDetailAsync(DateTime nextOccurrence, BessConfig bessConfig)
         {
             var existingScheduleDetail = await azureTableStorageHelper.GetScheduleDetailAsync(bessConfig.Name);
@@ -345,7 +341,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 return existingScheduleDetail;
             }
 
-            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, bessConfig, false);
+            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, bessConfig, IsExecuted);
 
             ScheduleDetailEntity scheduleDetailEntity = new();
             {
@@ -363,7 +359,6 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// <param name="encCellNames"></param>
         /// <param name="salesCatalogueProducts"></param>
         /// <returns></returns>
-        [ExcludeFromCodeCoverage]
         private IEnumerable<(string, int?)> GetEncCells(IEnumerable<string> encCellNames, IEnumerable<SalesCatalogueDataProductResponse> salesCatalogueProducts)
         {
             //filter provided prefix patterns
