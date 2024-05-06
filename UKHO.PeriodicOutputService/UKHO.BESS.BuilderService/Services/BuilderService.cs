@@ -64,7 +64,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            bool isBatchCreated = false;
+            bool isBatchCreated;
             if (bool.Parse(configuration["IsFTRunning"]))
             {
                 isBatchCreated = await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
