@@ -11,11 +11,11 @@ using UKHO.PeriodicOutputService.Common.Logging;
 namespace UKHO.BESS.CleanUpJob.UnitTests.Services
 {
     [TestFixture]
-    public class BespokeExchangeSetCleanUpServiceTests
+    public class BessCleanUpServiceTests
     {
-        private BespokeExchangeSetCleanUpService bespokeExchangeSetCleanUpService;
+        private CleanUpService bessCleanUpService;
         private IFileSystem fakeFileSystem;
-        private ILogger<BespokeExchangeSetCleanUpService> fakeLogger;
+        private ILogger<CleanUpService> fakeLogger;
         private IOptions<CleanUpConfiguration> fakeCleanUpConfig;
         private IConfiguration fakeConfiguration;
         public string[] fakeFilePath = { @"D:\\Downloads", @"D:\\test", @"D:\\test1" };
@@ -24,29 +24,29 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         [SetUp]
         public void Setup()
         {
-            fakeLogger = A.Fake<ILogger<BespokeExchangeSetCleanUpService>>();
+            fakeLogger = A.Fake<ILogger<CleanUpService>>();
             fakeConfiguration = A.Fake<IConfiguration>();
             fakeFileSystem = A.Fake<IFileSystem>();
             fakeCleanUpConfig = Options.Create(new CleanUpConfiguration()
             { NumberOfDays = 5 });
             fakeDateTime = DateTime.UtcNow.AddDays(-6);
 
-            bespokeExchangeSetCleanUpService = new BespokeExchangeSetCleanUpService(fakeConfiguration, fakeLogger, fakeCleanUpConfig, fakeFileSystem);
+            bessCleanUpService = new CleanUpService(fakeConfiguration, fakeLogger, fakeCleanUpConfig, fakeFileSystem);
         }
 
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullLogger = () => new BespokeExchangeSetCleanUpService(fakeConfiguration, null, fakeCleanUpConfig, fakeFileSystem);
+            Action nullLogger = () => new CleanUpService(fakeConfiguration, null, fakeCleanUpConfig, fakeFileSystem);
             nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
 
-            Action nullCleanupConfiguration = () => new BespokeExchangeSetCleanUpService(fakeConfiguration, fakeLogger, null, fakeFileSystem);
+            Action nullCleanupConfiguration = () => new CleanUpService(fakeConfiguration, fakeLogger, null, fakeFileSystem);
             nullCleanupConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("cleanUpConfig");
 
-            Action nullFileSystem = () => new BespokeExchangeSetCleanUpService(fakeConfiguration, fakeLogger, fakeCleanUpConfig, null);
+            Action nullFileSystem = () => new CleanUpService(fakeConfiguration, fakeLogger, fakeCleanUpConfig, null);
             nullFileSystem.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fileSystem");
 
-            Action nullConfiguration = () => new BespokeExchangeSetCleanUpService(null, fakeLogger, fakeCleanUpConfig, fakeFileSystem);
+            Action nullConfiguration = () => new CleanUpService(null, fakeLogger, fakeCleanUpConfig, fakeFileSystem);
             nullConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
         }
 
@@ -56,7 +56,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(fakeFilePath);
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(fakeDateTime);
 
-            await bespokeExchangeSetCleanUpService.CleanUpHistoricFoldersAndFiles();
+            await bessCleanUpService.CleanUpHistoricFoldersAndFiles();
 
             A.CallTo(() => fakeFileSystem.Directory.Delete(A<string>.Ignored, A<bool>.Ignored)).MustHaveHappenedTwiceOrMore();
 
@@ -73,7 +73,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         {
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(new string[] { });
 
-            await bespokeExchangeSetCleanUpService.CleanUpHistoricFoldersAndFiles();
+            await bessCleanUpService.CleanUpHistoricFoldersAndFiles();
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -89,7 +89,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(fakeFilePath);
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(DateTime.UtcNow);
 
-            await bespokeExchangeSetCleanUpService.CleanUpHistoricFoldersAndFiles();
+            await bessCleanUpService.CleanUpHistoricFoldersAndFiles();
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -106,7 +106,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(fakeDateTime);
             A.CallTo(() => fakeFileSystem.Directory.Delete(A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            await bespokeExchangeSetCleanUpService.CleanUpHistoricFoldersAndFiles();
+            await bessCleanUpService.CleanUpHistoricFoldersAndFiles();
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"

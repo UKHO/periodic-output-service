@@ -8,14 +8,14 @@ using UKHO.PeriodicOutputService.Common.Logging;
 
 namespace UKHO.BESS.CleanUpJob.Services
 {
-    public class BespokeExchangeSetCleanUpService : IBespokeExchangeSetCleanUpService
+    public class CleanUpService : ICleanUpService
     {
         private readonly IOptions<CleanUpConfiguration> cleanUpConfig;
-        private readonly ILogger<BespokeExchangeSetCleanUpService> logger;
+        private readonly ILogger<CleanUpService> logger;
         private readonly IFileSystem fileSystem;
         private readonly string homeDirectoryPath;
 
-        public BespokeExchangeSetCleanUpService(IConfiguration configuration, ILogger<BespokeExchangeSetCleanUpService> logger, IOptions<CleanUpConfiguration> cleanUpConfig, IFileSystem fileSystem)
+        public CleanUpService(IConfiguration configuration, ILogger<CleanUpService> logger, IOptions<CleanUpConfiguration> cleanUpConfig, IFileSystem fileSystem)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.cleanUpConfig = cleanUpConfig ?? throw new ArgumentNullException(nameof(cleanUpConfig));
@@ -23,6 +23,7 @@ namespace UKHO.BESS.CleanUpJob.Services
             homeDirectoryPath = configuration == null ? throw new ArgumentNullException(nameof(configuration))
                                 : Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
         }
+
         public async Task CleanUpHistoricFoldersAndFiles()
         {
             var folderPaths = fileSystem.Directory.GetDirectories(homeDirectoryPath);

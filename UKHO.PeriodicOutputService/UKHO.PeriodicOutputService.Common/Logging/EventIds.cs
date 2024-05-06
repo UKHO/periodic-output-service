@@ -729,6 +729,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809144 - PRODUCT.TXT file and INFO folder delete operation failed
         /// </summary>
         BessProductTxtAndInfoFolderDeleteFailed = 809144,
+
         /// <summary>
         /// 809145 - Bespoke exchange set cleanup web job is started.
         /// </summary>

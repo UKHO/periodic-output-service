@@ -7,16 +7,17 @@ using UKHO.PeriodicOutputService.Common.Logging;
 namespace UKHO.BESS.CleanUpJob
 {
     [ExcludeFromCodeCoverage]
-    public class BespokeExchangeSetCleanUpJob
+    public class BessCleanUpJob
     {
-        private readonly ILogger<BespokeExchangeSetCleanUpJob> logger;
-        private readonly IBespokeExchangeSetCleanUpService bespokeExchangeSetCleanUpService;
+        private readonly ILogger<BessCleanUpJob> logger;
+        private readonly ICleanUpService bespokeExchangeSetCleanUpService;
 
-        public BespokeExchangeSetCleanUpJob(ILogger<BespokeExchangeSetCleanUpJob> logger, IBespokeExchangeSetCleanUpService bespokeExchangeSetCleanUpService)
+        public BessCleanUpJob(ILogger<BessCleanUpJob> logger, ICleanUpService bespokeExchangeSetCleanUpService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.bespokeExchangeSetCleanUpService = bespokeExchangeSetCleanUpService ?? throw new ArgumentNullException(nameof(bespokeExchangeSetCleanUpService));
         }
+
         public async Task ProcessCleanUp()
         {
             logger.LogInformation(EventIds.BESSCleanUpJobRequestStarted.ToEventId(), "Bespoke Exchange set service clean up web job started at " + DateTime.Now + "| _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);

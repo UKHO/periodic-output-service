@@ -12,13 +12,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Configuration;
 using Serilog;
 using Serilog.Events;
-using UKHO.BESS.CleanUpJob;
 using UKHO.BESS.CleanUpJob.Configuration;
 using UKHO.BESS.CleanUpJob.Services;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 
-namespace UKHO.ExchangeSetService.CleanUpJob
+namespace UKHO.BESS.CleanUpJob
 {
     [ExcludeFromCodeCoverage]
     public static class Program
@@ -45,7 +44,7 @@ namespace UKHO.ExchangeSetService.CleanUpJob
 
                 try
                 {
-                    var cleanUpJob = serviceProvider.GetService<BespokeExchangeSetCleanUpJob>();
+                    var cleanUpJob = serviceProvider.GetService<BessCleanUpJob>();
 
                     await cleanUpJob.ProcessCleanUp();
                 }
@@ -150,8 +149,8 @@ namespace UKHO.ExchangeSetService.CleanUpJob
                 serviceCollection.Configure<CleanUpConfiguration>(configuration.GetSection("CleanUpConfiguration"));
             }
 
-            serviceCollection.AddSingleton<BespokeExchangeSetCleanUpJob>();
-            serviceCollection.AddScoped<IBespokeExchangeSetCleanUpService, BespokeExchangeSetCleanUpService>();
+            serviceCollection.AddSingleton<BessCleanUpJob>();
+            serviceCollection.AddScoped<ICleanUpService, CleanUpService>();
             serviceCollection.AddScoped<IFileSystem, FileSystem>();
         }
     }
