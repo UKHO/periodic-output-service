@@ -17,8 +17,16 @@ namespace UKHO.FmEssFssMock.API.Services
             { ".xml", "text/xml" },
             { ".csv", "text/csv" },
             { ".iso", "application/x-raw-disk-image" },
-            { ".sha1", "text/plain" }
+            { ".sha1", "text/plain" },
+            { ".txt", "text/plain" }
         };
+
+        private readonly Enum[] besBatchTypes = new Enum[]
+                                     {
+                                            Batch.BesBaseZipBatch,
+                                            Batch.BesChangeZipBatch,
+                                            Batch.BesUpdateZipBatch
+                                     };
 
         private readonly Enum[] aioBatchTypes = new Enum[]
                                      {
@@ -85,6 +93,44 @@ namespace UKHO.FmEssFssMock.API.Services
                     }
                 });
             }
+
+            //BES - batch attributes from Queue message - start
+
+            if (besBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)))
+            {
+                ConfigQueueMessage message = new()
+                {
+                    AllowedUserGroups = new List<string> { "FSS/BESS-Port of London" },
+                    AllowedUsers = new List<string> { "FSS/BESS-Port of London" },
+                    BatchExpiryInDays = 7,
+                    Tags = new List<Tag> {
+                            new() { Key = "Audience", Value = "Port of London" },
+                            new() { Key = "Frequency",Value="Weekly" },
+                            new() { Key = "Year", Value = "2024" },
+                            new() { Key = "Week Number", Value = "16" },
+                            new() { Key = "Year / Week", Value = "2024 / 16" }
+                }
+                };
+
+                List<KeyValuePair<string, string>> batchAttributes = new();
+
+                foreach (Tag tag in message.Tags)
+                {
+                    batchAttributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
+                }
+
+                return new BatchDetail
+                {
+                    BatchId = batchId,
+                    Status = GetBatchStatus(path),
+                    BusinessUnit = "AVCSCustomExchangeSets",
+                    ExpiryDate = DateTime.UtcNow.AddDays(message.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Attributes = batchAttributes,
+                    Files = files
+                };
+            }
+
+            //BES - batch attributes from Queue message - end
 
             List<KeyValuePair<string, string>> attributes = new()
             {
