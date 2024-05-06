@@ -15,6 +15,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IOptions<PksApiConfiguration> pksApiConfiguration;
         private readonly IAuthPksTokenProvider authPksTokenProvider;
         private readonly IPksApiClient pksApiClient;
+        private const string KeysEnc = "/keys/ENC-S63";
 
 
         public PksService(ILogger<PksService> logger, IOptions<PksApiConfiguration> pksApiConfiguration, IAuthPksTokenProvider authPksTokenProvider, IPksApiClient pksApiClient)
@@ -30,7 +31,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             logger.LogInformation(EventIds.PostProductKeyDataToPksStarted.ToEventId(), "Request to post product key data to product key service started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
             string bodyJson;
-            string uri = $"{pksApiConfiguration.Value.BaseUrl}/keys/ENC-S63";
+            string uri = pksApiConfiguration.Value.BaseUrl + KeysEnc;
             string accessToken = await authPksTokenProvider.GetManagedIdentityAuthForPksAsync(pksApiConfiguration.Value.ClientId);
 
             string payloadJson = JsonConvert.SerializeObject(productKeyServiceRequest);
