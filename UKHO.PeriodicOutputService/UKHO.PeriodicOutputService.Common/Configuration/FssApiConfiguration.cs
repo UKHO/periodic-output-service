@@ -25,8 +25,6 @@ namespace UKHO.PeriodicOutputService.Common.Configuration
         public string Content { get; set; }
         public string ProductType { get; set; }
         public string BESSBusinessUnit { get; set; }
-        public string BessReadUsers { get; set; }
-        public string BessReadGroups { get; set; }
         public string BespokeExchangeSetFileFolder { get; set; }
         public string EncRoot { get; set; }
         public string ReadMeFileName { get; set; }
