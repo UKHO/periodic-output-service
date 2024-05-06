@@ -379,7 +379,7 @@ namespace UKHO.BESS.BuilderService.Services
         {
             if (configQueueMessage.KeyFileType == "KEY_TEXT")
             {
-                int i = 0;
+                int i = 1;
                 string permitTextFileContent = PermitTextFileHeader;
 
                 foreach (var productKeyServiceResponse in productKeyServiceResponses)
@@ -388,7 +388,7 @@ namespace UKHO.BESS.BuilderService.Services
 
                     if (permitKey != null)
                     {
-                        string date = DateTime.UtcNow.ToString("yyyy/MM/dd", CultureInfo.InvariantCulture);
+                        string date = DateTime.UtcNow.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
                         permitTextFileContent += Environment.NewLine;
                         permitTextFileContent += $"{i++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,1:Active";
