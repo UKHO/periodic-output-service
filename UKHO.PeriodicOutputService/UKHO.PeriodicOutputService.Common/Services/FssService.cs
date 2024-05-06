@@ -405,51 +405,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
         [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
         {
-
             string currentYear = DateTime.UtcNow.Year.ToString();
-            string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-            CreateBatchRequestModel createBatchRequest;
+            string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
 
-            if (_aioBatchTypes.Contains(batchType))
-            {
-                createBatchRequest = new()
-                {
-                    BusinessUnit = _fssApiConfiguration.Value.AioBusinessUnit,
-                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl()
-                    {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new() : _fssApiConfiguration.Value.AioReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new() : _fssApiConfiguration.Value.AioReadGroups.Split(",").ToList(),
-                    },
-                    Attributes = new List<KeyValuePair<string, string>>
-                    {
-                        new("Product Type", "AIO"),
-                        new("Week Number", currentWeek),
-                        new("Year", currentYear),
-                        new("Year / Week", currentYear + " / " + currentWeek)
-                    }
-                };
-            }            
-            else
-            {
-                createBatchRequest = new()
-                {
-                    BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
-                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl()
-                    {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
-                    },
-                    Attributes = new List<KeyValuePair<string, string>>
-                    {
-                        new("Product Type", "AVCS"),
-                        new("Week Number", currentWeek),
-                        new("Year", currentYear),
-                        new("Year / Week", currentYear + " / " + currentWeek)
-                    }
-                };
-            }
+            CreateBatchRequestModel createBatchRequest = _aioBatchTypes.Contains(batchType) ?
+                AddBatchAttributesForAio(currentWeek, currentYear) : AddBatchAttributesForPos(currentWeek, currentYear);
 
             //This batch attribute is added for fss stub.
             if (bool.Parse(_configuration["IsFTRunning"]))
@@ -494,9 +454,55 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Exchange Set Type", "Update"));
                     createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Media Type", "Zip"));
                     break;
-                
+
                 default:
                     break;
+            };
+            return createBatchRequest;
+        }
+
+        [ExcludeFromCodeCoverage]
+        private CreateBatchRequestModel AddBatchAttributesForPos(string currentWeek, string currentYear)
+        {
+            CreateBatchRequestModel createBatchRequest = new()
+            {
+                BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
+                ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Acl = new Acl
+                {
+                    ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new List<string>() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
+                    ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new List<string>() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
+                },
+                Attributes = new List<KeyValuePair<string, string>>
+                {
+                    new("Product Type", "AVCS"),
+                    new("Week Number", currentWeek),
+                    new("Year", currentYear),
+                    new("Year / Week", currentYear + " / " + currentWeek)
+                }
+            };
+            return createBatchRequest;
+        }
+
+        [ExcludeFromCodeCoverage]
+        private CreateBatchRequestModel AddBatchAttributesForAio(string currentWeek, string currentYear)
+        {
+            CreateBatchRequestModel createBatchRequest = new()
+            {
+                BusinessUnit = _fssApiConfiguration.Value.AioBusinessUnit,
+                ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Acl = new Acl
+                {
+                    ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new List<string>() : _fssApiConfiguration.Value.AioReadUsers.Split(",").ToList(),
+                    ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new List<string>() : _fssApiConfiguration.Value.AioReadGroups.Split(",").ToList(),
+                },
+                Attributes = new List<KeyValuePair<string, string>>
+                {
+                    new("Product Type", "AIO"),
+                    new("Week Number", currentWeek),
+                    new("Year", currentYear),
+                    new("Year / Week", currentYear + " / " + currentWeek)
+                }
             };
             return createBatchRequest;
         }
@@ -513,11 +519,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 batchAttributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
             }
 
-            createBatchRequest = new()
+            createBatchRequest = new CreateBatchRequestModel
             {
                 BusinessUnit = _fssApiConfiguration.Value.BESSBusinessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(configQueueMessage.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                Acl = new Acl()
+                Acl = new Acl
                 {
                     ReadUsers = configQueueMessage.AllowedUsers,
                     ReadGroups = configQueueMessage.AllowedUserGroups,
