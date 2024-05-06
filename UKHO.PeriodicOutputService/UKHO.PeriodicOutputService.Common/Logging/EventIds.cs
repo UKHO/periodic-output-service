@@ -661,79 +661,79 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         EmptyBatchResponse = 809130,
 
         /// <summary>
-        /// 809130 - Macro is invalid or unavailable.
+        /// 809131 - Macro is invalid or unavailable.
         /// </summary>
         MacroInvalidOrUnavailable = 809131,
 
         /// <summary>
-        /// 809131 - Exception occurred while transforming macros.
+        /// 809132 - Exception occurred while transforming macros.
         /// </summary>
-        MacroTransformationFailed = 809131,
+        MacroTransformationFailed = 809132,
 
         /// <summary>
-        /// 809132 - Request for searching readme.txt file from file share service is started.
+        /// 809133 - Request for searching readme.txt file from file share service is started.
         /// </summary>
-        QueryFileShareServiceReadMeFileRequestStart = 809132,
+        QueryFileShareServiceReadMeFileRequestStart = 809133,
 
         /// <summary>
-        /// 809133 - Request for searching readme.txt from file share service is completed.
+        /// 809134 - Request for searching readme.txt from file share service is completed.
         /// </summary>
-        QueryFileShareServiceReadMeFileRequestCompleted = 809133,
+        QueryFileShareServiceReadMeFileRequestCompleted = 809134,
 
         /// <summary>
-        /// 809134 - Request for searching readme.txt file from file share service is failed due to non ok response.
+        /// 809135 - Request for searching readme.txt file from file share service is failed due to non ok response.
         /// </summary>
-        QueryFileShareServiceReadMeFileNonOkResponse = 809134,
+        QueryFileShareServiceReadMeFileNonOkResponse = 809135,
 
         /// <summary>
-        /// 809135 - Readme.txt file is not found while searching in file share service.
+        /// 809136 - Readme.txt file is not found while searching in file share service.
         /// </summary>
-        ReadMeTextFileNotFound = 809135,
+        ReadMeTextFileNotFound = 809136,
 
         /// <summary>
-        /// 809136 - Request for downloading readme.txt file from file share service is started.
+        /// 809137 - Request for downloading readme.txt file from file share service is started.
         /// </summary>
-        DownloadReadMeFileRequestStart = 809136,
+        DownloadReadMeFileRequestStart = 809137,
 
         /// <summary>
-        /// 809137 - Request for downloading readme.txt file from file share service is completed.
+        /// 809138 - Request for downloading readme.txt file from file share service is completed.
         /// </summary>
-        DownloadReadMeFileRequestCompleted = 809137,
+        DownloadReadMeFileRequestCompleted = 809138,
 
         /// <summary>
-        /// 809138 - Request for downloading readme.txt file from file share service is failed due to non ok response.
+        /// 809139 - Request for downloading readme.txt file from file share service is failed due to non ok response.
         /// </summary>
-        DownloadReadMeFileNonOkResponse = 809138,
+        DownloadReadMeFileNonOkResponse = 809139,
 
         /// <summary>
-        /// 809139 - Completed download of 307 response readme.txt file from the file share service.
+        /// 809140 - Completed download of 307 response readme.txt file from the file share service.
         /// </summary>
-        DownloadReadmeFile307RedirectResponse = 809139,
+        DownloadReadmeFile307RedirectResponse = 809140,
 
         /// <summary>
-        /// 809140 - Multiple files found while searching readme.txt file from the file share service.
+        /// 809141 - Multiple files found while searching readme.txt file from the file share service.
         /// </summary>
-        QueryFileShareServiceMultipleFilesFound = 809140,
+        QueryFileShareServiceMultipleFilesFound = 809141,
 
         /// <summary>
-        /// 809141 - Serial.ENC file updated with Type from configuration
+        /// 809142 - Serial.ENC file updated with Type from configuration
         /// </summary>
-        BessSerialEncUpdated = 809141,
+        BessSerialEncUpdated = 809142,
 
         /// <summary>
-        /// 809142 - PRODUCT.TXT file and INFO folder deleted
+        /// 809143 - PRODUCT.TXT file and INFO folder deleted
         /// </summary>
-        BessProductTxtAndInfoFolderDeleted = 809142,
+        BessProductTxtAndInfoFolderDeleted = 809143,
 
         /// <summary>
-        /// 809143 - SERIAL.ENC file update operation failed
+        /// 809144 - SERIAL.ENC file update operation failed
         /// </summary>
-        BessSerialEncUpdateFailed = 809143,
+        BessSerialEncUpdateFailed = 809144,
 
         /// <summary>
-        /// 809144 - PRODUCT.TXT file and INFO folder delete operation failed
+        /// 809145 - PRODUCT.TXT file and INFO folder delete operation failed
         /// </summary>
-        BessProductTxtAndInfoFolderDeleteFailed = 809144
+        BessProductTxtAndInfoFolderDeleteFailed = 809145
     }
 
     public static class EventIdExtensions
