@@ -81,6 +81,8 @@ namespace UKHO.BESS.BuilderService.Services
                     }));
 
                 List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
+
+                CreateKeyFile(configQueueMessage, essFileDownloadPath, productKeyServiceResponse);
             }
 
             //Temporary Upload Code
@@ -103,22 +105,6 @@ namespace UKHO.BESS.BuilderService.Services
                          configQueueMessage.Type == BessType.CHANGE.ToString())
                 {
                     LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
-                }
-
-                if (!string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    List<ProductKeyServiceRequest> productKeyServiceRequest = new();
-
-                    productKeyServiceRequest.AddRange(latestProductVersions.ProductVersions.Select(
-                        item => new ProductKeyServiceRequest()
-                        {
-                            ProductName = item.ProductName,
-                            Edition = item.EditionNumber.ToString()
-                        }));
-
-                    List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
-
-                    CreateKeyFile(configQueueMessage, essFileDownloadPath, productKeyServiceResponse);
                 }
             }
 
