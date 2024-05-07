@@ -57,7 +57,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         [Test]
         [TestCase("")]
         [TestCase(null)]
-        public void WhenNullOrEmptyPermitKeyPassed_Then_GetPermitKeys_Returns_Null(string permitKey)
+        public void WhenNullOrEmptyPermitKeyPassed_Then_GetPermitKeys_Returns_Null(string? permitKey)
         {
             var result = permitDecryption.GetPermitKeys(permitKey);
 
