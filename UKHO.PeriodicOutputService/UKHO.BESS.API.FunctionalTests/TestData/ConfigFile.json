@@ -1,5 +1,5 @@
 {
-    "name": "BES-1",
+    "name": "BESConfig",
     "exchangeSetStandard": "s63",
     "encCellNames": [
         "AU220150",

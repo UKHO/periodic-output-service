@@ -69,6 +69,10 @@ namespace UKHO.BESS.BuilderService.Services
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
+            if (bool.Parse(configuration["IsFTRunning"]))
+            {
+                await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
+            }
             if (!CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage).Result)
                 return false;
 
@@ -76,7 +80,14 @@ namespace UKHO.BESS.BuilderService.Services
                      configQueueMessage.Type == BessType.CHANGE.ToString())
             {
                 var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
-                LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                if (latestProductVersions.ProductVersions.Count > 0)
+                {
+                    LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                }
+                else
+                {
+                    logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
             }
 
             return true;
@@ -212,6 +223,11 @@ namespace UKHO.BESS.BuilderService.Services
                 {
                     batchType = Batch.BesChangeZipBatch;
                 }
+                //else if block for mock only
+                else if (configQueueMessage.Type.ToUpper().Equals("EMPTY"))
+                {
+                    batchType = Batch.EssEmptyBatch;
+                }
 
                 besBatchId = await fssService.CreateBatch(batchType, configQueueMessage);
 
@@ -239,16 +255,16 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
 
-            bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
-            if (isFileAdded)
-            {
-                List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
-                if (blockIds.Any())
+                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
+                if (isFileAdded)
                 {
-                    bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
+                    List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
+                    if (blockIds.Any())
+                    {
+                        bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
+                    }
                 }
-            }
-        });
+            });
         }
         [ExcludeFromCodeCoverage]
         private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, string[] cellNames, string configName, string exchangeSetStandard)
@@ -411,6 +427,27 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             await Task.CompletedTask;
+        }
+
+        // This method is for mock only
+        [ExcludeFromCodeCoverage]
+        private async Task<bool> IsBatchCreatedForMock(ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
+        {
+            bool isBatchCreated;
+
+            var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+
+            var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(),
+                configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+
+            var product = productVersions.Any(x => x.EditionNumber > 0);
+            if (product)
+            {
+                configQueueMessage.Type = "EMPTY";
+            }
+            isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage).Result;
+
+            return isBatchCreated;
         }
     }
 }

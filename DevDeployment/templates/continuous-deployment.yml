@@ -45,13 +45,6 @@ steps:
       scriptPath: '$(Pipeline.Workspace)/devterraformartifact/mock_api_deployment.ps1'
       arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FmEssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
 
-  - task: FileTransform@2
-    displayName: "File Transform: PKSMock API WebApp"
-    inputs:
-      folderPath: '$(Pipeline.Workspace)/PKSWireMockWebAPI/*.zip'
-      xmlTransformationRules:
-      jsonTargetFiles: '**/appsettings.json'
-
   - task: AzureCLI@2
     displayName: "PKSMock API WebApp deployment"
     inputs:
