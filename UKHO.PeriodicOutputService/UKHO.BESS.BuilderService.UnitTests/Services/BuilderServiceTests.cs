@@ -267,6 +267,13 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<EventId>(1) == EventIds.ErrorFileFoundInBatch.ToEventId()
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Either no files found in batch or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}"
@@ -313,6 +320,13 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
             await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -454,6 +468,13 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
             await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -886,6 +907,71 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             ).MustHaveHappenedOnceExactly();
         }
 
+        [Test]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsUpdateOrChangeAndEmptyBatchResponseFromESS_ThenBespokeExchangeSetCreatedAndAzureTableNotUpdated(BessType type, ExchangeSetStandard exchangeSetStandard)
+        {
+            A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
+            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored))
+              .Returns(GetValidBatchResponseModel());
+            A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
+             .Returns(true);
+            A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(new List<ProductVersion>());
+
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.BLANK.ToString()));
+
+            result.Should().Be("Exchange Set Created Successfully");
+
+            A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceOrMore();
+            A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
+                .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakeAzureTableStorageHelper.SaveBessProductVersionDetailsAsync((A<List<ProductVersion>>.Ignored), A<string>.Ignored, A<string>.Ignored))
+                .MustNotHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<EventId>(1) == EventIds.ProductsFetchedFromESS.ToEventId()
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileStarted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileCompleted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.CreateBatchCompleted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess batch created {DateTime} | {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.EmptyBatchResponse.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+        }
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
         [TestCase(ExchangeSetStandard.S57)]
