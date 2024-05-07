@@ -235,6 +235,13 @@
     </notes>
     <cve>CVE-2022-39349</cve>
   </suppress>
+  <suppress>
+   <notes><![CDATA[
+   file name: Azure.Identity:1.11.2
+   False positive
+   ]]></notes>
+   <cve>CVE-2023-36415</cve>
+</suppress>
   <!-- Below suppression are for wire mock and should be removed when wire mock is removed from POS -->
   <suppress>
    <notes><![CDATA[
