@@ -64,9 +64,19 @@ namespace UKHO.BESS.BuilderService.Services
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            Batch batch = configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch
-                : configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch;
-            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, batch).Result;
+            bool isBatchCreated;
+            if (bool.Parse(configuration["IsFTRunning"]))
+            {
+                isBatchCreated = await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
+            }
+            else
+            {
+                Batch batch = configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch
+                    : configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch;
+
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, batch).Result;
+
+            }
 
             // temporary logs
             if (isBatchCreated)
@@ -77,7 +87,14 @@ namespace UKHO.BESS.BuilderService.Services
                          configQueueMessage.Type == BessType.CHANGE.ToString())
                 {
                     var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
-                    LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                    if (latestProductVersions.ProductVersions.Count > 0)
+                    {
+                        LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                    }
+                    else
+                    {
+                        logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    }
                 }
             }
 
@@ -399,6 +416,34 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             await Task.CompletedTask;
+        }
+
+        // This method is for mock only
+        [ExcludeFromCodeCoverage]
+        private async Task<bool> IsBatchCreatedForMock(ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
+        {
+            bool isBatchCreated;
+            if (configQueueMessage.Type == BessType.BASE.ToString())
+            {
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch).Result;
+            }
+            else
+            {
+                var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+
+                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(),
+                    configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                var product = productVersions.Any(x => x.EditionNumber > 0);
+                if (product)
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.EssEmptyBatch).Result;
+                }
+                else
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch).Result;
+                }
+            }
+            return isBatchCreated;
         }
     }
 }
