@@ -87,6 +87,7 @@ namespace UKHO.PKSWireMock.API
                    .WithHeader(ContentType, ApplicationType)
                    .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Response4.json")));
 
+            // actual representation of permit, can be decrypted with dummy machine hardware key - 7E,A1,85,6E,2A
             server.Given(Request.Create().WithPath(PksUrl)
                    .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Request6.json"))))
                    .UsingPost())
