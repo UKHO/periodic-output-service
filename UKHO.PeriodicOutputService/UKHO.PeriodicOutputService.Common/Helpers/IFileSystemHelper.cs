@@ -28,6 +28,18 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         void CreateZipFile(string sourceDirectoryName, string destinationArchiveFileName, bool deleteOldArchive = false);
 
+
+        string ReadFileText(string filePath);
+
+        bool CreateFileContent(string filePath, string content);
+
+        void DeleteFile(string filePath);
+
+        void DeleteFolder(string folderPath);
         IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName);
+
+        bool CreateEmptyFileContent(string filePath);
+
+        bool DownloadReadmeFile(string filePath, Stream fileStream);
     }
 }

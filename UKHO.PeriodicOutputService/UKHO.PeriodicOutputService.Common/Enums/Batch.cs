@@ -14,6 +14,8 @@
         AioBaseCDZipIsoSha1Batch = 10,
         AioUpdateZipBatch = 11,
         BesBaseZipBatch = 12,
-        BesUpdateZipBatch = 13
+        BesUpdateZipBatch = 13,
+        BesChangeZipBatch = 14,
+        EssEmptyBatch = 15
     }
 }

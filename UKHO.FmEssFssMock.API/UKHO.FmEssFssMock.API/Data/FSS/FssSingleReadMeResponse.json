@@ -1,0 +1,49 @@
+{
+    "count": 1,
+    "total": 1,
+    "entries": [
+        {
+            "batchId": "ab4a692d-6e3b-48a3-bd37-d232c60dd75d",
+            "status": "Committed",
+            "allFilesZipSize": 911,
+            "attributes": [
+                {
+                    "key": "Audience",
+                    "value": "Port of London"
+                },
+                {
+                    "key": "Content",
+                    "value": "Bespoke README"
+                }
+            ],
+            "businessUnit": "AVCS-BespokeExchangeSets",
+            "batchPublishedDate": "2024-04-18T09:05:38.93Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "README.TXT",
+                    "fileSize": 1498,
+                    "mimeType": "text/plain",
+                    "hash": "RJbZFFTi+TWLUwSnemycPw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/ab4a692d-6e3b-48a3-bd37-d232c60dd75d/files/README.TXT"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "_Links": {
+        "self": {
+            "href": "/batch?limit=10&start=0&$filter=businessUnit%20eq%20%27AVCS-BespokeExchangeSets%27%20and%20filename%20eq%20%27README.TXT%27%20and%20%24batch%28Content%29%20eq%20%27Bespoke%20README%27%20and%20%24batch%28Audience%29%20eq%20%27Port%20of%20London%27%20"
+        },
+        "first": {
+            "href": "/batch?limit=10&start=0&$filter=businessUnit%20eq%20%27AVCS-BespokeExchangeSets%27%20and%20filename%20eq%20%27README.TXT%27%20and%20%24batch%28Content%29%20eq%20%27Bespoke%20README%27%20and%20%24batch%28Audience%29%20eq%20%27Port%20of%20London%27%20"
+        },
+        "last": {
+            "href": "/batch?limit=10&start=0&$filter=businessUnit%20eq%20%27AVCS-BespokeExchangeSets%27%20and%20filename%20eq%20%27README.TXT%27%20and%20%24batch%28Content%29%20eq%20%27Bespoke%20README%27%20and%20%24batch%28Audience%29%20eq%20%27Port%20of%20London%27%20"
+        }
+    }
+}
