@@ -25,7 +25,7 @@ namespace UKHO.BESS.CleanUpJob
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         private static readonly InMemoryChannel aiChannel = new();
 
-        static async Task Main()
+        private static async Task Main()
         {
             try
             {
@@ -46,7 +46,7 @@ namespace UKHO.BESS.CleanUpJob
                 {
                     var cleanUpJob = serviceProvider.GetService<BessCleanUpJob>();
 
-                    await cleanUpJob.ProcessCleanUp();
+                    cleanUpJob.ProcessCleanUp();
                 }
                 finally
                 {

@@ -12,7 +12,6 @@
     <NoWarn>1701;1702;8600;8602</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Elastic.Apm" Version="1.26.0" />
     <PackageReference Include="Microsoft.ApplicationInsights" Version="2.22.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.WorkerService" Version="2.22.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />

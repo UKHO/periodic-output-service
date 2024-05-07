@@ -10,19 +10,19 @@ namespace UKHO.BESS.CleanUpJob
     public class BessCleanUpJob
     {
         private readonly ILogger<BessCleanUpJob> logger;
-        private readonly ICleanUpService bessCleanUpService;
+        private readonly ICleanUpService cleanUpService;
 
-        public BessCleanUpJob(ILogger<BessCleanUpJob> logger, ICleanUpService bessCleanUpService)
+        public BessCleanUpJob(ILogger<BessCleanUpJob> logger, ICleanUpService cleanUpService)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.bessCleanUpService = bessCleanUpService ?? throw new ArgumentNullException(nameof(bessCleanUpService));
+            this.cleanUpService = cleanUpService ?? throw new ArgumentNullException(nameof(cleanUpService));
         }
 
-        public async Task ProcessCleanUp()
+        public void ProcessCleanUp()
         {
             logger.LogInformation(EventIds.BESSCleanUpJobRequestStarted.ToEventId(), "Bespoke Exchange set service clean up web job started at " + DateTime.Now + "| _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
-            await bessCleanUpService.CleanUpHistoricFoldersAndFiles();
+            cleanUpService.CleanUpHistoricFoldersAndFiles();
 
             logger.LogInformation(EventIds.BESSCleanUpJobRequestCompleted.ToEventId(), "Bespoke Exchange set service clean up web job completed at " + DateTime.Now + "| _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
         }

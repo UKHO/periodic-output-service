@@ -51,13 +51,13 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenHistoricFoldersAndFilesFound_ThenCleanupJobIsSuccessful()
+        public void WhenHistoricFoldersAndFilesFound_ThenCleanupJobIsSuccessful()
         {
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(fakeFilePath);
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(fakeDateTime);
 
-            await bessCleanUpService.CleanUpHistoricFoldersAndFiles();
-
+            var result = bessCleanUpService.CleanUpHistoricFoldersAndFiles();
+            result.Should().Be("Successfully cleaned the folder");
             A.CallTo(() => fakeFileSystem.Directory.Delete(A<string>.Ignored, A<bool>.Ignored)).MustHaveHappenedTwiceOrMore();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -69,11 +69,12 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenFolderPathsNotFound_ThenCleanupProcessIsNotRunned()
+        public void WhenFolderPathsNotFound_ThenCleanupProcessIsNotRunned()
         {
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(new string[] { });
 
-            await bessCleanUpService.CleanUpHistoricFoldersAndFiles();
+            var result = bessCleanUpService.CleanUpHistoricFoldersAndFiles();
+            result.Should().Be("No folders to delete");
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -84,12 +85,13 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenHistoricFoldersAndFilesNotFound_ThenCleanupProcessIsNotRunned()
+        public void WhenHistoricFoldersAndFilesNotFound_ThenCleanupProcessIsNotRunned()
         {
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(fakeFilePath);
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(DateTime.UtcNow);
 
-            await bessCleanUpService.CleanUpHistoricFoldersAndFiles();
+            var result = bessCleanUpService.CleanUpHistoricFoldersAndFiles();
+            result.Should().Be("No folders to delete");
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -100,13 +102,13 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenHistoricFoldersDeletionFailed_ThenCleanupJobThrowsExceptionAndLogsError()
+        public void WhenHistoricFoldersDeletionFailed_ThenCleanupJobThrowsExceptionAndLogsError()
         {
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(fakeFilePath);
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(fakeDateTime);
             A.CallTo(() => fakeFileSystem.Directory.Delete(A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            await bessCleanUpService.CleanUpHistoricFoldersAndFiles();
+            bessCleanUpService.CleanUpHistoricFoldersAndFiles();
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"

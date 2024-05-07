@@ -2,6 +2,6 @@
 {
     public interface ICleanUpService
     {
-        Task CleanUpHistoricFoldersAndFiles();
+        string CleanUpHistoricFoldersAndFiles();
     }
 }

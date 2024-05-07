@@ -15,22 +15,25 @@ namespace UKHO.BESS.CleanUpJob.Services
         private readonly IFileSystem fileSystem;
         private readonly string homeDirectoryPath;
 
+        private const string BESPOKEFOLDERNAME = "BespokeFolderName";
+        private const string HOME = "HOME";
+
         public CleanUpService(IConfiguration configuration, ILogger<CleanUpService> logger, IOptions<CleanUpConfiguration> cleanUpConfig, IFileSystem fileSystem)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.cleanUpConfig = cleanUpConfig ?? throw new ArgumentNullException(nameof(cleanUpConfig));
             this.fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             homeDirectoryPath = configuration == null ? throw new ArgumentNullException(nameof(configuration))
-                                : Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
+                                : Path.Combine(configuration[HOME]!, configuration[BESPOKEFOLDERNAME]!);
         }
 
-        public async Task CleanUpHistoricFoldersAndFiles()
+        public string CleanUpHistoricFoldersAndFiles()
         {
             var folderPaths = fileSystem.Directory.GetDirectories(homeDirectoryPath);
             if (!folderPaths.Any())
             {
                 logger.LogInformation(EventIds.NoFoldersFound.ToEventId(), "No folders to delete | DateTime: {DateTime} | Correlation ID: {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                return;
+                return "No folders to delete";
             }
             var historicDateTimeInUtc = DateTime.UtcNow.AddDays(-cleanUpConfig.Value.NumberOfDays);
             var historicDate = new DateTime(historicDateTimeInUtc.Year, historicDateTimeInUtc.Month, historicDateTimeInUtc.Day);
@@ -40,7 +43,7 @@ namespace UKHO.BESS.CleanUpJob.Services
             if (!foldersToDelete.Any())
             {
                 logger.LogInformation(EventIds.NoFoldersFound.ToEventId(), "No folders to delete based on the cleanup configured date - {historicDate} | DateTime: {DateTime} | Correlation ID: {CorrelationId}", historicDate, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                return;
+                return "No folders to delete";
             }
 
             // Deletes all the folders that satisfy the above filter
@@ -59,7 +62,7 @@ namespace UKHO.BESS.CleanUpJob.Services
             }
 
             logger.LogInformation(EventIds.CleanUpSuccessful.ToEventId(), "Successfully cleaned the folder | DateTime: {DateTime} | Correlation ID: {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            await Task.CompletedTask;
+            return "Successfully cleaned the folder";
         }
     }
 }
