@@ -2,15 +2,10 @@
 using System.Net;
 using Azure.Storage.Queues;
 using FluentAssertions;
-using Grpc.Core;
-using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using NUnit.Framework;
 using UKHO.BESS.API.FunctionalTests.Helpers;
-using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Common.Models.Bess;
 using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.PermitKeyService
