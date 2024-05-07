@@ -733,7 +733,32 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809145 - PRODUCT.TXT file and INFO folder delete operation failed
         /// </summary>
-        BessProductTxtAndInfoFolderDeleteFailed = 809145
+        BessProductTxtAndInfoFolderDeleteFailed = 809145,
+
+        /// <summary>
+        /// 809146 - Bespoke exchange set cleanup web job is started.
+        /// </summary>
+        BESSCleanUpJobRequestStarted = 809146,
+
+        /// <summary>
+        /// 809147 - Bespoke exchange set cleanup web job is completed.
+        /// </summary>
+        BESSCleanUpJobRequestCompleted = 809147,
+
+        /// <summary>
+        /// 809148 - Deletion of folders failed.
+        /// </summary>
+        FoldersDeletionFailed = 809148,
+
+        /// <summary>
+        /// 809149 - No folders found.
+        /// </summary>
+        NoFoldersFound = 809149,
+
+        /// <summary>
+        /// 809150 - CleanUp successful.
+        /// </summary>
+        CleanUpSuccessful = 809150
     }
 
     public static class EventIdExtensions
