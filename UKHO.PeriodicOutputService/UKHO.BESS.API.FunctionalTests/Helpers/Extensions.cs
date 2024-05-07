@@ -1,4 +1,6 @@
-﻿namespace UKHO.BESS.API.FunctionalTests.Helpers
+﻿using Azure.Data.Tables;
+
+namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
     public static class Extensions
     {
@@ -49,6 +51,23 @@
         {
             Random rnd = new Random();
             return rnd.Next(00000, 99999);
+        }
+
+        /// <summary>
+        /// This Method is use to delete bessproductversiondetails azure table entries.
+        /// </summary>
+        /// <param name="connectionString"></param>
+        /// <param name="tableName"></param>
+        /// <param name="products"></param>
+        /// <param name="exchangeSetStandard"></param>
+        public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products, string? exchangeSetStandard)
+        {
+            TableClient tableClient = new(connectionString, tableName);
+
+            foreach (string product in products!)
+            {
+                await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard + "|" + product);
+            }
         }
     }
 }
