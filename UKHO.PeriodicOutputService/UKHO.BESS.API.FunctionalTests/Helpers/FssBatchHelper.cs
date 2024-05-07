@@ -5,6 +5,7 @@ using System.Net;
 using FluentAssertions;
 using Microsoft.IdentityModel.Tokens;
 using UKHO.BESS.API.FunctionalTests.Models;
+using System.Xml.Linq;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -33,7 +34,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             {
                 HttpResponseMessage batchStatusResponse = await FssApiClient.GetBatchStatusAsync(batchStatusUri);
                 batchStatusResponse.StatusCode.Should().Be((HttpStatusCode)200);
-                
+
                 var batchStatusResponseObj = JsonConvert.DeserializeObject<ResponseBatchStatusModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                 batchStatus = batchStatusResponseObj!.Status!;
 
@@ -68,7 +69,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl);
             response.StatusCode.Should().Be((HttpStatusCode)200);
-            
+
             Stream stream = await response.Content.ReadAsStreamAsync();
 
             await using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, fileName), FileMode.Create))
@@ -79,6 +80,37 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             string zipPath = Path.Combine(batchFolderPath, fileName);
             string extractPath = Path.Combine(batchFolderPath, RenameFolder(zipPath));
             ZipFile.ExtractToDirectory(zipPath, extractPath);
+
+            string rootFolder = downloadFileUrl.Remove(downloadFileUrl.Length - 10);
+
+            string permitXmlUri = rootFolder + "Permit.xml";
+            response = await FssApiClient.GetFileDownloadAsync(permitXmlUri);
+
+            if (response.StatusCode == ((HttpStatusCode)200))
+            {
+                Stream permitStream = await response.Content.ReadAsStreamAsync();
+
+                await using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, "Permit.xml"), FileMode.Create))
+                {
+                    await permitStream.CopyToAsync(outputFileStream);
+                }
+            }
+
+            string permitTxtUri = rootFolder + "Permit.txt";
+            response = await FssApiClient.GetFileDownloadAsync(permitTxtUri);
+
+            if (response.StatusCode == ((HttpStatusCode)200))
+            {
+
+
+                Stream permitStream = await response.Content.ReadAsStreamAsync();
+
+                await using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, "Permit.txt"), FileMode.Create))
+                {
+                    await permitStream.CopyToAsync(outputFileStream);
+                }
+            }
+
             return extractPath;
         }
 
@@ -158,7 +190,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 expectedEncryptionFlag = "0";
             }
             expectedEncryptionFlag.Should().Be(encryptionFlag);
-            
+
             return checkFile;
         }
 
@@ -219,6 +251,65 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 default:
                     return false;
             }
+        }
+
+        /// <summary>
+        /// This method is used to check the Permit files and their content
+        /// </summary>
+        /// <param name="downloadFolderPath"></param>
+        /// <param name="keyFileType"></param>
+        /// <returns></returns>
+        public static bool CheckPermitFile(string? downloadFolderPath, string? keyFileType)
+        {
+            List<string>? cellNames = testConfiguration.bessConfig.ProductsName;
+            List<string>? CK = testConfiguration.bessConfig.Keys;
+            List<string>? cellPermits = testConfiguration.bessConfig.Permits;
+            List<string>? Editions = testConfiguration.bessConfig.EditionNumber;
+            string PermitTxt = "Permit.txt";
+            string PermitXml = "Permit.xml";
+            string Date = "11/07/2023";
+
+            if (cellNames != null && CK != null && cellPermits != null && Editions != null)
+                switch (keyFileType)
+                {
+                    case "KEY_TEXT":
+                        string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, PermitTxt));
+                        int rows = fileContent.Length;
+                        for (int row = 1; row < rows; row++)
+                        {
+                            string[] cellPermitDetails = fileContent[row].Split(",");
+                            cellPermitDetails[1].Equals(CK[(row - 1) / 2]).Should().Be(true);
+                            cellPermitDetails[2].Equals(cellNames[(row - 1) / 2]).Should().Be(true);
+                            string Edtn = Editions[(row - 1) / 2];
+                            Edtn = row % 2 == 0 ?  (int.Parse(Edtn) + 1).ToString() : Edtn;
+                            cellPermitDetails[3].Equals(Edtn).Should().Be(true);
+                            cellPermitDetails[4].Equals(Date).Should().Be(true);
+                            cellPermitDetails[5].Equals(Date).Should().Be(true);
+                            (row % 2 == 0 ? cellPermitDetails[7] == "2:Next" : cellPermitDetails[7] == "1:Active").Should().Be(true);
+                        }
+                        return true;
+
+                    case "PERMIT_XML":
+                        var permit = XDocument.Load(Path.Combine(downloadFolderPath!, PermitXml));
+                        IEnumerable<XElement>? cellKeys = permit?.Root?.Element("cellkeys")?.Elements("cell");
+                        if (cellKeys != null)
+                        {
+                            int count = 0;
+                            foreach (var cell in cellKeys)
+                            {
+                                string? encCell = cell.Element("cellname")?.Value;
+                                encCell?.Equals(cellNames[count]).Should().Be(true);
+                                string? encCellEdition = cell.Element("edition")?.Value;
+                                encCellEdition?.Equals(Editions[count]).Should().Be(true);
+                                string? encPermit = cell.Element("permit")?.Value;
+                                encPermit?.Equals(cellPermits[count]).Should().Be(true);
+                                count++;
+                            }
+                        }
+                        return true;
+                }
+
+            return true;
         }
     }
 }
