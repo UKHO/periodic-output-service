@@ -28,7 +28,6 @@
     <PackageReference Include="System.IO.Abstractions" Version="21.0.2" />
 	<PackageReference Include="UKHO.WeekNumberUtils" Version="1.5.22270.11" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
-    <PackageReference Include="UKHO.WeekNumberUtils" Version="1.5.22270.11" />
     <PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
   </ItemGroup>
 
