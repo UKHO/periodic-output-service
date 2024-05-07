@@ -69,7 +69,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         }
 
         [Test]
-        public void WhenFolderPathsNotFound_ThenCleanupProcessIsNotRunned()
+        public void WhenFolderPathsNotFound_ThenCleanupProcessIsNotPerformed()
         {
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(new string[] { });
 
@@ -85,7 +85,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         }
 
         [Test]
-        public void WhenHistoricFoldersAndFilesNotFound_ThenCleanupProcessIsNotRunned()
+        public void WhenHistoricFoldersAndFilesNotFound_ThenCleanupProcessIsNotPerformed()
         {
             A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(fakeFilePath);
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(DateTime.UtcNow);
