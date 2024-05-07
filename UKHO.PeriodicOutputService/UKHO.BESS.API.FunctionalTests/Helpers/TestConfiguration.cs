@@ -44,7 +44,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public int? UpdateNumber { get; set; }
         }
 
-        public class FssApiConfiguration    
+        public class FssApiConfiguration
         {
             public string? BaseUrl { get; set; }
             public int BatchCommitWaitTime { get; set; }
@@ -54,6 +54,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             public string? ConnectionString { get; set; }
             public string? ContainerName { get; set; }
+            public string? TableName { get; set; }
             public string? QueueName { get; set; }
         }
 
