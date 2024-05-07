@@ -56,6 +56,13 @@ namespace UKHO.BESS.BuilderService.Services
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BESSFolderName"]!);
         }
 
+        /// <summary>
+        ///     This method will request exchange set to ESS,
+        ///     download batch files from FSS,
+        ///     create BES and upload to FSS.
+        /// </summary>
+        /// <param name="configQueueMessage"></param>
+        /// <returns>Returns true/false</returns>
         public async Task<bool> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
@@ -81,6 +88,11 @@ namespace UKHO.BESS.BuilderService.Services
             return true;
         }
 
+        /// <summary>
+        ///     This method will request exchange set to ESS.
+        /// </summary>
+        /// <param name="configQueueMessage"></param>
+        /// <returns>will return batch id from ESS</returns>
         private async Task<string> RequestExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
             ExchangeSetResponseModel exchangeSetResponseModel = new();
@@ -108,6 +120,12 @@ namespace UKHO.BESS.BuilderService.Services
             return CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
         }
 
+        /// <summary>
+        ///     This method will check if ESS batch is committed and then will download batch files from FSS.
+        /// </summary>
+        /// <param name="essBatchId"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
         private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
         {
             string downloadPath = Path.Combine(homeDirectoryPath, essBatchId);
@@ -117,8 +135,8 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (fssBatchStatus == FssBatchStatus.Committed)
             {
-                fileSystemHelper.CreateDirectory(downloadPath);
                 files = await GetBatchFilesAsync(essBatchId);
+                fileSystemHelper.CreateDirectory(downloadPath);
                 DownloadFiles(files, downloadPath);
             }
             else
@@ -130,6 +148,12 @@ namespace UKHO.BESS.BuilderService.Services
             return (downloadPath, files);
         }
 
+        /// <summary>
+        ///     This method will get batch files details from FSS.
+        /// </summary>
+        /// <param name="essBatchId"></param>
+        /// <returns>List of FssBatchFile</returns>
+        /// <exception cref="FulfilmentException"></exception>
         private async Task<List<FssBatchFile>> GetBatchFilesAsync(string essBatchId)
         {
             GetBatchResponseModel batchDetail = await fssService.GetBatchDetails(essBatchId);
@@ -144,6 +168,11 @@ namespace UKHO.BESS.BuilderService.Services
             throw new FulfilmentException(EventIds.ErrorFileFoundInBatch.ToEventId());
         }
 
+        /// <summary>
+        ///     This method will download batch files from FSS.
+        /// </summary>
+        /// <param name="fileDetails"></param>
+        /// <param name="downloadPath"></param>
         private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
@@ -153,6 +182,12 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
+        /// <summary>
+        ///     This method will extract files from ESS batch zip.
+        /// </summary>
+        /// <param name="fileDetails"></param>
+        /// <param name="downloadPath"></param>
+        /// <exception cref="Exception"></exception>
         private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
@@ -173,6 +208,12 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
+        /// <summary>
+        ///     This method will create BESS zip file.
+        /// </summary>
+        /// <param name="fileDetails"></param>
+        /// <param name="downloadPath"></param>
+        /// <exception cref="Exception"></exception>
         private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
@@ -193,6 +234,14 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
+        /// <summary>
+        ///     This method will create, upload and commit BESS batch to FSS.
+        /// </summary>
+        /// <param name="downloadPath"></param>
+        /// <param name="fileExtension"></param>
+        /// <param name="configQueueMessage"></param>
+        /// <returns>Return true or false</returns>
+        /// <exception cref="FulfilmentException"></exception>
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
         {
             bool isCommitted;
@@ -232,23 +281,38 @@ namespace UKHO.BESS.BuilderService.Services
             return isCommitted;
         }
 
+        /// <summary>
+        ///     This method will upload BESS batch file to FSS.
+        /// </summary>
+        /// <param name="filePaths"></param>
+        /// <param name="batchId"></param>
+        /// <param name="batchType"></param>
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
         {
             Parallel.ForEach(filePaths, filePath =>
             {
                 IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
 
-            bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
-            if (isFileAdded)
-            {
-                List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
-                if (blockIds.Any())
+                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
+                if (isFileAdded)
                 {
-                    bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
+                    List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
+                    if (blockIds.Any())
+                    {
+                        bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
+                    }
                 }
-            }
-        });
+            });
         }
+
+        /// <summary>
+        ///     This method will return list of product versions from product version azure table.
+        /// </summary>
+        /// <param name="productVersionEntities"></param>
+        /// <param name="cellNames"></param>
+        /// <param name="configName"></param>
+        /// <param name="exchangeSetStandard"></param>
+        /// <returns></returns>
         [ExcludeFromCodeCoverage]
         private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, string[] cellNames, string configName, string exchangeSetStandard)
         {
@@ -278,6 +342,12 @@ namespace UKHO.BESS.BuilderService.Services
             return productVersions;
         }
 
+        /// <summary>
+        ///     This method will return the latest edition and update number of products from directory.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="cellNames"></param>
+        /// <returns></returns>
         private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames)
         {
             string exchangeSetPath = Path.Combine(filePath, BESPOKE_FILE_NAME);
@@ -296,6 +366,14 @@ namespace UKHO.BESS.BuilderService.Services
             return productVersionsRequest;
         }
 
+        /// <summary>
+        ///     This method will add/update entry of the product version details in azure table.
+        /// </summary>
+        /// <param name="productVersionsRequest"></param>
+        /// <param name="configName"></param>
+        /// <param name="exchangeSetStandard"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         private async Task LogProductVersionsAsync(ProductVersionsRequest productVersionsRequest, string configName, string exchangeSetStandard)
         {
             try
@@ -313,6 +391,13 @@ namespace UKHO.BESS.BuilderService.Services
             }
         }
 
+        /// <summary>
+        ///     This method will perform operations like create README.txt file, update SERIAL.ENC file and Delete PRODUCT.txt file
+        /// </summary>
+        /// <param name="batchId"></param>
+        /// <param name="configQueueMessage"></param>
+        /// <param name="essFileDownloadPath"></param>
+        /// <returns></returns>
         private async Task PerformAncillaryFilesOperationsAsync(string batchId, ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
         {
             string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, fssApiConfig.Value.BespokeExchangeSetFileFolder);
@@ -329,6 +414,15 @@ namespace UKHO.BESS.BuilderService.Services
             await DeleteProductTxtAndInfoFolderAsync(productFilePath, exchangeSetInfoPath, configQueueMessage.CorrelationId);
         }
 
+        /// <summary>
+        ///     This method will create/download README.txt file based on ReadmeSearchFilter.
+        /// </summary>
+        /// <param name="batchId"></param>
+        /// <param name="correlationId"></param>
+        /// <param name="readMeSearchFilter"></param>
+        /// <param name="exchangeSetRootPath"></param>
+        /// <param name="readMeFilePath"></param>
+        /// <returns></returns>
         private async Task CreateReadMeFileAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
         {
             if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
@@ -346,6 +440,14 @@ namespace UKHO.BESS.BuilderService.Services
             }
         }
 
+        /// <summary>
+        ///     This method will download README.txt file from FSS on ReadmeSearchFilter
+        /// </summary>
+        /// <param name="batchId"></param>
+        /// <param name="exchangeSetRootPath"></param>
+        /// <param name="correlationId"></param>
+        /// <param name="readMeSearchFilter"></param>
+        /// <returns></returns>
         private async Task<bool> DownloadReadMeFileAsync(string batchId, string exchangeSetRootPath, string correlationId, string readMeSearchFilter)
         {
             bool isDownloadReadMeFileSuccess = false;
@@ -367,6 +469,14 @@ namespace UKHO.BESS.BuilderService.Services
             return isDownloadReadMeFileSuccess;
         }
 
+        /// <summary>
+        ///     This method will update SERIAL.ENC file from batch.
+        /// </summary>
+        /// <param name="serialFilePath"></param>
+        /// <param name="exchangeSetType"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
         private async Task UpdateSerialFileAsync(string serialFilePath, string exchangeSetType, string correlationId)
         {
             try
@@ -392,6 +502,14 @@ namespace UKHO.BESS.BuilderService.Services
             await Task.CompletedTask;
         }
 
+        /// <summary>
+        ///     This method will delete INFO folder and PRODUCTS.txt file from batch.
+        /// </summary>
+        /// <param name="productFilePath"></param>
+        /// <param name="infoFolderPath"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
         private async Task DeleteProductTxtAndInfoFolderAsync(string productFilePath, string infoFolderPath, string correlationId)
         {
             try
