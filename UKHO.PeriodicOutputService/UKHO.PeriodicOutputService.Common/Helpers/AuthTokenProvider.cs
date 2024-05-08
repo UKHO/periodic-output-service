@@ -19,7 +19,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         private static readonly object _lock = new();
         private readonly ILogger<AuthTokenProvider> _logger;
         private readonly IDistributedCache _cache;
-        private readonly PksApiConfiguration pksApiConfiguration;
+        private readonly PksApiConfiguration _pksApiConfiguration;
 
         public AuthTokenProvider(IOptions<EssManagedIdentityConfiguration> essManagedIdentityConfiguration,
                                  IDistributedCache cache,
@@ -28,7 +28,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _essManagedIdentityConfiguration = essManagedIdentityConfiguration;
             _cache = cache;
             _logger = logger;
-            this.pksApiConfiguration = pksApiConfiguration.Value ?? throw new ArgumentNullException(nameof(pksApiConfiguration)); ;
+            _pksApiConfiguration = pksApiConfiguration.Value ?? throw new ArgumentNullException(nameof(pksApiConfiguration)); ;
         }
 
         public async Task<string> GetManagedIdentityAuthAsync(string resource)
@@ -91,11 +91,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _logger.LogInformation(EventIds.GetNewAccessTokenStarted.ToEventId(), "Generating new access token to call external endpoint started | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(resource)
-                .WithClientSecret(pksApiConfiguration.ClientSecret)
-                .WithAuthority(pksApiConfiguration.AccessTokenUrl)
+                .WithClientSecret(_pksApiConfiguration.ClientSecret)
+                .WithAuthority(_pksApiConfiguration.AccessTokenUrl)
                 .Build();
 
-            string[] scopes = { pksApiConfiguration.TenantId + "/.default" };
+            string[] scopes = { _pksApiConfiguration.TenantId + "/.default" };
 
             AuthenticationResult accessToken = await confidentialClientApplication.AcquireTokenForClient(scopes).ExecuteAsync();
 
