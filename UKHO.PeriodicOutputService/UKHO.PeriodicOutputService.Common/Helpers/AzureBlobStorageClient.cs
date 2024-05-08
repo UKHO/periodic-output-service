@@ -78,20 +78,20 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return await reader.ReadToEndAsync();
         }
 
-        public Dictionary<string, string> DeleteConfigsInContainer()
+        public async Task<Dictionary<string, string>> DeleteConfigsInContainer()
         {
             Dictionary<string, string> configs = new();
 
             try
             {
-                BlobContainerClient blobContainerClient = GetBlobContainerClient();
+                BlobContainerClient blobContainerClient = await GetBlobContainerClientAsync();
 
-                foreach (BlobItem blobItem in blobContainerClient.GetBlobs())
+               await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
                 {
                     if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                     {
                         BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
-                        blobClient.DeleteIfExistsAsync();
+                        await blobClient.DeleteIfExistsAsync();
                     }
                 }
             }

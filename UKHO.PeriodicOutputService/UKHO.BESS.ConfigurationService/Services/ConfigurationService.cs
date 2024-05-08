@@ -342,7 +342,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
             await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, bessConfig, false);
 
-            var scheduleDetailEntity = new ScheduleDetailEntity();
+            ScheduleDetailEntity scheduleDetailEntity = new();
             scheduleDetailEntity.NextScheduleTime = nextOccurrence;
             scheduleDetailEntity.IsEnabled = bessConfig.IsEnabled;
 

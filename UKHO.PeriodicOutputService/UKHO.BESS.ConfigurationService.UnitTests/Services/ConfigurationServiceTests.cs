@@ -307,7 +307,6 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithValidMacroJson));
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Throws<Exception>();
 
             Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
@@ -369,7 +368,6 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenEmptyConfigIsFound_ThenThrowsError()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetEmptyConfigJson());
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
 
             var result = configurationService.ProcessConfigsAsync();
 
@@ -401,7 +399,6 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenConfigWithJsonErrorIsFound_ThenThrowsError()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetConfigWithJsonError());
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
 
             var result = configurationService.ProcessConfigsAsync();
 
@@ -433,7 +430,6 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenInvalidEncCellNameIsFound_ThenThrowsError()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetInvalidEncCellNameJson());
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
 
             var result = configurationService.ProcessConfigsAsync();
 
@@ -465,7 +461,6 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenUndefinedValuesFoundInConfig_ThenConfigIsNotAddedToList()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetUndefinedValuesConfigJson());
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
 
             var result = configurationService.ProcessConfigsAsync();
 
