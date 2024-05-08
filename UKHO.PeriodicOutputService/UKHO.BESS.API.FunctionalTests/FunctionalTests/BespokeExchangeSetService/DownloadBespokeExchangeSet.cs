@@ -50,6 +50,20 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
 
+        //PBI 147171: BESS BS - Handling of empty ES and Error.txt Scenarios
+        [Test]
+        [TestCase("d0635e6c-81ae-4acb-9129-1a69f9ee58d2", "s57", "UPDATE")]
+        public async Task WhenIProcessSameConfigWithCorrectDetailsTwice_ThenEmptyExchangeSetShouldBeDownloaded(string batchId, string exchangeSetStandard, string type)
+        {
+            Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
+            Extensions.WaitForDownloadExchangeSet();
+            Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
+            Extensions.WaitForDownloadExchangeSet();
+            string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
+            FssBatchHelper.CheckFilesInEmptyBess(downloadFolderPath);
+            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
+        }
+
         [TearDown]
         public void TearDown()
         {

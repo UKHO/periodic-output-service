@@ -610,10 +610,10 @@ namespace UKHO.PeriodicOutputService.Common.Services
             };
 
             ////This batch attribute is added for fss stub.
-            //if (bool.Parse(_configuration["IsFTRunning"]))
-            //{
-            //    createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", batchType.ToString()));
-            //}
+            if (bool.Parse(_configuration["IsFTRunning"]))
+            {
+                createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", batchType.ToString()));
+            }
             return createBatchRequest;
         }
 
