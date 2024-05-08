@@ -753,7 +753,22 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809150 - CleanUp successful.
         /// </summary>
-        CleanUpSuccessful = 809150
+        CleanUpSuccessful = 809150,
+
+        /// <summary>
+        /// 809151 - Post product data to Product Key Service started.
+        /// </summary>
+        PostProductKeyDataToPksStarted = 809151,
+
+        /// <summary>
+        /// 809152 - Post product data to Product Key Service completed.
+        /// </summary>
+        PostProductKeyDataToPksCompleted = 809152,
+
+        /// <summary>
+        /// 809153 - Post product data to Product Key Service failed.
+        /// </summary>
+        PostProductKeyDataToPksFailed = 809153
     }
 
     public static class EventIdExtensions
