@@ -72,6 +72,9 @@
     <None Update="Data\4BC70797-7EE6-407F-BAFE-CAE49A5B5F91\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\Permit.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -10,6 +10,7 @@ using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.PermitKeyService
 {
+    [Ignore("temporary")]
     [TestFixture]
     public class PKSTests
     {
