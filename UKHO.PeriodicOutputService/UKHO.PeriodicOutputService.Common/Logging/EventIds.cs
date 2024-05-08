@@ -736,19 +736,44 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessProductTxtAndInfoFolderDeleteFailed = 809145,
 
         /// <summary>
-        /// 809146 - Post product data to Product Key Service started.
+        /// 809146 - Bespoke exchange set cleanup web job is started.
         /// </summary>
-        PostProductKeyDataToPksStarted = 809146,
+        BESSCleanUpJobRequestStarted = 809146,
 
         /// <summary>
-        /// 809147 - Post product data to Product Key Service completed.
+        /// 809147 - Bespoke exchange set cleanup web job is completed.
         /// </summary>
-        PostProductKeyDataToPksCompleted = 809147,
+        BESSCleanUpJobRequestCompleted = 809147,
 
         /// <summary>
-        /// 809148 - Post product data to Product Key Service failed.
+        /// 809148 - Deletion of folders failed.
         /// </summary>
-        PostProductKeyDataToPksFailed = 809148
+        FoldersDeletionFailed = 809148,
+
+        /// <summary>
+        /// 809149 - No folders found.
+        /// </summary>
+        NoFoldersFound = 809149,
+
+        /// <summary>
+        /// 809150 - CleanUp successful.
+        /// </summary>
+        CleanUpSuccessful = 809150,
+
+        /// <summary>
+        /// 809151 - Post product data to Product Key Service started.
+        /// </summary>
+        PostProductKeyDataToPksStarted = 809151,
+
+        /// <summary>
+        /// 809152 - Post product data to Product Key Service completed.
+        /// </summary>
+        PostProductKeyDataToPksCompleted = 809152,
+
+        /// <summary>
+        /// 809153 - Post product data to Product Key Service failed.
+        /// </summary>
+        PostProductKeyDataToPksFailed = 809153
     }
 
     public static class EventIdExtensions
