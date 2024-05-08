@@ -20,6 +20,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         private readonly ILogger<AuthTokenProvider> _logger;
         private readonly IDistributedCache _cache;
         private readonly PksApiConfiguration _pksApiConfiguration;
+        private const string AccessTokenUrl = "/oauth2/v2.0/token";
 
         public AuthTokenProvider(IOptions<EssManagedIdentityConfiguration> essManagedIdentityConfiguration,
                                  IDistributedCache cache,
@@ -92,10 +93,10 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(resource)
                 .WithClientSecret(_pksApiConfiguration.ClientSecret)
-                .WithAuthority(_pksApiConfiguration.AccessTokenUrl)
+                .WithAuthority($"{_pksApiConfiguration.MicrosoftOnlineLoginUrl}{_pksApiConfiguration.TenantId}{AccessTokenUrl}")
                 .Build();
 
-            string[] scopes = { _pksApiConfiguration.TenantId + "/.default" };
+            string[] scopes = { _pksApiConfiguration.Scope + "/.default" };
 
             AuthenticationResult accessToken = await confidentialClientApplication.AcquireTokenForClient(scopes).ExecuteAsync();
 
