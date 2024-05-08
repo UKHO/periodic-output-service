@@ -736,17 +736,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessProductTxtAndInfoFolderDeleteFailed = 809145,
 
         /// <summary>
-        /// 809146 - Post product data to PKS started.
+        /// 809146 - Post product data to Product Key Service started.
         /// </summary>
         PostProductKeyDataToPksStarted = 809146,
 
         /// <summary>
-        /// 809147 - Post product data to PKS completed.
+        /// 809147 - Post product data to Product Key Service completed.
         /// </summary>
         PostProductKeyDataToPksCompleted = 809147,
 
         /// <summary>
-        /// 809148 - Post product data to PKS failed.
+        /// 809148 - Post product data to Product Key Service failed.
         /// </summary>
         PostProductKeyDataToPksFailed = 809148
     }
