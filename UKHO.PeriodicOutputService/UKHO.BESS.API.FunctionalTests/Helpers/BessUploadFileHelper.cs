@@ -17,6 +17,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <param name="exchangeSetStandard"></param>
         /// <param name="type"></param>
         /// <param name="readMeSearchFilter"></param>
+        /// <param name="keyFileType"></param>
         /// <returns></returns>
         public static async Task<HttpResponseMessage> UploadConfigFile(string? baseUrl, string? path, string? value, string exchangeSetStandard, string type, string readMeSearchFilter, string keyFileType)
         {
@@ -29,16 +30,16 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         }
 
         /// <summary>
-        ///  This method is to deserialize the payload
+        /// This method is to deserialize the payload
         /// </summary>
         /// <param name="configDetails"></param>
         /// <param name="exchangeSetStandard"></param>
         /// <param name="type"></param>
         /// <param name="readMeSearchFilter"></param>
+        /// <param name="keyFileType"></param>
         /// <returns></returns>
         public static string GetPayload(dynamic configDetails, string exchangeSetStandard, string type, string readMeSearchFilter, string keyFileType)
         {
-            configDetails.Name = "BES-123" + Extensions.RandomNumber();
             configDetails.Type = type;
             configDetails.ExchangeSetStandard = exchangeSetStandard;
             configDetails.ReadMeSearchFilter = readMeSearchFilter;
