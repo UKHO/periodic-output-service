@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using UKHO.BESS.API.FunctionalTests.Models;
 using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using System.Globalization;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -14,6 +16,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         static FssApiConfiguration config = new TestConfiguration().fssConfig;
         static BessApiConfiguration bessConfig = new TestConfiguration().bessConfig;
         static readonly TestConfiguration testConfiguration = new();
+        static readonly string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+        static readonly string currentYear = DateTime.UtcNow.Year.ToString();
 
         static FssBatchHelper()
         {
@@ -227,6 +231,46 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 default:
                     return false;
             }
+        }
+
+        public static void CheckFilesInEmptyBess(string? downloadFolderPath)
+        {
+            //Checking for the PRODUCTS.TXT file in the downloaded zip
+            var checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!), testConfiguration.exchangeSetDetails.ExchangeSetProductFile!);
+            checkFile.Should().Be(false);
+
+            //Checking for the README.TXT file in the downloaded zip
+            checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
+            checkFile.Should().Be(true);
+
+            //Checking for the CATALOG file in the downloaded zip
+            checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile!);
+            checkFile.Should().Be(true);
+
+            //Checking for the folder of the requested products in the downloaded zip
+            foreach (var productName in testConfiguration.bessConfig.ProductsName!)
+            {
+                var countryCode = productName.Substring(0, 2);
+                checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//" + countryCode + "//" + productName);
+                checkFile.Should().Be(false);
+            }
+        }
+
+        public static async Task VerifyBessBatchDetails(HttpResponseMessage apiResponse)
+        {
+            var apiResponseData = await apiResponse.ReadAsTypeAsync<GetBatchResponseModel>();
+            for (int i = 0; i <= 3; i++)
+            {
+                var value = apiResponseData.Attributes.ToArray()[i].Value;
+                value.Should().Be(testConfiguration.bessConfig.BessBatchDetails![i]);
+            }
+
+            var year = apiResponseData.Attributes.ToArray()[4].Value;
+            year.Should().Be(currentYear);
+            var weekNumber = apiResponseData.Attributes.ToArray()[5].Value;
+            weekNumber.Should().Be(currentWeek);
+            var yearWeek = apiResponseData.Attributes.ToArray()[6].Value;
+            yearWeek.Should().Be(year + " / " + weekNumber);
         }
     }
 }

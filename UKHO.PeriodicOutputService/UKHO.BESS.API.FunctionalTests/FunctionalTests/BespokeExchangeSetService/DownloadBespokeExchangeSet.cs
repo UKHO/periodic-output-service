@@ -12,6 +12,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
     public class DownloadBespokeExchangeSet
     {
         static readonly TestConfiguration testConfiguration = new();
+        FssEndPointHelper fssEndPointHelper = new();
         static BessStorageConfiguration bessStorageConfiguration = testConfiguration.bessStorageConfig;
         AzureBlobStorageClient? azureBlobStorageClient;
         readonly dynamic config = Options.Create(new PeriodicOutputService.Common.Configuration.BessStorageConfiguration
@@ -44,6 +45,8 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             expectedResultReadme.Should().Be(true);
             var expectedResultSerial = FssBatchHelper.CheckInfoFolderAndSerialEncInBessExchangeSet(downloadFolderPath, type);
             expectedResultSerial.Should().Be(true);
+            HttpResponseMessage expectedResult = await fssEndPointHelper.CheckBatchDetails(batchId);
+            await FssBatchHelper.VerifyBessBatchDetails(expectedResult);
             await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
 

@@ -100,15 +100,17 @@ namespace UKHO.FmEssFssMock.API.Services
             {
                 ConfigQueueMessage message = new()
                 {
-                    AllowedUserGroups = new List<string> { "FSS/BESS-Port of London" },
-                    AllowedUsers = new List<string> { "FSS/BESS-Port of London" },
+                    AllowedUserGroups = new List<string> { "FSS/BESS-Port of Atlantis" },
+                    AllowedUsers = new List<string> { "FSS/BESS-Port of Atlantis" },
                     BatchExpiryInDays = 7,
                     Tags = new List<Tag> {
-                            new() { Key = "Audience", Value = "Port of London" },
+                            new() { Key = "Audience", Value = "Port of Atlantis" },
                             new() { Key = "Frequency",Value="Weekly" },
-                            new() { Key = "Year", Value = "2024" },
-                            new() { Key = "Week Number", Value = "16" },
-                            new() { Key = "Year / Week", Value = "2024 / 16" }
+                            new() { Key = "Media Type",Value="Zip" },
+                            new() { Key = "Product Type",Value="AVCS" },
+                            new() { Key = "Year", Value = currentYear },
+                            new() { Key = "Week Number", Value = currentWeek },
+                            new() { Key = "Year / Week", Value = currentYear + " / " + currentWeek },
                 }
                 };
 

@@ -16,6 +16,6 @@
         BesBaseZipBatch = 12,
         BesUpdateZipBatch = 13,
         BesChangeZipBatch = 14,
-        EssEmptyBatch = 15
+        BesEmptyBatch = 15
     }
 }

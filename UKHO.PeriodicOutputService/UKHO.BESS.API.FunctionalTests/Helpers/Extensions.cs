@@ -95,5 +95,16 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             return httpClient.Send(httpRequestMessage, CancellationToken.None);
         }
+
+        /// Reads response body json as given type
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="httpResponseMessage"></param>
+        /// <returns></returns>
+        public static async Task<T> ReadAsTypeAsync<T>(this HttpResponseMessage httpResponseMessage)
+        {
+            string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(bodyJson)!;
+        }
     }
 }

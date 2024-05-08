@@ -31,7 +31,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                                       };
         private const string ServerHeaderValue = "Windows-Azure-Blob";
 
-        private readonly Enum[] bessBatchTypes = new Enum[] { Batch.BesBaseZipBatch, Batch.BesUpdateZipBatch, Batch.BesChangeZipBatch, Batch.EssEmptyBatch };
+        private readonly Enum[] bessBatchTypes = new Enum[] { Batch.BesBaseZipBatch, Batch.BesUpdateZipBatch, Batch.BesChangeZipBatch, Batch.BesEmptyBatch };
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,

@@ -24,6 +24,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? TempFolderName { get; set; }
             public List<string>? ProductsName { get; set; }
             public string? Identifiers { get; set; }
+            public List<string>? BessBatchDetails { get; set; }
         }
 
         public class SharedKeyConfiguration

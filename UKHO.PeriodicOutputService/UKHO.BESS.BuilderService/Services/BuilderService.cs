@@ -226,7 +226,7 @@ namespace UKHO.BESS.BuilderService.Services
                 //else if block for mock only
                 else if (configQueueMessage.Type.ToUpper().Equals("EMPTY"))
                 {
-                    batchType = Batch.EssEmptyBatch;
+                    batchType = Batch.BesEmptyBatch;
                 }
 
                 besBatchId = await fssService.CreateBatch(batchType, configQueueMessage);
