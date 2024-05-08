@@ -44,16 +44,21 @@ variables:
 stages:
   - stage: Stryker_Mutator
     displayName: "Stryker Mutator"
-    condition: ${{ eq(parameters.disableStryker, false) }}
+    dependsOn: []
+
+    
+  - stage: PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+    displayName: "Build (inc DependencyChecker, Dotnet Build , dotnet test and publish artifact )"
     dependsOn: []
     variables:
-    - name: StrykerDotNetVersion
-      value: 8.0.x
+      - name: StrykerDotNetVersion
+        value: 8.0.x
     jobs:
-    - job: Stryker
-      workspace:
-        clean: all
-      steps:
+      - job: Stryker
+        condition: ${{ eq(parameters.disableStryker, false) }}
+        workspace:
+          clean: all
+        steps:
         - task: UseDotNet@2
           displayName: 'Use .NET SDK'
           inputs:
@@ -96,10 +101,6 @@ stages:
           inputs:
             reportPattern: '**/mutation-report.html'
 
-  - stage: PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
-    displayName: "Build (inc DependencyChecker, Dotnet Build , dotnet test and publish artifact )"
-    dependsOn: []
-    jobs:
       - job: Dependencychecker
         workspace:
           clean: all
