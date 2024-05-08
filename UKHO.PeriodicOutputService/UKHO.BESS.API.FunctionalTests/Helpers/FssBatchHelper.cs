@@ -308,7 +308,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                         }
                         return true;
                 }
-
             return true;
         }
     }

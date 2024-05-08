@@ -29,7 +29,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.MockEndPoint
         [Test]
         public async Task WhenICallUploadConfigApiWithValidConfigFile_ThenCreatedStatusCode201IsReturned()
         {
-            HttpResponseMessage apiResponse = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, "s63","UPDATE","AVCS", "PERMIT_XML");
+            HttpResponseMessage apiResponse = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, "s63", "UPDATE", "AVCS", "PERMIT_XML");
             apiResponse.StatusCode.Should().Be((HttpStatusCode)201);
         }
 
