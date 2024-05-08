@@ -44,6 +44,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             expectedResultReadme.Should().Be(true);
             var expectedResultSerial = FssBatchHelper.CheckInfoFolderAndSerialEncInBessExchangeSet(downloadFolderPath, type);
             expectedResultSerial.Should().Be(true);
+            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
 
         [TearDown]
@@ -54,6 +55,14 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
 
             //cleaning up the downloaded files from temp folder
             Extensions.DeleteTempDirectory(testConfiguration.bessConfig.TempFolderName);
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            //cleaning up the stub home directory
+            HttpResponseMessage apiResponse = Extensions.Cleanup(testConfiguration.bessConfig.BaseUrl);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }
 }
