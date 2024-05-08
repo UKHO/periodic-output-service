@@ -753,16 +753,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809150 - CleanUp successful.
         /// </summary>
-        CleanUpSuccessful = 809150,
-
-        /// 809151 - Macro is invalid or unavailable.
-        /// </summary>
-        MacroInvalidOrUnavailable = 809151,
-
-        /// <summary>
-        /// 809152 - Exception occurred while transforming macros.
-        /// </summary>
-        MacroTransformationFailed = 809152
+        CleanUpSuccessful = 809150
     }
 
     public static class EventIdExtensions
