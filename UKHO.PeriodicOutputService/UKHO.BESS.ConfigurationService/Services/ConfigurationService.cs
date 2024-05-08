@@ -135,7 +135,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                 if (bessConfigs.Any())
                 {
-                    configsWithInvalidMacrosCount = await TransformMacros(bessConfigs);
+                    configsWithInvalidMacrosCount = TransformMacros(bessConfigs);
                 }
 
                 int totalConfigCount = deserializedConfigsCount + filesWithJsonErrorCount;
@@ -403,7 +403,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// </summary>
         /// <param name="bessConfigs"></param>
         /// <returns></returns>
-        private async Task<int> TransformMacros(IList<BessConfig> bessConfigs)
+        private int TransformMacros(IList<BessConfig> bessConfigs)
         {
             List<BessConfig> configsWithInvalidMacros = new();
 
@@ -439,8 +439,6 @@ namespace UKHO.BESS.ConfigurationService.Services
             {
                 bessConfigs.Remove(config);
             }
-            await Task.CompletedTask;
-
             return configsWithInvalidMacros.Count;
         }
     }
