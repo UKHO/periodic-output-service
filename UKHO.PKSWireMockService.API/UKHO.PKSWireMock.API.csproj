@@ -28,9 +28,6 @@
     <Content Update="__files\Request2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Update="__files\Request3.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Update="__files\Request4.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -41,9 +38,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="__files\response2.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Update="__files\Response3.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Update="__files\Response4.json">

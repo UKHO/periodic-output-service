@@ -1,26 +1,26 @@
-[
+﻿[
     {
         "productName": "AU220150",
-        "edition": "8"
+        "edition": "0"
     },
     {
         "productName": "AU5PTL01",
-        "edition": "1"
+        "edition": "0"
     },
     {
         "productName": "CA570182",
-        "edition": "3"
-    },
-    {
-        "productName": "CN484220",
-        "edition": "6"
+        "edition": "0"
     },
     {
         "productName": "CA570226",
-        "edition": "3"
+        "edition": "0"
     },
     {
         "productName": "CN484220",
-        "edition": "1"
+        "edition": "0"
+    },
+    {
+        "productName": "GB301910",
+        "edition": "0"
     }
 ]
