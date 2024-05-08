@@ -1,0 +1,273 @@
+{
+    "count": 8,
+    "total": 8,
+    "entries": [
+        {
+            "batchId": "10d40dd5-ddfb-497a-bb67-d99fb1658320",
+            "status": "Committed",
+            "allFilesZipSize": 14576585,
+            "attributes": [
+                {
+                    "key": "Audience",
+                    "value": "Port of London"
+                },
+                {
+                    "key": "Catalogue Type",
+                    "value": "ADC"
+                },
+                {
+                    "key": "Content",
+                    "value": "Catalogue"
+                },
+                {
+                    "key": "Frequency",
+                    "value": "Weekly"
+                },
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                },
+                {
+                    "key": "Week Number",
+                    "value": "15"
+                },
+                {
+                    "key": "Year",
+                    "value": "2024"
+                },
+                {
+                    "key": "Year / Week",
+                    "value": "2024 / 15"
+                }
+            ],
+            "businessUnit": "AVCS-BespokeExchangeSets",
+            "batchPublishedDate": "2024-04-12T10:20:09.65Z",
+            "expiryDate": "2024-05-10T10:19:16Z",
+            "files": [
+                {
+                    "filename": "ADC_README.TXT",
+                    "fileSize": 760,
+                    "mimeType": "text/plain",
+                    "hash": "k9wcCnV3aBXLh2PZFFYiZw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/ADC_README.TXT"
+                        }
+                    }
+                },
+                {
+                    "filename": "ACCatalogs.zip",
+                    "fileSize": 1800,
+                    "mimeType": "application/zip",
+                    "hash": "Yf5ZK01oqJiRip14rxQM5Q==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/ACCatalogs.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "distributors.zip",
+                    "fileSize": 76497,
+                    "mimeType": "application/zip",
+                    "hash": "WUCxlu0CE7XRtgNe8GdA8w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/distributors.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "tpnms.zip",
+                    "fileSize": 422317,
+                    "mimeType": "application/zip",
+                    "hash": "ur7+UWFSgn4zihxyPhuXXQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/tpnms.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "TPNMS Diagrams.zip",
+                    "fileSize": 1646408,
+                    "mimeType": "application/zip",
+                    "hash": "218BLbULr+qqtsTipLNf/w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/10d40dd5-ddfb-497a-bb67-d99fb1658320/files/TPNMS%20Diagrams.zip"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "ab4a692d-6e3b-48a3-bd37-d232c60dd75d",
+            "status": "Committed",
+            "allFilesZipSize": 18957,
+            "attributes": [
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                }
+            ],
+            "businessUnit": "AVCS-BespokeExchangeSets",
+            "batchPublishedDate": "2024-04-11T09:01:18.027Z",
+            "expiryDate": null,
+            "files": [
+                {
+                    "filename": "README.txt",
+                    "fileSize": 55092,
+                    "mimeType": "text/plain",
+                    "hash": "C2DI95LYetdIO6q1baIHBA==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/ab4a692d-6e3b-48a3-bd37-d232c60dd75d/files/README.txt"
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "batchId": "a9ca8292-17a2-4920-9814-ed9ff32f601e",
+            "status": "Committed",
+            "allFilesZipSize": 14568512,
+            "attributes": [
+                {
+                    "key": "Catalogue Type",
+                    "value": "ADC"
+                },
+                {
+                    "key": "Content",
+                    "value": "Catalogue"
+                },
+                {
+                    "key": "Frequency",
+                    "value": "Weekly"
+                },
+                {
+                    "key": "Product Type",
+                    "value": "AVCS"
+                },
+                {
+                    "key": "Week Number",
+                    "value": "14"
+                },
+                {
+                    "key": "Year",
+                    "value": "2024"
+                },
+                {
+                    "key": "Year / Week",
+                    "value": "2024 / 14"
+                }
+            ],
+            "businessUnit": "AVCS-BespokeExchangeSets",
+            "batchPublishedDate": "2024-04-05T07:55:53.197Z",
+            "expiryDate": "2024-05-03T07:55:16Z",
+            "files": [
+                {
+                    "filename": "ADC_README.TXT",
+                    "fileSize": 760,
+                    "mimeType": "text/plain",
+                    "hash": "k9wcCnV3aBXLh2PZFFYiZw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ADC_README.TXT"
+                        }
+                    }
+                },
+                {
+                    "filename": "ACCatalogs.zip",
+                    "fileSize": 1787,
+                    "mimeType": "application/zip",
+                    "hash": "2rhIm4X+QBNUwGR5i95kpw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/ACCatalogs.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "distributors.zip",
+                    "fileSize": 76497,
+                    "mimeType": "application/zip",
+                    "hash": "WUCxlu0CE7XRtgNe8GdA8w==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/distributors.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "objects.zip",
+                    "fileSize": 131379,
+                    "mimeType": "application/zip",
+                    "hash": "hwXRSrkaT+x/LCopfgmmxg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/objects.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "tpnms.zip",
+                    "fileSize": 422444,
+                    "mimeType": "application/zip",
+                    "hash": "gAjiZNFObLtuSH2dH3m4Yw==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/tpnms.zip"
+                        }
+                    }
+                },
+                {
+                    "filename": "Paper Charts.cat",
+                    "fileSize": 1042263,
+                    "mimeType": "application/binary",
+                    "hash": "4VpGMtFbCJlrhpihJrUvcQ==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/Paper%20Charts.cat"
+                        }
+                    }
+                },
+                {
+                    "filename": "TPNMS Diagrams.zip",
+                    "fileSize": 1646408,
+                    "mimeType": "application/zip",
+                    "hash": "nrHaWIjBJWoJmynbvRgodg==",
+                    "attributes": [],
+                    "links": {
+                        "get": {
+                            "href": "/batch/a9ca8292-17a2-4920-9814-ed9ff32f601e/files/TPNMS%20Diagrams.zip"
+                        }
+                    }
+                }
+            ]
+        }       
+    ],
+    "_Links": {
+        "self": {
+            "href": "/batch?limit=10&start=0&$filter=businessUnit%20eq%20%27AVCS-BespokeExchangeSets%27%20and%20filename%20eq%20%27README.TXT%27%20and%20%24batch%28Content%29%20eq%20%27Bespoke%20README%27%20and%20%24batch%28Audience%29%20eq%20%27Port%20of%20London%27%20"
+        },
+        "first": {
+            "href": "/batch?limit=10&start=0&$filter=businessUnit%20eq%20%27AVCS-BespokeExchangeSets%27%20and%20filename%20eq%20%27README.TXT%27%20and%20%24batch%28Content%29%20eq%20%27Bespoke%20README%27%20and%20%24batch%28Audience%29%20eq%20%27Port%20of%20London%27%20"
+        },
+        "last": {
+            "href": "/batch?limit=10&start=0&$filter=businessUnit%20eq%20%27AVCS-BespokeExchangeSets%27%20and%20filename%20eq%20%27README.TXT%27%20and%20%24batch%28Content%29%20eq%20%27Bespoke%20README%27%20and%20%24batch%28Audience%29%20eq%20%27Port%20of%20London%27%20"
+        }
+    }
+}
