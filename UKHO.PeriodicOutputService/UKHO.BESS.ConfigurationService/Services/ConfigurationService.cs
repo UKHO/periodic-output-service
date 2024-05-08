@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Text;
 using FluentValidation.Results;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -33,7 +32,6 @@ namespace UKHO.BESS.ConfigurationService.Services
         private const string NewLine = "\n";
         private const string Colon = ": ";
         private const string IsEnabled = "IsEnabled";
-        private const bool IsExecuted = false;
 
         public ConfigurationService(IAzureBlobStorageClient azureBlobStorageClient,
                                     IAzureTableStorageHelper azureTableStorageHelper,
@@ -128,7 +126,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                         catch (Exception ex)
                         {
                             logger.LogError(EventIds.BessConfigValidationError.ToEventId(), "Error occurred while validating BESS config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", fileName, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
-                            return "Error occurred while validating BESS config file";
+                            throw new FulfilmentException(EventIds.BessConfigValidationError.ToEventId());
                         }
                     }
                 }
@@ -195,6 +193,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 return new ValueTuple<BessConfig, bool>(bessConfig, isValid);
             }
         }
+
         /// <summary>
         /// Remove duplicate configs
         /// </summary>
@@ -290,7 +289,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                     {   //Update schedule details
                         if (IsScheduleRefreshed(existingScheduleDetail, nextOccurrence, config))
                         {
-                            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, IsExecuted);
+                            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, false);
                         }
                     }
                 }
@@ -341,13 +340,11 @@ namespace UKHO.BESS.ConfigurationService.Services
                 return existingScheduleDetail;
             }
 
-            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, bessConfig, IsExecuted);
+            await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, bessConfig, false);
 
-            ScheduleDetailEntity scheduleDetailEntity = new();
-            {
-                scheduleDetailEntity.NextScheduleTime = nextOccurrence;
-                scheduleDetailEntity.IsEnabled = bessConfig.IsEnabled;
-            }
+            var scheduleDetailEntity = new ScheduleDetailEntity();
+            scheduleDetailEntity.NextScheduleTime = nextOccurrence;
+            scheduleDetailEntity.IsEnabled = bessConfig.IsEnabled;
 
             return scheduleDetailEntity;
         }
@@ -406,7 +403,7 @@ namespace UKHO.BESS.ConfigurationService.Services
         /// </summary>
         /// <param name="bessConfigs"></param>
         /// <returns></returns>
-        public async Task<int> TransformMacros(IList<BessConfig> bessConfigs)
+        private async Task<int> TransformMacros(IList<BessConfig> bessConfigs)
         {
             List<BessConfig> configsWithInvalidMacros = new();
 
@@ -434,6 +431,7 @@ namespace UKHO.BESS.ConfigurationService.Services
                 catch (Exception ex)
                 {
                     logger.LogError(EventIds.MacroTransformationFailed.ToEventId(), "Exception occurred while transforming macros {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.MacroTransformationFailed.ToEventId());
                 }
             }
 

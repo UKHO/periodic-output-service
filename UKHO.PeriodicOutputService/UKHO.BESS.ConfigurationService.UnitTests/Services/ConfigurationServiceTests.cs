@@ -219,7 +219,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
-        
+
         [Test]
         public void WhenValueOfKeyInTagsIsNullOrEmpty_ThenThrowsValidationError()
         {
@@ -303,16 +303,15 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenAValidConfigWithValidMacroIsNotTransformed_ThenTransformMacrosThrowsException()
+        public async Task WhenAValidConfigWithValidMacroIsNotTransformed_ThenTransformMacrosThrowsException()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithValidMacroJson));
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Throws<Exception>();
 
-            var result = configurationService.ProcessConfigsAsync();
-
-            result.Result.Should().Be("BESS configs processing completed");
+            Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.MacroTransformationFailed.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -326,21 +325,6 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.MacroTransformationFailed.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Exception occurred while transforming macros {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
-                  ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
-                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-                  call.Method.Name == "Log"
-                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
 
@@ -510,10 +494,12 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public void WhenGetConfigsInContainerAsyncMethodSendNull_ThenThrowsException()
+        public async Task WhenGetConfigsInContainerAsyncMethodSendNull_ThenThrowsException()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Throws<Exception>();
-            configurationService.Invoking(x => x.ProcessConfigsAsync()).Should().ThrowExactlyAsync<Exception>();
+
+            Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
+            await act.Should().ThrowAsync<Exception>();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -619,9 +605,8 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Throws<Exception>();
 
-            var result = await configurationService.ProcessConfigsAsync();
-
-            result.Should().Be("Error occurred while validating BESS config file");
+            Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessConfigValidationError.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
