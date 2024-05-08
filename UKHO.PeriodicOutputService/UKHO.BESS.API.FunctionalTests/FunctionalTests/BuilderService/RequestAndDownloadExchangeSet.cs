@@ -32,12 +32,14 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
             string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
             bool expectedResulted = FssBatchHelper.CheckFilesInDownloadedZip(downloadFolderPath, exchangeSetStandard);
             expectedResulted.Should().Be(true);
-            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
 
         [TearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
+            //cleaning bessproductversiondetails azure table entries
+            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName);
+
             //cleaning up the downloaded files from temp folder
             Extensions.DeleteTempDirectory(testConfiguration.bessConfig.TempFolderName);
         }

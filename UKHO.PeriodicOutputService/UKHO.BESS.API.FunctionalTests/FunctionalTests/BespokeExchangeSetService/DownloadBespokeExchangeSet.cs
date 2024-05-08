@@ -47,7 +47,6 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             expectedResultSerial.Should().Be(true);
             HttpResponseMessage expectedResult = await fssEndPointHelper.CheckBatchDetails(batchId);
             await FssBatchHelper.VerifyBessBatchDetails(expectedResult);
-            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
 
         //PBI 147171: BESS BS - Handling of empty ES and Error.txt Scenarios
@@ -56,17 +55,19 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
         public async Task WhenIProcessSameConfigWithCorrectDetailsTwice_ThenEmptyExchangeSetShouldBeDownloaded(string batchId, string exchangeSetStandard, string type)
         {
             Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
-            Extensions.WaitForDownloadExchangeSet();
+            Extensions.WaitForDownloadExchangeSet(true);
             Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
-            Extensions.WaitForDownloadExchangeSet();
+            Extensions.WaitForDownloadExchangeSet(true);
             string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
             FssBatchHelper.CheckFilesInEmptyBess(downloadFolderPath);
-            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
 
         [TearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
+            //cleaning bessproductversiondetails azure table entries
+            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName);
+
             // Cleaning up config files from container.
             azureBlobStorageClient?.DeleteConfigsInContainer();
 

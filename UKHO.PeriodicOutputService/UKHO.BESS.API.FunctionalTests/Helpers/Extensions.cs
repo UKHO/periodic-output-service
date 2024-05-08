@@ -8,6 +8,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
     public static class Extensions
     {
         static readonly HttpClient httpClient = new();
+        static readonly TestConfiguration testConfiguration = new();
+        static readonly string[] exchangeSetStandards = { testConfiguration.bessConfig.s57ExchangeSetStandard!, testConfiguration.bessConfig.s63ExchangeSetStandard! };
 
         /// <summary>
         /// This method is used to set the test scenario.
@@ -40,10 +42,17 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is use to give time to BuilderService to download the exchangeSet.
         /// </summary>
-        public static void WaitForDownloadExchangeSet()
+        public static void WaitForDownloadExchangeSet(bool blankES = false)
         {
             //The below sleep is to give time to BuilderService to download the exchangeSet.
-            Thread.Sleep(210000);
+            if (blankES)
+            {
+                Thread.Sleep(240000); //BuilderService takes some additional time to create blank bescope exchange set.
+            }
+            else
+            {
+                Thread.Sleep(210000);
+            }
         }
 
         /// <summary>
@@ -52,14 +61,16 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <param name="connectionString"></param>
         /// <param name="tableName"></param>
         /// <param name="products"></param>
-        /// <param name="exchangeSetStandard"></param>
-        public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products, string? exchangeSetStandard)
+        public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products)
         {
             TableClient tableClient = new(connectionString, tableName);
-
-            foreach(string product in products!)
+            
+            foreach(var exchangeSetStandard in exchangeSetStandards)
             {
-                await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard+"|"+product);
+                foreach (var product in products!)
+                {
+                    await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard+"|"+product);
+                }
             }
         }
 
