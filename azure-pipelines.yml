@@ -997,8 +997,6 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PKSApiConfiguration.ClientSecret"
-        value: $(PKSApiClientSecret)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     jobs:
       - deployment: LiveDeployApp
@@ -1129,8 +1127,6 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PKSApiConfiguration.ClientSecret"
-        value: $(PKSApiClientSecret)
     jobs:
       - deployment: vNextIATDeployApp
         displayName: "vNextIAT - Deploy Terraform and Dotnet App"
