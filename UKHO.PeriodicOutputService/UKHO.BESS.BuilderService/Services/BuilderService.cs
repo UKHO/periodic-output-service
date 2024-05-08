@@ -35,8 +35,8 @@ namespace UKHO.BESS.BuilderService.Services
 
         private const string BESPOKE_FILE_NAME = "V01X01";
         private const string BessBatchFileExtension = "zip";
-        private const string KeyTextFile = "Keys.txt";
-        private const string PermitXmlFile = "Avcs Cell Keys.xml";
+        private const string PermitTextFile = "Permit.txt";
+        private const string PermitXmlFile = "Permit.xml";
         private const string PermitTextFileHeader = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
         private readonly string mimeType = "application/zip";
         private readonly string homeDirectoryPath;
@@ -82,7 +82,7 @@ namespace UKHO.BESS.BuilderService.Services
 
                 List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
 
-                CreateKeyFile(configQueueMessage, essFileDownloadPath, productKeyServiceResponse);
+                CreatePermitFile(configQueueMessage.KeyFileType, essFileDownloadPath, productKeyServiceResponse);
             }
 
             //Temporary Upload Code
@@ -375,9 +375,11 @@ namespace UKHO.BESS.BuilderService.Services
             return isDownloadReadMeFileSuccess;
         }
 
-        private void CreateKeyFile(ConfigQueueMessage configQueueMessage, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses)
+        private void CreatePermitFile(string keyFileType, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses)
         {
-            if (configQueueMessage.KeyFileType == "KEY_TEXT")
+            Enum.TryParse(keyFileType, false, out KeyFileType fileType);
+
+            if (fileType == KeyFileType.KEY_TEXT)
             {
                 int i = 1;
                 string permitTextFileContent = PermitTextFileHeader;
@@ -397,9 +399,9 @@ namespace UKHO.BESS.BuilderService.Services
                     }
                 };
 
-                fileSystemHelper.CreateTextFile(filePath, KeyTextFile, permitTextFileContent);
+                fileSystemHelper.CreateTextFile(filePath, PermitTextFile, permitTextFileContent);
             }
-            else if (configQueueMessage.KeyFileType == "PERMIT_XML")
+            else if (fileType == KeyFileType.PERMIT_XML)
             {
                 PKSXml pKSXml = new()
                 {
