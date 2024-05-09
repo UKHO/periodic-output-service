@@ -55,9 +55,9 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
         public async Task WhenIProcessSameConfigWithCorrectDetailsTwice_ThenEmptyExchangeSetShouldBeDownloaded(string batchId, string exchangeSetStandard, string type)
         {
             Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
-            Extensions.WaitForDownloadExchangeSet(true);
+            Extensions.WaitForDownloadExchangeSet();
             Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
-            Extensions.WaitForDownloadExchangeSet(true);
+            Extensions.WaitForDownloadExchangeSet();
             string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
             FssBatchHelper.CheckFilesInEmptyBess(downloadFolderPath);
         }
