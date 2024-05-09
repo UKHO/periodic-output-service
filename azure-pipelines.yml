@@ -268,6 +268,16 @@ stages:
               zipAfterPublish: false
               modifyOutputPath: false
 
+          - task: DotNetCoreCLI@2
+            displayName: "Publish BESS CleanUp Service Code"
+            inputs:
+              command: "publish"
+              publishWebProjects: false
+              projects: "**/*UKHO.BESS.CleanUpJob.csproj"
+              arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\BESSCleanUpWebJob'
+              zipAfterPublish: false
+              modifyOutputPath: false
+
           - task: ArchiveFiles@2
             displayName: "Zip POS fulfilment service"
             inputs:
@@ -505,6 +515,8 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
+      - name: "PKSApiConfiguration.ClientSecret"
+        value: $(PKSApiClientSecret)
 
     jobs:
       - deployment: DevDeployApp
@@ -1223,6 +1235,8 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
+      - name: "PKSApiConfiguration.ClientSecret"
+        value: $(PKSApiClientSecret)
     jobs:
       - deployment: vNextE2EDeployApp
         displayName: "vNextE2E - Deploy Terraform and Dotnet App"

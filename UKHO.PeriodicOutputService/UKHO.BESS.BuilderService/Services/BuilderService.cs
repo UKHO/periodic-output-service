@@ -28,6 +28,7 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly ILogger<BuilderService> logger;
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
         private readonly IOptions<FssApiConfiguration> fssApiConfig;
+        private readonly IPksService pksService;
 
         private const string BESPOKE_FILE_NAME = "V01X01";
         private readonly string homeDirectoryPath;
@@ -43,7 +44,7 @@ namespace UKHO.BESS.BuilderService.Services
         };
         private const string DEFAULTMIMETYPE = "application/octet-stream";
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
@@ -52,7 +53,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
             this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
-
+            this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BESSFolderName"]!);
         }
 
@@ -77,16 +78,42 @@ namespace UKHO.BESS.BuilderService.Services
 
             await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
 
+            ProductVersionsRequest? latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray(), bessZipFileName);
+
+            if (!string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                List<ProductKeyServiceRequest> productKeyServiceRequest = new();
+
+                productKeyServiceRequest.AddRange(latestProductVersions.ProductVersions.Select(
+                    item => new ProductKeyServiceRequest()
+                    {
+                        ProductName = item.ProductName,
+                        Edition = item.EditionNumber.ToString()
+                    }));
+
+                List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
+            }
+
             CreateZipFile(essFiles, essFileDownloadPath);
 
+            if (bool.Parse(configuration["IsFTRunning"]))
+            {
+                await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
+            }
             if (!CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage).Result)
                 return false;
 
             if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
-                configQueueMessage.Type == BessType.CHANGE.ToString())
-            {
-                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray(), bessZipFileName);
-                await LogProductVersionsAsync(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                     configQueueMessage.Type == BessType.CHANGE.ToString())
+            {                
+                if (latestProductVersions.ProductVersions.Count > 0)
+                {
+                    await LogProductVersionsAsync(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                }
+                else
+                {
+                    logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
             }
 
             return true;
@@ -263,6 +290,11 @@ namespace UKHO.BESS.BuilderService.Services
                 else if (configQueueMessage.Type.ToUpper().Equals(BessType.CHANGE.ToString()))
                 {
                     batchType = Batch.BesChangeZipBatch;
+                }
+                //else if block for mock only
+                else if (configQueueMessage.Type.ToUpper().Equals("EMPTY"))
+                {
+                    batchType = Batch.BesEmptyBatch;
                 }
 
                 besBatchId = await fssService.CreateBatch(batchType, configQueueMessage);
@@ -531,6 +563,27 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             await Task.CompletedTask;
+        }
+
+        // This method is for mock only
+        [ExcludeFromCodeCoverage]
+        private async Task<bool> IsBatchCreatedForMock(ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
+        {
+            bool isBatchCreated;
+
+            var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+
+            var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(),
+                configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+
+            var product = productVersions.Any(x => x.EditionNumber > 0);
+            if (product)
+            {
+                configQueueMessage.Type = "EMPTY";
+            }
+            isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage).Result;
+
+            return isBatchCreated;
         }
 
         private void RenameFile(string downloadPath, List<FssBatchFile> files, string bessZipFileName)

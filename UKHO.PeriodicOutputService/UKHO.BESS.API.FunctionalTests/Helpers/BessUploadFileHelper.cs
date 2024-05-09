@@ -24,7 +24,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             var configDetails = JsonConvert.DeserializeObject<BessConfig>(File.ReadAllText(path!));
             string payloadJson = GetPayload(configDetails!, exchangeSetStandard, type, readMeSearchFilter);
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
-                { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+            { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
             return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
@@ -38,7 +38,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static string GetPayload(dynamic configDetails, string exchangeSetStandard, string type, string readMeSearchFilter)
         {
-            configDetails.Name = "BES-123" + Extensions.RandomNumber();
             configDetails.Type = type;
             configDetails.ExchangeSetStandard = exchangeSetStandard;
             configDetails.ReadMeSearchFilter = readMeSearchFilter;

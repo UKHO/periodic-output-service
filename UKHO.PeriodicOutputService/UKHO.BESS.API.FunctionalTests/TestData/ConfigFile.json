@@ -1,5 +1,5 @@
 {
-    "name": "BES-1",
+    "name": "BESConfig",
     "exchangeSetStandard": "s63",
     "encCellNames": [
         "AU220150",
@@ -17,17 +17,28 @@
         "User2"
     ],
     "allowedUserGroups": [
-        "UG1",
-        "UG2"
+        "FSS/BESS-Port of Atlantis"
     ],
     "tags": [
         {
-            "Key": "key1",
-            "Value": "value1"
+            "Key": "Audience",
+            "Value": "Port of Atlantis"
         },
         {
-            "Key": "key2",
-            "Value": "value2"
+            "Key": "Frequency",
+            "Value": "Weekly"
+        },
+        {
+            "Key": "Media Type",
+            "Value": "Zip"
+        },
+        {
+            "Key": "Year",
+            "Value": "$(now.WeekNumber.Year)"
+        },
+        {
+            "Key": "Week Number",
+            "Value": "$(now.WeekNumber)"
         }
     ],
     "readMeSearchFilter": "AVCS",

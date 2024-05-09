@@ -13,6 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public FssApiConfiguration fssConfig = new();
         public BessStorageConfiguration bessStorageConfig = new();
         public ExchangeSetDetails exchangeSetDetails = new();
+        public PKSApiConfiguration pksConfig = new();
 
         public class BessApiConfiguration
         {
@@ -23,7 +24,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? s57ExchangeSetStandard { get; set; }
             public string? TempFolderName { get; set; }
             public List<string>? ProductsName { get; set; }
+            public List<string>? EditionNumber { get; set; }
             public string? Identifiers { get; set; }
+            public List<string>? BessBatchDetails { get; set; }
         }
 
         public class SharedKeyConfiguration
@@ -44,7 +47,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public int? UpdateNumber { get; set; }
         }
 
-        public class FssApiConfiguration    
+        public class FssApiConfiguration
         {
             public string? BaseUrl { get; set; }
             public int BatchCommitWaitTime { get; set; }
@@ -54,6 +57,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             public string? ConnectionString { get; set; }
             public string? ContainerName { get; set; }
+            public string? TableName { get; set; }
             public string? QueueName { get; set; }
         }
 
@@ -66,6 +70,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? ExchangeSetEncRootFolder { get; set; }
             public string? ExchangeSetCatalogueFile { get; set; }
             public string? ExchangeSetSerialEncFile { get; set; }
+        }
+
+        public class PKSApiConfiguration
+        {
+            public string? BaseUrl { get; set; }
         }
 
         public TestConfiguration()
@@ -81,6 +90,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             configurationRoot.Bind("FSSApiConfiguration", fssConfig);
             configurationRoot.Bind("BessStorageConfiguration", bessStorageConfig);
             configurationRoot.Bind("ExchangeSetDetails", exchangeSetDetails);
+            configurationRoot.Bind("PKSApiConfiguration", pksConfig);
         }
     }
 }

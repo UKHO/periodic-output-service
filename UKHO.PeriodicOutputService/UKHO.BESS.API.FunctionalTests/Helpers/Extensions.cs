@@ -1,8 +1,15 @@
-﻿namespace UKHO.BESS.API.FunctionalTests.Helpers
+﻿using Azure.Data.Tables;
+using Azure.Storage.Queues;
+using Newtonsoft.Json;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
+
+namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
     public static class Extensions
     {
         static readonly HttpClient httpClient = new();
+        static readonly TestConfiguration testConfiguration = new();
+        static readonly string[] exchangeSetStandards = { testConfiguration.bessConfig.s57ExchangeSetStandard!, testConfiguration.bessConfig.s63ExchangeSetStandard! };
 
         /// <summary>
         /// This method is used to set the test scenario.
@@ -42,13 +49,67 @@
         }
 
         /// <summary>
-        /// This method is used to generate random number
+        /// This Method is use to delete bessproductversiondetails azure table entries.
         /// </summary>
-        /// <returns></returns>
-        public static int RandomNumber()
+        /// <param name="connectionString">Sets the connection string</param>
+        /// <param name="tableName">Sets the Azure table name</param>
+        /// <param name="products">Sets the products</param>
+        public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products)
         {
-            Random rnd = new Random();
-            return rnd.Next(00000, 99999);
+            TableClient tableClient = new(connectionString, tableName);
+            
+            foreach(var exchangeSetStandard in exchangeSetStandards)
+            {
+                foreach (var product in products!)
+                {
+                    await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard+"|"+product);
+                }
+            }
+        }
+
+        /// <summary>
+        /// This method is use to add the queue message.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="exchangeSetStandard"></param>
+        /// <param name="webjobConnectionString"></param>
+        /// <param name="queueName"></param>
+        public static void AddQueueMessage(string type, string? exchangeSetStandard, string? webjobConnectionString, string? queueName)
+        {
+            var queueMessage = JsonConvert.DeserializeObject<ConfigQueueMessage>(File.ReadAllText("./TestData/BSQueueMessage.txt"));
+            queueMessage!.Type = type;
+            queueMessage.ExchangeSetStandard = exchangeSetStandard!;
+            string jsonString = JsonConvert.SerializeObject(queueMessage);
+
+            QueueClientOptions queueOptions = new() { MessageEncoding = QueueMessageEncoding.Base64 };
+            QueueClient queue = new(webjobConnectionString, queueName, queueOptions);
+            queue.SendMessage(jsonString);
+        }
+
+        /// <summary>
+        /// This method is use to clean the POS folder.
+        /// </summary>
+        /// <param name="baseUrl"></param>
+        /// <returns></returns>
+        public static HttpResponseMessage Cleanup(string? baseUrl)
+        {
+            string uri = $"{baseUrl}/cleanUp";
+
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+
+            return httpClient.Send(httpRequestMessage, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// This method reads response body json as given type
+        /// </summary>
+        /// <typeparam name="T">Sets the type</typeparam>
+        /// <param name="httpResponseMessage">Sets the response message</param>
+        /// <returns></returns>
+        public static async Task<T> ReadAsTypeAsync<T>(this HttpResponseMessage httpResponseMessage)
+        {
+            string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(bodyJson)!;
         }
     }
 }

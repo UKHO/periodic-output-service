@@ -1,10 +1,12 @@
-﻿using Newtonsoft.Json;
-using System.IO.Compression;
-using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
+﻿using System.IO.Compression;
 using System.Net;
 using FluentAssertions;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using UKHO.BESS.API.FunctionalTests.Models;
+using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using System.Globalization;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -14,6 +16,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         static FssApiConfiguration config = new TestConfiguration().fssConfig;
         static BessApiConfiguration bessConfig = new TestConfiguration().bessConfig;
         static readonly TestConfiguration testConfiguration = new();
+        static readonly string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+        static readonly string currentYear = DateTime.UtcNow.Year.ToString();
 
         static FssBatchHelper()
         {
@@ -33,7 +37,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             {
                 HttpResponseMessage batchStatusResponse = await FssApiClient.GetBatchStatusAsync(batchStatusUri);
                 batchStatusResponse.StatusCode.Should().Be((HttpStatusCode)200);
-                
+
                 var batchStatusResponseObj = JsonConvert.DeserializeObject<ResponseBatchStatusModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                 batchStatus = batchStatusResponseObj!.Status!;
 
@@ -68,7 +72,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl);
             response.StatusCode.Should().Be((HttpStatusCode)200);
-            
+
             Stream stream = await response.Content.ReadAsStreamAsync();
 
             await using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, fileName), FileMode.Create))
@@ -124,8 +128,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// </summary>
         /// <param name="downloadFolderPath"></param>
         /// <param name="exchangeSetStandard"></param>
+        /// <param name="emptyZip"></param>
         /// <returns></returns>
-        public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63")
+        public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63", bool emptyZip = false)
         {
             //Checking for the PRODUCTS.TXT file in the downloaded zip
             var checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!), testConfiguration.exchangeSetDetails.ExchangeSetProductFile!);
@@ -143,13 +148,20 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             foreach (var productName in testConfiguration.bessConfig.ProductsName!)
             {
                 var countryCode = productName.Substring(0, 2);
-                checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//"+ countryCode +"//" + productName);
-                checkFile.Should().Be(true);
+                checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//" + countryCode + "//" + productName);
+                if (emptyZip)
+                {
+                    checkFile.Should().Be(false);
+                }
+                else
+                {
+                    checkFile.Should().Be(true);
+                }
             }
 
             //Checking the value of the Encryption Flag in the PRODUCTS.TXT file based on the ExchangeSet Standard
             string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFile!));
-            int rowNumber = new Random().Next(4, fileContent.Length-1);
+            int rowNumber = new Random().Next(4, fileContent.Length - 1);
             var productData = fileContent[rowNumber].Split(",").Reverse();
             string encryptionFlag = productData.ToList()[4];
             string expectedEncryptionFlag = "1";
@@ -158,7 +170,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 expectedEncryptionFlag = "0";
             }
             expectedEncryptionFlag.Should().Be(encryptionFlag);
-            
+
             return checkFile;
         }
 
@@ -219,6 +231,55 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 default:
                     return false;
             }
+        }
+
+        /// <summary>
+        /// This method is used to check files in Empty bess.
+        /// </summary>
+        /// <param name="downloadFolderPath"></param>
+        public static void CheckFilesInEmptyBess(string? downloadFolderPath)
+        {
+            //Checking for the PRODUCTS.TXT file in the downloaded zip
+            var checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!), testConfiguration.exchangeSetDetails.ExchangeSetProductFile!);
+            checkFile.Should().Be(false);
+
+            //Checking for the README.TXT file in the downloaded zip
+            checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
+            checkFile.Should().Be(true);
+
+            //Checking for the CATALOG file in the downloaded zip
+            checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile!);
+            checkFile.Should().Be(true);
+
+            //Checking for the folder of the requested products in the downloaded zip
+            foreach (var productName in testConfiguration.bessConfig.ProductsName!)
+            {
+                var countryCode = productName.Substring(0, 2);
+                checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//" + countryCode + "//" + productName);
+                checkFile.Should().Be(false);
+            }
+        }
+
+        /// <summary>
+        /// This method is used to verify the Bess batch details.
+        /// </summary>
+        /// <param name="apiResponse">Sets the apiResponse</param>
+        /// <returns></returns>
+        public static async Task VerifyBessBatchDetails(HttpResponseMessage apiResponse)
+        {
+            var apiResponseData = await apiResponse.ReadAsTypeAsync<GetBatchResponseModel>();
+            for (int i = 0; i <= 3; i++)
+            {
+                var value = apiResponseData.Attributes.ToArray()[i].Value;
+                value.Should().Be(testConfiguration.bessConfig.BessBatchDetails![i]);
+            }
+
+            var year = apiResponseData.Attributes.ToArray()[4].Value;
+            year.Should().Be(currentYear);
+            var weekNumber = apiResponseData.Attributes.ToArray()[5].Value;
+            weekNumber.Should().Be(currentWeek);
+            var yearWeek = apiResponseData.Attributes.ToArray()[6].Value;
+            yearWeek.Should().Be(year + " / " + weekNumber);
         }
     }
 }

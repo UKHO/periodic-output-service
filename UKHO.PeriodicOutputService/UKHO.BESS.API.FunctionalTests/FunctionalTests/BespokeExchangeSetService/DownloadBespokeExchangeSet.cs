@@ -12,6 +12,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
     public class DownloadBespokeExchangeSet
     {
         static readonly TestConfiguration testConfiguration = new();
+        FssEndPointHelper fssEndPointHelper = new();
         static BessStorageConfiguration bessStorageConfiguration = testConfiguration.bessStorageConfig;
         AzureBlobStorageClient? azureBlobStorageClient;
         readonly dynamic config = Options.Create(new PeriodicOutputService.Common.Configuration.BessStorageConfiguration
@@ -44,16 +45,42 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             expectedResultReadme.Should().Be(true);
             var expectedResultSerial = FssBatchHelper.CheckInfoFolderAndSerialEncInBessExchangeSet(downloadFolderPath, type);
             expectedResultSerial.Should().Be(true);
+            HttpResponseMessage expectedResult = await fssEndPointHelper.CheckBatchDetails(batchId);
+            await FssBatchHelper.VerifyBessBatchDetails(expectedResult);
+        }
+
+        //PBI 147171: BESS BS - Handling of empty ES and Error.txt Scenarios
+        [Test]
+        [TestCase("d0635e6c-81ae-4acb-9129-1a69f9ee58d2", "s57", "UPDATE")]
+        public async Task WhenIProcessSameConfigWithCorrectDetailsTwice_ThenEmptyExchangeSetShouldBeDownloaded(string batchId, string exchangeSetStandard, string type)
+        {
+            Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
+            Extensions.WaitForDownloadExchangeSet();
+            Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
+            Extensions.WaitForDownloadExchangeSet();
+            string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
+            FssBatchHelper.CheckFilesInEmptyBess(downloadFolderPath);
         }
 
         [TearDown]
-        public void TearDown()
+        public async Task TearDown()
         {
+            //cleaning bessproductversiondetails azure table entries
+            await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName);
+
             // Cleaning up config files from container.
             azureBlobStorageClient?.DeleteConfigsInContainer();
 
             //cleaning up the downloaded files from temp folder
             Extensions.DeleteTempDirectory(testConfiguration.bessConfig.TempFolderName);
+        }
+
+        [OneTimeTearDown]
+        public void OneTimeTearDown()
+        {
+            //cleaning up the stub home directory
+            HttpResponseMessage apiResponse = Extensions.Cleanup(testConfiguration.bessConfig.BaseUrl);
+            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
         }
     }
 }
