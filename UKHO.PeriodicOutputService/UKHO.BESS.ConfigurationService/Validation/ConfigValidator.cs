@@ -7,11 +7,6 @@ using UKHO.PeriodicOutputService.Common.Models.Bess;
 
 namespace UKHO.BESS.ConfigurationService.Validation
 {
-    public interface IConfigValidator
-    {
-        ValidationResult Validate(BessConfig configurationSetting);
-    }
-
     public class ConfigValidator : AbstractValidator<BessConfig>, IConfigValidator
     {
         private const string ValidationMessageInvalidOrNullAttribute = "Attribute is missing or value is not provided";

@@ -60,7 +60,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             if (!isExist)
             {
-                throw new Exception("Container does not exists");
+                logger.LogError(EventIds.ContainerDoesNotExists.ToEventId(), "Container does not exists | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.ContainerDoesNotExists.ToEventId());
             }
             return blobContainerClient;
         }
@@ -86,7 +87,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 BlobContainerClient blobContainerClient = await GetBlobContainerClientAsync();
 
-               await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
+                await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
                 {
                     if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                     {
@@ -97,7 +98,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
             catch (Exception ex)
             {
-                logger.LogError("Exception occurred while deleting configs from azure storage");
+                logger.LogError(EventIds.ConfigDeleteException.ToEventId(), "Exception occurred while deleting configs from azure storage | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.ConfigDeleteException.ToEventId());
             }
             return configs;
         }

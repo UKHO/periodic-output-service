@@ -26,6 +26,7 @@ namespace UKHO.BESS.ConfigurationService
                 await logger.LogStartEndAndElapsedTimeAsync(EventIds.BessConfigurationServiceStarted,
                             EventIds.BessConfigurationServiceCompleted,
                             "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}",
+                            "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}",
                             async () => await configurationService.ProcessConfigsAsync(),
                              CommonHelper.CorrelationID);
             }

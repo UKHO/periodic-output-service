@@ -8,6 +8,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     public class MacroTransformer : IMacroTransformer
     {
         private readonly ICurrentDateTimeProvider currentDateTimeProvider;
+        int dayOffset = 0;
 
         public MacroTransformer(ICurrentDateTimeProvider currentDateTimeProvider)
         {
@@ -27,7 +28,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_Year(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).Year.ToString();
             };
 
@@ -39,31 +40,31 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string now_WeekNumberPlusWeeks(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return WeekNumber.GetUKHOWeekFromDateTime(currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset * 7)).Week.ToString();
             }
 
             string now_WeekNumberPlusWeeksYear(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return WeekNumber.GetUKHOWeekFromDateTime(currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset * 7)).Year.ToString();
             };
 
             string nowAddDays_WeekNumber(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return WeekNumber.GetUKHOWeekFromDateTime(currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset)).Week.ToString();
             };
 
             string nowAddDays_WeekYear(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return WeekNumber.GetUKHOWeekFromDateTime(currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset)).Year.ToString();
             };
 
             string nowAddDays_Date(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString(CultureInfo.InvariantCulture);
             };
 
@@ -75,7 +76,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_Day(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).Day.ToString();
             };
 
@@ -84,7 +85,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_Month(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).Month.ToString();
             };
 
@@ -93,7 +94,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_MonthName(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString("MMMM");
             };
 
@@ -102,7 +103,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_MonthShortName(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString("MMM");
             };
 
@@ -111,7 +112,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_DayName(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString("dddd");
             };
 
@@ -120,7 +121,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             string nowAddDays_DayShortName(Match match)
             {
-                int dayOffset = offsetCapture(match);
+                dayOffset = offsetCapture(match);
                 return currentDateTimeProvider.CurrentDateTime.AddDays(dayOffset).ToString("ddd");
             };
 
