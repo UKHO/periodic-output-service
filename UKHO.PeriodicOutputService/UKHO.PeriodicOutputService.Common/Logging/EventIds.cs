@@ -743,7 +743,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809147 - BES batch creation failed
         /// </summary>
-        BESBatchCreationFailed = 809147
+        BESBatchCreationFailed = 809147,
+
+        /// <summary>
+        /// 809148 - Request for retrying file share service endpoint
+        /// </summary>
+        RetryHttpClientFSSRequest = 809148,
+
+        /// <summary>
+        /// 809149 - Request for retrying exchange share service endpoint
+        /// </summary>
+        RetryHttpClientESSRequest = 809149
     }
 
     public static class EventIdExtensions
