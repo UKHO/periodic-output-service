@@ -233,6 +233,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
         }
 
+        /// <summary>
+        /// This method is used to check files in Empty bess.
+        /// </summary>
+        /// <param name="downloadFolderPath"></param>
         public static void CheckFilesInEmptyBess(string? downloadFolderPath)
         {
             //Checking for the PRODUCTS.TXT file in the downloaded zip
@@ -256,6 +260,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
         }
 
+        /// <summary>
+        /// This method is used to verify the Bess batch details.
+        /// </summary>
+        /// <param name="apiResponse"></param>
+        /// <returns></returns>
         public static async Task VerifyBessBatchDetails(HttpResponseMessage apiResponse)
         {
             var apiResponseData = await apiResponse.ReadAsTypeAsync<GetBatchResponseModel>();

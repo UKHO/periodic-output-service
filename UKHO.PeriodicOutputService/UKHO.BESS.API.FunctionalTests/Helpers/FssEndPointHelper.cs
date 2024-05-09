@@ -3,7 +3,7 @@
     public class FssEndPointHelper
     {
         static readonly HttpClient httpClient = new();
-        static readonly TestConfiguration testConfiguration = new TestConfiguration();
+        static readonly TestConfiguration testConfiguration = new();
 
         /// <summary>
         /// This method is used to get the batch status endpoint response.
@@ -32,6 +32,11 @@
             return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
+        /// <summary>
+        /// This method is used to get the batch details endpoint response.
+        /// </summary>
+        /// <param name="batchId"></param>
+        /// <returns></returns>
         public async Task<HttpResponseMessage> CheckBatchDetails(string batchId)
         {
             string uri = $"{testConfiguration.fssConfig.BaseUrl}/batch/{batchId}";

@@ -100,6 +100,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             return httpClient.Send(httpRequestMessage, CancellationToken.None);
         }
 
+        /// <summary>
         /// Reads response body json as given type
         /// </summary>
         /// <typeparam name="T"></typeparam>
