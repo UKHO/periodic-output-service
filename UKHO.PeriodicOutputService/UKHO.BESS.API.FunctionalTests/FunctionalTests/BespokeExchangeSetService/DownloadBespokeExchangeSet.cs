@@ -30,6 +30,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
 
         //PBI 140039 : BESS BS - Dealing with ancillary files : Get ReadMe.txt from FSS based on config
         //PBI 147178: BESS BS - Dealing with ancillary files : Delete PRODUCT.TXT file, INFO folder and update SERIAL.ENC
+        //PBI 140040: BESS BS - Get permit from PKS and create key file (XML/TXT)
         [Test]
         [TestCase("s57", "UPDATE", "AVCS", "fa741049-7a78-4ec3-8737-1b3fb8d1cc3f", "KEY_TEXT")]
         [TestCase("s63", "BASE", "BLANK", "a7fb95f0-b3ff-4ef2-9b76-a74c7d3c3c8f", "PERMIT_XML")]

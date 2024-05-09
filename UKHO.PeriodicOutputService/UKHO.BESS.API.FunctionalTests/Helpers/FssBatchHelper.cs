@@ -24,7 +24,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the batch status.
         /// </summary>
-        /// <param name="batchStatusUri"></param>
+        /// <param name="batchStatusUri">Sets the Uri for getting Batch Status</param>
         /// <returns></returns>
         public static async Task<string> CheckBatchIsCommitted(string batchStatusUri)
         {
@@ -49,7 +49,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to extract & download the exchangeSet.
         /// </summary>
-        /// <param name="downloadFileUrl"></param>
+        /// <param name="downloadFileUrl">Sets the Url for downloading Batch</param>
         /// <returns></returns>
         public static async Task<string> ExtractDownloadedFolder(string downloadFileUrl)
         {
@@ -117,7 +117,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to rename the folder.
         /// </summary>
-        /// <param name="pathInput"></param>
+        /// <param name="pathInput">Sets the path for which destination folder is to be renamed</param>
         /// <returns></returns>
         public static string RenameFolder(string pathInput)
         {
@@ -132,8 +132,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the file existence.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="fileName"></param>
+        /// <param name="filePath">Sets the path of the file to be checked</param>
+        /// <param name="fileName">Sets the name of the file to be checked</param>
         /// <returns></returns>
         public static bool CheckForFileExist(string? filePath, string fileName)
         {
@@ -143,8 +143,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the folder existence.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="folderName"></param>
+        /// <param name="filePath">Sets the path of the required file</param>
+        /// <param name="folderName">Sets the name of the folder containing the file</param>
         /// <returns></returns>
         public static bool CheckForFolderExist(string filePath, string folderName)
         {
@@ -154,9 +154,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the existence of files and folders in the downloaded exchange set
         /// </summary>
-        /// <param name="downloadFolderPath"></param>
-        /// <param name="exchangeSetStandard"></param>
-        /// <param name="emptyZip"></param>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the file is downloaded</param>
+        /// <param name="exchangeSetStandard">Sets the value of exchangeSetStandard for Encryption Flag out of s63 or s57. By default it is set to s63</param>
+        /// <param name="emptyZip">Sets the value true or false based on the content of the Zip download</param>
         /// <returns></returns>
         public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63", bool emptyZip = false)
         {
@@ -205,8 +205,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the README.TXT
         /// </summary>
-        /// <param name="downloadFolderPath"></param>
-        /// <param name="readMeSearchFilter"></param>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <param name="readMeSearchFilter">Sets the value of the Readme File type based on Config out of AVCS, BLANK or {Query}</param>
         /// <returns></returns>
         public static bool CheckReadMeInBessExchangeSet(string? downloadFolderPath, string? readMeSearchFilter)
         {
@@ -235,8 +235,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the info folder and serial.enc file content
         /// </summary>
-        /// <param name="downloadFolderPath"></param>
-        /// <param name="type"></param>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <param name="type">Sets the value BASE, UPDATE or CHANGE based on the requested ExchangeSet Type</param>
         /// <returns></returns>
         public static bool CheckInfoFolderAndSerialEncInBessExchangeSet(string? downloadFolderPath, string? type)
         {
@@ -264,41 +264,41 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the Permit files and their content
         /// </summary>
-        /// <param name="downloadFolderPath"></param>
-        /// <param name="keyFileType"></param>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <param name="keyFileType">Sets the value KEY_TEXT or PERMIT_XML based on the requested Permit Type</param>
         /// <returns></returns>
         public static bool CheckPermitFile(string? downloadFolderPath, string? keyFileType)
         {
             List<string>? cellNames = testConfiguration.bessConfig.ProductsName;
-            List<string>? CK = testConfiguration.bessConfig.Keys;
+            List<string>? ck = testConfiguration.bessConfig.Keys;
             List<string>? cellPermits = testConfiguration.bessConfig.Permits;
-            List<string>? Editions = testConfiguration.bessConfig.EditionNumber;
-            string PermitTxt = "Permit.txt";
-            string PermitXml = "Permit.xml";
-            string Date = "11/07/2023";
+            List<string>? editions = testConfiguration.bessConfig.EditionNumber;
+            string? permitTxt = testConfiguration.bessConfig.PermitTxtFile;
+            string? permitXml = testConfiguration.bessConfig.PermitXmlFile;
+            string? date = testConfiguration.bessConfig.PermitDate;
 
-            if (cellNames != null && CK != null && cellPermits != null && Editions != null)
+            if (cellNames != null && ck != null && cellPermits != null && editions != null && permitTxt != null && permitXml != null)
                 switch (keyFileType)
                 {
                     case "KEY_TEXT":
-                        string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, PermitTxt));
+                        string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, permitTxt));
                         int rows = fileContent.Length;
                         for (int row = 1; row < rows; row++)
                         {
                             string[] cellPermitDetails = fileContent[row].Split(",");
-                            cellPermitDetails[1].Equals(CK[(row - 1) / 2]).Should().Be(true);
+                            cellPermitDetails[1].Equals(ck[(row - 1) / 2]).Should().Be(true);
                             cellPermitDetails[2].Equals(cellNames[(row - 1) / 2]).Should().Be(true);
-                            string Edtn = Editions[(row - 1) / 2];
-                            Edtn = row % 2 == 0 ?  (int.Parse(Edtn) + 1).ToString() : Edtn;
-                            cellPermitDetails[3].Equals(Edtn).Should().Be(true);
-                            cellPermitDetails[4].Equals(Date).Should().Be(true);
-                            cellPermitDetails[5].Equals(Date).Should().Be(true);
+                            string edition = editions[(row - 1) / 2];
+                            edition = row % 2 == 0 ?  (int.Parse(edition) + 1).ToString() : edition;
+                            cellPermitDetails[3].Equals(edition).Should().Be(true);
+                            cellPermitDetails[4].Equals(date).Should().Be(true);
+                            cellPermitDetails[5].Equals(date).Should().Be(true);
                             (row % 2 == 0 ? cellPermitDetails[7] == "2:Next" : cellPermitDetails[7] == "1:Active").Should().Be(true);
                         }
                         return true;
 
                     case "PERMIT_XML":
-                        var permit = XDocument.Load(Path.Combine(downloadFolderPath!, PermitXml));
+                        var permit = XDocument.Load(Path.Combine(downloadFolderPath!, permitXml));
                         IEnumerable<XElement>? cellKeys = permit?.Root?.Element("cellkeys")?.Elements("cell");
                         if (cellKeys != null)
                         {
@@ -308,7 +308,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                                 string? encCell = cell.Element("cellname")?.Value;
                                 encCell?.Equals(cellNames[count]).Should().Be(true);
                                 string? encCellEdition = cell.Element("edition")?.Value;
-                                encCellEdition?.Equals(Editions[count]).Should().Be(true);
+                                encCellEdition?.Equals(editions[count]).Should().Be(true);
                                 string? encPermit = cell.Element("permit")?.Value;
                                 encPermit?.Equals(cellPermits[count]).Should().Be(true);
                                 count++;
@@ -319,4 +319,4 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             return true;
         }
     }
-}
+} 
