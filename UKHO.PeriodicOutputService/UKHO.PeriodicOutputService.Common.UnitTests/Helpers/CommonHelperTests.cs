@@ -82,7 +82,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             IServiceCollection services = new ServiceCollection();
 
             services.AddHttpClient(TestClient)
-                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientScsRequest , RetryCount, SleepDuration))
+                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "File Share", EventIds.RetryHttpClientScsRequest , RetryCount, SleepDuration))
                 .AddHttpMessageHandler(() => new InternalServerErrorDelegatingHandler());
 
             HttpClient configuredClient =
