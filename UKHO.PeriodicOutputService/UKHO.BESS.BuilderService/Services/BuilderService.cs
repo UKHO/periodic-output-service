@@ -69,9 +69,13 @@ namespace UKHO.BESS.BuilderService.Services
 
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
 
+            string bessZipFileName = string.Format(fssApiConfig.Value.BESSZipFileName, configQueueMessage.Name);
+
+            RenameFile(essFileDownloadPath, essFiles, bessZipFileName);
+
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-            await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath);
+            await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
@@ -81,7 +85,7 @@ namespace UKHO.BESS.BuilderService.Services
             if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                 configQueueMessage.Type == BessType.CHANGE.ToString())
             {
-                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray(), bessZipFileName);
                 await LogProductVersionsAsync(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
             }
 
@@ -348,9 +352,9 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="filePath"></param>
         /// <param name="cellNames"></param>
         /// <returns></returns>
-        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames)
+        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName)
         {
-            string exchangeSetPath = Path.Combine(filePath, BESPOKE_FILE_NAME);
+            string exchangeSetPath = Path.Combine(filePath, bessZipFileName);
 
             ProductVersionsRequest productVersionsRequest = new()
             {
@@ -398,16 +402,16 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="configQueueMessage"></param>
         /// <param name="essFileDownloadPath"></param>
         /// <returns></returns>
-        private async Task PerformAncillaryFilesOperationsAsync(string batchId, ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
+        private async Task PerformAncillaryFilesOperationsAsync(string batchId, ConfigQueueMessage configQueueMessage, string essFileDownloadPath, string bessZipFileName)
         {
-            string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, fssApiConfig.Value.BespokeExchangeSetFileFolder);
+            string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, bessZipFileName);
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
             await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
 
-            string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.Info);
-            string serialFilePath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.SerialFileName);
-            string productFilePath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);
+            string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info);
+            string serialFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.SerialFileName);
+            string productFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);
 
             await UpdateSerialFileAsync(serialFilePath, configQueueMessage.Type, configQueueMessage.CorrelationId);
 
@@ -527,6 +531,20 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             await Task.CompletedTask;
+        }
+
+        private void RenameFile(string downloadPath, List<FssBatchFile> files, string bessZipFileName)
+        {
+            foreach (var file in files)
+            {
+                IFileInfo fileInfo = fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
+                if (fileInfo != null)
+                {
+                    file.FileName = file.FileName.Replace(BESPOKE_FILE_NAME, bessZipFileName);
+                }
+                fileInfo.MoveTo(Path.Combine(downloadPath, file.FileName));
+
+            }
         }
     }
 }
