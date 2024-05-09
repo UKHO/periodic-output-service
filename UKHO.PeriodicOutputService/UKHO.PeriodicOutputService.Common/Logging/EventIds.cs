@@ -760,20 +760,35 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         CleanUpSuccessful = 809150,
 
+        /// <summary>
+        /// 809151 - Post product data to Product Key Service started.
+        /// </summary>
+        PostProductKeyDataToPksStarted = 809151,
+
+        /// <summary>
+        /// 809152 - Post product data to Product Key Service completed.
+        /// </summary>
+        PostProductKeyDataToPksCompleted = 809152,
+
+        /// <summary>
+        /// 809153 - Post product data to Product Key Service failed.
+        /// </summary>
+        PostProductKeyDataToPksFailed = 809153,
+
         // <summary>
-        /// 809151 - BES batch creation started
+        /// 809154 - BES batch creation started
         /// </summary>
-        BESBatchCreationStarted = 809151,
+        BESBatchCreationStarted = 809154,
 
         /// <summary>
-        /// 809152 - BES batch creation completed
+        /// 809155 - BES batch creation completed
         /// </summary>
-        BESBatchCreationCompleted = 809152,
+        BESBatchCreationCompleted = 809155,
 
         /// <summary>
-        /// 809153 - BES batch creation failed
+        /// 809156 - BES batch creation failed
         /// </summary>
-        BESBatchCreationFailed = 809153
+        BESBatchCreationFailed = 809156
     }
 
     public static class EventIdExtensions
