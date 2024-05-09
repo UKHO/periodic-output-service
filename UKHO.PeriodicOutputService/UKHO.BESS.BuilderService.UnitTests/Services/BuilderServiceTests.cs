@@ -54,7 +54,8 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 ReadMeFileName = "README.TXT",
                 SerialFileName = "SERIAL.ENC",
                 ProductFileName = "PRODUCT.TXT",
-                Info = "INFO"
+                Info = "INFO",
+                BESSZipFileName = "BESS_test"
             });
 
             fakeEssService = A.Fake<IEssService>();
