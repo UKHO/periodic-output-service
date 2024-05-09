@@ -51,9 +51,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This Method is use to delete bessproductversiondetails azure table entries.
         /// </summary>
-        /// <param name="connectionString"></param>
-        /// <param name="tableName"></param>
-        /// <param name="products"></param>
+        /// <param name="connectionString">Sets the connection string</param>
+        /// <param name="tableName">Sets the Azure table name</param>
+        /// <param name="products">Sets the products</param>
         public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products)
         {
             TableClient tableClient = new(connectionString, tableName);
@@ -101,10 +101,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         }
 
         /// <summary>
-        /// Reads response body json as given type
+        /// This method reads response body json as given type
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="httpResponseMessage"></param>
+        /// <typeparam name="T">Sets the type</typeparam>
+        /// <param name="httpResponseMessage">Sets the response message</param>
         /// <returns></returns>
         public static async Task<T> ReadAsTypeAsync<T>(this HttpResponseMessage httpResponseMessage)
         {

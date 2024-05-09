@@ -263,7 +263,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to verify the Bess batch details.
         /// </summary>
-        /// <param name="apiResponse"></param>
+        /// <param name="apiResponse">Sets the apiResponse</param>
         /// <returns></returns>
         public static async Task VerifyBessBatchDetails(HttpResponseMessage apiResponse)
         {
