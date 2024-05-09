@@ -723,12 +723,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809143 - Bespoke exchange set cleanup web job is started.
         /// </summary>
-        BESSCleanUpJobRequestStarted = 809143,
+        BessCleanUpJobRequestStarted = 809143,
 
         /// <summary>
         /// 809144 - Bespoke exchange set cleanup web job is completed.
         /// </summary>
-        BESSCleanUpJobRequestCompleted = 809144,
+        BessCleanUpJobRequestCompleted = 809144,
 
         /// <summary>
         /// 809145 - Deletion of folders failed.
