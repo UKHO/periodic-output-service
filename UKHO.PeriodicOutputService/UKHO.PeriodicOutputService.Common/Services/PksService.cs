@@ -17,7 +17,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IPksApiClient pksApiClient;
         private const string KeysEnc = "/keys/ENC-S63";
 
-
         public PksService(ILogger<PksService> logger, IOptions<PksApiConfiguration> pksApiConfiguration, IAuthPksTokenProvider authPksTokenProvider, IPksApiClient pksApiClient)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));

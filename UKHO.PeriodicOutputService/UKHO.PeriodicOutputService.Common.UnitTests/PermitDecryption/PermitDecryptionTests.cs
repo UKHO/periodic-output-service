@@ -15,8 +15,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         private ILogger<Common.PermitDecryption.PermitDecryption> fakeLogger;
         private IOptions<PermitConfiguration> fakePermitConfiguration;
         private IS63Crypt fakeS63Crypt;
-
         private IPermitDecryption permitDecryption;
+
         [SetUp]
         public void Setup()
         {

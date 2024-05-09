@@ -90,6 +90,5 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             }
             return new string(c);
         }
-
     }
 }

@@ -34,11 +34,10 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IPksService pksService;
         private readonly IPermitDecryption permitDecryption;
 
-        private const string BESPOKE_FILE_NAME = "V01X01";
-        private const string BessBatchFileExtension = "zip";
-        private const string PermitTextFile = "Permit.txt";
-        private const string PermitXmlFile = "Permit.xml";
-        private const string PermitTextFileHeader = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
+        private const string BESSBATCHFILEEXTENSION = "zip";
+        private const string PERMITTEXTFILE = "Permit.txt";
+        private const string PERMITXMLFILE = "Permit.xml";
+        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
         private readonly string mimeType = "application/zip";
         private readonly string homeDirectoryPath;
 
@@ -101,7 +100,7 @@ namespace UKHO.BESS.BuilderService.Services
                 Batch batch = configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch
                     : configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch;
 
-                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, batch).Result;
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, batch).Result;
             }
 
             // temporary logs
@@ -311,7 +310,7 @@ namespace UKHO.BESS.BuilderService.Services
 
         private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames)
         {
-            string exchangeSetPath = Path.Combine(filePath, BESPOKE_FILE_NAME);
+            string exchangeSetPath = Path.Combine(filePath, fssApiConfig.Value.BespokeExchangeSetFileFolder);
 
             ProductVersionsRequest productVersionsRequest = new()
             {
@@ -450,7 +449,7 @@ namespace UKHO.BESS.BuilderService.Services
             bool isBatchCreated;
             if (configQueueMessage.Type == BessType.BASE.ToString())
             {
-                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch).Result;
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, Batch.BesBaseZipBatch).Result;
             }
             else
             {
@@ -461,11 +460,11 @@ namespace UKHO.BESS.BuilderService.Services
                 var product = productVersions.Any(x => x.EditionNumber > 0);
                 if (product)
                 {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.EssEmptyBatch).Result;
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, Batch.EssEmptyBatch).Result;
                 }
                 else
                 {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch).Result;
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch).Result;
                 }
             }
             return isBatchCreated;
@@ -478,7 +477,7 @@ namespace UKHO.BESS.BuilderService.Services
             if (keyFileType == KeyFileType.KEY_TEXT)
             {
                 int i = 1;
-                string permitTextFileContent = PermitTextFileHeader;
+                string PERMITTEXTFILEContent = PERMITTEXTFILEHEADER;
 
                 foreach (var productKeyServiceResponse in productKeyServiceResponses)
                 {
@@ -488,14 +487,14 @@ namespace UKHO.BESS.BuilderService.Services
                     {
                         string date = DateTime.UtcNow.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-                        permitTextFileContent += Environment.NewLine;
-                        permitTextFileContent += $"{i++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,1:Active";
-                        permitTextFileContent += Environment.NewLine;
-                        permitTextFileContent += $"{i++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{Convert.ToInt16(productKeyServiceResponse.Edition) + 1},{date},{date},,2:Next";
+                        PERMITTEXTFILEContent += Environment.NewLine;
+                        PERMITTEXTFILEContent += $"{i++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,1:Active";
+                        PERMITTEXTFILEContent += Environment.NewLine;
+                        PERMITTEXTFILEContent += $"{i++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{Convert.ToInt16(productKeyServiceResponse.Edition) + 1},{date},{date},,2:Next";
                     }
                 };
 
-                fileSystemHelper.CreateTextFile(filePath, PermitTextFile, permitTextFileContent);
+                fileSystemHelper.CreateTextFile(filePath, PERMITTEXTFILE, PERMITTEXTFILEContent);
             }
             else if (keyFileType == KeyFileType.PERMIT_XML)
             {
@@ -508,7 +507,7 @@ namespace UKHO.BESS.BuilderService.Services
                     }
                 };
 
-                fileSystemHelper.CreateXmlFromObject(pKSXml, filePath, PermitXmlFile);
+                fileSystemHelper.CreateXmlFromObject(pKSXml, filePath, PERMITXMLFILE);
             }
 
             logger.LogInformation(EventIds.PermitFileCreationCompleted.ToEventId(), "Permit file creation completed for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, CommonHelper.CorrelationID);

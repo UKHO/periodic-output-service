@@ -3,7 +3,6 @@ using System.Runtime.Caching;
 
 namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 {
-
     [ExcludeFromCodeCoverage]
     public class BlowfishFactory : IBlowfishFactory
     {
