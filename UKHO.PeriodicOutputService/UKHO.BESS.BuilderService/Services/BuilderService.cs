@@ -491,7 +491,7 @@ namespace UKHO.BESS.BuilderService.Services
                         permitTextFileContent += Environment.NewLine;
                         permitTextFileContent += $"{i++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,1:Active";
                         permitTextFileContent += Environment.NewLine;
-                        permitTextFileContent += $"{i++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,2:Next";
+                        permitTextFileContent += $"{i++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{Convert.ToInt16(productKeyServiceResponse.Edition) + 1},{date},{date},,2:Next";
                     }
                 };
 
