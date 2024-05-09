@@ -30,6 +30,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                                       };
         private const string ServerHeaderValue = "Windows-Azure-Blob";
 
+        private readonly Enum[] bessBatchTypes = new Enum[] { Batch.BesBaseZipBatch, Batch.BesUpdateZipBatch, Batch.BesChangeZipBatch, Batch.EssEmptyBatch };
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
@@ -466,7 +467,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 };
             }
             //Temporary Upload Code Start
-            else if (batchType is Batch.BesBaseZipBatch or Batch.BesUpdateZipBatch or Batch.BesChangeZipBatch)
+            else if (bessBatchTypes.Contains(batchType))
             {
                 createBatchRequest = new CreateBatchRequestModel
                 {

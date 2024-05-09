@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.Abstractions;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -59,13 +60,12 @@ namespace UKHO.BESS.BuilderService.Services
         public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
+
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
-            var exchangeSetPath = Path.Combine(homeDirectoryPath, essBatchId, fssApiConfig.Value.BespokeExchangeSetFileFolder);
-
-            await PerformAncillaryFilesOperationsAsync(essBatchId, exchangeSetPath, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter);
+            await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath);
 
             ProductVersionsRequest? latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
 
@@ -91,10 +91,18 @@ namespace UKHO.BESS.BuilderService.Services
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            Batch batch = configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch
-                : configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch;
+            bool isBatchCreated;
+            if (bool.Parse(configuration["IsFTRunning"]))
+            {
+                isBatchCreated = await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
+            }
+            else
+            {
+                Batch batch = configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch
+                    : configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch;
 
-            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, batch).Result;
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, batch).Result;
+            }
 
             // temporary logs
             if (isBatchCreated)
@@ -104,7 +112,14 @@ namespace UKHO.BESS.BuilderService.Services
                 if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                          configQueueMessage.Type == BessType.CHANGE.ToString())
                 {
-                    LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                    if (latestProductVersions.ProductVersions.Count > 0)
+                    {
+                        LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                    }
+                    else
+                    {
+                        logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    }
                 }
             }
 
@@ -330,11 +345,20 @@ namespace UKHO.BESS.BuilderService.Services
             }
         }
 
-        private async Task PerformAncillaryFilesOperationsAsync(string batchId, string exchangeSetPath, string correlationId, string readMeSearchFilter)
+        private async Task PerformAncillaryFilesOperationsAsync(string batchId, ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
         {
+            string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, fssApiConfig.Value.BespokeExchangeSetFileFolder);
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
-            await CreateReadMeFileAsync(batchId, correlationId, readMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+            await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+
+            string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.Info);
+            string serialFilePath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.SerialFileName);
+            string productFilePath = Path.Combine(essFileDownloadPath, fssApiConfig.Value.BespokeExchangeSetFileFolder, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);
+
+            await UpdateSerialFileAsync(serialFilePath, configQueueMessage.Type, configQueueMessage.CorrelationId);
+
+            await DeleteProductTxtAndInfoFolderAsync(productFilePath, exchangeSetInfoPath, configQueueMessage.CorrelationId);
         }
 
         private async Task CreateReadMeFileAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
@@ -373,6 +397,78 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             return isDownloadReadMeFileSuccess;
+        }
+
+        private async Task UpdateSerialFileAsync(string serialFilePath, string exchangeSetType, string correlationId)
+        {
+            try
+            {
+                string serialFileContent = fileSystemHelper.ReadFileText(serialFilePath);
+                const string searchText = "UPDATE";
+
+                if (serialFileContent.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    serialFileContent = Regex.Replace(serialFileContent, searchText, exchangeSetType, RegexOptions.IgnoreCase);
+
+                    fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
+
+                    logger.LogInformation(EventIds.BessSerialEncUpdated.ToEventId(), "SERIAL.ENC file updated with Type: {exchangeSetType} | _X-Correlation-ID:{CorrelationId}", exchangeSetType, correlationId);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.BessSerialEncUpdateFailed.ToEventId(), "SERIAL.ENC file update operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.BessSerialEncUpdateFailed.ToEventId());
+            }
+
+            await Task.CompletedTask;
+        }
+
+        private async Task DeleteProductTxtAndInfoFolderAsync(string productFilePath, string infoFolderPath, string correlationId)
+        {
+            try
+            {
+                fileSystemHelper.DeleteFile(productFilePath);
+
+                fileSystemHelper.DeleteFolder(infoFolderPath);
+
+                logger.LogInformation(EventIds.BessProductTxtAndInfoFolderDeleted.ToEventId(), "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}", correlationId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId(), "PRODUCT.TXT file and INFO folder delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId());
+            }
+
+            await Task.CompletedTask;
+        }
+
+        // This method is for mock only
+        [ExcludeFromCodeCoverage]
+        private async Task<bool> IsBatchCreatedForMock(ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
+        {
+            bool isBatchCreated;
+            if (configQueueMessage.Type == BessType.BASE.ToString())
+            {
+                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.BesBaseZipBatch).Result;
+            }
+            else
+            {
+                var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+
+                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(),
+                    configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                var product = productVersions.Any(x => x.EditionNumber > 0);
+                if (product)
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, Batch.EssEmptyBatch).Result;
+                }
+                else
+                {
+                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch).Result;
+                }
+            }
+            return isBatchCreated;
         }
 
         private void CreatePermitFile(string keyFileType, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses)

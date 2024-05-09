@@ -21,7 +21,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         }
 
         [Test]
-        public void DoesProductKeyServiceData_ReturnsOKResponse()
+        public void WhenValidProductKeyServiceDataIsPassed_ThenReturnsOKResponse()
         {
             string serializedProductIdentifierData = JsonConvert.SerializeObject(GetProductKeyServiceRequest());
 
@@ -46,7 +46,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         }
 
         [Test]
-        public void DoesProductKeyServiceData_ThenReturnsUnauthorizedResponse()
+        public void WhenInvalidProductKeyServiceDataIsPassed_ThenReturnsUnauthorizedResponse()
         {
             HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                 JsonConvert.SerializeObject(new List<ProductKeyServiceResponse>(){new()}), HttpStatusCode.Unauthorized);

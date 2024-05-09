@@ -23,7 +23,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
 
-                { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+            { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
             return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
     }

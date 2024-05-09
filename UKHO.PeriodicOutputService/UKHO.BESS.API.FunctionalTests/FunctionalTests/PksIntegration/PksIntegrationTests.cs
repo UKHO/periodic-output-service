@@ -15,7 +15,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.PksIntegration
         [Test]
         public async Task WhenICallPksEndpointWithValidProduct_ThenSuccessStatusCode200IsReturned()
         {
-            for(int i = 0; i < testConfiguration.bessConfig.ProductsName!.Count; i++)
+            for (int i = 0; i < testConfiguration.bessConfig.ProductsName!.Count; i++)
             {
                 productKeyService!.Add(dataHelper.GetProductKeyServiceData(testConfiguration.bessConfig.ProductsName[i], testConfiguration.bessConfig.EditionNumber![i]));
             }
@@ -26,7 +26,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.PksIntegration
 
         [Test]
         [TestCase("GB301910", "5")]
-        public async Task WhenICallPksEndpointWithInValidProduct_ThenSuccessStatusCode404IsReturned(string productName, string editionNumber) 
+        public async Task WhenICallPksEndpointWithInvalidProduct_ThenBadRequestStatusCode400IsReturned(string productName, string editionNumber)
         {
             productKeyService = new List<ProductKeyServiceModel> {
             dataHelper.GetProductKeyServiceData(productName, editionNumber)

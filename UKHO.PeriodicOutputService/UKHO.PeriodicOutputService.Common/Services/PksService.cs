@@ -15,6 +15,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IOptions<PksApiConfiguration> pksApiConfiguration;
         private readonly IAuthPksTokenProvider authPksTokenProvider;
         private readonly IPksApiClient pksApiClient;
+        private const string KeysEnc = "/keys/ENC-S63";
 
 
         public PksService(ILogger<PksService> logger, IOptions<PksApiConfiguration> pksApiConfiguration, IAuthPksTokenProvider authPksTokenProvider, IPksApiClient pksApiClient)
@@ -27,10 +28,10 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         public async Task<List<ProductKeyServiceResponse>> PostProductKeyData(List<ProductKeyServiceRequest> productKeyServiceRequest)
         {
-            logger.LogInformation(EventIds.PostProductKeyDataToPksStarted.ToEventId(), "Request to post product key data to product key service started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+            logger.LogInformation(EventIds.PostProductKeyDataToPksStarted.ToEventId(), "Request to post product key data to Product Key Service started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
 
             string bodyJson;
-            string uri = $"{pksApiConfiguration.Value.BaseUrl}/keys/ENC-S63";
+            string uri = pksApiConfiguration.Value.BaseUrl + KeysEnc;
             string accessToken = await authPksTokenProvider.GetManagedIdentityAuthForPksAsync(pksApiConfiguration.Value.ClientId);
 
             string payloadJson = JsonConvert.SerializeObject(productKeyServiceRequest);
@@ -43,7 +44,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     {
                         bodyJson = httpResponseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                        logger.LogInformation(EventIds.PostProductKeyDataToPksCompleted.ToEventId(), "Request to post product key data to product key service completed | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponseMessage.StatusCode.ToString(), CommonHelper.CorrelationID);
+                        logger.LogInformation(EventIds.PostProductKeyDataToPksCompleted.ToEventId(), "Request to post product key data to Product Key Service completed | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponseMessage.StatusCode.ToString(), CommonHelper.CorrelationID);
 
                         List<ProductKeyServiceResponse> productKeyServiceResponse = JsonConvert.DeserializeObject<List<ProductKeyServiceResponse>>(bodyJson);
                         return productKeyServiceResponse;
@@ -54,7 +55,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                         {
                             bodyJson = httpResponseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                            logger.LogError(EventIds.PostProductKeyDataToPksFailed.ToEventId(), "Failed to post product key data | StatusCode : {StatusCode}| Errors : {ErrorDetails}", httpResponseMessage.StatusCode.ToString(), bodyJson);
+                            logger.LogError(EventIds.PostProductKeyDataToPksFailed.ToEventId(), "Failed to retrieve post product key data with | StatusCode : {StatusCode}| Errors : {ErrorDetails} for Product Key Service", httpResponseMessage.StatusCode.ToString(), bodyJson);
 
                             throw new FulfilmentException(EventIds.PostProductKeyDataToPksFailed.ToEventId());
                         }

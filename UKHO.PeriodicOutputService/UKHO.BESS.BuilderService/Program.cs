@@ -156,6 +156,10 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddSingleton<IAuthPksTokenProvider, AuthTokenProvider>();
                  serviceCollection.AddScoped<IPksService, PksService>();
 
+                 serviceCollection.AddTransient<IPksApiClient, PksApiClient>();
+                 serviceCollection.AddSingleton<IAuthPksTokenProvider, AuthTokenProvider>();
+                 serviceCollection.AddScoped<IPksService, PksService>();
+
                  serviceCollection.AddHttpClient("DownloadClient",
                          httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
                      .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()

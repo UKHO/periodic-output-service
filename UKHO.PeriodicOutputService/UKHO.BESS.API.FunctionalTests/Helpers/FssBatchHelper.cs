@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using System.IO.Compression;
-using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
+﻿using System.IO.Compression;
 using System.Net;
 using FluentAssertions;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 using UKHO.BESS.API.FunctionalTests.Models;
+using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 using System.Xml.Linq;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
@@ -156,8 +156,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// </summary>
         /// <param name="downloadFolderPath"></param>
         /// <param name="exchangeSetStandard"></param>
+        /// <param name="emptyZip"></param>
         /// <returns></returns>
-        public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63")
+        public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63", bool emptyZip = false)
         {
             //Checking for the PRODUCTS.TXT file in the downloaded zip
             var checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!), testConfiguration.exchangeSetDetails.ExchangeSetProductFile!);
@@ -175,13 +176,20 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             foreach (var productName in testConfiguration.bessConfig.ProductsName!)
             {
                 var countryCode = productName.Substring(0, 2);
-                checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//"+ countryCode +"//" + productName);
-                checkFile.Should().Be(true);
+                checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//" + countryCode + "//" + productName);
+                if (emptyZip)
+                {
+                    checkFile.Should().Be(false);
+                }
+                else
+                {
+                    checkFile.Should().Be(true);
+                }
             }
 
             //Checking the value of the Encryption Flag in the PRODUCTS.TXT file based on the ExchangeSet Standard
             string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFile!));
-            int rowNumber = new Random().Next(4, fileContent.Length-1);
+            int rowNumber = new Random().Next(4, fileContent.Length - 1);
             var productData = fileContent[rowNumber].Split(",").Reverse();
             string encryptionFlag = productData.ToList()[4];
             string expectedEncryptionFlag = "1";
