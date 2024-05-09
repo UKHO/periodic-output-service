@@ -7,6 +7,5 @@ namespace UKHO.PeriodicOutputService.Common.Models
     {
         public string ActiveKey { get; set; }
         public string NextKey { get; set; }
-
     }
 }

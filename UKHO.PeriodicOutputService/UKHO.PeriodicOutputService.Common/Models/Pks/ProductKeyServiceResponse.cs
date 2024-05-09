@@ -1,8 +1,7 @@
 ﻿using System.Xml.Serialization;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
-namespace UKHO.PeriodicOutputService.Common.Models.Bess
+namespace UKHO.PeriodicOutputService.Common.Models.Pks
 {
     public class ProductKeyServiceResponse
     {

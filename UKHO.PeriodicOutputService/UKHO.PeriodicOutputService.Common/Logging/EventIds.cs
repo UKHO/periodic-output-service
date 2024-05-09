@@ -776,7 +776,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         PostProductKeyDataToPksFailed = 809153,
 
         /// <summary>
-        /// 809154 - Permit Decryption Exception
+        /// 809154 - Exception occurred while Permit Decryption
         /// </summary>
         PermitDecryptionException = 809154,
 

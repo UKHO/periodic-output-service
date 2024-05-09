@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.Bess;
+using UKHO.PeriodicOutputService.Common.Models.Pks;
 
 namespace UKHO.PeriodicOutputService.Common.Services
 {

@@ -13,6 +13,7 @@ using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.Models.Pks;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.PermitDecryption;
 using UKHO.PeriodicOutputService.Common.Services;
@@ -134,7 +135,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFileSystemHelper.DeleteFolder(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => fakeFileSystemHelper.CreateXmlFromObject(A<PKSXml>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeFileSystemHelper.CreateXmlFromObject(A<PksXml>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -191,7 +192,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeAzureTableStorageHelper.SaveBessProductVersionDetailsAsync((A<List<ProductVersion>>.Ignored), A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => fakeFileSystemHelper.CreateXmlFromObject(A<PKSXml>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeFileSystemHelper.CreateXmlFromObject(A<PksXml>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>

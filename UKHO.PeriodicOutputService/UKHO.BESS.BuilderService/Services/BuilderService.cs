@@ -16,6 +16,7 @@ using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.Models.Pks;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.PermitDecryption;
 using UKHO.PeriodicOutputService.Common.Services;
@@ -498,12 +499,12 @@ namespace UKHO.BESS.BuilderService.Services
             }
             else if (keyFileType == KeyFileType.PERMIT_XML)
             {
-                PKSXml pKSXml = new()
+                PksXml pKSXml = new()
                 {
-                    date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
-                    cellkeys = new()
+                    Date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                    Cellkeys = new()
                     {
-                        response = productKeyServiceResponses,
+                        ProductKeyServiceResponses = productKeyServiceResponses,
                     }
                 };
 

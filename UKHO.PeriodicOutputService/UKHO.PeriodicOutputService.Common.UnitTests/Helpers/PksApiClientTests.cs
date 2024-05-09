@@ -3,7 +3,7 @@ using FakeItEasy;
 using FluentAssertions;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Common.Models.Bess;
+using UKHO.PeriodicOutputService.Common.Models.Pks;
 using UKHO.PeriodicOutputService.Common.UnitTests.Handler;
 
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers

@@ -3,8 +3,8 @@ using System.IO.Abstractions;
 using FakeItEasy;
 using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
+using UKHO.PeriodicOutputService.Common.Models.Pks;
 using UKHO.PeriodicOutputService.Common.Utilities;
 
 namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
@@ -147,12 +147,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void WhenValidPermitXmlDataPassed_Then_CreateXmlFromObject_Executes_Successfully()
         {
-            PKSXml pKSXml = new()
+            PksXml pKSXml = new()
             {
-                date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
-                cellkeys = new()
+                Date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
+                Cellkeys = new()
                 {
-                    response = new List<ProductKeyServiceResponse>()
+                    ProductKeyServiceResponses = new List<ProductKeyServiceResponse>()
                     {
                         new()
                         {
