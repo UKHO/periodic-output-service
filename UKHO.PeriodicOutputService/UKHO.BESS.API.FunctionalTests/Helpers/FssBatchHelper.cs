@@ -304,6 +304,14 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static async Task<bool> ExtractDownloadedPermit(string downloadFileUrl, string? keyFileType, string batchFolderPath)
         {
+            string? permitTxt = testConfiguration.bessConfig.PermitTxtFile;
+            string? permitXml = testConfiguration.bessConfig.PermitXmlFile;
+            keyFileType = keyFileType switch
+            {
+                "KEY_TEXT" => permitTxt,
+                "PERMIT_XML" => permitXml,
+                _ => keyFileType
+            };
             string rootFolder = downloadFileUrl.Remove(downloadFileUrl.Length - 10);
             string permitUri = rootFolder + keyFileType;
 
