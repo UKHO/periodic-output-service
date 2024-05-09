@@ -53,15 +53,17 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// This Method is used to check the Batch Status and Download ES
         /// </summary>
         /// <param name="batchId">Provide the BatchId of the requested Product</param>
+        /// <param name="isPermitFileRequested">Checks if permit is requested to download</param>
+        /// <param name="keyFileType">Sets the key file type</param>
         /// <returns></returns>
-        public static async Task<string> CreateExchangeSetFile(string batchId)
+        public static async Task<string> CreateExchangeSetFile(string batchId, bool isPermitFileRequested = false, string? keyFileType = null)
         {
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
 
             batchStatus.Contains("Committed").Should().Be(true);
             string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetFileName}";
-            string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolder(downloadFileUrl);
+            string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolder(downloadFileUrl, isPermitFileRequested, keyFileType);
 
             return extractDownloadedFolder;
         }

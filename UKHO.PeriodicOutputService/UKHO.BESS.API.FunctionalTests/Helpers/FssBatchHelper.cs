@@ -50,8 +50,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// This method is used to extract & download the exchangeSet.
         /// </summary>
         /// <param name="downloadFileUrl">Sets the Url for downloading Batch</param>
+        /// <param name="isPermitFileRequested">Checks if permit is requested to download</param>
+        /// <param name="keyFileType">Sets the key file type</param>
         /// <returns></returns>
-        public static async Task<string> ExtractDownloadedFolder(string downloadFileUrl)
+        public static async Task<string> ExtractDownloadedFolder(string downloadFileUrl, bool isPermitFileRequested, string? keyFileType)
         {
             string batchId = downloadFileUrl.Split('/')[5];
             string fileName = downloadFileUrl.Split('/')[7];
@@ -81,36 +83,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             string extractPath = Path.Combine(batchFolderPath, RenameFolder(zipPath));
             ZipFile.ExtractToDirectory(zipPath, extractPath);
 
-            string rootFolder = downloadFileUrl.Remove(downloadFileUrl.Length - 10);
-
-            string permitXmlUri = rootFolder + "Permit.xml";
-            response = await FssApiClient.GetFileDownloadAsync(permitXmlUri);
-
-            if (response.StatusCode == ((HttpStatusCode)200))
+            if (isPermitFileRequested)
             {
-                Stream permitStream = await response.Content.ReadAsStreamAsync();
-
-                await using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, "Permit.xml"), FileMode.Create))
-                {
-                    await permitStream.CopyToAsync(outputFileStream);
-                }
+                await ExtractDownloadedPermit(downloadFileUrl, keyFileType, batchFolderPath);
             }
-
-            string permitTxtUri = rootFolder + "Permit.txt";
-            response = await FssApiClient.GetFileDownloadAsync(permitTxtUri);
-
-            if (response.StatusCode == ((HttpStatusCode)200))
-            {
-
-
-                Stream permitStream = await response.Content.ReadAsStreamAsync();
-
-                await using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, "Permit.txt"), FileMode.Create))
-                {
-                    await permitStream.CopyToAsync(outputFileStream);
-                }
-            }
-
             return extractPath;
         }
 
@@ -289,7 +265,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                             cellPermitDetails[1].Equals(ck[(row - 1) / 2]).Should().Be(true);
                             cellPermitDetails[2].Equals(cellNames[(row - 1) / 2]).Should().Be(true);
                             string edition = editions[(row - 1) / 2];
-                            edition = row % 2 == 0 ?  (int.Parse(edition) + 1).ToString() : edition;
+                            edition = row % 2 == 0 ? (int.Parse(edition) + 1).ToString() : edition;
                             cellPermitDetails[3].Equals(edition).Should().Be(true);
                             cellPermitDetails[4].Equals(date).Should().Be(true);
                             cellPermitDetails[5].Equals(date).Should().Be(true);
@@ -299,7 +275,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
                     case "PERMIT_XML":
                         var permit = XDocument.Load(Path.Combine(downloadFolderPath!, permitXml));
-                        IEnumerable<XElement>? cellKeys = permit?.Root?.Element("cellkeys")?.Elements("cell");
+                        IEnumerable<XElement>? cellKeys = permit.Root?.Element("cellkeys")?.Elements("cell");
                         if (cellKeys != null)
                         {
                             int count = 0;
@@ -318,5 +294,28 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 }
             return true;
         }
+
+        /// <summary>
+        /// This method is use to verify and extract Permit file
+        /// </summary>
+        /// <param name="downloadFileUrl">Sets the url to download permit</param>
+        /// <param name="keyFileType">Sets the key file type</param>
+        /// <param name="batchFolderPath">sets the batch folder path</param>
+        /// <returns></returns>
+        public static async Task<bool> ExtractDownloadedPermit(string downloadFileUrl, string? keyFileType, string batchFolderPath)
+        {
+            string rootFolder = downloadFileUrl.Remove(downloadFileUrl.Length - 10);
+            string permitUri = rootFolder + keyFileType;
+
+            var response = await FssApiClient.GetFileDownloadAsync(permitUri);
+
+            if (response.StatusCode == ((HttpStatusCode)200) && keyFileType != null)
+            {
+                Stream permitStream = await response.Content.ReadAsStreamAsync();
+                await using FileStream outputFileStream = new(Path.Combine(batchFolderPath, keyFileType), FileMode.Create);
+                await permitStream.CopyToAsync(outputFileStream);
+            }
+            return true;
+        }
     }
-} 
+}

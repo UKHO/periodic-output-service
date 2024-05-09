@@ -40,7 +40,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             HttpResponseMessage response = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, exchangeSetStandard, type, readMeSearchFilter, keyFileType);
             response.StatusCode.Should().Be((HttpStatusCode)201);
             Extensions.WaitForDownloadExchangeSet();
-            var downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
+            var downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId, true, keyFileType);
             var expectedResultReadme = FssBatchHelper.CheckReadMeInBessExchangeSet(downloadFolderPath, readMeSearchFilter);
             expectedResultReadme.Should().Be(true);
             var expectedResultSerial = FssBatchHelper.CheckInfoFolderAndSerialEncInBessExchangeSet(downloadFolderPath, type);
