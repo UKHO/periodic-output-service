@@ -55,5 +55,27 @@ namespace UKHO.PeriodicOutputService.Common.Extensions
 
             return result;
         }
+
+    public static async Task<TResult> LogStartEndAndElapsedTimeAsync<T, TResult>(this ILogger<T> logger,
+    EventIds startEventId,
+    EventIds completedEventId,
+    string startMessageFormat,
+    Func<Task<TResult>> func,
+    params object[] messageArguments)
+        {
+            logger.LogInformation(startEventId.ToEventId(), startMessageFormat, messageArguments);
+
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            var result = await func();
+
+            stopwatch.Stop();
+            logger.LogInformation(completedEventId.ToEventId(),
+                startMessageFormat + " Elapsed {Elapsed}",
+                messageArguments.Concat(new object[] { stopwatch.Elapsed }).ToArray());
+
+            return result;
+        }
     }
 }
