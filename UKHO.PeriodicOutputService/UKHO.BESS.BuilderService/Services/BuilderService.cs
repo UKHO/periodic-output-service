@@ -58,7 +58,7 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
-        {
+        {           
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
 
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
@@ -69,7 +69,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             ProductVersionsRequest? latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
 
-            if (!string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 List<ProductKeyServiceRequest> productKeyServiceRequest = new();
 
@@ -82,7 +82,7 @@ namespace UKHO.BESS.BuilderService.Services
 
                 List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
 
-                CreatePermitFile(configQueueMessage.KeyFileType, essFileDownloadPath, productKeyServiceResponse);
+                CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse);
             }
 
             //Temporary Upload Code
@@ -471,11 +471,11 @@ namespace UKHO.BESS.BuilderService.Services
             return isBatchCreated;
         }
 
-        private void CreatePermitFile(string keyFileType, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses)
+        private void CreatePermitFile(KeyFileType keyFileType, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses)
         {
-            Enum.TryParse(keyFileType, false, out KeyFileType fileType);
+            logger.LogInformation(EventIds.PermitFileCreationStarted.ToEventId(), "Permit file creation started for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, CommonHelper.CorrelationID);
 
-            if (fileType == KeyFileType.KEY_TEXT)
+            if (keyFileType == KeyFileType.KEY_TEXT)
             {
                 int i = 1;
                 string permitTextFileContent = PermitTextFileHeader;
@@ -497,7 +497,7 @@ namespace UKHO.BESS.BuilderService.Services
 
                 fileSystemHelper.CreateTextFile(filePath, PermitTextFile, permitTextFileContent);
             }
-            else if (fileType == KeyFileType.PERMIT_XML)
+            else if (keyFileType == KeyFileType.PERMIT_XML)
             {
                 PKSXml pKSXml = new()
                 {
@@ -510,6 +510,8 @@ namespace UKHO.BESS.BuilderService.Services
 
                 fileSystemHelper.CreateXmlFromObject(pKSXml, filePath, PermitXmlFile);
             }
+
+            logger.LogInformation(EventIds.PermitFileCreationCompleted.ToEventId(), "Permit file creation completed for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, CommonHelper.CorrelationID);
         }
     }
 }

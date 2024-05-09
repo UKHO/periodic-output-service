@@ -778,7 +778,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809154 - Permit Decryption Exception
         /// </summary>
-        PermitDecryptionException = 809154
+        PermitDecryptionException = 809154,
+
+        /// <summary>
+        /// 809155 - Permit file creation started
+        /// </summary>
+        PermitFileCreationStarted = 809155,
+
+        /// <summary>
+        /// 809156 - Permit file creation completed
+        /// </summary>
+        PermitFileCreationCompleted = 809156,
     }
 
     public static class EventIdExtensions
