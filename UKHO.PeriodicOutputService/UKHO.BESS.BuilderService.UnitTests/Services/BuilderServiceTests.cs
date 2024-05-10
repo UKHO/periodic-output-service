@@ -50,7 +50,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 PosReadUsers = "",
                 PosReadGroups = "public",
                 BlockSizeInMultipleOfKBs = 4096,
-                BespokeExchangeSetFileFolder = "V01X01",
                 EncRoot = "ENC_ROOT",
                 ReadMeFileName = "README.TXT",
                 SerialFileName = "SERIAL.ENC",
