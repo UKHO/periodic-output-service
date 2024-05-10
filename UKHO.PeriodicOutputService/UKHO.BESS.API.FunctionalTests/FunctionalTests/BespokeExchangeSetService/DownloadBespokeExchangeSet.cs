@@ -12,7 +12,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
     public class DownloadBespokeExchangeSet
     {
         static readonly TestConfiguration testConfiguration = new();
-        FssEndPointHelper fssEndPointHelper = new();
+        readonly FssEndPointHelper fssEndPointHelper = new();
         static BessStorageConfiguration bessStorageConfiguration = testConfiguration.bessStorageConfig;
         AzureBlobStorageClient? azureBlobStorageClient;
         readonly dynamic config = Options.Create(new PeriodicOutputService.Common.Configuration.BessStorageConfiguration
