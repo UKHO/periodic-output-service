@@ -87,7 +87,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return tableClient;
         }
 
-        public void UpsertScheduleDetail(DateTime nextSchedule, BessConfig bessConfig, bool isExecuted)
+        public async Task UpsertScheduleDetailAsync(DateTime nextSchedule, BessConfig bessConfig, bool isExecuted)
         {
             ScheduleDetailEntity scheduleDetailEntity = new()
             {
@@ -98,13 +98,13 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 IsExecuted = isExecuted
             };
 
-            TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
-            tableJobScheduleEntityClient.UpsertEntity(scheduleDetailEntity);
+            TableClient tableJobScheduleEntityClient = await GetTableClientAsync(BESS_SCHEDULE_DETAILS_TABLE_NAME);
+           await tableJobScheduleEntityClient.UpsertEntityAsync(scheduleDetailEntity);
         }
 
-        public ScheduleDetailEntity GetScheduleDetail(string configName)
+        public async Task<ScheduleDetailEntity> GetScheduleDetailAsync(string configName)
         {
-            TableClient tableJobScheduleEntityClient = GetTableClient(BESS_SCHEDULE_DETAILS_TABLE_NAME);
+            TableClient tableJobScheduleEntityClient = await GetTableClientAsync(BESS_SCHEDULE_DETAILS_TABLE_NAME);
             ScheduleDetailEntity scheduleDetailEntity = tableJobScheduleEntityClient.Query<ScheduleDetailEntity>().FirstOrDefault(i => i.IsEnabled.ToLower().Equals("yes") && i.IsExecuted.Equals(false) && i.RowKey.Equals(configName));
             return scheduleDetailEntity;
         }
