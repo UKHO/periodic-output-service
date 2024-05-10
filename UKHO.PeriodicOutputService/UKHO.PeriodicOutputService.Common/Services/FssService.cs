@@ -30,8 +30,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                                             Batch.AioUpdateZipBatch
                                       };
         private const string ServerHeaderValue = "Windows-Azure-Blob";
-
-        private readonly Enum[] bessBatchTypes = new Enum[] { Batch.BesBaseZipBatch, Batch.BesUpdateZipBatch, Batch.BesChangeZipBatch, Batch.BesEmptyBatch };
+        
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
@@ -492,28 +491,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     }
                 };
             }
-            //Temporary Upload Code Start
-            else if (bessBatchTypes.Contains(batchType))
-            {
-                createBatchRequest = new CreateBatchRequestModel
-                {
-                    BusinessUnit = _fssApiConfiguration.Value.BessBusinessUnit,
-                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl
-                    {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadUsers) ? new List<string>() : _fssApiConfiguration.Value.BessReadUsers.Split(","),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.BessReadGroups) ? new List<string>() : _fssApiConfiguration.Value.BessReadGroups.Split(",")
-                    },
-                    Attributes = new List<KeyValuePair<string, string>>
-                    {
-                        new("Product Type", "AVCS"),
-                        new("Week Number", currentWeek),
-                        new("Year", currentYear),
-                        new("Year / Week", currentYear + " / " + currentWeek)
-                    }
-                };
-            }
-            //Temporary Upload Code End
             else
             {
                 createBatchRequest = new CreateBatchRequestModel
