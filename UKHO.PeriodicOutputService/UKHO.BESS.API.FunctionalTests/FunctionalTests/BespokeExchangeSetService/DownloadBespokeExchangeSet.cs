@@ -47,7 +47,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             expectedResultSerial.Should().Be(true);
 
             string batchFolderPath = downloadFolderPath.Remove(downloadFolderPath.Length - 7);
-            bool expectedResulted = FssBatchHelper.CheckPermitFile(batchFolderPath, keyFileType);
+            bool expectedResulted = FssBatchHelper.VerifyPermitFile(batchFolderPath, keyFileType);
             expectedResulted.Should().Be(true);
             await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
