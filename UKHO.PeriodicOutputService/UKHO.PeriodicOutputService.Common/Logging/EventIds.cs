@@ -775,20 +775,36 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         PostProductKeyDataToPksFailed = 809153,
 
+        /// <summary>
+        /// 809154 - Exception occurred while Permit Decryption
+        /// </summary>
+        PermitDecryptionException = 809154,
+
+        /// <summary>
+        /// 809155 - Permit file creation started
+        /// </summary>
+        PermitFileCreationStarted = 809155,
+
+        /// <summary>
+        /// 809156 - Permit file creation completed
+        /// </summary>
+        PermitFileCreationCompleted = 809156,
+
+        
         // <summary>
-        /// 809154 - BES batch creation started
+        /// 809157 - BES batch creation started
         /// </summary>
-        BESBatchCreationStarted = 809154,
+        BESBatchCreationStarted = 809157,
 
         /// <summary>
-        /// 809155 - BES batch creation completed
+        /// 809158 - BES batch creation completed
         /// </summary>
-        BESBatchCreationCompleted = 809155,
+        BESBatchCreationCompleted = 809158,
 
         /// <summary>
-        /// 809156 - BES batch creation failed
+        /// 809159 - BES batch creation failed
         /// </summary>
-        BESBatchCreationFailed = 809156
+        BESBatchCreationFailed = 809159
     }
 
     public static class EventIdExtensions

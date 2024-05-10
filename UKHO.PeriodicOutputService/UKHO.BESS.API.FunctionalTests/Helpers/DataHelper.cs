@@ -10,9 +10,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to create the product versions endpoint body.
         /// </summary>
-        /// <param name="productName"></param>
-        /// <param name="editionNumber"></param>
-        /// <param name="updateNumber"></param>
+        /// <param name="productName">Sets the product provided into the model</param>
+        /// <param name="editionNumber">Sets the Edition for the provided product into the model</param>
+        /// <param name="updateNumber">Sets the Update for the provided product into the model</param>
         /// <returns></returns>
         public ProductVersionModel GetProductVersionData(string? productName, int? editionNumber, int? updateNumber)
         {
@@ -28,8 +28,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// /// This method is used to create the pks data body.
         /// </summary>
-        /// <param name="productName"></param>
-        /// <param name="edition"></param>
+        /// <param name="productName">Sets the product provided into the model</param>
+        /// <param name="edition">Sets the Edition for the provided product into the model</param>
         /// <returns></returns>
         public ProductKeyServiceModel GetProductKeyServiceData(string? productName, string? edition)
         {

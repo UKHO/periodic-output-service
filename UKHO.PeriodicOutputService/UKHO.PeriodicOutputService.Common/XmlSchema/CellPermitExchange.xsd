@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<xs:element name="CellPermitExchange">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="date"/>
+				<xs:element ref="cellkeys"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="cell">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="cellname"/>
+				<xs:element ref="edition"/>
+				<xs:element ref="permit"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="cellkeys">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="cell" maxOccurs="unbounded"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="cellname">
+	</xs:element>
+	<xs:element name="date">
+	</xs:element>
+	<xs:element name="edition">
+	</xs:element>
+	<xs:element name="permit">
+	</xs:element>
+</xs:schema>
