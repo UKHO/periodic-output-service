@@ -43,7 +43,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         }
 
         [Test]
-        public void WhenValidPermitKeyPassed_Then_GetPermitKeys_Returns_ValidData()
+        public void WhenValidPermitKeyPassed_ThenGetPermitKeys_Returns_ValidData()
         {
             A.CallTo(() => fakeS63Crypt.GetEncKeysFromPermit(A<string>.Ignored, A<byte[]>.Ignored))
                                         .Returns((CryptResult.Ok, new byte[5] { 1, 2, 3, 4, 5 }, new byte[5] { 1, 2, 3, 4, 5 }));
@@ -57,7 +57,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         [Test]
         [TestCase("")]
         [TestCase(null)]
-        public void WhenNullOrEmptyPermitKeyPassed_Then_GetPermitKeys_Returns_Null(string? permitKey)
+        public void WhenNullOrEmptyPermitKeyPassed_ThenGetPermitKeys_Returns_Null(string? permitKey)
         {
             var result = permitDecryption.GetPermitKeys(permitKey);
 
@@ -86,7 +86,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         }
 
         [Test]
-        public void WhenExceptionOccurred_Then_GetPermitKeys_Returns_Null()
+        public void WhenExceptionOccurred_ThenGetPermitKeys_Returns_Null()
         {
             A.CallTo(() => fakeS63Crypt.GetEncKeysFromPermit(A<string>.Ignored, A<byte[]>.Ignored))
                                         .Throws<Exception>();

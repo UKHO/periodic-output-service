@@ -478,7 +478,7 @@ namespace UKHO.BESS.BuilderService.Services
             if (keyFileType == KeyFileType.KEY_TEXT)
             {
                 int i = 1;
-                string PERMITTEXTFILEContent = PERMITTEXTFILEHEADER;
+                string permitFileContent = PERMITTEXTFILEHEADER;
 
                 foreach (var productKeyServiceResponse in productKeyServiceResponses)
                 {
@@ -488,14 +488,14 @@ namespace UKHO.BESS.BuilderService.Services
                     {
                         string date = DateTime.UtcNow.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-                        PERMITTEXTFILEContent += Environment.NewLine;
-                        PERMITTEXTFILEContent += $"{i++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,1:Active";
-                        PERMITTEXTFILEContent += Environment.NewLine;
-                        PERMITTEXTFILEContent += $"{i++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{Convert.ToInt16(productKeyServiceResponse.Edition) + 1},{date},{date},,2:Next";
+                        permitFileContent += Environment.NewLine;
+                        permitFileContent += $"{i++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,1:Active";
+                        permitFileContent += Environment.NewLine;
+                        permitFileContent += $"{i++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{Convert.ToInt16(productKeyServiceResponse.Edition) + 1},{date},{date},,2:Next";
                     }
                 };
 
-                fileSystemHelper.CreateTextFile(filePath, PERMITTEXTFILE, PERMITTEXTFILEContent);
+                fileSystemHelper.CreateTextFile(filePath, PERMITTEXTFILE, permitFileContent);
             }
             else if (keyFileType == KeyFileType.PERMIT_XML)
             {
