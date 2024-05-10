@@ -26,20 +26,20 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             this.bessStorageConfiguration = bessStorageConfiguration.Value ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
         }
 
-        public Dictionary<string, string> GetConfigsInContainer()
+        public async Task<Dictionary<string, string>> GetConfigsInContainerAsync()
         {
             Dictionary<string, string> configs = new();
 
             try
             {
-                BlobContainerClient blobContainerClient = GetBlobContainerClient();
+                BlobContainerClient blobContainerClient = await GetBlobContainerClientAsync();
 
-                foreach (BlobItem blobItem in blobContainerClient.GetBlobs())
+                await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
                 {
                     if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                     {
                         BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
-                        configs.Add(blobItem.Name, DownloadBlobContent(blobClient));
+                        configs.Add(blobItem.Name, await DownloadBlobContentAsync(blobClient));
                     }
                 }
             }
@@ -52,53 +52,54 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         //Private Methods
 
-        private BlobContainerClient GetBlobContainerClient()
+        private async Task<BlobContainerClient> GetBlobContainerClientAsync()
         {
             BlobContainerClient blobContainerClient = new(bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName);
 
-            bool isExist = blobContainerClient.Exists();
+            bool isExist = await blobContainerClient.ExistsAsync();
 
             if (!isExist)
             {
-                throw new Exception("Container does not exists");
+                logger.LogError(EventIds.ContainerDoesNotExists.ToEventId(), "Container does not exists | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.ContainerDoesNotExists.ToEventId());
             }
             return blobContainerClient;
         }
 
         private static BlobClient GetBlobClient(BlobContainerClient blobContainerClient, string blobName)
         {
-            BlobClient blobClient = blobContainerClient.GetBlobClient(blobName);
-            return blobClient;
+            return blobContainerClient.GetBlobClient(blobName);
         }
 
-        private static string DownloadBlobContent(BlobClient blobClient)
+        private static async Task<string> DownloadBlobContentAsync(BlobClient blobClient)
         {
-            BlobDownloadInfo response = blobClient.DownloadAsync().Result;
+            BlobDownloadInfo response = await blobClient.DownloadAsync();
 
             using var reader = new StreamReader(response.Content);
-            return reader.ReadToEnd();
+            return await reader.ReadToEndAsync();
         }
 
-        public Dictionary<string, string> DeleteConfigsInContainer()
+        public async Task<Dictionary<string, string>> DeleteConfigsInContainer()
         {
             Dictionary<string, string> configs = new();
 
             try
             {
-                BlobContainerClient blobContainerClient = GetBlobContainerClient();
+                BlobContainerClient blobContainerClient = await GetBlobContainerClientAsync();
 
-                foreach (BlobItem blobItem in blobContainerClient.GetBlobs())
+                await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
                 {
                     if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                     {
                         BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
-                        blobClient.DeleteIfExistsAsync();
+                        await blobClient.DeleteIfExistsAsync();
                     }
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError("Exception occurred while deleting configs from azure storage");
+                logger.LogError(EventIds.ConfigDeleteException.ToEventId(), "Exception occurred while deleting configs from azure storage | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                throw new FulfilmentException(EventIds.ConfigDeleteException.ToEventId());
             }
             return configs;
         }
