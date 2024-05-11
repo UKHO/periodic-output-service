@@ -103,13 +103,6 @@ namespace UKHO.PKSWireMock.API
                     .WithHeader(ContentType, ApplicationType)
                     .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Response5.json")));
 
-            server.Given(Request.Create().WithPath(PksUrl)
-                   .WithBody(new JsonMatcher(GetJsonData(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Request3.json"))))
-                   .UsingPost())
-               .RespondWith(Response.Create().WithStatusCode(200)
-                   .WithHeader(ContentType, ApplicationType)
-                   .WithBodyFromFile(Path.Combine(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory)), "__files", "Response3.json")));
-
             logger.LogInformation($"WireMock.Net server settings {JsonConvert.SerializeObject(settings)}");
         }
 
