@@ -17,7 +17,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IPksApiClient pksApiClient;
         private const string KeysEnc = "/keys/ENC-S63";
 
-
         public PksService(ILogger<PksService> logger, IOptions<PksApiConfiguration> pksApiConfiguration, IAuthPksTokenProvider authPksTokenProvider, IPksApiClient pksApiClient)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -32,7 +31,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             string bodyJson;
             string uri = pksApiConfiguration.Value.BaseUrl + KeysEnc;
-            string accessToken = await authPksTokenProvider.GetManagedIdentityAuthForPksAsync(pksApiConfiguration.Value.ClientId);
+            string accessToken = await authPksTokenProvider.GetManagedIdentityAuthAsync(pksApiConfiguration.Value.ClientId);
 
             string payloadJson = JsonConvert.SerializeObject(productKeyServiceRequest);
 
