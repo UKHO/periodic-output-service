@@ -515,8 +515,6 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PKSApiConfiguration.ClientSecret"
-        value: $(PKSApiClientSecret)
 
     jobs:
       - deployment: DevDeployApp
@@ -1235,8 +1233,6 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PKSApiConfiguration.ClientSecret"
-        value: $(PKSApiClientSecret)
     jobs:
       - deployment: vNextE2EDeployApp
         displayName: "vNextE2E - Deploy Terraform and Dotnet App"
