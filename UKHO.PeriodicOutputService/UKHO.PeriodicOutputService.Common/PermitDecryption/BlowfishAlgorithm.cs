@@ -286,10 +286,6 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 
             byte[] Work = new byte[4];
             for (i = 0; i < _P.Length; i++)
-            //{	Work.byte.zero = passwd[(j++)%len];
-            //	Work.byte.one = passwd[(j++)%len];
-            //	Work.byte.two = passwd[(j++)%len];
-            //	Work.byte.three = passwd[(j++)%len];
             {
                 Work[0] = passwd[(j++) % len];
                 Work[1] = passwd[(j++) % len];
@@ -313,12 +309,10 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
                 }
 
         }
-        //###############################################
         uint F(uint x)
         {
             return (((_S[0, (x >> 24) & 0xFF] + _S[1, (x >> 16) & 0xFF]) ^ _S[2, (x >> 8) & 0xFF]) + _S[3, x & 0xFF]);
         }
-        //###############################################
         void BF_En(ref uint x1, ref uint x2)
         {
             uint w1 = x1, w2 = x2;
@@ -337,7 +331,7 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             x1 = w2;
             x2 = w1;
         }
-        //###############################################
+
         void BF_De(ref uint x1, ref uint x2)
         {
             uint w1 = x1, w2 = x2;
@@ -363,7 +357,6 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
         /// <returns></returns>
         public bool Encrypt(byte[] buf)
         {
-
             if ((buf.Length % 8) != 0) return false;
 
             for (int i = 0; i < buf.Length; i += 8)

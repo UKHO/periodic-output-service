@@ -25,6 +25,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             FssApiClient = new FssEndPointHelper();
         }
 
+        static readonly List<string>? cellNames = testConfiguration.bessConfig.ProductsName;
+        static readonly List<string>? ck = testConfiguration.bessConfig.Keys;
+        static readonly List<string>? cellPermits = testConfiguration.bessConfig.Permits;
+        static readonly List<string>? editions = testConfiguration.bessConfig.EditionNumber;
+
         /// <summary>
         /// This method is used to check the batch status.
         /// </summary>
@@ -242,61 +247,66 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         }
 
         /// <summary>
-        /// This method is used to check the Permit files and their content
+        /// This method is used to check the Permit Txt file and its content
         /// </summary>
         /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
-        /// <param name="keyFileType">Sets the value KEY_TEXT or PERMIT_XML based on the requested Permit Type</param>
         /// <returns></returns>
-        public static bool CheckPermitFile(string? downloadFolderPath, string? keyFileType)
+        public static bool CheckPermitTxtFile(string? downloadFolderPath)
         {
-            List<string>? cellNames = testConfiguration.bessConfig.ProductsName;
-            List<string>? ck = testConfiguration.bessConfig.Keys;
-            List<string>? cellPermits = testConfiguration.bessConfig.Permits;
-            List<string>? editions = testConfiguration.bessConfig.EditionNumber;
+            bool check = false;
             string? permitTxt = testConfiguration.bessConfig.PermitTxtFile;
-            string? permitXml = testConfiguration.bessConfig.PermitXmlFile;
             string? date = testConfiguration.bessConfig.PermitDate;
-
-            if (cellNames != null && ck != null && cellPermits != null && editions != null && permitTxt != null && permitXml != null)
-                switch (keyFileType)
+            if (cellNames != null && ck != null && cellPermits != null && editions != null && permitTxt != null)
+            {
+                string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, permitTxt));
+                int rows = fileContent.Length;
+                for (int row = 1; row < rows; row++)
                 {
-                    case "KEY_TEXT":
-                        string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, permitTxt));
-                        int rows = fileContent.Length;
-                        for (int row = 1; row < rows; row++)
-                        {
-                            string[] cellPermitDetails = fileContent[row].Split(",");
-                            cellPermitDetails[1].Equals(ck[(row - 1) / 2]).Should().Be(true);
-                            cellPermitDetails[2].Equals(cellNames[(row - 1) / 2]).Should().Be(true);
-                            string edition = editions[(row - 1) / 2];
-                            edition = row % 2 == 0 ? (int.Parse(edition) + 1).ToString() : edition;
-                            cellPermitDetails[3].Equals(edition).Should().Be(true);
-                            cellPermitDetails[4].Equals(date).Should().Be(true);
-                            cellPermitDetails[5].Equals(date).Should().Be(true);
-                            (row % 2 == 0 ? cellPermitDetails[7] == "2:Next" : cellPermitDetails[7] == "1:Active").Should().Be(true);
-                        }
-                        return true;
-
-                    case "PERMIT_XML":
-                        var permit = XDocument.Load(Path.Combine(downloadFolderPath!, permitXml));
-                        IEnumerable<XElement>? cellKeys = permit.Root?.Element("cellkeys")?.Elements("cell");
-                        if (cellKeys != null)
-                        {
-                            int count = 0;
-                            foreach (var cell in cellKeys)
-                            {
-                                string? encCell = cell.Element("cellname")?.Value;
-                                encCell?.Equals(cellNames[count]).Should().Be(true);
-                                string? encCellEdition = cell.Element("edition")?.Value;
-                                encCellEdition?.Equals(editions[count]).Should().Be(true);
-                                string? encPermit = cell.Element("permit")?.Value;
-                                encPermit?.Equals(cellPermits[count]).Should().Be(true);
-                                count++;
-                            }
-                        }
-                        return true;
+                    string[] cellPermitDetails = fileContent[row].Split(",");
+                    cellPermitDetails[1].Equals(ck[(row - 1) / 2]).Should().Be(true);
+                    cellPermitDetails[2].Equals(cellNames[(row - 1) / 2]).Should().Be(true);
+                    string edition = editions[(row - 1) / 2];
+                    edition = row % 2 == 0 ? (int.Parse(edition) + 1).ToString() : edition;
+                    cellPermitDetails[3].Equals(edition).Should().Be(true);
+                    cellPermitDetails[4].Equals(date).Should().Be(true);
+                    cellPermitDetails[5].Equals(date).Should().Be(true);
+                    (row % 2 == 0 ? cellPermitDetails[7] == "2:Next" : cellPermitDetails[7] == "1:Active").Should().Be(true);
                 }
-            return true;
+                check = true;
+            }
+            return check;
+        }
+
+        /// <summary>
+        /// This method is used to check the Permit Xml file and its content
+        /// </summary>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <returns></returns>
+        public static bool CheckPermitXmlFile(string? downloadFolderPath)
+        {
+            bool check = false;
+            string? permitXml = testConfiguration.bessConfig.PermitXmlFile;
+            if (cellNames != null && ck != null && cellPermits != null && editions != null && permitXml != null)
+            {
+                var permit = XDocument.Load(Path.Combine(downloadFolderPath!, permitXml));
+                IEnumerable<XElement>? cellKeys = permit.Root?.Element("cellkeys")?.Elements("cell");
+                if (cellKeys != null)
+                {
+                    int count = 0;
+                    foreach (var cell in cellKeys)
+                    {
+                        string? encCell = cell.Element("cellname")?.Value;
+                        encCell?.Equals(cellNames[count]).Should().Be(true);
+                        string? encCellEdition = cell.Element("edition")?.Value;
+                        encCellEdition?.Equals(editions[count]).Should().Be(true);
+                        string? encPermit = cell.Element("permit")?.Value;
+                        encPermit?.Equals(cellPermits[count]).Should().Be(true);
+                        count++;
+                    }
+                }
+                check = true;
+            }
+            return check;
         }
 
         /// <summary>
@@ -377,6 +387,26 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             weekNumber.Should().Be(currentWeek);
             var yearWeek = apiResponseData.Attributes.ToArray()[6].Value;
             yearWeek.Should().Be(year + " / " + weekNumber);
+        }
+
+        /// <summary>
+        /// This method is used to verify the Permit files and their content
+        /// </summary>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <param name="keyFileType">Sets the value KEY_TEXT or PERMIT_XML based on the requested Permit Type</param>
+        /// <returns></returns>
+        public static bool VerifyPermitFile(string? downloadFolderPath, string? keyFileType)
+        {
+            bool permitVerified = false;
+            if (keyFileType == "KEY_TEXT")
+            {
+                permitVerified = CheckPermitTxtFile(downloadFolderPath);
+            }
+            else if (keyFileType == "PERMIT_XML")
+            {
+                permitVerified = CheckPermitXmlFile(downloadFolderPath);
+            }
+            return permitVerified;
         }
     }
 }

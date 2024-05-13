@@ -515,8 +515,6 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PKSApiConfiguration.ClientSecret"
-        value: $(PKSApiClientSecret)
       - name: "PermitConfiguration.PermitDecryptionHardwareId"
         value: $(PermitDecryptionHardwareId)
 
@@ -1241,8 +1239,6 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PKSApiConfiguration.ClientSecret"
-        value: $(PKSApiClientSecret)
       - name: "PermitConfiguration.PermitDecryptionHardwareId"
         value: $(PermitDecryptionHardwareId)
     jobs:

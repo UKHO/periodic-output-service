@@ -2,6 +2,6 @@
 {
     public interface IAuthPksTokenProvider
     {
-        public Task<string> GetManagedIdentityAuthForPksAsync(string resource);
+        public Task<string> GetManagedIdentityAuthAsync(string resource);
     }
 }

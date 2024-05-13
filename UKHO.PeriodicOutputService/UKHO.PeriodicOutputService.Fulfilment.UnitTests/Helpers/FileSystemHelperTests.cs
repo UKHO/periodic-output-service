@@ -145,7 +145,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         }
 
         [Test]
-        public void WhenValidPermitXmlDataPassed_Then_CreateXmlFromObject_Executes_Successfully()
+        public void WhenValidPermitXmlDataPassed_ThenCreateXmlFromObject_Executes_Successfully()
         {
             PksXml pKSXml = new()
             {
@@ -173,7 +173,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         }
 
         [Test]
-        public void WhenAllValid_Then_CreateTextFile_Executes_Successfully()
+        public void WhenValidDataPassed_ThenCreateTextFile_Executes_Successfully()
         {
             _fileSystemHelper.CreateTextFile("C:\\Test", "test.txt", "test");
 

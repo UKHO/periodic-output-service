@@ -49,7 +49,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             HttpResponseMessage expectedResult = await fssEndPointHelper.CheckBatchDetails(batchId);
             await FssBatchHelper.VerifyBessBatchDetails(expectedResult);
             string batchFolderPath = downloadFolderPath.Remove(downloadFolderPath.Length - 7);
-            bool expectedResulted = FssBatchHelper.CheckPermitFile(batchFolderPath, keyFileType);
+            bool expectedResulted = FssBatchHelper.VerifyPermitFile(batchFolderPath, keyFileType);
             expectedResulted.Should().Be(true);
         }
 

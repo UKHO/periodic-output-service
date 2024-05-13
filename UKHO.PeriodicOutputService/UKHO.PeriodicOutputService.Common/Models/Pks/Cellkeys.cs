@@ -1,8 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Xml.Serialization;
-using UKHO.PeriodicOutputService.Common.Models.Pks;
 
-namespace UKHO.PeriodicOutputService.Common.Models.Bess
+namespace UKHO.PeriodicOutputService.Common.Models.Pks
 {
     [ExcludeFromCodeCoverage]
     [XmlRoot(ElementName = "cellkeys")]
