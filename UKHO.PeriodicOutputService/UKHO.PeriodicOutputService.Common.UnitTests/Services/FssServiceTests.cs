@@ -970,9 +970,9 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         #endregion
 
         [Test]
-        [TestCase(Batch.BesBaseZipBatch)]
-        [TestCase(Batch.BesUpdateZipBatch)]
-        [TestCase(Batch.BesChangeZipBatch)]
+        [TestCase(Batch.BessBaseZipBatch)]
+        [TestCase(Batch.BessUpdateZipBatch)]
+        [TestCase(Batch.BessChangeZipBatch)]
         public async Task WhenValidRequestToCreateBatchForBessIsSent_ThenReturnsBatchId(Batch batchType)
         {
             _fakeconfiguration["IsFTRunning"] = "true";
@@ -992,10 +992,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             switch (batchType)
             {
-                case Batch.BesUpdateZipBatch:
+                case Batch.BessUpdateZipBatch:
                     type = BessType.UPDATE.ToString();
                     break;
-                case Batch.BesChangeZipBatch:
+                case Batch.BessChangeZipBatch:
                     type = BessType.CHANGE.ToString();
                     break;
                 default:
@@ -1025,9 +1025,9 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         [Test]
-        [TestCase(Batch.BesBaseZipBatch)]
-        [TestCase(Batch.BesUpdateZipBatch)]
-        [TestCase(Batch.BesChangeZipBatch)]
+        [TestCase(Batch.BessBaseZipBatch)]
+        [TestCase(Batch.BessUpdateZipBatch)]
+        [TestCase(Batch.BessChangeZipBatch)]
         public async Task WhenInvalidRequestToCreateBatchForBessIsSent_ThenThrowsException(Batch batchType)
         {
             _fakeconfiguration["IsFTRunning"] = "true";
@@ -1047,10 +1047,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             switch (batchType)
             {
-                case Batch.BesUpdateZipBatch:
+                case Batch.BessUpdateZipBatch:
                     type = BessType.UPDATE.ToString();
                     break;
-                case Batch.BesChangeZipBatch:
+                case Batch.BessChangeZipBatch:
                     type = BessType.CHANGE.ToString();
                     break;
                 default:

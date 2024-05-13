@@ -205,7 +205,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
         }
 
-
         public async Task<string> CreateBatch(Batch batchType)
         {
             _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
@@ -565,8 +564,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         //Private Methods
         [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType, ConfigQueueMessage configQueueMessage)
-        {
-            CreateBatchRequestModel createBatchRequest;
+        {            
             List<KeyValuePair<string, string>> batchAttributes = new();
 
             foreach (Tag tag in configQueueMessage.Tags)
@@ -574,7 +572,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 batchAttributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
             }
 
-            createBatchRequest = new()
+            CreateBatchRequestModel createBatchRequest = new()
             {
                 BusinessUnit = _fssApiConfiguration.Value.BessBusinessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(configQueueMessage.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
@@ -586,7 +584,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 Attributes = batchAttributes
             };
 
-            ////This batch attribute is added for fss stub.
+            //This batch attribute is added for fss stub.
             if (bool.Parse(_configuration["IsFTRunning"]))
             {
                 createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", batchType.ToString()));

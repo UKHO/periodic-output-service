@@ -21,11 +21,11 @@ namespace UKHO.FmEssFssMock.API.Services
             { ".txt", "text/plain" }
         };
 
-        private readonly Enum[] besBatchTypes = new Enum[]
+        private readonly Enum[] bessBatchTypes = new Enum[]
                                      {
-                                            Batch.BesBaseZipBatch,
-                                            Batch.BesChangeZipBatch,
-                                            Batch.BesUpdateZipBatch
+                                            Batch.BessBaseZipBatch,
+                                            Batch.BessChangeZipBatch,
+                                            Batch.BessUpdateZipBatch
                                      };
 
         private readonly Enum[] aioBatchTypes = new Enum[]
@@ -37,8 +37,8 @@ namespace UKHO.FmEssFssMock.API.Services
                                      };
 
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
-        private readonly string besSingleReadmeFileBatchId = "AB4A692D-6E3B-48A3-BD37-D232C60DD75D";
-        private readonly string besMultipleFilesBatchId = "10D40DD5-DDFB-497A-BB67-D99FB1658320";
+        private readonly string bessSingleReadmeFileBatchId = "AB4A692D-6E3B-48A3-BD37-D232C60DD75D";
+        private readonly string bessMultipleFilesBatchId = "10D40DD5-DDFB-497A-BB67-D99FB1658320";
         private const string BESPOKEREADME = "BESPOKE README";
         private const string MULTIPLEFILES = "MULTIPLE";
         private const string PERMITTXTFILENAME = "Permit.txt";
@@ -96,9 +96,9 @@ namespace UKHO.FmEssFssMock.API.Services
                 });
             }
 
-            //BES - batch attributes from Queue message - start
+            //BESS - batch attributes from Queue message - start
 
-            if (besBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)))
+            if (bessBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)))
             {
                 ConfigQueueMessage message = new()
                 {
@@ -134,7 +134,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 };
             }
 
-            //BES - batch attributes from Queue message - end
+            //BESS - batch attributes from Queue message - end
 
             List<KeyValuePair<string, string>> attributes = new()
             {
@@ -283,11 +283,11 @@ namespace UKHO.FmEssFssMock.API.Services
             }
             else if (filter.ToUpper().Contains(BESPOKEREADME))
             {
-                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName, besSingleReadmeFileBatchId);
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName, bessSingleReadmeFileBatchId);
             }
             else if (filter.ToUpper().Contains(MULTIPLEFILES))
             {
-                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName, besMultipleFilesBatchId);
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName, bessMultipleFilesBatchId);
             }
 
             return new SearchBatchResponse()

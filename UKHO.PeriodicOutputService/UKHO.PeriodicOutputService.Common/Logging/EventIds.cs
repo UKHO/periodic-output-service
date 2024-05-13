@@ -786,19 +786,19 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         PermitFileCreationCompleted = 809155,
 
         // <summary>
-        /// 809156 - BES batch creation started
+        /// 809156 - Bess batch creation started
         /// </summary>
-        BESBatchCreationStarted = 809156,
+        BessBatchCreationStarted = 809156,
 
         /// <summary>
-        /// 809157 - BES batch creation completed
+        /// 809157 - Bess batch creation completed
         /// </summary>
-        BESBatchCreationCompleted = 809157,
+        BessBatchCreationCompleted = 809157,
 
         /// <summary>
-        /// 809158 - BES batch creation failed
+        /// 809158 - Bess batch creation failed
         /// </summary>
-        BESBatchCreationFailed = 809158
+        BessBatchCreationFailed = 809158
     }
 
     public static class EventIdExtensions
