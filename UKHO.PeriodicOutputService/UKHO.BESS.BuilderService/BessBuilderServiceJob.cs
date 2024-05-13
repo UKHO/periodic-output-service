@@ -29,21 +29,16 @@ namespace UKHO.BESS.BuilderService
                 ConfigQueueMessage configQueueMessage = message.Body.ToObjectFromJson<ConfigQueueMessage>();
                 CommonHelper.CorrelationID = Guid.Parse(configQueueMessage.CorrelationId);
 
-                logger.LogInformation(EventIds.BessBuilderServiceStarted.ToEventId(),
-                    "Bess Builder Service Started | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-
-                await logger.LogStartEndAndElapsedTimeAsync(EventIds.CreateBespokeExchangeSetRequestStart,
-                    EventIds.CreateBespokeExchangeSetRequestCompleted,
-                    "Create Bespoke Exchange Set for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",
+                await logger.LogStartEndAndElapsedTimeAsync(EventIds.BessBuilderServiceStarted,
+                    EventIds.BessBuilderServiceCompleted,
+                    "Create Bespoke Exchange Set Started for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",
+                    "Create Bespoke Exchange Set Completed for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",
                     async () => await builderService.CreateBespokeExchangeSetAsync(configQueueMessage),
                     configQueueMessage.Name, CommonHelper.CorrelationID);
-
-                logger.LogInformation(EventIds.BessBuilderServiceCompleted.ToEventId(),
-                    "Bess Builder Service Completed | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing Bess Builder Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);               
+                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing Bess Builder Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
             }
         }
     }

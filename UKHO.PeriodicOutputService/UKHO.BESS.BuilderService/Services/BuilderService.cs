@@ -28,13 +28,14 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly ILogger<BuilderService> logger;
         private readonly IAzureTableStorageHelper azureTableStorageHelper;
         private readonly IOptions<FssApiConfiguration> fssApiConfig;
+        private readonly IPksService pksService;
 
         private const string BESPOKE_FILE_NAME = "V01X01";
         private const string BessBatchFileExtension = "zip";
         private readonly string mimeType = "application/zip";
         private readonly string homeDirectoryPath;
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
@@ -43,9 +44,8 @@ namespace UKHO.BESS.BuilderService.Services
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
             this.azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
             this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
-
+            this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
-
         }
 
         public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
@@ -57,6 +57,22 @@ namespace UKHO.BESS.BuilderService.Services
             ExtractExchangeSetZip(essFiles, essFileDownloadPath);
 
             await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath);
+
+            ProductVersionsRequest? latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
+
+            if (!string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                List<ProductKeyServiceRequest> productKeyServiceRequest = new();
+
+                productKeyServiceRequest.AddRange(latestProductVersions.ProductVersions.Select(
+                    item => new ProductKeyServiceRequest()
+                    {
+                        ProductName = item.ProductName,
+                        Edition = item.EditionNumber.ToString()
+                    }));
+
+                List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
+            }
 
             //Temporary Upload Code
 
@@ -75,7 +91,6 @@ namespace UKHO.BESS.BuilderService.Services
                     : configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch;
 
                 isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BessBatchFileExtension, batch).Result;
-
             }
 
             // temporary logs
@@ -86,7 +101,6 @@ namespace UKHO.BESS.BuilderService.Services
                 if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                          configQueueMessage.Type == BessType.CHANGE.ToString())
                 {
-                    var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray());
                     if (latestProductVersions.ProductVersions.Count > 0)
                     {
                         LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);

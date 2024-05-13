@@ -371,7 +371,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         ExchangeSetNotModified = 809072,
 
         /// <summary>
-        /// 809073 - Cancelled products found in ESS repsonse
+        /// 809073 - Cancelled products found in ESS response
         /// </summary>
         CancelledProductsFound = 809073,
 
@@ -551,214 +551,224 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessConfigInvalidAttributes = 809108,
 
         /// <summary>
-        /// 809109 - Bess config duplicate Name attribute
+        /// 809109 - Bess config validation summary
         /// </summary>
-        BessConfigDuplicateFileCount = 809109,
+        BessConfigValidationSummary = 809109,
 
         /// <summary>
-        /// 809110 - Bess config validation summary
+        /// 809110 - Bess config duplicate records found
         /// </summary>
-        BessConfigValidationSummary = 809110,
+        BessConfigsDuplicateRecordsFound = 809110,
 
         /// <summary>
-        /// 809111 - Bess config duplicate records found
+        /// 809111 - Bess config frequency due or lapsed
         /// </summary>
-        BessConfigsDuplicateRecordsFound = 809111,
+        BessConfigFrequencyElapsed = 809111,
 
         /// <summary>
-        /// 809112 - Bess config frequency due or lapsed
+        /// 809112 - Exception occurred while processing bess config frequency
         /// </summary>
-        BessConfigFrequencyElapsed = 809112,
+        BessConfigFrequencyProcessingException = 809112,
 
         /// <summary>
-        /// 809113 - Exception occurred while processing bess config frequency
+        /// 809113 - Request to Sales Catalogue Service's catalogue essData endpoint is started.
         /// </summary>
-        BessConfigFrequencyProcessingException = 809113,
+        ScsGetSalesCatalogueDataRequestStarted = 809113,
 
         /// <summary>
-        /// 809114 - Request to Sales Catalogue Service's catalogue essData endpoint is started.
+        /// 809114 - Request to Sales Catalogue Service's catalogue essData endpoint is completed.
         /// </summary>
-        ScsGetSalesCatalogueDataRequestStarted = 809114,
+        ScsGetSalesCatalogueDataRequestCompleted = 809114,
 
         /// <summary>
-        /// 809115 - Request to Sales Catalogue Service's catalogue essData endpoint is completed.
+        /// 809115 - Request to Sales Catalogue Service's catalogue essData endpoint failed due to Non-Ok response.
         /// </summary>
-        ScsGetSalesCatalogueDataRequestCompleted = 809115,
+        ScsGetSalesCatalogueDataNonOkResponse = 809115,
 
         /// <summary>
-        /// 809116 - Request to Sales Catalogue Service's catalogue essData endpoint failed due to Non-Ok response.
+        /// 809116 - Request for retrying sales catalogue service endpoint.
         /// </summary>
-        ScsGetSalesCatalogueDataNonOkResponse = 809116,
+        RetryHttpClientScsRequest = 809116,
 
         /// <summary>
-        /// 809117 - Request for retrying sales catalogue service endpoint.
+        /// 809117 - Bess Builder Service Started
         /// </summary>
-        RetryHttpClientScsRequest = 809117,
+        BessBuilderServiceStarted = 809117,
 
         /// <summary>
-        /// 809118 - Bess Builder Service Started
+        /// 809118 - Bess Builder Service Completed
         /// </summary>
-        BessBuilderServiceStarted = 809118,
+        BessBuilderServiceCompleted = 809118,
 
         /// <summary>
-        /// 809119 - Bess Builder Service Completed
+        /// 809119 - Listed cells or pattern not found in catalogue
         /// </summary>
-        BessBuilderServiceCompleted = 809119,
+        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809119,
 
         /// <summary>
-        /// 809120 - Listed cells or pattern not found in catalogue
+        /// 809120 - All listed cells are not found and neither cell is matching with the pattern
         /// </summary>
-        BessInvalidEncCellNamesOrPatternNotFoundInSalesCatalogue = 809120,
+        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809120,
 
         /// <summary>
-        /// 809121 - All listed cells are not found and neither cell is matching with the pattern
+        /// 809121 - Config message added in the queue
         /// </summary>
-        BessEncCellNamesAndPatternNotFoundInSalesCatalogue = 809121,
+        BessConfigPropertiesAddedInQueue = 809121,
 
         /// <summary>
-        /// 809122 - Config message added in the queue
+        /// 809122 - Bess Config Validation Error
         /// </summary>
-        BessConfigPropertiesAddedInQueue = 809122,
+        BessConfigValidationError = 809122,
 
         /// <summary>
-        /// 809123 - Bess Config Validation Error
+        /// 809123 - Bespoke Exchange Set size exceeds threshold 700MB
         /// </summary>
-        BessConfigValidationError = 809123,
+        BessSizeExceedsThreshold = 809123,
 
         /// <summary>
-        /// 809124 - Bespoke Exchange Set size exceeds threshold 700MB
+        /// 809124 - Message added in the queue
         /// </summary>
-        BessSizeExceedsThreshold = 809124,
+        BessQueueMessageSuccessful = 809124,
 
         /// <summary>
-        /// 809125 - Message added in the queue
+        /// 809125 - Message not added in the queue
         /// </summary>
-        BessQueueMessageSuccessful = 809125,
+        BessQueueMessageFailed = 809125,
 
         /// <summary>
-        /// 809126 - Message not added in the queue
+        /// 809126 - Products Fetched from ESS.
         /// </summary>
-        BessQueueMessageFailed = 809126,
+        ProductsFetchedFromESS = 809126,
 
         /// <summary>
-        /// 809127 - Creation of bespoke exchange set is started.
+        /// 809127 - Empty batch response from ESS.
         /// </summary>
-        CreateBespokeExchangeSetRequestStart = 809127,
+        EmptyBatchResponse = 809127,
 
         /// <summary>
-        /// 809128 - Creation of bespoke exchange set is completed.
+        /// 809128 - Macro is invalid or unavailable.
         /// </summary>
-        CreateBespokeExchangeSetRequestCompleted = 809128,
+        MacroInvalidOrUnavailable = 809128,
 
         /// <summary>
-        /// 809129 - Products Fetched from ESS.
+        /// 809129 - Exception occurred while transforming macros.
         /// </summary>
-        ProductsFetchedFromESS = 809129,
+        MacroTransformationFailed = 809129,
 
         /// <summary>
-        /// 809130 - Empty batch response from ESS.
+        /// 809130 - Request for searching readme.txt file from file share service is started.
         /// </summary>
-        EmptyBatchResponse = 809130,
+        QueryFileShareServiceReadMeFileRequestStart = 809130,
 
         /// <summary>
-        /// 809131 - Macro is invalid or unavailable.
+        /// 809131 - Request for searching readme.txt from file share service is completed.
         /// </summary>
-        MacroInvalidOrUnavailable = 809131,
+        QueryFileShareServiceReadMeFileRequestCompleted = 809131,
 
         /// <summary>
-        /// 809132 - Exception occurred while transforming macros.
+        /// 809132 - Request for searching readme.txt file from file share service is failed due to non ok response.
         /// </summary>
-        MacroTransformationFailed = 809132,
+        QueryFileShareServiceReadMeFileNonOkResponse = 809132,
 
         /// <summary>
-        /// 809133 - Request for searching readme.txt file from file share service is started.
+        /// 809133 - Readme.txt file is not found while searching in file share service.
         /// </summary>
-        QueryFileShareServiceReadMeFileRequestStart = 809133,
+        ReadMeTextFileNotFound = 809133,
 
         /// <summary>
-        /// 809134 - Request for searching readme.txt from file share service is completed.
+        /// 809134 - Request for downloading readme.txt file from file share service is started.
         /// </summary>
-        QueryFileShareServiceReadMeFileRequestCompleted = 809134,
+        DownloadReadMeFileRequestStart = 809134,
 
         /// <summary>
-        /// 809135 - Request for searching readme.txt file from file share service is failed due to non ok response.
+        /// 809135 - Request for downloading readme.txt file from file share service is completed.
         /// </summary>
-        QueryFileShareServiceReadMeFileNonOkResponse = 809135,
+        DownloadReadMeFileRequestCompleted = 809135,
 
         /// <summary>
-        /// 809136 - Readme.txt file is not found while searching in file share service.
+        /// 809136 - Request for downloading readme.txt file from file share service is failed due to non ok response.
         /// </summary>
-        ReadMeTextFileNotFound = 809136,
+        DownloadReadMeFileNonOkResponse = 809136,
 
         /// <summary>
-        /// 809137 - Request for downloading readme.txt file from file share service is started.
+        /// 809137 - Completed download of 307 response readme.txt file from the file share service.
         /// </summary>
-        DownloadReadMeFileRequestStart = 809137,
+        DownloadReadmeFile307RedirectResponse = 809137,
 
         /// <summary>
-        /// 809138 - Request for downloading readme.txt file from file share service is completed.
+        /// 809138 - Multiple files found while searching readme.txt file from the file share service.
         /// </summary>
-        DownloadReadMeFileRequestCompleted = 809138,
+        QueryFileShareServiceMultipleFilesFound = 809138,
 
         /// <summary>
-        /// 809139 - Request for downloading readme.txt file from file share service is failed due to non ok response.
+        /// 809139 - Serial.ENC file updated with Type from configuration
         /// </summary>
-        DownloadReadMeFileNonOkResponse = 809139,
+        BessSerialEncUpdated = 809139,
 
         /// <summary>
-        /// 809140 - Completed download of 307 response readme.txt file from the file share service.
+        /// 809140 - PRODUCT.TXT file and INFO folder deleted
         /// </summary>
-        DownloadReadmeFile307RedirectResponse = 809140,
+        BessProductTxtAndInfoFolderDeleted = 809140,
 
         /// <summary>
-        /// 809141 - Multiple files found while searching readme.txt file from the file share service.
+        /// 809141 - SERIAL.ENC file update operation failed
         /// </summary>
-        QueryFileShareServiceMultipleFilesFound = 809141,
+        BessSerialEncUpdateFailed = 809141,
 
         /// <summary>
-        /// 809142 - Serial.ENC file updated with Type from configuration
+        /// 809142 - PRODUCT.TXT file and INFO folder delete operation failed
         /// </summary>
-        BessSerialEncUpdated = 809142,
+        BessProductTxtAndInfoFolderDeleteFailed = 809142,
 
         /// <summary>
-        /// 809143 - PRODUCT.TXT file and INFO folder deleted
+        /// 809143 - Bespoke exchange set cleanup web job is started.
         /// </summary>
-        BessProductTxtAndInfoFolderDeleted = 809143,
+        BessCleanUpJobRequestStarted = 809143,
 
         /// <summary>
-        /// 809144 - SERIAL.ENC file update operation failed
+        /// 809144 - Bespoke exchange set cleanup web job is completed.
         /// </summary>
-        BessSerialEncUpdateFailed = 809144,
+        BessCleanUpJobRequestCompleted = 809144,
 
         /// <summary>
-        /// 809145 - PRODUCT.TXT file and INFO folder delete operation failed
+        /// 809145 - Deletion of folders failed.
         /// </summary>
-        BessProductTxtAndInfoFolderDeleteFailed = 809145,
+        FoldersDeletionFailed = 809145,
 
         /// <summary>
-        /// 809146 - Bespoke exchange set cleanup web job is started.
+        /// 809146 - No folders found.
         /// </summary>
-        BESSCleanUpJobRequestStarted = 809146,
+        NoFoldersFound = 809146,
 
         /// <summary>
-        /// 809147 - Bespoke exchange set cleanup web job is completed.
+        /// 809147 - CleanUp successful.
         /// </summary>
-        BESSCleanUpJobRequestCompleted = 809147,
+        CleanUpSuccessful = 809147,
 
         /// <summary>
-        /// 809148 - Deletion of folders failed.
+        /// 809148 - Post product data to Product Key Service started.
         /// </summary>
-        FoldersDeletionFailed = 809148,
+        PostProductKeyDataToPksStarted = 809148,
 
         /// <summary>
-        /// 809149 - No folders found.
+        /// 809149 - Post product data to Product Key Service completed.
         /// </summary>
-        NoFoldersFound = 809149,
+        PostProductKeyDataToPksCompleted = 809149,
 
         /// <summary>
-        /// 809150 - CleanUp successful.
+        /// 809150 - Post product data to Product Key Service failed.
         /// </summary>
-        CleanUpSuccessful = 809150
+        PostProductKeyDataToPksFailed = 809150,
+
+        /// <summary>
+        /// 809151 - Container does not exists
+        /// </summary>
+        ContainerDoesNotExists = 809151,
+
+        /// <summary>
+        /// 809152 - Config delete exception
+        /// </summary>
+        ConfigDeleteException = 809152
     }
 
     public static class EventIdExtensions
