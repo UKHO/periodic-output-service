@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace UKHO.PeriodicOutputService.Common.Models.Bess
+namespace UKHO.PeriodicOutputService.Common.Models.Pks
 {
     public class ProductKeyServiceRequest
     {

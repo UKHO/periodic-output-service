@@ -12,18 +12,15 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to get the response from pks endpoint.
         /// </summary>
-        /// <param name="baseUrl"></param>
-        /// <param name="pksData"></param>
+        /// <param name="baseUrl">Sets the PKS baseUrl</param>
+        /// <param name="pksData">Sets the data to get permit as per products provided</param>
         /// <returns></returns>
         public static async Task<HttpResponseMessage> PermitKeysEndpoint(string? baseUrl, List<ProductKeyServiceModel> pksData)
         {
             uri = $"{baseUrl}/keys/ENC-S63";
-
             string payloadJson = JsonConvert.SerializeObject(pksData);
-
             using var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri)
-
-            { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
+                { Content = new StringContent(payloadJson, Encoding.UTF8, "application/json") };
             return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
     }

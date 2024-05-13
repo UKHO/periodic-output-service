@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.Bess;
+using UKHO.PeriodicOutputService.Common.Models.Pks;
 
 namespace UKHO.PeriodicOutputService.Common.Services
 {
@@ -16,7 +16,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthPksTokenProvider authPksTokenProvider;
         private readonly IPksApiClient pksApiClient;
         private const string KeysEnc = "/keys/ENC-S63";
-
 
         public PksService(ILogger<PksService> logger, IOptions<PksApiConfiguration> pksApiConfiguration, IAuthPksTokenProvider authPksTokenProvider, IPksApiClient pksApiClient)
         {
@@ -32,7 +31,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             string bodyJson;
             string uri = pksApiConfiguration.Value.BaseUrl + KeysEnc;
-            string accessToken = await authPksTokenProvider.GetManagedIdentityAuthForPksAsync(pksApiConfiguration.Value.ClientId);
+            string accessToken = await authPksTokenProvider.GetManagedIdentityAuthAsync(pksApiConfiguration.Value.ClientId);
 
             string payloadJson = JsonConvert.SerializeObject(productKeyServiceRequest);
 

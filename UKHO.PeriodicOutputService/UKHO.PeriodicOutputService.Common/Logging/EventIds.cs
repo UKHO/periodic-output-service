@@ -768,7 +768,22 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809152 - Config delete exception
         /// </summary>
-        ConfigDeleteException = 809152
+        ConfigDeleteException = 809152,
+
+        /// <summary>
+        /// 809153 - Exception occurred while Permit Decryption
+        /// </summary>
+        PermitDecryptionException = 809153,
+
+        /// <summary>
+        /// 809154 - Permit file creation started
+        /// </summary>
+        PermitFileCreationStarted = 809154,
+
+        /// <summary>
+        /// 809155 - Permit file creation completed
+        /// </summary>
+        PermitFileCreationCompleted = 809155
     }
 
     public static class EventIdExtensions

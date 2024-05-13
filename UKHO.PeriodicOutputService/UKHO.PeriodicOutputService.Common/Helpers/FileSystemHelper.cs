@@ -1,4 +1,7 @@
 ﻿using System.IO.Abstractions;
+using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Utilities;
@@ -117,6 +120,28 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         public void CreateXmlFile(byte[] fileContent, string targetPath)
         {
             _fileUtility.CreateXmlFile(fileContent, targetPath);
+        }
+
+        public Task CreateXmlFromObject<T>(T obj, string filePath, string fileName)
+        {
+            var serializer = new XmlSerializer(typeof(T));
+            var namespaces = new XmlSerializerNamespaces();
+            namespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+                       
+            using (var fileStream = _fileSystem.File.OpenWrite(Path.Combine(filePath, fileName)))
+            {
+                using (var xmlTextWriter = new XmlTextWriter(fileStream, Encoding.UTF8) { Formatting = Formatting.Indented })
+                {
+                    serializer.Serialize(xmlTextWriter, obj, namespaces);
+                }
+            }
+
+           return Task.CompletedTask;
+        }
+
+        public void CreateTextFile(string filePath, string fileName, string content)
+        {
+            _fileSystem.File.AppendAllText(Path.Combine(filePath, fileName), content);
         }
 
         public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName)

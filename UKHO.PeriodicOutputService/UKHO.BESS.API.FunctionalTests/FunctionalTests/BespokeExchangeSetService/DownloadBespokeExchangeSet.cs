@@ -30,20 +30,25 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
 
         //PBI 140039 : BESS BS - Dealing with ancillary files : Get ReadMe.txt from FSS based on config
         //PBI 147178: BESS BS - Dealing with ancillary files : Delete PRODUCT.TXT file, INFO folder and update SERIAL.ENC
+        //PBI 140040: BESS BS - Get permit from PKS and create key file (XML/TXT)
         [Test]
-        [TestCase("s57", "UPDATE", "AVCS", "fa741049-7a78-4ec3-8737-1b3fb8d1cc3f")]
-        [TestCase("s63", "BASE", "BLANK", "a7fb95f0-b3ff-4ef2-9b76-a74c7d3c3c8f")]
-        [TestCase("s63", "CHANGE", "businessUnit eq 'AVCS-BESSets' and filename eq 'README.TXT' and $batch(Content) eq 'Bespoke README'", "5581ca8c-27a8-42ec-86d2-bef6915c2992")]
-        public async Task WhenIUploadAConfigWithCorrectDetails_ThenBespokeExchangeSetShouldBeDownloaded(string exchangeSetStandard, string type, string readMeSearchFilter, string batchId)
+        [TestCase("s57", "UPDATE", "AVCS", "fa741049-7a78-4ec3-8737-1b3fb8d1cc3f", "KEY_TEXT")]
+        [TestCase("s63", "BASE", "BLANK", "a7fb95f0-b3ff-4ef2-9b76-a74c7d3c3c8f", "PERMIT_XML")]
+        [TestCase("s63", "CHANGE", "businessUnit eq 'AVCS-BESSets' and filename eq 'README.TXT' and $batch(Content) eq 'Bespoke README'", "5581ca8c-27a8-42ec-86d2-bef6915c2992", "PERMIT_XML")]
+        public async Task WhenIUploadAConfigWithCorrectDetails_ThenBespokeExchangeSetShouldBeDownloaded(string exchangeSetStandard, string type, string readMeSearchFilter, string batchId, string keyFileType)
         {
-            HttpResponseMessage response = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, exchangeSetStandard, type, readMeSearchFilter);
+            HttpResponseMessage response = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, exchangeSetStandard, type, readMeSearchFilter, keyFileType);
             response.StatusCode.Should().Be((HttpStatusCode)201);
             Extensions.WaitForDownloadExchangeSet();
-            var downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
+            var downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId, true, keyFileType);
             var expectedResultReadme = FssBatchHelper.CheckReadMeInBessExchangeSet(downloadFolderPath, readMeSearchFilter);
             expectedResultReadme.Should().Be(true);
             var expectedResultSerial = FssBatchHelper.CheckInfoFolderAndSerialEncInBessExchangeSet(downloadFolderPath, type);
             expectedResultSerial.Should().Be(true);
+
+            string batchFolderPath = downloadFolderPath.Remove(downloadFolderPath.Length - 7);
+            bool expectedResulted = FssBatchHelper.VerifyPermitFile(batchFolderPath, keyFileType);
+            expectedResulted.Should().Be(true);
             await Extensions.DeleteTableEntries(testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.TableName, testConfiguration.bessConfig.ProductsName, exchangeSetStandard);
         }
 
