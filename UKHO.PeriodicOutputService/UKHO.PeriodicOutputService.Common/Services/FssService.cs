@@ -24,14 +24,12 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IConfiguration _configuration;
-        private readonly Enum[] _aioBatchTypes = new Enum[]
-                                      {
+        private readonly Enum[] _aioBatchTypes = {
                                             Batch.AioBaseCDZipIsoSha1Batch,
                                             Batch.AioUpdateZipBatch
                                       };
         private const string ServerHeaderValue = "Windows-Azure-Blob";
 
-        private readonly Enum[] bessBatchTypes = new Enum[] { Batch.BesBaseZipBatch, Batch.BesUpdateZipBatch, Batch.BesChangeZipBatch, Batch.BesEmptyBatch };
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
@@ -124,11 +122,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _logger.LogInformation(EventIds.GetBatchDetailRequestCompleted.ToEventId(), "Request to get batch details for BatchID - {BatchID} from FSS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 return JsonConvert.DeserializeObject<GetBatchResponseModel>(await batchDetailResponse.Content.ReadAsStringAsync());
             }
-            else
-            {
-                _logger.LogError(EventIds.GetBatchDetailRequestFailed.ToEventId(), "Request to get batch details for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.GetBatchDetailRequestFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.GetBatchDetailRequestFailed.ToEventId(), "Request to get batch details for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.GetBatchDetailRequestFailed.ToEventId());
         }
 
         public async Task<bool> DownloadFileAsync(string fileName, string fileLink, long fileSize, string filePath)
@@ -199,11 +195,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse!.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 return createBatchResponse.BatchId;
             }
-            else
-            {
-                _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
         }
 
 
@@ -224,11 +218,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse!.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 return createBatchResponse.BatchId;
             }
-            else
-            {
-                _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
         }
 
         public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType, Batch batchType)
@@ -247,11 +239,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _logger.LogInformation(EventIds.AddFileToBatchRequestCompleted.ToEventId(), "File {FileName} is added in batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponseMessage.StatusCode.ToString(), CommonHelper.CorrelationID);
                 return httpResponseMessage.StatusCode == HttpStatusCode.Created;
             }
-            else
-            {
-                _logger.LogError(EventIds.AddFileToBatchRequestFailed.ToEventId(), "Request to add file {FileName} to batch with BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponseMessage.StatusCode.ToString(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.AddFileToBatchRequestFailed.ToEventId(), "Request to add file {FileName} to batch with BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponseMessage.StatusCode.ToString(), CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
         }
 
         public async Task<List<string>> UploadBlocks(string batchId, IFileInfo fileInfo)
@@ -325,11 +315,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _logger.LogInformation(EventIds.WriteBlockToFileCompleted.ToEventId(), "File blocks written in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 return true;
             }
-            else
-            {
-                _logger.LogError(EventIds.WriteBlockToFileFailed.ToEventId(), "Request to write blocks in file {FileName} failed for batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID.ToString());
-                throw new FulfilmentException(EventIds.WriteBlockToFileFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.WriteBlockToFileFailed.ToEventId(), "Request to write blocks in file {FileName} failed for batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID.ToString());
+            throw new FulfilmentException(EventIds.WriteBlockToFileFailed.ToEventId());
         }
 
         public async Task<bool> CommitBatch(string batchId, IEnumerable<string> fileNames, Batch batchType)
@@ -353,11 +341,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _logger.LogInformation(EventIds.CommitBatchCompleted.ToEventId(), "Batch {BatchType} with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
                 return true;
             }
-            else
-            {
-                _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
-                throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
+            throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
         }
 
         public async Task<IEnumerable<BatchFile>> GetAioInfoFolderFilesAsync(string batchId, string correlationId)
@@ -405,7 +391,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         public async Task<string> SearchReadMeFilePathAsync(string batchId, string correlationId, string readMeSearchFilter)
         {
-            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);       
+            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
             var uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch?$filter={readMeSearchFilter}";
 
             HttpResponseMessage httpResponse = await _fssApiClient.GetAncillaryFileDetailsAsync(uri, accessToken);
@@ -424,17 +410,13 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     _logger.LogError(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId(), "Error in file share service while searching readme.txt file, multiple files are found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
                     throw new FulfilmentException(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId());
                 }
-                else
-                {
-                    _logger.LogError(EventIds.ReadMeTextFileNotFound.ToEventId(), "Error in file share service while searching readme.txt file not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
-                    throw new FulfilmentException(EventIds.ReadMeTextFileNotFound.ToEventId());
-                }
+
+                _logger.LogError(EventIds.ReadMeTextFileNotFound.ToEventId(), "Error in file share service while searching readme.txt file not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
+                throw new FulfilmentException(EventIds.ReadMeTextFileNotFound.ToEventId());
             }
-            else
-            {
-                _logger.LogError(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId(), "Error in file share service while searching readme.txt file with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", httpResponse.RequestMessage.RequestUri, httpResponse.StatusCode, batchId, correlationId);
-                throw new FulfilmentException(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
-            }
+
+            _logger.LogError(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId(), "Error in file share service while searching readme.txt file with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", httpResponse.RequestMessage.RequestUri, httpResponse.StatusCode, batchId, correlationId);
+            throw new FulfilmentException(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
         }
 
         public async Task<bool> DownloadReadMeFileAsync(string readMeFilePath, string batchId, string exchangeSetRootPath, string correlationId)
@@ -457,11 +439,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 }
                 return _fileSystemHelper.DownloadReadmeFile(filePath, stream);
             }
-            else
-            {
-                _logger.LogError(EventIds.DownloadReadMeFileNonOkResponse.ToEventId(), "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", requestUri, httpReadMeFileResponse.StatusCode, batchId, correlationId);
-                throw new FulfilmentException(EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
-            }
+
+            _logger.LogError(EventIds.DownloadReadMeFileNonOkResponse.ToEventId(), "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", requestUri, httpReadMeFileResponse.StatusCode, batchId, correlationId);
+            throw new FulfilmentException(EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
         }
 
         //Private Methods
@@ -607,7 +587,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         {
             AddFileToBatchRequestModel addFileToBatchRequestModel = new()
             {
-                Attributes = new List<KeyValuePair<string, string>>()
+                Attributes = new List<KeyValuePair<string, string>>
                 {
                     new("Product Type", _aioBatchTypes.Contains(batchType) ? "AIO" : "AVCS"),
                     new("File Name", fileName)

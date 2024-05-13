@@ -966,9 +966,9 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         #endregion
 
         [Test]
-        [TestCase(Batch.BesBaseZipBatch)]
-        [TestCase(Batch.BesUpdateZipBatch)]
-        [TestCase(Batch.BesChangeZipBatch)]
+        [TestCase(Batch.BESSBaseZipBatch)]
+        [TestCase(Batch.BESSUpdateZipBatch)]
+        [TestCase(Batch.BESSChangeZipBatch)]
         public async Task WhenValidRequestToCreateBatchForBessIsSent_ThenReturnsBatchId(Batch batchType)
         {
             _fakeconfiguration["IsFTRunning"] = "true";
@@ -977,7 +977,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
-                    StatusCode = System.Net.HttpStatusCode.OK,
+                    StatusCode = HttpStatusCode.OK,
 
                     RequestMessage = new HttpRequestMessage()
                     {
@@ -988,10 +988,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             switch (batchType)
             {
-                case Batch.BesUpdateZipBatch:
+                case Batch.BESSUpdateZipBatch:
                     type = BessType.UPDATE.ToString();
                     break;
-                case Batch.BesChangeZipBatch:
+                case Batch.BESSChangeZipBatch:
                     type = BessType.CHANGE.ToString();
                     break;
                 default:
@@ -1021,9 +1021,9 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         [Test]
-        [TestCase(Batch.BesBaseZipBatch)]
-        [TestCase(Batch.BesUpdateZipBatch)]
-        [TestCase(Batch.BesChangeZipBatch)]
+        [TestCase(Batch.BESSBaseZipBatch)]
+        [TestCase(Batch.BESSUpdateZipBatch)]
+        [TestCase(Batch.BESSChangeZipBatch)]
         public async Task WhenInvalidRequestToCreateBatchForBessIsSent_ThenThrowsException(Batch batchType)
         {
             _fakeconfiguration["IsFTRunning"] = "true";
@@ -1043,10 +1043,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             switch (batchType)
             {
-                case Batch.BesUpdateZipBatch:
+                case Batch.BESSUpdateZipBatch:
                     type = BessType.UPDATE.ToString();
                     break;
-                case Batch.BesChangeZipBatch:
+                case Batch.BESSChangeZipBatch:
                     type = BessType.CHANGE.ToString();
                     break;
                 default:
