@@ -388,7 +388,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return fileDetails;
         }
 
-        public async Task<string> SearchReadMeFilePathAsync(string batchId, string correlationId, string readMeSearchFilter)
+        public async Task<string> SearchReadMeFilePathAsync(string correlationId, string readMeSearchFilter)
         {
             var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
             var uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch?$filter={readMeSearchFilter}";
@@ -406,19 +406,19 @@ namespace UKHO.PeriodicOutputService.Common.Services
                         return batchResult.Files.FirstOrDefault().Links.Get.Href; ;
                     }
 
-                    _logger.LogError(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId(), "Error in file share service while searching readme.txt file, multiple files are found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
+                    _logger.LogError(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId(), "Error in file share service while searching readme.txt file, multiple files are found for _X-Correlation-ID:{CorrelationId}", correlationId);
                     throw new FulfilmentException(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId());
                 }
 
-                _logger.LogError(EventIds.ReadMeTextFileNotFound.ToEventId(), "Error in file share service while searching readme.txt file not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}", batchId, correlationId);
+                _logger.LogError(EventIds.ReadMeTextFileNotFound.ToEventId(), "Error in file share service while searching readme.txt file not found for _X-Correlation-ID:{CorrelationId}", correlationId);
                 throw new FulfilmentException(EventIds.ReadMeTextFileNotFound.ToEventId());
             }
 
-            _logger.LogError(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId(), "Error in file share service while searching readme.txt file with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", httpResponse.RequestMessage.RequestUri, httpResponse.StatusCode, batchId, correlationId);
+            _logger.LogError(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId(), "Error in file share service while searching readme.txt file with uri {RequestUri} responded with {StatusCode} for _X-Correlation-ID:{CorrelationId}", httpResponse.RequestMessage.RequestUri, httpResponse.StatusCode, correlationId);
             throw new FulfilmentException(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
         }
 
-        public async Task<bool> DownloadReadMeFileAsync(string readMeFilePath, string batchId, string exchangeSetRootPath, string correlationId)
+        public async Task<bool> DownloadReadMeFileAsync(string readMeFilePath, string exchangeSetRootPath, string correlationId)
         {
             var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
             string fileName = _fssApiConfiguration.Value.ReadMeFileName;
@@ -434,12 +434,12 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 await using Stream stream = await httpReadMeFileResponse.Content.ReadAsStreamAsync();
                 if (serverValue == ServerHeaderValue)
                 {
-                    _logger.LogInformation(EventIds.DownloadReadmeFile307RedirectResponse.ToEventId(), "File share service download readme.txt file redirected with uri:{requestUri} responded with 307 code for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", requestUri, batchId, correlationId);
+                    _logger.LogInformation(EventIds.DownloadReadmeFile307RedirectResponse.ToEventId(), "File share service download readme.txt file redirected with uri:{requestUri} responded with 307 code for _X-Correlation-ID:{CorrelationId}", requestUri, correlationId);
                 }
                 return _fileSystemHelper.DownloadReadmeFile(filePath, stream);
             }
 
-            _logger.LogError(EventIds.DownloadReadMeFileNonOkResponse.ToEventId(), "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}", requestUri, httpReadMeFileResponse.StatusCode, batchId, correlationId);
+            _logger.LogError(EventIds.DownloadReadMeFileNonOkResponse.ToEventId(), "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and _X-Correlation-ID:{CorrelationId}", requestUri, httpReadMeFileResponse.StatusCode, correlationId);
             throw new FulfilmentException(EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
         }
 
@@ -552,7 +552,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         //Private Methods
         [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType, ConfigQueueMessage configQueueMessage)
-        {            
+        {
             List<KeyValuePair<string, string>> batchAttributes = new();
 
             foreach (Tag tag in configQueueMessage.Tags)

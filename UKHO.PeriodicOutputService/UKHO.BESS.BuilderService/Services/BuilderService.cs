@@ -47,7 +47,7 @@ namespace UKHO.BESS.BuilderService.Services
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
         private const string PERMITTEXTFILE = "Permit.txt";
         private const string PERMITXMLFILE = "Permit.xml";
-        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";        
+        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
         private const string DEFAULTMIMETYPE = "application/octet-stream";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption)
@@ -482,7 +482,7 @@ namespace UKHO.BESS.BuilderService.Services
             }
             else
             {
-                await DownloadReadMeFileAsync(batchId, exchangeSetRootPath, correlationId, readMeSearchFilter);
+                await DownloadReadMeFileAsync(exchangeSetRootPath, correlationId, readMeSearchFilter);
             }
         }
 
@@ -494,22 +494,22 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="correlationId"></param>
         /// <param name="readMeSearchFilter"></param>
         /// <returns></returns>
-        private async Task<bool> DownloadReadMeFileAsync(string batchId, string exchangeSetRootPath, string correlationId, string readMeSearchFilter)
+        private async Task<bool> DownloadReadMeFileAsync(string exchangeSetRootPath, string correlationId, string readMeSearchFilter)
         {
             bool isDownloadReadMeFileSuccess = false;
             string readMeFilePath = await logger.LogStartEndAndElapsedTimeAsync(EventIds.QueryFileShareServiceReadMeFileRequestStart,
                   EventIds.QueryFileShareServiceReadMeFileRequestCompleted,
-                  "File share service search query request for readme.txt file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
-                  async () => await fssService.SearchReadMeFilePathAsync(batchId, correlationId, readMeSearchFilter),
-               batchId, correlationId);
+                  "File share service search query request for readme.txt file for _X-Correlation-ID:{CorrelationId}",
+                  async () => await fssService.SearchReadMeFilePathAsync(correlationId, readMeSearchFilter),
+               correlationId);
 
             if (!string.IsNullOrWhiteSpace(readMeFilePath))
             {
                 isDownloadReadMeFileSuccess = await logger.LogStartEndAndElapsedTimeAsync(EventIds.DownloadReadMeFileRequestStart,
                    EventIds.DownloadReadMeFileRequestCompleted,
-                   "File share service download request for readme.txt file for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}",
-                   async () => await fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, correlationId),
-                batchId, correlationId);
+                   "File share service download request for readme.txt file for _X-Correlation-ID:{CorrelationId}",
+                   async () => await fssService.DownloadReadMeFileAsync(readMeFilePath, exchangeSetRootPath, correlationId),
+                   correlationId);
             }
 
             return isDownloadReadMeFileSuccess;
@@ -579,11 +579,11 @@ namespace UKHO.BESS.BuilderService.Services
         [ExcludeFromCodeCoverage]
         private async Task<bool> IsBatchCreatedForMock(ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
         {
-            bool isBatchCreated;            
+            bool isBatchCreated;
             var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
-                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(),
-                configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+            var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(),
+            configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
 
             var product = productVersions.Any(x => x.EditionNumber > 0);
             if (product)
