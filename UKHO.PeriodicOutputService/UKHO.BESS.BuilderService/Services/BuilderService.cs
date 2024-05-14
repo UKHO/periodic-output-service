@@ -36,19 +36,14 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IPermitDecryption permitDecryption;
 
         private readonly string homeDirectoryPath;
-        private readonly Dictionary<string, string> mimeTypes = new()
-        {
-            { ".zip", "application/zip" },
-            { ".xml", "text/xml" },
-            { ".csv", "text/csv" },
-            { ".txt", "text/plain" }
-        };
 
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
         private const string PERMITTEXTFILE = "Permit.txt";
         private const string PERMITXMLFILE = "Permit.xml";
         private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";        
         private const string DEFAULTMIMETYPE = "application/octet-stream";
+        private const string BESSFolderName = "BESSFolderName";
+        private const string HOME = "HOME";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption)
         {
@@ -62,7 +57,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
 
-            homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BESSFolderName"]!);
+            homeDirectoryPath = Path.Combine(configuration[HOME]!, configuration[BESSFolderName]!);
         }
 
         /// <summary>
@@ -90,14 +85,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                List<ProductKeyServiceRequest> productKeyServiceRequest = new();
-
-                productKeyServiceRequest.AddRange(latestProductVersions.ProductVersions.Select(
-                    item => new ProductKeyServiceRequest()
-                    {
-                        ProductName = item.ProductName,
-                        Edition = item.EditionNumber.ToString()
-                    }));
+                List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
 
                 List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
 
@@ -339,7 +327,7 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
 
-                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
+                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, CommonHelper.MimeTypeList().ContainsKey(fileInfo.Extension.ToLower()) ? CommonHelper.MimeTypeList()[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
                 if (isFileAdded)
                 {
                     List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
@@ -650,6 +638,20 @@ namespace UKHO.BESS.BuilderService.Services
                 fileInfo.MoveTo(Path.Combine(downloadPath, file.FileName));
 
             }
+        }
+
+        [ExcludeFromCodeCoverage]
+        private static List<ProductKeyServiceRequest> ProductKeyServiceRequest(ProductVersionsRequest latestProductVersions)
+        {
+            List<ProductKeyServiceRequest> productKeyServiceRequest = new();
+
+            productKeyServiceRequest.AddRange(latestProductVersions.ProductVersions.Select(
+                item => new ProductKeyServiceRequest
+                {
+                    ProductName = item.ProductName,
+                    Edition = item.EditionNumber.ToString()
+                }));
+            return productKeyServiceRequest;
         }
     }
 }
