@@ -1,4 +1,4 @@
-﻿using UKHO.PeriodicOutputService.Common.Models.Bess;
+﻿using UKHO.PeriodicOutputService.Common.Models.Pks;
 
 namespace UKHO.PeriodicOutputService.Common.Services
 {

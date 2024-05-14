@@ -106,17 +106,19 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         [Test]
         public void WhenAValidConfigIsFound_ThenConfigIsAddedToListAndProcessedFurther()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigFilesJson());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigFilesJson());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
 
-            configurationService.ProcessConfigsAsync();
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -131,28 +133,30 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
         }
 
         [Test]
         public void WhenAValidConfigWithValidMacroIsFound_ThenConfigIsFurtherProcessed()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithValidMacroJson));
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithValidMacroJson));
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Returns("2024");
 
-            configurationService.ProcessConfigsAsync();
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -167,28 +171,30 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
         }
 
         [Test]
         public void WhenAValidConfigWithInvalidOrUnavailableMacroIsFound_ThenConfigIsNotFurtherProcessed()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithInvalidMacroJson));
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithInvalidMacroJson));
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Returns("$(now.Yea)");
 
-            configurationService.ProcessConfigsAsync();
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -210,7 +216,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
 
@@ -218,23 +224,25 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenValueOfKeyInTagsIsNullOrEmpty_ThenThrowsValidationError()
         {
             var validationMessage = new ValidationFailure("Tags", "Key or Value not provided");
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithNullMacroValueJson));
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithNullMacroValueJson));
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure> { validationMessage }));
 
-            configurationService.ProcessConfigsAsync();
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidAttributes.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -249,7 +257,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
 
@@ -257,23 +265,25 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenKeyInTagsIsNullOrEmpty_ThenThrowValidationError()
         {
             var validationMessage = new ValidationFailure("Tags", "Key or Value not provided");
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithEmptyOrNullKeyInTagsJson));
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithEmptyOrNullKeyInTagsJson));
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure> { validationMessage }));
 
-            configurationService.ProcessConfigsAsync();
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidAttributes.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -288,25 +298,25 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
-        public void WhenAValidConfigWithValidMacroIsNotTransformed_ThenTransformMacrosThrowsException()
+        public async Task WhenAValidConfigWithValidMacroIsNotTransformed_ThenTransformMacrosThrowsException()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithValidMacroJson));
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithValidMacroJson));
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
             A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Throws<Exception>();
 
-            configurationService.ProcessConfigsAsync();
+            Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.MacroTransformationFailed.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -315,37 +325,24 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   && call.GetArgument<EventId>(1) == EventIds.MacroTransformationFailed.ToEventId()
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Exception occurred while transforming macros {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
-                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(fakeLogger).Where(call =>
-                  call.Method.Name == "Log"
-                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
-                  ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void WhenMoreThanOneValidConfigIsFound_ThenConfigsAreAddedToList()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetMoreThanOneValidConfigFilesJson());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetMoreThanOneValidConfigFilesJson());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
 
-            configurationService.ProcessConfigsAsync();
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -360,192 +357,206 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
         }
 
         [Test]
         public void WhenEmptyConfigIsFound_ThenThrowsError()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetEmptyConfigJson());
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
-            configurationService.ProcessConfigsAsync();
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetEmptyConfigJson());
+
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigParsingError.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing Bess config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing BESS config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void WhenConfigWithJsonErrorIsFound_ThenThrowsError()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigWithJsonError());
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
-            configurationService.ProcessConfigsAsync();
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetConfigWithJsonError());
+
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigParsingError.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing Bess config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing BESS config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void WhenInvalidEncCellNameIsFound_ThenThrowsError()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetInvalidEncCellNameJson());
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetInvalidEncCellNameJson());
 
-            configurationService.ProcessConfigsAsync();
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigParsingError.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing Bess config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while parsing BESS config file : {fileName}. It might have missing or extra commas, missing brackets, or other syntax errors.| Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void WhenUndefinedValuesFoundInConfig_ThenConfigIsNotAddedToList()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetUndefinedValuesConfigJson());
-            A.CallTo(() => fakeSalesCatalogueService.GetSalesCatalogueData()).Returns(GetSalesCatalogueDataResponse());
-            configurationService.ProcessConfigsAsync();
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetUndefinedValuesConfigJson());
+
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                  call.Method.Name == "Log"
                  && call.GetArgument<LogLevel>(0) == LogLevel.Warning
                  && call.GetArgument<EventId>(1) == EventIds.BessConfigValueNotDefined.ToEventId()
-                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess config file : {fileName} contains undefined values. | _X-Correlation-ID : {CorrelationId}"
+                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS config file : {fileName} contains undefined values. | _X-Correlation-ID : {CorrelationId}"
                  ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
-        public void WhenGetConfigsInContainerMethodSendNull_ThenThrowsException()
+        public async Task WhenGetConfigsInContainerAsyncMethodSendNull_ThenThrowsException()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Throws<Exception>();
-            configurationService.Invoking(x => x.ProcessConfigsAsync()).Should().ThrowExactlyAsync<Exception>();
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Throws<Exception>();
+
+            Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
+            await act.Should().ThrowAsync<Exception>();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingFailed.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing failed with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing failed with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void WhenContainerHasNoConfigs_ThenConfigIsNotAddedToList()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(new Dictionary<string, string>());
-            configurationService.ProcessConfigsAsync();
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(new Dictionary<string, string>());
+
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs not found");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
                   ).MustNotHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Warning
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsNotFound.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs not found | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs not found | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Information
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
                   ).MustNotHaveHappened();
         }
 
         [Test]
         public void WhenDuplicateConfigIsFound_ThenThrowsError()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetDuplicateConfigJson());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetDuplicateConfigJson());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
 
-            configurationService.ProcessConfigsAsync();
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Warning
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigsDuplicateRecordsFound.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess config file : {fileName} found with duplicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS config file : {fileName} found with duplicate Name attribute : {name} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -560,7 +571,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
@@ -568,32 +579,35 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public void WhenIncorrectExchangeSetStandardIsFound_ThenThrowsValidationError()
         {
             var validationMessage = new ValidationFailure("ExchangeSetStandard", "Attribute value is invalid. Expected value is either s63 or s57");
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure> { validationMessage }));
 
-            configurationService.ProcessConfigsAsync();
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
                   && call.GetArgument<LogLevel>(0) == LogLevel.Error
                   && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidAttributes.ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Bess Config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS config file : {fileName} found with Validation errors. {errors} | _X-Correlation-ID : {CorrelationId}"
                   ).MustHaveHappened();
         }
 
         [Test]
-        public void WhenInvalidConfigValidating_ThenValidationThrowsException()
+        public async Task WhenInvalidConfigValidating_ThenValidationThrowsException()
         {
-            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainer()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Throws<Exception>();
 
-            configurationService.ProcessConfigsAsync();
+            Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessConfigValidationError.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Error
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationError.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while validating Bess config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error occurred while validating BESS config file : {fileName} | Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
         }
 
@@ -641,23 +655,24 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessful_ThenReturnsTrue()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncIsSuccessful_ThenReturnsTrue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
             result.Should().BeTrue();
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsThrowsException_ThenReturnsFalse()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncThrowsException_ThenReturnsFalse()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Throws<Exception>();
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Throws<Exception>();
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            Func<Task> act = async () => { await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse()); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessConfigFrequencyProcessingException.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -665,26 +680,24 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigFrequencyProcessingException.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Exception occurred while processing Bess config {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
+                "Exception occurred while processing BESS config {DateTime} | {ErrorMessage} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
-
-            result.Should().BeFalse();
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsReturnsTrueAndScheduleDetailsAddedToQueue_ThenLogWithMessagAdded()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncReturnsTrueAndScheduleDetailsAddedToQueue_ThenLogWithMessagAdded()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
             A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
 
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(true);
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored))
                 .MustHaveHappened();
@@ -700,26 +713,26 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsReturnsFalseAndScheduleDetailsAddedToQueue_ThenLogWithMessageNotAdded()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncReturnsFalseAndScheduleDetailsAddedToQueue_ThenLogWithMessageNotAdded()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
             A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
 
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(false);
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail(A<string>.Ignored))
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Warning
                 && call.GetArgument<EventId>(1) == EventIds.BessQueueMessageFailed.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Something went wrong while adding message to queue, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Something went wrong while adding message to queue, Bespoke Exchange Set will not be created for file : {FileName} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             result.Should().BeTrue();
@@ -728,7 +741,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         [Test]
         public async Task WhenCheckConfigFrequencyAndFileSizeIsGreater_ThenMessageNotAddedToQueue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
             A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
 
             var fakeScsList = GetEmptySalesCatalogueDataProductResponses();
@@ -753,7 +766,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 ProductName = "1U320240"
             });
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), fakeScsList);
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), fakeScsList);
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -761,7 +774,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<EventId>(1) == EventIds.BessSizeExceedsThreshold.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
+                "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file : {FileName} | " + "_X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<IEnumerable<string>>.Ignored, A<int>.Ignored)).MustNotHaveHappened();
 
@@ -769,14 +782,14 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsNotAddedToQueue_ThenReturnsTrue()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncIsSuccessfulAndScheduleDetailsNotAddedToQueue_ThenReturnsTrue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueue());
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, false)).MustHaveHappenedOnceOrMore();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, false)).MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored))
                 .MustNotHaveHappened();
@@ -785,38 +798,40 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScheduleDetailsNotAddedToQueueSameDay_ThenReturnsTrue()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncIsSuccessfulAndScheduleDetailsNotAddedToQueueSameDay_ThenReturnsTrue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueueOnSameDay());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsNotToAddInQueueOnSameDay());
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingNotEnabled(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSettingNotEnabled(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
             result.Should().BeTrue();
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndWhenNextScheduleDetailsIsNull_ThenReturnsTrue()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncIsSuccessfulAndWhenNextScheduleDetailsIsNull_ThenReturnsTrue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1"))!.Returns(null);
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1"))!.Returns(Task.FromResult<ScheduleDetailEntity>(null));
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
             result.Should().BeTrue();
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndConfigurationSettingsHasInvalidCell_ThenLogDetails()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncIsSuccessfulAndConfigurationSettingsHasInvalidCell_ThenLogDetails()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
             A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingWithInvalidEncCell(), GetFakeSalesCatalogueDataProductResponse());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSettingWithInvalidEncCell(), GetFakeSalesCatalogueDataProductResponse());
+
+            result.Should().BeTrue();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -824,7 +839,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigFrequencyElapsed.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}"
+                "BESS Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -835,20 +850,18 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     "{OriginalFormat}"].ToString() == "Invalid pattern or ENC cell names found : {InvalidEncCellName} | AIO cells to be excluded : {AIOCellName} | _X-Correlation-ID : {CorrelationId}").MustHaveHappened();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
-
-            result.Should().BeTrue();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
         }
 
         [Test]
         public async Task WhenConfigurationSettingsHasInvalidCellAndInvalidPattern_ThenScheduleDetailsNotAddedToQueue()
         {
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSettingWithInvalidEncCellAndInvalidPattern(), GetEmptySalesCatalogueDataProductResponses());
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSettingWithInvalidEncCellAndInvalidPattern(), GetEmptySalesCatalogueDataProductResponses());
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -863,11 +876,11 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsIsSuccessfulAndScsResponseDataHasAioCell_ThenRemoveAioCell()
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncIsSuccessfulAndScsResponseDataHasAioCell_ThenRemoveAioCell()
         {
             fakeConfiguration["AioCells"] = "GB800001";
 
-            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetail("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
             A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
 
             var salesCatalogueDataProductResponse = GetFakeSalesCatalogueDataProductResponse();
@@ -892,7 +905,9 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 ProductName = fakeConfiguration["AioCells"]!
             });
 
-            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetails(GetFakeConfigurationSetting(), salesCatalogueDataProductResponse);
+            bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), salesCatalogueDataProductResponse);
+
+            result.Should().BeTrue();
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -900,13 +915,52 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<EventId>(1) == EventIds.BessConfigFrequencyElapsed.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Bess Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}"
+                "BESS Config Name: {Name} with CRON ({Frequency}), Schedule At : {ScheduleTime}, Executed At : {Timestamp} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
             A.CallTo(() =>
-                fakeAzureTableStorageHelper.UpsertScheduleDetail(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
+        }
 
-            result.Should().BeTrue();
+        [Test]
+        public void WhenValueOfIsEnabledIsNullOrEmpty_ThenThrowsValidationError()
+        {
+            var validationMessage = new ValidationFailure("IsEnabled", "Attribute is missing or value is not provided");
+            A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithNullMacroValueJson));
+            A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure> { validationMessage }));
+
+            var result = configurationService.ProcessConfigsAsync();
+
+            result.Result.Should().Be("BESS configs processing completed");
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingStarted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing started, Total configs file count : {count}  | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Warning
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigInvalidAttributes.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS config file : {fileName} will be skipped for exchange set creation since the attribute value for IsEnabled is not Yes | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessConfigValidationSummary.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() ==
+                "Configs validation summary, total configs : {totalConfigCount} | valid configs : {validFileCount} | configs with missing attributes or values : {invalidFileCount} | configs with json error : {filesWithJsonErrorCount} | configs with duplicate name attribute : {configsWithDuplicateNameAttributeCount} | configs with invalid macros {configsWithInvalidMacros} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.BessConfigsProcessingCompleted.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS configs processing completed | _X-Correlation-ID : {CorrelationId}"
+                  ).MustHaveHappenedOnceExactly();
         }
 
         private ScheduleDetailEntity GetFakeScheduleDetailsToAddInQueue()

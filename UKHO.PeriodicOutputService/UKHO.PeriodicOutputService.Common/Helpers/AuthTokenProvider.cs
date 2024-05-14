@@ -4,7 +4,6 @@ using Azure.Identity;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Identity.Client;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -68,47 +67,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             };
         }
 
-        public async Task<string> GetManagedIdentityAuthForPksAsync(string resource)
-        {
-            _logger.LogInformation(EventIds.GetAccessTokenStarted.ToEventId(), "Getting access token to call external endpoint started | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-            AccessTokenItem? accessToken = GetAuthTokenFromCache(resource);
-
-            if (accessToken != null && accessToken.AccessToken != null && accessToken.ExpiresIn > DateTime.UtcNow)
-            {
-                _logger.LogInformation(EventIds.CachedAccessTokenFound.ToEventId(), "Valid access token found in cache to call external endpoint | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                return accessToken.AccessToken;
-            }
-
-            AccessTokenItem? newAccessToken = await GetNewAuthTokenForPks(resource);
-            AddAuthTokenToCache(resource, newAccessToken);
-
-            _logger.LogInformation(EventIds.GetAccessTokenCompleted.ToEventId(), "Getting access token to call external endpoint completed | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-            return newAccessToken.AccessToken;
-        }
-
-        private async Task<AccessTokenItem> GetNewAuthTokenForPks(string resource)
-        {
-            _logger.LogInformation(EventIds.GetNewAccessTokenStarted.ToEventId(), "Generating new access token to call external endpoint started | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-            IConfidentialClientApplication confidentialClientApplication = ConfidentialClientApplicationBuilder.Create(resource)
-                .WithClientSecret(_pksApiConfiguration.ClientSecret)
-                .WithAuthority($"{_pksApiConfiguration.MicrosoftOnlineLoginUrl}{_pksApiConfiguration.TenantId}{AccessTokenUrl}")
-                .Build();
-
-            string[] scopes = { _pksApiConfiguration.Scope + "/.default" };
-
-            AuthenticationResult accessToken = await confidentialClientApplication.AcquireTokenForClient(scopes).ExecuteAsync();
-
-            _logger.LogInformation(EventIds.GetNewAccessTokenCompleted.ToEventId(), "New access token to call external endpoint generated successfully | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-
-            return new AccessTokenItem
-            {
-                ExpiresIn = accessToken.ExpiresOn.UtcDateTime,
-                AccessToken = accessToken.AccessToken
-            };
-        }
-
         private void AddAuthTokenToCache(string key, AccessTokenItem accessTokenItem)
         {
             _logger.LogInformation(EventIds.CachingExternalEndPointTokenStarted.ToEventId(), "Adding new access token in cache to call external endpoint | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
@@ -124,6 +82,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
             _logger.LogInformation(EventIds.CachingExternalEndPointTokenCompleted.ToEventId(), "New token is added in cache to call external endpoint and it expires in {ExpiresIn} with sliding expiration duration {options}.", Convert.ToString(accessTokenItem.ExpiresIn), JsonConvert.SerializeObject(options));
         }
+
         private AccessTokenItem GetAuthTokenFromCache(string key)
         {
             string? item;

@@ -16,6 +16,7 @@ using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.PermitDecryption;
 using UKHO.PeriodicOutputService.Common.Services;
 using UKHO.PeriodicOutputService.Common.Utilities;
 
@@ -130,6 +131,8 @@ namespace UKHO.BESS.BuilderService
                      serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
                      serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
                      serviceCollection.Configure<PksApiConfiguration>(configuration.GetSection("PksApiConfiguration"));
+                     serviceCollection.Configure<PermitConfiguration>(configuration.GetSection("PermitConfiguration"));
+
                      configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
                  }
 
@@ -168,6 +171,8 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddScoped<IZipHelper, ZipHelper>();
                  serviceCollection.AddScoped<IFileUtility, FileUtility>();
                  serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
+                 serviceCollection.AddScoped<IPermitDecryption, PermitDecryption>();
+                 serviceCollection.AddScoped<IS63Crypt, S63Crypt>();
 
                  serviceCollection.AddTransient<IPksApiClient, PksApiClient>();
                  serviceCollection.AddSingleton<IAuthPksTokenProvider, AuthTokenProvider>();
@@ -177,7 +182,7 @@ namespace UKHO.BESS.BuilderService
                          httpClient => httpClient.BaseAddress = new Uri(fssApiConfiguration.BaseUrl))
                      .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
                      {
-                         AllowAutoRedirect = true
+                         AllowAutoRedirect = false
                      }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
              })
               .ConfigureWebJobs(b =>

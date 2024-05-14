@@ -14,8 +14,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to set the test scenario.
         /// </summary>
-        /// <param name="baseUrl"></param>
-        /// <param name="configurationOption"></param>
+        /// <param name="baseUrl">Sets the ConfigureFm baseUrl</param>
+        /// <param name="configurationOption">Sets the value for configuring FT</param>
         /// <returns></returns>
         public static HttpResponseMessage ConfigureFt(string? baseUrl, string? configurationOption)
         {
@@ -28,7 +28,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to delete the temp folder.
         /// </summary>
-        /// <param name="tempFolder"></param>
+        /// <param name="tempFolder">Sets the temp folder path to download and check the Exchange Sets and contents</param>
         public static void DeleteTempDirectory(string? tempFolder)
         {
             string path = Path.GetTempPath() + tempFolder;
@@ -51,9 +51,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This Method is use to delete bessproductversiondetails azure table entries.
         /// </summary>
-        /// <param name="connectionString">Sets the connection string</param>
-        /// <param name="tableName">Sets the Azure table name</param>
-        /// <param name="products">Sets the products</param>
+        /// <param name="connectionString">Sets the connectionString of the storage account</param>
+        /// <param name="tableName">Sets the name of the table from which entries is to be removed</param>
+        /// <param name="products">Sets the products for which entry is to be deleted</param>        
         public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products)
         {
             TableClient tableClient = new(connectionString, tableName);
@@ -70,10 +70,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is use to add the queue message.
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="exchangeSetStandard"></param>
-        /// <param name="webjobConnectionString"></param>
-        /// <param name="queueName"></param>
+        /// <param name="type">Sets the type in the queueMessage as per the config</param>
+        /// <param name="exchangeSetStandard">Sets the value as s63 or s57 of the exchangeSetStandard as per config</param>
+        /// <param name="webjobConnectionString">Sets the connectionString of the webJob</param>
+        /// <param name="queueName">Sets the name of the table for queue</param>
         public static void AddQueueMessage(string type, string? exchangeSetStandard, string? webjobConnectionString, string? queueName)
         {
             var queueMessage = JsonConvert.DeserializeObject<ConfigQueueMessage>(File.ReadAllText("./TestData/BSQueueMessage.txt"));
@@ -89,14 +89,12 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is use to clean the POS folder.
         /// </summary>
-        /// <param name="baseUrl"></param>
+        /// <param name="baseUrl">Sets the baseUrl for cleanUp</param>
         /// <returns></returns>
         public static HttpResponseMessage Cleanup(string? baseUrl)
         {
             string uri = $"{baseUrl}/cleanUp";
-
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
-
             return httpClient.Send(httpRequestMessage, CancellationToken.None);
         }
 
