@@ -4,5 +4,6 @@
     {
         public string BaseUrl { get; set; }
         public string ClientId { get; set; }
+        public string PermitDecryptionHardwareId { get; set; } = string.Empty;
     }
 }

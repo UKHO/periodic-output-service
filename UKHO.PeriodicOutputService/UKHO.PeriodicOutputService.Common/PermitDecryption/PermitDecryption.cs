@@ -11,13 +11,13 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
     public class PermitDecryption : IPermitDecryption
     {
         private readonly ILogger<PermitDecryption> logger;
-        private readonly IOptions<PermitConfiguration> permitConfiguration;
+        private readonly IOptions<PksApiConfiguration> pksApiConfiguration;
         private readonly IS63Crypt s63Crypt;
 
-        public PermitDecryption(ILogger<PermitDecryption> logger, IOptions<PermitConfiguration> permitConfiguration, IS63Crypt s63Crypt)
+        public PermitDecryption(ILogger<PermitDecryption> logger, IOptions<PksApiConfiguration> pksApiConfiguration, IS63Crypt s63Crypt)
         {
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            this.permitConfiguration = permitConfiguration ?? throw new ArgumentNullException(nameof(permitConfiguration));
+            this.pksApiConfiguration = pksApiConfiguration ?? throw new ArgumentNullException(nameof(pksApiConfiguration));
             this.s63Crypt = s63Crypt ?? throw new ArgumentNullException(nameof(s63Crypt));
         }
 
@@ -51,7 +51,7 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 
         private byte[] GetHardwareIds()
         {
-            var permitHardwareIds = permitConfiguration.Value.PermitDecryptionHardwareId.Split(',').ToList();
+            var permitHardwareIds = pksApiConfiguration.Value.PermitDecryptionHardwareId.Split(',').ToList();
             int i = 0;
             byte[] hardwareIds = new byte[6];
             foreach (string? hardwareId in permitHardwareIds)
