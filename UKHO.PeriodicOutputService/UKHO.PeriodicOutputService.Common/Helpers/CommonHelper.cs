@@ -71,5 +71,17 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             double byteSize = 1024f;
             return (bytes / byteSize) / byteSize;
         }
+
+        public static Dictionary<string, string> MimeTypeList()
+        {
+            Dictionary<string, string> mimeTypes = new()
+            {
+                { ".zip", "application/zip" },
+                { ".xml", "text/xml" },
+                { ".csv", "text/csv" },
+                { ".txt", "text/plain" }
+            };
+            return mimeTypes;
+        }
     }
 }
