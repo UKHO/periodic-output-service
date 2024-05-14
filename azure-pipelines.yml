@@ -515,7 +515,7 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PermitConfiguration.PermitDecryptionHardwareId"
+      - name: "PKSApiConfiguration.PermitDecryptionHardwareId"
         value: $(PermitDecryptionHardwareId)
 
     jobs:
@@ -997,7 +997,7 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PermitConfiguration.PermitDecryptionHardwareId"
+      - name: "PKSApiConfiguration.PermitDecryptionHardwareId"
         value: $(PermitDecryptionHardwareId)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     jobs:
@@ -1129,7 +1129,7 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PermitConfiguration.PermitDecryptionHardwareId"
+      - name: "PKSApiConfiguration.PermitDecryptionHardwareId"
         value: $(PermitDecryptionHardwareId)
     jobs:
       - deployment: vNextIATDeployApp
@@ -1239,7 +1239,7 @@ stages:
         value: $(ElasticAPM.ServerURL)
       - name: "ElasticAPM_ApiKey"
         value: $(ElasticAPM.ApiKey)
-      - name: "PermitConfiguration.PermitDecryptionHardwareId"
+      - name: "PKSApiConfiguration.PermitDecryptionHardwareId"
         value: $(PermitDecryptionHardwareId)
     jobs:
       - deployment: vNextE2EDeployApp

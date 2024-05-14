@@ -131,7 +131,6 @@ namespace UKHO.BESS.BuilderService
                      serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
                      serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
                      serviceCollection.Configure<PksApiConfiguration>(configuration.GetSection("PksApiConfiguration"));
-                     serviceCollection.Configure<PermitConfiguration>(configuration.GetSection("PermitConfiguration"));
 
                      configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
                  }
