@@ -34,15 +34,14 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IOptions<FssApiConfiguration> fssApiConfig;
         private readonly IPksService pksService;
         private readonly IPermitDecryption permitDecryption;
-
         private readonly string homeDirectoryPath;
 
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
         private const string PERMITTEXTFILE = "Permit.txt";
         private const string PERMITXMLFILE = "Permit.xml";
-        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";        
+        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
         private const string DEFAULTMIMETYPE = "application/octet-stream";
-        private const string BESSFolderName = "BESSFolderName";
+        private const string BESSFOLDERNAME = "BESSFolderName";
         private const string HOME = "HOME";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption)
@@ -57,7 +56,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
 
-            homeDirectoryPath = Path.Combine(configuration[HOME]!, configuration[BESSFolderName]!);
+            homeDirectoryPath = Path.Combine(configuration[HOME]!, configuration[BESSFOLDERNAME]!);
         }
 
         /// <summary>
@@ -81,16 +80,9 @@ namespace UKHO.BESS.BuilderService.Services
 
             await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
 
-            ProductVersionsRequest? latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray(), bessZipFileName);
+            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray(), bessZipFileName);
 
-            if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
-            {
-                List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
-
-                List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
-
-                CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse);
-            }
+            await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
 
             CreateZipFile(essFiles, essFileDownloadPath);
 
@@ -98,11 +90,27 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
             }
-            if (!CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result)
-                return false;
 
+            if (!CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result)
+            {
+                return false;
+            }
+
+            await SaveLatestProductVersionDetailsAsync(configQueueMessage, latestProductVersions);
+
+            return true;
+        }
+
+        /// <summary>
+        /// This method will add/update entry of the product version details in azure table
+        /// </summary>
+        /// <param name="configQueueMessage"></param>
+        /// <param name="latestProductVersions"></param>
+        /// <returns></returns>
+        private async Task SaveLatestProductVersionDetailsAsync(ConfigQueueMessage configQueueMessage, ProductVersionsRequest latestProductVersions)
+        {
             if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
-                     configQueueMessage.Type == BessType.CHANGE.ToString())
+                                 configQueueMessage.Type == BessType.CHANGE.ToString())
             {
                 if (latestProductVersions.ProductVersions.Count > 0)
                 {
@@ -113,8 +121,25 @@ namespace UKHO.BESS.BuilderService.Services
                     logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
                 }
             }
+        }
 
-            return true;
+        /// <summary>
+        /// This method will request CellKeys from ProductKeyService.
+        /// </summary>
+        /// <param name="configQueueMessage"></param>
+        /// <param name="essFileDownloadPath"></param>
+        /// <param name="latestProductVersions"></param>
+        /// <returns></returns>
+        private async Task RequestCellKeysFromPksAsync(ConfigQueueMessage configQueueMessage, string essFileDownloadPath, ProductVersionsRequest latestProductVersions)
+        {
+            if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
+
+                List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
+
+                CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse);
+            }
         }
 
         /// <summary>
@@ -134,7 +159,7 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
-                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(), configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
 
                 exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest
                 {
@@ -274,7 +299,6 @@ namespace UKHO.BESS.BuilderService.Services
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
         {
             bool isCommitted;
-            string bessBatchId;
             Batch batchType = Batch.BessBaseZipBatch;
 
             try
@@ -295,13 +319,13 @@ namespace UKHO.BESS.BuilderService.Services
                     batchType = Batch.BessEmptyBatch;
                 }
 
-                bessBatchId = await fssService.CreateBatch(batchType, configQueueMessage);
+                string bessBatchId = await fssService.CreateBatch(batchType, configQueueMessage);
 
-                IEnumerable<string> filePath = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                var filePaths = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
 
-                UploadBatchFiles(filePath, bessBatchId, batchType);
+                UploadBatchFiles(filePaths, bessBatchId, batchType);
 
-                isCommitted = await fssService.CommitBatch(bessBatchId, filePath, batchType);
+                isCommitted = await fssService.CommitBatch(bessBatchId, filePaths, batchType);
 
                 logger.LogInformation(EventIds.BessBatchCreationCompleted.ToEventId(), "BESS batch {bessBatchId} is created and added to FSS with status: {isCommitted} at {DateTime} | _X-Correlation-ID: {CorrelationId}", bessBatchId, isCommitted, DateTime.UtcNow, CommonHelper.CorrelationID);
             }
@@ -333,7 +357,7 @@ namespace UKHO.BESS.BuilderService.Services
                     List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
                     if (blockIds.Any())
                     {
-                        bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
+                        fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds);
                     }
                 }
             });
@@ -348,7 +372,7 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="exchangeSetStandard"></param>
         /// <returns></returns>
         [ExcludeFromCodeCoverage]
-        private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, string[] cellNames, string configName, string exchangeSetStandard)
+        private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, IEnumerable<string> cellNames, string configName, string exchangeSetStandard)
         {
             List<ProductVersion> productVersions = new();
 
@@ -356,7 +380,7 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 ProductVersion productVersion = new();
 
-                var result = productVersionEntities.Where(p => p.PartitionKey == configName && p.RowKey == exchangeSetStandard + "|" + cellName);
+                var result = productVersionEntities.Where(p => p.PartitionKey == configName && p.RowKey == exchangeSetStandard + "|" + cellName).ToList();
 
                 if (result.Any())
                 {
@@ -377,10 +401,11 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
-        ///     This method will return the latest edition and update number of products from directory.
+        /// This method will return the latest edition and update number of products from directory.
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="cellNames"></param>
+        /// <param name="bessZipFileName"></param>
         /// <returns></returns>
         private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName)
         {
@@ -426,11 +451,12 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
-        ///     This method will perform operations like create README.txt file, update SERIAL.ENC file and Delete PRODUCT.txt file
+        /// This method will perform operations like create README.txt file, update SERIAL.ENC file and Delete PRODUCT.txt file
         /// </summary>
         /// <param name="batchId"></param>
         /// <param name="configQueueMessage"></param>
         /// <param name="essFileDownloadPath"></param>
+        /// <param name="bessZipFileName"></param>
         /// <returns></returns>
         private async Task PerformAncillaryFilesOperationsAsync(string batchId, ConfigQueueMessage configQueueMessage, string essFileDownloadPath, string bessZipFileName)
         {
@@ -477,7 +503,6 @@ namespace UKHO.BESS.BuilderService.Services
         /// <summary>
         ///     This method will download README.txt file from FSS on ReadmeSearchFilter
         /// </summary>
-        /// <param name="batchId"></param>
         /// <param name="exchangeSetRootPath"></param>
         /// <param name="correlationId"></param>
         /// <param name="readMeSearchFilter"></param>
@@ -567,10 +592,9 @@ namespace UKHO.BESS.BuilderService.Services
         [ExcludeFromCodeCoverage]
         private async Task<bool> IsBatchCreatedForMock(ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
         {
-            bool isBatchCreated;
             var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
-            var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(),
+            var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames,
             configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
 
             var product = productVersions.Any(x => x.EditionNumber > 0);
@@ -578,7 +602,7 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 configQueueMessage.Type = "EMPTY";
             }
-            isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result;
+            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result;
 
             return isBatchCreated;
         }
@@ -605,7 +629,7 @@ namespace UKHO.BESS.BuilderService.Services
                         permitFileContent += Environment.NewLine;
                         permitFileContent += $"{rowNumber++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{Convert.ToInt16(productKeyServiceResponse.Edition) + 1},{date},{date},,2:Next";
                     }
-                };
+                }
 
                 fileSystemHelper.CreateTextFile(filePath, PERMITTEXTFILE, permitFileContent);
             }
@@ -636,7 +660,6 @@ namespace UKHO.BESS.BuilderService.Services
                     file.FileName = file.FileName.Replace(fssApiConfig.Value.BespokeExchangeSetFileFolder, bessZipFileName);
                 }
                 fileInfo.MoveTo(Path.Combine(downloadPath, file.FileName));
-
             }
         }
 
