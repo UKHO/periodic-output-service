@@ -401,9 +401,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 if (searchBatchResponse.Entries.Any())
                 {
                     var batchResult = searchBatchResponse.Entries.FirstOrDefault();
-                    if (batchResult.Files.Count() == 1 && batchResult.Files.Any(x => x.Filename.ToUpper() == _fssApiConfiguration.Value.ReadMeFileName))
+                    if (batchResult!.Files.Count() == 1 && batchResult.Files.Any(x => x.Filename.ToUpper() == _fssApiConfiguration.Value.ReadMeFileName))
                     {
-                        return batchResult.Files.FirstOrDefault().Links.Get.Href; ;
+                        return batchResult.Files.FirstOrDefault()?.Links.Get.Href; ;
                     }
 
                     _logger.LogError(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId(), "Error in file share service while searching readme.txt file, multiple files are found for _X-Correlation-ID:{CorrelationId}", correlationId);
@@ -414,7 +414,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 throw new FulfilmentException(EventIds.ReadMeTextFileNotFound.ToEventId());
             }
 
-            _logger.LogError(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId(), "Error in file share service while searching readme.txt file with uri {RequestUri} responded with {StatusCode} for _X-Correlation-ID:{CorrelationId}", httpResponse.RequestMessage.RequestUri, httpResponse.StatusCode, correlationId);
+            _logger.LogError(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId(), "Error in file share service while searching readme.txt file with uri {RequestUri} responded with {StatusCode} for _X-Correlation-ID:{CorrelationId}", httpResponse.RequestMessage?.RequestUri, httpResponse.StatusCode, correlationId);
             throw new FulfilmentException(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
         }
 
@@ -426,7 +426,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             HttpResponseMessage httpReadMeFileResponse = await _fssApiClient.DownloadFile(readMeFilePath.TrimStart('/'), accessToken);
 
-            var requestUri = new Uri(httpReadMeFileResponse.RequestMessage.RequestUri.ToString()).GetLeftPart(UriPartial.Path);
+            var requestUri = new Uri(httpReadMeFileResponse.RequestMessage?.RequestUri?.ToString()).GetLeftPart(UriPartial.Path);
 
             if (httpReadMeFileResponse.IsSuccessStatusCode)
             {

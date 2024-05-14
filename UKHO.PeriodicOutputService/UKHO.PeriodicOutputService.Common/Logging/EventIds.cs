@@ -785,7 +785,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         PermitFileCreationCompleted = 809155,
 
-        // <summary>
+        /// <summary>
         /// 809156 - Bess batch creation started
         /// </summary>
         BessBatchCreationStarted = 809156,
