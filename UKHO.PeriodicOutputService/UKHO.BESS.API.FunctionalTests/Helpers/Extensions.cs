@@ -57,12 +57,12 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products)
         {
             TableClient tableClient = new(connectionString, tableName);
-            
-            foreach(var exchangeSetStandard in exchangeSetStandards)
+
+            foreach (var exchangeSetStandard in exchangeSetStandards)
             {
                 foreach (var product in products!)
                 {
-                    await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard+"|"+product);
+                    await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard + "|" + product);
                 }
             }
         }
