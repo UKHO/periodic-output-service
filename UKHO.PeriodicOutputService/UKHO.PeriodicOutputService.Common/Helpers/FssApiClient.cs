@@ -6,13 +6,10 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     public class FssApiClient : IFssApiClient
     {
         private HttpClient _httpClient;
-        private readonly IHttpClientFactory _httpClientFactory;
-
 
         public FssApiClient(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient();
-            _httpClientFactory = httpClientFactory;
+            _httpClient = httpClientFactory.CreateClient("DownloadClient");
             _httpClient.MaxResponseContentBufferSize = 2147483647;
             _httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
@@ -124,8 +121,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public async Task<HttpResponseMessage> DownloadFile(string uri, string accessToken)
         {
-            _httpClient = _httpClientFactory.CreateClient("DownloadClient");
-
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, Path.Combine(_httpClient.BaseAddress!.AbsoluteUri.ToString(), uri));
             httpRequestMessage.SetBearerToken(accessToken);
 

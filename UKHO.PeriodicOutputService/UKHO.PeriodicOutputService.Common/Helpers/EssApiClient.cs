@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public EssApiClient(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient();
+            _httpClient = httpClientFactory.CreateClient("EssClient");
             _httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
 
