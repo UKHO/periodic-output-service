@@ -801,12 +801,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessBatchCreationFailed = 809158,
 
         /// <summary>
-        /// 809157 - Request for retrying file share service endpoint
+        /// 809159 - Request for retrying file share service endpoint
         /// </summary>
         RetryHttpClientFSSRequest = 809159,
 
         /// <summary>
-        /// 809158 - Request for retrying exchange share service endpoint
+        /// 809160 - Request for retrying exchange share service endpoint
         /// </summary>
         RetryHttpClientESSRequest = 809160
     }
