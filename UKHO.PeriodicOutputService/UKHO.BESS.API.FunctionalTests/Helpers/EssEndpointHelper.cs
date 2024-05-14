@@ -56,13 +56,18 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <param name="isPermitFileRequested">Checks if permit is requested to download</param>
         /// <param name="keyFileType">Sets the key file type</param>
         /// <returns></returns>
-        public static async Task<string> CreateExchangeSetFile(string batchId, bool isPermitFileRequested = false, string? keyFileType = null)
+        public static async Task<string> CreateExchangeSetFile(string batchId, bool isPermitFileRequested = false, string? keyFileType = null, bool isBessBatch = false)
         {
+            string downloadFileUrl;
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
 
             batchStatus.Contains("Committed").Should().Be(true);
-            string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetZipName}";
+            downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetFileName}";
+            if (isBessBatch)
+            {
+                downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.BessExchangeSetFileName}";
+            }
             string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolder(downloadFileUrl, isPermitFileRequested, keyFileType);
 
             return extractDownloadedFolder;

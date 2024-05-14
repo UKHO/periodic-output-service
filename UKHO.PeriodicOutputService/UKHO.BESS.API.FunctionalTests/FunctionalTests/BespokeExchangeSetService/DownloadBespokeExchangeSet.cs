@@ -41,7 +41,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             HttpResponseMessage response = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, exchangeSetStandard, type, readMeSearchFilter, keyFileType);
             response.StatusCode.Should().Be((HttpStatusCode)201);
             Extensions.WaitForDownloadExchangeSet();
-            var downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId, true, keyFileType);
+            var downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId, true, keyFileType, true);
             var expectedResultReadme = FssBatchHelper.CheckReadMeInBessExchangeSet(downloadFolderPath, readMeSearchFilter);
             expectedResultReadme.Should().Be(true);
             var expectedResultSerial = FssBatchHelper.CheckInfoFolderAndSerialEncInBessExchangeSet(downloadFolderPath, type);
@@ -62,7 +62,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             Extensions.WaitForDownloadExchangeSet();
             Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
             Extensions.WaitForDownloadExchangeSet();
-            string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
+            string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId, true);
             FssBatchHelper.CheckFilesInEmptyBess(downloadFolderPath);
         }
 

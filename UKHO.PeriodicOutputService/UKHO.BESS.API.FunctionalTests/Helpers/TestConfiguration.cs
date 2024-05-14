@@ -75,7 +75,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? ExchangeSetEncRootFolder { get; set; }
             public string? ExchangeSetCatalogueFile { get; set; }
             public string? ExchangeSetSerialEncFile { get; set; }
-            public string? ExchangeSetZipName { get; set; }
+            public string? BessExchangeSetFileName { get; set; }
         }
 
         public class PksApiConfiguration
