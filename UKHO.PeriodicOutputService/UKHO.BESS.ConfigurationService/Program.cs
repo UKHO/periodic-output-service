@@ -149,17 +149,6 @@ namespace UKHO.BESS.ConfigurationService
             }
             serviceCollection.AddDistributedMemoryCache();
 
-            var retryCount = Convert.ToInt32(configuration["RetryConfiguration:RetryCount"]);
-            var sleepDuration = Convert.ToDouble(configuration["RetryConfiguration:SleepDuration"]);
-
-            serviceCollection.AddHttpClient<ISalesCatalogueClient, SalesCatalogueClient>(client =>
-            {
-                client.BaseAddress = new Uri(configuration["SCSApiConfiguration:BaseUrl"]);
-                var productHeaderValue = new ProductInfoHeaderValue(BESSConfigurationService, assemblyVersion);
-                client.DefaultRequestHeaders.UserAgent.Add(productHeaderValue);
-            }).AddPolicyHandler((services, request) =>
-                    CommonHelper.GetRetryPolicy(services.GetService<ILogger<ISalesCatalogueClient>>(), "Sales Catalogue", EventIds.RetryHttpClientScsRequest, retryCount, sleepDuration));
-
             serviceCollection.AddSingleton<IAuthScsTokenProvider, AuthTokenProvider>();
             serviceCollection.AddSingleton<BessConfigurationServiceJob>();
             serviceCollection.AddScoped<IConfigurationService, Services.ConfigurationService>();
@@ -167,11 +156,23 @@ namespace UKHO.BESS.ConfigurationService
             serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
             serviceCollection.AddScoped<IConfigValidator, ConfigValidator>();
             serviceCollection.AddScoped<ISalesCatalogueService, SalesCatalogueService>();
-            serviceCollection.AddScoped<ISalesCatalogueClient, SalesCatalogueClient>();
             serviceCollection.AddScoped<IAzureBlobStorageService, AzureBlobStorageService>();
             serviceCollection.AddScoped<IAzureMessageQueueHelper, AzureMessageQueueHelper>();
             serviceCollection.AddScoped<IMacroTransformer, MacroTransformer>();
             serviceCollection.AddScoped<ICurrentDateTimeProvider, CurrentDateTimeProvider>();
+
+            var retryCount = Convert.ToInt32(configuration["RetryConfiguration:RetryCount"]);
+            var sleepDuration = Convert.ToDouble(configuration["RetryConfiguration:SleepDuration"]);
+
+            serviceCollection.AddHttpClient<ISalesCatalogueClient, SalesCatalogueClient>("ScsClient", client =>
+            {
+                client.BaseAddress = new Uri(configuration["SCSApiConfiguration:BaseUrl"]);
+                var productHeaderValue = new ProductInfoHeaderValue(BESSConfigurationService, assemblyVersion);
+                client.DefaultRequestHeaders.UserAgent.Add(productHeaderValue);
+            }).AddPolicyHandler((services, request) =>
+                    CommonHelper.GetRetryPolicy(services.GetService<ILogger<ISalesCatalogueClient>>(), "Sales Catalogue", EventIds.RetryHttpClientScsRequest, retryCount, sleepDuration));
+
+            serviceCollection.AddTransient<ISalesCatalogueClient, SalesCatalogueClient>();
         }
     }
 }

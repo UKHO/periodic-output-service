@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public SalesCatalogueClient(IHttpClientFactory httpClientFactory)
         {
-            httpClient = httpClientFactory.CreateClient();
+            httpClient = httpClientFactory.CreateClient("ScsClient");
             httpClient.MaxResponseContentBufferSize = 2147483647;
             httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
