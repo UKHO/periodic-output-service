@@ -8,6 +8,7 @@ using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 using System.Xml.Linq;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using System.Globalization;
+using Microsoft.AspNetCore.Http;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -326,8 +327,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 "PERMIT_XML" => permitXml,
                 _ => keyFileType
             };
-            string rootFolder = downloadFileUrl.Remove(downloadFileUrl.Length - 10);
-            string permitUri = rootFolder + keyFileType;
+            string? rootFolder = downloadFileUrl.Substring(0, downloadFileUrl.LastIndexOf('/'));
+            string permitUri = rootFolder  + "/" + keyFileType;
 
             var response = await FssApiClient.GetFileDownloadAsync(permitUri);
 

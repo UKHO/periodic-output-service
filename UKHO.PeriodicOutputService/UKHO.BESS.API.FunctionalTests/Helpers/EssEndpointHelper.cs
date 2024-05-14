@@ -62,7 +62,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
 
             batchStatus.Contains("Committed").Should().Be(true);
-            string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetFileName}";
+            string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetZipName}";
             string extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedFolder(downloadFileUrl, isPermitFileRequested, keyFileType);
 
             return extractDownloadedFolder;

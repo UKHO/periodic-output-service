@@ -13,7 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public FssApiConfiguration fssConfig = new();
         public BessStorageConfiguration bessStorageConfig = new();
         public ExchangeSetDetails exchangeSetDetails = new();
-        public PKSApiConfiguration pksConfig = new();
+        public PksApiConfiguration pksConfig = new();
 
         public class BessApiConfiguration
         {
@@ -75,9 +75,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? ExchangeSetEncRootFolder { get; set; }
             public string? ExchangeSetCatalogueFile { get; set; }
             public string? ExchangeSetSerialEncFile { get; set; }
+            public string? ExchangeSetZipName { get; set; }
         }
 
-        public class PKSApiConfiguration
+        public class PksApiConfiguration
         {
             public string? BaseUrl { get; set; }
         }

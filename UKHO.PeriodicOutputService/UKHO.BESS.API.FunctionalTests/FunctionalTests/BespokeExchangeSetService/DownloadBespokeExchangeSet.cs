@@ -48,7 +48,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             expectedResultSerial.Should().Be(true);
             HttpResponseMessage expectedResult = await fssEndPointHelper.CheckBatchDetails(batchId);
             await FssBatchHelper.VerifyBessBatchDetails(expectedResult);
-            string batchFolderPath = downloadFolderPath.Remove(downloadFolderPath.Length - 7);
+            string? batchFolderPath = Path.GetDirectoryName(downloadFolderPath);
             bool expectedResulted = FssBatchHelper.VerifyPermitFile(batchFolderPath, keyFileType);
             expectedResulted.Should().Be(true);
         }

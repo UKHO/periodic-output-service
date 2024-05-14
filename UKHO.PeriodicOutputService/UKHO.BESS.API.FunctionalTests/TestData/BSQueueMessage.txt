@@ -1,5 +1,5 @@
 {
-    "Name": "BESConfig",
+    "Name": "Port of London",
     "ExchangeSetStandard": "s57",
     "EncCellNames": [
         "AU220150",

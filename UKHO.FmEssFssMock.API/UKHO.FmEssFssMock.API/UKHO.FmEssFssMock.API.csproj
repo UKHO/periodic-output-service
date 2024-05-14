@@ -51,7 +51,7 @@
     <None Update="Data\0D91FB1A-CBE2-4443-8F61-E9A925FA00C9\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\0F13A253-DB5D-4B77-A165-643F4B4A77FC\V01X01.zip">
+    <None Update="Data\0F13A253-DB5D-4B77-A165-643F4B4A77FC\BESS_Port of London.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\10D40DD5-DDFB-497A-BB67-D99FB1658320\ACCatalogs.zip">
@@ -69,13 +69,28 @@
     <None Update="Data\38EBEB5C-2FAA-47F5-B3AC-B196D411FA75\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\4BC70797-7EE6-407F-BAFE-CAE49A5B5F91\V01X01.zip">
+    <None Update="Data\4BC70797-7EE6-407F-BAFE-CAE49A5B5F91\BESS_Port of London.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\BESConfig.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\BESS_Port of London.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\Permit.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\BESConfig.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\BESS_BESConfig.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\BESS_Port of London.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\Permit.xml">
@@ -108,7 +123,7 @@
     <None Update="Data\649C902D-5282-4CCF-924A-2B548EF42179\End-User-Licence-Agreement-for-ADMIRALTY-digital-data-services.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\7B6EDD6A-7A62-4271-A657-753F4C648531\V01X01.zip">
+    <None Update="Data\7B6EDD6A-7A62-4271-A657-753F4C648531\BESS_Port of London.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\7D302AD3-97C3-4108-BC8A-B19FC4920079\AIO.zip">
@@ -121,6 +136,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\CurrentTestCase.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\BESConfig.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\BESS_Port of London.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\V01X01.zip">
@@ -138,7 +159,13 @@
     <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\F8FD2FB4-3DD6-425D-B34F-3059E262FEED\V01X01.zip">
+    <None Update="Data\F8FD2FB4-3DD6-425D-B34F-3059E262FEED\BESS_Port of London.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESConfig.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESS_Port of London.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\Permit.txt">
