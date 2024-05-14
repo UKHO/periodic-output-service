@@ -17,8 +17,16 @@ namespace UKHO.FmEssFssMock.API.Services
             { ".xml", "text/xml" },
             { ".csv", "text/csv" },
             { ".iso", "application/x-raw-disk-image" },
-            { ".sha1", "text/plain" }
+            { ".sha1", "text/plain" },
+            { ".txt", "text/plain" }
         };
+
+        private readonly Enum[] bessBatchTypes = new Enum[]
+                                     {
+                                            Batch.BessBaseZipBatch,
+                                            Batch.BessChangeZipBatch,
+                                            Batch.BessUpdateZipBatch
+                                     };
 
         private readonly Enum[] aioBatchTypes = new Enum[]
                                      {
@@ -29,8 +37,8 @@ namespace UKHO.FmEssFssMock.API.Services
                                      };
 
         private readonly string DEFAULTMIMETYPE = "application/octet-stream";
-        private readonly string besSingleReadmeFileBatchId = "AB4A692D-6E3B-48A3-BD37-D232C60DD75D";
-        private readonly string besMultipleFilesBatchId = "10D40DD5-DDFB-497A-BB67-D99FB1658320";
+        private readonly string bessSingleReadmeFileBatchId = "AB4A692D-6E3B-48A3-BD37-D232C60DD75D";
+        private readonly string bessMultipleFilesBatchId = "10D40DD5-DDFB-497A-BB67-D99FB1658320";
         private const string BESPOKEREADME = "BESPOKE README";
         private const string MULTIPLEFILES = "MULTIPLE";
         private const string PERMITTXTFILENAME = "Permit.txt";
@@ -87,6 +95,46 @@ namespace UKHO.FmEssFssMock.API.Services
                     }
                 });
             }
+
+            //BESS - batch attributes from Queue message - start
+
+            if (bessBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)))
+            {
+                ConfigQueueMessage message = new()
+                {
+                    AllowedUserGroups = new List<string> { "FSS/BESS-Port of Atlantis" },
+                    AllowedUsers = new List<string> { "FSS/BESS-Port of Atlantis" },
+                    BatchExpiryInDays = 7,
+                    Tags = new List<Tag> {
+                            new() { Key = "Audience", Value = "Port of Atlantis" },
+                            new() { Key = "Frequency",Value="Weekly" },
+                            new() { Key = "Media Type",Value="Zip" },
+                            new() { Key = "Product Type",Value="AVCS" },
+                            new() { Key = "Year", Value = currentYear },
+                            new() { Key = "Week Number", Value = currentWeek },
+                            new() { Key = "Year / Week", Value = currentYear + " / " + currentWeek },
+                }
+                };
+
+                List<KeyValuePair<string, string>> batchAttributes = new();
+
+                foreach (Tag tag in message.Tags)
+                {
+                    batchAttributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
+                }
+
+                return new BatchDetail
+                {
+                    BatchId = batchId,
+                    Status = GetBatchStatus(path),
+                    BusinessUnit = "AVCSCustomExchangeSets",
+                    ExpiryDate = DateTime.UtcNow.AddDays(message.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                    Attributes = batchAttributes,
+                    Files = files
+                };
+            }
+
+            //BESS - batch attributes from Queue message - end
 
             List<KeyValuePair<string, string>> attributes = new()
             {
@@ -235,11 +283,11 @@ namespace UKHO.FmEssFssMock.API.Services
             }
             else if (filter.ToUpper().Contains(BESPOKEREADME))
             {
-                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName, besSingleReadmeFileBatchId);
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName, bessSingleReadmeFileBatchId);
             }
             else if (filter.ToUpper().Contains(MULTIPLEFILES))
             {
-                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName, besMultipleFilesBatchId);
+                return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName, bessMultipleFilesBatchId);
             }
 
             return new SearchBatchResponse()

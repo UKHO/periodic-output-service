@@ -31,6 +31,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? PermitTxtFile { get; set; }
             public string? PermitXmlFile { get; set; }
             public string? PermitDate { get; set; }
+            public List<string>? BessBatchDetails { get; set; }
         }
 
         public class SharedKeyConfiguration
