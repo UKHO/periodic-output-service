@@ -403,7 +403,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     var batchResult = searchBatchResponse.Entries.FirstOrDefault();
                     if (batchResult.Files.Count() == 1 && batchResult.Files.Any(x => x.Filename.ToUpper() == _fssApiConfiguration.Value.ReadMeFileName))
                     {
-                        return batchResult.Files.FirstOrDefault().Links.Get.Href; ;
+                        return batchResult.Files.FirstOrDefault().Links.Get.Href;
                     }
 
                     _logger.LogError(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId(), "Error in file share service while searching readme.txt file, multiple files are found for _X-Correlation-ID:{CorrelationId}", correlationId);
