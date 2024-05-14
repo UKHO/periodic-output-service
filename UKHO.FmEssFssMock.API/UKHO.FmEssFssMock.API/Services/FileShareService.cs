@@ -29,6 +29,13 @@ namespace UKHO.FmEssFssMock.API.Services
                                             Batch.BessEmptyBatch
                                      };
 
+        private readonly Enum[] bessBatchTypes = new Enum[]
+                                     {
+                                            Batch.BessBaseZipBatch,
+                                            Batch.BessChangeZipBatch,
+                                            Batch.BessUpdateZipBatch
+                                     };
+
         private readonly Enum[] aioBatchTypes = new Enum[]
                                      {
                                             Batch.AioBaseCDZipIsoSha1Batch,

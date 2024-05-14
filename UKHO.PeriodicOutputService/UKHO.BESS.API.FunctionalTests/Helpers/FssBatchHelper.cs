@@ -8,7 +8,6 @@ using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 using System.Xml.Linq;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using System.Globalization;
-using Microsoft.AspNetCore.Http;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {

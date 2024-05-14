@@ -47,7 +47,7 @@ namespace UKHO.BESS.BuilderService.Services
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
         private const string PERMITTEXTFILE = "Permit.txt";
         private const string PERMITXMLFILE = "Permit.xml";
-        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
+        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";        
         private const string DEFAULTMIMETYPE = "application/octet-stream";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption)
