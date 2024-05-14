@@ -1,4 +1,4 @@
-[
+﻿[
     {
         "productName": "AU220150",
         "edition": "8"
@@ -12,15 +12,15 @@
         "edition": "3"
     },
     {
-        "productName": "CN484220",
-        "edition": "6"
-    },
-    {
         "productName": "CA570226",
         "edition": "3"
     },
     {
         "productName": "CN484220",
-        "edition": "1"
+        "edition": "6"
+    },
+    {
+        "productName": "GB301910",
+        "edition": "10"
     }
 ]

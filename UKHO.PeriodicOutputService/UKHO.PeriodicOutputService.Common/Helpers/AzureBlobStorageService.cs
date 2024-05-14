@@ -41,7 +41,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
         };
 
         string configQueueMessageJson = JsonConvert.SerializeObject(configQueueMessage);
-        await azureMessageQueueHelper.AddMessageAsync(configQueueMessageJson);
+        await azureMessageQueueHelper.AddMessageAsync(configQueueMessageJson, bessConfig.Name, bessConfig.FileName);
 
         return true;
     }

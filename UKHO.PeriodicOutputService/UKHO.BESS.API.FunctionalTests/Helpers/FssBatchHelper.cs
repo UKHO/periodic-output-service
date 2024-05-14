@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using UKHO.BESS.API.FunctionalTests.Models;
 using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
+using System.Xml.Linq;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -20,10 +21,15 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             FssApiClient = new FssEndPointHelper();
         }
 
+        static readonly List<string>? cellNames = testConfiguration.bessConfig.ProductsName;
+        static readonly List<string>? ck = testConfiguration.bessConfig.Keys;
+        static readonly List<string>? cellPermits = testConfiguration.bessConfig.Permits;
+        static readonly List<string>? editions = testConfiguration.bessConfig.EditionNumber;
+
         /// <summary>
         /// This method is used to check the batch status.
         /// </summary>
-        /// <param name="batchStatusUri"></param>
+        /// <param name="batchStatusUri">Sets the Uri for getting Batch Status</param>
         /// <returns></returns>
         public static async Task<string> CheckBatchIsCommitted(string batchStatusUri)
         {
@@ -48,9 +54,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to extract & download the exchangeSet.
         /// </summary>
-        /// <param name="downloadFileUrl"></param>
+        /// <param name="downloadFileUrl">Sets the Url for downloading Batch</param>
+        /// <param name="isPermitFileRequested">Checks if permit is requested to download</param>
+        /// <param name="keyFileType">Sets the key file type</param>
         /// <returns></returns>
-        public static async Task<string> ExtractDownloadedFolder(string downloadFileUrl)
+        public static async Task<string> ExtractDownloadedFolder(string downloadFileUrl, bool isPermitFileRequested, string? keyFileType)
         {
             string batchId = downloadFileUrl.Split('/')[5];
             string fileName = downloadFileUrl.Split('/')[7];
@@ -79,13 +87,18 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             string zipPath = Path.Combine(batchFolderPath, fileName);
             string extractPath = Path.Combine(batchFolderPath, RenameFolder(zipPath));
             ZipFile.ExtractToDirectory(zipPath, extractPath);
+
+            if (isPermitFileRequested)
+            {
+                await ExtractDownloadedPermit(downloadFileUrl, keyFileType, batchFolderPath);
+            }
             return extractPath;
         }
 
         /// <summary>
         /// This method is used to rename the folder.
         /// </summary>
-        /// <param name="pathInput"></param>
+        /// <param name="pathInput">Sets the path for which destination folder is to be renamed</param>
         /// <returns></returns>
         public static string RenameFolder(string pathInput)
         {
@@ -100,8 +113,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the file existence.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="fileName"></param>
+        /// <param name="filePath">Sets the path of the file to be checked</param>
+        /// <param name="fileName">Sets the name of the file to be checked</param>
         /// <returns></returns>
         public static bool CheckForFileExist(string? filePath, string fileName)
         {
@@ -111,8 +124,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the folder existence.
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <param name="folderName"></param>
+        /// <param name="filePath">Sets the path of the required file</param>
+        /// <param name="folderName">Sets the name of the folder containing the file</param>
         /// <returns></returns>
         public static bool CheckForFolderExist(string filePath, string folderName)
         {
@@ -122,9 +135,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the existence of files and folders in the downloaded exchange set
         /// </summary>
-        /// <param name="downloadFolderPath"></param>
-        /// <param name="exchangeSetStandard"></param>
-        /// <param name="emptyZip"></param>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the file is downloaded</param>
+        /// <param name="exchangeSetStandard">Sets the value of exchangeSetStandard for Encryption Flag out of s63 or s57. By default it is set to s63</param>
+        /// <param name="emptyZip">Sets the value true or false based on the content of the Zip download</param>
         /// <returns></returns>
         public static bool CheckFilesInDownloadedZip(string? downloadFolderPath, string exchangeSetStandard = "s63", bool emptyZip = false)
         {
@@ -173,8 +186,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the README.TXT
         /// </summary>
-        /// <param name="downloadFolderPath"></param>
-        /// <param name="readMeSearchFilter"></param>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <param name="readMeSearchFilter">Sets the value of the Readme File type based on Config out of AVCS, BLANK or {Query}</param>
         /// <returns></returns>
         public static bool CheckReadMeInBessExchangeSet(string? downloadFolderPath, string? readMeSearchFilter)
         {
@@ -203,8 +216,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is used to check the info folder and serial.enc file content
         /// </summary>
-        /// <param name="downloadFolderPath"></param>
-        /// <param name="type"></param>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <param name="type">Sets the value BASE, UPDATE or CHANGE based on the requested ExchangeSet Type</param>
         /// <returns></returns>
         public static bool CheckInfoFolderAndSerialEncInBessExchangeSet(string? downloadFolderPath, string? type)
         {
@@ -227,6 +240,120 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 default:
                     return false;
             }
+        }
+
+        /// <summary>
+        /// This method is used to check the Permit Txt file and its content
+        /// </summary>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <returns></returns>
+        public static bool CheckPermitTxtFile(string? downloadFolderPath)
+        {
+            bool check = false;
+            string? permitTxt = testConfiguration.bessConfig.PermitTxtFile;
+            string? date = testConfiguration.bessConfig.PermitDate;
+            if (cellNames != null && ck != null && cellPermits != null && editions != null && permitTxt != null)
+            {
+                string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, permitTxt));
+                int rows = fileContent.Length;
+                for (int row = 1; row < rows; row++)
+                {
+                    string[] cellPermitDetails = fileContent[row].Split(",");
+                    cellPermitDetails[1].Equals(ck[(row - 1) / 2]).Should().Be(true);
+                    cellPermitDetails[2].Equals(cellNames[(row - 1) / 2]).Should().Be(true);
+                    string edition = editions[(row - 1) / 2];
+                    edition = row % 2 == 0 ? (int.Parse(edition) + 1).ToString() : edition;
+                    cellPermitDetails[3].Equals(edition).Should().Be(true);
+                    cellPermitDetails[4].Equals(date).Should().Be(true);
+                    cellPermitDetails[5].Equals(date).Should().Be(true);
+                    (row % 2 == 0 ? cellPermitDetails[7] == "2:Next" : cellPermitDetails[7] == "1:Active").Should().Be(true);
+                }
+                check = true;
+            }
+            return check;
+        }
+
+        /// <summary>
+        /// This method is used to check the Permit Xml file and its content
+        /// </summary>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <returns></returns>
+        public static bool CheckPermitXmlFile(string? downloadFolderPath)
+        {
+            bool check = false;
+            string? permitXml = testConfiguration.bessConfig.PermitXmlFile;
+            if (cellNames != null && ck != null && cellPermits != null && editions != null && permitXml != null)
+            {
+                var permit = XDocument.Load(Path.Combine(downloadFolderPath!, permitXml));
+                IEnumerable<XElement>? cellKeys = permit.Root?.Element("cellkeys")?.Elements("cell");
+                if (cellKeys != null)
+                {
+                    int count = 0;
+                    foreach (var cell in cellKeys)
+                    {
+                        string? encCell = cell.Element("cellname")?.Value;
+                        encCell?.Equals(cellNames[count]).Should().Be(true);
+                        string? encCellEdition = cell.Element("edition")?.Value;
+                        encCellEdition?.Equals(editions[count]).Should().Be(true);
+                        string? encPermit = cell.Element("permit")?.Value;
+                        encPermit?.Equals(cellPermits[count]).Should().Be(true);
+                        count++;
+                    }
+                }
+                check = true;
+            }
+            return check;
+        }
+
+        /// <summary>
+        /// This method is use to verify and extract Permit file
+        /// </summary>
+        /// <param name="downloadFileUrl">Sets the url to download permit</param>
+        /// <param name="keyFileType">Sets the key file type</param>
+        /// <param name="batchFolderPath">sets the batch folder path</param>
+        /// <returns></returns>
+        public static async Task<bool> ExtractDownloadedPermit(string downloadFileUrl, string? keyFileType, string batchFolderPath)
+        {
+            string? permitTxt = testConfiguration.bessConfig.PermitTxtFile;
+            string? permitXml = testConfiguration.bessConfig.PermitXmlFile;
+            keyFileType = keyFileType switch
+            {
+                "KEY_TEXT" => permitTxt,
+                "PERMIT_XML" => permitXml,
+                _ => keyFileType
+            };
+            string rootFolder = downloadFileUrl.Remove(downloadFileUrl.Length - 10);
+            string permitUri = rootFolder + keyFileType;
+
+            var response = await FssApiClient.GetFileDownloadAsync(permitUri);
+
+            if (response.StatusCode == ((HttpStatusCode)200) && keyFileType != null)
+            {
+                Stream permitStream = await response.Content.ReadAsStreamAsync();
+                await using FileStream outputFileStream = new(Path.Combine(batchFolderPath, keyFileType), FileMode.Create);
+                await permitStream.CopyToAsync(outputFileStream);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// This method is used to verify the Permit files and their content
+        /// </summary>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <param name="keyFileType">Sets the value KEY_TEXT or PERMIT_XML based on the requested Permit Type</param>
+        /// <returns></returns>
+        public static bool VerifyPermitFile(string? downloadFolderPath, string? keyFileType)
+        {
+            bool permitVerified = false;
+            if (keyFileType == "KEY_TEXT")
+            {
+                permitVerified = CheckPermitTxtFile(downloadFolderPath);
+            }
+            else if (keyFileType == "PERMIT_XML")
+            {
+                permitVerified = CheckPermitXmlFile(downloadFolderPath);
+            }
+            return permitVerified;
         }
     }
 }

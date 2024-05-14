@@ -7,7 +7,7 @@
         /// <summary>
         /// This method is used to get the batch status endpoint response.
         /// </summary>
-        /// <param name="uri"></param>
+        /// <param name="uri">Sets the Batch Status uri</param>
         /// <returns></returns>
         public async Task<HttpResponseMessage> GetBatchStatusAsync(string uri)
         {
@@ -18,8 +18,8 @@
         /// <summary>
         /// This method is used to get the file download endpoint response
         /// </summary>
-        /// <param name="uri"></param>
-        /// <param name="fileRangeHeader"></param>
+        /// <param name="uri">Sets the Batch Download Uri</param>
+        /// <param name="fileRangeHeader">Sets the file range</param>
         /// <returns></returns>
         public async Task<HttpResponseMessage> GetFileDownloadAsync(string uri, string? fileRangeHeader = null)
         {

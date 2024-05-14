@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -39,7 +39,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\UKHO.BESS.BuilderService\UKHO.BESS.BuilderService.csproj" />
-    <ProjectReference Include="..\UKHO.PeriodicOutputService.Common\UKHO.PeriodicOutputService.Common.csproj" />
   </ItemGroup>
 
 </Project>

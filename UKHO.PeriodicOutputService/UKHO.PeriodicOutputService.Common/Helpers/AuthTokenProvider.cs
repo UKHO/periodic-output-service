@@ -12,20 +12,23 @@ using UKHO.PeriodicOutputService.Common.Models;
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     [ExcludeFromCodeCoverage] ////Excluded from code coverage as it has ADD interaction
-    public class AuthTokenProvider : IAuthEssTokenProvider, IAuthFssTokenProvider, IAuthScsTokenProvider
+    public class AuthTokenProvider : IAuthEssTokenProvider, IAuthFssTokenProvider, IAuthScsTokenProvider, IAuthPksTokenProvider
     {
         private readonly IOptions<EssManagedIdentityConfiguration> _essManagedIdentityConfiguration;
         private static readonly object _lock = new();
         private readonly ILogger<AuthTokenProvider> _logger;
         private readonly IDistributedCache _cache;
+        private readonly PksApiConfiguration _pksApiConfiguration;
+        private const string AccessTokenUrl = "/oauth2/v2.0/token";
 
         public AuthTokenProvider(IOptions<EssManagedIdentityConfiguration> essManagedIdentityConfiguration,
                                  IDistributedCache cache,
-                                 ILogger<AuthTokenProvider> logger)
+                                 ILogger<AuthTokenProvider> logger, IOptions<PksApiConfiguration> pksApiConfiguration)
         {
             _essManagedIdentityConfiguration = essManagedIdentityConfiguration;
             _cache = cache;
             _logger = logger;
+            _pksApiConfiguration = pksApiConfiguration.Value ?? throw new ArgumentNullException(nameof(pksApiConfiguration)); ;
         }
 
         public async Task<string> GetManagedIdentityAuthAsync(string resource)
@@ -79,6 +82,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
             _logger.LogInformation(EventIds.CachingExternalEndPointTokenCompleted.ToEventId(), "New token is added in cache to call external endpoint and it expires in {ExpiresIn} with sliding expiration duration {options}.", Convert.ToString(accessTokenItem.ExpiresIn), JsonConvert.SerializeObject(options));
         }
+
         private AccessTokenItem GetAuthTokenFromCache(string key)
         {
             string? item;
