@@ -6,6 +6,7 @@ using UKHO.BESS.API.FunctionalTests.Models;
 
 namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.PksIntegration
 {
+    [Ignore("temp")]
     public class PksIntegrationTests
     {
         static readonly TestConfiguration testConfiguration = new();

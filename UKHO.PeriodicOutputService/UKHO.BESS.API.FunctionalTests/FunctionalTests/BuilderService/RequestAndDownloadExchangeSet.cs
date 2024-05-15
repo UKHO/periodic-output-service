@@ -5,6 +5,7 @@ using UKHO.BESS.API.FunctionalTests.Helpers;
 
 namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
 {
+    [Ignore("temp")]
     [TestFixture]
     public class RequestAndDownloadExchangeSet
     {

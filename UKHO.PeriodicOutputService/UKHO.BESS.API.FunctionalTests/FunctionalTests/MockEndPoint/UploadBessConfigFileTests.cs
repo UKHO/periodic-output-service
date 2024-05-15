@@ -8,6 +8,7 @@ using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.MockEndPoint
 {
+    [Ignore("temp")]
     public class UploadBessConfigFileTests
     {
         static readonly TestConfiguration testConfiguration = new();

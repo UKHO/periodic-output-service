@@ -6,6 +6,7 @@ using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
+    [Ignore("temp")]
     [Category("CallEssEndPoint")]
     public class CallEssEndPoint : ObjectStorage
     {

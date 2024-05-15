@@ -75,7 +75,7 @@
     <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\BESConfig.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\BESS_Port of London.zip">
+    <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\BESS_PortOfIndia.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\Permit.xml">
@@ -90,7 +90,7 @@
     <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\BESS_BESConfig.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\BESS_Port of London.zip">
+    <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\BESS_PortOfIndia.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\Permit.xml">
@@ -141,7 +141,7 @@
     <None Update="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\BESConfig.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\BESS_Port of London.zip">
+    <None Update="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\BESS_PortOfIndia.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\V01X01.zip">
@@ -165,7 +165,7 @@
     <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESConfig.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESS_Port of London.zip">
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESS_PortOfIndia.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\Permit.txt">
@@ -256,7 +256,6 @@
 
   <ItemGroup>
     <Folder Include="Data\649C902D-5282-4CCF-924A-2B548EF42179\" />
-    <Folder Include="Data\D0635E6C-81AE-4ACB-9129-1A69F9EE58D2\" />
   </ItemGroup>
 
 </Project>
