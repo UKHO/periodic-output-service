@@ -808,7 +808,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809160 - Request for retrying exchange share service endpoint
         /// </summary>
-        RetryHttpClientESSRequest = 809160
+        RetryHttpClientESSRequest = 809160,
+
+        /// <summary>
+        /// 809161 - Bess config is not Enable
+        /// </summary>
+        BessConfigIsNotEnable = 809161
     }
 
     public static class EventIdExtensions
