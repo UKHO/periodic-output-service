@@ -507,6 +507,7 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="correlationId"></param>
         /// <param name="readMeSearchFilter"></param>
         /// <returns></returns>
+        [ExcludeFromCodeCoverage]
         private async Task<bool> DownloadReadMeFileAsync(string exchangeSetRootPath, string correlationId, string readMeSearchFilter)
         {
             bool isDownloadReadMeFileSuccess = false;
@@ -536,6 +537,7 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="correlationId"></param>
         /// <returns></returns>
         /// <exception cref="FulfilmentException"></exception>
+        [ExcludeFromCodeCoverage]
         private async Task UpdateSerialFileAsync(string serialFilePath, string exchangeSetType, string correlationId)
         {
             try
@@ -569,6 +571,7 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="correlationId"></param>
         /// <returns></returns>
         /// <exception cref="FulfilmentException"></exception>
+        [ExcludeFromCodeCoverage]
         private async Task DeleteProductTxtAndInfoFolderAsync(string productFilePath, string infoFolderPath, string correlationId)
         {
             try
@@ -606,6 +609,7 @@ namespace UKHO.BESS.BuilderService.Services
             return configQueueMessage;
         }
 
+        [ExcludeFromCodeCoverage]
         private void CreatePermitFile(KeyFileType keyFileType, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses)
         {
             logger.LogInformation(EventIds.PermitFileCreationStarted.ToEventId(), "Permit file creation started for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, CommonHelper.CorrelationID);
@@ -649,6 +653,7 @@ namespace UKHO.BESS.BuilderService.Services
             logger.LogInformation(EventIds.PermitFileCreationCompleted.ToEventId(), "Permit file creation completed for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, CommonHelper.CorrelationID);
         }
 
+        [ExcludeFromCodeCoverage]
         private void RenameFile(string downloadPath, List<FssBatchFile> files, string bessZipFileName)
         {
             foreach (var file in files)
