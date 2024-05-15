@@ -780,7 +780,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
         #region SearchReadMeFilePath
         [Test]
-        public void WhenReadMeFileNotFound_ThenReturnFulfilmentException()
+        public async Task WhenReadMeFileNotFound_ThenReturnFulfilmentException()
         {
             SearchBatchResponse searchBatchResponse = new();
             string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
@@ -798,8 +798,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync("8k0997d5-8905-43fa-9009-9c38b2007f81", invalidReadMeSearchFilterQuery))
-                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
+            Func<Task> act = async () => { await _fssService.SearchReadMeFilePathAsync("8k0997d5-8905-43fa-9009-9c38b2007f81", invalidReadMeSearchFilterQuery); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -809,7 +809,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         [Test]
-        public void WhenInvalidSearchReadMeFileRequest_ThenReturnFulfilmentException()
+        public async Task WhenInvalidSearchReadMeFileRequest_ThenReturnFulfilmentException()
         {
             var searchBatchResponse = GetSearchBatchEmptyResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
@@ -826,8 +826,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery))
-                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ReadMeTextFileNotFound.ToEventId());
+            Func<Task> act = async () => { await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ReadMeTextFileNotFound.ToEventId());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -837,7 +837,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         [Test]
-        public void WhenMultipleFilesSearchReadMeFileRequest_ThenReturnFulfilmentException()
+        public async Task WhenMultipleFilesSearchReadMeFileRequest_ThenReturnFulfilmentException()
         {
             var searchBatchResponse = GetMultipleFilesSearchBatchResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
@@ -854,9 +854,9 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery))
-                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ReadMeTextFileNotFound.ToEventId());
-
+            Func<Task> act = async () => { await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId());
+           
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -906,7 +906,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var searchBatchResponse = GetReadMeFileDetails();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))), RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://test.com") } };
-            httpResponse.Headers.Add("Server", "test/10.0");
+            httpResponse.Headers.Add("Server", "Windows-Azure-Blob/10.0");
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
             A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
@@ -921,10 +921,16 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var response = await _fssService.DownloadReadMeFileAsync(readMeFilePath, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc");
 
             response.Should().Be(true);
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "File share service download readme.txt file redirected with uri:{requestUri} responded with 307 code for _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
-        public void WhenInvalidDownloadReadMeFileRequest_ThenReturnFulfilmentException()
+        public async Task WhenInvalidDownloadReadMeFileRequest_ThenReturnFulfilmentException()
         {
             string accessTokenParam = null;
             string uriParam = null;
@@ -949,8 +955,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                })
                .Returns(httpResponse);
 
-            FluentActions.Invoking(async () => await _fssService.DownloadReadMeFileAsync(readMeFilePath, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc"))
-                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
+            Func<Task> act = async () => { await _fssService.DownloadReadMeFileAsync(readMeFilePath, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc"); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -1151,7 +1157,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         #endregion
 
         #region GetSearchBatchEmptyResponse
-        private SearchBatchResponse GetSearchBatchEmptyResponse()
+        private static SearchBatchResponse GetSearchBatchEmptyResponse()
         {
             return new SearchBatchResponse()
             {
@@ -1169,7 +1175,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         #endregion
 
         #region GetReadMeFileDetails
-        private String GetReadMeFileDetails()
+        private static string GetReadMeFileDetails()
         {
             StringBuilder sb = new StringBuilder();
             string lineTwo = "Version: Published Week 22 / 21 dated 03 - 06 - 2021";
