@@ -11,6 +11,7 @@ using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Services;
 using Attribute = UKHO.PeriodicOutputService.Common.Models.Fss.Response.Attribute;
@@ -455,8 +456,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(Batch.PosCatalogueBatch)]
         [TestCase(Batch.PosEncUpdateBatch)]
         [TestCase(Batch.EssUpdateZipBatch)]
-        [TestCase(Batch.BesBaseZipBatch)]
-        [TestCase(Batch.BesUpdateZipBatch)]
         public async Task DoesCreateBatch_Returns_BatchId_If_ValidRequest(Batch batchType)
         {
             _fakeconfiguration["IsFTRunning"] = "true";
@@ -970,6 +969,115 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
         #endregion
 
+        [Test]
+        [TestCase(Batch.BessBaseZipBatch)]
+        [TestCase(Batch.BessUpdateZipBatch)]
+        [TestCase(Batch.BessChangeZipBatch)]
+        public async Task WhenValidRequestToCreateBatchForBessIsSent_ThenReturnsBatchId(Batch batchType)
+        {
+            _fakeconfiguration["IsFTRunning"] = "true";
+            string type;
+
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.OK,
+
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\"}")))
+                });
+
+            switch (batchType)
+            {
+                case Batch.BessUpdateZipBatch:
+                    type = BessType.UPDATE.ToString();
+                    break;
+                case Batch.BessChangeZipBatch:
+                    type = BessType.CHANGE.ToString();
+                    break;
+                default:
+                    type = BessType.BASE.ToString();
+                    break;
+            }
+
+            string result = await _fssService.CreateBatch(batchType, GetConfigQueueMessage(type));
+
+            result.Should().Be("4c5397d5-8a05-43fa-9009-9c38b2007f81");
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<EventId>(1) == EventIds.CreateBatchStarted.ToEventId()
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<EventId>(1) == EventIds.CreateBatchCompleted.ToEventId()
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        [TestCase(Batch.BessBaseZipBatch)]
+        [TestCase(Batch.BessUpdateZipBatch)]
+        [TestCase(Batch.BessChangeZipBatch)]
+        public async Task WhenInvalidRequestToCreateBatchForBessIsSent_ThenThrowsException(Batch batchType)
+        {
+            _fakeconfiguration["IsFTRunning"] = "true";
+            string type;
+
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage()
+                {
+                    StatusCode = System.Net.HttpStatusCode.Unauthorized,
+
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\"}")))
+                });
+
+            switch (batchType)
+            {
+                case Batch.BessUpdateZipBatch:
+                    type = BessType.UPDATE.ToString();
+                    break;
+                case Batch.BessChangeZipBatch:
+                    type = BessType.CHANGE.ToString();
+                    break;
+                default:
+                    type = BessType.BASE.ToString();
+                    break;
+            }
+
+            Func<Task> act = async () => await _fssService.CreateBatch(batchType, GetConfigQueueMessage(type));
+            await act.Should().ThrowExactlyAsync<FulfilmentException>().Where(x => x.EventId == EventIds.CreateBatchFailed.ToEventId());
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Information
+             && call.GetArgument<EventId>(1) == EventIds.CreateBatchStarted.ToEventId()
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(_fakeLogger).Where(call =>
+             call.Method.Name == "Log"
+             && call.GetArgument<LogLevel>(0) == LogLevel.Error
+             && call.GetArgument<EventId>(1) == EventIds.CreateBatchFailed.ToEventId()
+             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+             ).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+        }
+
         #region GetSearchBatchResponse
         private static SearchBatchResponse GetSearchBatchResponse()
         {
@@ -990,6 +1098,25 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             };
         }
         #endregion
+
+        private ConfigQueueMessage GetConfigQueueMessage(string type) => new()
+        {
+            Name = "test",
+            ExchangeSetStandard = "s63",
+            EncCellNames = new List<string> { "testcell" },
+            Frequency = "30 13 * * *",
+            Type = type,
+            KeyFileType = "NONE",
+            AllowedUsers = new string[] { "testuser" },
+            AllowedUserGroups = new string[] { "testgroup" },
+            Tags = new List<Tag> { new() { Key = "key1", Value = "value1" }, new() { Key = "key2", Value = "value2" } },
+            ReadMeSearchFilter = "NONE",
+            BatchExpiryInDays = 8,
+            IsEnabled = "Yes",
+            FileName = "test.json",
+            FileSize = 1,
+            CorrelationId = "384b3783-df9c-4378-a342-47523dc1c7ef"
+        };
 
         #region GetReadMeSearchBatchResponse
         private static SearchBatchResponse GetReadMeSearchBatchResponse()

@@ -7,7 +7,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
     public static class Extensions
     {
-        private static readonly HttpClient httpClient = new();
+        static readonly HttpClient httpClient = new();
+        static readonly TestConfiguration testConfiguration = new();
+        static readonly string[] exchangeSetStandards = { testConfiguration.bessConfig.s57ExchangeSetStandard!, testConfiguration.bessConfig.s63ExchangeSetStandard! };
 
         /// <summary>
         /// This method is used to set the test scenario.
@@ -51,15 +53,17 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// </summary>
         /// <param name="connectionString">Sets the connectionString of the storage account</param>
         /// <param name="tableName">Sets the name of the table from which entries is to be removed</param>
-        /// <param name="products">Sets the products for which entry is to be deleted</param>
-        /// <param name="exchangeSetStandard">Sets the exchangeSetStandard entries of whose is to be deleted</param>
-        public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products, string? exchangeSetStandard)
+        /// <param name="products">Sets the products for which entry is to be deleted</param>        
+        public static async Task DeleteTableEntries(string? connectionString, string? tableName, List<string>? products)
         {
             TableClient tableClient = new(connectionString, tableName);
 
-            foreach (string product in products!)
+            foreach (var exchangeSetStandard in exchangeSetStandards)
             {
-                await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard + "|" + product);
+                foreach (var product in products!)
+                {
+                    await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard + "|" + product);
+                }
             }
         }
 
@@ -92,6 +96,18 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             string uri = $"{baseUrl}/cleanUp";
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
             return httpClient.Send(httpRequestMessage, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// This method reads response body json as given type
+        /// </summary>
+        /// <typeparam name="T">Sets the type</typeparam>
+        /// <param name="httpResponseMessage">Sets the response message</param>
+        /// <returns></returns>
+        public static async Task<T> ReadAsTypeAsync<T>(this HttpResponseMessage httpResponseMessage)
+        {
+            string bodyJson = await httpResponseMessage.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(bodyJson)!;
         }
     }
 }

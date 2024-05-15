@@ -35,12 +35,22 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IPksService pksService;
         private readonly IPermitDecryption permitDecryption;
 
-        private const string BESSBATCHFILEEXTENSION = "zip";
+        private readonly string homeDirectoryPath;
+        private readonly Dictionary<string, string> mimeTypes = new()
+        {
+            { ".zip", "application/zip" },
+            { ".xml", "text/xml" },
+            { ".csv", "text/csv" },
+            { ".txt", "text/plain" }
+        };
+
+        private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
         private const string PERMITTEXTFILE = "Permit.txt";
         private const string PERMITXMLFILE = "Permit.xml";
-        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
-        private readonly string mimeType = "application/zip";
-        private readonly string homeDirectoryPath;
+        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";        
+        private const string DEFAULTMIMETYPE = "application/octet-stream";
+
+        
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption)
         {
@@ -57,8 +67,8 @@ namespace UKHO.BESS.BuilderService.Services
             homeDirectoryPath = Path.Combine(configuration["HOME"]!, configuration["BespokeFolderName"]!);
         }
 
-        public async Task<string> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
-        {           
+        public async Task<bool> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
+        {
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
 
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
@@ -85,47 +95,29 @@ namespace UKHO.BESS.BuilderService.Services
                 CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse);
             }
 
-            //Temporary Upload Code
-
-            #region TemporaryUploadCode
-
             CreateZipFile(essFiles, essFileDownloadPath);
 
-            bool isBatchCreated;
             if (bool.Parse(configuration["IsFTRunning"]))
             {
-                isBatchCreated = await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
+                await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
             }
-            else
+            if (!CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result)
+                return false;
+
+            if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
+                     configQueueMessage.Type == BessType.CHANGE.ToString())
             {
-                Batch batch = configQueueMessage.Type == BessType.BASE.ToString() ? Batch.BesBaseZipBatch
-                    : configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch;
-
-                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, batch).Result;
-            }
-
-            // temporary logs
-            if (isBatchCreated)
-            {
-                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Bess batch created {DateTime} | {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
-
-                if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
-                         configQueueMessage.Type == BessType.CHANGE.ToString())
+                if (latestProductVersions.ProductVersions.Count > 0)
                 {
-                    if (latestProductVersions.ProductVersions.Count > 0)
-                    {
-                        LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
-                    }
-                    else
-                    {
-                        logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
-                    }
+                    LogProductVersions(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                }
+                else
+                {
+                    logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                 }
             }
 
-            #endregion TemporaryUploadCode
-
-            return "Exchange Set Created Successfully";
+            return true;
         }
 
         private async Task<string> RequestExchangeSetAsync(ConfigQueueMessage configQueueMessage)
@@ -220,7 +212,6 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        [ExcludeFromCodeCoverage]
         private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
         {
             Parallel.ForEach(fileDetails, file =>
@@ -235,51 +226,73 @@ namespace UKHO.BESS.BuilderService.Services
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(EventIds.ZipFileCreationFailed.ToEventId(), "Creating zip file of directory {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                    logger.LogError(EventIds.ZipFileCreationFailed.ToEventId(), "Creating zip file of directory {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID: {CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
                     throw new Exception($"Creating zip file {file.FileName} failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
                 }
             });
         }
 
-        private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, Batch batchType)
+        private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
         {
             bool isCommitted;
+            string bessBatchId;
+            Batch batchType = Batch.BessBaseZipBatch;
+
             try
             {
-                string batchId = await fssService.CreateBatch(batchType);
+                logger.LogInformation(EventIds.BessBatchCreationStarted.ToEventId(), "BESS batch creation started at {DateTime} | _X-Correlation-ID: {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                if (configQueueMessage.Type.ToUpper().Equals(BessType.UPDATE.ToString()))
+                {
+                    batchType = Batch.BessUpdateZipBatch;
+                }
+                else if (configQueueMessage.Type.ToUpper().Equals(BessType.CHANGE.ToString()))
+                {
+                    batchType = Batch.BessChangeZipBatch;
+                }
+                //else if block for mock only
+                else if (configQueueMessage.Type.ToUpper().Equals("EMPTY"))
+                {
+                    batchType = Batch.BessEmptyBatch;
+                }
+
+                bessBatchId = await fssService.CreateBatch(batchType, configQueueMessage);
+
                 IEnumerable<string> filePath = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
-                UploadBatchFiles(filePath, batchId, batchType);
-                isCommitted = await fssService.CommitBatch(batchId, filePath, batchType);
-                logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "Batch is created and added to FSS. BatchId: {batchId} and status: {isCommitted}", batchId, isCommitted);
+
+                UploadBatchFiles(filePath, bessBatchId, batchType);
+
+                isCommitted = await fssService.CommitBatch(bessBatchId, filePath, batchType);
+
+                logger.LogInformation(EventIds.BessBatchCreationCompleted.ToEventId(), "BESS batch {bessBatchId} is created and added to FSS with status: {isCommitted} at {DateTime} | _X-Correlation-ID: {CorrelationId}", bessBatchId, isCommitted, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Batch creation failed with Exception : {ex}", ex);
-                throw;
+                logger.LogError(EventIds.BessBatchCreationFailed.ToEventId(), "BESS batch creation failed with Exception: {ex} at {DateTime} | _X-Correlation-ID : {CorrelationId}", ex, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                throw new FulfilmentException(EventIds.BessBatchCreationFailed.ToEventId());
             }
 
             return isCommitted;
         }
 
-        [ExcludeFromCodeCoverage]
         private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
         {
             Parallel.ForEach(filePaths, filePath =>
             {
                 IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
 
-                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeType, batchType).Result;
+                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
                 if (isFileAdded)
                 {
                     List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
-                    if (blockIds.Count > 0)
+                    if (blockIds.Any())
                     {
                         bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds).Result;
                     }
                 }
             });
         }
-
         [ExcludeFromCodeCoverage]
         private List<ProductVersion> GetProductVersionsFromEntities(List<ProductVersionEntities> productVersionEntities, string[] cellNames, string configName, string exchangeSetStandard)
         {
@@ -447,27 +460,19 @@ namespace UKHO.BESS.BuilderService.Services
         [ExcludeFromCodeCoverage]
         private async Task<bool> IsBatchCreatedForMock(ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
         {
-            bool isBatchCreated;
-            if (configQueueMessage.Type == BessType.BASE.ToString())
-            {
-                isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, Batch.BesBaseZipBatch).Result;
-            }
-            else
-            {
-                var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+            bool isBatchCreated;            
+            var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
                 var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames.ToArray(),
-                    configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
-                var product = productVersions.Any(x => x.EditionNumber > 0);
-                if (product)
-                {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, Batch.EssEmptyBatch).Result;
-                }
-                else
-                {
-                    isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage.Type == BessType.UPDATE.ToString() ? Batch.BesUpdateZipBatch : Batch.BesChangeZipBatch).Result;
-                }
+                configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+
+            var product = productVersions.Any(x => x.EditionNumber > 0);
+            if (product)
+            {
+                configQueueMessage.Type = "EMPTY";
             }
+            isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result;
+
             return isBatchCreated;
         }
 
