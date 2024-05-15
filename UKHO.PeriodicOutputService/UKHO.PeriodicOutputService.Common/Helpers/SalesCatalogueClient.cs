@@ -1,9 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Text;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
-    [ExcludeFromCodeCoverage]
     public class SalesCatalogueClient : ISalesCatalogueClient
     {
         private HttpClient httpClient;
