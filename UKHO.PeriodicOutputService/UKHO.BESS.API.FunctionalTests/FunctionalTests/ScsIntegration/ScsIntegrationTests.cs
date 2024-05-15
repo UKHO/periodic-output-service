@@ -5,7 +5,6 @@ using UKHO.BESS.API.FunctionalTests.Helpers;
 
 namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
 {
-    [Ignore("temp")]
     public class ScsIntegrationTests
     {
         static readonly TestConfiguration testConfiguration = new();
