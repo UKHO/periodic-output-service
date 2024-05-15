@@ -88,7 +88,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (bool.Parse(configuration["IsFTRunning"]))
             {
-                await IsBatchCreatedForMock(configQueueMessage, essFileDownloadPath);
+                configQueueMessage = await CheckEmptyBatchTypeForMock(configQueueMessage);
             }
 
             if (!CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result)
@@ -590,7 +590,7 @@ namespace UKHO.BESS.BuilderService.Services
 
         // This method is for mock only
         [ExcludeFromCodeCoverage]
-        private async Task<bool> IsBatchCreatedForMock(ConfigQueueMessage configQueueMessage, string essFileDownloadPath)
+        private async Task<ConfigQueueMessage> CheckEmptyBatchTypeForMock(ConfigQueueMessage configQueueMessage)
         {
             var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
@@ -602,9 +602,8 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 configQueueMessage.Type = "EMPTY";
             }
-            bool isBatchCreated = CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result;
 
-            return isBatchCreated;
+            return configQueueMessage;
         }
 
         private void CreatePermitFile(KeyFileType keyFileType, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses)
