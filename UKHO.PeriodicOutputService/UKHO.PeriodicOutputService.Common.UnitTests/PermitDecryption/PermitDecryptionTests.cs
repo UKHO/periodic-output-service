@@ -81,7 +81,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<EventId>(1) == EventIds.PermitDecryptionException.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit decryption failed with Error : HWIDFmtErr"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit decryption failed with Error : {cryptResult} at {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
@@ -99,7 +99,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<EventId>(1) == EventIds.PermitDecryptionException.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "An error occurred while decrypting the permit string."
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "An error occurred while decrypting the permit string at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
