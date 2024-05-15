@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
+using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models;
 
@@ -32,7 +33,7 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 
                 if (cryptResult.Item1 != CryptResult.Ok)
                 {
-                    logger.LogError(EventIds.PermitDecryptionException.ToEventId(), $"Permit decryption failed with Error : {cryptResult.Item1}");
+                    logger.LogError(EventIds.PermitDecryptionException.ToEventId(), "Permit decryption failed with Error : {cryptResult} at {DateTime} | _X-Correlation-ID : {CorrelationId}", cryptResult.Item1, DateTime.UtcNow, CommonHelper.CorrelationID);
                     return null;
                 }
 
@@ -44,7 +45,7 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.PermitDecryptionException.ToEventId(), ex, "An error occurred while decrypting the permit string.");
+                logger.LogError(EventIds.PermitDecryptionException.ToEventId(), ex, "An error occurred while decrypting the permit string at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
                 return null;
             }
         }
