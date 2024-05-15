@@ -62,7 +62,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             Extensions.WaitForDownloadExchangeSet();
             Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
             Extensions.WaitForDownloadExchangeSet();
-            string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId, true);
+            string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId, false, null, true);
             FssBatchHelper.CheckFilesInEmptyBess(downloadFolderPath);
         }
 

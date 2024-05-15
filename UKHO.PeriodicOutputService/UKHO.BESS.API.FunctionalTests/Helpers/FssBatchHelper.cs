@@ -326,7 +326,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 "PERMIT_XML" => permitXml,
                 _ => keyFileType
             };
-            string? rootFolder = downloadFileUrl.Substring(0, downloadFileUrl.LastIndexOf('/'));
+            string rootFolder = downloadFileUrl[..downloadFileUrl.LastIndexOf('/')];
             string permitUri = rootFolder  + "/" + keyFileType;
 
             var response = await FssApiClient.GetFileDownloadAsync(permitUri);

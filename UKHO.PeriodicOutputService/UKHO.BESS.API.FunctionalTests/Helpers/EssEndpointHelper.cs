@@ -55,15 +55,15 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <param name="batchId">Provide the BatchId of the requested Product</param>
         /// <param name="isPermitFileRequested">Checks if permit is requested to download</param>
         /// <param name="keyFileType">Sets the key file type</param>
+        /// <param name="isBessBatch">Checks if bess batch is getting created or not</param>
         /// <returns></returns>
         public static async Task<string> CreateExchangeSetFile(string batchId, bool isPermitFileRequested = false, string? keyFileType = null, bool isBessBatch = false)
         {
-            string downloadFileUrl;
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
 
             batchStatus.Contains("Committed").Should().Be(true);
-            downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetFileName}";
+            string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetFileName}";
             if (isBessBatch)
             {
                 downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.BessExchangeSetFileName}";
