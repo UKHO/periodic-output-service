@@ -59,7 +59,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 SerialFileName = "SERIAL.ENC",
                 ProductFileName = "PRODUCT.TXT",
                 Info = "INFO",
-                BESSZipFileName = "BESS_test",
+                BessZipFileName = "BESS_test",
                 BespokeExchangeSetFileFolder = "V01X01"
             });
 

@@ -562,7 +562,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             CreateBatchRequestModel createBatchRequest = new()
             {
-                BusinessUnit = _fssApiConfiguration.Value.BESSBusinessUnit,
+                BusinessUnit = _fssApiConfiguration.Value.BessBusinessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(configQueueMessage.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl
                 {

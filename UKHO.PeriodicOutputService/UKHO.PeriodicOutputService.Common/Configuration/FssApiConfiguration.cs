@@ -24,14 +24,14 @@ namespace UKHO.PeriodicOutputService.Common.Configuration
         public string AioReadGroups { get; set; }
         public string Content { get; set; }
         public string ProductType { get; set; }
-        public string BESSBusinessUnit { get; set; }
+        public string BessBusinessUnit { get; set; }
         public string BespokeExchangeSetFileFolder { get; set; }
         public string EncRoot { get; set; }
         public string ReadMeFileName { get; set; }
         public string SerialFileName { get; set; }
         public string ProductFileName { get; set; }
         public string Info { get; set; }
-        public string BESSZipFileName { get; set; }
+        public string BessZipFileName { get; set; }
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     }
 }

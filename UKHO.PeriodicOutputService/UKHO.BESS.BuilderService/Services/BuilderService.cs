@@ -72,7 +72,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
 
-            string bessZipFileName = string.Format(fssApiConfig.Value.BESSZipFileName, configQueueMessage.Name);
+            string bessZipFileName = string.Format(fssApiConfig.Value.BessZipFileName, configQueueMessage.Name);
 
             RenameFile(essFileDownloadPath, essFiles, bessZipFileName);
 
