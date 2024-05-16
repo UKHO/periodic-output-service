@@ -806,7 +806,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         RetryHttpClientFSSRequest = 809159,
 
         /// <summary>
-        /// 809160 - Request for retrying exchange share service endpoint
+        /// 809160 - Request for retrying exchange set service endpoint
         /// </summary>
         RetryHttpClientESSRequest = 809160,
 

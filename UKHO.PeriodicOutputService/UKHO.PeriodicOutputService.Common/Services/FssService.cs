@@ -185,7 +185,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(batchType, configQueueMessage);
+            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModelForBess(batchType, configQueueMessage);
             string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
             HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
 
@@ -551,7 +551,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         //Private Methods
         [ExcludeFromCodeCoverage]
-        private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType, ConfigQueueMessage configQueueMessage)
+        private CreateBatchRequestModel CreateBatchRequestModelForBess(Batch batchType, ConfigQueueMessage configQueueMessage)
         {
             List<KeyValuePair<string, string>> batchAttributes = new();
 
