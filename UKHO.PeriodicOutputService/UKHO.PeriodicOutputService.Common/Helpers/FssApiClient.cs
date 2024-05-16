@@ -6,11 +6,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     public class FssApiClient : IFssApiClient
     {
         private HttpClient _httpClient;
-        private const string DOWNLOADCLIENT = "DownloadClient";
+        private const string FSSCLIENT = "DownloadClient";
 
         public FssApiClient(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClientFactory.CreateClient(DOWNLOADCLIENT);
+            _httpClient = httpClientFactory.CreateClient(FSSCLIENT);
             _httpClient.MaxResponseContentBufferSize = 2147483647;
             _httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
