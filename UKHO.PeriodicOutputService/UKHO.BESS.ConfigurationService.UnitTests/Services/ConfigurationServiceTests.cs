@@ -731,7 +731,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncReturnsTrueAndScheduleDetailsAddedToQueue_ThenLogWithMessagAdded()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
-            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
+            A.CallTo(() => fakeConfiguration["BessSizeInMB"]).Returns("700");
 
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(true);
             bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
@@ -759,7 +759,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncReturnsFalseAndScheduleDetailsAddedToQueue_ThenLogWithMessageNotAdded()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
-            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
+            A.CallTo(() => fakeConfiguration["BessSizeInMB"]).Returns("700");
 
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(false);
 
@@ -785,7 +785,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public async Task WhenCheckConfigFrequencyAndFileSizeIsGreater_ThenMessageNotAddedToQueue()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
-            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
+            A.CallTo(() => fakeConfiguration["BessSizeInMB"]).Returns("700");
 
             var fakeScsList = GetEmptySalesCatalogueDataProductResponses();
             fakeScsList.Add(new()
@@ -870,7 +870,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncIsSuccessfulAndConfigurationSettingsHasInvalidCell_ThenLogDetails()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
-            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
+            A.CallTo(() => fakeConfiguration["BessSizeInMB"]).Returns("700");
 
             bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSettingWithInvalidEncCell(), GetFakeSalesCatalogueDataProductResponse());
 
@@ -924,7 +924,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             fakeConfiguration["AioCells"] = "GB800001";
 
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
-            A.CallTo(() => fakeConfiguration["BESSizeInMB"]).Returns("700");
+            A.CallTo(() => fakeConfiguration["BessSizeInMB"]).Returns("700");
 
             var salesCatalogueDataProductResponse = GetFakeSalesCatalogueDataProductResponse();
             salesCatalogueDataProductResponse.Add(new()

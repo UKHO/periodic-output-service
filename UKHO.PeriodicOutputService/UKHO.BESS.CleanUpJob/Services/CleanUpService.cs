@@ -15,7 +15,7 @@ namespace UKHO.BESS.CleanUpJob.Services
         private readonly IFileSystem fileSystem;
         private readonly string homeDirectoryPath;
 
-        private const string BESPOKEFOLDERNAME = "BespokeFolderName";
+        private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
 
         public CleanUpService(IConfiguration configuration, ILogger<CleanUpService> logger, IOptions<CleanUpConfiguration> cleanUpConfig, IFileSystem fileSystem)
@@ -24,7 +24,7 @@ namespace UKHO.BESS.CleanUpJob.Services
             this.cleanUpConfig = cleanUpConfig ?? throw new ArgumentNullException(nameof(cleanUpConfig));
             this.fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             homeDirectoryPath = configuration == null ? throw new ArgumentNullException(nameof(configuration))
-                                : Path.Combine(configuration[HOME]!, configuration[BESPOKEFOLDERNAME]!);
+                                : Path.Combine(configuration[HOME]!, configuration[BESSFOLDERNAME]!);
         }
 
         public string CleanUpHistoricFoldersAndFiles()

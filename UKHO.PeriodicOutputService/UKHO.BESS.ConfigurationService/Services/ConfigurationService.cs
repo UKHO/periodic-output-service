@@ -260,7 +260,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize!.Value);
 
-                        int BESSize = Convert.ToInt16(configuration["BESSizeInMB"]);
+                        int BESSize = Convert.ToInt16(configuration["BessSizeInMB"]);
 
                         //Bespoke will not create if size is large
                         if (fileSizeInMb > BESSize)

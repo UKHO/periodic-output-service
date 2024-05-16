@@ -41,7 +41,7 @@ namespace UKHO.BESS.BuilderService.Services
         private const string PERMITXMLFILE = "Permit.xml";
         private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
         private const string DEFAULTMIMETYPE = "application/octet-stream";
-        private const string BESSFOLDERNAME = "BESSFolderName";
+        private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption)
