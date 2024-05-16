@@ -32,7 +32,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => fakeHttpClientFactory.CreateClient(A<string>.Ignored)).Returns(httpClient);
             salesCatalogueClient = new SalesCatalogueClient(fakeHttpClientFactory);
 
-            var result = salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Get, "", "", httpClient.BaseAddress.ToString());
+            var result = salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Get, null, "", httpClient.BaseAddress.ToString());
             var deSerializedResult = JsonConvert.DeserializeObject<HttpResponseMessage>(result.Result.Content.ReadAsStringAsync().Result);
 
             result.Result.StatusCode.Should().Be(HttpStatusCode.OK);
