@@ -62,7 +62,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             {
                 foreach (var product in products!)
                 {
-                    await tableClient.DeleteEntityAsync("BESConfig", exchangeSetStandard + "|" + product);
+                    await tableClient.DeleteEntityAsync("PortOfIndia", exchangeSetStandard + "|" + product);
                 }
             }
         }
