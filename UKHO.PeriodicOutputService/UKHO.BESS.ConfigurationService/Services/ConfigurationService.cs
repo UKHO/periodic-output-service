@@ -115,8 +115,8 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                                 if (!string.IsNullOrEmpty(warnings.ToString()))
                                     logger.LogWarning(EventIds.BessConfigIsNotEnable.ToEventId(),
-                                        "BESS config file : {fileName} will be skipped for exchange set creation since the attribute value for IsEnabled is not Yes | _X-Correlation-ID : {CorrelationId}",
-                                        fileName, CommonHelper.CorrelationID);
+                                        "BESS config file : {fileName} will be skipped for exchange set creation since the attribute value for IsEnabled is not Yes. Message : {Message} | _X-Correlation-ID : {CorrelationId}",
+                                        fileName, warnings, CommonHelper.CorrelationID);
                             }
                             else
                             {
