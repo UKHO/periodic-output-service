@@ -14,7 +14,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
         this.azureMessageQueueHelper = azureMessageQueueHelper ?? throw new ArgumentNullException(nameof(azureMessageQueueHelper));
     }
 
-    public async Task<bool> SetConfigQueueMessageModelAndAddToQueueAsync(BessConfig bessConfig, IEnumerable<string> encCellNames, int? fileSize)
+    public async Task<bool> SetConfigQueueMessageModelAndAddToQueueAsync(BessConfig bessConfig, IEnumerable<string> encCellNames, long? fileSize)
     {
         if (bessConfig == null)
         {

@@ -733,7 +733,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
             A.CallTo(() => fakeConfiguration["BessSizeInMB"]).Returns("700");
 
-            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(true);
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<long>.Ignored)).Returns(true);
             bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync(A<string>.Ignored))
@@ -742,7 +742,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored))
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<long>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -761,7 +761,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
             A.CallTo(() => fakeConfiguration["BessSizeInMB"]).Returns("700");
 
-            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored)).Returns(false);
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<long>.Ignored)).Returns(false);
 
             bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
 
@@ -819,7 +819,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     "{OriginalFormat}"].ToString() ==
                 "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file : {FileName} | " + "_X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
-            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<IEnumerable<string>>.Ignored, A<int>.Ignored)).MustNotHaveHappened();
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<IEnumerable<string>>.Ignored, A<long>.Ignored)).MustNotHaveHappened();
 
             result.Should().BeTrue();
         }
@@ -834,7 +834,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, false)).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<int>.Ignored))
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<long>.Ignored))
                 .MustNotHaveHappened();
 
             result.Should().BeTrue();

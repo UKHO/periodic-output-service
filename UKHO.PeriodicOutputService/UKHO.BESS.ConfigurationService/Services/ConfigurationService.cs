@@ -256,9 +256,14 @@ namespace UKHO.BESS.ConfigurationService.Services
                             continue;
                         }
 
-                        int? totalFileSize = encCells.Select(i => i.Item2).Sum();
+                        long totalFileSize = 0;
 
-                        double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize!.Value);
+                        foreach (var encCell in encCells)
+                        {
+                            totalFileSize += (long)encCell.Item2!;
+                        }
+
+                        double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize!);
 
                         int BESSize = Convert.ToInt16(configuration["BessSizeInMB"]);
 

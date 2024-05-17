@@ -66,7 +66,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 });
         }
 
-        public static double ConvertBytesToMegabytes(int bytes)
+        public static double ConvertBytesToMegabytes(long bytes)
         {
             double byteSize = 1024f;
             return (bytes / byteSize) / byteSize;
