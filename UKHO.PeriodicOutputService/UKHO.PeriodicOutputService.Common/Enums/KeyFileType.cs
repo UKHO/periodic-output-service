@@ -2,8 +2,7 @@
 public enum KeyFileType
 {
     KEY_TEXT = 1,
-    KEY_XML = 2,
-    PERMIT_XML = 3,
-    NONE = 4
+    PERMIT_XML = 2,
+    NONE = 3
 }
 

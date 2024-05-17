@@ -56,7 +56,7 @@ namespace UKHO.BESS.ConfigurationService.Validation
                     RuleFor(config => config.KeyFileType)
                         .Must(keyFileType => IsValidKeyFileType(keyFileType.ToUpper()))
                         .WithMessage(
-                            "Attribute value is invalid. Expected value is KEY_TEXT, KEY_XML, PERMIT_XML or NONE");
+                            "Attribute value is invalid. Expected value is KEY_TEXT, PERMIT_XML or NONE");
                 });
 
             RuleFor(config => config.AllowedUsers).Must((config, s) => IsAclProvided(config)).WithMessage(ValidationMessageInvalidAcl);
