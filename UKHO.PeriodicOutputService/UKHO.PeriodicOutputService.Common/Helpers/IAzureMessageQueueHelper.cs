@@ -2,5 +2,5 @@
 
 public interface IAzureMessageQueueHelper
 {
-    Task AddMessageAsync(string message, string configName, string fileName);
+    Task AddMessageAsync(string message, string configName, string fileName, string builderServiceCorrelationId);
 }

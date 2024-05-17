@@ -114,9 +114,9 @@ namespace UKHO.BESS.ConfigurationService.Services
                                         fileName, errors, CommonHelper.CorrelationID);
 
                                 if (!string.IsNullOrEmpty(warnings.ToString()))
-                                    logger.LogWarning(EventIds.BessConfigInvalidAttributes.ToEventId(),
-                                        "BESS config file : {fileName} will be skipped for exchange set creation since the attribute value for IsEnabled is not Yes | _X-Correlation-ID : {CorrelationId}",
-                                        fileName, CommonHelper.CorrelationID);
+                                    logger.LogWarning(EventIds.BessConfigIsNotEnable.ToEventId(),
+                                        "BESS config file : {fileName} will be skipped for exchange set creation since the attribute value for IsEnabled is not Yes. Message : {Message} | _X-Correlation-ID : {CorrelationId}",
+                                        fileName, warnings, CommonHelper.CorrelationID);
                             }
                             else
                             {
@@ -256,11 +256,16 @@ namespace UKHO.BESS.ConfigurationService.Services
                             continue;
                         }
 
-                        int? totalFileSize = encCells.Select(i => i.Item2).Sum();
+                        long totalFileSize = 0;
 
-                        double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize!.Value);
+                        foreach (var encCell in encCells)
+                        {
+                            totalFileSize += (long)encCell.Item2!;
+                        }
 
-                        int BESSize = Convert.ToInt16(configuration["BESSizeInMB"]);
+                        double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize!);
+
+                        int BESSize = Convert.ToInt16(configuration["BessSizeInMB"]);
 
                         //Bespoke will not create if size is large
                         if (fileSizeInMb > BESSize)

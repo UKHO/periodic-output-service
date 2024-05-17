@@ -11,7 +11,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
     [TestFixture]
     public class PksApiClientTests
     {
-        private IPksApiClient pksApiClient;
+        private IPksApiClient? pksApiClient;
         private IHttpClientFactory fakeHttpClientFactory;
 
         [SetUp]

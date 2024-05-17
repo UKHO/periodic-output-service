@@ -785,7 +785,7 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// </summary>
         PermitFileCreationCompleted = 809155,
 
-        // <summary>
+        /// <summary>
         /// 809156 - Bess batch creation started
         /// </summary>
         BessBatchCreationStarted = 809156,
@@ -798,7 +798,22 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809158 - Bess batch creation failed
         /// </summary>
-        BessBatchCreationFailed = 809158
+        BessBatchCreationFailed = 809158,
+
+        /// <summary>
+        /// 809159 - Request for retrying file share service endpoint
+        /// </summary>
+        RetryHttpClientFSSRequest = 809159,
+
+        /// <summary>
+        /// 809160 - Request for retrying exchange set service endpoint
+        /// </summary>
+        RetryHttpClientESSRequest = 809160,
+
+        /// <summary>
+        /// 809161 - Bess config is not Enable
+        /// </summary>
+        BessConfigIsNotEnable = 809161
     }
 
     public static class EventIdExtensions

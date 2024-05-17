@@ -19,7 +19,7 @@ public class AzureMessageQueueHelper : IAzureMessageQueueHelper
         this.bessStorageConfiguration = bessStorageConfiguration ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
     }
 
-    public async Task AddMessageAsync(string message, string configName, string fileName)
+    public async Task AddMessageAsync(string message, string configName, string fileName, string builderServiceCorrelationId)
     {
         // Create the queue client.
         var queueClient = new QueueClient(bessStorageConfiguration.Value.ConnectionString, bessStorageConfiguration.Value.QueueName);
@@ -32,6 +32,6 @@ public class AzureMessageQueueHelper : IAzureMessageQueueHelper
         // Send a message to the queue
         await queueClient.SendMessageAsync(messageBase64String);
 
-        logger.LogInformation(EventIds.BessConfigPropertiesAddedInQueue.ToEventId(), "Added message in Queue:{queue}, Filename:{filename}, Configname:{configname} and _X-Correlation-ID:{CorrelationId}", bessStorageConfiguration.Value.QueueName, fileName, configName, CommonHelper.CorrelationID);
+        logger.LogInformation(EventIds.BessConfigPropertiesAddedInQueue.ToEventId(), "Added message in Queue:{queue}, Filename:{filename}, Configname:{configname}, BuilderService_X-Correlation-ID:{builderServiceCorrelationId} and _X-Correlation-ID:{CorrelationId}", bessStorageConfiguration.Value.QueueName, fileName, configName, builderServiceCorrelationId, CommonHelper.CorrelationID);
     }
 }

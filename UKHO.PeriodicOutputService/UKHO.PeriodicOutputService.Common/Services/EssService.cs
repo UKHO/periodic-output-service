@@ -95,7 +95,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             if (httpResponse.IsSuccessStatusCode)
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
-                _logger.LogInformation(EventIds.GetProductDataProductVersionCompleted.ToEventId(), "ESS request to create exhchange set for product version completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.GetProductDataProductVersionCompleted.ToEventId(), "ESS request to create exchange set for product version completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 ExchangeSetResponseModel? exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
 
                 return exchangeSetResponseModel;

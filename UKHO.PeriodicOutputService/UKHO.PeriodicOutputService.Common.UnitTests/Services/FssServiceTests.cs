@@ -39,15 +39,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 BaseUrl = "http://test.com",
                 FssClientId = "8YFGEFI78TYIUGH78YGHR5",
                 BatchStatusPollingCutoffTime = "0.1",
-                BatchStatusPollingDelayTime = "1000",
+                BatchStatusPollingDelayTime = "20",
                 BatchStatusPollingCutoffTimeForAIO = "0.1",
-                BatchStatusPollingDelayTimeForAIO = "1000",
-                BatchStatusPollingCutoffTimeForBES = "0.1",
-                BatchStatusPollingDelayTimeForBES = "1000",
+                BatchStatusPollingDelayTimeForAIO = "20",
+                BatchStatusPollingCutoffTimeForBESS = "0.1",
+                BatchStatusPollingDelayTimeForBESS = "20",
                 PosReadUsers = "",
                 PosReadGroups = "public",
                 BlockSizeInMultipleOfKBs = 4096,
-                BespokeExchangeSetFileFolder = "V01X01",
                 EncRoot = "ENC_ROOT",
                 ReadMeFileName = "README.TXT"
             });
@@ -186,9 +185,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\":\"CommitInProgress\"}")))
                 });
-
-            _fakeFssApiConfiguration.Value.BatchStatusPollingCutoffTime = "0.1";
-            _fakeFssApiConfiguration.Value.BatchStatusPollingDelayTime = "500";
 
             Assert.ThrowsAsync<FulfilmentException>(
                 () => _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType));
@@ -784,7 +780,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
         #region SearchReadMeFilePath
         [Test]
-        public void WhenReadMeFileNotFound_ThenReturnFulfilmentException()
+        public async Task WhenReadMeFileNotFound_ThenReturnFulfilmentException()
         {
             SearchBatchResponse searchBatchResponse = new();
             string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
@@ -802,20 +798,19 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "8k0997d5-8905-43fa-9009-9c38b2007f81", invalidReadMeSearchFilterQuery))
-                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
+            Func<Task> act = async () => { await _fssService.SearchReadMeFilePathAsync("8k0997d5-8905-43fa-9009-9c38b2007f81", invalidReadMeSearchFilterQuery); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching readme.txt file with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching readme.txt file with uri {RequestUri} responded with {StatusCode} for _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
-        public void WhenInvalidSearchReadMeFileRequest_ThenReturnFulfilmentException()
+        public async Task WhenInvalidSearchReadMeFileRequest_ThenReturnFulfilmentException()
         {
-            string batchId = "a07537ff-ffa2-4565-8f0e-96e61e70a9fc";
             var searchBatchResponse = GetSearchBatchEmptyResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
@@ -831,20 +826,19 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync(batchId, string.Empty, readMeSearchFilterQuery))
-                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ReadMeTextFileNotFound.ToEventId());
+            Func<Task> act = async () => { await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ReadMeTextFileNotFound.ToEventId());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching readme.txt file not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching readme.txt file not found for _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
-        public void WhenMultipleFilesSearchReadMeFileRequest_ThenReturnFulfilmentException()
+        public async Task WhenMultipleFilesSearchReadMeFileRequest_ThenReturnFulfilmentException()
         {
-            string batchId = "a07537ff-ffa2-4565-8f0e-96e61e70a9fc";
             var searchBatchResponse = GetMultipleFilesSearchBatchResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
@@ -860,13 +854,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            FluentActions.Invoking(async () => await _fssService.SearchReadMeFilePathAsync(batchId, string.Empty, readMeSearchFilterQuery))
-                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ReadMeTextFileNotFound.ToEventId());
-
+            Func<Task> act = async () => { await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId());
+           
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching readme.txt file, multiple files are found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching readme.txt file, multiple files are found for _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
@@ -875,7 +869,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             string accessTokenParam = null;
             string uriParam = null;
-            string batchId = "a07537ff-ffa2-4565-8f0e-96e61e70a9fc";
             var searchReadMeFileName = @"batch/a07537ff-ffa2-4565-8f0e-96e61e70a9fc/files/README.TXT";
 
             var searchBatchResponse = GetReadMeSearchBatchResponse();
@@ -892,7 +885,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                })
                .Returns(httpResponse);
 
-            var response = await _fssService.SearchReadMeFilePathAsync(batchId, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc", readMeSearchFilterQuery);
+            var response = await _fssService.SearchReadMeFilePathAsync("1a7537ff-ffa2-4565-8f0e-96e61e70a9fc", readMeSearchFilterQuery);
             string expectedReadMeFilePath = @"batch/a07537ff-ffa2-4565-8f0e-96e61e70a9fc/files/README.TXT";
             response.Should().NotBeNull();
             expectedReadMeFilePath.Should().Be(searchReadMeFileName);
@@ -906,7 +899,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             string accessTokenParam = null;
             string uriParam = null;
-            string batchId = "c4af46f5-1b41-4294-93f9-dda87bf8ab96";
             _fakeFssApiConfiguration.Value.ReadMeFileName = "ReadMe.txt";
             string readMeFilePath = @"batch/c4af46f5-1b41-4294-93f9-dda87bf8ab96/files/README.TXT";
             string exchangeSetRootPath = @"C:\\HOME";
@@ -914,7 +906,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var searchBatchResponse = GetReadMeFileDetails();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))), RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://test.com") } };
-            httpResponse.Headers.Add("Server", "test/10.0");
+            httpResponse.Headers.Add("Server", "Windows-Azure-Blob/10.0");
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
             A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
@@ -926,17 +918,22 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                .Returns(httpResponse);
             A.CallTo(() => _fileSystemHelper.DownloadReadmeFile(A<string>.Ignored, A<Stream>.Ignored)).Returns(true);
 
-            var response = await _fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc");
+            var response = await _fssService.DownloadReadMeFileAsync(readMeFilePath, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc");
 
             response.Should().Be(true);
+
+            A.CallTo(_fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "File share service download readme.txt file redirected with uri:{requestUri} responded with 307 code for _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
         }
 
         [Test]
-        public void WhenInvalidDownloadReadMeFileRequest_ThenReturnFulfilmentException()
+        public async Task WhenInvalidDownloadReadMeFileRequest_ThenReturnFulfilmentException()
         {
             string accessTokenParam = null;
             string uriParam = null;
-            string batchId = "c4af46f5-1b41-4294-93f9-dda87bf8ab96";
 
             _fakeFssApiConfiguration.Value.ReadMeFileName = "ReadMe.txt";
 
@@ -958,13 +955,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                })
                .Returns(httpResponse);
 
-            FluentActions.Invoking(async () => await _fssService.DownloadReadMeFileAsync(readMeFilePath, batchId, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc"))
-                .Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
+            Func<Task> act = async () => { await _fssService.DownloadReadMeFileAsync(readMeFilePath, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc"); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
         #endregion
@@ -981,7 +978,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
-                    StatusCode = System.Net.HttpStatusCode.OK,
+                    StatusCode = HttpStatusCode.OK,
 
                     RequestMessage = new HttpRequestMessage()
                     {
@@ -1160,7 +1157,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         #endregion
 
         #region GetSearchBatchEmptyResponse
-        private SearchBatchResponse GetSearchBatchEmptyResponse()
+        private static SearchBatchResponse GetSearchBatchEmptyResponse()
         {
             return new SearchBatchResponse()
             {
@@ -1178,7 +1175,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         #endregion
 
         #region GetReadMeFileDetails
-        private String GetReadMeFileDetails()
+        private static string GetReadMeFileDetails()
         {
             StringBuilder sb = new StringBuilder();
             string lineTwo = "Version: Published Week 22 / 21 dated 03 - 06 - 2021";
