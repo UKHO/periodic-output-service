@@ -11,9 +11,9 @@
     <NoWarn>1701;1702;8618;8602;8604;8600;8603</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="6.0.28" />
+    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="6.0.30" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="Data\ESS\ESSResponse.json">
