@@ -11,7 +11,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         public static Guid CorrelationID { get; set; } = Guid.NewGuid();
 
-        public static string GetCorrelationID(string? correlationId)
+        public static string GetCorrelationId(string? correlationId)
         {
             if (correlationId == string.Empty)
             {
