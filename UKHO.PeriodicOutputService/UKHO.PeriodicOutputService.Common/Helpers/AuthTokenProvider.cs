@@ -18,8 +18,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         private static readonly object _lock = new();
         private readonly ILogger<AuthTokenProvider> _logger;
         private readonly IDistributedCache _cache;
-        private readonly PksApiConfiguration _pksApiConfiguration;
-        private const string AccessTokenUrl = "/oauth2/v2.0/token";
 
         public AuthTokenProvider(IOptions<EssManagedIdentityConfiguration> essManagedIdentityConfiguration,
                                  IDistributedCache cache,
@@ -28,7 +26,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _essManagedIdentityConfiguration = essManagedIdentityConfiguration;
             _cache = cache;
             _logger = logger;
-            _pksApiConfiguration = pksApiConfiguration.Value ?? throw new ArgumentNullException(nameof(pksApiConfiguration));
         }
 
         public async Task<string> GetManagedIdentityAuthAsync(string resource, string? correlationId = null)
