@@ -152,7 +152,7 @@ namespace UKHO.BESS.BuilderService.Services
             ExchangeSetResponseModel exchangeSetResponseModel = new();
             if (configQueueMessage.Type == BessType.BASE.ToString())
             {
-                exchangeSetResponseModel = await essService.PostProductIdentifiersData((List<string>)configQueueMessage.EncCellNames, configQueueMessage.ExchangeSetStandard);
+                exchangeSetResponseModel = await essService.PostProductIdentifiersData((List<string>)configQueueMessage.EncCellNames, configQueueMessage.ExchangeSetStandard, configQueueMessage.CorrelationId);
             }
             else if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                      configQueueMessage.Type == BessType.CHANGE.ToString())
@@ -164,7 +164,7 @@ namespace UKHO.BESS.BuilderService.Services
                 exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest
                 {
                     ProductVersions = productVersions
-                }, configQueueMessage.ExchangeSetStandard);
+                }, configQueueMessage.ExchangeSetStandard, configQueueMessage.CorrelationId);
             }
 
             logger.LogInformation(EventIds.ProductsFetchedFromESS.ToEventId(),

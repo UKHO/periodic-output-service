@@ -110,7 +110,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBase_ThenPostProductIdentifiersEndpointIsCalledAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -214,7 +214,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsUpdateOrChange_ThenGetProductVersionsEndpointIsCalledAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
                 .Returns(FssBatchStatus.Committed);
@@ -337,7 +337,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsUpdateChangeAndKeyFileTypeIsText_ThenPostProductVersionsEndpointIsCalledAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -422,7 +422,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBaseAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -431,7 +431,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
             await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
-
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -456,7 +455,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -493,7 +492,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBaseAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -526,7 +525,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -563,7 +562,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBaseAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -605,7 +604,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsUpdateOrChangeAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -651,7 +650,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBaseAndBatchStatusIsNotCommitted_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
@@ -675,7 +674,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsUpdateOrChangeAndBatchStatusIsNotCommitted_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
@@ -713,7 +712,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenLoggingProductVersionDetailsInAzureFails_ThenCreateBespokeExchangeSetsThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -769,7 +768,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBaseAndBespokeExchangeSetIsCreated_ThenSerialENCContentIsUpdatedAndProductFileIsDeleted(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -817,6 +816,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "PRODUCT.TXT file and INFO folder deleted | _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
+
         [Test]
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
@@ -825,7 +825,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsUpdateOrChange_ThenGetProductVersionsEndpointIsCalledAndProductIsNotAvailableOnAzureTableBespokeExchangeSetIsCreatedWithZeroEditionAndUpdate(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(new List<ProductVersionEntities>() { });
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -914,7 +914,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
         public void WhenTypeIsUpdateOrChangeAndUpdateSerialFileAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -943,7 +943,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
         public void WhenTypeIsUpdateOrChangeAndDeleteProductTxtAndInfoFolderAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -972,7 +972,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsBaseAndValidReadmeSearchFilter_ThenStandardReadmeIsReplacedAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
         {
             string filePath = @"D:\\Downloads";
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1060,7 +1060,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsUpdateOrChangeAndValidReadmeSearchFilter_ThenStandardReadmeIsReplacedAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             string filePath = @"D:\\Downloads";
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1145,7 +1145,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBaseAndReadmeSearchFilterIsBLANK_ThenBlankReadmeReplacedAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1216,7 +1216,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
         public async Task WhenTypeIsUpdateOrChangeAndReadmeSearchFilterIsBLANK_ThenBlankReadmeReplacedAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1285,7 +1285,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBaseAndKeyFileTypeIsNone_ThenPostProductIdentifierEndpointIsCalledAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1334,7 +1334,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public async Task WhenTypeIsUpdateOrChangeAndEmptyBatchResponseFromESS_ThenBespokeExchangeSetCreatedAndAzureTableNotUpdated(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1391,7 +1391,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S63)]
         public void WhenTypeIsBaseAndCreationOfZipFileFails_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1439,7 +1439,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
         public void WhenTypeIsUpdateOrChangeAndCreationOfZipFileFails_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1485,7 +1485,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(ExchangeSetStandard.S63)]
         public async Task WhenTypeIsBaseAndCreationOfBatchFails_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1555,7 +1555,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
         public async Task WhenTypeIsUpdateOrChangeAndCreationOfBatchFails_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -1618,12 +1618,13 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "BESS batch creation failed with Exception: {ex} at {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
+
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
         [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBaseAndKeyFileTypeIsKey_Text_ThenPostProductIdentifiersEndpointIsCalledAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
         {
-            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
               .Returns(FssBatchStatus.Committed);
