@@ -164,7 +164,7 @@ namespace UKHO.BESS.BuilderService.Services
                 exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest
                 {
                     ProductVersions = productVersions
-                }, configQueueMessage.ExchangeSetStandard);
+                }, configQueueMessage.ExchangeSetStandard, configQueueMessage.CorrelationId);
             }
 
             logger.LogInformation(EventIds.ProductsFetchedFromESS.ToEventId(),
