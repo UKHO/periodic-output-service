@@ -349,7 +349,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
                 .Returns(GetProductKeyServiceResponse());
 
-            A.CallTo(() => fakePermitDecryption.GetPermitKeys(A<string>.Ignored)).Returns(new PermitKey() { ActiveKey = "12345", NextKey = "12345" });
+            A.CallTo(() => fakePermitDecryption.GetPermitKeys(A<string>.Ignored, A<string>.Ignored)).Returns(new PermitKey() { ActiveKey = "12345", NextKey = "12345" });
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.KEY_TEXT));
 

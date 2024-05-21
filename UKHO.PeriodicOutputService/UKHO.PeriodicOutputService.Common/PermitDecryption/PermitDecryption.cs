@@ -22,7 +22,7 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             this.s63Crypt = s63Crypt ?? throw new ArgumentNullException(nameof(s63Crypt));
         }
 
-        public PermitKey GetPermitKeys(string permit)
+        public PermitKey GetPermitKeys(string permit, string? correlationId = null)
         {
             if (string.IsNullOrEmpty(permit)) return null;
             try
@@ -33,7 +33,7 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 
                 if (cryptResult.Item1 != CryptResult.Ok)
                 {
-                    logger.LogError(EventIds.PermitDecryptionException.ToEventId(), "Permit decryption failed with Error : {cryptResult} at {DateTime} | _X-Correlation-ID : {CorrelationId}", cryptResult.Item1, DateTime.UtcNow, CommonHelper.CorrelationID);
+                    logger.LogError(EventIds.PermitDecryptionException.ToEventId(), "Permit decryption failed with Error : {cryptResult} at {DateTime} | _X-Correlation-ID : {CorrelationId}", cryptResult.Item1, DateTime.UtcNow, CommonHelper.GetCorrelationId(correlationId));
                     return null;
                 }
 
@@ -45,7 +45,7 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.PermitDecryptionException.ToEventId(), ex, "An error occurred while decrypting the permit string at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.PermitDecryptionException.ToEventId(), ex, "An error occurred while decrypting the permit string at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.GetCorrelationId(correlationId));
                 return null;
             }
         }
