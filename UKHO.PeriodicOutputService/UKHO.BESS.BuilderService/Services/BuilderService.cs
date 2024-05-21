@@ -70,13 +70,13 @@ namespace UKHO.BESS.BuilderService.Services
         {
             string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
 
-            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId);
+            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId, configQueueMessage.CorrelationId);
 
             string bessZipFileName = string.Format(fssApiConfig.Value.BessZipFileName, configQueueMessage.Name);
 
             RenameFile(essFileDownloadPath, essFiles, bessZipFileName);
 
-            ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+            ExtractExchangeSetZip(essFiles, essFileDownloadPath, configQueueMessage.CorrelationId);
 
             await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
 
@@ -84,7 +84,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
 
-            CreateZipFile(essFiles, essFileDownloadPath);
+            CreateZipFile(essFiles, essFileDownloadPath, configQueueMessage.CorrelationId);
 
             if (bool.Parse(configuration["IsFTRunning"]))
             {
@@ -114,11 +114,11 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 if (latestProductVersions.ProductVersions.Count > 0)
                 {
-                    await LogProductVersionsAsync(latestProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                    await LogProductVersionsAsync(latestProductVersions, configQueueMessage);
                 }
                 else
                 {
-                    logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
+                    logger.LogInformation(EventIds.EmptyBatchResponse.ToEventId(), "Latest edition/update details not found. | DateTime: {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
                 }
             }
         }
@@ -169,7 +169,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             logger.LogInformation(EventIds.ProductsFetchedFromESS.ToEventId(),
                 "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}",
-                configQueueMessage.EncCellNames.Count(), exchangeSetResponseModel.ExchangeSetCellCount, exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), DateTime.UtcNow, CommonHelper.CorrelationID);
+                configQueueMessage.EncCellNames.Count(), exchangeSetResponseModel.ExchangeSetCellCount, exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), DateTime.UtcNow, configQueueMessage.CorrelationId);
 
             return CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
         }
@@ -180,7 +180,7 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="essBatchId"></param>
         /// <returns></returns>
         /// <exception cref="FulfilmentException"></exception>
-        private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId)
+        private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSetAsync(string essBatchId, string correlationId)
         {
             string downloadPath = Path.Combine(homeDirectoryPath, essBatchId);
             List<FssBatchFile> files;
@@ -189,13 +189,13 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (fssBatchStatus == FssBatchStatus.Committed)
             {
-                files = await GetBatchFilesAsync(essBatchId);
+                files = await GetBatchFilesAsync(essBatchId, correlationId);
                 fileSystemHelper.CreateDirectory(downloadPath);
                 DownloadFiles(files, downloadPath);
             }
             else
             {
-                logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, fssBatchStatus, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.FssPollingCutOffTimeout.ToEventId(), "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, fssBatchStatus, correlationId);
                 throw new FulfilmentException(EventIds.FssPollingCutOffTimeout.ToEventId());
             }
 
@@ -208,7 +208,7 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="essBatchId"></param>
         /// <returns>List of FssBatchFile</returns>
         /// <exception cref="FulfilmentException"></exception>
-        private async Task<List<FssBatchFile>> GetBatchFilesAsync(string essBatchId)
+        private async Task<List<FssBatchFile>> GetBatchFilesAsync(string essBatchId, string correlationId)
         {
             GetBatchResponseModel batchDetail = await fssService.GetBatchDetails(essBatchId);
             List<FssBatchFile> batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href, FileSize = a.FileSize }).ToList();
@@ -218,7 +218,7 @@ namespace UKHO.BESS.BuilderService.Services
                 return batchFiles;
             }
 
-            logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found in batch or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.UtcNow, CommonHelper.CorrelationID);
+            logger.LogError(EventIds.ErrorFileFoundInBatch.ToEventId(), "Either no files found in batch or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", essBatchId, DateTime.UtcNow, correlationId);
             throw new FulfilmentException(EventIds.ErrorFileFoundInBatch.ToEventId());
         }
 
@@ -242,22 +242,22 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="fileDetails"></param>
         /// <param name="downloadPath"></param>
         /// <exception cref="Exception"></exception>
-        private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath)
+        private void ExtractExchangeSetZip(List<FssBatchFile> fileDetails, string downloadPath, string correlationId)
         {
             Parallel.ForEach(fileDetails, file =>
             {
                 try
                 {
-                    logger.LogInformation(EventIds.ExtractZipFileStarted.ToEventId(), "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, CommonHelper.CorrelationID);
+                    logger.LogInformation(EventIds.ExtractZipFileStarted.ToEventId(), "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, correlationId);
 
                     fileSystemHelper.ExtractZipFile(Path.Combine(downloadPath, file.FileName), Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), true);
 
-                    logger.LogInformation(EventIds.ExtractZipFileCompleted.ToEventId(), "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, CommonHelper.CorrelationID);
+                    logger.LogInformation(EventIds.ExtractZipFileCompleted.ToEventId(), "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, correlationId);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(EventIds.ExtractZipFileFailed.ToEventId(), "Extracting zip file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
-                    throw new Exception($"Extracting zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+                    logger.LogError(EventIds.ExtractZipFileFailed.ToEventId(), "Extracting zip file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, ex.Message, correlationId);
+                    throw new FulfilmentException(EventIds.ExtractZipFileFailed.ToEventId());
                 }
             });
         }
@@ -268,22 +268,22 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="fileDetails"></param>
         /// <param name="downloadPath"></param>
         /// <exception cref="Exception"></exception>
-        private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath)
+        private void CreateZipFile(List<FssBatchFile> fileDetails, string downloadPath, string correlationId)
         {
             Parallel.ForEach(fileDetails, file =>
             {
                 try
                 {
-                    logger.LogInformation(EventIds.ZipFileCreationStarted.ToEventId(), "Creating zip file of directory {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, CommonHelper.CorrelationID);
+                    logger.LogInformation(EventIds.ZipFileCreationStarted.ToEventId(), "Creating zip file of directory {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, correlationId);
 
                     fileSystemHelper.CreateZipFile(Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName)), Path.Combine(downloadPath, file.FileName), true);
 
-                    logger.LogInformation(EventIds.ZipFileCreationCompleted.ToEventId(), "Creating zip file of directory {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, CommonHelper.CorrelationID);
+                    logger.LogInformation(EventIds.ZipFileCreationCompleted.ToEventId(), "Creating zip file of directory {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, correlationId);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(EventIds.ZipFileCreationFailed.ToEventId(), "Creating zip file of directory {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID: {CorrelationId}", file.FileName, DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
-                    throw new Exception($"Creating zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+                    logger.LogError(EventIds.ZipFileCreationFailed.ToEventId(), "Creating zip file of directory {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID: {CorrelationId}", file.FileName, DateTime.UtcNow, ex.Message, correlationId);
+                    throw new FulfilmentException(EventIds.ZipFileCreationFailed.ToEventId());
                 }
             });
         }
@@ -303,7 +303,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             try
             {
-                logger.LogInformation(EventIds.BessBatchCreationStarted.ToEventId(), "BESS batch creation started at {DateTime} | _X-Correlation-ID: {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessBatchCreationStarted.ToEventId(), "BESS batch creation started at {DateTime} | _X-Correlation-ID: {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
 
                 if (configQueueMessage.Type.ToUpper().Equals(BessType.UPDATE.ToString()))
                 {
@@ -327,11 +327,11 @@ namespace UKHO.BESS.BuilderService.Services
 
                 isCommitted = await fssService.CommitBatch(bessBatchId, filePaths, batchType);
 
-                logger.LogInformation(EventIds.BessBatchCreationCompleted.ToEventId(), "BESS batch {bessBatchId} is created and added to FSS with status: {isCommitted} at {DateTime} | _X-Correlation-ID: {CorrelationId}", bessBatchId, isCommitted, DateTime.UtcNow, CommonHelper.CorrelationID);
+                logger.LogInformation(EventIds.BessBatchCreationCompleted.ToEventId(), "BESS batch {bessBatchId} is created and added to FSS with status: {isCommitted} at {DateTime} | _X-Correlation-ID: {CorrelationId}", bessBatchId, isCommitted, DateTime.UtcNow, configQueueMessage.CorrelationId);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessBatchCreationFailed.ToEventId(), "BESS batch creation failed with Exception: {ex} at {DateTime} | _X-Correlation-ID : {CorrelationId}", ex, DateTime.UtcNow, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessBatchCreationFailed.ToEventId(), "BESS batch creation failed with Exception: {ex} at {DateTime} | _X-Correlation-ID : {CorrelationId}", ex, DateTime.UtcNow, configQueueMessage.CorrelationId);
 
                 throw new FulfilmentException(EventIds.BessBatchCreationFailed.ToEventId());
             }
@@ -433,20 +433,20 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="exchangeSetStandard"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        private async Task LogProductVersionsAsync(ProductVersionsRequest productVersionsRequest, string configName, string exchangeSetStandard)
+        private async Task LogProductVersionsAsync(ProductVersionsRequest productVersionsRequest, ConfigQueueMessage configQueueMessage)
         {
             try
             {
                 await logger.LogStartEndAndElapsedTime(EventIds.LoggingProductVersionsStarted,
                     EventIds.LoggingProductVersionsCompleted,
                     "Logging product version details for Config Name:{configName} | {DateTime} | _X-Correlation-ID:{CorrelationId}",
-                    async () => await azureTableStorageHelper.SaveBessProductVersionDetailsAsync(productVersionsRequest.ProductVersions, configName, exchangeSetStandard),
-                    configName, DateTime.UtcNow, CommonHelper.CorrelationID);
+                    async () => await azureTableStorageHelper.SaveBessProductVersionDetailsAsync(productVersionsRequest.ProductVersions, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard),
+                    configQueueMessage.Name, DateTime.UtcNow, configQueueMessage.CorrelationId);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.LoggingProductVersionsFailed.ToEventId(), "Logging product version failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
-                throw new Exception($"Logging product version failed for Config Name:{configName} at {DateTime.UtcNow} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+                logger.LogError(EventIds.LoggingProductVersionsFailed.ToEventId(), "Logging product version failed | {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, configQueueMessage.CorrelationId);
+                throw new FulfilmentException(EventIds.LoggingProductVersionsFailed.ToEventId());
             }
         }
 
@@ -554,7 +554,7 @@ namespace UKHO.BESS.BuilderService.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessSerialEncUpdateFailed.ToEventId(), "SERIAL.ENC file update operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessSerialEncUpdateFailed.ToEventId(), "SERIAL.ENC file update operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, correlationId);
                 throw new FulfilmentException(EventIds.BessSerialEncUpdateFailed.ToEventId());
             }
 
@@ -581,7 +581,7 @@ namespace UKHO.BESS.BuilderService.Services
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId(), "PRODUCT.TXT file and INFO folder delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId(), "PRODUCT.TXT file and INFO folder delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, correlationId);
                 throw new FulfilmentException(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId());
             }
 
