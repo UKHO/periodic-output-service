@@ -26,8 +26,6 @@ namespace UKHO.BESS.BuilderService
             ConfigQueueMessage configQueueMessage = message.Body.ToObjectFromJson<ConfigQueueMessage>();
             try
             {
-                //CommonHelper.CorrelationID = Guid.Parse(configQueueMessage.CorrelationId);
-
                 await logger.LogStartEndAndElapsedTimeAsync(EventIds.BessBuilderServiceStarted,
                     EventIds.BessBuilderServiceCompleted,
                     "Create Bespoke Exchange Set Started for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",

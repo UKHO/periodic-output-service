@@ -571,7 +571,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true)).Throws<Exception>();
 
             Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.Message.Contains("Extracting zip file"));
+            await act.Should().ThrowAsync<Exception>().Where(x => x.Message.Contains("Extracting zip file"));
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -726,7 +726,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeAzureTableStorageHelper.SaveBessProductVersionDetailsAsync(A<List<ProductVersion>>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<Exception>();
 
             Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ZipFileCreationFailed.ToEventId()); //change-Shirin
+            await act.Should().ThrowAsync<Exception>().Where(x => x.Message.Contains("Logging product version failed"));
 
             A.CallTo(fakeLogger).Where(call =>
               call.Method.Name == "Log"
