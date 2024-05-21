@@ -52,7 +52,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
-        [TestCase("s63", "base", "key_XML", "avcs", "yes")]
+        [TestCase("s63", "base", "key_Text", "avcs", "yes")]
         [TestCase("s57", "change", "Permit_xml", "blank", "YeS")]
         [TestCase("s57", "upDate", "noNe", "query", "YES")]
         public void WhenConfigContainsCaseInsensitiveValidAttributes_ThenNoValidationErrorsAreFound(string exchangeSetStandard, string type, string keyFileType, string readMeSearchFilter, string isEnabled)
@@ -278,7 +278,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
 
         [Test]
         [TestCase("KEY_JSON")]
-        [TestCase("KEY-XML")]
+        [TestCase("KEY_XML")]
         public void WhenConfigContainsInvalidKeyFileType_ThenThrowValidationError(string keyFileType)
         {
             BessConfig bessConfig = GetBessConfig();
@@ -287,7 +287,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
 
             result.ShouldHaveValidationErrorFor(x => x.KeyFileType)
-                .WithErrorMessage("Attribute value is invalid. Expected value is KEY_TEXT, KEY_XML, PERMIT_XML or NONE");
+                .WithErrorMessage("Attribute value is invalid. Expected value is KEY_TEXT, PERMIT_XML or NONE");
         }
 
         [Test]

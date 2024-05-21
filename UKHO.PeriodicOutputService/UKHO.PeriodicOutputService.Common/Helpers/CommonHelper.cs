@@ -46,7 +46,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return Policy
                 .HandleResult<HttpResponseMessage>(r => r.StatusCode == HttpStatusCode.ServiceUnavailable)
                 .OrResult(r => r.StatusCode == HttpStatusCode.TooManyRequests)
-                .OrResult(r => r.StatusCode == HttpStatusCode.InternalServerError && requestType == "Sales Catalogue")
+                .OrResult(r => r.StatusCode == HttpStatusCode.InternalServerError && requestType == "File Share")
                 .WaitAndRetryAsync(retryCount, (retryAttempt) =>
                 {
                     return TimeSpan.FromSeconds(Math.Pow(sleepDuration, (retryAttempt - 1)));
@@ -66,10 +66,22 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 });
         }
 
-        public static double ConvertBytesToMegabytes(int bytes)
+        public static double ConvertBytesToMegabytes(long bytes)
         {
             double byteSize = 1024f;
             return (bytes / byteSize) / byteSize;
+        }
+
+        public static Dictionary<string, string> MimeTypeList()
+        {
+            Dictionary<string, string> mimeTypes = new()
+            {
+                { ".zip", "application/zip" },
+                { ".xml", "text/xml" },
+                { ".csv", "text/csv" },
+                { ".txt", "text/plain" }
+            };
+            return mimeTypes;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
     public class PermitDecryptionTests
     {
         private ILogger<Common.PermitDecryption.PermitDecryption> fakeLogger;
-        private IOptions<PermitConfiguration> fakePermitConfiguration;
+        private IOptions<PksApiConfiguration> fakePksApiConfiguration;
         private IS63Crypt fakeS63Crypt;
         private IPermitDecryption permitDecryption;
 
@@ -21,24 +21,24 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         public void Setup()
         {
             fakeLogger = A.Fake<ILogger<Common.PermitDecryption.PermitDecryption>>();
-            fakePermitConfiguration = A.Fake<IOptions<PermitConfiguration>>();
+            fakePksApiConfiguration = A.Fake<IOptions<PksApiConfiguration>>();
             fakeS63Crypt = A.Fake<IS63Crypt>();
 
-            fakePermitConfiguration.Value.PermitDecryptionHardwareId = "7E,A1,85,6E,2A";
+            fakePksApiConfiguration.Value.PermitDecryptionHardwareId = "7E,A1,85,6E,2A";
 
-            permitDecryption = new Common.PermitDecryption.PermitDecryption(fakeLogger, fakePermitConfiguration, fakeS63Crypt);
+            permitDecryption = new Common.PermitDecryption.PermitDecryption(fakeLogger, fakePksApiConfiguration, fakeS63Crypt);
         }
 
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullLogger = () => new Common.PermitDecryption.PermitDecryption(null, fakePermitConfiguration, fakeS63Crypt);
+            Action nullLogger = () => new Common.PermitDecryption.PermitDecryption(null, fakePksApiConfiguration, fakeS63Crypt);
             nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
 
-            Action nullPermitConfiguration = () => new Common.PermitDecryption.PermitDecryption(fakeLogger, null, fakeS63Crypt);
-            nullPermitConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("permitConfiguration");
+            Action nullPksApiConfiguration = () => new Common.PermitDecryption.PermitDecryption(fakeLogger, null, fakeS63Crypt);
+            nullPksApiConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("pksApiConfiguration");
 
-            Action nullS63Crypt = () => new Common.PermitDecryption.PermitDecryption(fakeLogger, fakePermitConfiguration, null);
+            Action nullS63Crypt = () => new Common.PermitDecryption.PermitDecryption(fakeLogger, fakePksApiConfiguration, null);
             nullS63Crypt.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("s63Crypt");
         }
 
@@ -81,7 +81,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<EventId>(1) == EventIds.PermitDecryptionException.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit decryption failed with Error : HWIDFmtErr"
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit decryption failed with Error : {cryptResult} at {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
@@ -99,7 +99,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<EventId>(1) == EventIds.PermitDecryptionException.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "An error occurred while decrypting the permit string."
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "An error occurred while decrypting the permit string at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 

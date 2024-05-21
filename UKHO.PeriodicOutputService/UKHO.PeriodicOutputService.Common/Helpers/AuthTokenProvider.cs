@@ -28,7 +28,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _essManagedIdentityConfiguration = essManagedIdentityConfiguration;
             _cache = cache;
             _logger = logger;
-            _pksApiConfiguration = pksApiConfiguration.Value ?? throw new ArgumentNullException(nameof(pksApiConfiguration)); ;
+            _pksApiConfiguration = pksApiConfiguration.Value ?? throw new ArgumentNullException(nameof(pksApiConfiguration));
         }
 
         public async Task<string> GetManagedIdentityAuthAsync(string resource)
