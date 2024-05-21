@@ -31,7 +31,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             string bodyJson;
             string uri = pksApiConfiguration.Value.BaseUrl + KeysEnc;
-            string accessToken = await authPksTokenProvider.GetManagedIdentityAuthAsync(pksApiConfiguration.Value.ClientId);
+            string accessToken = await authPksTokenProvider.GetManagedIdentityAuthAsync(pksApiConfiguration.Value.ClientId, correlationId);
 
             string payloadJson = JsonConvert.SerializeObject(productKeyServiceRequest);
 
