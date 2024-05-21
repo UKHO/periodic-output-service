@@ -66,7 +66,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
@@ -132,7 +132,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
@@ -175,7 +175,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
@@ -220,7 +220,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
@@ -257,7 +257,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored))
@@ -333,7 +333,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                            Href ="http://testaio1.com"
                        }
                    },
-
                }
             }
         };

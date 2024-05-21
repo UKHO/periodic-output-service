@@ -12,11 +12,9 @@ using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using UKHO.PeriodicOutputService.Common.Services;
 
-
 namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 {
     [TestFixture]
-
     public class FulfilmentDataServiceTests
     {
         private IFulfilmentDataService _fulfilmentDataService;
@@ -82,7 +80,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         [Test]
         public async Task Does_CreateAioExchangeSets_Executes_Successfully()
         {
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -124,7 +122,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
               .MustHaveHappened(2, Times.Exactly);
-
 
             A.CallTo(() => _fakeFileInfo.MoveTo(A<string>.Ignored))
               .MustHaveHappened(2, Times.Exactly);
@@ -173,13 +170,11 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creation of AIO base exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
                 ).MustHaveHappenedOnceExactly();
 
-
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Information
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
                 ).MustHaveHappenedOnceExactly();
-
 
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -223,13 +218,13 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
               ).MustHaveHappenedOnceExactly();
 
-            #endregion
+            #endregion Log checks
         }
 
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_Batch_Is_Not_Committed()
         {
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
             .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
@@ -238,7 +233,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             Assert.ThrowsAsync<FulfilmentException>(
                  () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
-
             A.CallTo(_fakeLogger).Where(call =>
                call.Method.Name == "Log"
                && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -246,11 +240,10 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                ).MustHaveHappenedOnceExactly();
         }
 
-
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_Extraction_Fails()
         {
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
@@ -289,7 +282,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_CreateIsoAndSha1ForExchangeSet_Fails()
         {
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
@@ -333,7 +326,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         {
             _fakeconfiguration["AioCells"] = string.Empty;
 
-
             Assert.ThrowsAsync<FulfilmentException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
@@ -343,15 +335,14 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "AIO cells are empty in configuration | {DateTime} | _X-Correlation-ID : {CorrelationId}"
                ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .MustNotHaveHappened();
         }
 
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_If_GetBatchFiles_Contains_FileName_Error()
         {
-
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -376,8 +367,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_If_GetBatchFiles_Contains_FileName_V01X01()
         {
-
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -397,13 +387,12 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "The configuration of the AIO cell is not synchronized with the ESS. V01X01 file found in AIO batch - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceOrMore();
-
         }
 
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_Logging_Product_Version_Details_In_Azure_Fails()
         {
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -428,13 +417,12 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               && call.GetArgument<LogLevel>(0) == LogLevel.Error
               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Logging product version failed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
               ).MustHaveHappenedOnceExactly();
-
         }
 
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_CreateExchangeSetZip_Fails()
         {
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
@@ -476,7 +464,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_AioExchangeSetCellCount_Is_Zero()
         {
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -495,7 +483,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         [Test]
         public void Does_CreateAioExchangeSets_Throws_Error_When_Requested_Invalid_Products_In_ExchangeSet()
         {
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored))
@@ -510,7 +498,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "ESS validation failed for {Count} products [{Products}] while creating update exchange set {DateTime} | _X-Correlation-ID : {CorrelationId}"
                ).MustHaveHappenedOnceExactly();
         }
-
 
         private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
         {
