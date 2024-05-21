@@ -189,7 +189,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (fssBatchStatus == FssBatchStatus.Committed)
             {
-                files = await GetBatchFilesAsync(essBatchId);
+                files = await GetBatchFilesAsync(essBatchId, correlationId);
                 fileSystemHelper.CreateDirectory(downloadPath);
                 DownloadFiles(files, downloadPath);
             }
