@@ -138,7 +138,7 @@ namespace UKHO.BESS.BuilderService.Services
 
                 List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest);
 
-                CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse);
+                CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse, configQueueMessage.CorrelationId);
             }
         }
 
@@ -606,9 +606,9 @@ namespace UKHO.BESS.BuilderService.Services
             return configQueueMessage;
         }
 
-        private void CreatePermitFile(KeyFileType keyFileType, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses)
+        private void CreatePermitFile(KeyFileType keyFileType, string filePath, List<ProductKeyServiceResponse> productKeyServiceResponses, string correlationId)
         {
-            logger.LogInformation(EventIds.PermitFileCreationStarted.ToEventId(), "Permit file creation started for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, CommonHelper.CorrelationID);
+            logger.LogInformation(EventIds.PermitFileCreationStarted.ToEventId(), "Permit file creation started for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, correlationId);
 
             if (keyFileType == KeyFileType.KEY_TEXT)
             {
@@ -617,7 +617,7 @@ namespace UKHO.BESS.BuilderService.Services
 
                 foreach (var productKeyServiceResponse in productKeyServiceResponses)
                 {
-                    PermitKey permitKey = permitDecryption.GetPermitKeys(productKeyServiceResponse.Key);
+                    PermitKey permitKey = permitDecryption.GetPermitKeys(productKeyServiceResponse.Key, correlationId);
 
                     if (permitKey != null)
                     {
@@ -646,7 +646,7 @@ namespace UKHO.BESS.BuilderService.Services
                 fileSystemHelper.CreateXmlFromObject(pKSXml, filePath, PERMITXMLFILE);
             }
 
-            logger.LogInformation(EventIds.PermitFileCreationCompleted.ToEventId(), "Permit file creation completed for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, CommonHelper.CorrelationID);
+            logger.LogInformation(EventIds.PermitFileCreationCompleted.ToEventId(), "Permit file creation completed for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, correlationId);
         }
 
         [ExcludeFromCodeCoverage]

@@ -127,7 +127,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
              .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(GetProductVersions);
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
               .Returns(GetProductKeyServiceResponse());
             A.CallTo(() => fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored))
                 .Returns(new List<string> { "Block_00001" });
@@ -231,7 +231,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
                 .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(GetProductVersions);
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
               .Returns(GetProductKeyServiceResponse());
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML));
@@ -346,10 +346,10 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
              .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(GetProductVersions);
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
                 .Returns(GetProductKeyServiceResponse());
 
-            A.CallTo(() => fakePermitDecryption.GetPermitKeys(A<string>.Ignored)).Returns(new PermitKey() { ActiveKey = "12345", NextKey = "12345" });
+            A.CallTo(() => fakePermitDecryption.GetPermitKeys(A<string>.Ignored, A<string>.Ignored)).Returns(new PermitKey() { ActiveKey = "12345", NextKey = "12345" });
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.KEY_TEXT));
 
@@ -721,7 +721,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
              .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(GetProductVersions);
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
               .Returns(GetProductKeyServiceResponse());
             A.CallTo(() => fakeAzureTableStorageHelper.SaveBessProductVersionDetailsAsync(A<List<ProductVersion>>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<Exception>();
 
@@ -834,7 +834,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
              .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(GetProductVersions);
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
               .Returns(GetProductKeyServiceResponse());
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML));
@@ -1006,7 +1006,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.DownloadReadMeFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                .MustHaveHappenedOnceExactly();
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -1094,7 +1094,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.DownloadReadMeFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -1177,7 +1177,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFileSystemHelper.CreateEmptyFileContent(A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -1248,7 +1248,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFileSystemHelper.CreateEmptyFileContent(A<string>.Ignored))
                .MustHaveHappenedOnceExactly();
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -1294,7 +1294,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
              .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(new List<ProductVersion>());
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
               .Returns(GetProductKeyServiceResponse());
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString()));
@@ -1308,7 +1308,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true))
                 .MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
                 .MustNotHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -1632,7 +1632,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
              .Returns(true);
-            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored))
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
              .Returns(GetProductKeyServiceResponse());
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.KEY_TEXT));
 
