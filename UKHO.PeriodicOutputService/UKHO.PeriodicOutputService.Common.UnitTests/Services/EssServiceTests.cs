@@ -90,7 +90,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to post productidentifiers to ESS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -123,7 +123,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustNotHaveHappened();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -151,7 +151,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -180,10 +180,9 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Exchange set not modified | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
-
 
         [Test]
         public async Task DoesGetProductDataSinceDateTime_Returns_ValidData_WhenValidProductIdentifiersArePassed()
@@ -215,7 +214,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustNotHaveHappened();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -248,7 +247,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "ESS request to create exhchange set for data since {SinceDateTime} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -275,7 +274,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to create exchange set for data since {SinceDateTime} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -326,7 +325,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "ESS request to create exchange set for product version completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
                ).MustHaveHappened();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -364,7 +363,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to create exchange set for product version | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -403,7 +402,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to post productidentifiers to ESS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -442,7 +441,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustNotHaveHappened();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -492,7 +491,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "ESS request to create exchange set for product version completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
                ).MustHaveHappened();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -530,7 +529,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -541,8 +540,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(HttpStatusCode.ServiceUnavailable, "ServiceUnavailable")]
         public void DoesGetProductDataSinceDateTime_Returns_FulfilmentException_When_Response_Status_Is_Not_Ok(HttpStatusCode statusCode, string content)
         {
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns("InvalidToken");
-            
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns("InvalidToken");
+
             A.CallTo(() => _fakeEssApiClient.GetProductDataSinceDateTime
             (A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()
@@ -619,7 +618,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Failed to create exchange set for product version | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
