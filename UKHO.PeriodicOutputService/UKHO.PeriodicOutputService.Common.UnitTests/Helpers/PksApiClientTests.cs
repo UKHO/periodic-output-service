@@ -13,6 +13,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
     {
         private IPksApiClient? pksApiClient;
         private IHttpClientFactory fakeHttpClientFactory;
+        private string fakeCorrelationId = Guid.NewGuid().ToString();
 
         [SetUp]
         public void Setup()
@@ -37,7 +38,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             pksApiClient = new PksApiClient(fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = pksApiClient.PostPksDataAsync("http://test.com", serializedProductIdentifierData, "asdfsa");
+            Task<HttpResponseMessage> result = pksApiClient.PostPksDataAsync("http://test.com", serializedProductIdentifierData, "asdfsa", fakeCorrelationId);
 
             List<ProductKeyServiceResponse> deSerializedResult = JsonConvert.DeserializeObject<List<ProductKeyServiceResponse>>(result.Result.Content.ReadAsStringAsync().Result);
 
@@ -60,7 +61,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             pksApiClient = new PksApiClient(fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = pksApiClient.PostPksDataAsync("http://test.com", "", null);
+            Task<HttpResponseMessage> result = pksApiClient.PostPksDataAsync("http://test.com", "", null, fakeCorrelationId);
 
             result.Result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }

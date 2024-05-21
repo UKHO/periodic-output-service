@@ -35,7 +35,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             string payloadJson = JsonConvert.SerializeObject(productKeyServiceRequest);
 
-            HttpResponseMessage httpResponseMessage = await pksApiClient.PostPksDataAsync(uri, payloadJson, accessToken);
+            HttpResponseMessage httpResponseMessage = await pksApiClient.PostPksDataAsync(uri, payloadJson, accessToken, correlationId);
 
             switch (httpResponseMessage.IsSuccessStatusCode)
             {

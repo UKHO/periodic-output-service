@@ -2,7 +2,6 @@
 {
     public interface IPksApiClient
     {
-        Task<HttpResponseMessage> PostPksDataAsync(string uri, string requestBody, string accessToken,
-            string? correlationId = null);
+        Task<HttpResponseMessage> PostPksDataAsync(string uri, string requestBody, string accessToken, string? correlationId = null);
     }
 }
