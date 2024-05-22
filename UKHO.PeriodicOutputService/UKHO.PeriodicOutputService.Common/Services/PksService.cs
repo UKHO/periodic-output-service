@@ -54,7 +54,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                         {
                             bodyJson = httpResponseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                            logger.LogError(EventIds.PostProductKeyDataToPksFailed.ToEventId(), "Failed to retrieve post product key data with | StatusCode : {StatusCode}| Errors : {ErrorDetails} for Product Key Service", httpResponseMessage.StatusCode.ToString(), bodyJson);
+                            logger.LogError(EventIds.PostProductKeyDataToPksFailed.ToEventId(), "Failed to retrieve post product key data with | StatusCode : {StatusCode}| Errors : {ErrorDetails} for Product Key Service | _X-Correlation-ID : {CorrelationId}", httpResponseMessage.StatusCode.ToString(), bodyJson, correlationId);
 
                             throw new FulfilmentException(EventIds.PostProductKeyDataToPksFailed.ToEventId());
                         }

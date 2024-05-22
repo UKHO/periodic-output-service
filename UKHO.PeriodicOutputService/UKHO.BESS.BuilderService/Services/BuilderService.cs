@@ -256,7 +256,7 @@ namespace UKHO.BESS.BuilderService.Services
                 catch (Exception ex)
                 {
                     logger.LogError(EventIds.ExtractZipFileFailed.ToEventId(), "Extracting zip file {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.UtcNow, ex.Message, correlationId);
-                    throw new Exception($"Extracting zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{correlationId}", ex);
+                    throw new FulfilmentException(EventIds.ExtractZipFileFailed.ToEventId());
                 }
             });
         }
@@ -282,7 +282,7 @@ namespace UKHO.BESS.BuilderService.Services
                 catch (Exception ex)
                 {
                     logger.LogError(EventIds.ZipFileCreationFailed.ToEventId(), "Creating zip file of directory {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID: {CorrelationId}", file.FileName, DateTime.UtcNow, ex.Message, correlationId);
-                    throw new Exception($"Creating zip file {file.FileName} failed at {DateTime.UtcNow} | _X-Correlation-ID:{correlationId}", ex);
+                    throw new FulfilmentException(EventIds.ZipFileCreationFailed.ToEventId());
                 }
             });
         }
@@ -449,7 +449,7 @@ namespace UKHO.BESS.BuilderService.Services
             catch (Exception ex)
             {
                 logger.LogError(EventIds.LoggingProductVersionsFailed.ToEventId(), "Logging product version failed | {DateTime} | {ErrorMessage} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, ex.Message, configQueueMessage.CorrelationId);
-                throw new Exception($"Logging product version failed for Config Name:{configQueueMessage.Name} at {DateTime.UtcNow} | _X-Correlation-ID:{configQueueMessage.CorrelationId}", ex);
+                throw new FulfilmentException(EventIds.LoggingProductVersionsFailed.ToEventId());
             }
         }
 
