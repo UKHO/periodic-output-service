@@ -82,7 +82,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
-                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken, correlationId);
+                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken, CommonHelper.GetCorrelationId(correlationId));
 
                 if (batchStatusResponse.IsSuccessStatusCode)
                 {
