@@ -109,8 +109,7 @@ namespace UKHO.BESS.BuilderService.Services
         /// <returns></returns>
         private async Task SaveLatestProductVersionDetailsAsync(ConfigQueueMessage configQueueMessage, ProductVersionsRequest latestProductVersions)
         {
-            if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
-                                 configQueueMessage.Type == BessType.CHANGE.ToString())
+            if (configQueueMessage.Type == BessType.UPDATE.ToString() || configQueueMessage.Type == BessType.CHANGE.ToString())
             {
                 if (latestProductVersions.ProductVersions.Count > 0)
                 {
@@ -185,13 +184,13 @@ namespace UKHO.BESS.BuilderService.Services
             string downloadPath = Path.Combine(homeDirectoryPath, essBatchId);
             List<FssBatchFile> files;
 
-            FssBatchStatus fssBatchStatus = await fssService.CheckIfBatchCommitted(essBatchId, RequestType.BESS);
+            FssBatchStatus fssBatchStatus = await fssService.CheckIfBatchCommitted(essBatchId, RequestType.BESS, correlationId);
 
             if (fssBatchStatus == FssBatchStatus.Committed)
             {
                 files = await GetBatchFilesAsync(essBatchId, correlationId);
                 fileSystemHelper.CreateDirectory(downloadPath);
-                DownloadFiles(files, downloadPath);
+                DownloadFiles(files, downloadPath, correlationId);
             }
             else
             {
@@ -210,7 +209,7 @@ namespace UKHO.BESS.BuilderService.Services
         /// <exception cref="FulfilmentException"></exception>
         private async Task<List<FssBatchFile>> GetBatchFilesAsync(string essBatchId, string correlationId)
         {
-            GetBatchResponseModel batchDetail = await fssService.GetBatchDetails(essBatchId);
+            GetBatchResponseModel batchDetail = await fssService.GetBatchDetails(essBatchId, correlationId);
             List<FssBatchFile> batchFiles = batchDetail.Files.Select(a => new FssBatchFile { FileName = a.Filename, FileLink = a.Links.Get.Href, FileSize = a.FileSize }).ToList();
 
             if (batchFiles.Any() && !batchFiles.Any(f => f.FileName.ToLower().Contains("error")))
@@ -227,12 +226,12 @@ namespace UKHO.BESS.BuilderService.Services
         /// </summary>
         /// <param name="fileDetails"></param>
         /// <param name="downloadPath"></param>
-        private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath)
+        private void DownloadFiles(List<FssBatchFile> fileDetails, string downloadPath, string correlationId)
         {
             Parallel.ForEach(fileDetails, file =>
             {
                 string filePath = Path.Combine(downloadPath, file.FileName);
-                fssService.DownloadFileAsync(file.FileName, file.FileLink, file.FileSize, filePath).Wait();
+                fssService.DownloadFileAsync(file.FileName, file.FileLink, file.FileSize, filePath, correlationId).Wait();
             });
         }
 
@@ -319,13 +318,13 @@ namespace UKHO.BESS.BuilderService.Services
                     batchType = Batch.BessEmptyBatch;
                 }
 
-                string bessBatchId = await fssService.CreateBatch(batchType, configQueueMessage);
+                string bessBatchId = await fssService.CreateBatch(batchType, configQueueMessage, configQueueMessage.CorrelationId);
 
                 var filePaths = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
 
-                UploadBatchFiles(filePaths, bessBatchId, batchType);
+                UploadBatchFiles(filePaths, bessBatchId, batchType, configQueueMessage.CorrelationId);
 
-                isCommitted = await fssService.CommitBatch(bessBatchId, filePaths, batchType);
+                isCommitted = await fssService.CommitBatch(bessBatchId, filePaths, batchType, configQueueMessage.CorrelationId);
 
                 logger.LogInformation(EventIds.BessBatchCreationCompleted.ToEventId(), "BESS batch {bessBatchId} is created and added to FSS with status: {isCommitted} at {DateTime} | _X-Correlation-ID: {CorrelationId}", bessBatchId, isCommitted, DateTime.UtcNow, configQueueMessage.CorrelationId);
             }
@@ -345,19 +344,23 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="filePaths"></param>
         /// <param name="batchId"></param>
         /// <param name="batchType"></param>
-        private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType)
+        private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType, string correlationId)
         {
             Parallel.ForEach(filePaths, filePath =>
             {
                 IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
 
-                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, CommonHelper.MimeTypeList().ContainsKey(fileInfo.Extension.ToLower()) ? CommonHelper.MimeTypeList()[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType).Result;
+                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, CommonHelper.MimeTypeList().ContainsKey(fileInfo.Extension.ToLower()) ? CommonHelper.MimeTypeList()[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType, correlationId).Result;
                 if (isFileAdded)
                 {
-                    List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo).Result;
+                    List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo, correlationId).Result;
                     if (blockIds.Any())
                     {
-                        fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds);
+                        bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds, correlationId).Result; //temp change
+                        if (!fileWritten)
+                        {
+                            logger.LogWarning(EventIds.UploadFileBlockFailed.ToEventId(), "BESS UploadFileBlockFailed fileWritten: {fileWritten} for fileName: {Name} at {DateTime} | _X-Correlation-ID : {CorrelationId}", fileWritten, fileInfo.Name, DateTime.UtcNow, correlationId);
+                        }
                     }
                 }
             });

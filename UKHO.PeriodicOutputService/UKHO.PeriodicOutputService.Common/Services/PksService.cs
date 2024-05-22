@@ -27,7 +27,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         public async Task<List<ProductKeyServiceResponse>> PostProductKeyData(List<ProductKeyServiceRequest> productKeyServiceRequest, string? correlationId = null)
         {
-            logger.LogInformation(EventIds.PostProductKeyDataToPksStarted.ToEventId(), "Request to post product key data to Product Key Service started | _X-Correlation-ID : {CorrelationId}", CommonHelper.GetCorrelationId(correlationId));
+            logger.LogInformation(EventIds.PostProductKeyDataToPksStarted.ToEventId(), "Request to post product key data to Product Key Service started | _X-Correlation-ID : {CorrelationId}", correlationId);
 
             string bodyJson;
             string uri = pksApiConfiguration.Value.BaseUrl + KeysEnc;
@@ -43,7 +43,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     {
                         bodyJson = httpResponseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                        logger.LogInformation(EventIds.PostProductKeyDataToPksCompleted.ToEventId(), "Request to post product key data to Product Key Service completed | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponseMessage.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
+                        logger.LogInformation(EventIds.PostProductKeyDataToPksCompleted.ToEventId(), "Request to post product key data to Product Key Service completed | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponseMessage.StatusCode.ToString(), correlationId);
 
                         List<ProductKeyServiceResponse> productKeyServiceResponse = JsonConvert.DeserializeObject<List<ProductKeyServiceResponse>>(bodyJson);
                         return productKeyServiceResponse;
@@ -59,7 +59,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                             throw new FulfilmentException(EventIds.PostProductKeyDataToPksFailed.ToEventId());
                         }
 
-                        logger.LogError(EventIds.PostProductKeyDataToPksFailed.ToEventId(), "Failed to post product key data | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponseMessage.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
+                        logger.LogError(EventIds.PostProductKeyDataToPksFailed.ToEventId(), "Failed to post product key data | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponseMessage.StatusCode.ToString(), correlationId);
                         throw new FulfilmentException(EventIds.PostProductKeyDataToPksFailed.ToEventId());
                     }
             }
