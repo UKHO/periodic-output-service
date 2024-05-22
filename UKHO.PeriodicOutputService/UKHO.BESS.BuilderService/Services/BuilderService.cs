@@ -297,12 +297,14 @@ namespace UKHO.BESS.BuilderService.Services
         /// <exception cref="FulfilmentException"></exception>
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
         {
-            bool isCommitted = false;
-            Batch batchType = Batch.BessBaseZipBatch;
-
             try
             {
-                logger.LogInformation(EventIds.BessBatchCreationStarted.ToEventId(), "BESS batch creation started at {DateTime} | _X-Correlation-ID: {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                bool isCommitted = false;
+                Batch batchType = Batch.BessBaseZipBatch;
+
+                logger.LogInformation(EventIds.BessBatchCreationStarted.ToEventId(),
+                    "BESS batch creation started at {DateTime} | _X-Correlation-ID: {CorrelationId}", DateTime.UtcNow,
+                    configQueueMessage.CorrelationId);
 
                 if (configQueueMessage.Type.ToUpper().Equals(BessType.UPDATE.ToString()))
                 {
@@ -318,26 +320,36 @@ namespace UKHO.BESS.BuilderService.Services
                     batchType = Batch.BessEmptyBatch;
                 }
 
-                string bessBatchId = await fssService.CreateBatch(batchType, configQueueMessage, configQueueMessage.CorrelationId);
+                string bessBatchId =
+                    await fssService.CreateBatch(batchType, configQueueMessage, configQueueMessage.CorrelationId);
 
                 var filePaths = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
 
-                bool isBessFilesUploaded = await UploadBatchFiles(filePaths, bessBatchId, batchType, configQueueMessage.CorrelationId);
+                bool isBessFilesUploaded =
+                    await UploadBatchFiles(filePaths, bessBatchId, batchType, configQueueMessage.CorrelationId);
 
                 if (isBessFilesUploaded)
                 {
-                    isCommitted = await fssService.CommitBatch(bessBatchId, filePaths, batchType, configQueueMessage.CorrelationId);
-                }
+                    isCommitted = await fssService.CommitBatch(bessBatchId, filePaths, batchType,
+                        configQueueMessage.CorrelationId);
 
-                logger.LogInformation(EventIds.BessBatchCreationCompleted.ToEventId(), "BESS batch {bessBatchId} is created and added to FSS with status: {isCommitted} at {DateTime} | _X-Correlation-ID: {CorrelationId}", bessBatchId, isCommitted, DateTime.UtcNow, configQueueMessage.CorrelationId);
+                    if (isCommitted)
+                    {
+                        logger.LogInformation(EventIds.BessBatchCreationCompleted.ToEventId(),
+                            "BESS batch: {bessBatchId} is created and added to FSS with status: {isCommitted} at {DateTime} | _X-Correlation-ID: {CorrelationId}",
+                            bessBatchId, FssBatchStatus.Committed.ToString(), DateTime.UtcNow,
+                            configQueueMessage.CorrelationId);
+                    }
+                }
+                return isCommitted;
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessBatchCreationFailed.ToEventId(), "BESS batch creation failed with Exception: {ex} at {DateTime} | _X-Correlation-ID : {CorrelationId}", ex, DateTime.UtcNow, configQueueMessage.CorrelationId);
+                logger.LogError(EventIds.BessBatchCreationFailed.ToEventId(),
+                    "BESS batch creation failed with Exception: {ex} at {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                    ex, DateTime.UtcNow, configQueueMessage.CorrelationId);
                 throw new FulfilmentException(EventIds.BessBatchCreationFailed.ToEventId());
             }
-
-            return isCommitted;
         }
 
         /// <summary>
