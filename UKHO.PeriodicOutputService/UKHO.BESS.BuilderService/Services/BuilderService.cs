@@ -74,7 +74,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             string bessZipFileName = string.Format(fssApiConfig.Value.BessZipFileName, configQueueMessage.Name);
 
-            RenameFile(essFileDownloadPath, essFiles, bessZipFileName);
+            RenameFile(essFileDownloadPath, essFiles, bessZipFileName, configQueueMessage.CorrelationId);
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath, configQueueMessage.CorrelationId);
 
@@ -655,8 +655,7 @@ namespace UKHO.BESS.BuilderService.Services
             logger.LogInformation(EventIds.PermitFileCreationCompleted.ToEventId(), "Permit file creation completed for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, correlationId);
         }
 
-        [ExcludeFromCodeCoverage]
-        private void RenameFile(string downloadPath, List<FssBatchFile> files, string bessZipFileName)
+        private void RenameFile(string downloadPath, List<FssBatchFile> files, string bessZipFileName, string correlationId)
         {
             foreach (var file in files)
             {
@@ -664,6 +663,8 @@ namespace UKHO.BESS.BuilderService.Services
                 if (fileInfo != null)
                 {
                     file.FileName = file.FileName.Replace(fssApiConfig.Value.BespokeExchangeSetFileFolder, bessZipFileName);
+
+                    logger.LogInformation(EventIds.ZipFileRenamed.ToEventId(), "Zip file {fileName} renamed to file {newFileName} at {DateTime} | _X-Correlation-ID:{CorrelationId}", fssApiConfig.Value.BespokeExchangeSetFileFolder, file.FileName, DateTime.UtcNow, correlationId);
                 }
                 fileInfo.MoveTo(Path.Combine(downloadPath, file.FileName));
             }

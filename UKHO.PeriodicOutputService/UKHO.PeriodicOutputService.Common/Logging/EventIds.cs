@@ -818,7 +818,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809162 - Empty permit found from pks
         /// </summary>
-        EmptyPermitFound = 809162
+        EmptyPermitFound = 809162,
+
+        /// <summary>
+        /// 809163 - Bess file renamed
+        /// </summary>
+        ZipFileRenamed = 809163
     }
 
     public static class EventIdExtensions
