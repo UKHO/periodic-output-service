@@ -950,7 +950,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public void WhenTypeIsUpdateOrChangeAndUpdateSerialFileAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public async Task WhenTypeIsUpdateOrChangeAndUpdateSerialFileAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -960,8 +960,8 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.ReadFileText(A<string>.Ignored)).Throws<Exception>();
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.UPDATE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
-                .Should().ThrowAsync<Exception>().WithMessage("SERIAL.ENC file update operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}");
+            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.UPDATE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessSerialEncUpdateFailed.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -979,7 +979,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public void WhenTypeIsUpdateOrChangeAndDeleteProductTxtAndInfoFolderAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public async Task WhenTypeIsUpdateOrChangeAndDeleteProductTxtAndInfoFolderAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -989,8 +989,8 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.DeleteFile(A<string>.Ignored)).Throws<Exception>();
 
-            FluentActions.Invoking(async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.CHANGE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())))
-                .Should().ThrowAsync<Exception>().WithMessage("PRODUCT.TXT file and INFO folder delete operation failed at { DateTime} | { ErrorMessage} | _X - Correlation - ID:{ CorrelationId}");
+            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.CHANGE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId());
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
