@@ -122,20 +122,17 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Polling to FSS to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
-
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Polling to FSS to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
-
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
@@ -194,7 +191,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Fss batch status polling timed out for BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
-
         }
 
         [Test]
@@ -230,7 +226,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch details for BatchID - {BatchID} from FSS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
-
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -322,7 +317,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void DoesDownloadFile_Throws_Exception_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -384,7 +379,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Uploading of file blocks of {FileName} for BatchID - {BatchID} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
-
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -483,7 +477,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
-
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -779,6 +772,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         #region SearchReadMeFilePath
+
         [Test]
         public async Task WhenReadMeFileNotFound_ThenReturnFulfilmentException()
         {
@@ -856,7 +850,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             Func<Task> act = async () => { await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery); };
             await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId());
-           
+
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -869,6 +863,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             string accessTokenParam = null;
             string uriParam = null;
+            string correlationId = null;
             var searchReadMeFileName = @"batch/a07537ff-ffa2-4565-8f0e-96e61e70a9fc/files/README.TXT";
 
             var searchBatchResponse = GetReadMeSearchBatchResponse();
@@ -878,10 +873,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
             A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
-               .Invokes((string accessToken, string uri) =>
+               .Invokes((string accessToken, string uri, string corrId) =>
                {
                    accessTokenParam = accessToken;
                    uriParam = uri;
+                   correlationId = corrId;
                })
                .Returns(httpResponse);
 
@@ -890,6 +886,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             response.Should().NotBeNull();
             expectedReadMeFilePath.Should().Be(searchReadMeFileName);
         }
+
         #endregion SearchReadMeFilePath
 
         #region DownloadReadMeFile
@@ -964,7 +961,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
-        #endregion
+
+        #endregion DownloadReadMeFile
 
         [Test]
         [TestCase(Batch.BessBaseZipBatch)]
@@ -992,9 +990,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 case Batch.BessUpdateZipBatch:
                     type = BessType.UPDATE.ToString();
                     break;
+
                 case Batch.BessChangeZipBatch:
                     type = BessType.CHANGE.ToString();
                     break;
+
                 default:
                     type = BessType.BASE.ToString();
                     break;
@@ -1047,9 +1047,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 case Batch.BessUpdateZipBatch:
                     type = BessType.UPDATE.ToString();
                     break;
+
                 case Batch.BessChangeZipBatch:
                     type = BessType.CHANGE.ToString();
                     break;
+
                 default:
                     type = BessType.BASE.ToString();
                     break;
@@ -1076,6 +1078,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         #region GetSearchBatchResponse
+
         private static SearchBatchResponse GetSearchBatchResponse()
         {
             return new SearchBatchResponse()
@@ -1094,7 +1097,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 Total = 1,
             };
         }
-        #endregion
+
+        #endregion GetSearchBatchResponse
 
         private ConfigQueueMessage GetConfigQueueMessage(string type) => new()
         {
@@ -1116,6 +1120,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         };
 
         #region GetReadMeSearchBatchResponse
+
         private static SearchBatchResponse GetReadMeSearchBatchResponse()
         {
             return new SearchBatchResponse()
@@ -1154,9 +1159,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 Total = 1,
             };
         }
-        #endregion
+
+        #endregion GetReadMeSearchBatchResponse
 
         #region GetSearchBatchEmptyResponse
+
         private static SearchBatchResponse GetSearchBatchEmptyResponse()
         {
             return new SearchBatchResponse()
@@ -1165,16 +1172,20 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 Count = 0
             };
         }
-        #endregion
+
+        #endregion GetSearchBatchEmptyResponse
 
         #region GetFakeToken
+
         private static string GetFakeToken()
         {
             return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0ZXN0IHNlcnZlciIsImlhdCI6MTU1ODMyOTg2MCwiZXhwIjoxNTg5OTUyMjYwLCJhdWQiOiJ3d3cudGVzdC5jb20iLCJzdWIiOiJ0ZXN0dXNlckB0ZXN0LmNvbSIsIm9pZCI6IjE0Y2I3N2RjLTFiYTUtNDcxZC1hY2Y1LWEwNDBkMTM4YmFhOSJ9.uOPTbf2Tg6M2OIC6bPHsBAOUuFIuCIzQL_MV3qV6agc";
         }
-        #endregion
+
+        #endregion GetFakeToken
 
         #region GetReadMeFileDetails
+
         private static string GetReadMeFileDetails()
         {
             StringBuilder sb = new StringBuilder();
@@ -1185,6 +1196,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             sb.AppendLine(lineThree);
             return sb.ToString();
         }
-        #endregion
+
+        #endregion GetReadMeFileDetails
     }
 }

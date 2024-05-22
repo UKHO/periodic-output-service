@@ -24,10 +24,12 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IConfiguration _configuration;
+
         private readonly Enum[] _aioBatchTypes = {
                                             Batch.AioBaseCDZipIsoSha1Batch,
                                             Batch.AioUpdateZipBatch
                                       };
+
         private const string ServerHeaderValue = "Windows-Azure-Blob";
 
         public FssService(ILogger<FssService> logger,
@@ -151,7 +153,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             while (startByte <= endByte)
             {
-
                 fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader);
 
                 if (!fileDownloadResponse.IsSuccessStatusCode)
@@ -277,7 +278,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 ParallelBlockUploadTasks.Add(UploadFileBlock(uploadFileBlockRequestModel, correlationId));
                 blockIdList.Add(blockId);
                 uploadedBytes += readBlockSize;
-                //run uploads in parallel	
+                //run uploads in parallel
                 if (ParallelBlockUploadTasks.Count >= _fssApiConfiguration.Value.ParallelUploadThreadCount)
                 {
                     Task.WaitAll(ParallelBlockUploadTasks.ToArray());
@@ -337,11 +338,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                _logger.LogInformation(EventIds.CommitBatchCompleted.ToEventId(), "Batch {BatchType} with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.GetCorrelationId(correlationId).ToString());
+                _logger.LogInformation(EventIds.CommitBatchCompleted.ToEventId(), "Batch {BatchType} with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.GetCorrelationId(correlationId));
                 return true;
             }
 
-            _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
+            _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.GetCorrelationId(correlationId));
             throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
         }
 
