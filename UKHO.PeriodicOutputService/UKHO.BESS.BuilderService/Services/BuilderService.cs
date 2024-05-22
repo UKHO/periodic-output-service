@@ -297,7 +297,7 @@ namespace UKHO.BESS.BuilderService.Services
         /// <exception cref="FulfilmentException"></exception>
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
         {
-            bool isCommitted;
+            bool isCommitted = false;
             Batch batchType = Batch.BessBaseZipBatch;
 
             try
@@ -322,16 +322,18 @@ namespace UKHO.BESS.BuilderService.Services
 
                 var filePaths = fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
 
-                UploadBatchFiles(filePaths, bessBatchId, batchType, configQueueMessage.CorrelationId);
+                bool isBessFilesUploaded = await UploadBatchFiles(filePaths, bessBatchId, batchType, configQueueMessage.CorrelationId);
 
-                isCommitted = await fssService.CommitBatch(bessBatchId, filePaths, batchType, configQueueMessage.CorrelationId);
+                if (isBessFilesUploaded)
+                {
+                    isCommitted = await fssService.CommitBatch(bessBatchId, filePaths, batchType, configQueueMessage.CorrelationId);
+                }
 
                 logger.LogInformation(EventIds.BessBatchCreationCompleted.ToEventId(), "BESS batch {bessBatchId} is created and added to FSS with status: {isCommitted} at {DateTime} | _X-Correlation-ID: {CorrelationId}", bessBatchId, isCommitted, DateTime.UtcNow, configQueueMessage.CorrelationId);
             }
             catch (Exception ex)
             {
                 logger.LogError(EventIds.BessBatchCreationFailed.ToEventId(), "BESS batch creation failed with Exception: {ex} at {DateTime} | _X-Correlation-ID : {CorrelationId}", ex, DateTime.UtcNow, configQueueMessage.CorrelationId);
-
                 throw new FulfilmentException(EventIds.BessBatchCreationFailed.ToEventId());
             }
 
@@ -344,26 +346,26 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="filePaths"></param>
         /// <param name="batchId"></param>
         /// <param name="batchType"></param>
-        private void UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType, string correlationId)
+        /// <param name="correlationId"></param>
+        private async Task<bool> UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType, string correlationId)
         {
-            Parallel.ForEach(filePaths, filePath =>
+            bool fileWritten = false;
+            foreach (string filePath in filePaths)
             {
                 IFileInfo fileInfo = fileSystemHelper.GetFileInfo(filePath);
 
-                bool isFileAdded = fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, CommonHelper.MimeTypeList().ContainsKey(fileInfo.Extension.ToLower()) ? CommonHelper.MimeTypeList()[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType, correlationId).Result;
+                bool isFileAdded = await fssService.AddFileToBatch(batchId, fileInfo.Name, fileInfo.Length, CommonHelper.MimeTypeList().ContainsKey(fileInfo.Extension.ToLower()) ? CommonHelper.MimeTypeList()[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE, batchType, correlationId);
                 if (isFileAdded)
                 {
-                    List<string> blockIds = fssService.UploadBlocks(batchId, fileInfo, correlationId).Result;
+                    List<string> blockIds = await fssService.UploadBlocks(batchId, fileInfo, correlationId);
                     if (blockIds.Any())
                     {
-                        bool fileWritten = fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds, correlationId).Result; //temp change
-                        if (!fileWritten)
-                        {
-                            logger.LogWarning(EventIds.UploadFileBlockFailed.ToEventId(), "BESS UploadFileBlockFailed fileWritten: {fileWritten} for fileName: {Name} at {DateTime} | _X-Correlation-ID : {CorrelationId}", fileWritten, fileInfo.Name, DateTime.UtcNow, correlationId);
-                        }
+                        fileWritten = await fssService.WriteBlockFile(batchId, fileInfo.Name, blockIds, correlationId);
                     }
                 }
-            });
+            }
+
+            return fileWritten;
         }
 
         /// <summary>
