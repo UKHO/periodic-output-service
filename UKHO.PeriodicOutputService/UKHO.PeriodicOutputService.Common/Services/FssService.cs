@@ -342,7 +342,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
 
             _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
-            throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
+            throw new FulfilmentException(EventIds.CommitBatchFailed.ToEventId());
         }
 
         public async Task<IEnumerable<BatchFile>> GetAioInfoFolderFilesAsync(string batchId, string correlationId)
