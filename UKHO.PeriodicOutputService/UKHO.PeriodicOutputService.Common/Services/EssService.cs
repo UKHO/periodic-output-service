@@ -33,9 +33,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogInformation(EventIds.PostProductIdentifiersToEssStarted.ToEventId(), "Request to post {ProductIdentifiersCount} productidentifiers to ESS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productIdentifiers.Count.ToString(), DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = GetProductIdentifierUri(_essApiConfiguration.Value.BaseUrl, exchangeSetStandard);
-            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId, correlationId);
+            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId, CommonHelper.GetCorrelationId(correlationId));
 
-            HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(uri, productIdentifiers, accessToken);
+            HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(uri, productIdentifiers, accessToken, CommonHelper.GetCorrelationId(correlationId));
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -63,9 +63,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogInformation(EventIds.GetProductDataSinceDateTimeStarted.ToEventId(), "ESS request to create exchange set for data since {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = GetSinceDateTimeUri(_essApiConfiguration.Value.BaseUrl, sinceDateTime, exchangeSetStandard);
-            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId, correlationId);
+            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId, CommonHelper.GetCorrelationId(correlationId));
 
-            HttpResponseMessage httpResponse = await _essApiClient.GetProductDataSinceDateTime(uri, sinceDateTime, accessToken);
+            HttpResponseMessage httpResponse = await _essApiClient.GetProductDataSinceDateTime(uri, sinceDateTime, accessToken, CommonHelper.GetCorrelationId(correlationId));
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -88,9 +88,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogInformation(EventIds.GetProductDataProductVersionStarted.ToEventId(), "ESS request to create exchange set for product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = GetProductVersionUri(_essApiConfiguration.Value.BaseUrl, exchangeSetStandard);
-            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId, correlationId);
+            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId, CommonHelper.GetCorrelationId(correlationId));
 
-            HttpResponseMessage httpResponse = await _essApiClient.GetProductDataProductVersion(uri, productVersionsRequest.ProductVersions, accessToken);
+            HttpResponseMessage httpResponse = await _essApiClient.GetProductDataProductVersion(uri, productVersionsRequest.ProductVersions, accessToken, CommonHelper.GetCorrelationId(correlationId));
 
             if (httpResponse.IsSuccessStatusCode)
             {
