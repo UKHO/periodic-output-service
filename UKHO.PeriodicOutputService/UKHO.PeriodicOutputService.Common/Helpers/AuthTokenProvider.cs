@@ -77,7 +77,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 _cache.SetString(key, JsonConvert.SerializeObject(accessTokenItem), options);
             }
-            _logger.LogInformation(EventIds.CachingExternalEndPointTokenCompleted.ToEventId(), "New token is added in cache to call external endpoint and it expires in {ExpiresIn} with sliding expiration duration {options}.", Convert.ToString(accessTokenItem.ExpiresIn), JsonConvert.SerializeObject(options));
+            _logger.LogInformation(EventIds.CachingExternalEndPointTokenCompleted.ToEventId(), "New token is added in cache to call external endpoint and it expires in {ExpiresIn} with sliding expiration duration {options} | _X-Correlation-ID:{CorrelationId}.", Convert.ToString(accessTokenItem.ExpiresIn), JsonConvert.SerializeObject(options), CommonHelper.GetCorrelationId(correlationId));
         }
 
         private AccessTokenItem GetAuthTokenFromCache(string key)

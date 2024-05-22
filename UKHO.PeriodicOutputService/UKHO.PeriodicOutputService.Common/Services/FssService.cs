@@ -73,7 +73,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/status";
 
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             FssBatchStatus[] pollBatchStatus = { FssBatchStatus.CommitInProgress, FssBatchStatus.Incomplete };
 
@@ -82,7 +82,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
-                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken, CommonHelper.GetCorrelationId(correlationId));
+                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken, correlationId);
 
                 if (batchStatusResponse.IsSuccessStatusCode)
                 {
@@ -115,7 +115,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogInformation(EventIds.GetBatchDetailRequestStarted.ToEventId(), "Request to get batch details for BatchID - {BatchID} from FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             HttpResponseMessage batchDetailResponse = await _fssApiClient.GetBatchDetailsAsync(uri, accessToken, correlationId);
 
@@ -139,7 +139,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}" + fileLink;
 
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             HttpResponseMessage fileDownloadResponse = await _fssApiClient.DownloadFile(fileLink, accessToken);
 
@@ -153,7 +153,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             while (startByte <= endByte)
             {
-                fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader);
+                fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader, correlationId);
 
                 if (!fileDownloadResponse.IsSuccessStatusCode)
                 {
@@ -184,7 +184,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             CreateBatchRequestModel createBatchRequest = CreateBatchRequestModelForBess(batchType, configQueueMessage);
             string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
@@ -228,7 +228,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogInformation(EventIds.AddFileToBatchRequestStarted.ToEventId(), "Adding file {FileName} in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName, batchType);
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
@@ -300,7 +300,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogInformation(EventIds.WriteBlockToFileStarted.ToEventId(), "Writing blocks in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             WriteBlockFileRequestModel writeBlockfileRequestModel = new()
             {
@@ -325,7 +325,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogInformation(EventIds.CommitBatchStarted.ToEventId(), "Batch commit for {BatchType} with BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             List<FileDetail> fileDetails = _fileSystemHelper.GetFileMD5(fileNames);
             BatchCommitRequestModel batchCommitRequestModel = new()
@@ -351,7 +351,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             IEnumerable<BatchFile>? fileDetails = null;
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch?$filter=$batch(Content) eq '{_fssApiConfiguration.Value.Content}' and $batch(Product Type) eq '{_fssApiConfiguration.Value.ProductType}'";
 
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             HttpResponseMessage httpResponseMessage = await _fssApiClient.GetAncillaryFileDetailsAsync(uri, accessToken);
 
@@ -391,10 +391,10 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         public async Task<string> SearchReadMeFilePathAsync(string correlationId, string readMeSearchFilter)
         {
-            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
             var uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch?$filter={readMeSearchFilter}";
 
-            HttpResponseMessage httpResponse = await _fssApiClient.GetAncillaryFileDetailsAsync(uri, accessToken);
+            HttpResponseMessage httpResponse = await _fssApiClient.GetAncillaryFileDetailsAsync(uri, accessToken, correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -421,7 +421,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         public async Task<bool> DownloadReadMeFileAsync(string readMeFilePath, string exchangeSetRootPath, string correlationId)
         {
-            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
             string fileName = _fssApiConfiguration.Value.ReadMeFileName;
             string filePath = Path.Combine(exchangeSetRootPath, fileName);
 
@@ -599,7 +599,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private async Task UploadFileBlock(UploadFileBlockRequestModel uploadBlockMetaData, string? correlationId = null)
         {
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{uploadBlockMetaData.BatchId}/files/{uploadBlockMetaData.FileName}/{uploadBlockMetaData.BlockId}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             byte[] blockBytes = _fileSystemHelper.GetFileInBytes(uploadBlockMetaData);
             byte[]? blockMd5Hash = CommonHelper.CalculateMD5(blockBytes);
