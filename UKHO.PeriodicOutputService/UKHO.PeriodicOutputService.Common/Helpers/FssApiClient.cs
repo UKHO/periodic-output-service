@@ -128,7 +128,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return await _httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
-        private async Task<HttpResponseMessage> CallFSSApi(string uri, string accessToken, string correlationId, string? rangeHeader = null )
+        private async Task<HttpResponseMessage> CallFSSApi(string uri, string accessToken, string correlationId, string? rangeHeader = null)
         {
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
