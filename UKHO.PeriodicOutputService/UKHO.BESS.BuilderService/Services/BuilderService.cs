@@ -341,12 +341,13 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
-        ///     This method will upload BESS batch file to FSS.
+        /// This method will upload BESS batch file to FSS.
         /// </summary>
         /// <param name="filePaths"></param>
         /// <param name="batchId"></param>
         /// <param name="batchType"></param>
         /// <param name="correlationId"></param>
+        /// <returns>Returns true/false</returns>
         private async Task<bool> UploadBatchFiles(IEnumerable<string> filePaths, string batchId, Batch batchType, string correlationId)
         {
             bool fileWritten = false;
