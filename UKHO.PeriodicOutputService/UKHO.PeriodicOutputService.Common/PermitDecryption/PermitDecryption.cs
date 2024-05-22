@@ -24,7 +24,11 @@ namespace UKHO.PeriodicOutputService.Common.PermitDecryption
 
         public PermitKey GetPermitKeys(string permit, string? correlationId = null)
         {
-            if (string.IsNullOrEmpty(permit)) return null;
+            if (string.IsNullOrEmpty(permit))
+            {
+                logger.LogError(EventIds.EmptyPermitFound.ToEventId(), "Empty permit found at {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.GetCorrelationId(correlationId));
+                return null;
+            }
             try
             {
                 byte[] hardwareIds = GetHardwareIds();
