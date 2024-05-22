@@ -101,7 +101,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(RequestType.BESS)]
         public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus_If_ValidRequest(RequestType requestType)
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -147,7 +147,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(RequestType.BESS)]
         public void DoesCheckIfBatchCommitted_Throws_Exception_If_InvalidRequest(RequestType requestType)
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -175,7 +175,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(RequestType.BESS)]
         public void DoesCheckIfBatchCommitted_Returns_Error_If_TimedOut(RequestType requestType)
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -200,7 +200,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public async Task DoesGetBatchDetails_Returns_BatchDetail_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -238,7 +238,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void DoesGetBatchDetails_Throws_Exception_If_InvalidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -262,7 +262,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public async Task DoesDownloadFile_Returns_DownloadPath_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -322,7 +322,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void DoesDownloadFile_Throws_Exception_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -333,7 +333,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\": \"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\": \"Committed\",\"allFilesZipSize\": 11323697,\"attributes\": [{\"key\": \"Product Type\",\"value\": \"AVCS\"}],\"businessUnit\": \"AVCSCustomExchangeSets\",\"batchPublishedDate\": \"2022-07-13T10:53:58.98Z\",\"expiryDate\": \"2022-08-12T10:53:06Z\",\"files\": [{\"filename\": \"M01X02.zip\",\"fileSize\": 5095731,\"mimeType\": \"application/zip\",\"hash\": \"TLwn4f5J36mvWvrTafkXYA==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip\"}}},{\"filename\": \"M02X02.zip\",\"fileSize\": 6267757,\"mimeType\": \"application/zip\",\"hash\": \"7tP0BwgbMdKZT8koKakR+w==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M02X02.zip\"}}}]}")))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\"));
+            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\", null));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -353,7 +353,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             A.CallTo(() => fileInfo.Name).Returns("M01X01.zip");
             A.CallTo(() => fileInfo.Length).Returns(100000);
 
-            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(new HttpResponseMessage()
               {
                   StatusCode = System.Net.HttpStatusCode.OK,
@@ -396,7 +396,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             A.CallTo(() => fileInfo.Name).Returns("M01X01.zip");
             A.CallTo(() => fileInfo.Length).Returns(100);
 
-            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(new HttpResponseMessage()
               {
                   StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -423,7 +423,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             _fakeconfiguration["IsFTRunning"] = "true";
 
-            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -456,7 +456,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             _fakeconfiguration["IsFTRunning"] = "true";
 
-            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -491,7 +491,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public async Task DoesAddFileToBatch_Returns_True_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.AddFileToBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.AddFileToBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Created,
@@ -524,7 +524,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void DoesAddFileToBatch_Returns_False_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.AddFileToBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.AddFileToBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -550,7 +550,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public async Task DoesWriteBlockFile_Returns_True_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.WriteBlockInFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.WriteBlockInFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Created,
@@ -585,7 +585,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void DoesWriteBlockFile_Throws_Exception_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.WriteBlockInFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.WriteBlockInFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -612,7 +612,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public async Task DoesCommitBatch_Returns_True_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.CommitBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CommitBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Created,
@@ -647,7 +647,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void DoesCommitBatch_Returns_False_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.CommitBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CommitBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -677,7 +677,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             SearchBatchResponse searchBatchResponse = GetSearchBatchResponse();
             string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -708,7 +708,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             SearchBatchResponse searchBatchResponse = new();
             string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -733,7 +733,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void DoesGetAioInfoFolderFiles_Throws_Exception_If_BadRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest,
@@ -757,7 +757,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void DoesGetAioInfoFolderFiles_Throws_Exception_If_InvalidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -787,7 +787,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             string invalidReadMeSearchFilterQuery = "$batch(Product Type) eq 'AVCS nd businessUnit eq 'ADDS'";
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest,
@@ -815,7 +815,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -843,7 +843,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -877,7 +877,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))) };
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                .Invokes((string accessToken, string uri) =>
                {
                    accessTokenParam = accessToken;
@@ -975,7 +975,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             _fakeconfiguration["IsFTRunning"] = "true";
             string type;
 
-            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = HttpStatusCode.OK,
@@ -1030,7 +1030,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             _fakeconfiguration["IsFTRunning"] = "true";
             string type;
 
-            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,

@@ -80,7 +80,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
-                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
+                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken, correlationId);
 
                 if (batchStatusResponse.IsSuccessStatusCode)
                 {
@@ -115,7 +115,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}";
             string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, CommonHelper.GetCorrelationId(correlationId));
 
-            HttpResponseMessage batchDetailResponse = await _fssApiClient.GetBatchDetailsAsync(uri, accessToken);
+            HttpResponseMessage batchDetailResponse = await _fssApiClient.GetBatchDetailsAsync(uri, accessToken, correlationId);
 
             if (batchDetailResponse.IsSuccessStatusCode)
             {
@@ -187,7 +187,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             CreateBatchRequestModel createBatchRequest = CreateBatchRequestModelForBess(batchType, configQueueMessage);
             string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
-            HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
+            HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken, correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -231,7 +231,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName, batchType);
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
-            HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, mimeType);
+            HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, mimeType, correlationId);
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
@@ -307,7 +307,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             };
 
             string payloadJson = JsonConvert.SerializeObject(writeBlockfileRequestModel);
-            HttpResponseMessage httpResponse = await _fssApiClient.WriteBlockInFileAsync(uri, payloadJson, accessToken, "application/octet-stream");
+            HttpResponseMessage httpResponse = await _fssApiClient.WriteBlockInFileAsync(uri, payloadJson, accessToken, "application/octet-stream", correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -333,7 +333,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             };
 
             string payloadJson = JsonConvert.SerializeObject(batchCommitRequestModel.FileDetails);
-            HttpResponseMessage httpResponse = await _fssApiClient.CommitBatchAsync(uri, payloadJson, accessToken);
+            HttpResponseMessage httpResponse = await _fssApiClient.CommitBatchAsync(uri, payloadJson, accessToken, correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -603,7 +603,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             byte[] blockBytes = _fileSystemHelper.GetFileInBytes(uploadBlockMetaData);
             byte[]? blockMd5Hash = CommonHelper.CalculateMD5(blockBytes);
             HttpResponseMessage httpResponse;
-            httpResponse = await _fssApiClient.UploadFileBlockAsync(uri, blockBytes, blockMd5Hash, accessToken, "application/octet-stream");
+            httpResponse = await _fssApiClient.UploadFileBlockAsync(uri, blockBytes, blockMd5Hash, accessToken, "application/octet-stream", correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
