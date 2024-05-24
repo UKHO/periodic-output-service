@@ -70,7 +70,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(HttpStatusCode.Forbidden, "Forbidden")]
         public void WhenSCSClientReturnsOtherThanStatusCode200_ThenGetSalesCatalogueDataResponseReturnsFulfilmentException(HttpStatusCode statusCode, string content)
         {
-            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(NotRequiredAccessToken);
+            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(NotRequiredAccessToken);
             A.CallTo(() => fakeSalesCatalogueClient.CallSalesCatalogueServiceApi(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage() { StatusCode = statusCode, RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://abc.com") }, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(content))) });
 
@@ -98,7 +98,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             List<SalesCatalogueDataProductResponse> scsResponse = GetSalesCatalogueDataProductResponse();
             var jsonString = JsonConvert.SerializeObject(scsResponse);
 
-            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(NotRequiredAccessToken);
+            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(NotRequiredAccessToken);
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))) };
             A.CallTo(() => fakeSalesCatalogueClient.CallSalesCatalogueServiceApi(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(httpResponse);
@@ -135,7 +135,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var scsResponse = new List<SalesCatalogueDataResponse>();
             var jsonString = JsonConvert.SerializeObject(scsResponse);
 
-            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(actualAccessToken);
+            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(actualAccessToken);
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))) };
             A.CallTo(() => fakeSalesCatalogueClient.CallSalesCatalogueServiceApi(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Invokes((HttpMethod method, string postBody, string accessToken, string uri) =>

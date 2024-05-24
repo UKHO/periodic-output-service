@@ -4,7 +4,6 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using UKHO.BESS.BuilderService.Services;
 using UKHO.PeriodicOutputService.Common.Extensions;
-using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 
@@ -24,21 +23,19 @@ namespace UKHO.BESS.BuilderService
 
         public async Task ProcessQueueMessage([QueueTrigger("%BessStorageConfiguration:QueueName%")] QueueMessage message)
         {
+            ConfigQueueMessage configQueueMessage = message.Body.ToObjectFromJson<ConfigQueueMessage>();
             try
             {
-                ConfigQueueMessage configQueueMessage = message.Body.ToObjectFromJson<ConfigQueueMessage>();
-                CommonHelper.CorrelationID = Guid.Parse(configQueueMessage.CorrelationId);
-
                 await logger.LogStartEndAndElapsedTimeAsync(EventIds.BessBuilderServiceStarted,
                     EventIds.BessBuilderServiceCompleted,
                     "Create Bespoke Exchange Set Started for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",
                     "Create Bespoke Exchange Set Completed for Config Name:{Name} and _X-Correlation-ID:{CorrelationId}",
                     async () => await builderService.CreateBespokeExchangeSetAsync(configQueueMessage),
-                    configQueueMessage.Name, CommonHelper.CorrelationID);
+                    configQueueMessage.Name, configQueueMessage.CorrelationId);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing Bess Builder Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing Bess Builder Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, configQueueMessage.CorrelationId);
             }
         }
     }

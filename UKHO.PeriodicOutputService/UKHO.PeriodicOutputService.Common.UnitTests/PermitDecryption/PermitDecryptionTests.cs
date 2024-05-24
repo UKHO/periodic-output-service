@@ -63,6 +63,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
 
             result.Should().BeNull();
 
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<EventId>(1) == EventIds.EmptyPermitFound.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Empty permit found at {DateTime} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
             A.CallTo(() => fakeS63Crypt.GetEncKeysFromPermit(A<string>.Ignored, A<byte[]>.Ignored))
                                         .MustNotHaveHappened();
         }
