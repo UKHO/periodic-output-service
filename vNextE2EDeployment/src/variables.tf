@@ -68,3 +68,7 @@ variable "elastic_apm_api_key" {
 variable "mock_spoke_subnet_name" {
   type = string
 }
+
+variable "permitdecryptionhardwareid" {
+  type = string
+}

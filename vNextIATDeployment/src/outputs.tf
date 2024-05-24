@@ -64,3 +64,7 @@ output "mock_webappname" {
 output "mock_webapp_rg" {
 value = azurerm_resource_group.mock_webapp_rg.name
 }
+
+output "keyvault_uri"{
+  value = module.key_vault.keyvault_uri
+}

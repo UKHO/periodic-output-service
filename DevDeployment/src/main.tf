@@ -73,7 +73,6 @@ module "webapp_service" {
   location                  = azurerm_resource_group.webapp_rg.location
   subnet_id                 = data.azurerm_subnet.main_subnet.id
   app_settings = {
-    "KeyVaultSettings:ServiceUri"                              = "https://${local.key_vault_name}.vault.azure.net/"
     "EventHubLoggingConfiguration:Environment"                 = local.env_name
     "EventHubLoggingConfiguration:MinimumLoggingLevel"         = "Warning"
     "EventHubLoggingConfiguration:UkhoMinimumLoggingLevel"     = "Information"
@@ -103,6 +102,7 @@ module "storage" {
   location            = azurerm_resource_group.webapp_rg.location
   allowed_ips         = var.allowed_ips
   m_spoke_subnet      = data.azurerm_subnet.main_subnet.id
+  mock_spoke_subnet   = data.azurerm_subnet.mock_main_subnet.id
   agent_subnet        = data.azurerm_subnet.agent_subnet.id
   env_name            = local.env_name
   service_name        = local.service_name
@@ -129,6 +129,7 @@ module "key_vault" {
       "ApplicationInsights--ConnectionString"                = module.app_insights.connection_string
       "BessStorageConfiguration--ConnectionString"           = module.storage.bess_storage_connection_string
       "AzureWebJobsStorage"                                  = module.storage.bess_storage_connection_string
+      "PKSApiConfiguration--PermitDecryptionHardwareId"      = var.permitdecryptionhardwareid
  }
   tags                                                       = local.tags
 }

@@ -72,3 +72,7 @@ output "connection_string" {
   value = module.app_insights.connection_string
   sensitive = true
 }
+
+output "keyvault_uri"{
+  value = module.key_vault.keyvault_uri
+}
