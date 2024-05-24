@@ -813,7 +813,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809161 - Bess config is not Enable
         /// </summary>
-        BessConfigIsNotEnable = 809161
+        BessConfigIsNotEnable = 809161,
+
+        /// <summary>
+        /// 809162 - Empty permit found from pks
+        /// </summary>
+        EmptyPermitFound = 809162,
+
+        /// <summary>
+        /// 809163 - Bess file renamed
+        /// </summary>
+        ZipFileRenamed = 809163
     }
 
     public static class EventIdExtensions

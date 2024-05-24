@@ -11,6 +11,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         public static Guid CorrelationID { get; set; } = Guid.NewGuid();
 
+        public static string GetCorrelationId(string? correlationId)
+        {
+            return string.IsNullOrEmpty(correlationId) ? CorrelationID.ToString() : correlationId;
+        }
+
         public static string GetBase64EncodedCredentials(string userName, string password)
         {
             byte[]? userCredentialsBytes = System.Text.Encoding.UTF8.GetBytes(userName + ":" + password);
@@ -39,7 +44,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return hash;
         }
 
-        public static string GetCurrentWeekNumber(DateTime date) { string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString(); return currentWeek.Length == 1 ? string.Concat("0", currentWeek) : currentWeek; }
+        public static string GetCurrentWeekNumber(DateTime date)
+        { string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString(); return currentWeek.Length == 1 ? string.Concat("0", currentWeek) : currentWeek; }
 
         public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(ILogger logger, string requestType, EventIds eventId, int retryCount, double sleepDuration)
         {

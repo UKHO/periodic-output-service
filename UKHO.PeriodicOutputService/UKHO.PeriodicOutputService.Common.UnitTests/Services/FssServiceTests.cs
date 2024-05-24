@@ -101,7 +101,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(RequestType.BESS)]
         public async Task DoesCheckIfBatchCommitted_Returns_BatchStatus_If_ValidRequest(RequestType requestType)
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -122,13 +122,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
              && call.GetArgument<LogLevel>(0) == LogLevel.Information
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Polling to FSS to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
-
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -136,8 +134,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Polling to FSS to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
-
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -147,7 +144,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(RequestType.BESS)]
         public void DoesCheckIfBatchCommitted_Throws_Exception_If_InvalidRequest(RequestType requestType)
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -166,7 +163,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch status for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -175,7 +172,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [TestCase(RequestType.BESS)]
         public void DoesCheckIfBatchCommitted_Returns_Error_If_TimedOut(RequestType requestType)
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchStatusAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -194,13 +191,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Fss batch status polling timed out for BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
-
         }
 
         [Test]
         public async Task DoesGetBatchDetails_Returns_BatchDetail_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -231,14 +227,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch details for BatchID - {BatchID} from FSS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void DoesGetBatchDetails_Throws_Exception_If_InvalidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.GetBatchDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetBatchDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -256,13 +251,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to get batch details for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public async Task DoesDownloadFile_Returns_DownloadPath_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -288,7 +283,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Downloading of file {fileName} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -316,13 +311,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void DoesDownloadFile_Throws_Exception_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -333,7 +328,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\": \"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\": \"Committed\",\"allFilesZipSize\": 11323697,\"attributes\": [{\"key\": \"Product Type\",\"value\": \"AVCS\"}],\"businessUnit\": \"AVCSCustomExchangeSets\",\"batchPublishedDate\": \"2022-07-13T10:53:58.98Z\",\"expiryDate\": \"2022-08-12T10:53:06Z\",\"files\": [{\"filename\": \"M01X02.zip\",\"fileSize\": 5095731,\"mimeType\": \"application/zip\",\"hash\": \"TLwn4f5J36mvWvrTafkXYA==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip\"}}},{\"filename\": \"M02X02.zip\",\"fileSize\": 6267757,\"mimeType\": \"application/zip\",\"hash\": \"7tP0BwgbMdKZT8koKakR+w==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M02X02.zip\"}}}]}")))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\"));
+            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\", null));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -341,7 +336,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -353,7 +348,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             A.CallTo(() => fileInfo.Name).Returns("M01X01.zip");
             A.CallTo(() => fileInfo.Length).Returns(100000);
 
-            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(new HttpResponseMessage()
               {
                   StatusCode = System.Net.HttpStatusCode.OK,
@@ -385,8 +380,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Uploading of file blocks of {FileName} for BatchID - {BatchID} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
-
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -396,7 +390,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             A.CallTo(() => fileInfo.Name).Returns("M01X01.zip");
             A.CallTo(() => fileInfo.Length).Returns(100);
 
-            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.UploadFileBlockAsync(A<string>.Ignored, A<byte[]>.Ignored, A<byte[]>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(new HttpResponseMessage()
               {
                   StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -408,7 +402,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             Assert.ThrowsAsync<AggregateException>(() => _fssService.UploadBlocks("", fileInfo));
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
 
             A.CallTo(_fakeLogger).Where(call =>
@@ -423,7 +417,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             _fakeconfiguration["IsFTRunning"] = "true";
 
-            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -441,7 +435,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
@@ -456,7 +450,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             _fakeconfiguration["IsFTRunning"] = "true";
 
-            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -484,14 +478,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceExactly();
 
-
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public async Task DoesAddFileToBatch_Returns_True_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.AddFileToBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.AddFileToBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Created,
@@ -517,14 +510,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Adding file {FileName} in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
            ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void DoesAddFileToBatch_Returns_False_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.AddFileToBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.AddFileToBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -537,7 +530,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             Assert.ThrowsAsync<FulfilmentException>(
             () => _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream", Batch.PosFullAvcsIsoSha1Batch));
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
 
             A.CallTo(_fakeLogger).Where(call =>
@@ -550,7 +543,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public async Task DoesWriteBlockFile_Returns_True_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.WriteBlockInFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.WriteBlockInFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Created,
@@ -578,14 +571,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Writing blocks in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
            ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void DoesWriteBlockFile_Throws_Exception_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.WriteBlockInFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.WriteBlockInFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -605,14 +598,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to write blocks in file {FileName} failed for batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public async Task DoesCommitBatch_Returns_True_If_ValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.CommitBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CommitBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Created,
@@ -640,14 +633,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch commit for {BatchType} with BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void DoesCommitBatch_Returns_False_If_InValidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.CommitBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CommitBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -667,7 +660,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
              .MustHaveHappenedOnceExactly();
         }
 
@@ -677,7 +670,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             SearchBatchResponse searchBatchResponse = GetSearchBatchResponse();
             string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -698,7 +691,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<EventId>(1) == EventIds.GetAioInfoFolderFilesOkResponse.ToEventId()
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Successfully searched aio info folder files path for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}").MustHaveHappened();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                          .MustHaveHappenedOnceExactly();
         }
 
@@ -708,7 +701,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             SearchBatchResponse searchBatchResponse = new();
             string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -726,14 +719,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<EventId>(1) == EventIds.GetAioInfoFolderFilesNotFound.ToEventId()
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service, aio info folder files not found for BatchId:{batchId} and _X-Correlation-ID:{CorrelationId}").MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                          .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void DoesGetAioInfoFolderFiles_Throws_Exception_If_BadRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest,
@@ -750,14 +743,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<EventId>(1) == EventIds.GetAioInfoFolderFilesNonOkResponse.ToEventId()
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching aio info folder files with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}").MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                          .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void DoesGetAioInfoFolderFiles_Throws_Exception_If_InvalidRequest()
         {
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -774,11 +767,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<EventId>(1) == EventIds.GetAioInfoFolderFilesNonOkResponse.ToEventId()
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while searching aio info folder files with uri {RequestUri} responded with {StatusCode} for BatchId:{BatchId} and _X-Correlation-ID:{CorrelationId}").MustHaveHappenedOnceExactly();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                          .MustHaveHappenedOnceExactly();
         }
 
         #region SearchReadMeFilePath
+
         [Test]
         public async Task WhenReadMeFileNotFound_ThenReturnFulfilmentException()
         {
@@ -786,8 +780,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
             string invalidReadMeSearchFilterQuery = "$batch(Product Type) eq 'AVCS nd businessUnit eq 'ADDS'";
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest,
@@ -814,8 +808,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var searchBatchResponse = GetSearchBatchEmptyResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -842,8 +836,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var searchBatchResponse = GetMultipleFilesSearchBatchResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.OK,
@@ -856,7 +850,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             Func<Task> act = async () => { await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery); };
             await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId());
-           
+
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -869,6 +863,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             string accessTokenParam = null;
             string uriParam = null;
+            string correlationId = null;
             var searchReadMeFileName = @"batch/a07537ff-ffa2-4565-8f0e-96e61e70a9fc/files/README.TXT";
 
             var searchBatchResponse = GetReadMeSearchBatchResponse();
@@ -876,12 +871,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))) };
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
-            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored))
-               .Invokes((string accessToken, string uri) =>
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
+            A.CallTo(() => _fakeFssApiClient.GetAncillaryFileDetailsAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+               .Invokes((string accessToken, string uri, string corrId) =>
                {
                    accessTokenParam = accessToken;
                    uriParam = uri;
+                   correlationId = corrId;
                })
                .Returns(httpResponse);
 
@@ -890,6 +886,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             response.Should().NotBeNull();
             expectedReadMeFilePath.Should().Be(searchReadMeFileName);
         }
+
         #endregion SearchReadMeFilePath
 
         #region DownloadReadMeFile
@@ -908,7 +905,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.OK, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))), RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://test.com") } };
             httpResponse.Headers.Add("Server", "Windows-Azure-Blob/10.0");
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
             A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
                .Invokes((string accessToken, string uri) =>
                {
@@ -940,13 +937,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             string readMeFilePath = @"batch/c4af46f5-1b41-4294-93f9-dda87bf8ab96/files/README.TXT";
             string exchangeSetRootPath = @"C:\\HOME";
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
             var searchBatchResponse = GetReadMeFileDetails();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
 
             var httpResponse = new HttpResponseMessage() { StatusCode = HttpStatusCode.BadRequest, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(jsonString))), RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://test.com") } };
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).Returns(GetFakeToken());
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(GetFakeToken());
             A.CallTo(() => _fakeFssApiClient.DownloadFile(A<string>.Ignored, A<string>.Ignored))
                .Invokes((string accessToken, string uri) =>
                {
@@ -964,7 +961,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and _X-Correlation-ID:{CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
-        #endregion
+
+        #endregion DownloadReadMeFile
 
         [Test]
         [TestCase(Batch.BessBaseZipBatch)]
@@ -975,7 +973,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             _fakeconfiguration["IsFTRunning"] = "true";
             string type;
 
-            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = HttpStatusCode.OK,
@@ -992,9 +990,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 case Batch.BessUpdateZipBatch:
                     type = BessType.UPDATE.ToString();
                     break;
+
                 case Batch.BessChangeZipBatch:
                     type = BessType.CHANGE.ToString();
                     break;
+
                 default:
                     type = BessType.BASE.ToString();
                     break;
@@ -1018,7 +1018,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -1030,7 +1030,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             _fakeconfiguration["IsFTRunning"] = "true";
             string type;
 
-            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
                 {
                     StatusCode = System.Net.HttpStatusCode.Unauthorized,
@@ -1047,9 +1047,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 case Batch.BessUpdateZipBatch:
                     type = BessType.UPDATE.ToString();
                     break;
+
                 case Batch.BessChangeZipBatch:
                     type = BessType.CHANGE.ToString();
                     break;
+
                 default:
                     type = BessType.BASE.ToString();
                     break;
@@ -1072,10 +1074,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
              ).MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
 
         #region GetSearchBatchResponse
+
         private static SearchBatchResponse GetSearchBatchResponse()
         {
             return new SearchBatchResponse()
@@ -1094,7 +1097,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 Total = 1,
             };
         }
-        #endregion
+
+        #endregion GetSearchBatchResponse
 
         private ConfigQueueMessage GetConfigQueueMessage(string type) => new()
         {
@@ -1116,6 +1120,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         };
 
         #region GetReadMeSearchBatchResponse
+
         private static SearchBatchResponse GetReadMeSearchBatchResponse()
         {
             return new SearchBatchResponse()
@@ -1154,9 +1159,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 Total = 1,
             };
         }
-        #endregion
+
+        #endregion GetReadMeSearchBatchResponse
 
         #region GetSearchBatchEmptyResponse
+
         private static SearchBatchResponse GetSearchBatchEmptyResponse()
         {
             return new SearchBatchResponse()
@@ -1165,16 +1172,20 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 Count = 0
             };
         }
-        #endregion
+
+        #endregion GetSearchBatchEmptyResponse
 
         #region GetFakeToken
+
         private static string GetFakeToken()
         {
             return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0ZXN0IHNlcnZlciIsImlhdCI6MTU1ODMyOTg2MCwiZXhwIjoxNTg5OTUyMjYwLCJhdWQiOiJ3d3cudGVzdC5jb20iLCJzdWIiOiJ0ZXN0dXNlckB0ZXN0LmNvbSIsIm9pZCI6IjE0Y2I3N2RjLTFiYTUtNDcxZC1hY2Y1LWEwNDBkMTM4YmFhOSJ9.uOPTbf2Tg6M2OIC6bPHsBAOUuFIuCIzQL_MV3qV6agc";
         }
-        #endregion
+
+        #endregion GetFakeToken
 
         #region GetReadMeFileDetails
+
         private static string GetReadMeFileDetails()
         {
             StringBuilder sb = new StringBuilder();
@@ -1185,6 +1196,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             sb.AppendLine(lineThree);
             return sb.ToString();
         }
-        #endregion
+
+        #endregion GetReadMeFileDetails
     }
 }
