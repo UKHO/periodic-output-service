@@ -327,7 +327,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 _ => keyFileType
             };
             string rootFolder = downloadFileUrl[..downloadFileUrl.LastIndexOf('/')];
-            string permitUri = rootFolder  + "/" + keyFileType;
+            string permitUri = rootFolder + "/" + keyFileType;
 
             var response = await FssApiClient.GetFileDownloadAsync(permitUri);
 
@@ -397,16 +397,20 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static bool VerifyPermitFile(string? downloadFolderPath, string? keyFileType)
         {
-            bool permitVerified = false;
-            if (keyFileType == "KEY_TEXT")
+            if (File.Exists(Path.Combine(downloadFolderPath!, testConfiguration.bessConfig.PermitTxtFile!)) || File.Exists(Path.Combine(downloadFolderPath!, testConfiguration.bessConfig.PermitXmlFile!)))
             {
-                permitVerified = CheckPermitTxtFile(downloadFolderPath);
+                bool permitVerified = false;
+                if (keyFileType == "KEY_TEXT")
+                {
+                    permitVerified = CheckPermitTxtFile(downloadFolderPath);
+                }
+                else if (keyFileType == "PERMIT_XML")
+                {
+                    permitVerified = CheckPermitXmlFile(downloadFolderPath);
+                }
+                return permitVerified;
             }
-            else if (keyFileType == "PERMIT_XML")
-            {
-                permitVerified = CheckPermitXmlFile(downloadFolderPath);
-            }
-            return permitVerified;
+            return false;
         }
     }
 }
