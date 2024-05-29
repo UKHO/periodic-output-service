@@ -82,7 +82,14 @@ namespace UKHO.BESS.BuilderService.Services
 
             var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray(), bessZipFileName);
 
-            await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
+            if (latestProductVersions.ProductVersions.Any())
+            {
+                await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
+            }
+            else if (!string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                logger.LogInformation(EventIds.SkipPksAsNoUpdateFoundForProducts.ToEventId(), "Skipped Product Key Service request as no updates are found for requested product(s) | BESS Type : {type} | {DateTime} | _X-Correlation-ID : {CorrelationId}", configQueueMessage.Type, DateTime.UtcNow, configQueueMessage.CorrelationId);
+            }
 
             CreateZipFile(essFiles, essFileDownloadPath, configQueueMessage.CorrelationId);
 

@@ -823,7 +823,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809163 - Bess file renamed
         /// </summary>
-        ZipFileRenamed = 809163
+        ZipFileRenamed = 809163,
+
+        /// <summary>
+        /// 809164 - Skipping product key service request as no update found for given products (empty bespoke exchange set)
+        /// </summary>
+        SkipPksAsNoUpdateFoundForProducts = 809164
     }
 
     public static class EventIdExtensions
