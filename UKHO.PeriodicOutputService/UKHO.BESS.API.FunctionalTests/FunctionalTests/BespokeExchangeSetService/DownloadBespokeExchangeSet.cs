@@ -55,15 +55,19 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
 
         //PBI 147171: BESS BS - Handling of empty ES and Error.txt Scenarios
         [Test]
-        [TestCase("d0635e6c-81ae-4acb-9129-1a69f9ee58d2", "s57", "UPDATE")]
-        public async Task WhenIProcessSameConfigWithCorrectDetailsTwice_ThenEmptyExchangeSetShouldBeDownloaded(string batchId, string exchangeSetStandard, string type)
+        [TestCase("d0635e6c-81ae-4acb-9129-1a69f9ee58d2", "s57", "UPDATE", "NONE")]
+        [TestCase("d0635e6c-81ae-4acb-9129-1a69f9ee58d2", "s57", "UPDATE", "KEY_TEXT")]
+        public async Task WhenIProcessSameConfigWithCorrectDetailsTwice_ThenEmptyExchangeSetShouldBeDownloaded(string batchId, string exchangeSetStandard, string type, string keyFileType)
         {
-            Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
+            Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName, keyFileType);
             Extensions.WaitForDownloadExchangeSet();
-            Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName);
+            Extensions.AddQueueMessage(type, exchangeSetStandard, testConfiguration.AzureWebJobsStorage, testConfiguration.bessStorageConfig.QueueName, keyFileType);
             Extensions.WaitForDownloadExchangeSet();
             string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId, false, null, true);
             FssBatchHelper.CheckFilesInEmptyBess(downloadFolderPath);
+            string? batchFolderPath = Path.GetDirectoryName(downloadFolderPath);
+            bool expectedResulted = FssBatchHelper.VerifyPermitFile(batchFolderPath, keyFileType);
+            expectedResulted.Should().Be(false);
         }
 
         [TearDown]

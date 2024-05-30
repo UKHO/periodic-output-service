@@ -133,11 +133,18 @@ namespace UKHO.BESS.BuilderService.Services
         {
             if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
+                if (latestProductVersions.ProductVersions.Any())
+                {
+                    List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
 
-                List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest, configQueueMessage.CorrelationId);
+                    List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest, configQueueMessage.CorrelationId);
 
-                CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse, configQueueMessage.CorrelationId);
+                    CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse, configQueueMessage.CorrelationId);
+                }
+                else
+                {
+                    logger.LogInformation(EventIds.SkipPksAsEmptyExchangeSetFoundForProducts.ToEventId(), "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                }
             }
         }
 
