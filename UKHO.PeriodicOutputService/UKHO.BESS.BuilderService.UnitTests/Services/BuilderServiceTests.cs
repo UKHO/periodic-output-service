@@ -1560,8 +1560,8 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Information
-            && call.GetArgument<EventId>(1) == EventIds.SkipPksAsNoUpdateFoundForProducts.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Skipped Product Key Service request as no updates are found for requested product(s) | BESS Type : {type} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+            && call.GetArgument<EventId>(1) == EventIds.SkipPksAsEmptyExchangeSetFoundForProducts.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustNotHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -2000,8 +2000,8 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Information
-            && call.GetArgument<EventId>(1) == EventIds.SkipPksAsNoUpdateFoundForProducts.ToEventId()
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Skipped Product Key Service request as no updates are found for requested product(s) | BESS Type : {type} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+            && call.GetArgument<EventId>(1) == EventIds.SkipPksAsEmptyExchangeSetFoundForProducts.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 

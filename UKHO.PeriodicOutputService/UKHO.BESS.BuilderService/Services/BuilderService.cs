@@ -82,14 +82,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray(), bessZipFileName);
 
-            if (latestProductVersions.ProductVersions.Any())
-            {
-                await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
-            }
-            else if (!string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
-            {
-                logger.LogInformation(EventIds.SkipPksAsNoUpdateFoundForProducts.ToEventId(), "Skipped Product Key Service request as no updates are found for requested product(s) | BESS Type : {type} | {DateTime} | _X-Correlation-ID : {CorrelationId}", configQueueMessage.Type, DateTime.UtcNow, configQueueMessage.CorrelationId);
-            }
+            await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
 
             CreateZipFile(essFiles, essFileDownloadPath, configQueueMessage.CorrelationId);
 
@@ -140,11 +133,18 @@ namespace UKHO.BESS.BuilderService.Services
         {
             if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
+                if (latestProductVersions.ProductVersions.Any())
+                {
+                    List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
 
-                List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest, configQueueMessage.CorrelationId);
+                    List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest, configQueueMessage.CorrelationId);
 
-                CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse, configQueueMessage.CorrelationId);
+                    CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse, configQueueMessage.CorrelationId);
+                }
+                else
+                {
+                    logger.LogInformation(EventIds.SkipPksAsEmptyExchangeSetFoundForProducts.ToEventId(), "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                }
             }
         }
 
