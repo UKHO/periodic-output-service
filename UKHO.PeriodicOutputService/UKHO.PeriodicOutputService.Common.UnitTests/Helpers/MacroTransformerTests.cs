@@ -223,7 +223,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         [Test]
         public void WhenMacroValueIsAvailable_ThenCorrespondingDateStringIsReturnedAdd1DayOutputMonthShortName()
         {
-            string macroExpression = "$(now.AddDays(1).MonthName)";
+            string macroExpression = "$(now.AddDays(1).MonthShortName)";
             string output = DateTime.Now.AddDays(1).ToString("MMM");
             MacroTest(macroExpression, output).Should().Be(output);
         }
