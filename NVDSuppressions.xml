@@ -183,30 +183,12 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: Microsoft.IdentityModel.Abstractions.dll
-   ]]>
-    </notes>
-    <cve>CVE-2024-21319</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: System.Security.Cryptography.X509Certificates:4.1.0
    .NET Core 1.0, 1.1, and 2.0 allow an unauthenticated attacker to remotely cause a denial of service attack against a .NET Core web application by improperly parsing certificate data.
    POS is pinned to .Net core SDK 6.0.419 which is not vulnerable.
    ]]>
     </notes>
     <cve>CVE-2017-11770</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Net.Http:4.1.0
-   An information disclosure vulnerability exists in .NET Core when authentication information is inadvertently exposed in a redirect, aka ".NET Core Information Disclosure Vulnerability.
-   " This affects .NET Core 2.1, .NET Core 1.0, .NET Core 1.1, PowerShell Core 6.0. POS is pinned to .Net core SDK 6.0.419 which is not vulnerable.
-   ]]>
-    </notes>
-    <cve>CVE-2018-8292</cve>
   </suppress>
   <suppress>
     <notes>
@@ -424,16 +406,6 @@
     </notes>
     <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
     <cve>CVE-2023-41329</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   Vulnerability not applicable as we run wire mock locally
-   file name: WireMock.Net.Abstractions.dll
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
-    <cve>CVE-2022-31009</cve>
   </suppress>
   <suppress>
     <notes>
