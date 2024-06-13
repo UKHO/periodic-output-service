@@ -70,7 +70,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         [Test]
         public void WhenMacroValueIsAvailable_ThenCorrespondingDateStringIsReturnedThisMonthMonthName()
         {
-            string macroExpression = "$(now.MonthShortName)";
+            string macroExpression = "$(now.MonthName)";
             string output = DateTime.Now.ToString("MMMM");
             MacroTest(macroExpression, output).Should().Be(output);
         }
@@ -78,7 +78,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         [Test]
         public void WhenMacroValueIsAvailable_ThenCorrespondingDateStringIsReturnedThisMonthMonthNameShort()
         {
-            string macroExpression = "$(now.MonthName)";
+            string macroExpression = "$(now.MonthShortName)";
             string output = DateTime.Now.ToString("MMM");
             MacroTest(macroExpression, output).Should().Be(output);
         }
