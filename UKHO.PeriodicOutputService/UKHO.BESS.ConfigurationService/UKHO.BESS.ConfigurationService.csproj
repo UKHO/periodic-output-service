@@ -22,7 +22,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="NCrontab" Version="3.3.3" />
-    <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.23242.1" />
+    <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.24163.8" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
     <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
