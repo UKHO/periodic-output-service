@@ -1108,7 +1108,7 @@ stages:
     dependsOn: 
       - Devdeploy
     displayName: vNext IAT Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
       - group: "ESS-vNextIAT-Variables"
       - group: "ESS-Deployment-Variables-vNextIAT"
@@ -1216,7 +1216,7 @@ stages:
     dependsOn: 
        - vNextIATDeploy
     displayName: vNext E2E Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
       - group: "ESS-vNextE2E-Variables"
       - group: "ESS-Deployment-Variables-vNextE2E"
