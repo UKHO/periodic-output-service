@@ -441,4 +441,10 @@
     <cve>CVE-2023-41329</cve>
     <cve>CVE-2018-9117</cve>
   </suppress>
+  <suppress>
+   <notes><![CDATA[
+   file name: Azure.Identity.dll
+   ]]></notes>
+   <cve>CVE-2024-35255</cve>
+</suppress>
 </suppressions>
