@@ -26,9 +26,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Elastic.Apm" Version="1.27.1" />
-    <PackageReference Include="Elastic.Apm.Azure.Storage" Version="1.27.1" />
-    <PackageReference Include="Microsoft.Azure.Amqp" Version="2.6.8" />
+    <PackageReference Include="Elastic.Apm" Version="1.28.0" />
+    <PackageReference Include="Elastic.Apm.Azure.Storage" Version="1.28.0" />
+    <PackageReference Include="Microsoft.Azure.Amqp" Version="2.6.9" />
     <PackageReference Include="Microsoft.Azure.WebJobs" Version="3.0.39" />
     <PackageReference Include="Microsoft.Azure.WebJobs.Logging.ApplicationInsights" Version="3.0.35" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
