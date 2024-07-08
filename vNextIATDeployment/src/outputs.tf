@@ -27,6 +27,11 @@ output "pos_storage_connection_string"{
   sensitive = true
 }
 
+output "bess_storage_connection_string"{
+  value = module.storage.bess_storage_connection_string
+  sensitive = true
+}
+
 output "log_primary_connection_string" {
   value     = module.eventhub.log_primary_connection_string
   sensitive = true
@@ -58,4 +63,8 @@ output "mock_webappname" {
 
 output "mock_webapp_rg" {
 value = azurerm_resource_group.mock_webapp_rg.name
+}
+
+output "keyvault_uri"{
+  value = module.key_vault.keyvault_uri
 }

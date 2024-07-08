@@ -2,6 +2,6 @@
 {
     public interface IAuthEssTokenProvider
     {
-        public Task<string> GetManagedIdentityAuthAsync(string resource);
+        public Task<string> GetManagedIdentityAuthAsync(string resource, string? correlationId = null);
     }
 }

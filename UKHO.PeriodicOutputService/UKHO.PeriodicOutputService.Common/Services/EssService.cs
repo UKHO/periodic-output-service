@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
@@ -27,50 +28,49 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _authEssTokenProvider = authEssTokenProvider ?? throw new ArgumentNullException(nameof(authEssTokenProvider));
         }
 
-        public async Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers)
+        public async Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers, string? exchangeSetStandard = null, string? correlationId = null)
         {
-            _logger.LogInformation(EventIds.PostProductIdentifiersToEssStarted.ToEventId(), "Request to post {ProductIdentifiersCount} productidentifiers to ESS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productIdentifiers.Count.ToString(), DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.PostProductIdentifiersToEssStarted.ToEventId(), "Request to post {ProductIdentifiersCount} productidentifiers to ESS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productIdentifiers.Count.ToString(), DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
-            string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productIdentifiers";
-            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
+            string uri = GetProductIdentifierUri(_essApiConfiguration.Value.BaseUrl, exchangeSetStandard);
+            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId, correlationId);
 
-
-            HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(uri, productIdentifiers, accessToken);
+            HttpResponseMessage httpResponse = await _essApiClient.PostProductIdentifiersDataAsync(uri, productIdentifiers, accessToken, correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
-                _logger.LogInformation(EventIds.PostProductIdentifiersToEssCompleted.ToEventId(), "Request to post productidentifiers to ESS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.PostProductIdentifiersToEssCompleted.ToEventId(), "Request to post productidentifiers to ESS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 return JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
             }
             else
             {
                 if (httpResponse.StatusCode == System.Net.HttpStatusCode.NotModified)
                 {
-                    _logger.LogError(EventIds.ExchangeSetNotModified.ToEventId(), "Exchange set not modified | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                    _logger.LogError(EventIds.ExchangeSetNotModified.ToEventId(), "Exchange set not modified | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 }
                 else
                 {
-                    _logger.LogError(EventIds.PostProductIdentifiersToEssFailed.ToEventId(), "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                    _logger.LogError(EventIds.PostProductIdentifiersToEssFailed.ToEventId(), "Failed to post productidentifiers to ESS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 }
 
                 throw new FulfilmentException(EventIds.PostProductIdentifiersToEssFailed.ToEventId());
             }
         }
 
-        public async Task<ExchangeSetResponseModel?> GetProductDataSinceDateTime(string sinceDateTime)
+        public async Task<ExchangeSetResponseModel?> GetProductDataSinceDateTime(string sinceDateTime, string? exchangeSetStandard = null, string? correlationId = null)
         {
-            _logger.LogInformation(EventIds.GetProductDataSinceDateTimeStarted.ToEventId(), "ESS request to create exchange set for data since {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.GetProductDataSinceDateTimeStarted.ToEventId(), "ESS request to create exchange set for data since {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
-            string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData?sinceDateTime=" + sinceDateTime;
-            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
+            string uri = GetSinceDateTimeUri(_essApiConfiguration.Value.BaseUrl, sinceDateTime, exchangeSetStandard);
+            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId, correlationId);
 
-            HttpResponseMessage httpResponse = await _essApiClient.GetProductDataSinceDateTime(uri, sinceDateTime, accessToken);
+            HttpResponseMessage httpResponse = await _essApiClient.GetProductDataSinceDateTime(uri, sinceDateTime, accessToken, correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
-                _logger.LogInformation(EventIds.GetProductDataSinceDateTimeCompleted.ToEventId(), "ESS request to create exhchange set for data since {SinceDateTime} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.GetProductDataSinceDateTimeCompleted.ToEventId(), "ESS request to create exhchange set for data since {SinceDateTime} completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 ExchangeSetResponseModel? exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
                 exchangeSetResponseModel!.ResponseDateTime = httpResponse!.Headers!.Date!.Value.UtcDateTime;
 
@@ -78,33 +78,45 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
             else
             {
-                _logger.LogError(EventIds.GetProductDataSinceDateTimeFailed.ToEventId(), "Failed to create exchange set for data since {SinceDateTime} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.GetProductDataSinceDateTimeFailed.ToEventId(), "Failed to create exchange set for data since {SinceDateTime} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 throw new FulfilmentException(EventIds.GetProductDataSinceDateTimeFailed.ToEventId());
             }
         }
 
-        public async Task<ExchangeSetResponseModel?> GetProductDataProductVersions(ProductVersionsRequest productVersionsRequest)
+        public async Task<ExchangeSetResponseModel?> GetProductDataProductVersions(ProductVersionsRequest productVersionsRequest, string? exchangeSetStandard = null, string? correlationId = null)
         {
-            _logger.LogInformation(EventIds.GetProductDataProductVersionStarted.ToEventId(), "ESS request to create exchange set for product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.GetProductDataProductVersionStarted.ToEventId(), "ESS request to create exchange set for product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
-            string uri = $"{_essApiConfiguration.Value.BaseUrl}/productData/productVersions";
-            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId);
+            string uri = GetProductVersionUri(_essApiConfiguration.Value.BaseUrl, exchangeSetStandard);
+            string accessToken = await _authEssTokenProvider.GetManagedIdentityAuthAsync(_essApiConfiguration.Value.EssClientId, correlationId);
 
-            HttpResponseMessage httpResponse = await _essApiClient.GetProductDataProductVersion(uri, productVersionsRequest.ProductVersions, accessToken);
+            HttpResponseMessage httpResponse = await _essApiClient.GetProductDataProductVersion(uri, productVersionsRequest.ProductVersions, accessToken, correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
                 string bodyJson = await httpResponse.Content.ReadAsStringAsync();
-                _logger.LogInformation(EventIds.GetProductDataProductVersionCompleted.ToEventId(), "ESS request to create exhchange set for product version completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.GetProductDataProductVersionCompleted.ToEventId(), "ESS request to create exchange set for product version completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 ExchangeSetResponseModel? exchangeSetResponseModel = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(bodyJson);
 
                 return exchangeSetResponseModel;
             }
             else
             {
-                _logger.LogError(EventIds.GetProductDataProductVersionFailed.ToEventId(), "Failed to create exchange set for product version | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.GetProductDataProductVersionFailed.ToEventId(), "Failed to create exchange set for product version | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 throw new FulfilmentException(EventIds.GetProductDataProductVersionFailed.ToEventId());
             }
         }
+
+        [ExcludeFromCodeCoverage]
+        private static string GetProductIdentifierUri(string url, string exchangeSetStandard) =>
+            !string.IsNullOrEmpty(exchangeSetStandard) ? $"{url}/productData/productIdentifiers?exchangeSetStandard={exchangeSetStandard}" : $"{url}/productData/productIdentifiers";
+
+        [ExcludeFromCodeCoverage]
+        private static string GetSinceDateTimeUri(string url, string sinceDateTime, string exchangeSetStandard) =>
+            !string.IsNullOrEmpty(exchangeSetStandard) ? $"{url}/productData?sinceDateTime={sinceDateTime}&exchangeSetStandard={exchangeSetStandard}" : $"{url}/productData?sinceDateTime={sinceDateTime}";
+
+        [ExcludeFromCodeCoverage]
+        private static string GetProductVersionUri(string url, string exchangeSetStandard) =>
+            !string.IsNullOrEmpty(exchangeSetStandard) ? $"{url}/productData/productVersions?exchangeSetStandard={exchangeSetStandard}" : $"{url}/productData/productVersions";
     }
 }

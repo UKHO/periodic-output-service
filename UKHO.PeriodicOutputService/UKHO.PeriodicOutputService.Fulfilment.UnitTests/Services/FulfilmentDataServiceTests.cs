@@ -53,7 +53,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         {
             jwtauthUnpToken.StatusCode = HttpStatusCode.OK;
             jwtauthUnpToken.AuthToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ123";
-            
+
             FleetManagerGetCatalogueResponseModel fleetManagerGetCatalogue = new()
             {
                 StatusCode = HttpStatusCode.OK,
@@ -66,16 +66,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
-            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
 
             A.CallTo(() => _fakefileSystemHelper.GetFiles(A<string>.Ignored, A<string>.Ignored, A<SearchOption>.Ignored))
@@ -91,13 +91,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.GetFileInfo(A<string>.Ignored))
                           .Returns(_fakeFileInfo);
 
-            A.CallTo(() => _fakeFssService.AddFileToBatch(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<Batch>.Ignored))
+            A.CallTo(() => _fakeFssService.AddFileToBatch(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<Batch>.Ignored, A<string>.Ignored))
                 .Returns(true);
 
-            A.CallTo(() => _fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored))
+            A.CallTo(() => _fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored, A<string>.Ignored))
                 .Returns(new List<string> { "Block_00001" });
 
-            A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored))
+            A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored,A<string>.Ignored))
               .Returns(true);
 
             bool result = await _fulfilmentDataService.CreatePosExchangeSets();
@@ -107,7 +107,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
 
-            A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored))
+            A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored,A<string>.Ignored))
                 .MustHaveHappenedOnceOrMore();
 
             A.CallTo(() => _fakeFileInfo.MoveTo(A<string>.That.Contains("AVCS_UPDATE")))
@@ -132,16 +132,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
-            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetBatchResponseModelWithFileNameError());
 
             Assert.ThrowsAsync<FulfilmentException>(
@@ -175,16 +175,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
-            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
@@ -220,13 +220,13 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.CommitInProgress);
 
             Assert.ThrowsAsync<FulfilmentException>(
@@ -257,16 +257,16 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFleetManagerService.GetCatalogue(A<string>.Ignored))
               .Returns(fleetManagerGetCatalogue);
 
-            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored))
+            A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored))
+            A.CallTo(() => _fakeEssService.GetProductDataSinceDateTime(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
 
-            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored))
+            A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
               .Returns(Common.Enums.FssBatchStatus.Committed);
 
-            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
 
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<Exception>();
@@ -333,7 +333,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                            Href ="http://testaio1.com"
                        }
                    },
-
                }
             }
         };

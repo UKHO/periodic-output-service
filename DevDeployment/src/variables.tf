@@ -9,11 +9,14 @@ variable "resource_group_name" {
 }
 
 locals {
-  env_name           = lower(terraform.workspace)
-  service_name       = "pos"
-  web_app_name       = "${local.service_name}-${local.env_name}-lxs-webapp"
-  mock_web_app_name  = "${local.service_name}-${local.env_name}-mock-webapp"
-  key_vault_name     = "${local.service_name}-ukho-${local.env_name}-kv"
+  env_name               = lower(terraform.workspace)
+  service_name           = "pos"
+  web_app_name           = "${local.service_name}-${local.env_name}-lxs-webapp"
+  mock_web_app_name      = "${local.service_name}-${local.env_name}-mock-webapp"
+  pks_mock_web_app_name  = "${local.service_name}-${local.env_name}-pks-mock-webapp"
+  key_vault_name         = "${local.service_name}-ukho-${local.env_name}-kv"
+  service_name_bess      = "bess"
+  container_name         = "bess-configs"
 
   tags = {
     SERVICE                   = "Periodic Output Service"
@@ -65,4 +68,8 @@ variable "elastic_apm_server_url" {
 }
 
 variable "elastic_apm_api_key" {
+}
+
+variable "permitdecryptionhardwareid" {
+  type = string
 }

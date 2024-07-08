@@ -13,6 +13,8 @@ locals {
   service_name       = "pos"
   web_app_name       = "${local.service_name}-${local.env_name}-lxs-webapp"
   key_vault_name     = "${local.service_name}-ukho-${local.env_name}-kv"
+  service_name_bess  = "bess"
+  container_name     = "bess-configs"
 
   tags = {
     SERVICE                   = "Periodic Output Service"
@@ -62,4 +64,8 @@ variable "elastic_apm_server_url" {
 
 variable "elastic_apm_api_key" {
 
+}
+
+variable "permitdecryptionhardwareid" {
+  type = string
 }

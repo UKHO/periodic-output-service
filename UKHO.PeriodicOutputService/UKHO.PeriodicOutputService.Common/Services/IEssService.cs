@@ -5,9 +5,10 @@ namespace UKHO.PeriodicOutputService.Common.Services
 {
     public interface IEssService
     {
-        Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers);
-        Task<ExchangeSetResponseModel?> GetProductDataSinceDateTime(string sinceDateTime);
+        Task<ExchangeSetResponseModel?> PostProductIdentifiersData(List<string> productIdentifiers, string? exchangeSetStandard = null, string? correlationId = null);
 
-        Task<ExchangeSetResponseModel?> GetProductDataProductVersions(ProductVersionsRequest productVersionsRequest);
+        Task<ExchangeSetResponseModel?> GetProductDataSinceDateTime(string sinceDateTime, string? exchangeSetStandard = null, string? correlationId = null);
+
+        Task<ExchangeSetResponseModel?> GetProductDataProductVersions(ProductVersionsRequest productVersionsRequest, string? exchangeSetStandard = null, string? correlationId = null);
     }
 }

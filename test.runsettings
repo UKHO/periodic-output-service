@@ -14,7 +14,8 @@
                 <ModulePath>.*nunit.framework.dll</ModulePath>
                 <ModulePath>.*nunit3.testadapter.dll</ModulePath>
                 <ModulePath>.*microsoft.*</ModulePath>
-                <ModulePath>.microsoft*.*</ModulePath>	   
+                <ModulePath>.microsoft*.*</ModulePath>
+                <ModulePath>.*fluentvalidation.dll</ModulePath>                  
               </Exclude>
             </ModulePaths>
 

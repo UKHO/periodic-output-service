@@ -47,6 +47,7 @@ module "eventhub" {
 module "mock_webapp_service" {
   source              = "./Modules/MockWebApp"
   name                = local.mock_web_app_name
+  pks_name            = local.pks_mock_web_app_name
   env_name            = local.env_name
   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
   service_plan_id     = data.azurerm_app_service_plan.essft_asp.id
@@ -72,7 +73,6 @@ module "webapp_service" {
   location                  = azurerm_resource_group.webapp_rg.location
   subnet_id                 = data.azurerm_subnet.main_subnet.id
   app_settings = {
-    "KeyVaultSettings:ServiceUri"                              = "https://${local.key_vault_name}.vault.azure.net/"
     "EventHubLoggingConfiguration:Environment"                 = local.env_name
     "EventHubLoggingConfiguration:MinimumLoggingLevel"         = "Warning"
     "EventHubLoggingConfiguration:UkhoMinimumLoggingLevel"     = "Information"
@@ -102,9 +102,12 @@ module "storage" {
   location            = azurerm_resource_group.webapp_rg.location
   allowed_ips         = var.allowed_ips
   m_spoke_subnet      = data.azurerm_subnet.main_subnet.id
+  mock_spoke_subnet   = data.azurerm_subnet.mock_main_subnet.id
   agent_subnet        = data.azurerm_subnet.agent_subnet.id
   env_name            = local.env_name
   service_name        = local.service_name
+  service_name_bess   = local.service_name_bess
+  container_name      = local.container_name
   tags                = local.tags
 }
 
@@ -124,6 +127,9 @@ module "key_vault" {
       "EventHubLoggingConfiguration--ConnectionString"       = module.eventhub.log_primary_connection_string
       "EventHubLoggingConfiguration--EntityPath"             = module.eventhub.entity_path
       "ApplicationInsights--ConnectionString"                = module.app_insights.connection_string
+      "BessStorageConfiguration--ConnectionString"           = module.storage.bess_storage_connection_string
+      "AzureWebJobsStorage"                                  = module.storage.bess_storage_connection_string
+      "PKSApiConfiguration--PermitDecryptionHardwareId"      = var.permitdecryptionhardwareid
  }
   tags                                                       = local.tags
 }

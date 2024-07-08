@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO.Abstractions;
 using System.Net;
 using Microsoft.Extensions.Configuration;
@@ -9,6 +10,7 @@ using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 
@@ -22,11 +24,13 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IConfiguration _configuration;
-        private readonly Enum[] _aioBatchTypes = new Enum[]
-                                      {
+
+        private readonly Enum[] _aioBatchTypes = {
                                             Batch.AioBaseCDZipIsoSha1Batch,
                                             Batch.AioUpdateZipBatch
                                       };
+
+        private const string ServerHeaderValue = "Windows-Azure-Blob";
 
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
@@ -43,9 +47,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }
 
-        public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId, RequestType requestType)
+        public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId, RequestType requestType, string? correlationId = null)
         {
-            _logger.LogInformation(EventIds.FssBatchStatusPollingStarted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.FssBatchStatusPollingStarted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             FssBatchStatus batchStatus = FssBatchStatus.Incomplete;
             DateTime startTime = DateTime.UtcNow;
@@ -56,6 +60,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTime);
                 batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTime);
             }
+            else if (requestType.Equals(RequestType.BESS))
+            {
+                batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForBESS);
+                batchStatusPollingDelayTime = int.Parse(_fssApiConfiguration.Value.BatchStatusPollingDelayTimeForBESS);
+            }
             else
             {
                 batchStatusPollingCutoffTime = double.Parse(_fssApiConfiguration.Value.BatchStatusPollingCutoffTimeForAIO);
@@ -64,75 +73,73 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/status";
 
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             FssBatchStatus[] pollBatchStatus = { FssBatchStatus.CommitInProgress, FssBatchStatus.Incomplete };
 
             while (pollBatchStatus.Contains(batchStatus) &&
                         DateTime.UtcNow - startTime < TimeSpan.FromMinutes(batchStatusPollingCutoffTime))
             {
-                _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.GetBatchStatusRequestStarted.ToEventId(), "Request to get batch status for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
-                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken);
+                HttpResponseMessage? batchStatusResponse = await _fssApiClient.GetBatchStatusAsync(uri, accessToken, correlationId);
 
                 if (batchStatusResponse.IsSuccessStatusCode)
                 {
                     FssBatchStatusResponseModel? fssBatchStatusResponseModel = JsonConvert.DeserializeObject<FssBatchStatusResponseModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                     Enum.TryParse(fssBatchStatusResponseModel?.Status, false, out batchStatus);
 
-                    _logger.LogInformation(EventIds.GetBatchStatusRequestCompleted.ToEventId(), "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                    _logger.LogInformation(EventIds.GetBatchStatusRequestCompleted.ToEventId(), "Request to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
 
                     await Task.Delay(batchStatusPollingDelayTime);
                 }
                 else
                 {
-                    _logger.LogError(EventIds.GetBatchStatusRequestFailed.ToEventId(), "Request to get batch status for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                    _logger.LogError(EventIds.GetBatchStatusRequestFailed.ToEventId(), "Request to get batch status for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchStatusResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                     throw new FulfilmentException(EventIds.GetBatchStatusRequestFailed.ToEventId());
                 }
             }
 
             if (pollBatchStatus.Contains(batchStatus))
             {
-                _logger.LogError(EventIds.FssBatchStatusPollingTimedOut.ToEventId(), "Fss batch status polling timed out for BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.FssBatchStatusPollingTimedOut.ToEventId(), "Fss batch status polling timed out for BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
                 throw new FulfilmentException(EventIds.FssBatchStatusPollingTimedOut.ToEventId());
             }
 
-            _logger.LogInformation(EventIds.FssBatchStatusPollingCompleted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.FssBatchStatusPollingCompleted.ToEventId(), "Polling to FSS to get batch status for BatchID - {BatchID} completed | Batch Status is {BatchStatus} | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, batchStatus, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
             return batchStatus;
         }
 
-        public async Task<GetBatchResponseModel> GetBatchDetails(string batchId)
+        public async Task<GetBatchResponseModel> GetBatchDetails(string batchId, string? correlationId = null)
         {
-            _logger.LogInformation(EventIds.GetBatchDetailRequestStarted.ToEventId(), "Request to get batch details for BatchID - {BatchID} from FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.GetBatchDetailRequestStarted.ToEventId(), "Request to get batch details for BatchID - {BatchID} from FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
-            HttpResponseMessage batchDetailResponse = await _fssApiClient.GetBatchDetailsAsync(uri, accessToken);
+            HttpResponseMessage batchDetailResponse = await _fssApiClient.GetBatchDetailsAsync(uri, accessToken, correlationId);
 
             if (batchDetailResponse.IsSuccessStatusCode)
             {
-                _logger.LogInformation(EventIds.GetBatchDetailRequestCompleted.ToEventId(), "Request to get batch details for BatchID - {BatchID} from FSS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.GetBatchDetailRequestCompleted.ToEventId(), "Request to get batch details for BatchID - {BatchID} from FSS completed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 return JsonConvert.DeserializeObject<GetBatchResponseModel>(await batchDetailResponse.Content.ReadAsStringAsync());
             }
-            else
-            {
-                _logger.LogError(EventIds.GetBatchDetailRequestFailed.ToEventId(), "Request to get batch details for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.GetBatchDetailRequestFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.GetBatchDetailRequestFailed.ToEventId(), "Request to get batch details for BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchId, DateTime.Now.ToUniversalTime(), batchDetailResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
+            throw new FulfilmentException(EventIds.GetBatchDetailRequestFailed.ToEventId());
         }
 
-        public async Task<bool> DownloadFileAsync(string fileName, string fileLink, long fileSize, string filePath)
+        public async Task<bool> DownloadFileAsync(string fileName, string fileLink, long fileSize, string filePath, string? correlationId = null)
         {
             long startByte = 0;
             long downloadSize = fileSize < 10485760 ? fileSize : 10485760;
             long endByte = downloadSize;
 
-            _logger.LogInformation(EventIds.DownloadFileStarted.ToEventId(), "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.DownloadFileStarted.ToEventId(), "Downloading of file {fileName} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}" + fileLink;
 
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             HttpResponseMessage fileDownloadResponse = await _fssApiClient.DownloadFile(fileLink, accessToken);
 
@@ -146,12 +153,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             while (startByte <= endByte)
             {
-
-                fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader);
+                fileDownloadResponse = await _fssApiClient.DownloadFile(uri, accessToken, rangeHeader, correlationId);
 
                 if (!fileDownloadResponse.IsSuccessStatusCode)
                 {
-                    _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                    _logger.LogError(EventIds.DownloadFileFailed.ToEventId(), "Downloading of file {fileName} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), fileDownloadResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                     throw new FulfilmentException(EventIds.DownloadFileFailed.ToEventId());
                 }
 
@@ -169,8 +175,30 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
                 rangeHeader = $"bytes={startByte}-{endByte}";
             }
-            _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading of file {fileName} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.DownloadFileCompleted.ToEventId(), "Downloading of file {fileName} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
             return true;
+        }
+
+        public async Task<string> CreateBatch(Batch batchType, ConfigQueueMessage configQueueMessage, string? correlationId = null)
+        {
+            _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
+
+            string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
+
+            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModelForBess(batchType, configQueueMessage);
+            string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
+            HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken, correlationId);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                CreateBatchResponseModel? createBatchResponse = JsonConvert.DeserializeObject<CreateBatchResponseModel>(await httpResponse.Content.ReadAsStringAsync());
+                _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse!.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
+                return createBatchResponse.BatchId;
+            }
+
+            _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
+            throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
         }
 
         public async Task<string> CreateBatch(Batch batchType)
@@ -190,39 +218,35 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse!.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 return createBatchResponse.BatchId;
             }
-            else
-            {
-                _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+            throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
         }
 
-        public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType, Batch batchType)
+        public async Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType, Batch batchType, string? correlationId = null)
         {
-            _logger.LogInformation(EventIds.AddFileToBatchRequestStarted.ToEventId(), "Adding file {FileName} in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.AddFileToBatchRequestStarted.ToEventId(), "Adding file {FileName} in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             AddFileToBatchRequestModel addFileRequest = CreateAddFileRequestModel(fileName, batchType);
             string payloadJson = JsonConvert.SerializeObject(addFileRequest);
-            HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, mimeType);
+            HttpResponseMessage httpResponseMessage = await _fssApiClient.AddFileToBatchAsync(uri, payloadJson, accessToken, fileLength, mimeType, correlationId);
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                _logger.LogInformation(EventIds.AddFileToBatchRequestCompleted.ToEventId(), "File {FileName} is added in batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponseMessage.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.AddFileToBatchRequestCompleted.ToEventId(), "File {FileName} is added in batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponseMessage.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 return httpResponseMessage.StatusCode == HttpStatusCode.Created;
             }
-            else
-            {
-                _logger.LogError(EventIds.AddFileToBatchRequestFailed.ToEventId(), "Request to add file {FileName} to batch with BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponseMessage.StatusCode.ToString(), CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.AddFileToBatchRequestFailed.ToEventId(), "Request to add file {FileName} to batch with BatchID - {BatchID} failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponseMessage.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
+            throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
         }
 
-        public async Task<List<string>> UploadBlocks(string batchId, IFileInfo fileInfo)
+        public async Task<List<string>> UploadBlocks(string batchId, IFileInfo fileInfo, string? correlationId = null)
         {
-            _logger.LogInformation(EventIds.UploadFileBlockStarted.ToEventId(), "Uploading of file blocks of {FileName} for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileInfo.Name, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.UploadFileBlockStarted.ToEventId(), "Uploading of file blocks of {FileName} for BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileInfo.Name, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             int fileBlockSize = _fssApiConfiguration.Value.BlockSizeInMultipleOfKBs;
 
@@ -251,10 +275,10 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     FileName = fileInfo.Name
                 };
 
-                ParallelBlockUploadTasks.Add(UploadFileBlock(uploadFileBlockRequestModel));
+                ParallelBlockUploadTasks.Add(UploadFileBlock(uploadFileBlockRequestModel, correlationId));
                 blockIdList.Add(blockId);
                 uploadedBytes += readBlockSize;
-                //run uploads in parallel	
+                //run uploads in parallel
                 if (ParallelBlockUploadTasks.Count >= _fssApiConfiguration.Value.ParallelUploadThreadCount)
                 {
                     Task.WaitAll(ParallelBlockUploadTasks.ToArray());
@@ -267,16 +291,16 @@ namespace UKHO.PeriodicOutputService.Common.Services
                 ParallelBlockUploadTasks.Clear();
             }
 
-            _logger.LogInformation(EventIds.UploadFileBlockCompleted.ToEventId(), "Uploading of file blocks of {FileName} for BatchID - {BatchID} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileInfo.Name, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.UploadFileBlockCompleted.ToEventId(), "Uploading of file blocks of {FileName} for BatchID - {BatchID} completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileInfo.Name, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
             return blockIdList;
         }
 
-        public async Task<bool> WriteBlockFile(string batchId, string fileName, IEnumerable<string> blockIds)
+        public async Task<bool> WriteBlockFile(string batchId, string fileName, IEnumerable<string> blockIds, string? correlationId = null)
         {
-            _logger.LogInformation(EventIds.WriteBlockToFileStarted.ToEventId(), "Writing blocks in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+            _logger.LogInformation(EventIds.WriteBlockToFileStarted.ToEventId(), "Writing blocks in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}/files/{fileName}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             WriteBlockFileRequestModel writeBlockfileRequestModel = new()
             {
@@ -284,26 +308,24 @@ namespace UKHO.PeriodicOutputService.Common.Services
             };
 
             string payloadJson = JsonConvert.SerializeObject(writeBlockfileRequestModel);
-            HttpResponseMessage httpResponse = await _fssApiClient.WriteBlockInFileAsync(uri, payloadJson, accessToken, "application/octet-stream");
+            HttpResponseMessage httpResponse = await _fssApiClient.WriteBlockInFileAsync(uri, payloadJson, accessToken, "application/octet-stream", correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                _logger.LogInformation(EventIds.WriteBlockToFileCompleted.ToEventId(), "File blocks written in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.WriteBlockToFileCompleted.ToEventId(), "File blocks written in file {FileName} for batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 return true;
             }
-            else
-            {
-                _logger.LogError(EventIds.WriteBlockToFileFailed.ToEventId(), "Request to write blocks in file {FileName} failed for batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID.ToString());
-                throw new FulfilmentException(EventIds.WriteBlockToFileFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.WriteBlockToFileFailed.ToEventId(), "Request to write blocks in file {FileName} failed for batch with BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", fileName, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
+            throw new FulfilmentException(EventIds.WriteBlockToFileFailed.ToEventId());
         }
 
-        public async Task<bool> CommitBatch(string batchId, IEnumerable<string> fileNames, Batch batchType)
+        public async Task<bool> CommitBatch(string batchId, IEnumerable<string> fileNames, Batch batchType, string? correlationId = null)
         {
-            _logger.LogInformation(EventIds.CommitBatchStarted.ToEventId(), "Batch commit for {BatchType} with BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID.ToString());
+            _logger.LogInformation(EventIds.CommitBatchStarted.ToEventId(), "Batch commit for {BatchType} with BatchID - {BatchID} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{batchId}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             List<FileDetail> fileDetails = _fileSystemHelper.GetFileMD5(fileNames);
             BatchCommitRequestModel batchCommitRequestModel = new()
@@ -312,18 +334,16 @@ namespace UKHO.PeriodicOutputService.Common.Services
             };
 
             string payloadJson = JsonConvert.SerializeObject(batchCommitRequestModel.FileDetails);
-            HttpResponseMessage httpResponse = await _fssApiClient.CommitBatchAsync(uri, payloadJson, accessToken);
+            HttpResponseMessage httpResponse = await _fssApiClient.CommitBatchAsync(uri, payloadJson, accessToken, correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                _logger.LogInformation(EventIds.CommitBatchCompleted.ToEventId(), "Batch {BatchType} with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
+                _logger.LogInformation(EventIds.CommitBatchCompleted.ToEventId(), "Batch {BatchType} with BatchID - {BatchID} committed in FSS | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.GetCorrelationId(correlationId));
                 return true;
             }
-            else
-            {
-                _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID.ToString());
-                throw new FulfilmentException(EventIds.AddFileToBatchRequestFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.CommitBatchFailed.ToEventId(), "Batch commit for {BatchType} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, batchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.GetCorrelationId(correlationId));
+            throw new FulfilmentException(EventIds.CommitBatchFailed.ToEventId());
         }
 
         public async Task<IEnumerable<BatchFile>> GetAioInfoFolderFilesAsync(string batchId, string correlationId)
@@ -331,7 +351,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             IEnumerable<BatchFile>? fileDetails = null;
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch?$filter=$batch(Content) eq '{_fssApiConfiguration.Value.Content}' and $batch(Product Type) eq '{_fssApiConfiguration.Value.ProductType}'";
 
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             HttpResponseMessage httpResponseMessage = await _fssApiClient.GetAncillaryFileDetailsAsync(uri, accessToken);
 
@@ -369,54 +389,70 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return fileDetails;
         }
 
+        public async Task<string> SearchReadMeFilePathAsync(string correlationId, string readMeSearchFilter)
+        {
+            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
+            var uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch?$filter={readMeSearchFilter}";
+
+            HttpResponseMessage httpResponse = await _fssApiClient.GetAncillaryFileDetailsAsync(uri, accessToken, correlationId);
+
+            if (httpResponse.IsSuccessStatusCode)
+            {
+                SearchBatchResponse searchBatchResponse = await SearchBatchResponseAsync(httpResponse);
+                if (searchBatchResponse.Entries.Any())
+                {
+                    var batchResult = searchBatchResponse.Entries.FirstOrDefault();
+                    if (batchResult!.Files.Count() == 1 && batchResult.Files.Any(x => x.Filename.ToUpper() == _fssApiConfiguration.Value.ReadMeFileName))
+                    {
+                        return batchResult.Files.FirstOrDefault()?.Links.Get.Href;
+                    }
+
+                    _logger.LogError(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId(), "Error in file share service while searching readme.txt file, multiple files are found for _X-Correlation-ID:{CorrelationId}", correlationId);
+                    throw new FulfilmentException(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId());
+                }
+
+                _logger.LogError(EventIds.ReadMeTextFileNotFound.ToEventId(), "Error in file share service while searching readme.txt file not found for _X-Correlation-ID:{CorrelationId}", correlationId);
+                throw new FulfilmentException(EventIds.ReadMeTextFileNotFound.ToEventId());
+            }
+
+            _logger.LogError(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId(), "Error in file share service while searching readme.txt file with uri {RequestUri} responded with {StatusCode} for _X-Correlation-ID:{CorrelationId}", httpResponse.RequestMessage?.RequestUri, httpResponse.StatusCode, correlationId);
+            throw new FulfilmentException(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId());
+        }
+
+        public async Task<bool> DownloadReadMeFileAsync(string readMeFilePath, string exchangeSetRootPath, string correlationId)
+        {
+            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
+            string fileName = _fssApiConfiguration.Value.ReadMeFileName;
+            string filePath = Path.Combine(exchangeSetRootPath, fileName);
+
+            HttpResponseMessage httpReadMeFileResponse = await _fssApiClient.DownloadFile(readMeFilePath.TrimStart('/'), accessToken);
+
+            var requestUri = new Uri(httpReadMeFileResponse.RequestMessage?.RequestUri?.ToString()).GetLeftPart(UriPartial.Path);
+
+            if (httpReadMeFileResponse.IsSuccessStatusCode)
+            {
+                var serverValue = httpReadMeFileResponse.Headers.Server.ToString().Split('/').First();
+                await using Stream stream = await httpReadMeFileResponse.Content.ReadAsStreamAsync();
+                if (serverValue == ServerHeaderValue)
+                {
+                    _logger.LogInformation(EventIds.DownloadReadmeFile307RedirectResponse.ToEventId(), "File share service download readme.txt file redirected with uri:{requestUri} responded with 307 code for _X-Correlation-ID:{CorrelationId}", requestUri, correlationId);
+                }
+                return _fileSystemHelper.DownloadReadmeFile(filePath, stream);
+            }
+
+            _logger.LogError(EventIds.DownloadReadMeFileNonOkResponse.ToEventId(), "Error in file share service while downloading readme.txt file with uri:{requestUri} responded with {StatusCode} and _X-Correlation-ID:{CorrelationId}", requestUri, httpReadMeFileResponse.StatusCode, correlationId);
+            throw new FulfilmentException(EventIds.DownloadReadMeFileNonOkResponse.ToEventId());
+        }
+
         //Private Methods
+        [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
         {
-
             string currentYear = DateTime.UtcNow.Year.ToString();
-            string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-            CreateBatchRequestModel createBatchRequest;
+            string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
 
-            if (_aioBatchTypes.Contains(batchType))
-            {
-                createBatchRequest = new()
-                {
-                    BusinessUnit = _fssApiConfiguration.Value.AioBusinessUnit,
-                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl()
-                    {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new() : _fssApiConfiguration.Value.AioReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new() : _fssApiConfiguration.Value.AioReadGroups.Split(",").ToList(),
-                    },
-                    Attributes = new List<KeyValuePair<string, string>>
-                    {
-                        new("Product Type", "AIO"),
-                        new("Week Number", currentWeek),
-                        new("Year", currentYear),
-                        new("Year / Week", currentYear + " / " + currentWeek)
-                    }
-                };
-            }
-            else
-            {
-                createBatchRequest = new()
-                {
-                    BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
-                    ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
-                    Acl = new Acl()
-                    {
-                        ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new() : _fssApiConfiguration.Value.PosReadUsers.Split(",").ToList(),
-                        ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new() : _fssApiConfiguration.Value.PosReadGroups.Split(",").ToList(),
-                    },
-                    Attributes = new List<KeyValuePair<string, string>>
-                    {
-                        new("Product Type", "AVCS"),
-                        new("Week Number", currentWeek),
-                        new("Year", currentYear),
-                        new("Year / Week", currentYear + " / " + currentWeek)
-                    }
-                };
-            }
+            CreateBatchRequestModel createBatchRequest = _aioBatchTypes.Contains(batchType) ?
+                AddBatchAttributesForAio(currentWeek, currentYear) : AddBatchAttributesForPos(currentWeek, currentYear);
 
             //This batch attribute is added for fss stub.
             if (bool.Parse(_configuration["IsFTRunning"]))
@@ -468,11 +504,89 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return createBatchRequest;
         }
 
+        [ExcludeFromCodeCoverage]
+        private CreateBatchRequestModel AddBatchAttributesForPos(string currentWeek, string currentYear)
+        {
+            CreateBatchRequestModel createBatchRequest = new()
+            {
+                BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
+                ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Acl = new Acl
+                {
+                    ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new List<string>() : _fssApiConfiguration.Value.PosReadUsers.Split(","),
+                    ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new List<string>() : _fssApiConfiguration.Value.PosReadGroups.Split(","),
+                },
+                Attributes = new List<KeyValuePair<string, string>>
+                {
+                    new("Product Type", "AVCS"),
+                    new("Week Number", currentWeek),
+                    new("Year", currentYear),
+                    new("Year / Week", currentYear + " / " + currentWeek)
+                }
+            };
+            return createBatchRequest;
+        }
+
+        [ExcludeFromCodeCoverage]
+        private CreateBatchRequestModel AddBatchAttributesForAio(string currentWeek, string currentYear)
+        {
+            CreateBatchRequestModel createBatchRequest = new()
+            {
+                BusinessUnit = _fssApiConfiguration.Value.AioBusinessUnit,
+                ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Acl = new Acl
+                {
+                    ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new List<string>() : _fssApiConfiguration.Value.AioReadUsers.Split(","),
+                    ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new List<string>() : _fssApiConfiguration.Value.AioReadGroups.Split(","),
+                },
+                Attributes = new List<KeyValuePair<string, string>>
+                {
+                    new("Product Type", "AIO"),
+                    new("Week Number", currentWeek),
+                    new("Year", currentYear),
+                    new("Year / Week", currentYear + " / " + currentWeek)
+                }
+            };
+            return createBatchRequest;
+        }
+
+        //Private Methods
+        [ExcludeFromCodeCoverage]
+        private CreateBatchRequestModel CreateBatchRequestModelForBess(Batch batchType, ConfigQueueMessage configQueueMessage)
+        {
+            List<KeyValuePair<string, string>> batchAttributes = new();
+
+            foreach (Tag tag in configQueueMessage.Tags)
+            {
+                batchAttributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
+            }
+
+            CreateBatchRequestModel createBatchRequest = new()
+            {
+                BusinessUnit = _fssApiConfiguration.Value.BessBusinessUnit,
+                ExpiryDate = DateTime.UtcNow.AddDays(configQueueMessage.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
+                Acl = new Acl
+                {
+                    ReadUsers = configQueueMessage.AllowedUsers,
+                    ReadGroups = configQueueMessage.AllowedUserGroups,
+                },
+                Attributes = batchAttributes
+            };
+
+            //This batch attribute is added for fss stub.
+            if (bool.Parse(_configuration["IsFTRunning"]))
+            {
+                createBatchRequest.Attributes.Add(new KeyValuePair<string, string>("Batch Type", batchType.ToString()));
+            }
+            return createBatchRequest;
+        }
+
+        [ExcludeFromCodeCoverage]
         private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName, Batch batchType)
         {
             AddFileToBatchRequestModel addFileToBatchRequestModel = new()
             {
-                Attributes = new List<KeyValuePair<string, string>>()
+                Attributes = new List<KeyValuePair<string, string>>
                 {
                     new("Product Type", _aioBatchTypes.Contains(batchType) ? "AIO" : "AVCS"),
                     new("File Name", fileName)
@@ -481,15 +595,16 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return addFileToBatchRequestModel;
         }
 
-        private async Task UploadFileBlock(UploadFileBlockRequestModel uploadBlockMetaData)
+        [ExcludeFromCodeCoverage]
+        private async Task UploadFileBlock(UploadFileBlockRequestModel uploadBlockMetaData, string? correlationId = null)
         {
             string uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch/{uploadBlockMetaData.BatchId}/files/{uploadBlockMetaData.FileName}/{uploadBlockMetaData.BlockId}";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId, correlationId);
 
             byte[] blockBytes = _fileSystemHelper.GetFileInBytes(uploadBlockMetaData);
             byte[]? blockMd5Hash = CommonHelper.CalculateMD5(blockBytes);
             HttpResponseMessage httpResponse;
-            httpResponse = await _fssApiClient.UploadFileBlockAsync(uri, blockBytes, blockMd5Hash, accessToken, "application/octet-stream");
+            httpResponse = await _fssApiClient.UploadFileBlockAsync(uri, blockBytes, blockMd5Hash, accessToken, "application/octet-stream", correlationId);
 
             if (httpResponse.IsSuccessStatusCode)
             {
@@ -497,11 +612,12 @@ namespace UKHO.PeriodicOutputService.Common.Services
             }
             else
             {
-                _logger.LogError(EventIds.UploadFileBlockFailed.ToEventId(), "Request to upload block {BlockID} of {FileName} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", uploadBlockMetaData.BlockId, uploadBlockMetaData.FileName, uploadBlockMetaData.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID.ToString());
+                _logger.LogError(EventIds.UploadFileBlockFailed.ToEventId(), "Request to upload block {BlockID} of {FileName} failed for BatchID - {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", uploadBlockMetaData.BlockId, uploadBlockMetaData.FileName, uploadBlockMetaData.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
                 throw new FulfilmentException(EventIds.UploadFileBlockFailed.ToEventId());
             }
         }
 
+        [ExcludeFromCodeCoverage]
         private static async Task<SearchBatchResponse> SearchBatchResponseAsync(HttpResponseMessage httpResponse)
         {
             string body = await httpResponse.Content.ReadAsStringAsync();

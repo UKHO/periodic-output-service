@@ -27,6 +27,11 @@ output "pos_storage_connection_string"{
   sensitive = true
 }
 
+output "bess_storage_connection_string"{
+  value = module.storage.bess_storage_connection_string
+  sensitive = true
+}
+
 output "log_primary_connection_string" {
   value     = module.eventhub.log_primary_connection_string
   sensitive = true
@@ -50,4 +55,8 @@ output "webjob_password" {
 output "connection_string" {
   value = module.app_insights.connection_string
   sensitive = true
+}
+
+output "keyvault_uri"{
+  value = module.key_vault.keyvault_uri
 }

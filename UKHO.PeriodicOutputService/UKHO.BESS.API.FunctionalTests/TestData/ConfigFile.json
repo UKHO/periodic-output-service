@@ -1,0 +1,47 @@
+{
+    "name": "PortOfIndia",
+    "exchangeSetStandard": "s63",
+    "encCellNames": [
+        "AU220150",
+        "AU5PTL01",
+        "CA570182",
+        "CA570226",
+        "CN484220",
+        "GB301910"
+    ],
+    "frequency": "* * * * *",
+    "type": "BASE",
+    "keyFileType": "NONE",
+    "allowedUsers": [
+        "User1",
+        "User2"
+    ],
+    "allowedUserGroups": [
+        "FSS/BESS-Port of Atlantis"
+    ],
+    "tags": [
+        {
+            "Key": "Audience",
+            "Value": "Port of Atlantis"
+        },
+        {
+            "Key": "Frequency",
+            "Value": "Weekly"
+        },
+        {
+            "Key": "Media Type",
+            "Value": "Zip"
+        },
+        {
+            "Key": "Year",
+            "Value": "$(now.WeekNumber.Year)"
+        },
+        {
+            "Key": "Week Number",
+            "Value": "$(now.WeekNumber)"
+        }
+    ],
+    "readMeSearchFilter": "AVCS",
+    "batchExpiryInDays": 30,
+    "isEnabled": "Yes"
+}

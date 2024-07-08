@@ -1,4 +1,7 @@
 ﻿using System.IO.Abstractions;
+using System.Text;
+using System.Xml;
+using System.Xml.Serialization;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Utilities;
@@ -119,9 +122,31 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _fileUtility.CreateXmlFile(fileContent, targetPath);
         }
 
-        public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string aioCellName)
+        public Task CreateXmlFromObject<T>(T obj, string filePath, string fileName)
         {
-            string searchPath = $"ENC_ROOT/GB/{aioCellName}";
+            var serializer = new XmlSerializer(typeof(T));
+            var namespaces = new XmlSerializerNamespaces();
+            namespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+                       
+            using (var fileStream = _fileSystem.File.OpenWrite(Path.Combine(filePath, fileName)))
+            {
+                using (var xmlTextWriter = new XmlTextWriter(fileStream, Encoding.UTF8) { Formatting = Formatting.Indented })
+                {
+                    serializer.Serialize(xmlTextWriter, obj, namespaces);
+                }
+            }
+
+           return Task.CompletedTask;
+        }
+
+        public void CreateTextFile(string filePath, string fileName, string content)
+        {
+            _fileSystem.File.AppendAllText(Path.Combine(filePath, fileName), content);
+        }
+
+        public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName)
+        {
+            string searchPath = $"ENC_ROOT/{cellName[..2]}";
             string currentPath = Path.Combine(sourcePath, searchPath);
 
             List<ProductVersion> productVersions = new();
@@ -131,24 +156,24 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 return productVersions;
             }
 
-            var aioFolder = _fileSystem.Directory.GetDirectories(currentPath, aioCellName, SearchOption.AllDirectories).ToList();
+            var folders = _fileSystem.Directory.GetDirectories(currentPath, cellName, SearchOption.AllDirectories).ToList();
 
-            if (aioFolder.Count == 0)
+            if (folders.Count == 0)
             {
                 return productVersions;
             }
 
-            var editionFolders = _fileSystem.Directory.GetDirectories(aioFolder[0]).Select(Path.GetFileName).ToList();
+            var editionFolders = _fileSystem.Directory.GetDirectories(folders[0]).Select(Path.GetFileName).ToList();
 
             foreach (var editionFolder in editionFolders)
             {
                 ProductVersion productVersion = new();
 
-                productVersion.ProductName = aioCellName;
+                productVersion.ProductName = cellName;
 
                 productVersion.EditionNumber = Convert.ToInt32(editionFolder);
 
-                var updateNumberFolders = _fileSystem.Directory.GetDirectories(Path.Combine(currentPath, editionFolder));
+                var updateNumberFolders = _fileSystem.Directory.GetDirectories(Path.Combine(currentPath, cellName, editionFolder));
 
                 var maxDirectory = updateNumberFolders.Select(d => new { Path = d, Number = int.Parse(Path.GetFileName(d)) })
                                                .OrderByDescending(d => d.Number)
@@ -160,6 +185,59 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
 
             return productVersions;
+        }
+
+        public bool CreateEmptyFileContent(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                return false;
+            }
+            _fileSystem.File.WriteAllText(filePath, string.Empty);
+            return true;
+        }
+
+        public bool DownloadReadmeFile(string filePath, Stream fileStream)
+        {
+            using var outputFileStream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
+            fileStream.CopyTo(outputFileStream);
+            return true;
+        }
+
+        public string ReadFileText(string filePath)
+        {
+            if (_fileSystem.File.Exists(filePath))
+            {
+                return _fileSystem.File.ReadAllText(filePath);
+            }
+            return string.Empty;
+        }
+
+        public bool CreateFileContent(string filePath, string content)
+        {
+            if (string.IsNullOrWhiteSpace(content) || !_fileSystem.File.Exists(filePath))
+            {
+                return false;
+            }
+            _fileSystem.File.WriteAllText(filePath, content);
+
+            return true;
+        }
+
+        public void DeleteFile(string filePath)
+        {
+            if (_fileSystem.File.Exists(filePath))
+            {
+                _fileSystem.File.Delete(filePath);
+            }
+        }
+
+        public void DeleteFolder(string folderPath)
+        {
+            if (_fileSystem.Directory.Exists(folderPath))
+            {
+                _fileSystem.Directory.Delete(folderPath);
+            }
         }
     }
 }

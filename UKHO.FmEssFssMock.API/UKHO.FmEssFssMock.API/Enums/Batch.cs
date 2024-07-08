@@ -45,5 +45,35 @@ namespace UKHO.FmEssFssMock.Enums
 
         [Description("094cda16-fcc4-41cb-9317-bf4f26991e32")]
         EssAioUpdateZipBatch = 14,
+
+        [Description("4bc70797-7ee6-407f-bafe-cae49a5b5f91")]
+        EssProductIdentifiersS63ZipBatch = 15,
+
+        [Description("f8fd2fb4-3dd6-425d-b34f-3059e262feed")]
+        EssProductIdentifiersS57ZipBatch = 16,
+
+        [Description("0f13a253-db5d-4b77-a165-643f4b4a77fc")]
+        EssPostProductVersionS63ZipBatch = 17,
+
+        [Description("7b6edd6a-7a62-4271-a657-753f4c648531")]
+        EssPostProductVersionS57ZipBatch = 18,
+
+        [Description("5cf9e1d7-207c-4c96-b5e7-5a519f0ea0c0")]
+        EssZipBatch = 19,
+
+        [Description("a7fb95f0-b3ff-4ef2-9b76-a74c7d3c3c8f")]
+        BessBaseZipBatch = 20,
+
+        [Description("fa741049-7a78-4ec3-8737-1b3fb8d1cc3f")]
+        BessUpdateZipBatch = 21,
+
+        [Description("5581ca8c-27a8-42ec-86d2-bef6915c2992")]
+        BessChangeZipBatch = 22,
+
+        [Description("5331f8c2-9085-4083-9a1e-9f99953be122")]
+        EssEmptyBatch = 23,
+
+        [Description("d0635e6c-81ae-4acb-9129-1a69f9ee58d2")]
+        BessEmptyBatch = 24
     }
 }

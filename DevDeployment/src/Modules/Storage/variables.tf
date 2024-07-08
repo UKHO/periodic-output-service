@@ -18,7 +18,19 @@ variable "service_name" {
   type = string
 }
 
+variable "service_name_bess" {
+  type = string
+}
+
+variable "container_name" {
+  type = string
+}
+
 variable "m_spoke_subnet" {
+  type = string
+}
+
+variable "mock_spoke_subnet" {
   type = string
 }
 

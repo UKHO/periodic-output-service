@@ -23,15 +23,22 @@ namespace UKHO.FmEssFssMock.API
             {
                 options.Headers.Add(CorrelationIdMiddleware.XCorrelationIdHeaderKey);
             });
+
             services.AddControllers(o => o.InputFormatters.Insert(0, new BinaryRequestBodyFormatter()));
 
             services.Configure<FleetManagerB2BApiConfiguration>(Configuration.GetSection("FleetManagerB2BApiConfiguration"));
             services.Configure<ExchangeSetServiceConfiguration>(Configuration.GetSection("ExchangeSetServiceConfiguration"));
             services.Configure<FileShareServiceConfiguration>(Configuration.GetSection("FileShareServiceConfiguration"));
+            services.Configure<BessStorageConfiguration>(Configuration.GetSection("BessStorageConfiguration"));
+            services.Configure<SharedKeyConfiguration>(Configuration.GetSection("SharedKeyConfiguration"));
+            services.Configure<SalesCatalogueConfiguration>(Configuration.GetSection("SalesCatalogue"));
 
             services.AddScoped<FileShareService>();
             services.AddScoped<ExchangeSetService>();
             services.AddScoped<MockService>();
+            services.AddScoped<AzureStorageService>();
+            services.AddScoped<SharedKeyAuthFilter>();
+            services.AddScoped<SalesCatalogueService>();
 
             services.AddHealthChecks()
                 .AddCheck<FleetManagerStubHealthCheck>("FleetManagerStubHealthCheck");
@@ -52,6 +59,19 @@ namespace UKHO.FmEssFssMock.API
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.Use(async (context, next) =>
+            {
+                var endpoint = context.GetEndpoint();
+
+                if (endpoint == null)
+                {
+                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    return;
+                }
+
+                await next();
+            });
 
             app.UseEndpoints(endpoints =>
             {

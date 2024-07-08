@@ -2,6 +2,10 @@ output "mock_webappname" {
   value = local.mock_web_app_name
 }
 
+output "pks_mock_webappname" {
+  value = local.pks_mock_web_app_name
+}
+
 output "fm_mock_web_app_url" {
 value = "https://${module.mock_webapp_service.default_site_hostname}"
 }
@@ -39,6 +43,11 @@ output "pos_storage_connection_string"{
   sensitive = true
 }
 
+output "bess_storage_connection_string"{
+  value = module.storage.bess_storage_connection_string
+  sensitive = true
+}
+
 output "log_primary_connection_string" {
   value     = module.eventhub.log_primary_connection_string
   sensitive = true
@@ -62,4 +71,8 @@ output "webjob_password" {
 output "connection_string" {
   value = module.app_insights.connection_string
   sensitive = true
+}
+
+output "keyvault_uri"{
+  value = module.key_vault.keyvault_uri
 }

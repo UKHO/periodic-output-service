@@ -101,17 +101,18 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
         private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
         {
+            
             //Add logging
             serviceCollection.AddLogging(loggingBuilder =>
             {
-                loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
+               loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
 
                 string instrumentationKey = configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
                 if (!string.IsNullOrEmpty(instrumentationKey))
                 {
                     loggingBuilder.AddApplicationInsights(instrumentationKey);
                 }
-
+               
 #if DEBUG
                 loggingBuilder.AddSerilog(new LoggerConfiguration()
                                 .WriteTo.File("Logs/UKHO.PeriodicOutputService.Fulfilment-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")

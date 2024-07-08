@@ -1,0 +1,47 @@
+{
+    "Name": "PortOfIndia",
+    "ExchangeSetStandard": "s57",
+    "EncCellNames": [
+        "AU220150",
+        "AU5PTL01",
+        "CA570182",
+        "CA570226",
+        "CN484220",
+        "GB301910"
+    ],
+    "Frequency": "23 10 * * *",
+    "Type": "UPDATE",
+    "KeyFileType": "NONE",
+    "AllowedUsers": [],
+    "AllowedUserGroups": [
+        "FSS/BESS-Port of Atlantis"
+    ],
+    "Tags": [
+        {
+            "Key": "Audience",
+            "Value": "Port of Atlantis"
+        },
+        {
+            "Key": "Frequency",
+            "Value": "Weekly"
+        },
+        {
+            "Key": "Media Type",
+            "Value": "Zip"
+        },
+        {
+            "Key": "Year",
+            "Value": "$(now.WeekNumber.Year)"
+        },
+        {
+            "Key": "Week Number",
+            "Value": "$(now.WeekNumber)"
+        }
+    ],
+    "ReadMeSearchFilter": "AVCS",
+    "BatchExpiryInDays": 8,
+    "IsEnabled": "Yes",
+    "FileName": "config9.json",
+    "FileSize": 677834857,
+    "CorrelationId": "51787a45-6053-446f-a70b-48e85d081bd3"
+}
