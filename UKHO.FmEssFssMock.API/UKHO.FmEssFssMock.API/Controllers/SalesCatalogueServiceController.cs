@@ -50,7 +50,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         [Route("/scs/v1/productData/encs57/products/productIdentifiers")]
         public IActionResult ProductIdentifiers(List<string> productIdentifiers)
         {
@@ -66,7 +65,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         [Route("/scs/v1/productData/encs57/products/productVersions")]
         public IActionResult ProductVersions(List<ProductVersionRequest> productVersionRequest)
         {
