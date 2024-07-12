@@ -852,7 +852,6 @@ stages:
           - name: POSWebjobApiConfiguration.Password
             value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobPassword']  ]
         steps:
-
                 - task: AzureCLI@2
                   displayName: "Swap Stub Configuration"
                   condition: always()
@@ -921,9 +920,7 @@ stages:
             value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
           - name: BessStorageConfiguration.ConnectionString
             value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
-
         steps:
-
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download Terraform Artifact"
                   condition: always()
