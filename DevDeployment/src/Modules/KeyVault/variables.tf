@@ -35,5 +35,12 @@ variable "allowed_subnet_ids" {
 }
 
 variable "allowed_ips" {
+}
 
+variable "agent_2204_subnet" {
+  type = string
+}
+
+variable "agent_prd_subnet" {
+  type = string
 }
