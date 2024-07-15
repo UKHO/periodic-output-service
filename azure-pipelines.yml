@@ -35,7 +35,7 @@ variables:
   - name: UKHOAssemblyCopyright
     value: "Copyright © UK Hydrographic Office"
   - name: DeploymentPool
-    value: "UKHO Ubuntu 1804"
+    value: "Mare Nectaris"
   - name: Container
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.1.9"
   - name: WindowPool
