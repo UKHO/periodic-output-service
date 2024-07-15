@@ -118,7 +118,7 @@ module "key_vault" {
   env_name            = local.env_name
   tenant_id           = module.webapp_service.web_app_tenant_id
   allowed_ips         = var.allowed_ips
-  allowed_subnet_ids  = [data.azurerm_subnet.main_subnet.id,data.azurerm_subnet.agent_subnet.id]
+  allowed_subnet_ids  = [data.azurerm_subnet.main_subnet.id,data.azurerm_subnet.agent_subnet.id, var.agent_2204_subnet,var.agent_prd_subnet]
   location            = azurerm_resource_group.webapp_rg.location
   agent_2204_subnet   = var.agent_2204_subnet
   agent_prd_subnet    = var.agent_prd_subnet
