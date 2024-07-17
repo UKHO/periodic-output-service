@@ -19,15 +19,14 @@ steps:
       ARM_CLIENT_SECRET: $(TERRAFORM-CLIENT-SECRET)
       ARM_TENANT_ID: $(TERRAFORM-TENANT-ID)
       ARM_SUBSCRIPTION_ID: $(TERRAFORM-SUBSCRIPTION-ID)
-      TF_VAR_agent_rg: $(agentRG)
-      TF_VAR_agent_vnet_name: $(agentVnetName)
-      TF_VAR_agent_subnet_name: $(agentSubnetName)
-      TF_VAR_agent_subscription_id: $(agentSubscriptionId)
       TF_VAR_spoke_rg: $(spokeRG)
       TF_VAR_spoke_vnet_name: $(spokeVnetName)
       TF_VAR_spoke_subnet_name: $(POSESSspokeSubnetName)
       TF_VAR_allowed_ips: $(whiteListedIps)
       TF_VAR_permitdecryptionhardwareid: $(PermitDecryptionHardwareId)
+      TF_VAR_agent_2204_subnet: $(agent2204SubnetId)
+      TF_VAR_agent_prd_subnet: $(agentprdSubnetId)
+
 
   - task: FileTransform@2
     displayName: "File Transform: POS Config"
