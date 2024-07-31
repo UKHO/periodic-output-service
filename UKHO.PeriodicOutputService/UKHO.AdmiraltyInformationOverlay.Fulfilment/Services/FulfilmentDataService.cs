@@ -3,6 +3,7 @@ using Elastic.Apm.Api;
 using Elastic.Apm;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -471,9 +472,10 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
         private void LogProductVersions(ProductVersionsRequest productVersionsRequest)
         {
+            string productVersionsJson = JsonConvert.SerializeObject(productVersionsRequest);
             try
             {
-                _logger.LogInformation(EventIds.LoggingProductVersionsStarted.ToEventId(), "Logging product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.LoggingProductVersionsStarted.ToEventId(), "Logging product version started | {DateTime} | _X-Correlation-ID : {CorrelationId} | Product Versions : {productVersionsJson}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID, productVersionsJson);
 
                 _azureTableStorageHelper.SaveProductVersionDetails(productVersionsRequest.ProductVersions);
 

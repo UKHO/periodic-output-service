@@ -1,7 +1,10 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Azure.Data.Tables;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
@@ -17,10 +20,13 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         private const string BESS_PRODUCT_VERSION_DETAILS_TABLE_NAME = "bessproductversiondetails";
 
         private readonly IOptions<AzureStorageConfiguration> _azureStorageConfig;
+        private readonly ILogger<AzureTableStorageHelper> _logger;
 
-        public AzureTableStorageHelper(IOptions<AzureStorageConfiguration> azureStorageConfig)
+        public AzureTableStorageHelper(IOptions<AzureStorageConfiguration> azureStorageConfig,
+            ILogger<AzureTableStorageHelper> logger)
         {
             _azureStorageConfig = azureStorageConfig;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public void SaveHistory(WebJobHistory webJobHistory)
@@ -39,6 +45,10 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         public void SaveProductVersionDetails(List<ProductVersion> productVersions)
         {
             TableClient productVersionDetailsEntityClient = GetTableClient(AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME);
+
+            string productVersionsJson = JsonConvert.SerializeObject(productVersions);
+
+            _logger.LogInformation(EventIds.SavingProductVersionsStarted.ToEventId(), "Saving product version started | {DateTime} | _X-Correlation-ID : {CorrelationId} | Product Versions : {productVersionsJson}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID, productVersionsJson);
 
             foreach (var item in productVersions)
             {
@@ -59,8 +69,17 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 productVersionEntities.ProductName = item.ProductName;
                 productVersionEntities.EditionNumber = item.EditionNumber;
                 productVersionEntities.UpdateNumber = item.UpdateNumber;
+
+                string productVersionEntitiesJson = JsonConvert.SerializeObject(productVersionEntities);
+
+                _logger.LogInformation(EventIds.UpsertingProductVersionsStarted.ToEventId(), "Upserting product version started | {DateTime} | _X-Correlation-ID : {CorrelationId} | Product Versions Entity : {productVersionEntitiesJson}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID, productVersionEntitiesJson);
+                
                 productVersionDetailsEntityClient.UpsertEntity(productVersionEntities);
+
+                _logger.LogInformation(EventIds.UpsertingProductVersionsCompleted.ToEventId(), "Upserting product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId} | Product Versions Entity: {productVersionEntitiesJson}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID, productVersionEntitiesJson);
             }
+
+            _logger.LogInformation(EventIds.SavingProductVersionsCompleted.ToEventId(), "Saving product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId} | Product Versions : {productVersionsJson}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID, productVersionsJson);
         }
 
         public List<ProductVersionEntities> GetLatestProductVersionDetails()
