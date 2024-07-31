@@ -828,7 +828,27 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809164 - Skipping product key service request as no update found for given products (empty bespoke exchange set)
         /// </summary>
-        SkipPksAsEmptyExchangeSetFoundForProducts = 809164
+        SkipPksAsEmptyExchangeSetFoundForProducts = 809164,
+
+        /// <summary>
+        /// 809165 -  Saving Product Versions started
+        /// </summary>
+        SavingProductVersionsStarted = 809165,
+
+        /// <summary>
+        /// 809166 -  Logging Product Versions started
+        /// </summary>
+        SavingProductVersionsCompleted = 809166,
+
+        /// <summary>
+        /// 809167 -  Upserting Product Versions started
+        /// </summary>
+        UpsertingProductVersionsStarted = 809167,
+
+        /// <summary>
+        /// 809168 -  Logging Product Versions started
+        /// </summary>
+        UpsertingProductVersionsCompleted = 809168
     }
 
     public static class EventIdExtensions
