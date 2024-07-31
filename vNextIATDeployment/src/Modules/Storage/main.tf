@@ -11,7 +11,7 @@ resource "azurerm_storage_account" "pos_storage" {
     default_action                 = "Deny"
     ip_rules                       = var.allowed_ips
     bypass                         = ["Logging", "Metrics", "AzureServices"]
-    virtual_network_subnet_ids     = [var.m_spoke_subnet,var.agent_subnet]
+    virtual_network_subnet_ids     = [var.m_spoke_subnet, var.mock_spoke_subnet,var.agent_2204_subnet, var.agent_prd_subnet]
 }
 }
 
@@ -28,7 +28,7 @@ resource "azurerm_storage_account" "bess_storage" {
     default_action                 = "Deny"
     ip_rules                       = var.allowed_ips
     bypass                         = ["Logging", "Metrics", "AzureServices"]
-    virtual_network_subnet_ids     = [var.m_spoke_subnet,var.agent_subnet]
+    virtual_network_subnet_ids     = [var.m_spoke_subnet, var.mock_spoke_subnet,var.agent_2204_subnet, var.agent_prd_subnet]
 }
 }
 

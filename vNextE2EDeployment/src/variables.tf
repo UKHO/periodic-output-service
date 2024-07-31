@@ -47,7 +47,11 @@ variable "agent_vnet_name" {
   type = string
 }
 
-variable "agent_subnet_name" {
+variable "agent_2204_subnet" {
+  type = string
+}
+
+variable "agent_prd_subnet" {
   type = string
 }
 
