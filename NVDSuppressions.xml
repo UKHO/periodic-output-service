@@ -447,4 +447,13 @@
    ]]></notes>
    <cve>CVE-2024-35255</cve>
 </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Text.Json:8.0.0
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Text\.Json@.*$</packageUrl>
+    <vulnerabilityName>CVE-2024-30105</vulnerabilityName>
+  </suppress>
 </suppressions>
