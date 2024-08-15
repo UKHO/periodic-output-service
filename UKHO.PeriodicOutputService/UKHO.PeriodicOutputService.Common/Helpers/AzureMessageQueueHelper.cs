@@ -25,7 +25,7 @@ public class AzureMessageQueueHelper : IAzureMessageQueueHelper
         var queueClient = new QueueClient(bessStorageConfiguration.Value.ConnectionString, bessStorageConfiguration.Value.QueueName);
 
         // Create the queue if it doesn't already exist.
-        this.logger.LogInformation(EventIds.BessQueueCreated.ToEventId(), $"Creating queue now: connectionstring:{bessStorageConfiguration.Value.ConnectionString},queue name:{bessStorageConfiguration.Value.QueueName}}");
+        this.logger.LogInformation(EventIds.BessQueueCreated.ToEventId(), $"Creating queue now: connectionstring:{bessStorageConfiguration.Value.ConnectionString},queue name:{bessStorageConfiguration.Value.QueueName}");
 
         var queueResult = await queueClient.CreateIfNotExistsAsync();
 
