@@ -442,9 +442,21 @@
     <cve>CVE-2018-9117</cve>
   </suppress>
   <suppress>
-   <notes><![CDATA[
+    <notes>
+      <![CDATA[
    file name: Azure.Identity.dll
-   ]]></notes>
-   <cve>CVE-2024-35255</cve>
-</suppress>
+   ]]>
+    </notes>
+    <cve>CVE-2024-35255</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Text.Json:8.0.0
+   Vulnerability in .NET 8 - will need to review once upgrade occurs.
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/System\.Text\.Json@.*$</packageUrl>
+    <vulnerabilityName>CVE-2024-30105</vulnerabilityName>
+  </suppress>
 </suppressions>
