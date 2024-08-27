@@ -828,7 +828,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809164 - Skipping product key service request as no update found for given products (empty bespoke exchange set)
         /// </summary>
-        SkipPksAsEmptyExchangeSetFoundForProducts = 809164
+        SkipPksAsEmptyExchangeSetFoundForProducts = 809164,
+
+        /// <summary>
+        ///     Bess Queue Created
+        /// </summary>
+        BessQueueCreated = 809165
     }
 
     public static class EventIdExtensions

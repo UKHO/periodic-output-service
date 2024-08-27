@@ -25,7 +25,12 @@ public class AzureMessageQueueHelper : IAzureMessageQueueHelper
         var queueClient = new QueueClient(bessStorageConfiguration.Value.ConnectionString, bessStorageConfiguration.Value.QueueName);
 
         // Create the queue if it doesn't already exist.
-        await queueClient.CreateIfNotExistsAsync();
+        var queueResult = await queueClient.CreateIfNotExistsAsync();
+
+        if (queueResult != null)
+        {
+            this.logger.LogInformation(EventIds.BessQueueCreated.ToEventId(), "Queue created:{queue}, BuilderService_X-Correlation-ID:{builderServiceCorrelationId} and _X-Correlation-ID:{CorrelationId}", bessStorageConfiguration.Value.QueueName, builderServiceCorrelationId, CommonHelper.CorrelationID);
+        }
 
         // convert message to base64string
         var messageBase64String = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(message));

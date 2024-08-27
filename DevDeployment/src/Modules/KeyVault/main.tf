@@ -17,7 +17,6 @@ resource "azurerm_key_vault" "kv" {
   }
 
   tags = var.tags
-
 }
 
 #access policy for terraform script service account
