@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
@@ -56,13 +57,31 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             BlobContainerClient blobContainerClient = new(bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName);
 
-            bool isExist = await blobContainerClient.ExistsAsync();
-
-            if (!isExist)
+            try
             {
-                logger.LogError(EventIds.ContainerDoesNotExists.ToEventId(), "Container does not exists | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.ContainerDoesNotExists.ToEventId());
+                Response<BlobContainerInfo>? isExist = await blobContainerClient.CreateIfNotExistsAsync(
+                    PublicAccessType.Blob,
+                    null,
+                    new BlobContainerEncryptionScopeOptions(),
+                    CancellationToken.None
+                ).ConfigureAwait(
+                    false); // Add this line to configure the task to not capture the current synchronization context
+
+                if (!isExist.HasValue)
+                {
+                    logger.LogInformation(EventIds.BlobContainerCreated.ToEventId(),
+                        $"Created blob container {bessStorageConfiguration.ContainerName}");
+                    this.logger.LogInformation(EventIds.BlobContainerCreated.ToEventId(),
+                        "Blob created:{blob} and _X-Correlation-ID:{CorrelationId}",
+                        bessStorageConfiguration.ContainerName, CommonHelper.CorrelationID);
+                }
             }
+            catch (Exception e)
+            {
+                this.logger.LogError("Error occurred retrieving or creating blob with connection string {connectionString} and name {containersName}", bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName);
+                this.logger.LogError("Stack trace {message}, {inner}", e.Message, e.InnerException);
+            }
+
             return blobContainerClient;
         }
 
