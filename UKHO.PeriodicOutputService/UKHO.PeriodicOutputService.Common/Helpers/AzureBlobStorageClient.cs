@@ -59,13 +59,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             try
             {
-                Response<BlobContainerInfo>? containerCreated = await blobContainerClient.CreateIfNotExistsAsync(
-                    PublicAccessType.Blob,
-                    null,
-                    new BlobContainerEncryptionScopeOptions(),
-                    CancellationToken.None).ConfigureAwait(false);
+                Response<BlobContainerInfo>? containerCreated = await blobContainerClient.CreateIfNotExistsAsync();
 
-                if (containerCreated.HasValue)
+                if (containerCreated != null && containerCreated.HasValue)
                 {
                     logger.LogInformation(EventIds.BlobContainerCreated.ToEventId(),
                         $"Created blob container {bessStorageConfiguration.ContainerName}");
