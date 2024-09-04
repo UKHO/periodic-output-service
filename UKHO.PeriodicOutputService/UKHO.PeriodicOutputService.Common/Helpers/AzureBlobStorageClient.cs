@@ -72,8 +72,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
             catch (Exception e)
             {
-                this.logger.LogError("Error occurred retrieving or creating blob with connection string {connectionString} and name {containersName}", bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName);
-                this.logger.LogError("Stack trace {message}, {inner}", e.Message, e.InnerException);
+                this.logger.LogError(EventIds.ContainerCreationFailure.ToEventId(), "Error occurred retrieving or creating blob with connection string {connectionString} and name {containersName}", bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName);
+                this.logger.LogError(EventIds.ContainerCreationFailure.ToEventId(), "Stack trace {message}, {inner}", e.Message, e.InnerException);
             }
 
             return blobContainerClient;
