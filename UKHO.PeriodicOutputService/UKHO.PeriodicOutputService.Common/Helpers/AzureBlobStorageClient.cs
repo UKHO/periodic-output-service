@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
@@ -56,13 +57,25 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         {
             BlobContainerClient blobContainerClient = new(bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName);
 
-            bool isExist = await blobContainerClient.ExistsAsync();
-
-            if (!isExist)
+            try
             {
-                logger.LogError(EventIds.ContainerDoesNotExists.ToEventId(), "Container does not exists | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
-                throw new FulfilmentException(EventIds.ContainerDoesNotExists.ToEventId());
+                Response<BlobContainerInfo>? containerCreated = await blobContainerClient.CreateIfNotExistsAsync();
+
+                if (containerCreated != null && containerCreated.HasValue)
+                {
+                    logger.LogInformation(EventIds.BlobContainerCreated.ToEventId(),
+                        $"Created blob container {bessStorageConfiguration.ContainerName}");
+                    this.logger.LogInformation(EventIds.BlobContainerCreated.ToEventId(),
+                        "Blob created:{blob} and _X-Correlation-ID:{CorrelationId}",
+                        bessStorageConfiguration.ContainerName, CommonHelper.CorrelationID);
+                }
             }
+            catch (Exception e)
+            {
+                this.logger.LogError(EventIds.ContainerCreationFailure.ToEventId(), "Error occurred retrieving or creating blob with connection string {connectionString} and name {containersName} and _X-Correlation-ID:{correlationId}", bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName, CommonHelper.CorrelationID);
+                this.logger.LogError(EventIds.ContainerCreationFailure.ToEventId(), "Stack trace {message}, {inner} and _X-Correlation-ID:{correlationId}", e.Message, e.InnerException, CommonHelper.CorrelationID);
+            }
+
             return blobContainerClient;
         }
 
