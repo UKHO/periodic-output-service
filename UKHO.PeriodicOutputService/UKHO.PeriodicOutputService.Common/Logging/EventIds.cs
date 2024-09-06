@@ -833,7 +833,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         ///     Bess Queue Created
         /// </summary>
-        BessQueueCreated = 809165
+        BessQueueCreated = 809165,
+
+        /// <summary>
+        ///     Blob Container Created
+        /// </summary>
+        BlobContainerCreated = 809166,
+
+        /// <summary>
+        ///     Error Creating container
+        /// </summary>
+        ContainerCreationFailure = 809167
     }
 
     public static class EventIdExtensions
