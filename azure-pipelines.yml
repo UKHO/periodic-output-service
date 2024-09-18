@@ -1202,7 +1202,7 @@ stages:
     variables:
       - group: "ESS-PreProd-Variables"
       - group: "ESS-Deployment-Variables-Pre"
-      - group: "POS-Pre-Variables"
+      - group: "POS-PreProd-Variables"
       - name: "ESSApiConfiguration.TenantId"
         value: $(TenantId)
       - name: "ESSApiConfiguration.AutoTestClientId"
