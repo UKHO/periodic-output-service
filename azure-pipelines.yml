@@ -1201,7 +1201,7 @@ stages:
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
     variables:
       - group: "ESS-PreProd-Variables"
-      - group: "ESS-Deployment-Variables-Pre"
+      - group: "ESS-Deployment-Variables-PreProd"
       - group: "POS-PreProd-Variables"
       - name: "ESSApiConfiguration.TenantId"
         value: $(TenantId)
