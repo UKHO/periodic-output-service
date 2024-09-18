@@ -1,0 +1,92 @@
+parameters:
+- name: Environment
+  type: string
+- name: AzureSubscription
+  type: string
+
+jobs:
+- deployment: DeployApp
+  displayName: "${{parameters.Environment}} - Deploy Terraform and Dotnet App"
+  environment: "Ess-${{parameters.Environment}}"
+  pool: $(DeploymentPool)
+  container: ${{variables.Container}}
+  workspace:
+    clean: all
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - template: Deployment/templates/continuous-deployment.yml
+            parameters:
+              ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+              AzureSubscription: ${{parameters.AzureSubscription}}
+
+- job: Setup
+  displayName: "Set Webjob Configuration"
+  dependsOn: DeployApp
+  variables:
+    - name: WEB_APP_NAME
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
+    - name: RGName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Swap Webjob Configuration"
+      condition: always()
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: "$(Build.SourcesDirectory)/Deployment/set_webjob_configuration.ps1"
+        arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
+- job: CheckInfra
+  displayName: "Check Infrastructure Health"
+  dependsOn: DeployApp
+  variables:
+    - name: WEB_APP_NAME
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
+    - name: RGName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Check Infrastructure is healthy"
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: '$(Build.SourcesDirectory)/Deployment/check_service_status_webjob.ps1'
+        arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
+
+- job: CheckFSS
+  displayName: "Check FSS Health"
+  dependsOn: DeployApp
+  steps:
+    - task: PowerShell@2
+      displayName: "Check FSS Health endpoint is healthy"
+      inputs:
+        targetType: filePath
+        filePath: "$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1"
+        arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
+
+- job: CheckESS
+  displayName: "Check ESS Health"
+  dependsOn: DeployApp
+  steps:
+    - task: PowerShell@2
+      displayName: "Check ESS Health endpoint is healthy"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
+        arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
+
+- job: CheckFM
+  displayName: "Check Fleet Manager Health"
+  dependsOn: DeployApp
+  steps:
+    - task: PowerShell@2
+      displayName: "Check FM Health endpoint is healthy"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
+        arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"

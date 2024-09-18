@@ -1164,3 +1164,61 @@ stages:
               targetType: filePath
               filePath: '$(Build.SourcesDirectory)/vNextE2EDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+
+  - stage: iatDeploy
+    dependsOn: 
+       - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+    displayName: IAT Deploy (inc terraform, webapp deploy)
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    variables:
+      - group: "ESS-IAT-Variables"
+      - group: "ESS-Deployment-Variables-IAT"
+      - group: "POS-IAT-Variables"
+      - name: "ESSApiConfiguration.TenantId"
+        value: $(TenantId)
+      - name: "ESSApiConfiguration.AutoTestClientId"
+        value: $(AutoTestClientId_Authed)
+      - name: "ESSApiConfiguration.AutoTestClientSecret"
+        value: $(AutoTestClientSecret_Authed)
+      - name: "ESSApiConfiguration.EssClientId"
+        value: $(ESSClientId)
+      - name: "ElasticAPM_ServerURL"
+        value: $(ElasticAPM.ServerURL)
+      - name: "ElasticAPM_ApiKey"
+        value: $(ElasticAPM.ApiKey)
+    jobs:
+      - template: Deployment/templates/Deploy.yml
+        parameters:
+          Environment: "iat"
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-IAT-A.011.08"
+          Container: ${{variables.Container}}
+          
+  - stage: preprodDeploy
+    dependsOn: 
+      - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+    displayName: PreProd Deploy (inc terraform, webapp deploy)
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    variables:
+      - group: "ESS-Pre-Variables"
+      - group: "ESS-Deployment-Variables-Pre"
+      - group: "POS-Pre-Variables"
+      - name: "ESSApiConfiguration.TenantId"
+        value: $(TenantId)
+      - name: "ESSApiConfiguration.AutoTestClientId"
+        value: $(AutoTestClientId_Authed)
+      - name: "ESSApiConfiguration.AutoTestClientSecret"
+        value: $(AutoTestClientSecret_Authed)
+      - name: "ESSApiConfiguration.EssClientId"
+        value: $(ESSClientId)
+      - name: "ElasticAPM_ServerURL"
+        value: $(ElasticAPM.ServerURL)
+      - name: "ElasticAPM_ApiKey"
+        value: $(ElasticAPM.ApiKey)
+    jobs:
+      - template: Deployment/templates/Deploy.yml
+        parameters:
+          Environment: "preprod"
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-Pre-A.011.08"
+          Container: ${{variables.Container}} 
