@@ -3,6 +3,9 @@ parameters:
   type: string
 - name: AzureSubscription
   type: string
+- name: ContinueEvenIfResourcesAreGettingDestroyed
+  type: boolean
+  default: false
 
 jobs:
 - deployment: DeployApp
