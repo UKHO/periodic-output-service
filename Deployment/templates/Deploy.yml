@@ -21,7 +21,7 @@ jobs:
     runOnce:
       deploy:
         steps:
-          - template: Deployment/templates/continuous-deployment.yml
+          - template: continuous-deployment.yml
             parameters:
               ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
               AzureSubscription: ${{parameters.AzureSubscription}}
