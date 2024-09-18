@@ -6,6 +6,8 @@ parameters:
 - name: ContinueEvenIfResourcesAreGettingDestroyed
   type: boolean
   default: false
+- name: Container
+  type: string
 
 jobs:
 - deployment: DeployApp
