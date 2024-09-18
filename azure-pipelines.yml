@@ -1200,7 +1200,7 @@ stages:
     displayName: PreProd Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
     variables:
-      - group: "ESS-Pre-Variables"
+      - group: "ESS-PreProd-Variables"
       - group: "ESS-Deployment-Variables-Pre"
       - group: "POS-Pre-Variables"
       - name: "ESSApiConfiguration.TenantId"
