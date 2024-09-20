@@ -72,3 +72,11 @@ variable "mock_spoke_subnet_name" {
 variable "permitdecryptionhardwareid" {
   type = string
 }
+
+variable "agent_2204_subnet" {
+  type = string
+}
+
+variable "agent_prd_subnet" {
+  type = string
+}
