@@ -35,8 +35,8 @@ module "eventhub" {
 }
 
 data "azurerm_app_service_plan" "essft_asp" {
-  name                = "ess-vni-sxs-2-asp"
-  resource_group_name = "ess-vni-rg"
+  name                = "ess-${local.env_name}-sxs-2-asp"
+  resource_group_name = "ess-${local.env_name}-rg"
 }
 
 data "azurerm_app_service_plan" "ess_asp" {
