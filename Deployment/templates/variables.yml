@@ -1,0 +1,8 @@
+variables:
+- group: "ESS-${{parameters.Environment}}-Variables"
+- group: "ESS-Deployment-Variables-${{parameters.Environment}}"
+- name: "ElasticAPM_ServerURL"
+  value: $(ElasticAPM.ServerURL)
+- name: "ElasticAPM_ApiKey"
+  value: $(ElasticAPM.ApiKey)
+- group: "POS-${{parameters.Environment}}-Variables"

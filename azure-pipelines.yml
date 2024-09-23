@@ -40,6 +40,7 @@ variables:
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.1.9"
   - name: WindowPool
     value: "NautilusBuild"
+  - template: Deployment/templates/variables.yml
 
 stages:
   - stage: Stryker_Mutator
