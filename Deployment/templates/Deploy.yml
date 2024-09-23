@@ -1,6 +1,6 @@
 parameters:
-- name: Environment
-  type: string
+# - name: Environment
+#   type: string
 - name: AzureSubscription
   type: string
 - name: ContinueEvenIfResourcesAreGettingDestroyed
@@ -9,10 +9,7 @@ parameters:
 - name: Container
   type: string
 
-variables:
-- template: variables.yml
-  parameters:
-    Environment: ${{parameters.Environment}}
+
 
 jobs:
 - deployment: DeployApp

@@ -1205,10 +1205,15 @@ stages:
       - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     displayName: PreProd Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
+    variables:
+      - name: Environment
+        value: "preprod"
+      - template: variables.yml
+        parameters:
+          Environment: ${{Environment}}
     jobs:
       - template: Deployment/templates/Deploy.yml
         parameters:
-          Environment: "preprod"
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
           AzureSubscription: "Exchange-Set-Service-Pre-A.011.08"
           Container: ${{variables.Container}} 
