@@ -1205,22 +1205,6 @@ stages:
       - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     displayName: PreProd Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
-    variables:
-      - group: "ESS-PreProd-Variables"
-      - group: "ESS-Deployment-Variables-PreProd"
-      - group: "POS-PreProd-Variables"
-      - name: "ESSApiConfiguration.TenantId"
-        value: $(TenantId)
-      - name: "ESSApiConfiguration.AutoTestClientId"
-        value: $(AutoTestClientId_Authed)
-      - name: "ESSApiConfiguration.AutoTestClientSecret"
-        value: $(AutoTestClientSecret_Authed)
-      - name: "ESSApiConfiguration.EssClientId"
-        value: $(ESSClientId)
-      - name: "ElasticAPM_ServerURL"
-        value: $(ElasticAPM.ServerURL)
-      - name: "ElasticAPM_ApiKey"
-        value: $(ElasticAPM.ApiKey)
     jobs:
       - template: Deployment/templates/Deploy.yml
         parameters:
