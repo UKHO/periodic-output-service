@@ -1210,7 +1210,7 @@ stages:
         value: "preprod"
       - template: variables.yml
         parameters:
-          Environment: ${{Environment}}
+          Environment: ${{variables.Environment}}
     jobs:
       - template: Deployment/templates/Deploy.yml
         parameters:
