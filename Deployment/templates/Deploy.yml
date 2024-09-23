@@ -13,8 +13,8 @@ parameters:
 
 jobs:
 - deployment: DeployApp
-  displayName: "${{parameters.Environment}} - Deploy Terraform and Dotnet App"
-  environment: "Ess-${{parameters.Environment}}"
+  displayName: "${{variables.Environment}} - Deploy Terraform and Dotnet App"
+  environment: "Ess-${{variables.Environment}}"
   pool: $(DeploymentPool)
   container: ${{parameters.Container}}
   workspace:
