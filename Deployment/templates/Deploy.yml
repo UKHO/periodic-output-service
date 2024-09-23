@@ -9,6 +9,11 @@ parameters:
 - name: Container
   type: string
 
+variables:
+- template: variables.yml
+  parameters:
+    Environment: ${{parameters.Environment}}
+
 jobs:
 - deployment: DeployApp
   displayName: "${{parameters.Environment}} - Deploy Terraform and Dotnet App"
