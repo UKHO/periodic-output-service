@@ -8,6 +8,8 @@ parameters:
   default: false
 - name: Container
   type: string
+- name: Environment
+  type: string
 
 jobs:
 - deployment: DeployApp
@@ -17,6 +19,10 @@ jobs:
   container: ${{parameters.Container}}
   workspace:
     clean: all
+  variables:
+    - group: "ESS-${{parameters.Environment}}-Variables"
+    - group: "ESS-Deployment-Variables-${{parameters.Environment}}"
+    - group: "POS-${{parameters.Environment}}-Variables"
   strategy:
     runOnce:
       deploy:
