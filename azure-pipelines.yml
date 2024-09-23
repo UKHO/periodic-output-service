@@ -40,7 +40,6 @@ variables:
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.1.9"
   - name: WindowPool
     value: "NautilusBuild"
-  - template: Deployment/templates/variables.yml
 
 stages:
   - stage: Stryker_Mutator
@@ -1206,6 +1205,8 @@ stages:
       - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
     displayName: PreProd Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
+    variables:
+    - template: Deployment/templates/variables.yml
     jobs:
       - template: Deployment/templates/Deploy.yml
         parameters:
