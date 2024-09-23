@@ -1208,7 +1208,7 @@ stages:
     variables:
       - name: Environment
         value: "preprod"
-      - template: variables.yml
+      - template: Deployment/templates/variables.yml
         parameters:
           Environment: ${{variables.Environment}}
     jobs:
