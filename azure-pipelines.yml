@@ -1177,25 +1177,15 @@ stages:
     displayName: IAT Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
-      - group: "ESS-IAT-Variables"
-      - group: "ESS-Deployment-Variables-IAT"
-      - group: "POS-IAT-Variables"
-      - name: "ESSApiConfiguration.TenantId"
-        value: $(TenantId)
-      - name: "ESSApiConfiguration.AutoTestClientId"
-        value: $(AutoTestClientId_Authed)
-      - name: "ESSApiConfiguration.AutoTestClientSecret"
-        value: $(AutoTestClientSecret_Authed)
-      - name: "ESSApiConfiguration.EssClientId"
-        value: $(ESSClientId)
-      - name: "ElasticAPM_ServerURL"
-        value: $(ElasticAPM.ServerURL)
-      - name: "ElasticAPM_ApiKey"
-        value: $(ElasticAPM.ApiKey)
+      - name: Environment
+        value: "iat"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
     jobs:
       - template: Deployment/templates/Deploy.yml
         parameters:
-          Environment: "iat"
+          Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
           AzureSubscription: "Exchange-Set-Service-IAT-A.011.08"
           Container: ${{variables.Container}}
