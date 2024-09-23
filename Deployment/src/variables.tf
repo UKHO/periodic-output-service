@@ -47,10 +47,6 @@ variable "agent_vnet_name" {
   type = string
 }
 
-variable "agent_subnet_name" {
-  type = string
-}
-
 variable "agent_subscription_id" {
   type = string
 }
