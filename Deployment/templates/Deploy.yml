@@ -8,8 +8,6 @@ parameters:
   default: false
 - name: Container
   type: string
-- name: Environment
-  type: string
 
 jobs:
 - deployment: DeployApp
