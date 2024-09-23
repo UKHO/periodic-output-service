@@ -21,6 +21,10 @@ jobs:
     - group: "ESS-${{parameters.Environment}}-Variables"
     - group: "ESS-Deployment-Variables-${{parameters.Environment}}"
     - group: "POS-${{parameters.Environment}}-Variables"
+    - name: "ElasticAPM_ServerURL"
+      value: $(ElasticAPM.ServerURL)
+    - name: "ElasticAPM_ApiKey"
+      value: $(ElasticAPM.ApiKey)
   strategy:
     runOnce:
       deploy:
