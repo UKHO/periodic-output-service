@@ -1,6 +1,6 @@
 parameters:
-# - name: Environment
-#   type: string
+- name: Environment
+  type: string
 - name: AzureSubscription
   type: string
 - name: ContinueEvenIfResourcesAreGettingDestroyed
@@ -13,8 +13,8 @@ parameters:
 
 jobs:
 - deployment: DeployApp
-  displayName: "${{variables.Environment}} - Deploy Terraform and Dotnet App"
-  environment: "Ess-${{variables.Environment}}"
+  displayName: "${{parameters.Environment}} - Deploy Terraform and Dotnet App"
+  environment: "Ess-${{parameters.Environment}}"
   pool: $(DeploymentPool)
   container: ${{parameters.Container}}
   workspace:

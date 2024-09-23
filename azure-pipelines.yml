@@ -1195,7 +1195,7 @@ stages:
     jobs:
       - template: Deployment/templates/Deploy.yml
         parameters:
-         # Environment: "iat"
+          Environment: "iat"
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
           AzureSubscription: "Exchange-Set-Service-IAT-A.011.08"
           Container: ${{variables.Container}}
@@ -1214,6 +1214,7 @@ stages:
     jobs:
       - template: Deployment/templates/Deploy.yml
         parameters:
+          Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
           AzureSubscription: "Exchange-Set-Service-Pre-A.011.08"
           Container: ${{variables.Container}} 
