@@ -564,7 +564,7 @@ stages:
         pool: $(WindowPool)        
         displayName: Post Deployment Actions
         steps:
-          - template: QALiveDeployment/templates/retain-pipeline.yml
+          - template: Deployment/templates/retain-pipeline.yml
 
   - stage: vNextIATDeploy
     dependsOn: 
