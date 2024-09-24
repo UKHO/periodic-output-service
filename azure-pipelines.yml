@@ -506,442 +506,52 @@ stages:
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
     variables:
-      - group: "ESS-Dev-Variables"
-      - group: "ESS-Deployment-Variables-DEV"
-      - group: "POS-Dev-Variables"
-      - name: "ESSApiConfiguration.TenantId"
-        value: $(TenantId)
-      - name: "ESSApiConfiguration.AutoTestClientId"
-        value: $(AutoTestClientId_Authed)
-      - name: "ESSApiConfiguration.AutoTestClientSecret"
-        value: $(AutoTestClientSecret_Authed)
-      - name: "ESSApiConfiguration.EssClientId"
-        value: $(ESSClientId)
-      - name: "ElasticAPM_ServerURL"
-        value: $(ElasticAPM.ServerURL)
-      - name: "ElasticAPM_ApiKey"
-        value: $(ElasticAPM.ApiKey)
-
+      - name: Environment
+        value: "dev"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
     jobs:
-      - deployment: DevDeployApp
-        displayName: "Dev - Deploy Terraform and Dotnet App"
-        environment: "Ess-Dev"
-        pool: $(DeploymentPool)
-        container: ${{variables.Container}}
-        workspace:
-          clean: all
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - template: DevDeployment/templates/continuous-deployment.yml
-                  parameters:
-                    ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-                    AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-
-      - job: CheckInfra
-        displayName: "Check Infrastructure Health"
-        dependsOn: DevDeployApp
-        variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: RGName
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
-        steps:
-          - task: AzureCLI@2
-            displayName: "Check Infrastructure is healthy"
-            inputs:
-              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/DevDeployment/check_service_status_webjob.ps1'
-              arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
-
-      - job: CheckFSS
-        displayName: "Check FSS Health"
-        dependsOn: DevDeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FSS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: "$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1"
-              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckESS
-        displayName: "Check ESS Health"
-        dependsOn: DevDeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check ESS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckFM
-        displayName: "Check Fleet Manager Health"
-        dependsOn: DevDeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FM Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/DevDeployment/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: SetPOSQASubnet
-        displayName: "Set QA Subnet Configuration"
-        dependsOn: DevDeployApp
-        pool: $(DeploymentPool)
-        container: ${{variables.Container}}
-        variables:
-          - name: mockWebAppName
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
-          - name: mockWebAppResourceGroup
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
-        steps:
-          - task: AzureCLI@2
-            displayName: "Set QA Subnet Configuration"
-            inputs:
-              azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/DevDeployment/set_qa_subnet_configuration.ps1'
-              arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -qasubscriptionid $(POSESSQASubscriptionId) -qavnetresourcegroup $(spokeRG) -qavnetname $(POSESSQAspokeVnetName) -qasubnetname $(POSESSspokeSubnetName)'
-                         
-      - job: POSFunctionalTests
-        dependsOn:
-         - DevDeployApp
-         - CheckInfra
-         - CheckFSS
-         - CheckESS
-         - CheckFM
-        pool: NautilusBuild
-        displayName: "Dev POS Functional Automated Tests"
-        workspace:
-          clean: all
-        variables:
-          - name: POSWebjobApiConfiguration.UserName
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.webJobUsername']  ]
-          - name: POSWebjobApiConfiguration.Password
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.webJobPassword']  ]
-        steps:
-          - task: DownloadBuildArtifacts@0
-            displayName: "Download POS Functional test Artifact"
-            inputs:
-              buildType: 'current'
-              downloadType: 'single'
-              artifactName: 'posfunctionaltests'
-              downloadPath: '$(Build.SourcesDirectory)'
-
-          - task: FileTransform@2
-            displayName: "File Transform: functionaltests"
-            inputs:
-              folderPath: '$(Build.SourcesDirectory)/posfunctionaltests/'
-              xmlTransformationRules:
-              jsonTargetFiles: '**/appsettings.json'
-
-          - task: UseDotNet@2
-            displayName: 'Use .NET SDK'
-            inputs:
-              packageType: sdk
-              version: 6.0.x
-
-          - task: DotNetCoreCLI@2
-            displayName: "Run POS Functional tests"
-            inputs:
-              command: "test"
-              projects: |
-                       **/*FunctionalTest*.dll
-                       !**/*TestAdapter.dll
-                       !**/obj/**
-              arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
-              testRunTitle: "Dev-POSAutomationTests"
-              workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
-
-      - job: BESSFunctionalTests
-        dependsOn:
-         - DevDeployApp
-         - CheckInfra
-         - CheckFSS
-         - CheckESS
-         - CheckFM
-         - POSFunctionalTests 
-        pool: NautilusBuild
-        displayName: "Dev BESS Functional Automated Tests"
-        workspace:
-         clean: all
-        variables:
-          - name: AzureWebJobsStorage
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
-          - name: WEB_APP_NAME
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: mockWebAppName
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
-          - name: mockWebAppResourceGroup
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
-          - name: RGName
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.ResourceGroup']  ]
-          - name: BessStorageConfiguration.ConnectionString
-            value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
-        steps:
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download Terraform Artifact"
-                  condition: always()
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'devterraformartifact'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
-                - task: AzureCLI@2
-                  displayName: "Swap Storage Container Configuration"
-                  condition: always()
-                  inputs:
-                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                    scriptType: 'pscore'
-                    scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
-                    arguments: '-containername $(BessStorageConfiguration.ContainerName) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download BESS Functional test Artifact"
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'bessfunctionaltests'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
-                - task: FileTransform@2
-                  displayName: "File Transform: functionaltests"
-                  inputs:
-                    folderPath: '$(Build.SourcesDirectory)/bessfunctionaltests/'
-                    xmlTransformationRules:
-                    jsonTargetFiles: '**/appsettings.json'
-
-                - task: UseDotNet@2
-                  displayName: 'Use .NET SDK'
-                  inputs:
-                    packageType: sdk
-                    version: 6.0.x
-
-                - task: DotNetCoreCLI@2
-                  displayName: "Run BESS Functional tests"
-                  inputs:
-                    command: "test"
-                    projects: |
-                      **/*FunctionalTest*.dll
-                      !**/*TestAdapter.dll
-                      !**/obj/**
-                    testRunTitle: "Dev-BESSAutomationTests"
-                    workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
-
-                - task: AzureCLI@2
-                  displayName: "Swap Storage Container Configuration"
-                  condition: always()
-                  inputs:
-                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                    scriptType: 'pscore'
-                    scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
-                    arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
+      - template: Deployment/templates/Deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+          Container: ${{variables.Container}} 
+      
   - stage: QAdeploy
     dependsOn: Devdeploy
     displayName: "QAdeploy (inc terraform, webapp deploy)"
     variables:
-      - group: "ESS-QA-Variables"
-      - group: "ESS-Deployment-Variables-QA"
-      - group: "POS-QA-Variables"
-      - name: "ESSApiConfiguration.TenantId"
-        value: $(TenantId)
-      - name: "ESSApiConfiguration.AutoTestClientId"
-        value: $(AutoTestClientId_Authed)
-      - name: "ESSApiConfiguration.AutoTestClientSecret"
-        value: $(AutoTestClientSecret_Authed)
-      - name: "ESSApiConfiguration.EssClientId"
-        value: $(ESSClientId)
-      - name: "ElasticAPM_ServerURL"
-        value: $(ElasticAPM.ServerURL)
-      - name: "ElasticAPM_ApiKey"
-        value: $(ElasticAPM.ApiKey)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
-
+      - name: Environment
+        value: "qa"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
     jobs:
-      - deployment: QADeployApp
-        displayName: "QA - Deploy Terraform and Dotnet App"
-        environment: "Ess-Qa"
-        pool: $(DeploymentPool)
-        container: ${{variables.Container}}
-        workspace:
-          clean: all
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - template: QALiveDeployment/templates/continuous-deployment.yml
-                  parameters:
-                    ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-                    AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
-
-      - job: CheckInfra
-        displayName: "Check Infrastructure Health"
-        dependsOn: QADeployApp
-        variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: RGName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
-        steps:
-          - task: AzureCLI@2
-            displayName: "Check Infrastructure is healthy"
-            inputs:
-              azureSubscription: "Exchange-Set-Service-QA-A-008-02"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/QALiveDeployment/check_service_status_webjob.ps1'
-              arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
-
-      - job: CheckFSS
-        displayName: "Check FSS Health"
-        dependsOn: QADeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FSS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: "$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1"
-              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckESS
-        displayName: "Check ESS Health"
-        dependsOn: QADeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check ESS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckFM
-        displayName: "Check Fleet Manager Health"
-        dependsOn: QADeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FM Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+      - template: Deployment/templates/Deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
+          Container: ${{variables.Container}} 
 
   - stage: Livedeploy
     displayName: "Livedeploy (inc terraform, webapp deploy)"
     variables:
-      - group: "ESS-Live-Variables"
-      - group: "ESS-Deployment-Variables-LIVE"
-      - group: "POS-Live-Variables"
-      - name: "ElasticAPM_ServerURL"
-        value: $(ElasticAPM.ServerURL)
-      - name: "ElasticAPM_ApiKey"
-        value: $(ElasticAPM.ApiKey)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+      - name: Environment
+        value: "Live"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
     jobs:
-      - deployment: LiveDeployApp
-        displayName: "Live - Deploy Terraform and Dotnet App"
-        environment: "Ess-Live"
-        pool: $(DeploymentPool)
-        container: ${{variables.Container}}
-        workspace:
-          clean: all
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - template: QALiveDeployment/templates/continuous-deployment.yml
-                  parameters:
-                    ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-                    AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
-
-      - job: LiveSetup
-        displayName: "Set Webjob Configuration For Live"
-        dependsOn: LiveDeployApp
-        variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.LiveDeployApp.outputs['LiveDeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: RGName
-            value: $[ dependencies.LiveDeployApp.outputs['LiveDeployApp.TerraformDeploy.ResourceGroup']  ]
-        steps:
-          - task: AzureCLI@2
-            displayName: "Swap Webjob Configuration"
-            condition: always()
-            inputs:
-              azureSubscription: "Exchange-Set-Service-Live-A-008-02"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: "$(Build.SourcesDirectory)/QALiveDeployment/set_webjob_configuration.ps1"
-              arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
-      - job: CheckInfra
-        displayName: "Check Infrastructure Health"
-        dependsOn:
-        -  LiveDeployApp
-        -  LiveSetup
-        variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.LiveDeployApp.outputs['LiveDeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: RGName
-            value: $[ dependencies.LiveDeployApp.outputs['LiveDeployApp.TerraformDeploy.ResourceGroup']  ]
-        steps:
-          - task: AzureCLI@2
-            displayName: "Check Infrastructure is healthy"
-            inputs:
-              azureSubscription: "Exchange-Set-Service-Live-A-008-02"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/QALiveDeployment/check_service_status_webjob.ps1'
-              arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
-
-      - job: CheckFSS
-        displayName: "Check FSS Health"
-        dependsOn:
-        -  LiveDeployApp
-        -  LiveSetup
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FSS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: "$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1"
-              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckESS
-        displayName: "Check ESS Health"
-        dependsOn:
-        -  LiveDeployApp
-        -  LiveSetup
-        steps:
-          - task: PowerShell@2
-            displayName: "Check ESS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckFM
-        displayName: "Check Fleet Manager Health"
-        dependsOn:
-        -  LiveDeployApp
-        -  LiveSetup
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FM Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint_fm_live.ps1'
-              arguments: "-healthEndPointUrl $(FMHealthEndpoint)/live/echo/health-check -waitTimeInMinute $(waitTimeInMinute) -ocpapimsubscriptionkey $(FM_Ocp_Apim_Subscription_Key)"
-
+      - template: Deployment/templates/Deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
+          Container: ${{variables.Container}} 
+   
       - job: PostDeploymentActions
         dependsOn:
         - LiveDeployApp
@@ -961,107 +571,18 @@ stages:
     displayName: vNext IAT Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
-      - group: "ESS-vNextIAT-Variables"
-      - group: "ESS-Deployment-Variables-vNextIAT"
-      - group: "POS-vNextIAT-Variables"
-      - name: "ESSApiConfiguration.TenantId"
-        value: $(TenantId)
-      - name: "ESSApiConfiguration.AutoTestClientId"
-        value: $(AutoTestClientId_Authed)
-      - name: "ESSApiConfiguration.AutoTestClientSecret"
-        value: $(AutoTestClientSecret_Authed)
-      - name: "ESSApiConfiguration.EssClientId"
-        value: $(ESSClientId)
-      - name: "ElasticAPM_ServerURL"
-        value: $(ElasticAPM.ServerURL)
-      - name: "ElasticAPM_ApiKey"
-        value: $(ElasticAPM.ApiKey)
+      - name: Environment
+        value: "vnextiat"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
     jobs:
-      - deployment: vNextIATDeployApp
-        displayName: "vNextIAT - Deploy Terraform and Dotnet App"
-        environment: "Ess-vnextiat"
-        pool: $(DeploymentPool)
-        container: ${{variables.Container}}
-        workspace:
-          clean: all
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - template: vNextIATDeployment/templates/continuous-deployment.yml
-                  parameters:
-                    ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-                    AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
-
-      - job: vNextIATSetup
-        displayName: "Set Webjob Configuration For vNextIAT"
-        dependsOn: vNextIATDeployApp
-        variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: RGName
-            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.ResourceGroup']  ]
-        steps:
-          - task: AzureCLI@2
-            displayName: "Swap Webjob Configuration"
-            condition: always()
-            inputs:
-              azureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: "$(Build.SourcesDirectory)/vNextIATDeployment/set_webjob_configuration.ps1"
-              arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
-      - job: CheckInfra
-        displayName: "Check Infrastructure Health"
-        dependsOn: vNextIATDeployApp
-        variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: RGName
-            value: $[ dependencies.vNextIATDeployApp.outputs['vNextIATDeployApp.TerraformDeploy.ResourceGroup']  ]
-        steps:
-          - task: AzureCLI@2
-            displayName: "Check Infrastructure is healthy"
-            inputs:
-              azureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/vNextIATDeployment/check_service_status_webjob.ps1'
-              arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
-
-      - job: CheckFSS
-        displayName: "Check FSS Health"
-        dependsOn: vNextIATDeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FSS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: "$(Build.SourcesDirectory)/vNextIATDeployment/check_health_endpoint.ps1"
-              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckESS
-        displayName: "Check ESS Health"
-        dependsOn: vNextIATDeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check ESS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/vNextIATDeployment/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckFM
-        displayName: "Check Fleet Manager Health"
-        dependsOn: vNextIATDeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FM Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/vNextIATDeployment/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+      - template: Deployment/templates/Deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
+          Container: ${{variables.Container}} 
 
   - stage: vnexte2eDeploy
     dependsOn: 
@@ -1069,107 +590,18 @@ stages:
     displayName: vNext E2E Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
     variables:
-      - group: "ESS-vNextE2E-Variables"
-      - group: "ESS-Deployment-Variables-vNextE2E"
-      - group: "POS-vNextE2E-Variables"
-      - name: "ESSApiConfiguration.TenantId"
-        value: $(TenantId)
-      - name: "ESSApiConfiguration.AutoTestClientId"
-        value: $(AutoTestClientId_Authed)
-      - name: "ESSApiConfiguration.AutoTestClientSecret"
-        value: $(AutoTestClientSecret_Authed)
-      - name: "ESSApiConfiguration.EssClientId"
-        value: $(ESSClientId)
-      - name: "ElasticAPM_ServerURL"
-        value: $(ElasticAPM.ServerURL)
-      - name: "ElasticAPM_ApiKey"
-        value: $(ElasticAPM.ApiKey)
+      - name: Environment
+        value: "vnexte2e"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
     jobs:
-      - deployment: vNextE2EDeployApp
-        displayName: "vNextE2E - Deploy Terraform and Dotnet App"
-        environment: "Ess-vnexte2e"
-        pool: $(DeploymentPool)
-        container: ${{variables.Container}}
-        workspace:
-          clean: all
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - template: vNextE2EDeployment/templates/continuous-deployment.yml
-                  parameters:
-                    ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-                    AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
-
-      - job: vNextE2ESetup
-        displayName: "Set Webjob Configuration For vNextE2E"
-        dependsOn: vNextE2EDeployApp
-        variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: RGName
-            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.ResourceGroup']  ]
-        steps:
-          - task: AzureCLI@2
-            displayName: "Swap Webjob Configuration"
-            condition: always()
-            inputs:
-              azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: "$(Build.SourcesDirectory)/vNextE2EDeployment/set_webjob_configuration.ps1"
-              arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
-      - job: CheckInfra
-        displayName: "Check Infrastructure Health"
-        dependsOn: vNextE2EDeployApp
-        variables:
-          - name: WEB_APP_NAME
-            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: RGName
-            value: $[ dependencies.vNextE2EDeployApp.outputs['vNextE2EDeployApp.TerraformDeploy.ResourceGroup']  ]
-        steps:
-          - task: AzureCLI@2
-            displayName: "Check Infrastructure is healthy"
-            inputs:
-              azureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
-              scriptType: 'pscore'
-              scriptLocation: 'scriptPath'
-              scriptPath: '$(Build.SourcesDirectory)/vNextE2EDeployment/check_service_status_webjob.ps1'
-              arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
-
-      - job: CheckFSS
-        displayName: "Check FSS Health"
-        dependsOn: vNextE2EDeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FSS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: "$(Build.SourcesDirectory)/vNextE2EDeployment/check_health_endpoint.ps1"
-              arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckESS
-        displayName: "Check ESS Health"
-        dependsOn: vNextE2EDeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check ESS Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/vNextE2EDeployment/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
-
-      - job: CheckFM
-        displayName: "Check Fleet Manager Health"
-        dependsOn: vNextE2EDeployApp
-        steps:
-          - task: PowerShell@2
-            displayName: "Check FM Health endpoint is healthy"
-            inputs:
-              targetType: filePath
-              filePath: '$(Build.SourcesDirectory)/vNextE2EDeployment/check_health_endpoint.ps1'
-              arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+      - template: Deployment/templates/Deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+          Container: ${{variables.Container}}
 
   - stage: iatDeploy
     dependsOn: 
