@@ -555,8 +555,8 @@ stages:
    
       - job: PostDeploymentActions
         dependsOn:
-        - LiveDeployApp
-        - LiveSetup
+        - DeployApp
+        - Setup
         - CheckInfra
         - CheckFSS
         - CheckESS
