@@ -1,5 +1,5 @@
 parameters:
-- name: parameters.RunTests
+- name: RunTests
   type: boolean
   default: false
 - name: Environment
