@@ -311,31 +311,6 @@ stages:
           clean: all
         displayName: "Publish Terraform Artifacts"
         steps:
-
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish Dev terraform Artifacts"
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\DevDeployment'
-              ArtifactName: devterraformartifact              
-
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish QA and Live terraform Artifacts"
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\QALiveDeployment'
-              ArtifactName: qaliveterraformartifact
-              
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish vNext terraform Artifacts"
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\vNextE2EDeployment'
-              ArtifactName: vnexte2eterraformartifact
-
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish vNext terraform Artifacts"
-            inputs:
-              PathtoPublish: '$(Build.SourcesDirectory)\vNextIATDeployment'
-              ArtifactName: vnextiatterraformartifact
-
           - task: PublishBuildArtifacts@1
             displayName: "Publish terraform Artifacts"
             inputs:
