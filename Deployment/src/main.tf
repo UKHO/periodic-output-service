@@ -38,6 +38,7 @@ data "azurerm_app_service_plan" "ess_asp" {
 }
 
 module "mock_webapp_service" {
+  count = "${local.env_name}" == "dev" ? 1 : 0
   source              = "./Modules/MockWebApp"
   name                = local.mock_web_app_name
   env_name            = local.env_name
