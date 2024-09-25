@@ -4,7 +4,7 @@ steps:
     displayName: Retain Live Release
     inputs:
       targetType: filePath
-      filePath: "$(Build.SourcesDirectory)/QALiveDeployment/add-lease.ps1"
+      filePath: "$(Build.SourcesDirectory)/Deployment/add-lease.ps1"
       arguments: "-daysValid 365
                   -accessToken '$(System.AccessToken)'
                   -definitionId $(System.DefinitionId)
