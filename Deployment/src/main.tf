@@ -44,7 +44,7 @@ module "mock_webapp_service" {
   name                = local.mock_web_app_name
   env_name            = local.env_name
   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
-  service_plan_id     = data.azurerm_app_service_plan.essft_asp.id
+  service_plan_id     = data.azurerm_app_service_plan.essft_asp[0].id
   location            = azurerm_resource_group.mock_webapp_rg.location
   subnet_id           = data.azurerm_subnet.mock_main_subnet.id
   main_subnet_id      = data.azurerm_subnet.main_subnet.id
