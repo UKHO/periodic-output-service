@@ -28,6 +28,7 @@ module "eventhub" {
 }
 
 data "azurerm_app_service_plan" "essft_asp" {
+  count = "${local.env_name}" == "dev" ? 1 : 0
   name                = "essft-qc-yh3r1-asp"
   resource_group_name = "essft-qc-webapp-rg"
 }
