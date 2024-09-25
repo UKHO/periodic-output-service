@@ -28,6 +28,7 @@ jobs:
             parameters:
               ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
               AzureSubscription: ${{parameters.AzureSubscription}}
+              RunTests: ${{parameters.RunTests}}
 
 - job: Setup
   displayName: "Set Webjob Configuration"

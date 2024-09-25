@@ -4,6 +4,9 @@ parameters:
     default: false
   - name: AzureSubscription
     type: string
+  - name: RunTests
+    type: boolean
+    default: false
 
 steps:
   - task: PowerShell@2
@@ -38,6 +41,7 @@ steps:
       jsonTargetFiles: '**/appsettings.json'
 
   - task: AzureCLI@2
+    condition: ${{parameters.RunTests}}
     displayName: "Mock API WebApp deployment"
     inputs:
       azureSubscription: "${{ parameters.AzureSubscription }}"
