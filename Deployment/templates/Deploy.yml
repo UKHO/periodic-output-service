@@ -99,26 +99,26 @@ jobs:
         filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
         arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
-# - job: SetPOSQASubnet
-#   condition: ${{parameters.RunTests}}
-#   displayName: "Set Subnet Configuration"
-#   dependsOn: DeployApp
-#   pool: $(DeploymentPool)
-#   container: ${{variables.Container}}
-#   variables:
-#     - name: mockWebAppName
-#       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebApp']  ]
-#     - name: mockWebAppResourceGroup
-#       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
-#   steps:
-#     - task: AzureCLI@2
-#       displayName: "Set Subnet Configuration"
-#       inputs:
-#         azureSubscription: ${{parameters.AzureSubscription}}
-#         scriptType: 'pscore'
-#         scriptLocation: 'scriptPath'
-#         scriptPath: '$(Build.SourcesDirectory)/Deployment/set_qa_subnet_configuration.ps1'
-#         arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -qasubscriptionid $(POSESSQASubscriptionId) -qavnetresourcegroup $(spokeRG) -qavnetname $(POSESSQAspokeVnetName) -qasubnetname $(POSESSspokeSubnetName)'
+- job: SetPOSQASubnet
+  condition: ${{parameters.RunTests}}
+  displayName: "Set Subnet Configuration"
+  dependsOn: DeployApp
+  pool: $(DeploymentPool)
+  container: ${{variables.Container}}
+  variables:
+    - name: mockWebAppName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebApp']  ]
+    - name: mockWebAppResourceGroup
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Set Subnet Configuration"
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: '$(Build.SourcesDirectory)/Deployment/set_qa_subnet_configuration.ps1'
+        arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -qasubscriptionid $(POSESSQASubscriptionId) -qavnetresourcegroup $(spokeRG) -qavnetname $(POSESSQAspokeVnetName) -qasubnetname $(POSESSspokeSubnetName)'
 
 
 - job: POSFunctionalTests
