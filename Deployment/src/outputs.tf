@@ -6,6 +6,10 @@ output "env_name" {
   value = local.env_name
 }
 
+output "pks_mock_webappname" {
+  value = local.pks_mock_web_app_name
+}
+
 output "webapp_rg" {
   value = azurerm_resource_group.webapp_rg.name
 }
