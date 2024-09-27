@@ -50,6 +50,17 @@ steps:
       scriptPath: '$(Pipeline.Workspace)/terraformartifact/mock_api_deployment.ps1'
       arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FmEssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
 
+  - task: AzureCLI@2
+    condition: ${{parameters.RunTests}}
+    displayName: "PKSMock API WebApp deployment"
+    inputs:
+      azureSubscription: "${{ parameters.AzureSubscription }}"
+      scriptType: 'pscore'
+      scriptLocation: 'scriptPath'
+      scriptPath: '$(Pipeline.Workspace)/terraformartifact/mock_api_deployment.ps1'
+      arguments: '-mockWebAppName $(pksMockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/PKSWireMockWebAPI/UKHO.PKSWireMockService.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
+
+
   - task: FileTransform@2
     displayName: "File Transform: POS Config"
     inputs:
