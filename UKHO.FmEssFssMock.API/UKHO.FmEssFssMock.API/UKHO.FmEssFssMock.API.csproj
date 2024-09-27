@@ -186,6 +186,9 @@
     <None Update="Data\FSS\483AA1B9-8A3B-49F2-BAE9-759BB93B04D1\AVCS_DVD2_WK34_22.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Data\FSS\BECE0A26-867C-4EA6-8ECE-98AFA246A00E\avcs_catalogue.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Data\FSS\D2B46C4F-415A-4CA3-B844-6577254F39E5\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
