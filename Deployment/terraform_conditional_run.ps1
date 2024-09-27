@@ -57,6 +57,7 @@ write-output "Set JSON output into pipeline variables"
 Write-Host "##vso[task.setvariable variable=Website_Url]$($terraformOutput.Website_Url.value)"
 Write-Host "##vso[task.setvariable variable=WEB_APP_NAME]$($terraformOutput.web_app_name.value)"
 Write-Host "##vso[task.setvariable variable=mockWebAppName]$($terraformOutput.mock_webappname.value)"
+Write-Host "##vso[task.setvariable variable=pksMockWebAppName]$($terraformOutput.pks_mock_webappname.value)"
 Write-Host "##vso[task.setvariable variable=mock_web_app_url]$($terraformOutput.fm_mock_web_app_url.value)"
 Write-Host "##vso[task.setvariable variable=mockWebAppResourceGroup]$($terraformOutput.mock_webapp_rg.value)"
 Write-Host "##vso[task.setvariable variable=RGName]$($terraformOutput.webapp_rg.value)"
@@ -72,7 +73,7 @@ Write-Host "##vso[task.setvariable variable=EventHubLoggingConfiguration.Connect
 Write-Host "##vso[task.setvariable variable=EventHubLoggingConfiguration.EntityPath;issecret=true]$($terraformOutput.entity_path.value)"
 Write-Host "##vso[task.setvariable variable=ApplicationInsights.ConnectionString;issecret=true]$($terraformOutput.connection_string.value)"
 Write-Host "##vso[task.setvariable variable=AzureWebJobsStorage;issecret=true]$($terraformOutput.bess_storage_connection_string.value)"
+Write-Host "##vso[task.setvariable variable=AzureWebJobsStorageName;issecret=true;isOutput=true]$($terraformOutput.bess_storage_connection_string.value)"
 Write-Host "##vso[task.setvariable variable=KeyVaultSettings.ServiceUri]$($terraformOutput.keyvault_uri.value)"
-Write-Host "##vso[task.setvariable variable=pksMockWebAppName]$($terraformOutput.pks_mock_webappname.value)"
 
 $terraformOutput | ConvertTo-Json -Depth 5 > $terraformJsonOutputFile
