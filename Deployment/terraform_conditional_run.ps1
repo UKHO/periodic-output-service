@@ -73,5 +73,6 @@ Write-Host "##vso[task.setvariable variable=EventHubLoggingConfiguration.EntityP
 Write-Host "##vso[task.setvariable variable=ApplicationInsights.ConnectionString;issecret=true]$($terraformOutput.connection_string.value)"
 Write-Host "##vso[task.setvariable variable=AzureWebJobsStorage;issecret=true]$($terraformOutput.bess_storage_connection_string.value)"
 Write-Host "##vso[task.setvariable variable=KeyVaultSettings.ServiceUri]$($terraformOutput.keyvault_uri.value)"
+Write-Host "##vso[task.setvariable variable=pksMockWebAppName]$($terraformOutput.pks_mock_webappname.value)"
 
 $terraformOutput | ConvertTo-Json -Depth 5 > $terraformJsonOutputFile
