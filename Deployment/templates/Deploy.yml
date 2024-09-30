@@ -104,7 +104,7 @@ jobs:
   displayName: "Set QA Subnet Configuration"
   dependsOn: DeployApp
   pool: $(DeploymentPool)
-  container: ${{variables.Container}}
+  container: ${{parameters.Container}}
   variables:
     - name: mockWebAppName
       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebApp']  ]
