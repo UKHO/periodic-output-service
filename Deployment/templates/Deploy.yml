@@ -101,7 +101,7 @@ jobs:
         arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
 - job: SetPOSSubnet
-  displayName: "Set QA Subnet Configuration"
+  displayName: "Set Subnet Configuration"
   dependsOn: DeployApp
   pool: $(DeploymentPool)
   container: ${{parameters.Container}}
@@ -117,7 +117,7 @@ jobs:
         azureSubscription: ${{parameters.AzureSubscription}}
         scriptType: 'pscore'
         scriptLocation: 'scriptPath'
-        scriptPath: '$(Build.SourcesDirectory)/DevDeployment/set_qa_subnet_configuration.ps1'
+        scriptPath: '$(Build.SourcesDirectory)/DevDeployment/set_subnet_configuration.ps1'
         arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
                     
 
