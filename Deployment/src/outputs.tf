@@ -1,13 +1,25 @@
+output "mock_webappname" {
+  value = local.mock_web_app_name
+}
+
+output "pks_mock_webappname" {
+  value = local.pks_mock_web_app_name
+}
+
+output "fm_mock_web_app_url" {
+value = "https://${module.mock_webapp_service.default_site_hostname}"
+}
+
+output "mock_webapp_rg" {
+value = azurerm_resource_group.mock_webapp_rg.name
+}
+
 output "web_app_name" {
   value = local.web_app_name
 }
 
 output "env_name" {
   value = local.env_name
-}
-
-output "pks_mock_webappname" {
-  value = local.pks_mock_web_app_name
 }
 
 output "webapp_rg" {
@@ -59,14 +71,6 @@ output "webjob_password" {
 output "connection_string" {
   value = module.app_insights.connection_string
   sensitive = true
-}
-
-output "mock_webappname" {
-  value = local.mock_web_app_name
-}
-
-output "mock_webapp_rg" {
-value = azurerm_resource_group.mock_webapp_rg.name
 }
 
 output "keyvault_uri"{
