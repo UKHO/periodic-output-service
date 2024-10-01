@@ -262,7 +262,7 @@
     <FileToCopy Include="Data\**\*.*" />"
   </ItemGroup>
 
-  <Target Name=CopyFilesToPosDirectory" AfterTargetBuild">
+  <Target Name="CopyFilesToPosDirectory" AfterTargets="Build">
     <Copy SourceFiles="@(FileToCopy)"
           DestinationFolder="$(Home)\POS\"
           SkipUnchangedFiles="true"/>
