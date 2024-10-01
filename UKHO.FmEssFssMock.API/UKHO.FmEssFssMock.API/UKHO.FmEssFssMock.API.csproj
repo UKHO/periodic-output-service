@@ -258,4 +258,13 @@
     <Folder Include="Data\649C902D-5282-4CCF-924A-2B548EF42179\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <FileToCopy Include="Data\**\*.*" />
+  </ItemGroup>
+
+  <Target Name="CopyFilesToPosDirectory" AfterTargets="Build">
+    <Copy SourceFiles="@(FileToCopy)"
+          DestinationFolder="$(Home)\POS\"
+          SkipUnchangedFiles="true"/>
+  </Target>
 </Project>
