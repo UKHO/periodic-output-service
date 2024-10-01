@@ -259,7 +259,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <FileToCopy Include="Data\**\*.*" />"
+    <FileToCopy Include="Data\**\*.*" />
   </ItemGroup>
 
   <Target Name="CopyFilesToPosDirectory" AfterTargets="Build">
