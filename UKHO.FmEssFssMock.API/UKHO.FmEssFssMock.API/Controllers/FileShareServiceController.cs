@@ -50,7 +50,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 { "source","FileError" },
                 { "description","Error while creating file" }
             };
-            _homeDirectoryPath = configuration["POSFolderName"];
+            _homeDirectoryPath = Path.GetFullPath(configuration["POSFolderName"]);
         }
 
         [HttpPost]

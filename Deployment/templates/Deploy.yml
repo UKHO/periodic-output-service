@@ -100,6 +100,21 @@ jobs:
         filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
         arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
+- job: CopyDataFiles
+  displayName: "Copy Data Files"
+  dependsOn: DeployApp
+  pool: $(DeploymentPool)
+  steps:
+    - task: PowerShell@2
+      displayName: "Copy files from data folder"
+      inputs:
+        targetType: 'inline'
+        script: |
+          $sourceFolder = "$(Build.SourcesDirectory)/data"
+          $destinationFolder = "$(Build.ArtifactStagingDirectory)/data_copy"
+          New-Item -ItemType Directory -Force -Path $destinationFolder
+          Copy-Item -Path "$sourceFolder\*" -Destination $destinationFolder -Recurse
+
 - job: SetPOSSubnet
   displayName: "Set Subnet Configuration"
   dependsOn: DeployApp

@@ -21,7 +21,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             _fmConfiguration = fmConfiguration;
 
-            _homeDirectoryPath = configuration["POSFolderName"];
+            _homeDirectoryPath = Path.GetFullPath(configuration["POSFolderName"]);
         }
 
         [HttpGet]

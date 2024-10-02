@@ -19,7 +19,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
             this.mockService = mockService;
             this.azureStorageService = azureStorageService;
 
-            homeDirectoryPath = configuration["POSFolderName"];
+            homeDirectoryPath = Path.GetFullPath(Path.GetFullPath(configuration["POSFolderName"]));
         }
 
         [HttpPost]
