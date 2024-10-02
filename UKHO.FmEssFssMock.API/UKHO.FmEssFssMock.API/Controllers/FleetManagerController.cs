@@ -20,9 +20,8 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public FleetManagerController(IOptions<FleetManagerB2BApiConfiguration> fmConfiguration, IConfiguration configuration)
         {
             _fmConfiguration = fmConfiguration;
-            _configuration = configuration;
 
-            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
+            _homeDirectoryPath = configuration["POSFolderName"];
         }
 
         [HttpGet]
