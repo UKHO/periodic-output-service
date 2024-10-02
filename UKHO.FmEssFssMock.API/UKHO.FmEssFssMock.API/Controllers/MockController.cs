@@ -18,8 +18,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         {
             this.mockService = mockService;
             this.azureStorageService = azureStorageService;
-
-            homeDirectoryPath = Path.Combine(Environment.CurrentDirectory, configuration["POSFolderName"], "FM");
+            homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["POSFolderName"]);
         }
 
         [HttpPost]
