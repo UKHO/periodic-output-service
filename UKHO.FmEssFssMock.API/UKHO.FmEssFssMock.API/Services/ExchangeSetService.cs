@@ -157,8 +157,12 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private ExchangeSetServiceResponse GetEssResponse(string responseId)
         {
-            List<ExchangeSetServiceResponse>? responseData = FileHelper.ReadJsonFile<List<ExchangeSetServiceResponse>>(_essConfiguration.Value.EssDataDirectoryPath + _essConfiguration.Value.PostProductIdentifiersResponseFileName);
-            ExchangeSetServiceResponse? selectedProductIdentifier = responseData?.FirstOrDefault(a => a.Id.ToLowerInvariant() == responseId.ToLowerInvariant());
+            List<ExchangeSetServiceResponse> responseData = FileHelper.ReadJsonFile<List<ExchangeSetServiceResponse>>(_essConfiguration.Value.EssDataDirectoryPath + _essConfiguration.Value.PostProductIdentifiersResponseFileName);
+            ExchangeSetServiceResponse selectedProductIdentifier = responseData.FirstOrDefault(a => a.Id.ToLowerInvariant() == responseId.ToLowerInvariant());
+            if(selectedProductIdentifier == null)
+            {
+                return null;
+            }
             selectedProductIdentifier.ResponseBody.ExchangeSetUrlExpiryDateTime = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
             return selectedProductIdentifier;
         }

@@ -40,7 +40,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //verify model structure
             await apiResponse.CheckModelStructureForSuccessResponse();
-
         }
 
         [Test]
@@ -58,7 +57,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //Check RequestedProductsNotInExchangeSet is not empty
             apiResponseData.RequestedProductsNotInExchangeSet.Should().NotBeEmpty();
-            apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault(p => p.ProductName.Equals("ABCDEFGH")).Reason.Should().Be("invalidProduct");
+            apiResponseData.RequestedProductsNotInExchangeSet.FirstOrDefault(p => p.ProductName.Equals("ABCDEFGH"))?.Reason.Should().Be("invalidProduct");
         }
 
         [Test]
