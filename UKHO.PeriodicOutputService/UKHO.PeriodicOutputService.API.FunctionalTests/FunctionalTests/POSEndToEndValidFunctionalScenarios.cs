@@ -28,9 +28,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-          //  GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
 
-           // GetBatchDetails.GetBatchDetailsResponseValidationForFullAVCSExchangeSet(batchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidationForFullAVCSExchangeSet(batchDetailsResponse);
         }
 
         [Test]
@@ -65,9 +65,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
-           // GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidation(batchDetailsResponse);
 
-          //  GetBatchDetails.GetBatchDetailsResponseValidationForFullAVCSExchangeSet(batchDetailsResponse);
+            GetBatchDetails.GetBatchDetailsResponseValidationForFullAVCSExchangeSet(batchDetailsResponse);
         }
 
         [Test]

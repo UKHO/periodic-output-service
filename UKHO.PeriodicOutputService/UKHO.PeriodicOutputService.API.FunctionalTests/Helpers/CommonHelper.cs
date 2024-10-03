@@ -35,7 +35,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static dynamic XmlReadAsynch(string xmlreponse)
         {
-            XmlDocument doc = new XmlDocument();
+            XmlDocument doc = new ();
             doc.LoadXml(xmlreponse);
             string jsonText = JsonConvert.SerializeXmlNode(doc);
             dynamic deserializeJsonText = JsonConvert.DeserializeObject(jsonText);
@@ -60,7 +60,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             WebJob = new POSWebJob();
             if (!posWebJob.IsRunningOnLocalMachine)
             {
-                string POSWebJobUserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
+                string POSWebJobUserCredentialsBytes = GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobUserCredentialsBytes);
                 POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
 
@@ -74,7 +74,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             WebJob = new POSWebJob();
             if (!posWebJob.IsRunningOnLocalMachine)
             {
-                string POSWebJobUserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
+                string POSWebJobUserCredentialsBytes = GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(aioWebJob.BaseUrl, POSWebJobUserCredentialsBytes);
                 POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
 
