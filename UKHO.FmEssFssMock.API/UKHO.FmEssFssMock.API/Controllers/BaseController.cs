@@ -7,7 +7,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
     public class BaseController : ControllerBase
     {
         private readonly IHttpContextAccessor httpContextAccessor;
-        protected new HttpContext HttpContext => httpContextAccessor.HttpContext;
 
         public BaseController(IHttpContextAccessor httpContextAccessor)
         {

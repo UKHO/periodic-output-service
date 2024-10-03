@@ -25,7 +25,7 @@ namespace UKHO.FmEssFssMock.API.Services
             _fssService = fssService;
             _mockService = mockService;
 
-            _homeDirectoryPath = Path.Combine(Environment.CurrentDirectory, configuration["POSFolderName"]);
+            _homeDirectoryPath = Path.Combine(configuration["HOME"], configuration["POSFolderName"], "ESS");
         }
 
         public ExchangeSetServiceResponse CreateExchangeSetForGetProductDataSinceDateTime(string sinceDateTime, string exchangeSetStandard)

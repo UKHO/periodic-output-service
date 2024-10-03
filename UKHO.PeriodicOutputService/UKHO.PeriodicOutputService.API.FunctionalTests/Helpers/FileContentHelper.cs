@@ -8,8 +8,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     {
         private static readonly TestConfiguration Config = new();
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-        private static readonly string currentYear = DateTime.UtcNow.ToString("yy");
+        private static readonly string weekNumber = "22";
+        private static readonly string currentYear = "2024";
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string batchId, string fssJwtToken)
         {
