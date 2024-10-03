@@ -16,7 +16,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
         private readonly FileShareService _fileShareService;
 
         private readonly IConfiguration _configuration;
-        private readonly IOptions<FileShareServiceConfiguration> _fssConfiguration;
 
         public Dictionary<string, string> ErrorsCreateBatch { get; set; }
         public Dictionary<string, string> ErrorsPutBlocksInFile { get; set; }
@@ -28,7 +27,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
         public _fileShareServiceController(IHttpContextAccessor httpContextAccessor, FileShareService fileShareService, IConfiguration configuration, IOptions<FileShareServiceConfiguration> fssConfiguration) : base(httpContextAccessor)
         {
             _fileShareService = fileShareService;
-            _fssConfiguration = fssConfiguration;
 
             ErrorsCreateBatch = new Dictionary<string, string>
             {

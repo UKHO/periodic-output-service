@@ -11,8 +11,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static FssApiClient FssApiClient { get; set; }
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
         private static readonly TestConfiguration config = new();
-        private static readonly string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-        private static readonly string currentYear = DateTime.UtcNow.ToString("yy");
+        private static readonly string weekNumber = "34";
+        private static readonly string currentYear = "22";
         static FssBatchHelper()
         {
             FssApiClient = new FssApiClient();

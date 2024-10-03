@@ -8,8 +8,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     {
         private static readonly TestConfiguration Config = new();
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly string weekNumber = "22";
-        private static readonly string currentYear = "2024";
+        private static readonly string weekNumber = "34";
+        private static readonly string currentYear = "22";
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string batchId, string fssJwtToken)
         {

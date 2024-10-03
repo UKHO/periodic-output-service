@@ -262,7 +262,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                     files = await GetBatchFiles(essBatchId);
                     DownloadFiles(files, downloadPath);
 
-                    files = RenameFiles(downloadPath, files, batchType);
+                   // files = RenameFiles(downloadPath, files, batchType);
                 }
                 else
                 {
@@ -309,7 +309,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             foreach (FssBatchFile? file in files)
             {
                 IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
-                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
                 string currentYear = DateTime.UtcNow.ToString("yy");
                 file.VolumeIdentifier = "V01X01";
                 if (batchType == Batch.EssAioBaseZipBatch)
@@ -432,9 +432,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             IEnumerable<BatchFile> fileDetails = await _fssService.GetAioInfoFolderFilesAsync(batchId, CommonHelper.CorrelationID.ToString());
 
-            if (fileDetails != null && fileDetails.Any())
+            if (fileDetails.Any())
             {
-                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
                 string aioInfoFolderPath = string.Format(_configuration["AIOAdditionalContentFilePath"], weekNumber, DateTime.UtcNow.ToString("yy"));
                 string aioExchangeSetInfoPath = Path.Combine(_homeDirectoryPath, batchId, aioInfoFolderPath);
 
@@ -452,7 +452,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
         private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] aioCellNames)
         {
-            string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+            string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
             string aioInfoFolderPath = string.Format(_configuration["AioUpdateZipFileName"], weekNumber, DateTime.UtcNow.ToString("yy"));
             string aioExchangeSetInfoPath = Path.Combine(filePath, Path.GetFileNameWithoutExtension(aioInfoFolderPath));
 
