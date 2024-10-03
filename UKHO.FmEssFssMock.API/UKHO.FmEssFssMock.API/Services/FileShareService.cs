@@ -10,7 +10,7 @@ namespace UKHO.FmEssFssMock.API.Services
     public class FileShareService
     {
         private readonly IOptions<FileShareServiceConfiguration> fssConfiguration;
-        private readonly string aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";  
+        private readonly string aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";
         private readonly Dictionary<string, string> mimeTypes = new()
         {
             { ".zip", "application/zip" },
@@ -63,7 +63,6 @@ namespace UKHO.FmEssFssMock.API.Services
         public BatchDetail GetBatchDetails(string batchId, string homeDirectoryPath)
         {
             batchId = batchId.ToLower();
-            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
             string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
             string currentYear = DateTime.UtcNow.Year.ToString();
             string path = Path.Combine(homeDirectoryPath, batchId);
@@ -78,8 +77,8 @@ namespace UKHO.FmEssFssMock.API.Services
                 {
                     Attributes = new List<Models.Response.Attribute>
                     {
-                        new Models.Response.Attribute { Key = "Product Type", Value = aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)) ? "AIO" : "AVCS" },
-                        new Models.Response.Attribute { Key = "File Name", Value = fileInfo.Name }
+                        new () { Key = "Product Type", Value = aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)) ? "AIO" : "AVCS" },
+                        new () { Key = "File Name", Value = fileInfo.Name }
                     },
                     MimeType = mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE,
                     FileSize = fileInfo.Length,
@@ -230,22 +229,31 @@ namespace UKHO.FmEssFssMock.API.Services
             {
                 string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(fileName));
                 string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), fileName);
-                File.Copy(srcFile, destFile, true);
+                if (!string.Equals(srcFile, destFile))
+                {
+                    File.Copy(srcFile, destFile, true);
 
-                string permitXmlFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITXMLFILENAME);
-                string permitTxtFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITTXTFILENAME);
-                if (File.Exists(permitXmlFile))
-                {
-                    srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(PERMITXMLFILENAME));
-                    destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), PERMITXMLFILENAME);
-                    File.Copy(srcFile, destFile, true);
+                    string permitXmlFile =
+                        Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITXMLFILENAME);
+                    string permitTxtFile =
+                        Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITTXTFILENAME);
+                    if (File.Exists(permitXmlFile))
+                    {
+                        srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId,
+                            RenameFiles(PERMITXMLFILENAME));
+                        destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), PERMITXMLFILENAME);
+                        File.Copy(srcFile, destFile, true);
+                    }
+
+                    if (File.Exists(permitTxtFile))
+                    {
+                        srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId,
+                            RenameFiles(PERMITTXTFILENAME));
+                        destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), PERMITTXTFILENAME);
+                        File.Copy(srcFile, destFile, true);
+                    }
                 }
-                if (File.Exists(permitTxtFile))
-                {
-                    srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(PERMITTXTFILENAME));
-                    destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), PERMITTXTFILENAME);
-                    File.Copy(srcFile, destFile, true);
-                }
+
                 return true;
             }
             return false;

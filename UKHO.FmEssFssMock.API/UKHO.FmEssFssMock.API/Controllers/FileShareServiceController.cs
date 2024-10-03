@@ -49,19 +49,17 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 { "description","Error while creating file" }
             };
             _homeDirectoryPath = Path.Combine(Environment.CurrentDirectory, configuration["POSFolderName"]);
+
         }
 
         [HttpPost]
         [Route("/fss/batch")]
         public IActionResult CreateBatch([FromBody] CreateBatchRequest batchRequest)
         {
-            if (batchRequest != null && !string.IsNullOrEmpty(batchRequest.BusinessUnit))
+            if (!string.IsNullOrEmpty(batchRequest.BusinessUnit))
             {
-                BatchResponse? response = _fileShareService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
-                if (response != null)
-                {
-                    return Created(string.Empty, response);
-                }
+                BatchResponse response = _fileShareService.CreateBatch(batchRequest.Attributes, _homeDirectoryPath);
+                return Created(string.Empty, response);
             }
             return BadRequest();
         }
@@ -73,18 +71,13 @@ namespace UKHO.FmEssFssMock.API.Controllers
             if (!string.IsNullOrEmpty(batchId))
             {
                 string path = Path.Combine(_homeDirectoryPath, batchId);
-                if (Directory.Exists(path))
-                {
-                    BatchDetail response = _fileShareService.GetBatchDetails(batchId, _homeDirectoryPath);
-                    if (response != null)
-                    {
-                        return Ok(response);
-                    }
-                }
-                else
+                if (!Directory.Exists(path))
                 {
                     return NotFound();
                 }
+
+                BatchDetail response = _fileShareService.GetBatchDetails(batchId, _homeDirectoryPath);
+                return Ok(response);
             }
             return BadRequest();
         }
@@ -93,6 +86,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/fss/batch/{batchId}/files/{fileName}")]
         public ActionResult DownloadFile([FromRoute] string batchId, [FromRoute] string fileName)
         {
+            bool response = _fileShareService.AddFile(batchId, fileName, _homeDirectoryPath);
             byte[] bytes = null;
 
             if (!string.IsNullOrEmpty(fileName))
@@ -150,7 +144,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Produces("application/json")]
         public IActionResult CommitBatch([FromRoute] string batchId, [FromBody] List<BatchCommitRequest> body)
         {
-            if (!string.IsNullOrEmpty(batchId) && body != null)
+            if (!string.IsNullOrEmpty(batchId))
             {
                 bool response = _fileShareService.CheckBatchWithFileExist(batchId, body.Select(a => a.FileName).FirstOrDefault(), _homeDirectoryPath);
                 if (response)
@@ -207,10 +201,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
             {
                 SearchBatchResponse response = _fileShareService.GetBatchResponse(filter, _homeDirectoryPath);
 
-                if (response != null)
-                {
-                    return Ok(response);
-                }
+                return Ok(response);
             }
             return BadRequest();
         }
