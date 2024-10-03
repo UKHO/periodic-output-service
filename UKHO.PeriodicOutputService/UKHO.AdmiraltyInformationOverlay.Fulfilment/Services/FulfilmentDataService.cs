@@ -262,7 +262,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                     files = await GetBatchFiles(essBatchId);
                     DownloadFiles(files, downloadPath);
 
-                   // files = RenameFiles(downloadPath, files, batchType);
+                    files = RenameFiles(downloadPath, files, batchType);
                 }
                 else
                 {
