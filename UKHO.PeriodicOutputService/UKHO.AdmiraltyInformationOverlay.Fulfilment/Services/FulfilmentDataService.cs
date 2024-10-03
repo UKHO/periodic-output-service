@@ -61,24 +61,20 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         {
             _fileSystemHelper.CreateDirectory(_homeDirectoryPath);
 
-            bool isSuccess = false;
-
             _logger.LogInformation(EventIds.GetLatestProductVersionDetailsStarted.ToEventId(), "Getting latest product version details started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             var productVersionEntities = _azureTableStorageHelper.GetLatestProductVersionDetails();
 
             _logger.LogInformation(EventIds.GetLatestProductVersionDetailsCompleted.ToEventId(), "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            Task[] tasks = null;
-            
-            Task aioBaseExchangeSetTask = Task.Run(() => CreateAioBaseExchangeSet());
+            Task aioBaseExchangeSetTask = Task.Run(CreateAioBaseExchangeSet);
             Task updateAioExchangeSetTask = Task.Run(() => CreateUpdateAIOExchangeSet(productVersionEntities));
             
-            tasks = new Task[] { aioBaseExchangeSetTask, updateAioExchangeSetTask };
+            Task[] tasks = { aioBaseExchangeSetTask, updateAioExchangeSetTask };
 
             await Task.WhenAll(tasks);
 
-            isSuccess = true;
+            bool isSuccess = true;
 
             return isSuccess;
         }

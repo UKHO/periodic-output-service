@@ -8,8 +8,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     {
         private static readonly TestConfiguration Config = new();
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly string weekNumber = "34";
-        private static readonly string currentYear = "22";
+        private static readonly string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+        private static readonly string currentYear = DateTime.UtcNow.ToString("yy");
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string batchId, string fssJwtToken)
         {
@@ -112,7 +112,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task VerifyPosBatches(string fssJwtToken)
         {
-            string[] posBatchId = { posDetails.IsoSha1BatchId, posDetails.ZipFilesBatchId ,posDetails.CatalogueBatchId, posDetails.UpdateExchangeSetBatchId , posDetails.EncUpdateListCsvBatchId };
+            string[] posBatchId = { posDetails.IsoSha1BatchId, posDetails.ZipFilesBatchId, posDetails.CatalogueBatchId, posDetails.UpdateExchangeSetBatchId, posDetails.EncUpdateListCsvBatchId };
 
             foreach(string posBatchIdNumber in posBatchId)
             {
@@ -126,7 +126,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string filename = "AIO_S631-1_CD_WK" + weekNumber + "_" + currentYear;
             var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{filename}.zip";
 
-            var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedAioFolder(downloadFileUrl.ToString(), FssJwtToken);
+            var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedAioFolder(downloadFileUrl, FssJwtToken);
 
             return extractDownloadedFolder;
         }
