@@ -86,7 +86,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/fss/batch/{batchId}/files/{fileName}")]
         public ActionResult DownloadFile([FromRoute] string batchId, [FromRoute] string fileName)
         {
-            bool response = _fileShareService.AddFile(batchId, fileName, _homeDirectoryPath);
+            _fileShareService.AddFile(batchId, fileName, _homeDirectoryPath);
             byte[] bytes = null;
 
             if (!string.IsNullOrEmpty(fileName))
@@ -127,7 +127,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
                                              [FromRoute, SwaggerParameter(Required = true)] string fileName,
                                              [FromBody, SwaggerParameter(Required = true)] FileCommitPayload payload)
         {
-            if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(fileName) && payload != null)
+            if (!string.IsNullOrEmpty(batchId) && !string.IsNullOrEmpty(fileName))
             {
                 bool response = _fileShareService.CheckBatchWithFileExist(batchId, fileName, _homeDirectoryPath);
                 if (response)

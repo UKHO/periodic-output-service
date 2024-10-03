@@ -225,35 +225,36 @@ namespace UKHO.FmEssFssMock.API.Services
         {
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
 
-            if (FileHelper.CheckFolderExists(batchFolderPath))
+            if (!FileHelper.CheckFolderExists(batchFolderPath))
             {
-                string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(fileName));
-                string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), fileName);
-                if (!string.Equals(srcFile, destFile))
+                Directory.CreateDirectory(batchFolderPath);
+            }
+
+            string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(fileName));
+            string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), fileName);
+            if (!string.Equals(srcFile, destFile))
+            {
+                File.Copy(srcFile, destFile, true);
+
+                string permitXmlFile =
+                    Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITXMLFILENAME);
+                string permitTxtFile =
+                    Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITTXTFILENAME);
+                if (File.Exists(permitXmlFile))
                 {
+                    srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId,
+                        RenameFiles(PERMITXMLFILENAME));
+                    destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), PERMITXMLFILENAME);
                     File.Copy(srcFile, destFile, true);
-
-                    string permitXmlFile =
-                        Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITXMLFILENAME);
-                    string permitTxtFile =
-                        Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITTXTFILENAME);
-                    if (File.Exists(permitXmlFile))
-                    {
-                        srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId,
-                            RenameFiles(PERMITXMLFILENAME));
-                        destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), PERMITXMLFILENAME);
-                        File.Copy(srcFile, destFile, true);
-                    }
-
-                    if (File.Exists(permitTxtFile))
-                    {
-                        srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId,
-                            RenameFiles(PERMITTXTFILENAME));
-                        destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), PERMITTXTFILENAME);
-                        File.Copy(srcFile, destFile, true);
-                    }
                 }
 
+                if (File.Exists(permitTxtFile))
+                {
+                    srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId,
+                        RenameFiles(PERMITTXTFILENAME));
+                    destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), PERMITTXTFILENAME);
+                    File.Copy(srcFile, destFile, true);
+                }
                 return true;
             }
             return false;
