@@ -223,12 +223,11 @@ namespace UKHO.FmEssFssMock.API.Services
 
         public void AddAllFilesFromPath(string batchId, string homeDirectoryPath)
         {
-            string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId);
+            string srcFile = Path.Combine(Environment.CurrentDirectory, "Data", batchId);
             string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId));
 
             FileHelper.CopyAllFiles(srcFile, destFile);
         }
-
 
         public bool AddFile(string batchId, string fileName, string homeDirectoryPath)
         {

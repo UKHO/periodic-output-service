@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Globalization;
+using System.Security.Cryptography;
 using Newtonsoft.Json;
 
 namespace UKHO.FmEssFssMock.API.Helpers
@@ -56,6 +57,8 @@ namespace UKHO.FmEssFssMock.API.Helpers
 
         public static void CopyAllFiles(string srcFile, string destFile)
         {
+            string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+            string currentYear = DateTime.UtcNow.ToString("yy");
             // Ensure the destination directory exists
             Directory.CreateDirectory(destFile);
 
@@ -66,7 +69,10 @@ namespace UKHO.FmEssFssMock.API.Helpers
             {
                 // Get the file name
                 string fileName = Path.GetFileName(filePath);
-
+                if (fileName.Contains("WK"))
+                {
+                    fileName = fileName.Replace("WK34_22", $"WK{weekNumber}_{currentYear}");
+                }
                 // Create the destination file path
                 string destFilePath = Path.Combine(destFile, fileName);
 
