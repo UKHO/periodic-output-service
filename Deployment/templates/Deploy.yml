@@ -101,7 +101,7 @@ jobs:
         scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
         arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
 
-- job: SetupWebjob
+- job: Setup
   displayName: "Set Webjob Configuration"
   dependsOn: DeployApp
   variables:
