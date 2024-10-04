@@ -221,6 +221,15 @@ namespace UKHO.FmEssFssMock.API.Services
             return FileHelper.ValidateFilePath(batchFolderPath) && FileHelper.CheckBatchWithFileExist(batchFolderPath);
         }
 
+        public void AddAllFilesFromPath(string batchId, string homeDirectoryPath)
+        {
+            string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId);
+            string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId));
+
+            FileHelper.CopyAllFiles(srcFile, destFile);
+        }
+
+
         public bool AddFile(string batchId, string fileName, string homeDirectoryPath)
         {
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
@@ -262,7 +271,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
         private string RenameFiles(string fileName)
         {
-            return fileName.IndexOf("WK") > -1 ? fileName.Replace(fileName.Substring(fileName.IndexOf("WK"), 7), "WK34_22") : fileName;
+            return fileName.IndexOf("WK", StringComparison.Ordinal) > -1 ? fileName.Replace(fileName.Substring(fileName.IndexOf("WK", StringComparison.Ordinal), 7), "WK34_22") : fileName;
         }
 
         public BatchStatusResponse GetBatchStatus(string batchId, string homeDirectoryPath)
