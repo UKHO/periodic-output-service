@@ -101,7 +101,7 @@ jobs:
         scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
         arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
 
-- job: Setup Webjob
+- job: SetupWebjob
   displayName: "Set Webjob Configuration"
   dependsOn: DeployApp
   variables:
@@ -259,7 +259,7 @@ jobs:
               scriptPath: "$(Build.SourcesDirectory)/terraformartifact/swap_container_config.ps1"
               arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
-- job: Setup Webjob Config out of FT mode
+- job: SetupWebjobFalseFTmode
   condition: ${{parameters.RunTests}}
   displayName: "Set Webjob Configuration"
   dependsOn: DeployApp
