@@ -88,7 +88,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/fss/batch/{batchId}/files/{fileName}")]
         public ActionResult DownloadFile([FromRoute] string batchId, [FromRoute] string fileName)
         {
-            _fileShareService.AddAllFilesFromPath(batchId, _homeDirectoryPath);
+            _fileShareService.AddFile(batchId, fileName, _homeDirectoryPath);
 
             byte[] bytes = null;
 
