@@ -103,7 +103,7 @@ jobs:
 
 - job: Setup
   displayName: "Set Webjob Configuration"
-  condition: not(eq(${{parameters.RunTests}})) # Run only if tests are not running
+  condition: not(${{parameters.RunTests}}) # Run only if tests are not running
   dependsOn: DeployApp
   variables:
     - name: WEB_APP_NAME
