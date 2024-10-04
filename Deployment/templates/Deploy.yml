@@ -30,25 +30,6 @@ jobs:
               AzureSubscription: ${{parameters.AzureSubscription}}
               RunTests: ${{parameters.RunTests}}
 
-- job: Setup
-  displayName: "Set Webjob Configuration"
-  dependsOn: DeployApp
-  variables:
-    - name: WEB_APP_NAME
-      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
-    - name: RGName
-      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
-  steps:
-    - task: AzureCLI@2
-      displayName: "Swap Webjob Configuration"
-      condition: always()
-      inputs:
-        azureSubscription: ${{parameters.AzureSubscription}}
-        scriptType: 'pscore'
-        scriptLocation: 'scriptPath'
-        scriptPath: "$(Build.SourcesDirectory)/Deployment/set_webjob_configuration.ps1"
-        arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
 - job: CheckInfra
   displayName: "Check Infrastructure Health"
   dependsOn: DeployApp
@@ -119,7 +100,25 @@ jobs:
         scriptLocation: 'scriptPath'
         scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
         arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
-                    
+
+- job: Setup
+  displayName: "Set Webjob Configuration"
+  dependsOn: DeployApp
+  variables:
+    - name: WEB_APP_NAME
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
+    - name: RGName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Swap Webjob Configuration"
+      condition: always()
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: "$(Build.SourcesDirectory)/Deployment/set_webjob_configuration.ps1"
+        arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning ${{parameters.RunTests}} -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
 - job: POSFunctionalTests
   condition: ${{parameters.RunTests}}
@@ -259,3 +258,22 @@ jobs:
               scriptLocation: 'scriptPath'
               scriptPath: "$(Build.SourcesDirectory)/terraformartifact/swap_container_config.ps1"
               arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
+- job: Setup
+  displayName: "Set Webjob Configuration"
+  dependsOn: DeployApp
+  variables:
+    - name: WEB_APP_NAME
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
+    - name: RGName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Swap Webjob Configuration"
+      condition: always()
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: "$(Build.SourcesDirectory)/Deployment/set_webjob_configuration.ps1"
+        arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning "false" -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
