@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="JsonConverter.Abstractions" Version="0.6.0" />
     <PackageReference Include="JsonConverter.Newtonsoft.Json" Version="0.6.0" />
-    <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="6.0.33" />
+    <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="6.0.35" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
     <PackageReference Include="WireMock.Net" Version="1.6.3" />
