@@ -15,8 +15,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
     {
         private readonly FileShareService _fileShareService;
 
-        private readonly IConfiguration _configuration;
-
         public Dictionary<string, string> ErrorsCreateBatch { get; set; }
         public Dictionary<string, string> ErrorsPutBlocksInFile { get; set; }
         public Dictionary<string, string> ErrorsCommitBatch { get; set; }
