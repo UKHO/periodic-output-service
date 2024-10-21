@@ -14,12 +14,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             httpClient.Timeout = TimeSpan.FromMinutes(Convert.ToDouble(5));
         }
 
-        public async Task<HttpResponseMessage> CallSalesCatalogueServiceApi(HttpMethod method, string requestBody, string authToken, string uri)
+        public async Task<HttpResponseMessage> CallSalesCatalogueServiceApi(HttpMethod method, string? requestBody, string authToken, string uri)
         {
             HttpContent content = null;
 
             if (requestBody != null)
+            {
                 content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+            }
 
             using var httpRequestMessage = new HttpRequestMessage(method, uri);
             httpRequestMessage.Content = content;

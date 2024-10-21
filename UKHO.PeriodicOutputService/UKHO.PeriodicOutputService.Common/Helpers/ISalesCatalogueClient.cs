@@ -8,6 +8,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public interface ISalesCatalogueClient
     {
-        public Task<HttpResponseMessage> CallSalesCatalogueServiceApi(HttpMethod method, string requestBody, string authToken, string uri);
+        public Task<HttpResponseMessage> CallSalesCatalogueServiceApi(HttpMethod method, string? requestBody, string authToken, string uri);
     }
 }

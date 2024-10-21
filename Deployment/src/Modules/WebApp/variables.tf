@@ -19,7 +19,6 @@ variable "app_settings" {
 }
 
 variable "tags" {
-
 }
 
 variable "env_name" {
@@ -31,5 +30,4 @@ variable "subnet_id" {
 }
 
 variable "allowed_ips" {
-
 }

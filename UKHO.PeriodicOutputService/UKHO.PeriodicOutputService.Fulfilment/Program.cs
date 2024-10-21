@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Configuration;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
@@ -21,6 +22,7 @@ using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Services;
 using UKHO.PeriodicOutputService.Common.Utilities;
 using UKHO.PeriodicOutputService.Fulfilment.Services;
+using Microsoft.Extensions.Logging.ApplicationInsights;
 
 namespace UKHO.PeriodicOutputService.Fulfilment
 {
@@ -101,18 +103,17 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
         private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
         {
-            
+
             //Add logging
             serviceCollection.AddLogging(loggingBuilder =>
             {
-               loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
+                loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
 
-                string instrumentationKey = configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
-                if (!string.IsNullOrEmpty(instrumentationKey))
-                {
-                    loggingBuilder.AddApplicationInsights(instrumentationKey);
-                }
-               
+                loggingBuilder.AddApplicationInsights(
+                    configureTelemetryConfiguration: (config) => config.ConnectionString = configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"],
+                    configureApplicationInsightsLoggerOptions: _ => { }
+                );
+
 #if DEBUG
                 loggingBuilder.AddSerilog(new LoggerConfiguration()
                                 .WriteTo.File("Logs/UKHO.PeriodicOutputService.Fulfilment-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
@@ -157,19 +158,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
             var fssApiConfiguration = new FssApiConfiguration();
 
-            if (configuration != null)
-            {
-                serviceCollection.Configure<FleetManagerApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
-                serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
-                serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
-                serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
-                serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
-                serviceCollection.AddSingleton<IConfiguration>(configuration);
+            serviceCollection.Configure<FleetManagerApiConfiguration>(configuration.GetSection("FleetManagerB2BApiConfiguration"));
+            serviceCollection.Configure<EssManagedIdentityConfiguration>(configuration.GetSection("ESSManagedIdentityConfiguration"));
+            serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
+            serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
+            serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
+            serviceCollection.AddSingleton(configuration);
 
-                configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
-
-            }
-
+            configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
 
             serviceCollection.AddDistributedMemoryCache();
 
