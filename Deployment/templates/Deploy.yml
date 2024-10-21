@@ -122,7 +122,7 @@ jobs:
         arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning false -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
 - job: POSFunctionalTests
-  condition: ${{parameters.RunTests}}
+  condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
   dependsOn:
     - DeployApp
     - CheckInfra
@@ -173,7 +173,7 @@ jobs:
         workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
 
 - job: BESSFunctionalTests
-  condition: ${{parameters.RunTests}}
+  condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
   dependsOn:
     - DeployApp
     - CheckInfra
