@@ -467,4 +467,28 @@
    ]]></notes>
    <cve>CVE-2024-43591</cve>
 </suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: Azure.Identity:1.10.3
+   ]]></notes>
+   <vulnerabilityName>CVE-2024-29992</vulnerabilityName>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: Azure.Identity:1.7.0
+   ]]></notes>
+   <cve>CVE-2023-36414</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: Microsoft.IdentityModel.Abstractions.dll
+   ]]></notes>
+   <cve>CVE-2024-21319</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: System.Runtime.Caching:8.0.0
+   ]]></notes>
+   <vulnerabilityName>CVE-2024-43483</vulnerabilityName>
+</suppress>
 </suppressions>
