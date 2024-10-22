@@ -81,25 +81,25 @@ jobs:
         filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
         arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
-- job: SetPOSSubnet
-  displayName: "Set Subnet Configuration"
-  dependsOn: DeployApp
-  pool: $(DeploymentPool)
-  container: ${{parameters.Container}}
-  variables:
-    - name: mockWebAppName
-      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebApp']  ]
-    - name: mockWebAppResourceGroup
-      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
-  steps:
-    - task: AzureCLI@2
-      displayName: "Set Subnet Configuration"
-      inputs:
-        azureSubscription: ${{parameters.AzureSubscription}}
-        scriptType: 'pscore'
-        scriptLocation: 'scriptPath'
-        scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
-        arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
+# - job: SetPOSSubnet
+#   displayName: "Set Subnet Configuration"
+#   dependsOn: DeployApp
+#   pool: $(DeploymentPool)
+#   container: ${{parameters.Container}}
+#   variables:
+#     - name: mockWebAppName
+#       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebApp']  ]
+#     - name: mockWebAppResourceGroup
+#       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+#   steps:
+#     - task: AzureCLI@2
+#       displayName: "Set Subnet Configuration"
+#       inputs:
+#         azureSubscription: ${{parameters.AzureSubscription}}
+#         scriptType: 'pscore'
+#         scriptLocation: 'scriptPath'
+#         scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
+#         arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
 
 - job: Setup
   displayName: "Set Webjob Configuration"
