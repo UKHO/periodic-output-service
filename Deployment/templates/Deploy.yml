@@ -122,11 +122,11 @@ jobs:
     - task: AzureCLI@2
       displayName: "Set Subnet Configuration"
       inputs:
-      azureSubscription: ${{parameters.AzureSubscription}}
-      scriptType: 'pscore'
-      scriptLocation: 'scriptPath'
-      scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
-      arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
+        arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
 
     - task: DownloadBuildArtifacts@0
       displayName: "Download POS Functional test Artifact"
