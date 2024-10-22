@@ -258,14 +258,12 @@ jobs:
     - BESSFunctionalTests
   pool: NautilusBuild
   displayName: "Swap App Configs configuration"
-  workspace:
-  clean: all
   variables:
   - name: WEB_APP_NAME
     value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
   - name: RGName
     value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
-steps:
+  steps:
     - task: AzureCLI@2
       displayName: "Swap Storage Container Configuration"
       condition: always()
