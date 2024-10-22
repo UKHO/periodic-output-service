@@ -171,7 +171,6 @@ jobs:
         arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
         testRunTitle: "${{parameters.Environment}}-POSAutomationTests"
         workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
-        parallel: true
 
 - job: BESSFunctionalTests
   condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
@@ -249,7 +248,6 @@ jobs:
           !**/obj/**
         testRunTitle: "${{parameters.Environment}}-BESSAutomationTests"
         workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
-        parallel: true
 
 - job: SwapAppConfigsconfiguration
   condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))

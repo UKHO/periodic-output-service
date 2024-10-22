@@ -5,8 +5,6 @@ using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
-    [TestFixture]
-    [Parallelizable(ParallelScope.All)]
     [Category("POSEndToEndScenarioFullAvcsPollingTimeOut")]
     public class POSEndToEndScenarioFullAvcsPollingTimeOut: ObjectStorage
     {

@@ -6,8 +6,6 @@ using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
-    [TestFixture]
-    [Parallelizable(ParallelScope.All)]
     [Category("CallEssEndPoint")]
     public class CallEssEndPoint : ObjectStorage
     {

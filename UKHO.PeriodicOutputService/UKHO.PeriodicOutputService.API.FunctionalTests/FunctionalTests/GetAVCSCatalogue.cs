@@ -5,15 +5,12 @@ using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
-    [TestFixture]
-    [Parallelizable(ParallelScope.All)]
     [Category("GetAVCSCatalogue")]
     public class GetAVCSCatalogue : ObjectStorage
     {
         [OneTimeSetUp]
         public Task Setup()
         {
-            //testConfiguration = new TestConfiguration();
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
 
