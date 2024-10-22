@@ -38,7 +38,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             { ".sha1", "text/plain" }
         };
 
-        private ITransaction _currentTransaction => Agent.Tracer.CurrentTransaction;
+        private ITransaction? _currentTransaction => Agent.Tracer.CurrentTransaction;
 
         public FulfilmentDataService(IFileSystemHelper fileSystemHelper,
                                      IEssService essService,
@@ -85,7 +85,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             bool isFullAvcsDvdBatchCreated = false;
 
-            ISpan span = _currentTransaction.StartSpan("AioBaseExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+            ISpan span = _currentTransaction?.StartSpan("AioBaseExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
