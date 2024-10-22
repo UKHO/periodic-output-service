@@ -7,5 +7,5 @@ output "web_app_tenant_id" {
 }
 
 output "default_site_hostname" {
-  value = azurerm_app_service.mock_webapp_service.default_hostname
+  value = azurerm_app_service.mock_webapp_service.default_site_hostname
 }

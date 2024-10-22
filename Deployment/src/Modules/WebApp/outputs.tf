@@ -7,11 +7,11 @@ output "web_app_tenant_id" {
 }
 
 output "default_site_hostname" {
-  value = azurerm_app_service.webapp_service.default_hostname
+  value = azurerm_app_service.webapp_service.default_site_hostname
 }
 
 output "username" {
-  value = azurerm_app_service.webapp_service.site_credential[0].name
+  value = azurerm_app_service.webapp_service.site_credential[0].username
 }
 
 output "password" {
