@@ -5,8 +5,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
     public class AuthTokenProvider
     {
-        private static string EssAccessToken = null;
-        private static string FssAccessToken = null;
+        private static string EssAccessToken;
+        private static string FssAccessToken;
 
         private static readonly ESSApiConfiguration EssauthConfig = new TestConfiguration().EssConfig;
         private static readonly FSSApiConfiguration FssAuthConfig = new TestConfiguration().FssConfig;
@@ -17,10 +17,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             return EssAccessToken;
         }
 
-        private static async Task<string> GenerateEssToken(string ClientId, string ClientSecret, string Token)
+        private static async Task<string> GenerateEssToken(string clientId, string clientSecret, string token)
         {
             string[] scopes = new string[] { $"{EssauthConfig.EssClientId}/.default" };
-            if (Token == null)
+            if (token == null)
             {
                 if (EssauthConfig.IsRunningOnLocalMachine)
                 {
@@ -31,21 +31,21 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     AuthenticationResult tokenTask = await debugApp.AcquireTokenInteractive(scopes)
                                                             .WithTenantIdFromAuthority(new Uri($"{EssauthConfig.MicrosoftOnlineLoginUrl}{EssauthConfig.TenantId}"))
                                                             .ExecuteAsync();
-                    Token = tokenTask.AccessToken;
+                    token = tokenTask.AccessToken;
                 }
                 else
                 {
-                    IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(ClientId)
-                                                    .WithClientSecret(ClientSecret)
+                    IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(clientId)
+                                                    .WithClientSecret(clientSecret)
                                                     .WithAuthority(new Uri($"{EssauthConfig.MicrosoftOnlineLoginUrl}{EssauthConfig.TenantId}"))
                                                     .Build();
 
                     AuthenticationResult tokenTask = await app.AcquireTokenForClient(scopes).ExecuteAsync();
-                    Token = tokenTask.AccessToken;
+                    token = tokenTask.AccessToken;
                 }
 
             }
-            return Token;
+            return token;
         }
 
         public async Task<string> GetFssToken()
@@ -54,10 +54,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             return FssAccessToken;
         }
 
-        private static async Task<string> GenerateFssToken(string ClientId, string ClientSecret, string Token)
+        private static async Task<string> GenerateFssToken(string clientId, string clientSecret, string token)
         {
-            string[] scopes = new string[] { $"{FssAuthConfig.FssClientId}/.default" };
-            if (Token == null)
+            string[] scopes = { $"{FssAuthConfig.FssClientId}/.default" };
+            if (token == null)
             {
                 if (FssAuthConfig.IsRunningOnLocalMachine)
                 {
@@ -68,21 +68,21 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     AuthenticationResult tokenTask = await debugApp.AcquireTokenInteractive(scopes)
                                                             .WithTenantIdFromAuthority(new Uri($"{EssauthConfig.MicrosoftOnlineLoginUrl}{EssauthConfig.TenantId}"))
                                                             .ExecuteAsync();
-                    Token = tokenTask.AccessToken;
+                    token = tokenTask.AccessToken;
                 }
                 else
                 {
-                    IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(ClientId)
-                                                    .WithClientSecret(ClientSecret)
+                    IConfidentialClientApplication app = ConfidentialClientApplicationBuilder.Create(clientId)
+                                                    .WithClientSecret(clientSecret)
                                                     .WithAuthority(new Uri($"{EssauthConfig.MicrosoftOnlineLoginUrl}{EssauthConfig.TenantId}"))
                                                     .Build();
 
                     AuthenticationResult tokenTask = await app.AcquireTokenForClient(scopes).ExecuteAsync();
-                    Token = tokenTask.AccessToken;
+                    token = tokenTask.AccessToken;
                 }
 
             }
-            return Token;
+            return token;
         }
     }
 

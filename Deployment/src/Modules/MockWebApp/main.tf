@@ -1,15 +1,13 @@
-resource "azurerm_windows_web_app" "mock_webapp_service" {
+resource "azurerm_app_service" "mock_webapp_service" {
   name                = var.name
   location            = var.location
   resource_group_name = var.resource_group_name
-  service_plan_id     = var.service_plan_id
+  app_service_plan_id = var.service_plan_id
   tags                = var.tags
 
-  site_config {
-    application_stack {    
-      current_stack = "dotnet"
-      dotnet_version = "v6.0"
-    }
+ site_config {
+    windows_fx_version  =   "DOTNETCORE|6.0"
+    
     always_on  = true
     ftps_state = "Disabled"
 
