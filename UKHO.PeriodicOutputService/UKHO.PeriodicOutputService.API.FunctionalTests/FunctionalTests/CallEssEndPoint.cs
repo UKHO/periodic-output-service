@@ -4,10 +4,10 @@ using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Models;
 
-[assembly: Parallelizable(ParallelScope.Fixtures)]
-[assembly: LevelOfParallelism(4)]
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
     [Category("CallEssEndPoint")]
     public class CallEssEndPoint : ObjectStorage
     {

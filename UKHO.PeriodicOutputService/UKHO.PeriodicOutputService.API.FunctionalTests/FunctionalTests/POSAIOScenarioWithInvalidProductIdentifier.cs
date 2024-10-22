@@ -3,10 +3,10 @@ using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
-[assembly: Parallelizable(ParallelScope.Fixtures)]
-[assembly: LevelOfParallelism(4)]
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 {
+    [TestFixture]
+    [Parallelizable(ParallelScope.All)]
     [Category("POSAIOScenarioWithInvalidProductIdentifier")]
     public class POSAIOScenarioWithInvalidProductIdentifier :  ObjectStorage
     {
