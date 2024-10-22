@@ -85,7 +85,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             bool isFullAvcsDvdBatchCreated = false;
 
-            ISpan span = _currentTransaction?.StartSpan("AioBaseExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+            ISpan span = _currentTransaction.StartSpan("AioBaseExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
