@@ -7,7 +7,7 @@ output "pks_mock_webappname" {
 }
 
 output "fm_mock_web_app_url" {
-value = "https://${module.mock_webapp_service[0].default_site_hostname}"
+value = "https://${module.mock_webapp_service.default_site_hostname}"
 }
 
 output "mock_webapp_rg" {
