@@ -121,7 +121,7 @@ jobs:
     - name: mockWebAppName
       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebApp']  ]
     - name: mockWebAppResourceGroup
-      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']]
   steps:
     - task: AzureCLI@2
       displayName: "Set Subnet Configuration"
