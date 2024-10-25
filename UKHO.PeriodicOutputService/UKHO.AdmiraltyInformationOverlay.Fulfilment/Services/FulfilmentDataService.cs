@@ -69,14 +69,12 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             Task aioBaseExchangeSetTask = Task.Run(CreateAioBaseExchangeSet);
             Task updateAioExchangeSetTask = Task.Run(() => CreateUpdateAIOExchangeSet(productVersionEntities));
-            
+
             Task[] tasks = { aioBaseExchangeSetTask, updateAioExchangeSetTask };
 
-            await Task.WhenAll(tasks);
+                await Task.WhenAll(tasks);
 
-            bool isSuccess = true;
-
-            return isSuccess;
+                return true;
         }
 
         private async Task CreateAioBaseExchangeSet()
@@ -138,7 +136,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 span?.End();
             }
 
-            
+
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
 
