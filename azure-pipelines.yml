@@ -579,9 +579,9 @@ stages:
           AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
           Container: ${{variables.Container}}
 
-  - stage: iatDeploy
+  - stage: IatDeploy
     dependsOn: 
-       - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+       - Devdeploy
     displayName: IAT Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
@@ -598,9 +598,9 @@ stages:
           AzureSubscription: "Exchange-Set-Service-IAT-A.011.08"
           Container: ${{variables.Container}}
           
-  - stage: preprodDeploy
+  - stage: PreprodDeploy
     dependsOn: 
-      - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+      - IatDeploy
     displayName: PreProd Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:

@@ -122,7 +122,6 @@ jobs:
         scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
         arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
 
-
 - job: POSFunctionalTests
   condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
   dependsOn:
@@ -273,4 +272,3 @@ jobs:
         scriptLocation: 'scriptPath'
         scriptPath: "$(Build.SourcesDirectory)/terraformartifact/swap_container_config.ps1"
         arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
