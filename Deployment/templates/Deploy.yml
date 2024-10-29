@@ -257,6 +257,8 @@ jobs:
     - BESSFunctionalTests
   pool: NautilusBuild
   displayName: "Swap App Configs configuration"
+  workspace:
+    clean: all
   variables:
   - name: WEB_APP_NAME
     value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
