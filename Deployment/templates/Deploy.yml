@@ -265,6 +265,15 @@ jobs:
   - name: RGName
     value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
   steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: "Download Terraform Artifact"
+      condition: always()
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'terraformartifact'
+        downloadPath: '$(Build.SourcesDirectory)'
+
     - task: AzureCLI@2
       displayName: "Swap Storage Container Configuration"
       condition: always()
