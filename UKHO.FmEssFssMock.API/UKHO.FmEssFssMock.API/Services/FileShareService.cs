@@ -57,7 +57,7 @@ namespace UKHO.FmEssFssMock.API.Services
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
 
             FileHelper.CheckAndCreateFolder(batchFolderPath);
-            return new BatchResponse() { BatchId = Guid.Parse(batchId) };
+            return new BatchResponse { BatchId = Guid.Parse(batchId) };
         }
 
         public BatchDetail GetBatchDetails(string batchId, string homeDirectoryPath)
@@ -73,7 +73,7 @@ namespace UKHO.FmEssFssMock.API.Services
             {
                 FileInfo fileInfo = new(filePath);
 
-                files.Add(new BatchFile()
+                files.Add(new BatchFile
                 {
                     Attributes = new List<Models.Response.Attribute>
                     {
@@ -84,9 +84,9 @@ namespace UKHO.FmEssFssMock.API.Services
                     FileSize = fileInfo.Length,
                     Hash = FileHelper.GetFileMD5(fileInfo),
                     Filename = fileInfo.Name,
-                    Links = new Links()
+                    Links = new Links
                     {
-                        Get = new Link()
+                        Get = new Link
                         {
                             Href = "/batch/" + batchId + "/files/" + fileInfo.Name
                         }
@@ -221,14 +221,6 @@ namespace UKHO.FmEssFssMock.API.Services
             return FileHelper.ValidateFilePath(batchFolderPath) && FileHelper.CheckBatchWithFileExist(batchFolderPath);
         }
 
-        public void AddAllFilesFromPath(string batchId, string homeDirectoryPath)
-        {
-            string srcFile = Path.Combine(Environment.CurrentDirectory, "Data", batchId);
-            string destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId));
-
-            FileHelper.CopyAllFiles(srcFile, destFile);
-        }
-
         public bool AddFile(string batchId, string fileName, string homeDirectoryPath)
         {
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
@@ -297,21 +289,21 @@ namespace UKHO.FmEssFssMock.API.Services
             {
                 return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssInfoResponseFileName, aioInfoFilesBatchId);
             }
-            else if (filter.ToUpper().Contains(BESPOKEREADME))
+            if (filter.ToUpper().Contains(BESPOKEREADME))
             {
                 return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssSingleReadMeResponseFileName, bessSingleReadmeFileBatchId);
             }
-            else if (filter.ToUpper().Contains(MULTIPLEFILES))
+            if (filter.ToUpper().Contains(MULTIPLEFILES))
             {
                 return GetSearchBatchResponse(homeDirectoryPath, fssConfiguration.Value.FssMultipleReadMeResponseFileName, bessMultipleFilesBatchId);
             }
 
-            return new SearchBatchResponse()
+            return new SearchBatchResponse
             {
                 Entries = new List<BatchDetail>(),
-                _Links = new PagingLinks()
+                _Links = new PagingLinks
                 {
-                    Self = new Link()
+                    Self = new Link
                     {
                         Href = "/batch?limit=10&start=0&$filter=%24batch%28Content%29%20eq%20%27AIO%20CD%20INFO%27%20and%20%24batch%28Product%20Type%29%20eq%20%27%27"
                     },

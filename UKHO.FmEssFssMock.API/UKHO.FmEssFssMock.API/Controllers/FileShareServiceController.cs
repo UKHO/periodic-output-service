@@ -66,8 +66,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/fss/batch/{batchId}")]
         public IActionResult GetBatchDetails([FromRoute] string batchId)
         {
-            //_fileShareService.AddAllFilesFromPath(batchId, _homeDirectoryPath);
-
             if (!string.IsNullOrEmpty(batchId))
             {
                 string path = Path.Combine(_homeDirectoryPath, batchId);
@@ -86,8 +84,6 @@ namespace UKHO.FmEssFssMock.API.Controllers
         [Route("/fss/batch/{batchId}/files/{fileName}")]
         public ActionResult DownloadFile([FromRoute] string batchId, [FromRoute] string fileName)
         {
-           // _fileShareService.AddFile(batchId, fileName, _homeDirectoryPath);
-
             byte[] bytes = null;
 
             if (!string.IsNullOrEmpty(fileName))
