@@ -155,8 +155,6 @@ jobs:
     - AppSettingSetup
   pool: NautilusBuild
   displayName: "POS Functional Automated Tests"
-  workspace:
-    clean: all
   variables:
     - name: POSWebjobApiConfiguration.UserName
       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobUsername']  ]
@@ -201,8 +199,6 @@ jobs:
     - AppSettingSetup
   pool: NautilusBuild
   displayName: "BESS Functional Automated Tests"
-  workspace:
-    clean: all
   variables:
     - name: AzureWebJobsStorage
       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
