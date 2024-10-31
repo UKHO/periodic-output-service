@@ -101,6 +101,7 @@ jobs:
         scriptPath: "$(Build.SourcesDirectory)/Deployment/set_webjob_configuration.ps1"
         arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning false -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
+######## Test setups ########
 - job: SetPOSSubnet
   condition: ${{parameters.RunTests}}
   displayName: "Set Subnet Configuration"
@@ -122,6 +123,17 @@ jobs:
         scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
         arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
 
+- job: AppSettingSetup
+  condition: ${{parameters.RunTests}}
+  displayName: "Set App Settings Configuration"
+  steps:
+    - task: FileTransform@2
+      displayName: "File Transform: functionaltests"
+      inputs:
+        folderPath: '$(Build.SourcesDirectory)/posfunctionaltests/'
+        xmlTransformationRules:
+        jsonTargetFiles: '**/appsettings.json'
+#############################
 - job: POSFunctionalTests
   condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
   dependsOn:
@@ -148,13 +160,6 @@ jobs:
         downloadType: 'single'
         artifactName: 'posfunctionaltests'
         downloadPath: '$(Build.SourcesDirectory)'
-
-    - task: FileTransform@2
-      displayName: "File Transform: functionaltests"
-      inputs:
-        folderPath: '$(Build.SourcesDirectory)/posfunctionaltests/'
-        xmlTransformationRules:
-        jsonTargetFiles: '**/appsettings.json'
 
     - task: UseDotNet@2
       displayName: 'Use .NET SDK'
