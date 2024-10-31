@@ -126,6 +126,7 @@ jobs:
 - job: AppSettingSetup
   condition: ${{parameters.RunTests}}
   displayName: "Set App Settings Configuration"
+  dependsOn: DeployApp
   steps:
     - task: DownloadBuildArtifacts@0
       displayName: "Download POS Functional test Artifact"
