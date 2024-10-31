@@ -127,6 +127,14 @@ jobs:
   condition: ${{parameters.RunTests}}
   displayName: "Set App Settings Configuration"
   steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: "Download POS Functional test Artifact"
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'posfunctionaltests'
+        downloadPath: '$(Build.SourcesDirectory)'
+
     - task: FileTransform@2
       displayName: "File Transform: functionaltests"
       inputs:
