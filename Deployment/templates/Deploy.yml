@@ -130,7 +130,6 @@ jobs:
     - CheckFSS
     - CheckESS
     - CheckFM
-    - Setup
     - SetPOSSubnet
   pool: NautilusBuild
   displayName: "POS Functional Automated Tests"
@@ -183,6 +182,7 @@ jobs:
     - CheckFSS
     - CheckESS
     - CheckFM
+    - SetPOSSubnet
   pool: NautilusBuild
   displayName: "BESS Functional Automated Tests"
   workspace:
