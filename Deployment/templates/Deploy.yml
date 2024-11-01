@@ -139,7 +139,7 @@ jobs:
     - name: POSWebjobApiConfiguration.UserName
       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobUsername']  ]
     - name: POSWebjobApiConfiguration.Password
-      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobPassword']  ]  ]
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobPassword']  ]
   steps:
     - task: DownloadBuildArtifacts@0
       displayName: "Download POS Functional test Artifact"
