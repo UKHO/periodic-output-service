@@ -194,6 +194,7 @@ jobs:
     - CheckFSS
     - CheckESS
     - CheckFM
+    - POSFunctionalTests
   pool: NautilusBuild
   displayName: "BESS Functional Automated Tests"
   variables:
