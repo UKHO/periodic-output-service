@@ -127,6 +127,11 @@ jobs:
   condition: ${{parameters.RunTests}}
   displayName: "Set App Settings Configuration"
   dependsOn: DeployApp
+  variables:
+    - name: POSWebjobApiConfiguration.UserName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobUsername']  ]
+    - name: POSWebjobApiConfiguration.Password
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobPassword']  ]
   steps:
     - task: DownloadBuildArtifacts@0
       displayName: "Download POS Functional test Artifact"
@@ -155,11 +160,6 @@ jobs:
     - AppSettingSetup
   pool: NautilusBuild
   displayName: "POS Functional Automated Tests"
-  variables:
-    - name: POSWebjobApiConfiguration.UserName
-      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobUsername']  ]
-    - name: POSWebjobApiConfiguration.Password
-      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobPassword']  ]
   steps:
     - task: DownloadBuildArtifacts@0
       displayName: "Download POS Functional test Artifact"
