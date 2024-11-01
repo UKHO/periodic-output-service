@@ -53,7 +53,6 @@ namespace UKHO.FmEssFssMock.API.Services
             return null;
         }
 
-
         public ExchangeSetServiceResponse CreateExchangeSetForPostProductIdentifier(string[] productIdentifiers, string exchangeSetStandard)
         {
             string productIdentifiersPattern = "productIdentifier-" + string.Join("-", productIdentifiers);
