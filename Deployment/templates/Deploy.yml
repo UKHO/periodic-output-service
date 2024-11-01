@@ -135,6 +135,11 @@ jobs:
     - SetPOSSubnet
   pool: NautilusBuild
   displayName: "POS Functional Automated Tests"
+  variables:
+    - name: mockWebAppName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebApp']  ]
+    - name: mockWebAppResourceGroup
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
   steps:
     - task: DownloadBuildArtifacts@0
       displayName: "Download POS Functional test Artifact"
