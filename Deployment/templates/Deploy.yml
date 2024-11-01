@@ -132,7 +132,6 @@ jobs:
     - CheckFSS
     - CheckESS
     - CheckFM
-    - SetPOSSubnet
   pool: NautilusBuild
   displayName: "POS Functional Automated Tests"
   variables:
@@ -191,7 +190,6 @@ jobs:
     - CheckFSS
     - CheckESS
     - CheckFM
-    - SetPOSSubnet
   pool: NautilusBuild
   displayName: "BESS Functional Automated Tests"
   variables:
