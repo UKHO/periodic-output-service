@@ -244,7 +244,7 @@ jobs:
   # dependsOn:
   #   - POSFunctionalTests
   #   - BESSFunctionalTests
-  pool: NautilusBuild
+  pool: $(DeploymentPool)
   displayName: "Swap App Configs configuration"
   variables:
   - name: WEB_APP_NAME
