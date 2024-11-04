@@ -267,6 +267,7 @@ jobs:
         targetType: 'inline'
         script: |
           Write-Output "Resource Group Name: $(RGName)"
+          Write-Output "Resource Group Name: $(WEB_APP_NAME)"
 
     - task: AzureCLI@2
       displayName: "Swap Storage Container Configuration"
