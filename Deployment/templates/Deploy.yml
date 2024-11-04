@@ -241,9 +241,9 @@ jobs:
 
 - job: SwapAppConfigsconfiguration
   condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
-  dependsOn:
-    - POSFunctionalTests
-    - BESSFunctionalTests
+  # dependsOn:
+  #   - POSFunctionalTests
+  #   - BESSFunctionalTests
   pool: NautilusBuild
   displayName: "Swap App Configs configuration"
   variables:
