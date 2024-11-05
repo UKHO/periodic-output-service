@@ -48,7 +48,7 @@ module "mock_webapp_service" {
   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
   service_plan_id     = data.azurerm_app_service_plan.essft_asp[0].id
   location            = azurerm_resource_group.mock_webapp_rg.location
-  subnet_id           = data.azurerm_subnet.mock_main_subnet.id
+  subnet_id           = data.azurerm_subnet.mock_main_subnet[0].id
   main_subnet_id      = data.azurerm_subnet.main_subnet.id
   app_settings = {
     "ASPNETCORE_ENVIRONMENT"                               = local.env_name
@@ -98,7 +98,7 @@ module "storage" {
   location            = azurerm_resource_group.webapp_rg.location
   allowed_ips         = var.allowed_ips
   m_spoke_subnet      = data.azurerm_subnet.main_subnet.id
-  mock_spoke_subnet   = data.azurerm_subnet.mock_main_subnet.id
+  mock_spoke_subnet   = data.azurerm_subnet.mock_main_subnet[0].id
   agent_2204_subnet   = var.agent_2204_subnet
   agent_prd_subnet    = var.agent_prd_subnet
   env_name            = local.env_name
