@@ -5,6 +5,7 @@ data "azurerm_subnet" "main_subnet" {
 }
 
 data "azurerm_subnet" "mock_main_subnet" {
+  count = "${local.env_name}" == "dev" ? 1 : 0
   name                 = var.mock_spoke_subnet_name
   virtual_network_name = var.spoke_vnet_name
   resource_group_name  = var.spoke_rg
