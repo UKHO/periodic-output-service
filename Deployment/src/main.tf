@@ -93,7 +93,7 @@ module "webapp_service" {
 }
 
 locals {
-  mock_main_subnet_id = (length(data.azurerm_subnet.mock_main_subnet) > 0 ? data.azurerm_subnet.mock_main_subnet[0].id : null)
+  mock_main_subnet_id = (length(data.azurerm_subnet.mock_main_subnet) > 0 ? data.azurerm_subnet.mock_main_subnet[0].id : "")
 }
 
 module "storage" {
