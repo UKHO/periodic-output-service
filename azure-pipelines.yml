@@ -562,9 +562,9 @@ stages:
 
   - stage: vnexte2eDeploy
     dependsOn: 
-       - PERFORM_DEPENDENCYCHECK_DOTNETBUILD_DOTNETTEST_AND_PUBLISH
+       - vNextIATDeploy
     displayName: vNext E2E Deploy (inc terraform, webapp deploy)
-    # condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
     variables:
       - name: Environment
         value: "vnexte2e"
