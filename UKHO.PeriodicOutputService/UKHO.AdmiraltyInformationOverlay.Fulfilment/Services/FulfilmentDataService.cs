@@ -38,7 +38,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             { ".sha1", "text/plain" }
         };
 
-        private ITransaction _currentTransaction => Agent.Tracer.CurrentTransaction;
+        private ITransaction? _currentTransaction => Agent.Tracer.CurrentTransaction;
 
         public FulfilmentDataService(IFileSystemHelper fileSystemHelper,
                                      IEssService essService,
@@ -61,26 +61,20 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         {
             _fileSystemHelper.CreateDirectory(_homeDirectoryPath);
 
-            bool isSuccess = false;
-
             _logger.LogInformation(EventIds.GetLatestProductVersionDetailsStarted.ToEventId(), "Getting latest product version details started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             var productVersionEntities = _azureTableStorageHelper.GetLatestProductVersionDetails();
 
             _logger.LogInformation(EventIds.GetLatestProductVersionDetailsCompleted.ToEventId(), "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            Task[] tasks = null;
-            
-            Task aioBaseExchangeSetTask = Task.Run(() => CreateAioBaseExchangeSet());
+            Task aioBaseExchangeSetTask = Task.Run(CreateAioBaseExchangeSet);
             Task updateAioExchangeSetTask = Task.Run(() => CreateUpdateAIOExchangeSet(productVersionEntities));
-            
-            tasks = new Task[] { aioBaseExchangeSetTask, updateAioExchangeSetTask };
 
-            await Task.WhenAll(tasks);
+            Task[] tasks = { aioBaseExchangeSetTask, updateAioExchangeSetTask };
 
-            isSuccess = true;
+                await Task.WhenAll(tasks);
 
-            return isSuccess;
+                return true;
         }
 
         private async Task CreateAioBaseExchangeSet()
@@ -142,7 +136,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 span?.End();
             }
 
-            
+
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
 
@@ -309,7 +303,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             foreach (FssBatchFile? file in files)
             {
                 IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
-                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
                 string currentYear = DateTime.UtcNow.ToString("yy");
                 file.VolumeIdentifier = "V01X01";
                 if (batchType == Batch.EssAioBaseZipBatch)
@@ -432,9 +426,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             IEnumerable<BatchFile> fileDetails = await _fssService.GetAioInfoFolderFilesAsync(batchId, CommonHelper.CorrelationID.ToString());
 
-            if (fileDetails != null && fileDetails.Any())
+            if (fileDetails.Any())
             {
-                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
                 string aioInfoFolderPath = string.Format(_configuration["AIOAdditionalContentFilePath"], weekNumber, DateTime.UtcNow.ToString("yy"));
                 string aioExchangeSetInfoPath = Path.Combine(_homeDirectoryPath, batchId, aioInfoFolderPath);
 
@@ -452,7 +446,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
         private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] aioCellNames)
         {
-            string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
+            string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
             string aioInfoFolderPath = string.Format(_configuration["AioUpdateZipFileName"], weekNumber, DateTime.UtcNow.ToString("yy"));
             string aioExchangeSetInfoPath = Path.Combine(filePath, Path.GetFileNameWithoutExtension(aioInfoFolderPath));
 

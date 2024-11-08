@@ -5,7 +5,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
     public class GetProductIdentifiers
     {
-        static HttpClient httpClient = new HttpClient();
+        static HttpClient httpClient = new ();
         public async Task<HttpResponseMessage> GetProductIdentifiersDataAsync(string baseUrl, List<string> productIdentifierModel, string accessToken = null)
         {
             string uri = $"{baseUrl}/productData/productIdentifiers";

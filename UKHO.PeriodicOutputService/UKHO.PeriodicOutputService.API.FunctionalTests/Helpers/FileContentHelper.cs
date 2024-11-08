@@ -112,7 +112,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task VerifyPosBatches(string fssJwtToken)
         {
-            string[] posBatchId = { posDetails.IsoSha1BatchId, posDetails.ZipFilesBatchId ,posDetails.CatalogueBatchId, posDetails.UpdateExchangeSetBatchId , posDetails.EncUpdateListCsvBatchId };
+            string[] posBatchId = { posDetails.IsoSha1BatchId, posDetails.ZipFilesBatchId, posDetails.CatalogueBatchId, posDetails.UpdateExchangeSetBatchId, posDetails.EncUpdateListCsvBatchId };
 
             foreach(string posBatchIdNumber in posBatchId)
             {
@@ -126,7 +126,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string filename = "AIO_S631-1_CD_WK" + weekNumber + "_" + currentYear;
             var downloadFileUrl = $"{Config.FssConfig.BaseUrl}/batch/{batchId}/files/{filename}.zip";
 
-            var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedAioFolder(downloadFileUrl.ToString(), FssJwtToken);
+            var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedAioFolder(downloadFileUrl, FssJwtToken);
 
             return extractDownloadedFolder;
         }

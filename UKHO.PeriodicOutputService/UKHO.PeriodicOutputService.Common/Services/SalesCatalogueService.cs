@@ -51,9 +51,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             if (httpResponse.StatusCode != HttpStatusCode.OK)
             {
-                logger.LogError(EventIds.ScsGetSalesCatalogueDataNonOkResponse.ToEventId(), "Request to Sales Catalogue Service catalogue end point with uri:{RequestUri} FAILED.| {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponse.RequestMessage.RequestUri, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.ScsGetSalesCatalogueDataNonOkResponse.ToEventId(), "Request to Sales Catalogue Service catalogue end point with uri:{RequestUri} FAILED.| {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponse.RequestMessage?.RequestUri, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID);
                 response.ResponseCode = httpResponse.StatusCode;
-                response.ResponseBody = null;
+                response.ResponseBody = null!;
                 throw new FulfilmentException(EventIds.ScsGetSalesCatalogueDataNonOkResponse.ToEventId());
             }
             else
