@@ -38,18 +38,6 @@ variable "spoke_subnet_name" {
   type = string
 }
 
-variable "agent_rg" {
-  type = string
-}
-
-variable "agent_vnet_name" {
-  type = string
-}
-
-variable "agent_subnet_name" {
-  type = string
-}
-
 variable "agent_subscription_id" {
   type = string
 }
@@ -67,5 +55,13 @@ variable "elastic_apm_api_key" {
 }
 
 variable "permitdecryptionhardwareid" {
+  type = string
+}
+
+variable "agent_2204_subnet" {
+  type = string
+}
+
+variable "agent_prd_subnet" {
   type = string
 }

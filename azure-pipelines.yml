@@ -35,7 +35,7 @@ variables:
   - name: UKHOAssemblyCopyright
     value: "Copyright © UK Hydrographic Office"
   - name: DeploymentPool
-    value: "UKHO Ubuntu 1804"
+    value: "Mare Nectaris"
   - name: Container
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.1.9"
   - name: WindowPool
@@ -680,7 +680,6 @@ stages:
           - name: BessStorageConfiguration.ConnectionString
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
         steps:
-
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download Terraform Artifact"
                   condition: always()
@@ -699,6 +698,48 @@ stages:
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
                     arguments: '-containername $(BessStorageConfiguration.ContainerName) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
+                - task: DownloadBuildArtifacts@0
+                  displayName: "Download BESS Functional test Artifact"
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'bessfunctionaltests'
+                    downloadPath: '$(Build.SourcesDirectory)'
+
+                - task: FileTransform@2
+                  displayName: "File Transform: functionaltests"
+                  inputs:
+                    folderPath: '$(Build.SourcesDirectory)/bessfunctionaltests/'
+                    xmlTransformationRules:
+                    jsonTargetFiles: '**/appsettings.json'
+
+                - task: UseDotNet@2
+                  displayName: 'Use .NET SDK'
+                  inputs:
+                    packageType: sdk
+                    version: 6.0.x
+
+                - task: DotNetCoreCLI@2
+                  displayName: "Run BESS Functional tests"
+                  inputs:
+                    command: "test"
+                    projects: |
+                      **/*FunctionalTest*.dll
+                      !**/*TestAdapter.dll
+                      !**/obj/**
+                    testRunTitle: "Dev-BESSAutomationTests"
+                    workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
+
+                - task: AzureCLI@2
+                  displayName: "Swap Storage Container Configuration"
+                  condition: always()
+                  inputs:
+                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+                    scriptType: 'pscore'
+                    scriptLocation: 'scriptPath'
+                    scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
+                    arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download BESS Functional test Artifact"
@@ -831,160 +872,6 @@ stages:
               filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
-      - job: POSFunctionalTests
-        dependsOn:
-        - QADeployApp
-        - CheckInfra
-        - CheckFSS
-        - CheckESS
-        - CheckFM
-        pool: NautilusBuild
-        displayName: "QA POS Functional Automated Tests"
-        workspace:
-         clean: all
-        variables:
-          - name: mockWebAppName
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
-          - name: mockWebAppResourceGroup
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
-          - name: POSWebjobApiConfiguration.UserName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobUsername']  ]
-          - name: POSWebjobApiConfiguration.Password
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.webJobPassword']  ]
-        steps:
-
-                - task: AzureCLI@2
-                  displayName: "Swap Stub Configuration"
-                  condition: always()
-                  inputs:
-                    azureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-                    scriptType: 'pscore'
-                    scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/QALiveDeployment/set_stub_configuration.ps1"
-                    arguments: '-fleetmanagerfilepath $(FleetManagerB2BApiConfiguration.GetCatalogueResponseFilePath) -ftrunning "true" -mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName)'
-
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download POS Functional test Artifact"
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'posfunctionaltests'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
-                - task: FileTransform@2
-                  displayName: "File Transform: functionaltests"
-                  inputs:
-                    folderPath: '$(Build.SourcesDirectory)/posfunctionaltests/'
-                    xmlTransformationRules:
-                    jsonTargetFiles: '**/appsettings.json'
-
-                - task: UseDotNet@2
-                  displayName: 'Use .NET SDK'
-                  inputs:
-                    packageType: sdk
-                    version: 6.0.x
-
-                - task: DotNetCoreCLI@2
-                  displayName: "Run POS Functional tests"
-                  inputs:
-                    command: "test"
-                    projects: |
-                      **/*FunctionalTest*.dll
-                      !**/*TestAdapter.dll
-                      !**/obj/**
-                    arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
-                    testRunTitle: "QA-POSAutomationTests"
-                    workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
-
-      - job: BESSFunctionalTests
-        dependsOn:
-        - QADeployApp
-        - CheckInfra
-        - CheckFSS
-        - CheckESS
-        - CheckFM
-        - POSFunctionalTests
-        pool: NautilusBuild
-        displayName: "QA BESS Functional Automated Tests"
-        workspace:
-         clean: all
-        variables:
-          - name: AzureWebJobsStorage
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
-          - name: WEB_APP_NAME
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.WEBAPP']  ]
-          - name: mockWebAppName
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebApp']  ]
-          - name: mockWebAppResourceGroup
-            value: $[ stageDependencies.Devdeploy.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
-          - name: RGName
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.ResourceGroup']  ]
-          - name: BessStorageConfiguration.ConnectionString
-            value: $[ dependencies.QADeployApp.outputs['QADeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
-
-        steps:
-
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download Terraform Artifact"
-                  condition: always()
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'qaliveterraformartifact'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
-                - task: AzureCLI@2
-                  displayName: "Swap Storage Container Configuration"
-                  condition: always()
-                  inputs:
-                    azureSubscription: "Exchange-Set-Service-QA-A-008-02"
-                    scriptType: 'pscore'
-                    scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/swap_container_config.ps1"
-                    arguments: '-containername $(BessStorageConfiguration.ContainerName) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
-                - task: DownloadBuildArtifacts@0
-                  displayName: "Download BESS Functional test Artifact"
-                  inputs:
-                    buildType: 'current'
-                    downloadType: 'single'
-                    artifactName: 'bessfunctionaltests'
-                    downloadPath: '$(Build.SourcesDirectory)'
-
-                - task: FileTransform@2
-                  displayName: "File Transform: functionaltests"
-                  inputs:
-                    folderPath: '$(Build.SourcesDirectory)/bessfunctionaltests/'
-                    xmlTransformationRules:
-                    jsonTargetFiles: '**/appsettings.json'
-
-                - task: UseDotNet@2
-                  displayName: 'Use .NET SDK'
-                  inputs:
-                    packageType: sdk
-                    version: 6.0.x
-
-                - task: DotNetCoreCLI@2
-                  displayName: "Run BESS Functional tests"
-                  inputs:
-                    command: "test"
-                    projects: |
-                      **/*FunctionalTest*.dll
-                      !**/*TestAdapter.dll
-                      !**/obj/**
-                    testRunTitle: "QA-BESSAutomationTests"
-                    workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
-
-                - task: AzureCLI@2
-                  displayName: "Swap Storage Container Configuration"
-                  condition: always()
-                  inputs:
-                    azureSubscription: "Exchange-Set-Service-QA-A-008-02"
-                    scriptType: 'pscore'
-                    scriptLocation: 'scriptPath'
-                    scriptPath: "$(Build.SourcesDirectory)/qaliveterraformartifact/swap_container_config.ps1"
-                    arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
-
   - stage: Livedeploy
     displayName: "Livedeploy (inc terraform, webapp deploy)"
     variables:
@@ -1108,7 +995,7 @@ stages:
     dependsOn: 
       - Devdeploy
     displayName: vNext IAT Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
       - group: "ESS-vNextIAT-Variables"
       - group: "ESS-Deployment-Variables-vNextIAT"
@@ -1216,7 +1103,7 @@ stages:
     dependsOn: 
        - vNextIATDeploy
     displayName: vNext E2E Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
     variables:
       - group: "ESS-vNextE2E-Variables"
       - group: "ESS-Deployment-Variables-vNextE2E"
