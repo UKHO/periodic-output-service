@@ -53,8 +53,3 @@ resource "azurerm_storage_account" "bess_storage" {
     virtual_network_subnet_ids     = [var.m_spoke_subnet,var.agent_subnet]
 }
 }
-
-resource "azurerm_storage_container" "bess_config_container" {
-  name                  = var.container_name
-  storage_account_name  = azurerm_storage_account.bess_storage.name  
-}

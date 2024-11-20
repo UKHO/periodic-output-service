@@ -32,11 +32,6 @@ resource "azurerm_storage_account" "bess_storage" {
 }
 }
 
-resource "azurerm_storage_container" "bess_config_container" {
-  name                  = var.container_name
-  storage_account_name  = azurerm_storage_account.bess_storage.name  
-}
-
 resource "azurerm_storage_account" "bess_storage" {
   name                              = lower("${var.service_name_bess}${var.env_name}storageukho")
   resource_group_name               = var.resource_group_name
