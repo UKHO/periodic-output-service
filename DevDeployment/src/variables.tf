@@ -58,10 +58,6 @@ variable "elastic_apm_server_url" {
 variable "elastic_apm_api_key" {
 }
 
-variable "permitdecryptionhardwareid" {
-  type = string
-}
-
 variable "agent_2204_subnet" {
   type = string
 }
