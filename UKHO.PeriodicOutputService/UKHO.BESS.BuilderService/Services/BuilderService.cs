@@ -488,7 +488,15 @@ namespace UKHO.BESS.BuilderService.Services
             string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, bessZipFileName);
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
-            await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+            if (configQueueMessage.ReadMeSearchFilter == ReadMeSearchFilter.NONE.ToString())
+            {
+                await DeleteReadmeTxtAsync(readMeFilePath, configQueueMessage.CorrelationId);
+                //catalog file remove readme.txt content 
+            }
+            else
+            {
+                await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+            }
 
             string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info);
             string serialFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.SerialFileName);
@@ -498,6 +506,31 @@ namespace UKHO.BESS.BuilderService.Services
 
             await DeleteProductTxtAndInfoFolderAsync(productFilePath, exchangeSetInfoPath, configQueueMessage.CorrelationId);
         }
+
+        /// <summary>
+        ///     This method will delete README.TXT file from batch.
+        /// </summary>
+        /// <param name="readmeFilePath"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
+        private async Task DeleteReadmeTxtAsync(string readmeFilePath, string correlationId)
+        {
+            try
+            {
+                fileSystemHelper.DeleteFile(readmeFilePath);
+
+                logger.LogInformation(EventIds.BessReadmeTxtDeleted.ToEventId(), "README.TXT file  deleted | _X-Correlation-ID:{CorrelationId}", correlationId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.BessReadmeTxtDeleteFailed.ToEventId(), "README.TXT file delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, correlationId);
+                throw new FulfilmentException(EventIds.BessReadmeTxtDeleteFailed.ToEventId());
+            }
+
+            await Task.CompletedTask;
+        }
+
 
         /// <summary>
         ///     This method will create/download README.txt file based on ReadmeSearchFilter.

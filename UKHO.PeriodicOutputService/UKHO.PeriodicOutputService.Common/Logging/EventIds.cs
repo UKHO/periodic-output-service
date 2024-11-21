@@ -828,7 +828,15 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809164 - Skipping product key service request as no update found for given products (empty bespoke exchange set)
         /// </summary>
-        SkipPksAsEmptyExchangeSetFoundForProducts = 809164
+        SkipPksAsEmptyExchangeSetFoundForProducts = 809164,
+        /// <summary>
+        /// 809165 - README.TXT file deleted
+        /// </summary>
+        BessReadmeTxtDeleted = 809165,
+        /// <summary>
+        /// 809142 - README.TXT file delete operation failed
+        /// </summary>
+        BessReadmeTxtDeleteFailed = 809166
     }
 
     public static class EventIdExtensions
