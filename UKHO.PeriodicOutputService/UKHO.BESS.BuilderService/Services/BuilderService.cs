@@ -488,7 +488,7 @@ namespace UKHO.BESS.BuilderService.Services
             string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, bessZipFileName);
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
-            if (configQueueMessage.ReadMeSearchFilter == ReadMeSearchFilter.NONE.ToString())
+            if (string.Equals(configQueueMessage.ReadMeSearchFilter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 await DeleteReadmeTxtAsync(readMeFilePath, configQueueMessage.CorrelationId);
                 //catalog file remove readme.txt content 
@@ -543,12 +543,12 @@ namespace UKHO.BESS.BuilderService.Services
         /// <returns></returns>
         private async Task CreateReadMeFileAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
         {
-            if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
+            if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.AVCS.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 return;
             }
 
-            if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
+            if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.BLANK.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
             }
