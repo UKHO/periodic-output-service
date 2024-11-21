@@ -680,7 +680,6 @@ stages:
           - name: BessStorageConfiguration.ConnectionString
             value: $[ dependencies.DevDeployApp.outputs['DevDeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
         steps:
-
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download Terraform Artifact"
                   condition: always()
@@ -830,7 +829,7 @@ stages:
               targetType: filePath
               filePath: '$(Build.SourcesDirectory)/QALiveDeployment/check_health_endpoint.ps1'
               arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
-  
+
   - stage: Livedeploy
     displayName: "Livedeploy (inc terraform, webapp deploy)"
     variables:
@@ -954,7 +953,7 @@ stages:
     dependsOn: 
       - Devdeploy
     displayName: vNext IAT Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/main'), not(startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
       - group: "ESS-vNextIAT-Variables"
       - group: "ESS-Deployment-Variables-vNextIAT"
