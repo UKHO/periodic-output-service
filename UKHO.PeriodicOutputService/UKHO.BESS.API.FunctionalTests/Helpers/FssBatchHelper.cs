@@ -208,6 +208,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                     }
                 case "BLANK":
                     return readMeFileContent.IsNullOrEmpty();
+
             }
             if (!readMeSearchFilter.Contains("Bespoke README"))
             {

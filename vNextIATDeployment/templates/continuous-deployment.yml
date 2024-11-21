@@ -6,7 +6,6 @@ parameters:
     type: string
 
 steps:
-
   - task: PowerShell@2
     displayName: "Terraform $(Environment)deploy"
     name: TerraformDeploy
