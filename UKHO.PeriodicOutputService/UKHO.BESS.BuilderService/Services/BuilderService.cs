@@ -34,6 +34,7 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IOptions<FssApiConfiguration> fssApiConfig;
         private readonly IPksService pksService;
         private readonly IPermitDecryption permitDecryption;
+        private readonly ICatalog031FilterHelper catalog031FilterHelper;
         private readonly string homeDirectoryPath;
 
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
@@ -44,7 +45,7 @@ namespace UKHO.BESS.BuilderService.Services
         private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption, ICatalog031FilterHelper catalog031FilterHelper)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
@@ -55,6 +56,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
             this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
+            this.catalog031FilterHelper = catalog031FilterHelper ?? throw new ArgumentNullException(nameof(catalog031FilterHelper));
 
             homeDirectoryPath = Path.Combine(configuration[HOME]!, configuration[BESSFOLDERNAME]!);
         }
@@ -488,8 +490,15 @@ namespace UKHO.BESS.BuilderService.Services
             string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, bessZipFileName);
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
-            await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
 
+            if (string.Equals(configQueueMessage.ReadMeSearchFilter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog("D:\\HOME\\BESS\\4bc70797-7ee6-407f-bafe-cae49a5b5f91\\BESS_PortOfIndia\\ENC_ROOT\\CATALOG.031");
+            }
+            else
+            {
+                await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+            }
             string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info);
             string serialFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.SerialFileName);
             string productFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);

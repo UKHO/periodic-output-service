@@ -151,6 +151,7 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
                  serviceCollection.AddScoped<IPermitDecryption, PermitDecryption>();
                  serviceCollection.AddScoped<IS63Crypt, S63Crypt>();
+                 serviceCollection.AddScoped<ICatalog031FilterHelper, Catalog031FilterHelper>();
 
                  serviceCollection.AddSingleton<IAuthPksTokenProvider, AuthTokenProvider>();
                  serviceCollection.AddScoped<IPksService, PksService>();
