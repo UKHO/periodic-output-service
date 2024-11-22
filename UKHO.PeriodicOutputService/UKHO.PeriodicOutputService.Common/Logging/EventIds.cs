@@ -828,7 +828,22 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809164 - Skipping product key service request as no update found for given products (empty bespoke exchange set)
         /// </summary>
-        SkipPksAsEmptyExchangeSetFoundForProducts = 809164
+        SkipPksAsEmptyExchangeSetFoundForProducts = 809164,
+
+        /// <summary>
+        /// 809165 - Remove ReadMe entry from Catalog file request started when ReadMeSearchFilter is None
+        /// </summary>
+        RemoveReadMeEntryAndUpdateCatalogFileProcessStarted = 809165,
+
+        /// <summary>
+        /// 809166 - Remove ReadMe entry from Catalog file request completed for ReadMeSearchFilter is None
+        /// </summary>
+        RemoveReadMeEntryAndUpdateCatalogFileProcessCompleted = 809166,
+
+        /// <summary>
+        /// 809167 - Remove ReadMe entry from Catalog file request failed for ReadMeSearchFilter is None
+        /// </summary>
+        RemoveReadMeEntryAndUpdateCatalogFileProcessFailed = 809167
     }
 
     public static class EventIdExtensions

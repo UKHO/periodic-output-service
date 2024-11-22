@@ -44,6 +44,7 @@ namespace UKHO.BESS.BuilderService.Services
         private const string DEFAULTMIMETYPE = "application/octet-stream";
         private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
+        private const string EXCHANGEETATALOGFILE = "ExchangeSetCatalogFileName";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption, ICatalog031FilterHelper catalog031FilterHelper)
         {
@@ -493,7 +494,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (string.Equals(configQueueMessage.ReadMeSearchFilter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog("D:\\HOME\\BESS\\4bc70797-7ee6-407f-bafe-cae49a5b5f91\\BESS_PortOfIndia\\ENC_ROOT\\CATALOG.031");
+                catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(Path.Combine(exchangeSetRootPath, configuration[EXCHANGEETATALOGFILE]!));
             }
             else
             {
