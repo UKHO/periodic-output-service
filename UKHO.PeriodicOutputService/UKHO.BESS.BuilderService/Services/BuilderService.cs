@@ -488,15 +488,7 @@ namespace UKHO.BESS.BuilderService.Services
             string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, bessZipFileName);
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
-            if (string.Equals(configQueueMessage.ReadMeSearchFilter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
-            {
-                await DeleteReadmeTxtAsync(readMeFilePath, configQueueMessage.CorrelationId);
-                //catalog file remove readme.txt content 
-            }
-            else
-            {
-                await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
-            }
+            await HandleReadMeFileCreationAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
 
             string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info);
             string serialFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.SerialFileName);
@@ -508,13 +500,41 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
+        ///     This method handles Readme.txt file creation on readMeSearchFilter parameter
+        /// </summary>
+        /// <param name="batchId"></param>
+        /// <param name="correlationId"></param>
+        /// <param name="readMeSearchFilter"></param>
+        /// <param name="exchangeSetRootPath"></param>
+        /// <param name="readMeFilePath"></param>
+        /// <returns></returns>
+        private async Task HandleReadMeFileCreationAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
+        {
+            if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.AVCS.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                return; // Ignored filter, do nothing
+            }
+            else if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.BLANK.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
+            }
+            else if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                await DeleteReadMeFileAsync(readMeFilePath, correlationId);
+            }
+            else
+            {
+                await DownloadReadMeFileAsync(exchangeSetRootPath, correlationId, readMeSearchFilter);
+            }
+        }
+        /// <summary>
         ///     This method will delete README.TXT file from batch.
         /// </summary>
         /// <param name="readmeFilePath"></param>
         /// <param name="correlationId"></param>
         /// <returns></returns>
         /// <exception cref="FulfilmentException"></exception>
-        private async Task DeleteReadmeTxtAsync(string readmeFilePath, string correlationId)
+        private async Task DeleteReadMeFileAsync(string readmeFilePath, string correlationId)
         {
             try
             {
