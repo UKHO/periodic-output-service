@@ -461,6 +461,16 @@
   <suppress>
     <notes>
       <![CDATA[
+   file name: Azure.Core*
+   Suppression to be reviewed as part of update to .NET 8
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Azure\.Core@.*$</packageUrl>
+    <cve>CVE-2024-43591</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
    file name: Azure.Identity*
    Suppression to be reviewed as part of update to .NET 8
    ]]>
@@ -476,6 +486,16 @@
    ]]>
     </notes>
     <packageUrl regex="true">^pkg:generic/Microsoft\.Extensions\.Azure@.*$</packageUrl>
+    <cve>CVE-2024-43591</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Microsoft.Extensions.Azure*
+   Suppression to be reviewed as part of update to .NET 8
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Microsoft\.Extensions\.Azure@.*$</packageUrl>
     <cve>CVE-2024-43591</cve>
   </suppress>
   <suppress>
