@@ -44,7 +44,7 @@ namespace UKHO.BESS.BuilderService.Services
         private const string DEFAULTMIMETYPE = "application/octet-stream";
         private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
-        private const string EXCHANGEETATALOGFILE = "ExchangeSetCatalogFileName";
+        private const string EXCHANGESETCATALOGFILE = "ExchangeSetCatalogFileName";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption, ICatalog031FilterHelper catalog031FilterHelper)
         {
@@ -492,14 +492,8 @@ namespace UKHO.BESS.BuilderService.Services
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
 
-            if (string.Equals(configQueueMessage.ReadMeSearchFilter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
-            {
-                catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(Path.Combine(exchangeSetRootPath, configuration[EXCHANGEETATALOGFILE]!));
-            }
-            else
-            {
-                await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
-            }
+            await HandleReadMeFileCreationAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+          
             string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info);
             string serialFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.SerialFileName);
             string productFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);
@@ -518,16 +512,19 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="exchangeSetRootPath"></param>
         /// <param name="readMeFilePath"></param>
         /// <returns></returns>
-        private async Task CreateReadMeFileAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
+        private async Task HandleReadMeFileCreationAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
         {
             if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
             {
                 return;
             }
-
-            if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
+            else if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.BLANK.ToString(), StringComparison.OrdinalIgnoreCase))
             {
                 fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
+            }
+            else if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(Path.Combine(exchangeSetRootPath, configuration[EXCHANGESETCATALOGFILE]!));
             }
             else
             {

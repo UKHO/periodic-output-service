@@ -19,6 +19,10 @@ using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.PermitDecryption;
 using UKHO.PeriodicOutputService.Common.Services;
 using UKHO.PeriodicOutputService.Common.Utilities;
+using UKHO.Torus.Core;
+using UKHO.Torus.Enc.Core.EncCatalogue;
+using ICatalog031ReaderFactory = UKHO.PeriodicOutputService.Common.Helpers.ICatalog031ReaderFactory;
+using Catalog031ReaderFactory = UKHO.PeriodicOutputService.Common.Helpers.Catalog031ReaderFactory;
 
 namespace UKHO.BESS.BuilderService
 {
@@ -152,6 +156,8 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddScoped<IPermitDecryption, PermitDecryption>();
                  serviceCollection.AddScoped<IS63Crypt, S63Crypt>();
                  serviceCollection.AddScoped<ICatalog031FilterHelper, Catalog031FilterHelper>();
+                 serviceCollection.AddScoped<IFactory<ICatalog031Builder>, Catalog031BuilderFactory>(); 
+                 serviceCollection.AddScoped<ICatalog031ReaderFactory, Catalog031ReaderFactory>();
 
                  serviceCollection.AddSingleton<IAuthPksTokenProvider, AuthTokenProvider>();
                  serviceCollection.AddScoped<IPksService, PksService>();
