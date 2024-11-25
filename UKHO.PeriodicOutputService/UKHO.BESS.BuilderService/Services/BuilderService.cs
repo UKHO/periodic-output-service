@@ -504,7 +504,7 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
-        /// This method will handles README file and entries based on ReadmeSearchFilter.
+        /// This method will handles README file and catalog entries based on ReadmeSearchFilter.
         /// </summary>
         /// <param name="batchId"></param>
         /// <param name="correlationId"></param>
