@@ -2036,7 +2036,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 .Returns(new List<string> { "Block_00001" });
             A.CallTo(() => fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
                 .Returns(true);
-            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(A<string>.Ignored))
                 .DoesNothing();
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString(), KeyFileType.PERMIT_XML));
@@ -2057,7 +2057,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                .MustHaveHappenedOnceOrMore();
             A.CallTo(() => fakeFssService.DownloadReadMeFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                .MustNotHaveHappened();
-            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -2131,7 +2131,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 .Returns(new List<string> { "Block_00001" });
             A.CallTo(() => fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
                 .Returns(true);
-            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(A<string>.Ignored))
                 .DoesNothing();
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString(), KeyFileType.PERMIT_XML));
@@ -2152,7 +2152,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .MustHaveHappenedOnceOrMore();
             A.CallTo(() => fakeFssService.DownloadReadMeFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                .MustNotHaveHappened();
-            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -2212,13 +2212,13 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.DeleteFile(A<string>.Ignored)).Throws<Exception>();
-            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(A<string>.Ignored))
                 .DoesNothing();
 
             Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.CHANGE, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString())); };
             await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessReadMeFileDeletionFailed.ToEventId());
 
-            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(A<string>.Ignored))
                 .MustNotHaveHappened();
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"

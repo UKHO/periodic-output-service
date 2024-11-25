@@ -8,6 +8,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 {
     public interface ICatalog031Helper
     {
-        public void RemoveReadmeEntryAndUpdateCatalog(string catalogFilePath);
+        public void RemoveReadmeEntryAndUpdateCatalogFile(string catalogFilePath);
     }
 }

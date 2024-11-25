@@ -29,7 +29,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _catalog031ReaderFactory = catalog031ReaderFactory ?? throw new ArgumentNullException(nameof(catalog031ReaderFactory));
         }
 
-        public void RemoveReadmeEntryAndUpdateCatalog(string catalogFilePath)
+        public void RemoveReadmeEntryAndUpdateCatalogFile(string catalogFilePath)
         {
             catalogFilePath = Path.Combine(catalogFilePath, CATALOGFILENAME);
             try
