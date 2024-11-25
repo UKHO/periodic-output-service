@@ -2009,11 +2009,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="exchangeSetStandard"></param>
-        /// <returns></returns>
+
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
         [TestCase(ExchangeSetStandard.S57)]

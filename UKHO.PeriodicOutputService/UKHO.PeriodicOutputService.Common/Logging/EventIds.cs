@@ -844,19 +844,19 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         BessReadmeTxtDeleteFailed = 809169,
 
         /// <summary>
-        /// 809165 - Remove ReadMe entry from Catalog file request started when ReadMeSearchFilter is None
+        /// 809170 - Remove ReadMe entry from Catalog file request started when ReadMeSearchFilter is None
         /// </summary>
-        RemoveReadMeEntryAndUpdateCatalogFileProcessStarted = 809165,
+        RemoveReadMeEntryAndUpdateCatalogFileProcessStarted = 809170,
 
         /// <summary>
-        /// 809166 - Remove ReadMe entry from Catalog file request completed for ReadMeSearchFilter is None
+        /// 809171 - Remove ReadMe entry from Catalog file request completed for ReadMeSearchFilter is None
         /// </summary>
-        RemoveReadMeEntryAndUpdateCatalogFileProcessCompleted = 809166,
+        RemoveReadMeEntryAndUpdateCatalogFileProcessCompleted = 809171,
 
         /// <summary>
-        /// 809167 - Remove ReadMe entry from Catalog file request failed for ReadMeSearchFilter is None
+        /// 809172 - Remove ReadMe entry from Catalog file request failed for ReadMeSearchFilter is None
         /// </summary>
-        RemoveReadMeEntryAndUpdateCatalogFileProcessFailed = 809167
+        RemoveReadMeEntryAndUpdateCatalogFileProcessFailed = 809172
     }
 
     public static class EventIdExtensions
