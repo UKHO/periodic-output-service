@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="TestData\Catalog.031">
+    <None Update="TestData\CATALOG.031">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

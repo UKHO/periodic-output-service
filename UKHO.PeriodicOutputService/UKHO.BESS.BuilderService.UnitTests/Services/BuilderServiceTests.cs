@@ -37,7 +37,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         private IOptions<FssApiConfiguration> fakeFssApiConfiguration;
         private const string readMeSearchFilterQuery = "$batch(Product Type) eq 'AVCS' and businessUnit eq 'ADDS'";
         private IPksService fakePksService;
-        private ICatalog031FilterHelper fakeCatalog031FilterHelper;
+        private ICatalog031Helper _fakeCatalog031Helper;
 
         [SetUp]
         public void Setup()
@@ -75,39 +75,39 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             fakePermitDecryption = A.Fake<IPermitDecryption>();
             fakeConfiguration["IsFTRunning"] = "false";
             fakePksService = A.Fake<IPksService>();
-            fakeCatalog031FilterHelper = A.Fake<ICatalog031FilterHelper>();
-            builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031FilterHelper);
+            _fakeCatalog031Helper = A.Fake<ICatalog031Helper>();
+            builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, _fakeCatalog031Helper);
         }
 
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullEssService = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031FilterHelper);
+            Action nullEssService = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, _fakeCatalog031Helper);
             nullEssService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("essService");
 
-            Action nullFssService = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031FilterHelper);
+            Action nullFssService = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, _fakeCatalog031Helper);
             nullFssService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fssService");
 
-            Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031FilterHelper);
+            Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, _fakeCatalog031Helper);
             nullFileSystemHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fileSystemHelper");
 
-            Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031FilterHelper);
+            Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, _fakeCatalog031Helper);
             nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
 
-            Action nullAzureTableStorageHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, null, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031FilterHelper);
+            Action nullAzureTableStorageHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, null, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, _fakeCatalog031Helper);
             nullAzureTableStorageHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureTableStorageHelper");
 
-            Action nullFssApiConfiguration = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, null, fakePksService, fakePermitDecryption, fakeCatalog031FilterHelper);
+            Action nullFssApiConfiguration = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, null, fakePksService, fakePermitDecryption, _fakeCatalog031Helper);
             nullFssApiConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fssApiConfig");
 
-            Action nullPksService = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, null, fakePermitDecryption, fakeCatalog031FilterHelper);
+            Action nullPksService = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, null, fakePermitDecryption, _fakeCatalog031Helper);
             nullPksService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("pksService");
 
-            Action nullPermitDecryption = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, null, fakeCatalog031FilterHelper);
+            Action nullPermitDecryption = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, null, _fakeCatalog031Helper);
             nullPermitDecryption.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("permitDecryption");
 
-            Action nullCatalog031FilterHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, null);
-            nullCatalog031FilterHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031FilterHelper");
+            Action nullCatalog031Helper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, null);
+            nullCatalog031Helper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031Helper");
         }
 
         [Test]
@@ -2036,7 +2036,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 .Returns(new List<string> { "Block_00001" });
             A.CallTo(() => fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
                 .Returns(true);
-            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => _fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
                 .DoesNothing();
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString(), KeyFileType.PERMIT_XML));
@@ -2057,7 +2057,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                .MustHaveHappenedOnceOrMore();
             A.CallTo(() => fakeFssService.DownloadReadMeFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                .MustNotHaveHappened();
-            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => _fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -2131,7 +2131,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 .Returns(new List<string> { "Block_00001" });
             A.CallTo(() => fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
                 .Returns(true);
-            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => _fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
                 .DoesNothing();
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString(), KeyFileType.PERMIT_XML));
@@ -2152,7 +2152,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .MustHaveHappenedOnceOrMore();
             A.CallTo(() => fakeFssService.DownloadReadMeFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                .MustNotHaveHappened();
-            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => _fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
                 .MustHaveHappened();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -2212,13 +2212,13 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.DeleteFile(A<string>.Ignored)).Throws<Exception>();
-            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => _fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
                 .DoesNothing();
 
             Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.CHANGE, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString())); };
             await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessReadmeTxtDeleteFailed.ToEventId());
 
-            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+            A.CallTo(() => _fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
                 .MustNotHaveHappened();
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"

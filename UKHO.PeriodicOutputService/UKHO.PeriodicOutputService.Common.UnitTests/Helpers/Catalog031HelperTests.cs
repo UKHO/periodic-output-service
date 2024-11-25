@@ -12,20 +12,19 @@ using UKHO.Torus.Enc.Core.EncCatalogue;
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 {
     [TestFixture]
-    public class Catalog031FilterHelperTests
+    public class Catalog031HelperTests
     {
         private IOptions<FssApiConfiguration> _fakeFssApiConfiguration;
-        private ICatalog031FilterHelper _catalog031FilterHelper;
+        private ICatalog031Helper _catalog031Helper;
         private IFileSystemHelper _fakeFileSystemHelper;
         private IConfiguration _fakeConfiguration;
         private ICatalog031Builder _fakeCatalogBuilder;
         private ICatalog031Reader _fakeCatalogReader;
-        private ILogger<Catalog031FilterHelper> _fakeLogger;
+        private ILogger<Catalog031Helper> _fakeLogger;
         private IFactory<ICatalog031Builder> _fakeCatalog031BuilderFactory;
         private Common.Helpers.ICatalog031ReaderFactory _fakeCatalog031ReaderFactory;
 
-        private readonly string _catalogFilePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData", "Catalog.031");
-        private const string EXCHANGESETCATALOGFILE = "ExchangeSetCatalogFileName";
+        private readonly string _catalogFilePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData");
 
         [SetUp]
         public void Setup()
@@ -47,18 +46,17 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 ReadMeFileName = "README.TXT"
             });
 
-            _fakeLogger = A.Fake<ILogger<Catalog031FilterHelper>>();
+            _fakeLogger = A.Fake<ILogger<Catalog031Helper>>();
             _fakeFileSystemHelper = A.Fake<IFileSystemHelper>();
             _fakeConfiguration = A.Fake<IConfiguration>();
             _fakeCatalog031BuilderFactory = A.Fake<IFactory<ICatalog031Builder>>();
             _fakeCatalogBuilder = A.Fake<ICatalog031Builder>();
             _fakeCatalog031ReaderFactory = A.Fake<Common.Helpers.ICatalog031ReaderFactory>();
             _fakeCatalogReader = A.Fake<ICatalog031Reader>();
-            _fakeConfiguration[EXCHANGESETCATALOGFILE] = "CATALOG.031";
 
             A.CallTo(() => _fakeCatalog031BuilderFactory.Create()).Returns(_fakeCatalogBuilder);
 
-            _catalog031FilterHelper = new Catalog031FilterHelper(
+            _catalog031Helper = new Catalog031Helper(
                 _fakeFileSystemHelper,
                 _fakeFssApiConfiguration,
                 _fakeConfiguration,
@@ -72,29 +70,29 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
             Action nullFileSystemHelper = () =>
-                new Catalog031FilterHelper(null, _fakeFssApiConfiguration, _fakeConfiguration, _fakeLogger, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
+                new Catalog031Helper(null, _fakeFssApiConfiguration, _fakeConfiguration, _fakeLogger, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
             nullFileSystemHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should()
                 .Be("fileSystemHelper");
 
             Action nullFssApiConfiguration = () =>
-                new Catalog031FilterHelper(_fakeFileSystemHelper, null, _fakeConfiguration, _fakeLogger, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
+                new Catalog031Helper(_fakeFileSystemHelper, null, _fakeConfiguration, _fakeLogger, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
             nullFssApiConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should()
                 .Be("fssApiConfig");
 
             Action nullConfiguration = () =>
-                new Catalog031FilterHelper(_fakeFileSystemHelper, _fakeFssApiConfiguration, null, _fakeLogger, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
+                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, null, _fakeLogger, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
             nullConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
 
             Action nullLogger = () =>
-                new Catalog031FilterHelper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeConfiguration, null, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
+                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeConfiguration, null, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
             nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
 
             Action nullCatalog031BuilderFactory = () =>
-                new Catalog031FilterHelper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeConfiguration, _fakeLogger, null, _fakeCatalog031ReaderFactory);
+                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeConfiguration, _fakeLogger, null, _fakeCatalog031ReaderFactory);
             nullCatalog031BuilderFactory.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031BuilderFactory");
 
             Action nullCatalog031ReaderFactory = () =>
-                new Catalog031FilterHelper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeConfiguration, _fakeLogger, _fakeCatalog031BuilderFactory, null);
+                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeConfiguration, _fakeLogger, _fakeCatalog031BuilderFactory, null);
             nullCatalog031ReaderFactory.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031ReaderFactory");
         }
 
@@ -114,7 +112,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath)).DoesNothing();
             A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
 
-            _catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
+            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
 
             VerifyCatalogEntriesAdded(catalogEntries);
             VerifyCatalogFileOperations();
@@ -138,7 +136,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
            A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath)).DoesNothing();
            A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
 
-           _catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
+           _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
 
            VerifyCatalogEntriesAdded(new List<CatalogEntry> { catalogEntries[1] });
            A.CallTo(() => _fakeCatalogBuilder.Add(A<CatalogEntry>.That.Matches(x => x.FileLocation == "README.TXT"))).MustNotHaveHappened();
@@ -163,7 +161,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath)).DoesNothing();
             A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
 
-            _catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
+            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
 
             A.CallTo(() => _fakeCatalogBuilder.Add(A<CatalogEntry>._)).MustNotHaveHappened();
             VerifyCatalogFileOperations();
@@ -182,10 +180,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakeCatalogReader.ReadCatalogue()).Returns(catalogEntries);
 
             A.CallTo(() => _fakeCatalog031ReaderFactory.Create(A<byte[]>.Ignored)).Returns(_fakeCatalogReader);
-            A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath))
+            A.CallTo(() => _fakeFileSystemHelper.DeleteFile(A<string>.Ignored))
                 .Throws(new Exception("An error occurred while deleting the catalog file."));
 
-            Action action = () => _catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
+            Action action = () => _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
 
             action.Should().Throw<Exception>().WithMessage("An error occurred while deleting the catalog file.");
             A.CallTo(_fakeLogger).Where(call =>
@@ -195,7 +193,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessFailed.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)
                     ["{OriginalFormat}"].ToString() ==
-                "An error occurred while processing catalog file: {CatalogFilePath} at {DateTime} | {ErrorMessage} | _X-Correlation-ID: {CorrelationId}"
+                "An error occurred while processing catalog file. | {ErrorMessage} | _X-Correlation-ID: {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(A<string>._, A<MemoryStream>._)).MustNotHaveHappened();
         }
@@ -208,7 +206,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 && call.GetArgument<EventId>(1) == EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessStarted.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)
                     ["{OriginalFormat}"].ToString() ==
-                "Starting the process of removing README entry and updating catalog for file:| {CatalogFilePath} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                "Starting the process of removing README entry and updating catalog file. | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
@@ -220,7 +218,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 && call.GetArgument<EventId>(1) == EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessCompleted.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)
                     ["{OriginalFormat}"].ToString() ==
-                "Successfully completed the process of removing README entry and updating catalog for file:| {CatalogFilePath} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                "Successfully completed the process of removing README entry and updating catalog for file. | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
@@ -235,8 +233,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
         private void VerifyCatalogFileOperations()
         {
-            A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._))
+            A.CallTo(() => _fakeFileSystemHelper.DeleteFile(A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(A<string>.Ignored, A<MemoryStream>._))
                 .MustHaveHappenedOnceExactly();
         }
     }

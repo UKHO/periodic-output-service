@@ -34,7 +34,7 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IOptions<FssApiConfiguration> fssApiConfig;
         private readonly IPksService pksService;
         private readonly IPermitDecryption permitDecryption;
-        private readonly ICatalog031FilterHelper catalog031FilterHelper;
+        private readonly ICatalog031Helper _catalog031Helper;
         private readonly string homeDirectoryPath;
 
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
@@ -44,9 +44,8 @@ namespace UKHO.BESS.BuilderService.Services
         private const string DEFAULTMIMETYPE = "application/octet-stream";
         private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
-        private const string EXCHANGESETCATALOGFILE = "ExchangeSetCatalogFileName";
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption, ICatalog031FilterHelper catalog031FilterHelper)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption, ICatalog031Helper catalog031Helper)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
@@ -57,7 +56,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
             this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
-            this.catalog031FilterHelper = catalog031FilterHelper ?? throw new ArgumentNullException(nameof(catalog031FilterHelper));
+            this._catalog031Helper = catalog031Helper ?? throw new ArgumentNullException(nameof(catalog031Helper));
 
             homeDirectoryPath = Path.Combine(configuration[HOME]!, configuration[BESSFOLDERNAME]!);
         }
@@ -492,7 +491,7 @@ namespace UKHO.BESS.BuilderService.Services
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
 
-            await HandleReadMeFileCreationAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
+            await HandleReadMeFileCreationAsync(configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
           
             string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info);
             string serialFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.SerialFileName);
@@ -512,20 +511,20 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="exchangeSetRootPath"></param>
         /// <param name="readMeFilePath"></param>
         /// <returns></returns>
-        private async Task HandleReadMeFileCreationAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
+        private async Task HandleReadMeFileCreationAsync(string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
         {
             switch (readMeSearchFilter?.ToUpperInvariant())
             {
-                case var filter when string.Equals(filter, ReadMeSearchFilter.AVCS.ToString(), StringComparison.OrdinalIgnoreCase):
+                case nameof(ReadMeSearchFilter.AVCS):
                     return;
 
-                case var filter when string.Equals(filter, ReadMeSearchFilter.BLANK.ToString(), StringComparison.OrdinalIgnoreCase):
+                case nameof(ReadMeSearchFilter.BLANK):
                     fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
                     break;
 
-                case var filter when string.Equals(filter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase):
+                case nameof(ReadMeSearchFilter.NONE):
                     await DeleteReadMeFileAsync(readMeFilePath, correlationId);
-                    catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(Path.Combine(exchangeSetRootPath, configuration[EXCHANGESETCATALOGFILE]!));
+                    _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(exchangeSetRootPath);
                     break;
 
                 default:

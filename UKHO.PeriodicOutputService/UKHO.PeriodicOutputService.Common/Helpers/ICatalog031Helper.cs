@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
-    public interface ICatalog031FilterHelper
+    public interface ICatalog031Helper
     {
         public void RemoveReadmeEntryAndUpdateCatalog(string catalogFilePath);
     }
