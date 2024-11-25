@@ -490,12 +490,11 @@ namespace UKHO.BESS.BuilderService.Services
             string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, bessZipFileName);
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
-
-            await HandleReadMeFileCreationAsync(configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
-          
             string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info);
             string serialFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.SerialFileName);
             string productFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);
+
+            await HandleReadMeFileCreationAsync(exchangeSetRootPath, readMeFilePath, configQueueMessage.ReadMeSearchFilter, configQueueMessage.CorrelationId);
 
             await UpdateSerialFileAsync(serialFilePath, configQueueMessage.Type, configQueueMessage.CorrelationId);
 
@@ -505,13 +504,12 @@ namespace UKHO.BESS.BuilderService.Services
         /// <summary>
         /// This method will handles README file and catalog entries based on ReadmeSearchFilter.
         /// </summary>
-        /// <param name="batchId"></param>
-        /// <param name="correlationId"></param>
-        /// <param name="readMeSearchFilter"></param>
         /// <param name="exchangeSetRootPath"></param>
         /// <param name="readMeFilePath"></param>
+        /// <param name="readMeSearchFilter"></param>
+        /// <param name="correlationId"></param>
         /// <returns></returns>
-        private async Task HandleReadMeFileCreationAsync(string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
+        private async Task HandleReadMeFileCreationAsync(string exchangeSetRootPath, string readMeFilePath, string readMeSearchFilter, string correlationId)
         {
             switch (readMeSearchFilter?.ToUpperInvariant())
             {
@@ -523,8 +521,7 @@ namespace UKHO.BESS.BuilderService.Services
                     break;
 
                 case nameof(ReadMeSearchFilter.NONE):
-                    await DeleteReadMeFileAsync(readMeFilePath, correlationId);
-                    _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(exchangeSetRootPath);
+                    await DeleteReadMeFileAndUpdateCatalog(exchangeSetRootPath, readMeFilePath, correlationId);
                     break;
 
                 default:
@@ -534,24 +531,37 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
+        /// This method will delete ReadMe File and update Catalog.031 file in batch.
+        /// </summary>
+        /// <param name="exchangeSetRootPath"></param>
+        /// <param name="readMeFilePath"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        private async Task DeleteReadMeFileAndUpdateCatalog(string exchangeSetRootPath, string readMeFilePath, string correlationId)
+        {
+            await DeleteReadMeFileAsync(readMeFilePath, correlationId);
+            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(exchangeSetRootPath);
+        }
+
+        /// <summary>
         /// This method will delete README.TXT file from batch.
         /// </summary>
-        /// <param name="readmeFilePath"></param>
+        /// <param name="readMeFilePath"></param>
         /// <param name="correlationId"></param>
         /// <returns></returns>
         /// <exception cref="FulfilmentException"></exception>
-        private async Task DeleteReadMeFileAsync(string readmeFilePath, string correlationId)
+        private async Task DeleteReadMeFileAsync(string readMeFilePath, string correlationId)
         {
             try
             {
-                fileSystemHelper.DeleteFile(readmeFilePath);
+                fileSystemHelper.DeleteFile(readMeFilePath);
 
-                logger.LogInformation(EventIds.BessReadmeTxtDeleted.ToEventId(), "README.TXT file  deleted | _X-Correlation-ID:{CorrelationId}", correlationId);
+                logger.LogInformation(EventIds.BessReadMeFileDeleted.ToEventId(), "README.TXT file deleted. | _X-Correlation-ID:{CorrelationId}", correlationId);
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.BessReadmeTxtDeleteFailed.ToEventId(), "README.TXT file delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, correlationId);
-                throw new FulfilmentException(EventIds.BessReadmeTxtDeleteFailed.ToEventId());
+                logger.LogError(EventIds.BessReadMeFileDeletionFailed.ToEventId(), "README.TXT file delete operation failed. | ErrorMessage: {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", ex.Message, correlationId);
+                throw new FulfilmentException(EventIds.BessReadMeFileDeletionFailed.ToEventId());
             }
 
             await Task.CompletedTask;

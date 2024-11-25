@@ -104,7 +104,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 new() { FileLocation = "TEST.031" },
                 new() { FileLocation = "TEST.TXT" }
             };
-            
+
             A.CallTo(() => _fakeCatalogReader.ReadCatalogue()).Returns(catalogEntries);
 
             A.CallTo(() => _fakeCatalog031ReaderFactory.Create(A<byte[]>.Ignored)).Returns(_fakeCatalogReader);
@@ -123,26 +123,26 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         [Test]
         public void WhenCatalogContainsReadMeFile_ThenRemoveReadmeEntryAndUpdateCatalog_ShouldSkipsReadMeEntryAndUpdatesCatalog()
         {
-           var catalogEntries = new List<CatalogEntry>
+            var catalogEntries = new List<CatalogEntry>
            {
                new() { FileLocation = "README.TXT" },
                new() { FileLocation = "VALID.CAT" }
            };
 
-           A.CallTo(() => _fakeCatalogReader.ReadCatalogue()).Returns(catalogEntries);
+            A.CallTo(() => _fakeCatalogReader.ReadCatalogue()).Returns(catalogEntries);
 
             A.CallTo(() => _fakeCatalog031ReaderFactory.Create(A<byte[]>.Ignored)).Returns(_fakeCatalogReader);
 
-           A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath)).DoesNothing();
-           A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
+            A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath)).DoesNothing();
+            A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
 
-           _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
+            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
 
-           VerifyCatalogEntriesAdded(new List<CatalogEntry> { catalogEntries[1] });
-           A.CallTo(() => _fakeCatalogBuilder.Add(A<CatalogEntry>.That.Matches(x => x.FileLocation == "README.TXT"))).MustNotHaveHappened();
-           VerifyCatalogFileOperations();
-           VerifyLoggingStart();
-           VerifyLoggingComplete();
+            VerifyCatalogEntriesAdded(new List<CatalogEntry> { catalogEntries[1] });
+            A.CallTo(() => _fakeCatalogBuilder.Add(A<CatalogEntry>.That.Matches(x => x.FileLocation == "README.TXT"))).MustNotHaveHappened();
+            VerifyCatalogFileOperations();
+            VerifyLoggingStart();
+            VerifyLoggingComplete();
         }
 
         [Test]
@@ -193,7 +193,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessFailed.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)
                     ["{OriginalFormat}"].ToString() ==
-                "An error occurred while processing catalog file. | {ErrorMessage} | _X-Correlation-ID: {CorrelationId}"
+                "An error occurred while processing catalog file. | ErrorMessage: {ErrorMessage} | _X-Correlation-ID: {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
             A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(A<string>._, A<MemoryStream>._)).MustNotHaveHappened();
         }

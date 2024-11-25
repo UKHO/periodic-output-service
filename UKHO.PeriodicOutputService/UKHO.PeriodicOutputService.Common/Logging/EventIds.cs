@@ -847,11 +847,11 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809168 - README.TXT file deleted
         /// </summary>
-        BessReadmeTxtDeleted = 809168,
+        BessReadMeFileDeleted = 809168,
         /// <summary>
         /// 809169 - README.TXT file delete operation failed
         /// </summary>
-        BessReadmeTxtDeleteFailed = 809169,
+        BessReadMeFileDeletionFailed = 809169,
 
         /// <summary>
         /// 809170 - Remove ReadMe entry from Catalog file request started when ReadMeSearchFilter is None

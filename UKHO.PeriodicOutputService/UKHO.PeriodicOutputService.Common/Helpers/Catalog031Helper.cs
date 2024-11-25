@@ -17,7 +17,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         private readonly IFactory<ICatalog031Builder> _catalog031BuilderFactory;
         private readonly ICatalog031ReaderFactory _catalog031ReaderFactory;
 
-        private const string EXCHANGSETCATALOGFILE = "CATALOG.031";
+        private const string CATALOGFILENAME = "CATALOG.031";
 
         public Catalog031Helper(IFileSystemHelper fileSystemHelper, IOptions<FssApiConfiguration> fssApiConfig, IConfiguration configuration, ILogger<Catalog031Helper> logger, IFactory<ICatalog031Builder> catalog031BuilderFactory, ICatalog031ReaderFactory catalog031ReaderFactory)
         {
@@ -25,15 +25,13 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             _fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _catalog031BuilderFactory = catalog031BuilderFactory ??
-                                        throw new ArgumentNullException(nameof(catalog031BuilderFactory));
-            _catalog031ReaderFactory = catalog031ReaderFactory ??
-                                       throw new ArgumentNullException(nameof(catalog031ReaderFactory));
+            _catalog031BuilderFactory = catalog031BuilderFactory ?? throw new ArgumentNullException(nameof(catalog031BuilderFactory));
+            _catalog031ReaderFactory = catalog031ReaderFactory ?? throw new ArgumentNullException(nameof(catalog031ReaderFactory));
         }
 
         public void RemoveReadmeEntryAndUpdateCatalog(string catalogFilePath)
         {
-            catalogFilePath = Path.Combine(catalogFilePath, EXCHANGSETCATALOGFILE);
+            catalogFilePath = Path.Combine(catalogFilePath, CATALOGFILENAME);
             try
             {
                 _logger.LogInformation(EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessStarted.ToEventId(), "Starting the process of removing README entry and updating catalog file. | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
@@ -46,7 +44,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
             catch (Exception ex)
             {
-                _logger.LogError(EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessFailed.ToEventId(), "An error occurred while processing catalog file. | {ErrorMessage} | _X-Correlation-ID: {CorrelationId}", ex.Message, CommonHelper.CorrelationID);
+                _logger.LogError(EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessFailed.ToEventId(), "An error occurred while processing catalog file. | ErrorMessage: {ErrorMessage} | _X-Correlation-ID: {CorrelationId}", ex.Message, CommonHelper.CorrelationID);
                 throw;
             }
         }
@@ -63,8 +61,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             foreach (var catalogEntry in catalogEntries)
             {
-                if (!catalogEntry.FileLocation.Equals(_fssApiConfig.Value.ReadMeFileName) &&
-                    !catalogEntry.FileLocation.Equals(EXCHANGSETCATALOGFILE))
+                if (!catalogEntry.FileLocation.Equals(_fssApiConfig.Value.ReadMeFileName) && !catalogEntry.FileLocation.Equals(CATALOGFILENAME))
                 {
                     catBuilder.Add(catalogEntry);
                 }
