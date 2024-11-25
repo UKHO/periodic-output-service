@@ -11,5 +11,4 @@ variable "location" {
 }
 
 variable "tags" {
-
 }

@@ -30,10 +30,17 @@ variable "m_spoke_subnet" {
   type = string
 }
 
-variable "allowed_ips" {
-}
-
-variable "agent_subnet" {
+variable "mock_spoke_subnet" {
   type = string
 }
 
+variable "allowed_ips" {
+}
+
+variable "agent_2204_subnet" {
+  type = string
+}
+
+variable "agent_prd_subnet" {
+  type = string
+}

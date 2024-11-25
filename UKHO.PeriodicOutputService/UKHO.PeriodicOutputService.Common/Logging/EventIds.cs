@@ -831,7 +831,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         SkipPksAsEmptyExchangeSetFoundForProducts = 809164,
 
         /// <summary>
-        /// Error Creating container
+        ///     Bess Queue Created
+        /// </summary>
+        BessQueueCreated = 809165,
+
+        /// <summary>
+        ///     Blob Container Created
+        /// </summary>
+        BlobContainerCreated = 809166,
+
+        /// <summary>
+        ///     Error Creating container
         /// </summary>
         ContainerCreationFailure = 809167,
         /// <summary>

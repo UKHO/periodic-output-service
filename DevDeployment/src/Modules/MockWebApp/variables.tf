@@ -23,7 +23,6 @@ variable "app_settings" {
 }
 
 variable "tags" {
-
 }
 
 variable "env_name" {
