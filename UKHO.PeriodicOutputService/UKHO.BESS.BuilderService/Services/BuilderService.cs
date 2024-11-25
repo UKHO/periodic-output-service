@@ -502,7 +502,7 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
-        /// This method will handles README file and catalog entries based on ReadmeSearchFilter.
+        /// This method will handle will add/update/delete README.txt file based on ReadmeSearchFilter.
         /// </summary>
         /// <param name="exchangeSetRootPath"></param>
         /// <param name="readMeFilePath"></param>
@@ -521,7 +521,7 @@ namespace UKHO.BESS.BuilderService.Services
                     break;
 
                 case nameof(ReadMeSearchFilter.NONE):
-                    await DeleteReadMeFileAndUpdateCatalog(exchangeSetRootPath, readMeFilePath, correlationId);
+                    await DeleteReadMeFileAndUpdateCatalogFileAsync(exchangeSetRootPath, readMeFilePath, correlationId);
                     break;
 
                 default:
@@ -537,10 +537,10 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="readMeFilePath"></param>
         /// <param name="correlationId"></param>
         /// <returns></returns>
-        private async Task DeleteReadMeFileAndUpdateCatalog(string exchangeSetRootPath, string readMeFilePath, string correlationId)
+        private async Task DeleteReadMeFileAndUpdateCatalogFileAsync(string exchangeSetRootPath, string readMeFilePath, string correlationId)
         {
             await DeleteReadMeFileAsync(readMeFilePath, correlationId);
-            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(exchangeSetRootPath);
+            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(exchangeSetRootPath);
         }
 
         /// <summary>

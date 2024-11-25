@@ -112,7 +112,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath)).DoesNothing();
             A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
 
-            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
+            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(_catalogFilePath);
 
             VerifyCatalogEntriesAdded(catalogEntries);
             VerifyCatalogFileOperations();
@@ -136,7 +136,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath)).DoesNothing();
             A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
 
-            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
+            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(_catalogFilePath);
 
             VerifyCatalogEntriesAdded(new List<CatalogEntry> { catalogEntries[1] });
             A.CallTo(() => _fakeCatalogBuilder.Add(A<CatalogEntry>.That.Matches(x => x.FileLocation == "README.TXT"))).MustNotHaveHappened();
@@ -161,7 +161,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakeFileSystemHelper.DeleteFile(_catalogFilePath)).DoesNothing();
             A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
 
-            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
+            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(_catalogFilePath);
 
             A.CallTo(() => _fakeCatalogBuilder.Add(A<CatalogEntry>._)).MustNotHaveHappened();
             VerifyCatalogFileOperations();
@@ -183,7 +183,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakeFileSystemHelper.DeleteFile(A<string>.Ignored))
                 .Throws(new Exception("An error occurred while deleting the catalog file."));
 
-            Action action = () => _catalog031Helper.RemoveReadmeEntryAndUpdateCatalog(_catalogFilePath);
+            Action action = () => _catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(_catalogFilePath);
 
             action.Should().Throw<Exception>().WithMessage("An error occurred while deleting the catalog file.");
             A.CallTo(_fakeLogger).Where(call =>
