@@ -504,7 +504,7 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
-        ///     This method will create/download README.txt file based on ReadmeSearchFilter.
+        /// This method will handles README file and entries based on ReadmeSearchFilter.
         /// </summary>
         /// <param name="batchId"></param>
         /// <param name="correlationId"></param>
@@ -514,22 +514,48 @@ namespace UKHO.BESS.BuilderService.Services
         /// <returns></returns>
         private async Task HandleReadMeFileCreationAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
         {
-            if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
+            switch (readMeSearchFilter?.ToUpperInvariant())
             {
-                return;
+                case var filter when string.Equals(filter, ReadMeSearchFilter.AVCS.ToString(), StringComparison.OrdinalIgnoreCase):
+                    return;
+
+                case var filter when string.Equals(filter, ReadMeSearchFilter.BLANK.ToString(), StringComparison.OrdinalIgnoreCase):
+                    fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
+                    break;
+
+                case var filter when string.Equals(filter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase):
+                    await DeleteReadMeFileAsync(readMeFilePath, correlationId);
+                    catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(Path.Combine(exchangeSetRootPath, configuration[EXCHANGESETCATALOGFILE]!));
+                    break;
+
+                default:
+                    await DownloadReadMeFileAsync(exchangeSetRootPath, correlationId, readMeSearchFilter);
+                    break;
             }
-            else if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.BLANK.ToString(), StringComparison.OrdinalIgnoreCase))
+        }
+
+        /// <summary>
+        /// This method will delete README.TXT file from batch.
+        /// </summary>
+        /// <param name="readmeFilePath"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
+        private async Task DeleteReadMeFileAsync(string readmeFilePath, string correlationId)
+        {
+            try
             {
-                fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
+                fileSystemHelper.DeleteFile(readmeFilePath);
+
+                logger.LogInformation(EventIds.BessReadmeTxtDeleted.ToEventId(), "README.TXT file  deleted | _X-Correlation-ID:{CorrelationId}", correlationId);
             }
-            else if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            catch (Exception ex)
             {
-                catalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(Path.Combine(exchangeSetRootPath, configuration[EXCHANGESETCATALOGFILE]!));
+                logger.LogError(EventIds.BessReadmeTxtDeleteFailed.ToEventId(), "README.TXT file delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", DateTime.UtcNow, ex.Message, correlationId);
+                throw new FulfilmentException(EventIds.BessReadmeTxtDeleteFailed.ToEventId());
             }
-            else
-            {
-                await DownloadReadMeFileAsync(exchangeSetRootPath, correlationId, readMeSearchFilter);
-            }
+
+            await Task.CompletedTask;
         }
 
         /// <summary>

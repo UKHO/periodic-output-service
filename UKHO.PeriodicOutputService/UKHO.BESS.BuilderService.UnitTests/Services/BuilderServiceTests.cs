@@ -105,6 +105,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             Action nullPermitDecryption = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, null, fakeCatalog031FilterHelper);
             nullPermitDecryption.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("permitDecryption");
+
+            Action nullCatalog031FilterHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, null);
+            nullCatalog031FilterHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031FilterHelper");
         }
 
         [Test]
@@ -2005,6 +2008,231 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             && call.GetArgument<EventId>(1) == EventIds.SkipPksAsEmptyExchangeSetFoundForProducts.ToEventId()
             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="exchangeSetStandard"></param>
+        /// <returns></returns>
+        [Test]
+        [TestCase(ExchangeSetStandard.S63)]
+        [TestCase(ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsBaseAndReadmeSearchFilterIsNONE_ThenReadmeFileDeletedAndRemovedReadMeEntriesFromCatalogFileAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
+        {
+            A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                .Returns(GetValidExchangeSetGetBatchResponse());
+            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
+              .Returns(GetValidBatchResponseModel());
+            A.CallTo(() => fakeFssService.CreateBatch(A<Batch>.Ignored, A<ConfigQueueMessage>.Ignored, A<string>.Ignored))
+               .Returns(Guid.NewGuid().ToString());
+            A.CallTo(() => fakeFileSystemHelper.GetFiles(A<string>.Ignored, A<string>.Ignored, A<SearchOption>.Ignored))
+                           .Returns(new List<string> { @"D:\Test" });
+            A.CallTo(() => fakeFileSystemHelper.GetFileInfo(A<string>.Ignored))
+                .Returns(fakeFileInfo);
+            A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(GetProductVersions);
+            A.CallTo(() => fakeFssService.AddFileToBatch(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<Batch>.Ignored, A<string>.Ignored))
+                .Returns(true);
+            A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored, A<string>.Ignored))
+             .Returns(true);
+            A.CallTo(() => fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored, A<string>.Ignored))
+                .Returns(new List<string> { "Block_00001" });
+            A.CallTo(() => fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
+                .Returns(true);
+            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+                .DoesNothing();
+
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString(), KeyFileType.PERMIT_XML));
+
+            result.Should().Be(true);
+
+            A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceOrMore();
+            A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakeFileInfo.MoveTo(A<string>.Ignored))
+               .MustHaveHappenedOnceOrMore();
+            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true))
+                .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakeFileSystemHelper.DeleteFile(A<string>.Ignored))
+               .MustHaveHappenedOnceOrMore();
+            A.CallTo(() => fakeFssService.DownloadReadMeFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+               .MustNotHaveHappened();
+            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<EventId>(1) == EventIds.ZipFileRenamed.ToEventId()
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Zip file {fileName} renamed to file {newFileName} at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileStarted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileCompleted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<EventId>(1) == EventIds.PermitFileCreationStarted.ToEventId()
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit file creation started for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<EventId>(1) == EventIds.PermitFileCreationCompleted.ToEventId()
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit file creation completed for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<EventId>(1) == EventIds.BessReadmeTxtDeleted.ToEventId()
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "README.TXT file  deleted | _X-Correlation-ID:{CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsUpdateOrChangeAndReadmeSearchFilterIsNONE_ThenReadmeFileDeletedAndRemovedReadMeEntriesFromCatalogFileAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
+        {
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
+            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
+              .Returns(GetValidBatchResponseModel());
+            A.CallTo(() => fakeFssService.CreateBatch(A<Batch>.Ignored, A<ConfigQueueMessage>.Ignored, A<string>.Ignored))
+               .Returns(Guid.NewGuid().ToString());
+            A.CallTo(() => fakeFileSystemHelper.GetFiles(A<string>.Ignored, A<string>.Ignored, A<SearchOption>.Ignored))
+                           .Returns(new List<string> { @"D:\Test" });
+            A.CallTo(() => fakeFileSystemHelper.GetFileInfo(A<string>.Ignored))
+                .Returns(fakeFileInfo);
+            A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored, A<string>.Ignored)).Returns(GetProductVersions);
+            A.CallTo(() => fakeFssService.AddFileToBatch(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<Batch>.Ignored, A<string>.Ignored))
+                .Returns(true);
+            A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored, A<string>.Ignored))
+             .Returns(true);
+            A.CallTo(() => fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored, A<string>.Ignored))
+                .Returns(new List<string> { "Block_00001" });
+            A.CallTo(() => fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
+                .Returns(true);
+            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+                .DoesNothing();
+
+            var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString(), KeyFileType.PERMIT_XML));
+
+            result.Should().Be(true);
+
+            A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
+               .MustHaveHappenedOnceOrMore();
+            A.CallTo(() => fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
+              .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakeFileInfo.MoveTo(A<string>.Ignored))
+               .MustHaveHappenedOnceOrMore();
+            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
+                .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+            A.CallTo(() => fakeFileSystemHelper.DeleteFile(A<string>.Ignored))
+              .MustHaveHappenedOnceOrMore();
+            A.CallTo(() => fakeFssService.DownloadReadMeFileAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+               .MustNotHaveHappened();
+            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<EventId>(1) == EventIds.ZipFileRenamed.ToEventId()
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Zip file {fileName} renamed to file {newFileName} at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileStarted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Information
+            && call.GetArgument<EventId>(1) == EventIds.ExtractZipFileCompleted.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<EventId>(1) == EventIds.PermitFileCreationStarted.ToEventId()
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit file creation started for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<EventId>(1) == EventIds.PermitFileCreationCompleted.ToEventId()
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Permit file creation completed for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(fakeLogger).Where(call =>
+              call.Method.Name == "Log"
+              && call.GetArgument<LogLevel>(0) == LogLevel.Information
+              && call.GetArgument<EventId>(1) == EventIds.BessReadmeTxtDeleted.ToEventId()
+              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "README.TXT file  deleted | _X-Correlation-ID:{CorrelationId}"
+              ).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        public async Task WhenTypeIsUpdateOrChangeAndDeleteReadmeTxtAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        {
+            A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
+             .Returns(GetValidExchangeSetGetBatchResponse());
+            A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
+              .Returns(FssBatchStatus.Committed);
+            A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
+              .Returns(GetValidBatchResponseModel());
+            A.CallTo(() => fakeFileSystemHelper.DeleteFile(A<string>.Ignored)).Throws<Exception>();
+            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+                .DoesNothing();
+
+            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.CHANGE, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString())); };
+            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessReadmeTxtDeleteFailed.ToEventId());
+
+            A.CallTo(() => fakeCatalog031FilterHelper.RemoveReadmeEntryAndUpdateCatalog(A<string>.Ignored))
+                .MustNotHaveHappened();
+            A.CallTo(fakeLogger).Where(call =>
+            call.Method.Name == "Log"
+            && call.GetArgument<LogLevel>(0) == LogLevel.Error
+            && call.GetArgument<EventId>(1) == EventIds.BessReadmeTxtDeleteFailed.ToEventId()
+            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "README.TXT file delete operation failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}"
+            ).MustHaveHappenedOnceExactly();
+
+            A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).MustHaveHappened();
+            A.CallTo(() => fakeFileSystemHelper.DeleteFolder(A<string>.Ignored)).MustNotHaveHappened();
         }
 
         #region PrivateMethods

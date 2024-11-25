@@ -42,7 +42,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 foreach (var lst in details)
                 {
                     if (!lst.FileLocation.Equals(_fssApiConfig.Value.ReadMeFileName) &&
-                        !lst.FileLocation.Equals(_configuration[EXCHANGSETCATALOGFILE]!))
+                        !lst.FileLocation.Equals(_configuration[EXCHANGSETCATALOGFILE]))
                     {
                         catBuilder.Add(lst);
                     }

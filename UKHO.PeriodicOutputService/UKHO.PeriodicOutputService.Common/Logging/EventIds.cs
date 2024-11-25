@@ -831,6 +831,19 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         SkipPksAsEmptyExchangeSetFoundForProducts = 809164,
 
         /// <summary>
+        /// Error Creating container
+        /// </summary>
+        ContainerCreationFailure = 809167,
+        /// <summary>
+        /// 809168 - README.TXT file deleted
+        /// </summary>
+        BessReadmeTxtDeleted = 809168,
+        /// <summary>
+        /// 809169 - README.TXT file delete operation failed
+        /// </summary>
+        BessReadmeTxtDeleteFailed = 809169,
+
+        /// <summary>
         /// 809165 - Remove ReadMe entry from Catalog file request started when ReadMeSearchFilter is None
         /// </summary>
         RemoveReadMeEntryAndUpdateCatalogFileProcessStarted = 809165,
