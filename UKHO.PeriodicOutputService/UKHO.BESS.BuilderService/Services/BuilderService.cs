@@ -512,7 +512,7 @@ namespace UKHO.BESS.BuilderService.Services
         {
             if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.AVCS.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-                return; // Ignored filter, do nothing
+                return; 
             }
             else if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.BLANK.ToString(), StringComparison.OrdinalIgnoreCase))
             {
@@ -549,33 +549,6 @@ namespace UKHO.BESS.BuilderService.Services
             }
 
             await Task.CompletedTask;
-        }
-
-
-        /// <summary>
-        ///     This method will create/download README.txt file based on ReadmeSearchFilter.
-        /// </summary>
-        /// <param name="batchId"></param>
-        /// <param name="correlationId"></param>
-        /// <param name="readMeSearchFilter"></param>
-        /// <param name="exchangeSetRootPath"></param>
-        /// <param name="readMeFilePath"></param>
-        /// <returns></returns>
-        private async Task CreateReadMeFileAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
-        {
-            if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.AVCS.ToString(), StringComparison.OrdinalIgnoreCase))
-            {
-                return;
-            }
-
-            if (string.Equals(readMeSearchFilter, ReadMeSearchFilter.BLANK.ToString(), StringComparison.OrdinalIgnoreCase))
-            {
-                fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
-            }
-            else
-            {
-                await DownloadReadMeFileAsync(exchangeSetRootPath, correlationId, readMeSearchFilter);
-            }
         }
 
         /// <summary>
