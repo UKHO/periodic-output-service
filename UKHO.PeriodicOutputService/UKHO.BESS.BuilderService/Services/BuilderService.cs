@@ -317,11 +317,25 @@ namespace UKHO.BESS.BuilderService.Services
 
                 if (configQueueMessage.Type.ToUpper().Equals(BessType.UPDATE.ToString()))
                 {
-                    batchType = Batch.BessUpdateZipBatch;
+                    if (configQueueMessage.ReadMeSearchFilter.ToUpper().Equals("NONE"))
+                    {
+                        batchType = Batch.BessNoneReadmeBatch;
+                    }
+                    else
+                    {
+                        batchType = Batch.BessUpdateZipBatch;
+                    }
                 }
                 else if (configQueueMessage.Type.ToUpper().Equals(BessType.CHANGE.ToString()))
                 {
-                    batchType = Batch.BessChangeZipBatch;
+                    if (configQueueMessage.ReadMeSearchFilter.ToUpper().Equals("NONE"))
+                    {
+                        batchType = Batch.BessNoneReadmeBatch;
+                    }
+                    else
+                    {
+                        batchType = Batch.BessChangeZipBatch;
+                    }
                 }
                 //else if block for mock only
                 else if (configQueueMessage.Type.ToUpper().Equals("EMPTY"))

@@ -74,6 +74,9 @@ namespace UKHO.FmEssFssMock.Enums
         EssEmptyBatch = 23,
 
         [Description("d0635e6c-81ae-4acb-9129-1a69f9ee58d2")]
-        BessEmptyBatch = 24
+        BessEmptyBatch = 24,
+
+        [Description("9f19b71e-2dca-42fd-b7dd-a68792a2aa27")]
+        BessNoneReadmeBatch = 25
     }
 }
