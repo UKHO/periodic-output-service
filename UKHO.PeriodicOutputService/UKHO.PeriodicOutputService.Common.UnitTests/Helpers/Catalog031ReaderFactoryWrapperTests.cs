@@ -1,4 +1,5 @@
-﻿using UKHO.PeriodicOutputService.Common.Helpers;
+﻿using FluentAssertions;
+using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.Torus.Enc.Core.EncCatalogue;
 
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
@@ -21,14 +22,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         public void WhenGivenValidByteArray_ThenCreateShouldReturnCatalog031ReaderInstance()
         {
             var catalog031Reader = _catalog031ReaderFactoryWrapper.Create(_catalogFileBytes);
-
-            Assert.That(catalog031Reader, Is.InstanceOf<ICatalog031Reader>());
+            catalog031Reader.Should().BeOfType<Catalog031Reader>();
         }
 
         [Test]
         public void WhenGivenNullByteArray_ThenCreateShouldThrowArgumentNullException()
         {
-            Assert.Throws<NullReferenceException>(() => _catalog031ReaderFactoryWrapper.Create(null));
+            Action act = () => _catalog031ReaderFactoryWrapper.Create(null);
+            act.Should().Throw<NullReferenceException>();
         }
     }
 }
