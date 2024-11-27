@@ -1,6 +1,5 @@
 ﻿using FakeItEasy;
 using FluentAssertions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
@@ -17,12 +16,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         private IOptions<FssApiConfiguration> _fakeFssApiConfiguration;
         private ICatalog031Helper _catalog031Helper;
         private IFileSystemHelper _fakeFileSystemHelper;
-        private IConfiguration _fakeConfiguration;
         private ICatalog031Builder _fakeCatalogBuilder;
         private ICatalog031Reader _fakeCatalogReader;
-        private ILogger<Catalog031Helper> _fakeLogger;
         private IFactory<ICatalog031Builder> _fakeCatalog031BuilderFactory;
         private Common.Helpers.ICatalog031ReaderFactory _fakeCatalog031ReaderFactory;
+        private ILogger<Catalog031Helper> _fakeLogger;
 
         private readonly string _catalogFilePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData");
 
@@ -46,23 +44,21 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 ReadMeFileName = "README.TXT"
             });
 
-            _fakeLogger = A.Fake<ILogger<Catalog031Helper>>();
             _fakeFileSystemHelper = A.Fake<IFileSystemHelper>();
-            _fakeConfiguration = A.Fake<IConfiguration>();
             _fakeCatalog031BuilderFactory = A.Fake<IFactory<ICatalog031Builder>>();
             _fakeCatalogBuilder = A.Fake<ICatalog031Builder>();
             _fakeCatalog031ReaderFactory = A.Fake<Common.Helpers.ICatalog031ReaderFactory>();
             _fakeCatalogReader = A.Fake<ICatalog031Reader>();
+            _fakeLogger = A.Fake<ILogger<Catalog031Helper>>();
 
             A.CallTo(() => _fakeCatalog031BuilderFactory.Create()).Returns(_fakeCatalogBuilder);
 
             _catalog031Helper = new Catalog031Helper(
                 _fakeFileSystemHelper,
                 _fakeFssApiConfiguration,
-                _fakeConfiguration,
-                _fakeLogger,
                 _fakeCatalog031BuilderFactory,
-                _fakeCatalog031ReaderFactory
+                _fakeCatalog031ReaderFactory,
+                _fakeLogger
             );
         }
 
@@ -70,30 +66,26 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
             Action nullFileSystemHelper = () =>
-                new Catalog031Helper(null, _fakeFssApiConfiguration, _fakeConfiguration, _fakeLogger, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
+                new Catalog031Helper(null, _fakeFssApiConfiguration, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory, _fakeLogger);
             nullFileSystemHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should()
                 .Be("fileSystemHelper");
 
             Action nullFssApiConfiguration = () =>
-                new Catalog031Helper(_fakeFileSystemHelper, null, _fakeConfiguration, _fakeLogger, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
+                new Catalog031Helper(_fakeFileSystemHelper, null, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory, _fakeLogger);
             nullFssApiConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should()
                 .Be("fssApiConfig");
 
-            Action nullConfiguration = () =>
-                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, null, _fakeLogger, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
-            nullConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
-
-            Action nullLogger = () =>
-                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeConfiguration, null, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory);
-            nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
-
             Action nullCatalog031BuilderFactory = () =>
-                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeConfiguration, _fakeLogger, null, _fakeCatalog031ReaderFactory);
+                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, null, _fakeCatalog031ReaderFactory, _fakeLogger);
             nullCatalog031BuilderFactory.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031BuilderFactory");
 
             Action nullCatalog031ReaderFactory = () =>
-                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeConfiguration, _fakeLogger, _fakeCatalog031BuilderFactory, null);
+                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeCatalog031BuilderFactory, null, _fakeLogger);
             nullCatalog031ReaderFactory.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031ReaderFactory");
+
+            Action nullLogger = () =>
+                new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory, null);
+            nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
         }
 
         [Test]
