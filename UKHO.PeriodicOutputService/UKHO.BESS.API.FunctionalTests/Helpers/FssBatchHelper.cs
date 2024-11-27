@@ -191,7 +191,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// This method is used to check the README.TXT
         /// </summary>
         /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
-        /// <param name="readMeSearchFilter">Sets the value of the Readme File type based on Config out of AVCS, BLANK or {Query}</param>
+        /// <param name="readMeSearchFilter">Sets the value of the Readme File type based on Config out of AVCS, BLANK, NONE or {Query}</param>
         /// <returns></returns>
         public static bool CheckReadMeInBessExchangeSet(string? downloadFolderPath, string? readMeSearchFilter)
         {
