@@ -34,7 +34,7 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IOptions<FssApiConfiguration> fssApiConfig;
         private readonly IPksService pksService;
         private readonly IPermitDecryption permitDecryption;
-        private readonly ICatalog031Helper _catalog031Helper;
+        private readonly ICatalog031Helper catalog031Helper;
         private readonly string homeDirectoryPath;
 
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
@@ -56,7 +56,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
             this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
-            this._catalog031Helper = catalog031Helper ?? throw new ArgumentNullException(nameof(catalog031Helper));
+            this.catalog031Helper = catalog031Helper ?? throw new ArgumentNullException(nameof(catalog031Helper));
 
             homeDirectoryPath = Path.Combine(configuration[HOME]!, configuration[BESSFOLDERNAME]!);
         }
@@ -554,7 +554,7 @@ namespace UKHO.BESS.BuilderService.Services
         private async Task DeleteReadMeFileAndUpdateCatalogFileAsync(string exchangeSetRootPath, string readMeFilePath, string correlationId)
         {
             await DeleteReadMeFileAsync(readMeFilePath, correlationId);
-            _catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(exchangeSetRootPath);
+            catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(exchangeSetRootPath);
         }
 
         /// <summary>

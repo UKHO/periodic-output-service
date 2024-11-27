@@ -1,5 +1,5 @@
 ﻿using UKHO.Torus.Enc.Core.EncCatalogue;
-using Catalog031ReaderFactory = UKHO.PeriodicOutputService.Common.Helpers.Catalog031ReaderFactory;
+using Catalog031ReaderFactoryWrapper = UKHO.PeriodicOutputService.Common.Helpers.Catalog031ReaderFactoryWrapper;
 
 
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
@@ -7,7 +7,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
     [TestFixture]
     public class Catalog031ReaderFactoryTests
     {
-        private Catalog031ReaderFactory _catalog031ReaderFactory;
+        private Catalog031ReaderFactoryWrapper _catalog031ReaderFactory;
         private readonly string _catalogFilePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData", "Catalog.031");
         private byte[] _catalogFileBytes;
 

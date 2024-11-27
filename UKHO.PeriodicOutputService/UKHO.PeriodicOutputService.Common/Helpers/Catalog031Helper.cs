@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -12,21 +11,19 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     {
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IOptions<FssApiConfiguration> _fssApiConfig;
-        private readonly IConfiguration _configuration;
-        private readonly ILogger<Catalog031Helper> _logger;
         private readonly IFactory<ICatalog031Builder> _catalog031BuilderFactory;
         private readonly ICatalog031ReaderFactory _catalog031ReaderFactory;
+        private readonly ILogger<Catalog031Helper> _logger;
 
         private const string CATALOGFILENAME = "CATALOG.031";
 
-        public Catalog031Helper(IFileSystemHelper fileSystemHelper, IOptions<FssApiConfiguration> fssApiConfig, IConfiguration configuration, ILogger<Catalog031Helper> logger, IFactory<ICatalog031Builder> catalog031BuilderFactory, ICatalog031ReaderFactory catalog031ReaderFactory)
+        public Catalog031Helper(IFileSystemHelper fileSystemHelper, IOptions<FssApiConfiguration> fssApiConfig, IFactory<ICatalog031Builder> catalog031BuilderFactory, ICatalog031ReaderFactory catalog031ReaderFactory, ILogger<Catalog031Helper> logger)
         {
             _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             _fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
-            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _catalog031BuilderFactory = catalog031BuilderFactory ?? throw new ArgumentNullException(nameof(catalog031BuilderFactory));
             _catalog031ReaderFactory = catalog031ReaderFactory ?? throw new ArgumentNullException(nameof(catalog031ReaderFactory));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public void RemoveReadmeEntryAndUpdateCatalogFile(string catalogFilePath)

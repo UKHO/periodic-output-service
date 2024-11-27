@@ -21,8 +21,6 @@ using UKHO.PeriodicOutputService.Common.Services;
 using UKHO.PeriodicOutputService.Common.Utilities;
 using UKHO.Torus.Core;
 using UKHO.Torus.Enc.Core.EncCatalogue;
-using ICatalog031ReaderFactory = UKHO.PeriodicOutputService.Common.Helpers.ICatalog031ReaderFactory;
-using Catalog031ReaderFactory = UKHO.PeriodicOutputService.Common.Helpers.Catalog031ReaderFactory;
 
 namespace UKHO.BESS.BuilderService
 {
@@ -140,14 +138,14 @@ namespace UKHO.BESS.BuilderService
                  }
 
                  serviceCollection.AddDistributedMemoryCache();
-                 
+
                  serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
                  serviceCollection.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
                  serviceCollection.AddScoped<IBuilderService, Services.BuilderService>();
                  serviceCollection.AddScoped<IEssService, EssService>();
                  serviceCollection.AddScoped<IFssService, FssService>();
                  serviceCollection.AddHttpClient();
-                 
+
                  serviceCollection.AddScoped<IFileSystemHelper, FileSystemHelper>();
                  serviceCollection.AddScoped<IFileSystem, FileSystem>();
                  serviceCollection.AddScoped<IZipHelper, ZipHelper>();
@@ -156,8 +154,8 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddScoped<IPermitDecryption, PermitDecryption>();
                  serviceCollection.AddScoped<IS63Crypt, S63Crypt>();
                  serviceCollection.AddScoped<ICatalog031Helper, Catalog031Helper>();
-                 serviceCollection.AddScoped<IFactory<ICatalog031Builder>, Catalog031BuilderFactory>(); 
-                 serviceCollection.AddScoped<ICatalog031ReaderFactory, Catalog031ReaderFactory>();
+                 serviceCollection.AddScoped<IFactory<ICatalog031Builder>, Catalog031BuilderFactory>();
+                 serviceCollection.AddScoped<PeriodicOutputService.Common.Helpers.ICatalog031ReaderFactory, Catalog031ReaderFactoryWrapper>();
 
                  serviceCollection.AddSingleton<IAuthPksTokenProvider, AuthTokenProvider>();
                  serviceCollection.AddScoped<IPksService, PksService>();
@@ -172,9 +170,9 @@ namespace UKHO.BESS.BuilderService
                      httpClient.DefaultRequestHeaders.UserAgent.Add(productHeaderValue);
                  })
                  .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler()
-                     {
-                         AllowAutoRedirect = false
-                     }).SetHandlerLifetime(Timeout.InfiniteTimeSpan)
+                 {
+                     AllowAutoRedirect = false
+                 }).SetHandlerLifetime(Timeout.InfiniteTimeSpan)
                   .AddPolicyHandler((services, request) =>
                      CommonHelper.GetRetryPolicy(services.GetService<ILogger<IFssApiClient>>(), "File Share", EventIds.RetryHttpClientFSSRequest, retryCount, sleepDuration));
 
