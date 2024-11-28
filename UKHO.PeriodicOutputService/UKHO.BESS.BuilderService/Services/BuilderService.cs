@@ -307,19 +307,15 @@ namespace UKHO.BESS.BuilderService.Services
                     "BESS batch creation started at {DateTime} | _X-Correlation-ID: {CorrelationId}", DateTime.UtcNow,
                     configQueueMessage.CorrelationId);
 
-                if (configQueueMessage.Type.ToUpper().Equals(BessType.UPDATE.ToString()))
+                batchType = (configQueueMessage.Type.ToUpper(), configQueueMessage.ReadMeSearchFilter.ToUpper()) switch
                 {
-                    batchType = GetBatchTypeBasedOnReadMeSearchFilter(configQueueMessage, Batch.BessUpdateZipBatch);
-                }
-                else if (configQueueMessage.Type.ToUpper().Equals(BessType.CHANGE.ToString()))
-                {
-                    batchType = GetBatchTypeBasedOnReadMeSearchFilter(configQueueMessage, Batch.BessChangeZipBatch);
-                }
-                // else if block for mock only
-                else if (configQueueMessage.Type.ToUpper().Equals("EMPTY"))
-                {
-                    batchType = Batch.BessEmptyBatch;
-                }
+                    (nameof(BessType.UPDATE), "NONE") => Batch.BessNoneReadmeBatch,
+                    (nameof(BessType.UPDATE), _) => Batch.BessUpdateZipBatch,
+                    (nameof(BessType.CHANGE), "NONE") => Batch.BessNoneReadmeBatch,
+                    (nameof(BessType.CHANGE), _) => Batch.BessChangeZipBatch,
+                    ("EMPTY", _) => Batch.BessEmptyBatch,
+                    _ => batchType
+                };
 
                 string bessBatchId =
                     await fssService.CreateBatch(batchType, configQueueMessage, configQueueMessage.CorrelationId);

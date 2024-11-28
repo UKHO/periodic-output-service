@@ -197,32 +197,18 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             if (readMeSearchFilter!.Equals("NONE"))
             {
-                var verify = !File.Exists(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
-                return verify;
+                return !File.Exists(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
             }
-            else
+            string[] readMeFileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
+            string readMeType = readMeFileContent[0].Split(" ")[0];
+
+            return readMeSearchFilter switch
             {
-                string[] readMeFileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
-                string readMeType;
-                switch (readMeSearchFilter)
-                {
-                    case null:
-                        return false;
-                    case "AVCS":
-                        {
-                            readMeType = readMeFileContent[0].Split(" ")[0];
-                            return readMeType.Equals("AVCS");
-                        }
-                    case "BLANK":
-                        return readMeFileContent.IsNullOrEmpty();
-                }
-                if (!readMeSearchFilter.Contains("Bespoke README"))
-                {
-                    return false;
-                }
-                readMeType = readMeFileContent[0].Split(" ")[0];
-                return readMeType.Equals("DISCLAIMER");
-            }
+                null => false,
+                "AVCS" => readMeType.Equals("AVCS"),
+                "BLANK" => readMeFileContent.Length == 0,
+                _ => readMeSearchFilter.Contains("Bespoke README") && readMeType.Equals("DISCLAIMER")
+            };
         }
 
         /// <summary>
@@ -424,19 +410,14 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <summary>
         /// This method is use to validate the content of CATALOG.031 details
         /// </summary>
-        /// <param name="downloadFolderPath"></param>
-        /// <param name="readMeSearchFilter"></param>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <param name="readMeSearchFilter">Sets the value of the Readme File type based on Config out of AVCS, BLANK, NONE or {Query}</param>
         public static void VerifyCatalogContents(string? downloadFolderPath, string? readMeSearchFilter)
         {
-            var catalogFileContent = File.ReadAllText(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile!));
-            if (readMeSearchFilter!.Equals("NONE"))
-            {
-                catalogFileContent.Contains(testConfiguration.exchangeSetDetails.ExchangeReadMeFile!).Should().BeFalse();
-            }
-            else
-            {
-                catalogFileContent.Contains(testConfiguration.exchangeSetDetails.ExchangeReadMeFile!).Should().BeTrue();
-            }
+            var catalogFilePath = Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile!);
+            var catalogFileContent = File.ReadAllText(catalogFilePath);
+            var containsReadMeFile = catalogFileContent.Contains(testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
+            containsReadMeFile.Should().Be(!readMeSearchFilter!.Equals("NONE"));
         }
     }
 }
