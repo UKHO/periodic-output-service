@@ -416,8 +416,15 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             var catalogFilePath = Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile!);
             var catalogFileContent = File.ReadAllText(catalogFilePath);
-            var containsReadMeFile = catalogFileContent.Contains(testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
-            containsReadMeFile.Should().Be(!readMeSearchFilter!.Equals("NONE"));
+            bool containsReadMeFile = catalogFileContent.Contains(testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
+            if (readMeSearchFilter!.Equals("NONE"))
+            {
+                containsReadMeFile.Should().BeFalse();
+            }
+            else
+            {
+                containsReadMeFile.Should().BeTrue();
+            }
         }
     }
 }
