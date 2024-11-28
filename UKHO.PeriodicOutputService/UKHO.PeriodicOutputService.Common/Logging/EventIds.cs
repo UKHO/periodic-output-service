@@ -844,10 +844,12 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         ///     Error Creating container
         /// </summary>
         ContainerCreationFailure = 809167,
+
         /// <summary>
         /// 809168 - README.TXT file deleted
         /// </summary>
         BessReadMeFileDeleted = 809168,
+
         /// <summary>
         /// 809169 - README.TXT file delete operation failed
         /// </summary>
