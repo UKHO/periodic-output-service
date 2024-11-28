@@ -195,20 +195,31 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static bool CheckReadMeInBessExchangeSet(string? downloadFolderPath, string? readMeSearchFilter)
         {
+            var path = Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!);
             if (readMeSearchFilter!.Equals("NONE"))
             {
-                return !File.Exists(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
+                return !File.Exists(Path.Combine(path, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
             }
-            string[] readMeFileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
-            string readMeType = readMeFileContent[0].Split(" ")[0];
-
-            return readMeSearchFilter switch
+            string[] readMeFileContent = File.ReadAllLines(Path.Combine(path, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
+            string readMeType;
+            switch (readMeSearchFilter)
             {
-                null => false,
-                "AVCS" => readMeType.Equals("AVCS"),
-                "BLANK" => readMeFileContent.Length == 0,
-                _ => readMeSearchFilter.Contains("Bespoke README") && readMeType.Equals("DISCLAIMER")
-            };
+                case null:
+                    return false;
+                case "AVCS":
+                    {
+                        readMeType = readMeFileContent[0].Split(" ")[0];
+                        return readMeType.Equals("AVCS");
+                    }
+                case "BLANK":
+                    return readMeFileContent.IsNullOrEmpty();
+            }
+            if (!readMeSearchFilter.Contains("Bespoke README"))
+            {
+                return false;
+            }
+            readMeType = readMeFileContent[0].Split(" ")[0];
+            return readMeType.Equals("DISCLAIMER");
         }
 
         /// <summary>
