@@ -113,7 +113,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         }
 
         [Test]
-        public void WhenCatalogContainsReadMeFile_ThenRemoveReadmeEntryAndUpdateCatalog_ShouldSkipsReadMeEntryAndUpdatesCatalog()
+        public void WhenCatalogContainsReadMeFile_ThenRemoveReadmeEntryAndUpdateCatalog_ShouldSkipReadMeEntryAndUpdatesCatalo()
         {
             var catalogEntries = new List<CatalogEntry>
            {

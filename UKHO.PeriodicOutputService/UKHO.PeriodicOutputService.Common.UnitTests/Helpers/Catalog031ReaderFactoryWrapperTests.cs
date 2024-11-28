@@ -28,8 +28,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         [Test]
         public void WhenGivenNullByteArray_ThenCreateShouldThrowArgumentNullException()
         {
-            Action act = () => _catalog031ReaderFactoryWrapper.Create(null);
-            act.Should().Throw<NullReferenceException>();
+            Action action = () => _catalog031ReaderFactoryWrapper.Create(null);
+            action.Should().Throw<NullReferenceException>();
         }
     }
 }

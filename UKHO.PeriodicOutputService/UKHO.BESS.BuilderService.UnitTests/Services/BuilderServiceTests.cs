@@ -2013,7 +2013,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
         [TestCase(ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsBaseAndReadmeSearchFilterIsNONE_ThenReadmeFileDeletedAndRemovedReadMeEntriesFromCatalogFileAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
+        public async Task WhenTypeIsBaseAndReadmeSearchFilterIsNONE_ThenReadmeFileDeletedAndRemovedReadMeEntryFromCatalogFileAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -2108,7 +2108,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndReadmeSearchFilterIsNONE_ThenReadmeFileDeletedAndRemovedReadMeEntriesFromCatalogFileAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public async Task WhenTypeIsUpdateOrChangeAndReadmeSearchFilterIsNONE_ThenReadmeFileDeletedAndRemovedReadMeEntryFromCatalogFileAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());

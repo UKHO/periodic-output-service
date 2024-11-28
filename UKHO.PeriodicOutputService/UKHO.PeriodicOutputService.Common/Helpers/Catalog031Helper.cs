@@ -48,23 +48,23 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         private IEnumerable<CatalogEntry> GetCatalogEntries(string catalogFilePath)
         {
-            byte[] catalogFileBytes = File.ReadAllBytes(catalogFilePath);
-            return _catalog031ReaderFactory.Create(catalogFileBytes).ReadCatalogue();
+            byte[] catalog031File = File.ReadAllBytes(catalogFilePath);
+            return _catalog031ReaderFactory.Create(catalog031File).ReadCatalogue();
         }
 
         private byte[] FilterAndWriteCatalogEntries(IEnumerable<CatalogEntry> catalogEntries)
         {
-            var catBuilder = _catalog031BuilderFactory.Create();
+            var catalog031Builder = _catalog031BuilderFactory.Create();
 
             foreach (var catalogEntry in catalogEntries)
             {
                 if (!catalogEntry.FileLocation.Equals(_fssApiConfig.Value.ReadMeFileName) && !catalogEntry.FileLocation.Equals(CATALOGFILENAME))
                 {
-                    catBuilder.Add(catalogEntry);
+                    catalog031Builder.Add(catalogEntry);
                 }
             }
 
-            return catBuilder.WriteCatalog(_fssApiConfig.Value.BespokeExchangeSetFileFolder);
+            return catalog031Builder.WriteCatalog(_fssApiConfig.Value.BespokeExchangeSetFileFolder);
         }
 
         private void ReplaceCatalogFile(string catalogFilePath, byte[] updatedCatalogBytes)

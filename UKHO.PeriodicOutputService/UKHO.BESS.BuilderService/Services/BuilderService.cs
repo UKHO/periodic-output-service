@@ -296,14 +296,6 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
-        /// <summary>
-        ///     This method will create, upload and commit BESS batch to FSS.
-        /// </summary>
-        /// <param name="downloadPath"></param>
-        /// <param name="fileExtension"></param>
-        /// <param name="configQueueMessage"></param>
-        /// <returns>Return true or false</returns>
-        /// <exception cref="FulfilmentException"></exception>
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
         {
             try
@@ -317,27 +309,13 @@ namespace UKHO.BESS.BuilderService.Services
 
                 if (configQueueMessage.Type.ToUpper().Equals(BessType.UPDATE.ToString()))
                 {
-                    if (configQueueMessage.ReadMeSearchFilter.ToUpper().Equals("NONE"))
-                    {
-                        batchType = Batch.BessNoneReadmeBatch;
-                    }
-                    else
-                    {
-                        batchType = Batch.BessUpdateZipBatch;
-                    }
+                    batchType = GetBatchTypeBasedOnReadMeSearchFilter(configQueueMessage, Batch.BessUpdateZipBatch);
                 }
                 else if (configQueueMessage.Type.ToUpper().Equals(BessType.CHANGE.ToString()))
                 {
-                    if (configQueueMessage.ReadMeSearchFilter.ToUpper().Equals("NONE"))
-                    {
-                        batchType = Batch.BessNoneReadmeBatch;
-                    }
-                    else
-                    {
-                        batchType = Batch.BessChangeZipBatch;
-                    }
+                    batchType = GetBatchTypeBasedOnReadMeSearchFilter(configQueueMessage, Batch.BessChangeZipBatch);
                 }
-                //else if block for mock only
+                // else if block for mock only
                 else if (configQueueMessage.Type.ToUpper().Equals("EMPTY"))
                 {
                     batchType = Batch.BessEmptyBatch;
@@ -373,6 +351,19 @@ namespace UKHO.BESS.BuilderService.Services
                     ex, DateTime.UtcNow, configQueueMessage.CorrelationId);
                 throw new FulfilmentException(EventIds.BessBatchCreationFailed.ToEventId());
             }
+        }
+
+        /// <summary>
+        /// This method will return BESS batch based on ReadMeSearchFilter
+        /// </summary>
+        /// <param name="configQueueMessage"></param>
+        /// <param name="defaultBatchType"></param>
+        /// <returns>Batch</returns>
+        private Batch GetBatchTypeBasedOnReadMeSearchFilter(ConfigQueueMessage configQueueMessage, Batch defaultBatchType)
+        {
+            return configQueueMessage.ReadMeSearchFilter.ToUpper().Equals("NONE")
+                ? Batch.BessNoneReadmeBatch
+                : defaultBatchType;
         }
 
         /// <summary>
@@ -568,6 +559,7 @@ namespace UKHO.BESS.BuilderService.Services
         {
             try
             {
+                //throw new Exception("Explicit test exception to check logging");
                 fileSystemHelper.DeleteFile(readMeFilePath);
 
                 logger.LogInformation(EventIds.BessReadMeFileDeleted.ToEventId(), "README.TXT file deleted. | _X-Correlation-ID:{CorrelationId}", correlationId);
