@@ -69,3 +69,7 @@ variable "agent_prd_subnet" {
 variable "permitdecryptionhardwareid" {
   type = string
 }
+
+variable "BessContainerName" {
+  type = string
+}

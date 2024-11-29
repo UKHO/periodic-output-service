@@ -36,6 +36,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
         [TestCase("s57", "UPDATE", "AVCS", "fa741049-7a78-4ec3-8737-1b3fb8d1cc3f", "KEY_TEXT")]
         [TestCase("s63", "BASE", "BLANK", "a7fb95f0-b3ff-4ef2-9b76-a74c7d3c3c8f", "PERMIT_XML")]
         [TestCase("s63", "CHANGE", "businessUnit eq 'AVCS-BESSets' and filename eq 'README.TXT' and $batch(Content) eq 'Bespoke README'", "5581ca8c-27a8-42ec-86d2-bef6915c2992", "PERMIT_XML")]
+        [TestCase("s57", "UPDATE", "NONE", "9F19B71E-2DCA-42FD-B7DD-A68792A2AA27", "KEY_TEXT")]
         public async Task WhenIUploadAConfigWithCorrectDetails_ThenBespokeExchangeSetShouldBeDownloaded(string exchangeSetStandard, string type, string readMeSearchFilter, string batchId, string keyFileType)
         {
             HttpResponseMessage response = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, exchangeSetStandard, type, readMeSearchFilter, keyFileType);
@@ -46,6 +47,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
             expectedResultReadme.Should().Be(true);
             var expectedResultSerial = FssBatchHelper.CheckInfoFolderAndSerialEncInBessExchangeSet(downloadFolderPath, type);
             expectedResultSerial.Should().Be(true);
+            FssBatchHelper.VerifyCatalogContents(downloadFolderPath, readMeSearchFilter);
             HttpResponseMessage expectedResult = await fssEndPointHelper.CheckBatchDetails(batchId);
             await FssBatchHelper.VerifyBessBatchDetails(expectedResult);
             string? batchFolderPath = Path.GetDirectoryName(downloadFolderPath);
