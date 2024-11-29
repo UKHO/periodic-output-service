@@ -350,19 +350,6 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
-        /// This method will return BESS batch based on ReadMeSearchFilter
-        /// </summary>
-        /// <param name="configQueueMessage"></param>
-        /// <param name="defaultBatchType"></param>
-        /// <returns>Batch</returns>
-        private Batch GetBatchTypeBasedOnReadMeSearchFilter(ConfigQueueMessage configQueueMessage, Batch defaultBatchType)
-        {
-            return configQueueMessage.ReadMeSearchFilter.ToUpper().Equals("NONE")
-                ? Batch.BessNoneReadmeBatch
-                : defaultBatchType;
-        }
-
-        /// <summary>
         /// This method will upload BESS batch file to FSS.
         /// </summary>
         /// <param name="filePaths"></param>
