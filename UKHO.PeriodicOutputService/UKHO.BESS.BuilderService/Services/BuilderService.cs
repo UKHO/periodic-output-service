@@ -490,7 +490,7 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
-        /// This method will handle will add/update/delete README.txt file based on ReadmeSearchFilter.
+        /// This method will handle add/update/delete of README.txt file based on ReadmeSearchFilter.
         /// </summary>
         /// <param name="exchangeSetRootPath"></param>
         /// <param name="readMeFilePath"></param>
@@ -542,7 +542,6 @@ namespace UKHO.BESS.BuilderService.Services
         {
             try
             {
-                //throw new Exception("Explicit test exception to check logging");
                 fileSystemHelper.DeleteFile(readMeFilePath);
 
                 logger.LogInformation(EventIds.BessReadMeFileDeleted.ToEventId(), "README.TXT file deleted. | _X-Correlation-ID:{CorrelationId}", correlationId);
