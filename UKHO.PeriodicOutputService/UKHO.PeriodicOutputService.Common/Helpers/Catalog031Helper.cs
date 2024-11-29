@@ -37,7 +37,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 var updatedCatalogBytes = FilterAndWriteCatalogEntries(catalogEntries);
                 ReplaceCatalogFile(catalogFilePath, updatedCatalogBytes);
 
-                _logger.LogInformation(EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessCompleted.ToEventId(), "Successfully completed the process of removing README entry and updating catalog for file. | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
+                _logger.LogInformation(EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessCompleted.ToEventId(), "Successfully completed the process of removing README entry and updating catalog file. | _X-Correlation-ID : {CorrelationId}", CommonHelper.CorrelationID);
             }
             catch (Exception ex)
             {

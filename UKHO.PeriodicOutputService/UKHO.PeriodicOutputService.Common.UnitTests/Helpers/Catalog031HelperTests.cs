@@ -213,7 +213,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 && call.GetArgument<EventId>(1) == EventIds.RemoveReadMeEntryAndUpdateCatalogFileProcessCompleted.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)
                     ["{OriginalFormat}"].ToString() ==
-                "Successfully completed the process of removing README entry and updating catalog for file. | _X-Correlation-ID : {CorrelationId}"
+                "Successfully completed the process of removing README entry and updating catalog file. | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappenedOnceExactly();
         }
 
