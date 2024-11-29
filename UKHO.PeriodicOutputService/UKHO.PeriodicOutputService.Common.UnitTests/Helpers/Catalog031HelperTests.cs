@@ -113,7 +113,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         }
 
         [Test]
-        public void WhenCatalogContainsReadMeFile_ThenRemoveReadmeEntryAndUpdateCatalog_ShouldSkipReadMeEntryAndUpdatesCatalo()
+        public void WhenCatalogContainsReadMeFile_ThenRemoveReadmeEntryAndUpdateCatalog_ShouldSkipReadMeEntryAndUpdatesCatalog()
         {
             var catalogEntries = new List<CatalogEntry>
            {
@@ -143,7 +143,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             var catalogEntries = new List<CatalogEntry>
            {
                new() { FileLocation = "README.TXT" },
-               new() { FileLocation = "CATALOG.031" }
+               new() { FileLocation = "CATALOG.031" },
+               new() { FileLocation = "VALID.CAT" }
            };
 
             A.CallTo(() => _fakeCatalogReader.ReadCatalogue()).Returns(catalogEntries);
@@ -154,8 +155,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
 
             _catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(_catalogFilePath);
-
-            A.CallTo(() => _fakeCatalogBuilder.Add(A<CatalogEntry>._)).MustNotHaveHappened();
+            
+            A.CallTo(() => _fakeCatalogBuilder.Add(A<CatalogEntry>.That.Matches(x => x.FileLocation == "README.TXT" || x.FileLocation == "CATALOG.031")))
+                .MustNotHaveHappened();
+            VerifyCatalogEntriesAdded(new List<CatalogEntry> { catalogEntries[2] });
             VerifyCatalogFileOperations();
             VerifyLoggingStart();
             VerifyLoggingComplete();
