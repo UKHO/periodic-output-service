@@ -697,7 +697,7 @@ stages:
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
-                    arguments: '-containername $(BessStorageConfiguration.ContainerName) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+                    arguments: '-containername $(BessContainerForFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
                 - task: DownloadBuildArtifacts@0
                   displayName: "Download BESS Functional test Artifact"
@@ -739,7 +739,7 @@ stages:
                     scriptType: 'pscore'
                     scriptLocation: 'scriptPath'
                     scriptPath: "$(Build.SourcesDirectory)/devterraformartifact/swap_container_config.ps1"
-                    arguments: '-containername $(BessStorageConfiguration.ContainerName_PostFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+                    arguments: '-containername $(BessContainerForWebjob) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
   - stage: QAdeploy
     dependsOn: Devdeploy
