@@ -27,7 +27,7 @@ steps:
       TF_VAR_agent_2204_subnet: $(agent2204SubnetId)
       TF_VAR_agent_prd_subnet: $(agentprdSubnetId)
       TF_VAR_agent_subscription_id: $(agentSubscriptionId)
-      TF_VAR_BessContainerName: $(BessStorageConfiguration.ContainerName_PostFT)
+      TF_VAR_BessContainerName: $(BessContainerForWebjob)
 
   - task: FileTransform@2
     displayName: "File Transform: Mock API WebApp"
