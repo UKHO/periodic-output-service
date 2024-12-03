@@ -21,6 +21,14 @@ namespace UKHO.FmEssFssMock.API.Services
             { ".txt", "text/plain" }
         };
 
+        private readonly Enum[] bessBatchTypes = {
+                                            Batch.BessBaseZipBatch,
+                                            Batch.BessChangeZipBatch,
+                                            Batch.BessUpdateZipBatch,
+                                            Batch.BessEmptyBatch,
+                                            Batch.BessNoneReadmeBatch
+                                     };
+
         private readonly Enum[] aioBatchTypes = new Enum[]
                                      {
                                             Batch.AioBaseCDZipIsoSha1Batch,
@@ -90,7 +98,7 @@ namespace UKHO.FmEssFssMock.API.Services
             }
 
             //BESS - batch attributes from Queue message - start
-
+            Batch batchEnu = EnumHelper.GetValueFromDescription<Batch>(batchId);
             if (bessBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)))
             {
                 ConfigQueueMessage message = new()
