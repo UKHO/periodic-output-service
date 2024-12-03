@@ -486,8 +486,6 @@ namespace UKHO.BESS.BuilderService.Services
             string exchangeSetPath = Path.Combine(homeDirectoryPath, batchId, bessZipFileName);
             string exchangeSetRootPath = Path.Combine(exchangeSetPath, fssApiConfig.Value.EncRoot);
             string readMeFilePath = Path.Combine(exchangeSetRootPath, fssApiConfig.Value.ReadMeFileName);
-            await CreateReadMeFileAsync(batchId, configQueueMessage.CorrelationId, configQueueMessage.ReadMeSearchFilter, exchangeSetRootPath, readMeFilePath);
-
             string exchangeSetInfoPath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info);
             string serialFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.SerialFileName);
             string productFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);
