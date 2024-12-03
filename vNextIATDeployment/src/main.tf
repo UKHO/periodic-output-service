@@ -10,13 +10,6 @@ data "azurerm_subnet" "mock_main_subnet" {
   resource_group_name  = var.spoke_rg
 }
 
-data "azurerm_subnet" "agent_subnet" {
-  provider             = azurerm.build_agent
-  name                 = var.agent_subnet_name
-  virtual_network_name = var.agent_vnet_name
-  resource_group_name  = var.agent_rg
-}
-
 module "app_insights" {
   source              = "./Modules/AppInsights"
   name                = "${local.service_name}-${local.env_name}-insights"
@@ -90,6 +83,7 @@ module "webapp_service" {
     "ELASTIC_APM_ENVIRONMENT"                                  = local.env_name
     "ELASTIC_APM_SERVICE_NAME"                                 = "POS Web Job"
     "ELASTIC_APM_API_KEY"                                      = var.elastic_apm_api_key
+    "BessStorageConfiguration:ContainerName"                   = var.BessContainerName
   }
   tags                                                         = local.tags
   allowed_ips                                                  = var.allowed_ips
@@ -101,7 +95,9 @@ module "storage" {
   location            = azurerm_resource_group.webapp_rg.location
   allowed_ips         = var.allowed_ips
   m_spoke_subnet      = data.azurerm_subnet.main_subnet.id
-  agent_subnet        = data.azurerm_subnet.agent_subnet.id
+  mock_spoke_subnet   = data.azurerm_subnet.mock_main_subnet.id
+  agent_2204_subnet   = var.agent_2204_subnet
+  agent_prd_subnet    = var.agent_prd_subnet
   env_name            = local.env_name
   service_name        = local.service_name
   service_name_bess   = local.service_name_bess
@@ -116,8 +112,10 @@ module "key_vault" {
   env_name            = local.env_name
   tenant_id           = module.webapp_service.web_app_tenant_id
   allowed_ips         = var.allowed_ips
-  allowed_subnet_ids  = [data.azurerm_subnet.main_subnet.id,data.azurerm_subnet.agent_subnet.id]
+  allowed_subnet_ids  = [data.azurerm_subnet.main_subnet.id, var.agent_2204_subnet,var.agent_prd_subnet]
   location            = azurerm_resource_group.webapp_rg.location
+  agent_2204_subnet   = var.agent_2204_subnet
+  agent_prd_subnet    = var.agent_prd_subnet
   read_access_objects = {
      "webapp_service" = module.webapp_service.web_app_object_id
   }

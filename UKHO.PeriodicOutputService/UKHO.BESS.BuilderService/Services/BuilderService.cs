@@ -34,6 +34,7 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IOptions<FssApiConfiguration> fssApiConfig;
         private readonly IPksService pksService;
         private readonly IPermitDecryption permitDecryption;
+        private readonly ICatalog031Helper catalog031Helper;
         private readonly string homeDirectoryPath;
 
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
@@ -44,7 +45,7 @@ namespace UKHO.BESS.BuilderService.Services
         private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption, ICatalog031Helper catalog031Helper)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
@@ -55,6 +56,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
             this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
+            this.catalog031Helper = catalog031Helper ?? throw new ArgumentNullException(nameof(catalog031Helper));
 
             homeDirectoryPath = Path.Combine(configuration[HOME]!, configuration[BESSFOLDERNAME]!);
         }
@@ -313,19 +315,15 @@ namespace UKHO.BESS.BuilderService.Services
                     "BESS batch creation started at {DateTime} | _X-Correlation-ID: {CorrelationId}", DateTime.UtcNow,
                     configQueueMessage.CorrelationId);
 
-                if (configQueueMessage.Type.ToUpper().Equals(BessType.UPDATE.ToString()))
+                batchType = (configQueueMessage.Type.ToUpper(), configQueueMessage.ReadMeSearchFilter.ToUpper()) switch
                 {
-                    batchType = Batch.BessUpdateZipBatch;
-                }
-                else if (configQueueMessage.Type.ToUpper().Equals(BessType.CHANGE.ToString()))
-                {
-                    batchType = Batch.BessChangeZipBatch;
-                }
-                //else if block for mock only
-                else if (configQueueMessage.Type.ToUpper().Equals("EMPTY"))
-                {
-                    batchType = Batch.BessEmptyBatch;
-                }
+                    (nameof(BessType.UPDATE), "NONE") => Batch.BessNoneReadmeBatch,
+                    (nameof(BessType.UPDATE), _) => Batch.BessUpdateZipBatch,
+                    (nameof(BessType.CHANGE), "NONE") => Batch.BessNoneReadmeBatch,
+                    (nameof(BessType.CHANGE), _) => Batch.BessChangeZipBatch,
+                    ("EMPTY", _) => Batch.BessEmptyBatch,
+                    _ => batchType
+                };
 
                 string bessBatchId =
                     await fssService.CreateBatch(batchType, configQueueMessage, configQueueMessage.CorrelationId);
@@ -494,35 +492,80 @@ namespace UKHO.BESS.BuilderService.Services
             string serialFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.SerialFileName);
             string productFilePath = Path.Combine(essFileDownloadPath, bessZipFileName, fssApiConfig.Value.Info, fssApiConfig.Value.ProductFileName);
 
+            await HandleReadMeFileCreationAsync(exchangeSetRootPath, readMeFilePath, configQueueMessage.ReadMeSearchFilter, configQueueMessage.CorrelationId);
+
             await UpdateSerialFileAsync(serialFilePath, configQueueMessage.Type, configQueueMessage.CorrelationId);
 
             await DeleteProductTxtAndInfoFolderAsync(productFilePath, exchangeSetInfoPath, configQueueMessage.CorrelationId);
         }
 
         /// <summary>
-        ///     This method will create/download README.txt file based on ReadmeSearchFilter.
+        /// This method will handle add/update/delete of README.txt file based on ReadmeSearchFilter.
         /// </summary>
         /// <param name="batchId"></param>
         /// <param name="correlationId"></param>
         /// <param name="readMeSearchFilter"></param>
         /// <param name="exchangeSetRootPath"></param>
         /// <param name="readMeFilePath"></param>
+        /// <param name="readMeSearchFilter"></param>
+        /// <param name="correlationId"></param>
         /// <returns></returns>
-        private async Task CreateReadMeFileAsync(string batchId, string correlationId, string readMeSearchFilter, string exchangeSetRootPath, string readMeFilePath)
+        private async Task HandleReadMeFileCreationAsync(string exchangeSetRootPath, string readMeFilePath, string readMeSearchFilter, string correlationId)
         {
-            if (readMeSearchFilter == ReadMeSearchFilter.AVCS.ToString())
+            switch (readMeSearchFilter?.ToUpperInvariant())
             {
-                return;
+                case nameof(ReadMeSearchFilter.AVCS):
+                    return;
+
+                case nameof(ReadMeSearchFilter.BLANK):
+                    fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
+                    break;
+
+                case nameof(ReadMeSearchFilter.NONE):
+                    await DeleteReadMeFileAndUpdateCatalogFileAsync(exchangeSetRootPath, readMeFilePath, correlationId);
+                    break;
+
+                default:
+                    await DownloadReadMeFileAsync(exchangeSetRootPath, correlationId, readMeSearchFilter);
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// This method will delete ReadMe File and update Catalog.031 file in batch.
+        /// </summary>
+        /// <param name="exchangeSetRootPath"></param>
+        /// <param name="readMeFilePath"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        private async Task DeleteReadMeFileAndUpdateCatalogFileAsync(string exchangeSetRootPath, string readMeFilePath, string correlationId)
+        {
+            await DeleteReadMeFileAsync(readMeFilePath, correlationId);
+            catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(exchangeSetRootPath);
+        }
+
+        /// <summary>
+        /// This method will delete README.TXT file from batch.
+        /// </summary>
+        /// <param name="readMeFilePath"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
+        private async Task DeleteReadMeFileAsync(string readMeFilePath, string correlationId)
+        {
+            try
+            {
+                fileSystemHelper.DeleteFile(readMeFilePath);
+
+                logger.LogInformation(EventIds.BessReadMeFileDeleted.ToEventId(), "README.TXT file deleted. | _X-Correlation-ID:{CorrelationId}", correlationId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.BessReadMeFileDeletionFailed.ToEventId(), "README.TXT file delete operation failed. | ErrorMessage: {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", ex.Message, correlationId);
+                throw new FulfilmentException(EventIds.BessReadMeFileDeletionFailed.ToEventId());
             }
 
-            if (readMeSearchFilter == ReadMeSearchFilter.BLANK.ToString())
-            {
-                fileSystemHelper.CreateEmptyFileContent(readMeFilePath);
-            }
-            else
-            {
-                await DownloadReadMeFileAsync(exchangeSetRootPath, correlationId, readMeSearchFilter);
-            }
+            await Task.CompletedTask;
         }
 
         /// <summary>

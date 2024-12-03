@@ -9,21 +9,22 @@ variable "resource_group_name" {
 }
 
 locals {
-  env_name           = lower(terraform.workspace)
-  service_name       = "pos"
-  web_app_name       = "${local.service_name}-${local.env_name}-lxs-webapp"
-  mock_web_app_name  = "${local.service_name}-${local.env_name}-mock-webapp"
-  key_vault_name     = "${local.service_name}-ukho-${local.env_name}-kv"
-  service_name_bess  = "bess"
-  container_name     = "bess-configs"
+  env_name               = lower(terraform.workspace)
+  service_name           = "pos"
+  web_app_name           = "${local.service_name}-${local.env_name}-lxs-webapp"
+  mock_web_app_name      = "${local.service_name}-${local.env_name}-mock-webapp"
+  pks_mock_web_app_name  = "${local.service_name}-${local.env_name}-pks-mock-webapp"
+  key_vault_name         = "${local.service_name}-ukho-${local.env_name}-kv"
+  service_name_bess      = "bess"
+  container_name         = "bess-configs"
 
   tags = {
     SERVICE                   = "Periodic Output Service"
     ENVIRONMENT               = local.env_name
     SERVICE_OWNER             = "UKHO"
-    RESPONSIBLE_TEAM          = "ABZU"
+    RESPONSIBLE_TEAM          = "Abzu"
     CALLOUT_TEAM              = "On-Call_N/A"
-    COST_CENTRE               = "A.011.08"
+    COST_CENTRE               = "A.008.02"
   }
 }
 
@@ -39,15 +40,7 @@ variable "spoke_subnet_name" {
   type = string
 }
 
-variable "agent_rg" {
-  type = string
-}
-
-variable "agent_vnet_name" {
-  type = string
-}
-
-variable "agent_subnet_name" {
+variable "mock_spoke_subnet_name" {
   type = string
 }
 
@@ -65,10 +58,18 @@ variable "elastic_apm_server_url" {
 variable "elastic_apm_api_key" {
 }
 
-variable "mock_spoke_subnet_name" {
+variable "agent_2204_subnet" {
+  type = string
+}
+
+variable "agent_prd_subnet" {
   type = string
 }
 
 variable "permitdecryptionhardwareid" {
+  type = string
+}
+
+variable "BessContainerName" {
   type = string
 }

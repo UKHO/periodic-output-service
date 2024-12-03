@@ -191,11 +191,16 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// This method is used to check the README.TXT
         /// </summary>
         /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
-        /// <param name="readMeSearchFilter">Sets the value of the Readme File type based on Config out of AVCS, BLANK or {Query}</param>
+        /// <param name="readMeSearchFilter">Sets the value of the Readme File type based on Config out of AVCS, BLANK, NONE or {Query}</param>
         /// <returns></returns>
         public static bool CheckReadMeInBessExchangeSet(string? downloadFolderPath, string? readMeSearchFilter)
         {
-            string[] readMeFileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
+            var path = Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!);
+            if (readMeSearchFilter!.Equals("NONE"))
+            {
+                return !File.Exists(Path.Combine(path, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
+            }
+            string[] readMeFileContent = File.ReadAllLines(Path.Combine(path, testConfiguration.exchangeSetDetails.ExchangeReadMeFile!));
             string readMeType;
             switch (readMeSearchFilter)
             {
@@ -412,6 +417,26 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 return permitVerified;
             }
             return false;
+        }
+
+        /// <summary>
+        /// This method is use to validate the content of CATALOG.031 details
+        /// </summary>
+        /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
+        /// <param name="readMeSearchFilter">Sets the value of the Readme File type based on Config out of AVCS, BLANK, NONE or {Query}</param>
+        public static void VerifyCatalogContents(string? downloadFolderPath, string? readMeSearchFilter)
+        {
+            var catalogFilePath = Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!, testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile!);
+            var catalogFileContent = File.ReadAllText(catalogFilePath);
+            bool containsReadMeFile = catalogFileContent.Contains(testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
+            if (readMeSearchFilter!.Equals("NONE"))
+            {
+                containsReadMeFile.Should().BeFalse();
+            }
+            else
+            {
+                containsReadMeFile.Should().BeTrue();
+            }
         }
     }
 }

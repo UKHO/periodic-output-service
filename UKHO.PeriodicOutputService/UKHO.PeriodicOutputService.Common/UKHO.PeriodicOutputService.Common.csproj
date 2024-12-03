@@ -27,6 +27,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.IO.Abstractions" Version="21.0.22" />
 	<PackageReference Include="UKHO.WeekNumberUtils" Version="1.5.24165.3" />
+    <PackageReference Include="UKHO.Torus.Enc.Core" Version="2.0.1" />
     <PackageReference Include="SharpZipLib" Version="1.4.2" />
     <PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
   </ItemGroup>
