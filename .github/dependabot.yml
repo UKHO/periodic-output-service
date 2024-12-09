@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "nuget"
     directory: "/UKHO.FmEssFssMock.API/UKHO.FmEssFssMock.API"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
@@ -14,7 +14,7 @@ updates:
   - package-ecosystem: "nuget"
     directory: "/UKHO.PeriodicOutputService"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
