@@ -53,6 +53,7 @@ module "webapp_service" {
     "ELASTIC_APM_ENVIRONMENT"                                  = local.env_name
     "ELASTIC_APM_SERVICE_NAME"                                 = "POS Web Job"
     "ELASTIC_APM_API_KEY"                                      = var.elastic_apm_api_key
+    "BessStorageConfiguration:ContainerName"                   = var.BessContainerName
   }
   tags                                                         = local.tags
   allowed_ips                                                  = var.allowed_ips
