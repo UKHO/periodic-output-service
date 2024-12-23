@@ -78,6 +78,8 @@ module "webapp_service" {
   env_name                  = local.env_name
   location                  = azurerm_resource_group.webapp_rg.location
   subnet_id                 = data.azurerm_subnet.main_subnet.id
+  agent_2204_subnet         = var.agent_2204_subnet
+  agent_prd_subnet          = var.agent_prd_subnet
   app_settings = {
     "EventHubLoggingConfiguration:Environment"                 = local.env_name
     "EventHubLoggingConfiguration:MinimumLoggingLevel"         = "Warning"
