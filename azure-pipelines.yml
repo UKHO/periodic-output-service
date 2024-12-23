@@ -91,7 +91,7 @@ stages:
             pwsh: true
             script: $(Agent.BuildDirectory)/tools/dotnet-stryker
 
-        - task: PublishMutationReport@0
+        - task: PublishMutationReport@1
           displayName: 'Publish Stryker Mutator Report'
           inputs:
             reportPattern: '**/mutation-report.html'
