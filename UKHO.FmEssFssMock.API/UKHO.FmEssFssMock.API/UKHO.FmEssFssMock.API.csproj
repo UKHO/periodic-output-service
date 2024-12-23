@@ -11,11 +11,11 @@
     <NoWarn>1701;1702;8618;8602;8604;8600;8603</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.22.2" />
-    <PackageReference Include="FluentValidation" Version="11.9.2" />
-    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="6.0.33" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="6.0.36" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.9.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="appsettings.json">
@@ -82,6 +82,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\5581CA8C-27A8-42EC-86D2-BEF6915C2992\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\9F19B71E-2DCA-42FD-B7DD-A68792A2AA27\BESS_PortOfIndia.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\9F19B71E-2DCA-42FD-B7DD-A68792A2AA27\Permit.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\BESConfig.zip">

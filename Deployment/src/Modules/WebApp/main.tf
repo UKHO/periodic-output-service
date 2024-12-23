@@ -29,6 +29,10 @@ resource "azurerm_app_service" "webapp_service" {
     type = "SystemAssigned"
   }
 
+  lifecycle {
+    ignore_changes = [ virtual_network_subnet_id ]
+  }
+
   https_only = true
 } 
 
