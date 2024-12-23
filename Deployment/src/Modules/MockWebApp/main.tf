@@ -1,12 +1,15 @@
-resource "azurerm_app_service" "mock_webapp_service" {
+resource "azurerm_windows_web_app" "mock_webapp_service" {
   name                = var.name
   location            = var.location
   resource_group_name = var.resource_group_name
-  app_service_plan_id = var.service_plan_id
+  service_plan_id     = var.service_plan_id
   tags                = var.tags
 
- site_config {
-    windows_fx_version  =   "DOTNETCORE|6.0"
+  site_config {
+    application_stack {    
+      current_stack = "dotnet"
+      dotnet_version = "v6.0"
+    }
     always_on  = true
     ftps_state = "Disabled"
 
@@ -40,19 +43,22 @@ resource "azurerm_app_service" "mock_webapp_service" {
 } 
 
 resource "azurerm_app_service_virtual_network_swift_connection" "mock_webapp_vnet_integration" {
-  app_service_id = azurerm_app_service.mock_webapp_service.id
+  app_service_id = azurerm_windows_web_app.mock_webapp_service.id
   subnet_id      = var.subnet_id
 }
 
-resource "azurerm_app_service" "pks_mock_webapp_service" {
+resource "azurerm_windows_web_app" "pks_mock_webapp_service" {
   name                = var.pks_name
   location            = var.location
   resource_group_name = var.resource_group_name
-  app_service_plan_id = var.service_plan_id
+  service_plan_id     = var.service_plan_id
   tags                = var.tags
 
   site_config {
-    windows_fx_version  =   "DOTNETCORE|6.0"
+    application_stack {    
+      current_stack = "dotnet"
+      dotnet_version = "v6.0"
+    }
     always_on  = true
     ftps_state = "Disabled"
 
@@ -86,6 +92,6 @@ resource "azurerm_app_service" "pks_mock_webapp_service" {
 } 
 
 resource "azurerm_app_service_virtual_network_swift_connection" "pks_mock_webapp_vnet_integration" {
-  app_service_id = azurerm_app_service.pks_mock_webapp_service.id
+  app_service_id = azurerm_windows_web_app.pks_mock_webapp_service.id
   subnet_id      = var.subnet_id
 }
