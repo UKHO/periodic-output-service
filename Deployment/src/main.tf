@@ -11,16 +11,6 @@ data "azurerm_subnet" "mock_main_subnet" {
   resource_group_name  = var.spoke_rg
 }
 
-data "azurerm_app_service_plan" "essft_asp" {
-  name                = "ess-vne-sxs-2-asp"
-  resource_group_name = "ess-vne-rg"
-}
-
-data "azurerm_app_service_plan" "ess_asp" {
-  name                = "ess-${local.env_name}-lxs-1-asp"
-  resource_group_name = "ess-${local.env_name}-rg"
-}
-
 module "app_insights" {
   source              = "./Modules/AppInsights"
   name                = "${local.service_name}-${local.env_name}-insights"
