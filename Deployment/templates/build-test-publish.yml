@@ -87,7 +87,7 @@ jobs:
 
 - job: BuildAndPublishWebJob
   workspace:
-  clean: all
+    clean: all
   displayName: "Dotnet Build publish WebJob"
   steps:
     - task: PowerShell@2
