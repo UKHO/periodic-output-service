@@ -126,7 +126,7 @@ stages:
         parameters:
           Environment: ${{variables.Environment}}
     jobs:
-      - template: Deployment/templates/Deploy.yml
+      - template: Deployment/templates/app-deploy.yml
         parameters:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
@@ -144,7 +144,7 @@ stages:
         parameters:
           Environment: ${{variables.Environment}}
     jobs:
-      - template: Deployment/templates/Deploy.yml
+      - template: Deployment/templates/app-deploy.yml
         parameters:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
@@ -160,7 +160,7 @@ stages:
         parameters:
           Environment: ${{variables.Environment}}
     jobs:
-      - template: Deployment/templates/Deploy.yml
+      - template: Deployment/templates/app-deploy.yml
         parameters:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
@@ -192,7 +192,7 @@ stages:
         parameters:
           Environment: ${{variables.Environment}}
     jobs:
-      - template: Deployment/templates/Deploy.yml
+      - template: Deployment/templates/app-deploy.yml
         parameters:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
@@ -211,7 +211,7 @@ stages:
         parameters:
           Environment: ${{variables.Environment}}
     jobs:
-      - template: Deployment/templates/Deploy.yml
+      - template: Deployment/templates/app-deploy.yml
         parameters:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
@@ -230,7 +230,7 @@ stages:
         parameters:
           Environment: ${{variables.Environment}}
     jobs:
-      - template: Deployment/templates/Deploy.yml
+      - template: Deployment/templates/app-deploy.yml
         parameters:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
@@ -249,7 +249,7 @@ stages:
         parameters:
           Environment: ${{variables.Environment}}
     jobs:
-      - template: Deployment/templates/Deploy.yml
+      - template: Deployment/templates/app-deploy.yml
         parameters:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
