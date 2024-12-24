@@ -100,11 +100,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
                 return exchangeSetResponseModel;
             }
-            else
-            {
-                _logger.LogError(EventIds.GetProductDataProductVersionFailed.ToEventId(), "Failed to create exchange set for product version | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
-                throw new FulfilmentException(EventIds.GetProductDataProductVersionFailed.ToEventId());
-            }
+
+            _logger.LogError(EventIds.GetProductDataProductVersionFailed.ToEventId(), "Failed to create exchange set for product version | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
+            throw new FulfilmentException(EventIds.GetProductDataProductVersionFailed.ToEventId());
         }
 
         [ExcludeFromCodeCoverage]

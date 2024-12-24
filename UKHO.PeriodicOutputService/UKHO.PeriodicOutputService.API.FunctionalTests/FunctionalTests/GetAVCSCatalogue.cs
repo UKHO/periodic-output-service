@@ -11,7 +11,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [OneTimeSetUp]
         public Task Setup()
         {
-            //testConfiguration = new TestConfiguration();
             getunp = new GetUNPResponse();
             getcat = new GetCatalogue();
 

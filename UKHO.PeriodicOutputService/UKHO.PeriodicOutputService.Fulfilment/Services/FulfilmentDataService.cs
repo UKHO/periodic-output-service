@@ -79,18 +79,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
             _logger.LogInformation(EventIds.GetLatestSinceDateTimeCompleted.ToEventId(), "Getting latest since datetime completed  | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
+            Task fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
+            Task updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime.ToString("R")));
+
             bool isSuccess = false;
 
             try
             {
-                Task[] tasks = null;
-
-                Task fullAVCSExchangeSetTask = Task.Run(() => CreateFullAVCSExchangeSet());
-                Task updateAVCSExchangeSetTask = Task.Run(() => CreateUpdateExchangeSet(sinceDateTime.ToString("R")));
-
-                tasks = new Task[] { fullAVCSExchangeSetTask, updateAVCSExchangeSetTask };
-
-                await Task.WhenAll(tasks);
+                await Task.WhenAll(fullAVCSExchangeSetTask, updateAVCSExchangeSetTask);
 
                 isSuccess = true;
 

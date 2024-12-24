@@ -33,7 +33,6 @@
         /// <returns></returns>
         public async Task<HttpResponseMessage> GetFileDownloadAsync(string uri, string filerangeheader = null, string accessToken = null)
         {
-
             using (var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri))
             {
                 if (filerangeheader != null)

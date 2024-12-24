@@ -66,7 +66,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string AIOUpdateValidBatchId { get; set; }
             public string EncUpdateListCsvBatchId { get; set; }
             public string TempFolderName { get; set; }
-            public string UpdateExchangeSet { get; set; }
             public string PosAvcsZipFileName { get; set; }
             public string PosAvcsIsoFileName { get; set; }
             public string PosAvcsIsoSha1FileName { get; set; }
@@ -78,11 +77,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string IsoFileMimeType { get; set; }
             public string Sha1FileMimeType { get; set; }
             public string ZipFileMimeType { get; set; }
-            public string PosDVDVolumeIdentifier { get; set; }
             public string AioExchangeSetBatchId { get; set; }
             public string InfoFolderName { get; set; }
             public string AioFolderName { get; set; }
-
         }
 
         public class AioWebjobApiConfiguration
@@ -91,7 +88,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public int WebjobRunningStatusDelayTime { get; set; }
         }
 
-            public TestConfiguration()
+        public TestConfiguration()
         {
             ConfigurationRoot = new ConfigurationBuilder()
                                .AddJsonFile("appsettings.json", false)
