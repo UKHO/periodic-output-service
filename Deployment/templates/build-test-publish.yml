@@ -1,0 +1,373 @@
+parameters:
+# Disable the NVD dependency check job.
+- name: DisableDependencyCheck
+  type: boolean
+  default: false
+
+- name: DotNetVersion
+  type: string
+  default: '6.0.x'
+
+jobs:
+- job: Dependencychecker
+  condition: eq('${{ parameters.DisableDependencyCheck }}', false)
+  workspace:
+    clean: all
+  displayName: "Dependencychecker"
+  steps:          
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK'
+      inputs:
+        packageType: sdk
+        version: $(SdkVersion)
+
+    - task: DotNetCoreCLI@2
+      displayName: ".Net Core - NuGet restore non test projects only"
+      inputs:
+        command: "restore"
+        projects: |
+          **/*.csproj
+          !**/*Tests.csproj
+        feedsToUse: config
+        noCache: true
+        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+        workingDirectory:
+        packagesDirectory: 
+
+    - template: dependency-checker/windows-dependency-checker.yaml@UKHOTemplates
+      parameters:
+        scanName:
+        scanPath:
+        suppressionPath: '$(Build.SourcesDirectory)\NVDSuppressions.xml'
+
+- job: UnitTestsAndCodeCoverage
+  workspace:
+    clean: all
+  displayName: "Dotnet Test and Publish Code Coverage"
+  steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK'
+      inputs:
+        packageType: sdk
+        useGlobalJson: true
+        workingDirectory: '$(Build.SourcesDirectory)'
+
+    - task: DotNetCoreCLI@2
+      displayName: ".Net Core - NuGet restore test projects only"
+      inputs:
+        command: "restore"
+        projects: "**/*Tests.csproj"
+        feedsToUse: config
+        noCache: true
+        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+        packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packagesForTests'
+
+    - task: DotNetCoreCLI@2
+      displayName: "dotnet test - Perform Unit Tests"
+      inputs:
+        command: "test"
+        projects: "**/*UnitTests.csproj"
+        arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
+        publishTestResults: true
+        testRunTitle: "UnitTests"
+
+    - task: PowerShell@2
+      displayName: "Generate code coverage report"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)\CodeCoverageReport.ps1'
+        arguments: '-source "$(Build.SourcesDirectory)" -reportFolder "$(Build.ArtifactStagingDirectory)"'
+
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish Code coverage"
+      inputs:
+        PathtoPublish: "$(Build.ArtifactStagingDirectory)/codecoveragereport"
+        ArtifactName: codecoveragereport
+
+- job: BuildAndPublishWebJob
+  workspace:
+  clean: all
+  displayName: "Dotnet Build publish WebJob"
+  steps:
+    - task: PowerShell@2
+      displayName: "Set assembly version numbers based on build ID"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
+        arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$env:UKHOAssemblyProduct"'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK'
+      inputs:
+        packageType: sdk
+        useGlobalJson: true
+        workingDirectory: '$(Build.SourcesDirectory)'
+
+    - task: DotNetCoreCLI@2
+      displayName: ".Net Core - NuGet restore"
+      inputs:
+        command: restore
+        projects: |
+          **/*.csproj
+        feedsToUse: config
+        noCache: true
+        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+
+    - task: DotNetCoreCLI@2
+      displayName: "dotnet build task"
+      inputs:
+        command: "build"
+        projects: "**/*.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
+
+    - task: DotNetCoreCLI@2
+      displayName: "Publish POS Fulfilment Service Code"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: "**/*UKHO.PeriodicOutputService.Fulfilment.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob'
+        zipAfterPublish: false
+        modifyOutputPath: false
+
+    - task: DotNetCoreCLI@2
+      displayName: "Publish AIO Fulfilment Service Code"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: "**/*UKHO.AdmiraltyInformationOverlay.Fulfilment.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\AIOFulfilmentWebJob'
+        zipAfterPublish: false
+        modifyOutputPath: false
+
+    - task: DotNetCoreCLI@2
+      displayName: "Publish BESS Configuration Service Code"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: "**/*UKHO.BESS.ConfigurationService.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\continuous\BESSConfigurationServiceWebJob'
+        zipAfterPublish: false
+        modifyOutputPath: false
+
+    - task: DotNetCoreCLI@2
+      displayName: "Publish BESS Builder Service Code"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: "**/*UKHO.BESS.BuilderService.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\continuous\BESSBuilderServiceWebJob'
+        zipAfterPublish: false
+        modifyOutputPath: false
+
+    - task: DotNetCoreCLI@2
+      displayName: "Publish BESS CleanUp Service Code"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: "**/*UKHO.BESS.CleanUpJob.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\BESSCleanUpWebJob'
+        zipAfterPublish: false
+        modifyOutputPath: false
+
+    - task: ArchiveFiles@2
+      displayName: "Zip POS fulfilment service"
+      inputs:
+        rootFolderOrFile: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\'
+        includeRootFolder: false
+        archiveType: "zip"
+        archiveFile: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\PeriodicOutputFulfilmentService.zip'
+        replaceExistingArchive: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish PeriodicOutputFulfilmentService Artifact"
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService'
+        ArtifactName: PeriodicOutputService
+
+    - task: PowerShell@2
+      displayName: "Generate event id runbook"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)\Utility\XmlToRtfTransformation.ps1'
+        arguments: '-xmlFilePath $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob\UKHO.PeriodicOutputService.Common.xml -xsltFilePath $(Build.SourcesDirectory)\Utility\EventIdXmlTransformation.xslt -outputFileName Runbook-EventId'
+    
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish event id runbook"
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)\Utility\Runbook-EventId.rtf'
+        ArtifactName: Runbook
+
+- job: PublishTerraformArtifacts
+  workspace:
+    clean: all
+  displayName: "Publish Terraform Artifacts"
+  steps:
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish terraform Artifacts"
+      inputs:
+        PathtoPublish: '$(Build.SourcesDirectory)\Deployment'
+        ArtifactName: terraformartifact
+
+- job: PublishFunctionalTests
+  workspace:
+    clean: all
+  displayName: "Publish Functional Tests"
+  steps:
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK'
+      inputs:
+        packageType: sdk
+        useGlobalJson: true
+        workingDirectory: '$(Build.SourcesDirectory)'
+
+    - task: DotNetCoreCLI@2
+      displayName: ".Net Core - NuGet restore"
+      inputs:
+        command: restore
+        projects: |
+          **/*.csproj
+        feedsToUse: config
+        noCache: true
+        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+
+    - task: DotNetCoreCLI@2
+      displayName: "Publish POS functional test"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: "**/*UKHO.PeriodicOutputService.API.FunctionalTests.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\UKHO.PeriodicOutputService.API.FunctionalTests'
+        zipAfterPublish: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish POS Functional test Artifact"
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)\UKHO.PeriodicOutputService.API.FunctionalTests'
+        ArtifactName: posfunctionaltests
+
+    - task: DotNetCoreCLI@2
+      displayName: "Publish BESS functional test"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: "**/*UKHO.BESS.API.FunctionalTests.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\UKHO.BESS.API.FunctionalTests'
+        zipAfterPublish: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish BESS Functional test Artifact"
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)\UKHO.BESS.API.FunctionalTests'
+        ArtifactName: bessfunctionaltests
+  
+- job: BuildAndPublishMockAPI
+  workspace:
+    clean: all
+  displayName: "Build and Publish Mock API"
+  steps:
+    - task: PowerShell@2
+      displayName: "Set assembly version numbers based on build ID"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
+        arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK'
+      inputs:
+        packageType: sdk
+        useGlobalJson: true
+        workingDirectory: '$(Build.SourcesDirectory)'
+
+    - task: DotNetCoreCLI@2
+      displayName: ".Net Core - NuGet restore"
+      inputs:
+        command: restore
+        projects: |
+          **/*.csproj
+        feedsToUse: config
+        noCache: true
+        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+        workingDirectory: '$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API'
+
+    - task: DotNetCoreCLI@2
+      displayName: "dotnet build task"
+      inputs:
+        command: "build"
+        projects: "**/*UKHO.FmEssFssMock.API.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
+        workingDirectory: '$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API'
+
+    - task: DotNetCoreCLI@2
+      displayName: "Publish MockWebAPI"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: '**/*UKHO.FmEssFssMock.API.csproj'
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\MockWebAPI'
+        zipAfterPublish: true
+        modifyOutputPath: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish WebAPI Artifact"
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)\MockWebAPI'
+        ArtifactName: MockWebAPI
+
+- job: BuildAndPublishPKSWireMockAPI
+  workspace:
+    clean: all
+  displayName: "Build and Publish PKSWireMock API"
+  steps:
+    - task: PowerShell@2
+      displayName: "Set assembly version numbers based on build ID"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
+        arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.PKSWireMockService.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK'
+      inputs:
+        packageType: sdk
+        useGlobalJson: true
+        workingDirectory: '$(Build.SourcesDirectory)'
+
+    - task: DotNetCoreCLI@2
+      displayName: ".Net Core - NuGet restore"
+      inputs:
+        command: restore
+        projects: |
+          **/*.csproj
+        feedsToUse: config
+        noCache: true
+        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PKSWireMockService.API'
+
+    - task: DotNetCoreCLI@2
+      displayName: "dotnet build task"
+      inputs:
+        command: "build"
+        projects: "**/*UKHO.PKSWireMock.API.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
+        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PKSWireMockService.API'
+
+    - task: DotNetCoreCLI@2
+      displayName: "Publish PKSWireMock WebAPI"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: '**/*UKHO.PKSWireMock.API.csproj'
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PKSWireMockWebAPI'
+        zipAfterPublish: true
+        modifyOutputPath: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: "Publish PKSWireMock WebAPI Artifact"
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)\PKSWireMockWebAPI'
+        ArtifactName: PKSWireMockWebAPI
