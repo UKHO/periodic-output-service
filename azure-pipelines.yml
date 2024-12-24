@@ -44,6 +44,8 @@ variables:
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.9.6"
   - name: WindowPool
     value: "NautilusBuild"
+  - name: SdkVersion
+    value: "8.0.x"
 
 resources:
   repositories:
