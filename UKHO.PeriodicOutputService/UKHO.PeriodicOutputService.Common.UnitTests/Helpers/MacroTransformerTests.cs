@@ -175,7 +175,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         [Test]
         public void WhenMacroValueIsAvailable_ThenCorrespondingDateStringIsReturnedAdd1DayOutputWeekNumberPadded()
         {
-            string macroExpression = "$(now.AddDays(1).WeekNumber)";
+            string macroExpression = "$(now.AddDays(1).WeekNumber2)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(1)).Week.ToString().PadLeft(2, '0');
             MacroTest(macroExpression, output).Should().Be(output);
         }
@@ -280,7 +280,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         public void WhenMacroValueIsAvailable_ThenCorrespondingDateStringIsReturnedMinus1DayOutputYearNumber()
         {
             string macroExpression = "$(now.AddDays(-1).Year)";
-            string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(-1)).Year.ToString();
+            string output = DateTime.Now.AddDays(-1).Year.ToString();
             MacroTest(macroExpression, output).Should().Be(output);
         }
 
@@ -288,7 +288,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         public void WhenMacroValueIsAvailable_ThenCorrespondingDateStringIsReturnedMinus1DayOutputYearNumberLast2Digits()
         {
             string macroExpression = "$(now.AddDays(-1).Year2)";
-            string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(-1)).Year.ToString().Substring(2, 2);
+            string output = DateTime.Now.AddDays(-1).Year.ToString().Substring(2, 2);
             MacroTest(macroExpression, output).Should().Be(output);
         }
 
@@ -451,11 +451,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now).Year + "/" + WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now).Week.ToString().PadLeft(2, '0');
             MacroTest(macroExpression, output).Should().Be(output);
         }
-
-        public static object[] unavailableMacroValues =
-        {
-
-        };
 
         [Test]
         public void WhenMacroValueIsUnavailable_ThenSameValueIsReturned()
