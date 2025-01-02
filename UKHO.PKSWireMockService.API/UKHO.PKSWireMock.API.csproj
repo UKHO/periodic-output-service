@@ -12,9 +12,9 @@
     <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="6.0.36" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
-    <PackageReference Include="WireMock.Net" Version="1.6.9" />
-    <PackageReference Include="WireMock.Net.Abstractions" Version="1.6.9" />
-    <PackageReference Include="WireMock.Org.Abstractions" Version="1.6.9" />
+    <PackageReference Include="WireMock.Net" Version="1.6.10" />
+    <PackageReference Include="WireMock.Net.Abstractions" Version="1.6.10" />
+    <PackageReference Include="WireMock.Org.Abstractions" Version="1.6.10" />
     <PackageReference Include="YamlDotNet" Version="15.3.0" />
   </ItemGroup>
 
