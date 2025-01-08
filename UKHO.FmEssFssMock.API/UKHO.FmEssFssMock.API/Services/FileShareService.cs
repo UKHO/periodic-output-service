@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Options;
 using UKHO.FmEssFssMock.API.Common;
 using UKHO.FmEssFssMock.API.Helpers;
@@ -226,10 +227,10 @@ namespace UKHO.FmEssFssMock.API.Services
         public bool AddFile(string batchId, string fileName, string homeDirectoryPath)
         {
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
-
-            if (!FileHelper.CheckFolderExists(batchFolderPath))
+            string batchFolderPathSanatized = Regex.Replace(batchFolderPath, "[^a-zA-Z0-9-]", "");
+            if (!FileHelper.CheckFolderExists(batchFolderPathSanatized))
             {
-                Directory.CreateDirectory(batchFolderPath);
+                Directory.CreateDirectory(batchFolderPathSanatized);
             }
 
             string srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(fileName));
