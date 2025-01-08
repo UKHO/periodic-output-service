@@ -227,7 +227,7 @@ namespace UKHO.FmEssFssMock.API.Services
         public bool AddFile(string batchId, string fileName, string homeDirectoryPath)
         {
             string batchFolderPath = Path.Combine(homeDirectoryPath, batchId);
-            string batchFolderPathSanatized = Regex.Replace(batchFolderPath, "[^a-zA-Z0-9-]", "");
+            string batchFolderPathSanatized = Regex.Replace(batchFolderPath, "[^a-zA-Z0-9-_]", "");
             if (!FileHelper.CheckFolderExists(batchFolderPathSanatized))
             {
                 Directory.CreateDirectory(batchFolderPathSanatized);
