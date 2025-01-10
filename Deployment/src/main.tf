@@ -74,7 +74,7 @@ module "webapp_service" {
     "EventHubLoggingConfiguration:Environment"                 = local.env_name
     "EventHubLoggingConfiguration:MinimumLoggingLevel"         = "Warning"
     "EventHubLoggingConfiguration:UkhoMinimumLoggingLevel"     = "Information"
-    "APPLICATIONINSIGHTS_CONNECTION_STRING"                    = module.app_insights.connection_string
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = module.app_insights.instrumentation_key
     "ASPNETCORE_ENVIRONMENT"                                   = local.env_name
     "WEBSITE_RUN_FROM_PACKAGE"                                 = "1"
     "WEBSITE_ENABLE_SYNC_UPDATE_SITE"                          = "true"
