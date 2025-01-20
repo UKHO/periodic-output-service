@@ -68,10 +68,9 @@ steps:
       xmlTransformationRules:
       jsonTargetFiles: '**/appsettings.json'
 
-  - task: FileTransform@2
-    variables:
-    - name: "schedule"
-      value: $(ScheduleAppSetting)
+  - bash: echo "##vso[task.setvariable variable=schedule]$(ScheduleAppSetting)"
+    
+  - task: FileTransform@2   
     displayName: "File Transform: AIO settings Config"
     inputs:
       folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
