@@ -66,10 +66,9 @@ steps:
     inputs:
       folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
       xmlTransformationRules:
-      jsonTargetFiles: |
-        **/appsettings.json
-        !**/AIOFulfilmentWebJob/appsettings.json
-        !**/AIOFulfilmentWebJobPrinting/appsettings.json
+      jsonTargetFiles: | 
+        **/POS*/appsettings.json
+        **/BESS*/appsettings.json        
 
   - bash: echo "##vso[task.setvariable variable=schedule]$(AioSchedule)"
     displayName: "Set AIO weekly job schedule"
