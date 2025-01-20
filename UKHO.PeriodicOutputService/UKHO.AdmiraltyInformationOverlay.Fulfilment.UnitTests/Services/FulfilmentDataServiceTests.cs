@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.AdmiraltyInformationOverlay.Fulfilment.Services;
@@ -46,35 +45,29 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
-            Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
-                .ParamName
-                .Should().Be("fileSystemHelper");
+            var exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("fileSystemHelper"));
 
-            Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
-                .ParamName
-                .Should().Be("essService");
+            exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("essService"));
 
-            Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
-                .ParamName
-                .Should().Be("fssService");
+            exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("fssService"));
 
-            Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper))
-                .ParamName
-                .Should().Be("logger");
+            exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
-            Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper))
-                 .ParamName
-                 .Should().Be("configuration");
+            exception = Assert.Throws<ArgumentNullException>(
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("configuration"));
 
-            Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null))
-                 .ParamName
-                 .Should().Be("azureTableStorageHelper");
+            exception = Assert.Throws<ArgumentNullException>(
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null));
+            Assert.That(exception.ParamName, Is.EqualTo("azureTableStorageHelper"));
         }
 
         [Test]
@@ -254,7 +247,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            Assert.ThrowsAsync<AggregateException>(
+            Assert.ThrowsAsync<ArgumentNullException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
@@ -291,9 +284,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
             .Returns(GetValidBatchResponseModel());
 
-            A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<AggregateException>();
+            A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<ArgumentNullException>();
 
-            Assert.ThrowsAsync<AggregateException>(
+            Assert.ThrowsAsync<ArgumentNullException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored,  A<string>.Ignored))
@@ -431,9 +424,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
             .Returns(GetValidBatchResponseModel());
 
-            A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<AggregateException>();
+            A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<ArgumentNullException>();
 
-            Assert.ThrowsAsync<AggregateException>(
+            Assert.ThrowsAsync<ArgumentNullException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))

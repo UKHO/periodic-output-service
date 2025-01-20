@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 using Microsoft.Extensions.Options;
 using NUnit.Framework;
 using UKHO.BESS.API.FunctionalTests.Helpers;
@@ -30,7 +29,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.MockEndPoint
         public async Task WhenICallUploadConfigApiWithValidConfigFile_ThenCreatedStatusCode201IsReturned()
         {
             HttpResponseMessage apiResponse = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, "s63", "UPDATE", "AVCS", "PERMIT_XML");
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)201);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)201);
         }
 
         //PBI 142682: BESS CS : Create a mock endpoint to upload BESS configuration files to azure storage
@@ -38,7 +37,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.MockEndPoint
         public async Task WhenICallUploadConfigApiWithInvalidConfigFile_ThenBadRequestStatusCode400IsReturned()
         {
             HttpResponseMessage apiResponse = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.InvalidConfigPath, testConfiguration.sharedKeyConfig.Key, "s63", "UPDATE", "AVCS", "PERMIT_XML");
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)400);
         }
 
         [TearDown]

@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -83,31 +82,40 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
             Action nullEssService = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper);
-            nullEssService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("essService");
+            var exception = Assert.Throws<ArgumentNullException>(() => nullEssService());
+            Assert.That(exception.ParamName, Is.EqualTo("essService"));
 
             Action nullFssService = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper);
-            nullFssService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fssService");
+            exception = Assert.Throws<ArgumentNullException>(() => nullFssService());
+            Assert.That(exception.ParamName, Is.EqualTo("fssService"));
 
             Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper);
-            nullFileSystemHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fileSystemHelper");
+            exception = Assert.Throws<ArgumentNullException>(() => nullFileSystemHelper());
+            Assert.That(exception.ParamName, Is.EqualTo("fileSystemHelper"));
 
             Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper);
-            nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
+            exception = Assert.Throws<ArgumentNullException>(() => nullLogger());
+            Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             Action nullAzureTableStorageHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, null, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper);
-            nullAzureTableStorageHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureTableStorageHelper");
+            exception = Assert.Throws<ArgumentNullException>(() => nullAzureTableStorageHelper());
+            Assert.That(exception.ParamName, Is.EqualTo("azureTableStorageHelper"));
 
             Action nullFssApiConfiguration = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, null, fakePksService, fakePermitDecryption, fakeCatalog031Helper);
-            nullFssApiConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fssApiConfig");
+            exception = Assert.Throws<ArgumentNullException>(() => nullFssApiConfiguration());
+            Assert.That(exception.ParamName, Is.EqualTo("fssApiConfig"));
 
             Action nullPksService = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, null, fakePermitDecryption, fakeCatalog031Helper);
-            nullPksService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("pksService");
+            exception = Assert.Throws<ArgumentNullException>(() => nullPksService());
+            Assert.That(exception.ParamName, Is.EqualTo("pksService"));
 
             Action nullPermitDecryption = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, null, fakeCatalog031Helper);
-            nullPermitDecryption.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("permitDecryption");
+            exception = Assert.Throws<ArgumentNullException>(() => nullPermitDecryption());
+            Assert.That(exception.ParamName, Is.EqualTo("permitDecryption"));
 
             Action nullCatalog031Helper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, null);
-            nullCatalog031Helper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031Helper");
+            exception = Assert.Throws<ArgumentNullException>(() => nullCatalog031Helper());
+            Assert.That(exception.ParamName, Is.EqualTo("catalog031Helper"));
         }
 
         [Test]
@@ -141,7 +149,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -256,7 +264,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -392,7 +400,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.KEY_TEXT));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -468,7 +476,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
         [TestCase(ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsBaseAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsBaseAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -477,8 +485,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetBatchResponseModelWithFileNameError());
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.ErrorFileFoundInBatch.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -500,7 +509,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsFileNameError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
@@ -510,8 +519,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetBatchResponseModelWithFileNameError());
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.ErrorFileFoundInBatch.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -538,7 +548,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
         [TestCase(ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsBaseAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsBaseAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -547,8 +557,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetBatchResponseModelWithNoBatchFiles());
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.ErrorFileFoundInBatch.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -570,7 +581,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsUpdateOrChangeAndGetBatchFilesContainsNoBatchFiles_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
@@ -580,8 +591,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetBatchResponseModelWithNoBatchFiles());
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ErrorFileFoundInBatch.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.ErrorFileFoundInBatch.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -608,7 +620,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
         [TestCase(ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsBaseAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsBaseAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -618,8 +630,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true)).Throws<Exception>();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ExtractZipFileFailed.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
+            var exception = Assert.ThrowsAsync<AggregateException>(act);
+            Assert.That((exception.InnerException as FulfilmentException)?.EventId, Is.EqualTo(EventIds.ExtractZipFileFailed.ToEventId()));
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -649,7 +662,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsUpdateOrChangeAndExtractExchangeSetZipThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
@@ -660,8 +673,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, true)).Throws<Exception>();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ExtractZipFileFailed.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
+            var exception = Assert.ThrowsAsync<AggregateException>(act);
+            Assert.That((exception.InnerException as FulfilmentException)?.EventId, Is.EqualTo(EventIds.ExtractZipFileFailed.ToEventId()));
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -696,15 +710,16 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
         [TestCase(ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsBaseAndBatchStatusIsNotCommitted_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsBaseAndBatchStatusIsNotCommitted_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.FssPollingCutOffTimeout.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -719,7 +734,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndBatchStatusIsNotCommitted_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsUpdateOrChangeAndBatchStatusIsNotCommitted_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
@@ -727,8 +742,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
               .Returns(FssBatchStatus.CommitInProgress);
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.FssPollingCutOffTimeout.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.FssPollingCutOffTimeout.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -757,7 +773,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenLoggingProductVersionDetailsInAzureFails_ThenCreateBespokeExchangeSetsThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenLoggingProductVersionDetailsInAzureFails_ThenCreateBespokeExchangeSetsThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetProductVersionEntities());
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
@@ -783,8 +799,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 .Returns(true);
             A.CallTo(() => fakeAzureTableStorageHelper.SaveBessProductVersionDetailsAsync(A<List<ProductVersion>>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<Exception>();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.LoggingProductVersionsFailed.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.LoggingProductVersionsFailed.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
               call.Method.Name == "Log"
@@ -858,7 +875,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString()));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.ReadFileText(A<string>.Ignored))
                 .MustHaveHappened();
@@ -923,7 +940,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1005,7 +1022,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndUpdateSerialFileAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsUpdateOrChangeAndUpdateSerialFileAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -1015,8 +1032,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.ReadFileText(A<string>.Ignored)).Throws<Exception>();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.UPDATE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessSerialEncUpdateFailed.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.UPDATE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.BessSerialEncUpdateFailed.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -1034,7 +1052,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndDeleteProductTxtAndInfoFolderAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsUpdateOrChangeAndDeleteProductTxtAndInfoFolderAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -1044,8 +1062,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFileSystemHelper.DeleteFile(A<string>.Ignored)).Throws<Exception>();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.CHANGE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.CHANGE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.BessProductTxtAndInfoFolderDeleteFailed.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -1091,7 +1110,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, readMeSearchFilterQuery, KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1190,7 +1209,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, readMeSearchFilterQuery, KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1284,7 +1303,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.BLANK.ToString(), KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1366,7 +1385,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.BLANK.ToString(), KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1446,7 +1465,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString()));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1512,7 +1531,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.BLANK.ToString()));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1587,7 +1606,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase(ExchangeSetStandard.S57)]
         [TestCase(ExchangeSetStandard.S63)]
-        public async Task WhenTypeIsBaseAndCreationOfZipFileFails_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsBaseAndCreationOfZipFileFails_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -1598,8 +1617,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             A.CallTo(() => fakeFileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ZipFileCreationFailed.ToEventId());
+           AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
+            var exception = Assert.ThrowsAsync<AggregateException>(act);
+            Assert.That((exception.InnerException as FulfilmentException)?.EventId, Is.EqualTo(EventIds.ZipFileCreationFailed.ToEventId()));
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1635,7 +1655,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndCreationOfZipFileFails_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsUpdateOrChangeAndCreationOfZipFileFails_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -1646,8 +1666,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             A.CallTo(() => fakeFileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.ZipFileCreationFailed.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
+            var exception = Assert.ThrowsAsync<AggregateException>(act);
+            Assert.That((exception.InnerException as FulfilmentException)?.EventId, Is.EqualTo(EventIds.ZipFileCreationFailed.ToEventId()));
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1681,7 +1702,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         [TestCase(ExchangeSetStandard.S57)]
         [TestCase(ExchangeSetStandard.S63)]
-        public async Task WhenTypeIsBaseAndCreationOfBatchFails_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsBaseAndCreationOfBatchFails_ThenCreateBespokeExchangeSetAsyncThrowsError(ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(GetValidExchangeSetGetBatchResponse());
@@ -1691,8 +1712,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
             A.CallTo(() => fakeFssService.CreateBatch(A<Batch>.Ignored, A<ConfigQueueMessage>.Ignored, A<string>.Ignored)).Throws<Exception>();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId.Equals(EventIds.BessBatchCreationFailed.ToEventId()));
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
+            var exception = Assert.ThrowsAsync<AggregateException>(act);
+            Assert.That((exception.InnerException as FulfilmentException)?.EventId, Is.EqualTo(EventIds.BessBatchCreationFailed.ToEventId()));
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1751,7 +1773,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndCreationOfBatchFails_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsUpdateOrChangeAndCreationOfBatchFails_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -1762,8 +1784,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             A.CallTo(() => fakeFssService.CreateBatch(A<Batch>.Ignored, A<ConfigQueueMessage>.Ignored, A<string>.Ignored)).Throws<Exception>();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId.Equals(EventIds.BessBatchCreationFailed.ToEventId()));
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString())); };
+            var exception = Assert.ThrowsAsync<AggregateException>(act);
+            Assert.That((exception.InnerException as FulfilmentException)?.EventId, Is.EqualTo(EventIds.BessBatchCreationFailed.ToEventId()));
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1845,7 +1868,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
              .Returns(GetProductKeyServiceResponse());
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.KEY_TEXT));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -1921,7 +1944,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -2041,7 +2064,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.BASE, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString(), KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -2136,7 +2159,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             var result = await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString(), KeyFileType.PERMIT_XML));
 
-            result.Should().Be(true);
+            Assert.That(result);
 
             A.CallTo(() => fakeFileSystemHelper.CreateDirectory(A<string>.Ignored))
                .MustHaveHappenedOnceOrMore();
@@ -2203,7 +2226,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
         [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
-        public async Task WhenTypeIsUpdateOrChangeAndDeleteReadmeTxtAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
+        public void WhenTypeIsUpdateOrChangeAndDeleteReadmeTxtAsyncThrowsError_ThenCreateBespokeExchangeSetAsyncThrowsError(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             A.CallTo(() => fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
              .Returns(GetValidExchangeSetGetBatchResponse());
@@ -2215,8 +2238,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(A<string>.Ignored))
                 .DoesNothing();
 
-            Func<Task> act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.CHANGE, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString())); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessReadMeFileDeletionFailed.ToEventId());
+            AsyncTestDelegate act = async () => { await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(BessType.CHANGE, exchangeSetStandard, ReadMeSearchFilter.NONE.ToString())); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.BessReadMeFileDeletionFailed.ToEventId()));
 
             A.CallTo(() => fakeCatalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(A<string>.Ignored))
                 .MustNotHaveHappened();

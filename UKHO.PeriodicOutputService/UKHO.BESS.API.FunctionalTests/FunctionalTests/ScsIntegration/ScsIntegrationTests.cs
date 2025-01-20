@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 using NUnit.Framework;
 using UKHO.BESS.API.FunctionalTests.Helpers;
 
@@ -14,7 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
         public async Task WhenICallEssDataEndpoint_ThenSuccessStatusCode200IsReturned()
         {
             HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.BaseUrl);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
         }
 
         //PBI 140034: BESS CS - Get AVCS catalogue from SCS
@@ -22,7 +21,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.ScsIntegration
         public async Task WhenICallEssDataEndpointWithIncorrectURL_ThenBadRequestStatusCode400IsReturned()
         {
             HttpResponseMessage apiResponse = await ScsEndpointHelper.EssDataEndpoint(testConfiguration.scsConfig.BaseUrl, false);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)400);
         }
     }
 }

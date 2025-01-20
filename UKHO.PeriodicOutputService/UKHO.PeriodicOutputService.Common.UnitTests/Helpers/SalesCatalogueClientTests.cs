@@ -1,11 +1,9 @@
 ﻿using System.Net;
 using System.Text;
 using FakeItEasy;
-using FluentAssertions;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.UnitTests.Handler;
-
 
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 {
@@ -35,8 +33,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             var result = salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Get, null, "", httpClient.BaseAddress.ToString());
             var deSerializedResult = JsonConvert.DeserializeObject<HttpResponseMessage>(result.Result.Content.ReadAsStringAsync().Result);
 
-            result.Result.StatusCode.Should().Be(HttpStatusCode.OK);
-            deSerializedResult.Should().NotBeNull();
+            Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(deSerializedResult != null);
         }
 
         [Test]
@@ -56,8 +54,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             var result = salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Get, "", "", httpClient.BaseAddress.ToString());
             var deSerializedResult = JsonConvert.DeserializeObject<HttpResponseMessage>(result.Result.Content.ReadAsStringAsync().Result);
 
-            result.Result.StatusCode.Should().Be(statusCode);
-            deSerializedResult.Should().NotBeNull();
+            Assert.That(result.Result.StatusCode, Is.EqualTo(statusCode));
+            Assert.That(deSerializedResult != null);
         }
 
         private HttpResponseMessage GetHttpResponseMessage(HttpStatusCode statusCode) => new()

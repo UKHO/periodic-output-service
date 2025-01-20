@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 using NUnit.Framework;
 using UKHO.BESS.API.FunctionalTests.Helpers;
 using UKHO.BESS.API.FunctionalTests.Models;
@@ -21,7 +20,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.PksIntegration
             }
 
             HttpResponseMessage apiResponse = await PksEndpointHelper.PermitKeysEndpoint(testConfiguration.pksConfig.BaseUrl, productKeyService!);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
         }
 
         [Test]
@@ -33,7 +32,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.PksIntegration
             };
 
             HttpResponseMessage apiResponse = await PksEndpointHelper.PermitKeysEndpoint(testConfiguration.pksConfig.BaseUrl, productKeyService);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)400);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)400);
         }
 
         [TearDown]

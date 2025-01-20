@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using FluentAssertions;
+using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
@@ -117,7 +117,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             foreach(string posBatchIdNumber in posBatchId)
             {
                 HttpResponseMessage responseMessage = await FssBatchHelper.PosBatchesVerification(fssJwtToken, posBatchIdNumber);
-                responseMessage.StatusCode.Should().Be((System.Net.HttpStatusCode)404);
+                Assert.Equals(responseMessage.StatusCode, (System.Net.HttpStatusCode)404);
             }
         }
 

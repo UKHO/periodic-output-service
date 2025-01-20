@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
@@ -15,7 +14,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             FssJwtToken = await authTokenProvider.GetFssToken();
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationInValidProductIdentifier);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
             await CommonHelper.RunWebJob();
         }
 
@@ -23,7 +22,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallFileDownloadEndpointWithInvalidProductIdentifier_ThenABatchWithErrorTxtIsGenerated()
         {
             HttpResponseMessage responseMessage = await FssBatchHelper.VerifyErrorTxtExist(FssJwtToken);
-            responseMessage.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(responseMessage.StatusCode, (HttpStatusCode)200);
 
             await FileContentHelper.VerifyPosBatches(FssJwtToken);
         }
@@ -36,7 +35,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
         }
     }
 }

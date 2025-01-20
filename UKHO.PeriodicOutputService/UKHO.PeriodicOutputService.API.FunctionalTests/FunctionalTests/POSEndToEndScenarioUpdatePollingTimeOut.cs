@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
@@ -15,7 +14,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             FssJwtToken = await authTokenProvider.GetFssToken();
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationUpdatePollingTimeout);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
             await CommonHelper.RunWebJob();
         }
 
@@ -23,11 +22,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenTheExecutedPosWebJobForUpdateTimesOut_ThenCommitInProgressBatchStatusIsReturned()
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdatePollingTimeoutBatchId);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
             string batchStatus = batchDetailsResponse.status;
-            batchStatus.Should().Be("CommitInProgress");
+            Assert.Equals(batchStatus, "CommitInProgress");
 
             await FileContentHelper.VerifyPosBatches(FssJwtToken);
         }
@@ -40,7 +39,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
         }
     }
 }

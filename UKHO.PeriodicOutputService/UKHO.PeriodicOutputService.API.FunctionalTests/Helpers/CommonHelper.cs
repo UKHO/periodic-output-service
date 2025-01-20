@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Xml;
-using FluentAssertions;
 using Newtonsoft.Json;
+using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
@@ -62,7 +62,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             {
                 string POSWebJobUserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(posWebJob.BaseUrl, POSWebJobUserCredentialsBytes);
-                POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
+                Assert.Equals(POSWebJobApiResponse.StatusCode, (HttpStatusCode)202);
 
                 //As there is no way to check if webjob execution is completed or not, we have added below delay to wait till the execution completes and files get downloaded.
                 await Task.Delay(posWebJob.WebjobRunningStatusDelayTime);
@@ -76,7 +76,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             {
                 string POSWebJobUserCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(posWebJob.UserName, posWebJob.Password);
                 POSWebJobApiResponse = await WebJob.POSWebJobEndPoint(aioWebJob.BaseUrl, POSWebJobUserCredentialsBytes);
-                POSWebJobApiResponse.StatusCode.Should().Be((HttpStatusCode)202);
+                Assert.Equals(POSWebJobApiResponse.StatusCode, (HttpStatusCode)202);
 
                 //As there is no way to check if webjob execution is completed or not, we have added below delay to wait till the execution completes and files get downloaded.
                 await Task.Delay(aioWebJob.WebjobRunningStatusDelayTime);

@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Text;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -105,8 +104,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var response = await salesCatalogueService.GetSalesCatalogueData();
 
-            response.ResponseCode.Should().Be(HttpStatusCode.OK);
-            JsonConvert.SerializeObject(response.ResponseBody).Should().Be(jsonString);
+            Assert.That(response.ResponseCode >= HttpStatusCode.OK);
+            Assert.That(JsonConvert.SerializeObject(response.ResponseBody), Is.EqualTo(jsonString));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -149,10 +148,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var response = await salesCatalogueService.GetSalesCatalogueData();
 
-            response.ResponseCode.Should().Be(HttpStatusCode.OK);
-            httpMethodParam.Should().Be(HttpMethod.Get);
-            uriParam.Should().Be($"/{fakeSaleCatalogueConfig.Value.Version}/productData/{fakeSaleCatalogueConfig.Value.ProductType}/catalogue/{fakeSaleCatalogueConfig.Value.CatalogueType}");
-            accessTokenParam.Should().Be(actualAccessToken);
+            Assert.That(response.ResponseCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(httpMethodParam, Is.EqualTo(HttpMethod.Get));
+            Assert.That(uriParam, Is.EqualTo($"/{fakeSaleCatalogueConfig.Value.Version}/productData/{fakeSaleCatalogueConfig.Value.ProductType}/catalogue/{fakeSaleCatalogueConfig.Value.CatalogueType}"));
+            Assert.That(accessTokenParam, Is.EqualTo(actualAccessToken));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"

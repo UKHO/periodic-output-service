@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
@@ -12,7 +11,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task Setup()
         {
             HttpResponseMessage apiResponse = MockHelper.ConfigureFMAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationFullAvcsPollingTimeOut);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
             await CommonHelper.RunWebJobAio();
         }
 
@@ -20,11 +19,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenTheExecutedPosWebJobForAioTimesOut_ThenCommitInProgressBatchStatusIsReturned()
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.FullAvcsPollingTimeOutBatchId);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
             string batchStatus = batchDetailsResponse.status;
-            batchStatus.Should().Be("CommitInProgress");
+            Assert.Equals(batchStatus, "CommitInProgress");
         }
 
         [OneTimeTearDown]
@@ -35,7 +34,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
         }
     }
 }

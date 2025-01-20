@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using FakeItEasy;
-using FluentAssertions;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Models.Pks;
@@ -42,8 +41,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             List<ProductKeyServiceResponse> deSerializedResult = JsonConvert.DeserializeObject<List<ProductKeyServiceResponse>>(result.Result.Content.ReadAsStringAsync().Result);
 
-            result.Result.StatusCode.Should().Be(HttpStatusCode.OK);
-            deSerializedResult.Count.Should().BeGreaterThanOrEqualTo(1);
+            Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(deSerializedResult.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -63,7 +62,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             Task<HttpResponseMessage> result = pksApiClient.PostPksDataAsync("http://test.com", "", null, fakeCorrelationId);
 
-            result.Result.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+            Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
         }
 
         private static List<ProductKeyServiceRequest> GetProductKeyServiceRequest() =>
