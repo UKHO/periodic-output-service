@@ -143,6 +143,17 @@ jobs:
         modifyOutputPath: false
 
     - task: DotNetCoreCLI@2
+      displayName: "Publish AIO Fulfilment Service Code"
+      inputs:
+        command: "publish"
+        publishWebProjects: false
+        projects: "**/*UKHO.AdmiraltyInformationOverlay.Fulfilment.csproj"
+        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\AIOFulfilmentWebJobPrinting'
+        zipAfterPublish: false
+        modifyOutputPath: false
+
+
+    - task: DotNetCoreCLI@2
       displayName: "Publish BESS Configuration Service Code"
       inputs:
         command: "publish"

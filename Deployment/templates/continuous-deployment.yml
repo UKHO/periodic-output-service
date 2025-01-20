@@ -68,14 +68,25 @@ steps:
       xmlTransformationRules:
       jsonTargetFiles: '**/appsettings.json'
 
-  - bash: echo "##vso[task.setvariable variable=schedule]$(ScheduleAppSetting)"
+  - bash: echo "##vso[task.setvariable variable=schedule]$(AioSchedule)"
+    displayName: "Set AIO Job schedule"
     
   - task: FileTransform@2   
     displayName: "File Transform: AIO settings Config"
     inputs:
       folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
       xmlTransformationRules:
-      jsonTargetFiles: '**/AIOFulfilmentWebJob/settings.job'     
+      jsonTargetFiles: '**/AIOFulfilmentWebJob/settings.job'
+
+  - bash: echo "##vso[task.setvariable variable=schedule]$(AioSchedulePrinting)"
+    displayName: "Set AIO Job schedule for Printing"
+    
+  - task: FileTransform@2   
+    displayName: "File Transform: AIO settings Config"
+    inputs:
+      folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
+      xmlTransformationRules:
+      jsonTargetFiles: '**/AIOFulfilmentWebJobPrinting/settings.job'     
 
   - task: AzureWebApp@1
     displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp"
