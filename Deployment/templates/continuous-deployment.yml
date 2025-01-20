@@ -68,6 +68,13 @@ steps:
       xmlTransformationRules:
       jsonTargetFiles: '**/appsettings.json'
 
+  - task: FileTransform@2
+    displayName: "File Transform: AIO settings Config"
+    inputs:
+      folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
+      xmlTransformationRules:
+      jsonTargetFiles: '**/AIOFulfilmentWebJob/settings.job'     
+
   - task: AzureWebApp@1
     displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp"
     inputs:

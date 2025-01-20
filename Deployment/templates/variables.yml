@@ -18,3 +18,5 @@ variables:
   value: $(AutoTestClientSecret_Authed)
 - name: "ESSApiConfiguration.EssClientId"
   value: $(ESSClientId)
+- name: "schedule"
+  value: $(ScheduleAppSetting)
