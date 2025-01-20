@@ -44,3 +44,21 @@ variable "agent_2204_subnet" {
 variable "agent_prd_subnet" {
   type = string
 }
+
+variable "table_name" {
+  type = string
+  default = "aiojobconfiguration"
+}
+
+variable "is_enabled" {
+  type = string
+  default = true
+}
+
+variable "aio_weekly_configuration" {
+  type = map(string)
+}
+
+variable "aio_printing_configuration" {
+  type = map(string)
+}

@@ -33,6 +33,14 @@ steps:
       TF_VAR_agent_2204_subnet: $(agent2204SubnetId)
       TF_VAR_agent_prd_subnet: $(agentprdSubnetId)
       TF_VAR_BessContainerName: $(BessContainerForWebjob)
+      TF_VAR_aio_weekly_business_unit: $(AioJobIdWeekly.BusinessUnit)      
+      TF_VAR_aio_weekly_job_id: $(AioJobIdWeekly)      
+      TF_VAR_aio_weekly_read_users: $(AioJobIdWeekly.ReadUser)
+      TF_VAR_aio_weekly_read_group: $(AioJobIdWeekly.ReadGroup)
+      TF_VAR_aio_printing_job_id: $(AioJobIdPrinting)      
+      TF_VAR_aio_printing_business_unit: $(AioJobIdPrinting.BusinessUnit)
+      TF_VAR_aio_printing_read_users: $(AioJobIdPrinting.ReadUser)      
+      TF_VAR_aio_printing_read_group: $(AioJobIdPrinting.ReadGroup)
 
   - task: FileTransform@2
     displayName: "File Transform: Mock API WebApp"
@@ -66,7 +74,47 @@ steps:
     inputs:
       folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
       xmlTransformationRules:
-      jsonTargetFiles: '**/appsettings.json'
+      jsonTargetFiles: | 
+        **/POS*/appsettings.json
+        **/BESS*/appsettings.json        
+
+  - bash: |
+      echo "##vso[task.setvariable variable=schedule]$(AioJobIdWeekly.Schedule)"
+      echo "##vso[task.setvariable variable=AioJobId]$(AioJobIdWeekly)"
+      echo "##vso[task.setvariable variable=AzureStorageConfiguration.AioProductVersionDetailsTableName]$(AioJobIdWeekly.AioProductVersionDetailsTableName)"
+      echo "##vso[task.setvariable variable=FSSApiConfiguration.AioBusinessUnit]$(AioJobIdWeekly.BusinessUnit)"
+      echo "##vso[task.setvariable variable=FSSApiConfiguration.AioPosReadGroups]$(AioJobIdWeekly.ReadGroup)"
+      echo "##vso[task.setvariable variable=FSSApiConfiguration.AioPosReadUsers]$(AioJobIdWeekly.ReadUser)"
+      echo "##vso[task.setvariable variable=WeeksToIncrement]$(AioJobIdWeekly.WeeksToIncrement)"
+    displayName: "Set AIO weekly job variables"
+
+  - task: FileTransform@2   
+    displayName: "File Transform: AIO weekly settings Config"
+    inputs:
+      folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
+      xmlTransformationRules:
+      jsonTargetFiles: |
+        **/AIOFulfilmentWebJob/settings.job
+        **/AIOFulfilmentWebJob/appsettings.json
+  
+  - bash: |
+      echo "##vso[task.setvariable variable=schedule]$(AioJobIdPrinting.Schedule)"
+      echo "##vso[task.setvariable variable=AioJobId]$(AioJobIdPrinting)"
+      echo "##vso[task.setvariable variable=AzureStorageConfiguration.AioProductVersionDetailsTableName]$(AioJobIdPrinting.AioProductVersionDetailsTableName)"
+      echo "##vso[task.setvariable variable=FSSApiConfiguration.AioBusinessUnit]$(AioJobIdPrinting.BusinessUnit)"
+      echo "##vso[task.setvariable variable=FSSApiConfiguration.AioPosReadGroups]$(AioJobIdPrinting.ReadGroup)"
+      echo "##vso[task.setvariable variable=FSSApiConfiguration.AioPosReadUsers]$(AioJobIdPrinting.ReadUser)"
+      echo "##vso[task.setvariable variable=WeeksToIncrement]$(AioJobIdPrinting.WeeksToIncrement)"
+    displayName: "Set AIO printing job variables"
+    
+  - task: FileTransform@2   
+    displayName: "File Transform: AIO printing settings Config"
+    inputs:
+      folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
+      xmlTransformationRules:
+      jsonTargetFiles: |
+        **/AIOFulfilmentWebJobPrinting/settings.job
+        **/AIOFulfilmentWebJobPrinting/appsettings.json
 
   - task: AzureWebApp@1
     displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp"

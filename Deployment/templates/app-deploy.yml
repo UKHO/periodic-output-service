@@ -30,6 +30,33 @@ jobs:
               AzureSubscription: ${{parameters.AzureSubscription}}
               RunTests: ${{parameters.RunTests}}
 
+- job: InsertAioJobConfigurationEntityInTable
+  displayName: "Insert AIO job configuration in Table"
+  dependsOn: DeployApp
+  variables:    
+    - name: AccountName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.AioAzureStorageAccountName']  ]
+    - name: AccountKey
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.AioAzureStorageAccountKey']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Insert Weekly job configuration in Table"
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az storage entity insert --entity PartitionKey=weekly RowKey=$(AioJobIdWeekly) BusinessUnit=$(AioJobIdWeekly.BusinessUnit) ReadUsers=$(AioJobIdWeekly.ReadUser) ReadGroups=$(AioJobIdWeekly.ReadGroup) IsEnabled=true IsEnabled@odata.type=Edm.Boolean WeeksToIncrement=$(AioJobIdWeekly.WeeksToIncrement) WeeksToIncrement@odata.type=Edm.Int32 --account-name $(AccountName) --account-key $(AccountKey) --if-exists replace --table-name $(AioJobConfigurationTableName)
+
+    - task: AzureCLI@2
+      displayName: "Insert Printing job configuration in Table"
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az storage entity insert --entity PartitionKey=printing RowKey=$(AioJobIdPrinting) BusinessUnit=$(AioJobIdPrinting.BusinessUnit) ReadUsers=$(AioJobIdPrinting.ReadUser) ReadGroups=$(AioJobIdPrinting.ReadGroup) IsEnabled=true IsEnabled@odata.type=Edm.Boolean WeeksToIncrement=$(AioJobIdPrinting.WeeksToIncrement) WeeksToIncrement@odata.type=Edm.Int32 --account-name $(AccountName) --account-key $(AccountKey) --if-exists replace --table-name $(AioJobConfigurationTableName)
+
 - job: CheckInfra
   displayName: "Check Infrastructure Health"
   dependsOn: DeployApp
@@ -80,6 +107,8 @@ jobs:
         targetType: filePath
         filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
         arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+
+
 
 - job: Setup
   displayName: "Set Webjob Configuration"

@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Azure.Data.Tables;
+using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
@@ -12,15 +14,17 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     public class AzureTableStorageHelper : IAzureTableStorageHelper
     {
         private const string WEBJOB_HISTORY_TABLE_NAME = "poswebjobhistory";
-        private const string AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME = "aioproductversiondetails";
+        //private const string AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME = "aioproductversiondetails";
         private const string BESS_SCHEDULE_DETAILS_TABLE_NAME = "bessconfigscheduledetails";
         private const string BESS_PRODUCT_VERSION_DETAILS_TABLE_NAME = "bessproductversiondetails";
 
         private readonly IOptions<AzureStorageConfiguration> _azureStorageConfig;
+        private readonly IConfiguration _configuration;
 
-        public AzureTableStorageHelper(IOptions<AzureStorageConfiguration> azureStorageConfig)
+        public AzureTableStorageHelper(IOptions<AzureStorageConfiguration> azureStorageConfig, IConfiguration configuration)
         {
             _azureStorageConfig = azureStorageConfig;
+            _configuration = configuration;
         }
 
         public void SaveHistory(WebJobHistory webJobHistory)
@@ -38,7 +42,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public void SaveProductVersionDetails(List<ProductVersion> productVersions)
         {
-            TableClient productVersionDetailsEntityClient = GetTableClient(AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME);
+            TableClient productVersionDetailsEntityClient = GetTableClient(_azureStorageConfig.Value.AioProductVersionDetailsTableName);
 
             foreach (var item in productVersions)
             {
@@ -65,7 +69,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public List<ProductVersionEntities> GetLatestProductVersionDetails()
         {
-            TableClient productVersionDetailsEntityClient = GetTableClient(AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME);
+            TableClient productVersionDetailsEntityClient = GetTableClient(_azureStorageConfig.Value.AioProductVersionDetailsTableName);
             List<ProductVersionEntities> productVersionEntities = productVersionDetailsEntityClient.Query<ProductVersionEntities>().ToList();
 
             return productVersionEntities;
@@ -134,6 +138,17 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 };
                 await tableClient.UpsertEntityAsync(bessProductVersionEntities);
             }
+        }
+
+        public AioJobConfigurationEntities? GetAioJobConfiguration()
+        {
+            string? jobId = _configuration["AioJobId"];
+
+            if (string.IsNullOrEmpty(jobId)) return null;
+
+            TableClient tableClient = GetTableClient(_azureStorageConfig.Value.AioJobConfigurationTableName);
+            AioJobConfigurationEntities aioJobConfigurationEntities = tableClient.Query<AioJobConfigurationEntities>().FirstOrDefault(i => i.RowKey.Equals(jobId) && i.IsEnabled);
+            return aioJobConfigurationEntities;
         }
     }
 }

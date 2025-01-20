@@ -81,3 +81,45 @@ variable "agent_prd_subnet" {
 variable "BessContainerName" {
   type = string
 }
+
+variable "aio_weekly_business_unit" {
+  type = string
+}
+
+variable "aio_weekly_read_users" {
+  type = string
+}
+
+variable "aio_weekly_read_group"{ 
+  type = string
+}
+
+variable "aio_weekly_job_name" {
+  type = string
+  default = "Weekly"
+}
+
+variable "aio_weekly_job_id" {
+  type = string
+}
+
+variable "aio_printing_business_unit" {
+  type = string
+}
+
+variable "aio_printing_read_users" {
+  type = string
+}
+
+variable "aio_printing_read_group" {
+  type = string
+}
+
+variable "aio_printing_job_name" {
+  type = string
+  default = "Printing"
+}
+
+variable "aio_printing_job_id" {
+  type = string
+}

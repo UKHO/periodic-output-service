@@ -113,6 +113,20 @@ module "storage" {
   service_name_bess   = local.service_name_bess
   container_name      = local.container_name
   tags                = local.tags
+  aio_weekly_configuration     = {
+    "job_name"      = var.aio_weekly_job_name
+    "job_id"        = var.aio_weekly_job_id
+    "business_unit" = var.aio_weekly_business_unit
+    "read_users"    = var.aio_weekly_read_users
+    "read_group"    = var.aio_weekly_read_group        
+  }
+  aio_printing_configuration     = {
+    "job_name"      = var.aio_printing_job_name
+    "job_id"        = var.aio_printing_job_id
+    "business_unit" = var.aio_printing_business_unit
+    "read_users"    = var.aio_printing_read_users
+    "read_group"    = var.aio_printing_read_group
+  }
 }
 
 module "key_vault" {
