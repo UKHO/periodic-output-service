@@ -106,68 +106,11 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: System.Threading.Tasks.Dataflow.dll
-   False positive - applies to Tasks.org Android app
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks\.Dataflow@.*$</packageUrl>
-    <cve>CVE-2020-22475</cve>
-    <cve>CVE-2022-39349</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Threading.Tasks.Dataflow:Various
-   False positive - applies to Tasks.org Android app
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks\.Dataflow@.*$</packageUrl>
-    <cve>CVE-2020-22475</cve>
-    <cve>CVE-2022-39349</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Threading.Tasks.Extensions.dll
-   False positive - applies to Tasks.org Android app
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
-    <cve>CVE-2020-22475</cve>
-    <cve>CVE-2022-39349</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Threading.Tasks.Extensions:Various
-   False positive - applies to Tasks.org Android app
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
-    <cve>CVE-2020-22475</cve>
-    <cve>CVE-2022-39349</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Threading.Tasks.dll
-   False positive - applies to Tasks.org Android app
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks@.*$</packageUrl>
-    <cve>CVE-2020-22475</cve>
-    <cve>CVE-2022-39349</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: System.Threading.Tasks:Various
    False positive - applies to Tasks.org Android app
    ]]>
     </notes>
     <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks@.*$</packageUrl>
-    <cve>CVE-2020-22475</cve>
-    <cve>CVE-2022-39349</cve>
     <cve>CVE-2019-20138</cve>
     <cve>CVE-2023-36415</cve>
   </suppress>
@@ -199,23 +142,6 @@
    ]]>
     </notes>
     <cve>CVE-2024-21907</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Threading.Tasks.Parallel.dll
-   Vunerability due to permissions on VoiceCommandActivity application component, no applicable.
-   ]]>
-    </notes>
-    <cve>CVE-2020-22475</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Threading.Tasks.Parallel.dll
-   ]]>
-    </notes>
-    <cve>CVE-2022-39349</cve>
   </suppress>
   <!-- Below suppression are for wire mock and should be removed when wire mock is removed from POS -->
   <suppress>
@@ -439,14 +365,6 @@
    ]]>
     </notes>
     <cve>CVE-2024-35255</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Text.Json:8.0.0
-   ]]>
-    </notes>
-    <vulnerabilityName>CVE-2024-30105</vulnerabilityName>
   </suppress>
   <suppress>
     <notes>
