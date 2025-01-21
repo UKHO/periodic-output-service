@@ -767,7 +767,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         #region SearchReadMeFilePath
 
         [Test]
-        public async Task WhenReadMeFileNotFound_ThenReturnFulfilmentException()
+        public void WhenReadMeFileNotFound_ThenReturnFulfilmentException()
         {
             SearchBatchResponse searchBatchResponse = new();
             string jsonString = JsonConvert.SerializeObject(searchBatchResponse);
@@ -797,7 +797,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenInvalidSearchReadMeFileRequest_ThenReturnFulfilmentException()
+        public void WhenInvalidSearchReadMeFileRequest_ThenReturnFulfilmentException()
         {
             var searchBatchResponse = GetSearchBatchEmptyResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);
@@ -826,7 +826,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenMultipleFilesSearchReadMeFileRequest_ThenReturnFulfilmentException()
+        public void WhenMultipleFilesSearchReadMeFileRequest_ThenReturnFulfilmentException()
         {
             var searchBatchResponse = GetMultipleFilesSearchBatchResponse();
             var jsonString = JsonConvert.SerializeObject(searchBatchResponse);

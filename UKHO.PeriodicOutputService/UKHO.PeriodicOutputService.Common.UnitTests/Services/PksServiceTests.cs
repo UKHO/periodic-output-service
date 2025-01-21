@@ -39,19 +39,19 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             Action nullPksLogger = () => new PksService(null, fakePksApiConfiguration, fakeAuthPksTokenProvider, fakePksApiClient);
             var exception = Assert.Throws<ArgumentNullException>(() => nullPksLogger());
-            Assert.That("logger", Is.EqualTo(exception.ParamName));
+            Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             Action nullPksApiConfiguration = () => new PksService(fakeLogger, null, fakeAuthPksTokenProvider, fakePksApiClient);
             exception = Assert.Throws<ArgumentNullException>(() => nullPksApiConfiguration());
-            Assert.That("pksApiConfiguration", Is.EqualTo(exception.ParamName));
+            Assert.That(exception.ParamName, Is.EqualTo("pksApiConfiguration"));
 
             Action nullAuthPksTokenProvider = () => new PksService(fakeLogger, fakePksApiConfiguration, null, fakePksApiClient);
             exception = Assert.Throws<ArgumentNullException>(() => nullAuthPksTokenProvider());
-            Assert.That("authPksTokenProvider", Is.EqualTo(exception.ParamName));
+            Assert.That(exception.ParamName, Is.EqualTo("authPksTokenProvider"));
 
             Action nullPksApiClient = () => new PksService(fakeLogger, fakePksApiConfiguration, fakeAuthPksTokenProvider, null);
             exception = Assert.Throws<ArgumentNullException>(() => nullPksApiClient());
-            Assert.That("pksApiClient", Is.EqualTo(exception.ParamName));
+            Assert.That(exception.ParamName, Is.EqualTo("pksApiClient"));
         }
 
         [Test]
