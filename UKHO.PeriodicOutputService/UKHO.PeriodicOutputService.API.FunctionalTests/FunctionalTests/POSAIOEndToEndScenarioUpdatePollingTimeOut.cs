@@ -10,8 +10,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [OneTimeSetUp]
         public async Task Setup()
         {
-            AuthTokenProvider authTokenProvider = new();
-            FssJwtToken = await authTokenProvider.GetFssToken();
+            FssJwtToken = AuthTokenProvider.GetFssToken();
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFMAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationUpdatePollingTimeout);
             Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
