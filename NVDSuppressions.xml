@@ -88,31 +88,11 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: Microsoft.Identity.Client.dll
-   ]]>
-    </notes>
-    <cve>CVE-2019-20138</cve>
-    <cve>CVE-2023-36415</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: Various Azure.
    Refers to Azure CLI.
    ]]>
     </notes>
     <cve>CVE-2023-36052</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Threading.Tasks:Various
-   False positive - applies to Tasks.org Android app
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks@.*$</packageUrl>
-    <cve>CVE-2019-20138</cve>
-    <cve>CVE-2023-36415</cve>
   </suppress>
   <suppress>
     <notes>
