@@ -16,8 +16,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             getproductIdentifier = new GetProductIdentifiers();
 
             userCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(fleet.userName, fleet.password);
-            EssJwtToken = AuthTokenProvider.GetEssToken();
-            FssJwtToken = AuthTokenProvider.GetFssToken();
+            EssJwtToken = await AuthTokenProvider.GetEssToken();
+            FssJwtToken = await AuthTokenProvider.GetFssToken();
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
             Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));

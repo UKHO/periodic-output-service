@@ -3,7 +3,7 @@ using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfigur
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
-    public class AuthTokenProvider
+    public static class AuthTokenProvider
     {
         private static string EssAccessToken = null;
         private static string FssAccessToken = null;
@@ -11,7 +11,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static readonly ESSApiConfiguration EssauthConfig = new TestConfiguration().EssConfig;
         private static readonly FSSApiConfiguration FssAuthConfig = new TestConfiguration().FssConfig;
 
-        public async Task<string> GetEssToken()
+        public static async Task<string> GetEssToken()
         {
             EssAccessToken = await GenerateEssToken(EssauthConfig.AutoTestClientId, EssauthConfig.AutoTestClientSecret, EssAccessToken);
             return EssAccessToken;
@@ -48,7 +48,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             return Token;
         }
 
-        public async Task<string> GetFssToken()
+        public static async Task<string> GetFssToken()
         {
             FssAccessToken = await GenerateFssToken(EssauthConfig.AutoTestClientId, EssauthConfig.AutoTestClientSecret, FssAccessToken);
             return FssAccessToken;
