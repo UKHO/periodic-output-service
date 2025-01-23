@@ -52,8 +52,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
 
             var result = permitDecryption.GetPermitKeys("ID123456202501016326A0EFB11E46406");
 
-            Assert.That(result.ActiveKey, Is.EqualTo("0102030405"));
-            Assert.That(result.NextKey, Is.EqualTo("0102030405"));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result.ActiveKey, Is.EqualTo("0102030405"));
+                Assert.That(result.NextKey, Is.EqualTo("0102030405"));
+            }
         }
 
         [Test]
@@ -63,7 +66,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         {
             var result = permitDecryption.GetPermitKeys(permitKey);
 
-            Assert.That(result == null);
+            Assert.That(result, Is.EqualTo(null));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -84,7 +87,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
 
             var result = permitDecryption.GetPermitKeys("ID12");
 
-            Assert.That(result == null);
+            Assert.That(result, Is.EqualTo(null));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -102,7 +105,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
 
             var result = permitDecryption.GetPermitKeys("ID12");
 
-            Assert.That(result == null);
+            Assert.That(result, Is.EqualTo(null));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"

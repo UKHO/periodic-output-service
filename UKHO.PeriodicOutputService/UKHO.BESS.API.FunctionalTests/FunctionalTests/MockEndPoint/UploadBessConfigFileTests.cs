@@ -9,8 +9,8 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.MockEndPoint
 {
     public class UploadBessConfigFileTests
     {
-        static readonly TestConfiguration testConfiguration = new();
-        static BessStorageConfiguration bessStorageConfiguration = testConfiguration.bessStorageConfig;
+        private static readonly TestConfiguration testConfiguration = new();
+        private static readonly BessStorageConfiguration bessStorageConfiguration = testConfiguration.bessStorageConfig;
         AzureBlobStorageClient? azureBlobStorageClient;
         readonly dynamic config = Options.Create(new PeriodicOutputService.Common.Configuration.BessStorageConfiguration
         {
@@ -29,7 +29,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.MockEndPoint
         public async Task WhenICallUploadConfigApiWithValidConfigFile_ThenCreatedStatusCode201IsReturned()
         {
             HttpResponseMessage apiResponse = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, "s63", "UPDATE", "AVCS", "PERMIT_XML");
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)201);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)201));
         }
 
         //PBI 142682: BESS CS : Create a mock endpoint to upload BESS configuration files to azure storage
@@ -37,7 +37,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.MockEndPoint
         public async Task WhenICallUploadConfigApiWithInvalidConfigFile_ThenBadRequestStatusCode400IsReturned()
         {
             HttpResponseMessage apiResponse = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.InvalidConfigPath, testConfiguration.sharedKeyConfig.Key, "s63", "UPDATE", "AVCS", "PERMIT_XML");
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)400);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)400));
         }
 
         [TearDown]

@@ -98,7 +98,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             Assert.Multiple(() =>
             {
-                Assert.That(result.Count, Is.EqualTo(1));
+                Assert.That(result, Has.Count.EqualTo(1));
                 Assert.That(result.FirstOrDefault().FileName, Is.EqualTo(fileName));
                 Assert.That(result.FirstOrDefault().Hash, Is.Not.Null);
             });
@@ -190,7 +190,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             byte[] result = _fileSystemHelper.GetFileInBytes(GetUploadFileBlockRequestModel());
 
-            Assert.That(result.Length, Is.EqualTo(100000));
+            Assert.That(result, Has.Length.EqualTo(100000));
         }
 
         [Test]

@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Net;
 using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
@@ -13,7 +14,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string batchId, string fssJwtToken)
         {
-            List<string> downloadFolderPath = new();
+            List<string> downloadFolderPath = [];
 
             for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
             {
@@ -39,7 +40,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<List<string>> DownloadAndExtractExchangeSetZipFileForLargeMedia(string batchId, string fssJwtToken, dynamic batchDetailsResponse)
         {
-            List<string> downloadFolderPath = new();
+            List<string> downloadFolderPath = [];
 
             string mediaType = batchDetailsResponse.attributes[5].value;
 
@@ -71,7 +72,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         }
         public static async Task<List<string>> CreateExchangeSetFileForIsoAndSha1Files(string batchId, string fssJwtToken)
         {
-            List<string> downloadFolderPath = new();
+            List<string> downloadFolderPath = [];
 
             for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
             {
@@ -102,22 +103,22 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
             string downloadFile = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
 
-            List<string> downloadFolderPath = new()
-            {
+            List<string> downloadFolderPath =
+            [
                 downloadFile
-            };
+            ];
 
             return downloadFolderPath;
         }
 
         public static async Task VerifyPosBatches(string fssJwtToken)
         {
-            string[] posBatchId = { posDetails.IsoSha1BatchId, posDetails.ZipFilesBatchId ,posDetails.CatalogueBatchId, posDetails.UpdateExchangeSetBatchId , posDetails.EncUpdateListCsvBatchId };
+            string[] posBatchId = [posDetails.IsoSha1BatchId, posDetails.ZipFilesBatchId ,posDetails.CatalogueBatchId, posDetails.UpdateExchangeSetBatchId , posDetails.EncUpdateListCsvBatchId];
 
             foreach(string posBatchIdNumber in posBatchId)
             {
                 HttpResponseMessage responseMessage = await FssBatchHelper.PosBatchesVerification(fssJwtToken, posBatchIdNumber);
-                Assert.Equals(responseMessage.StatusCode, (System.Net.HttpStatusCode)404);
+                Assert.That(responseMessage.StatusCode, Is.EqualTo((HttpStatusCode)404));
             }
         }
 

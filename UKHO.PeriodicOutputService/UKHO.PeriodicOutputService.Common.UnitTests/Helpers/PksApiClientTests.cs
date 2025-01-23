@@ -41,8 +41,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             List<ProductKeyServiceResponse> deSerializedResult = JsonConvert.DeserializeObject<List<ProductKeyServiceResponse>>(result.Result.Content.ReadAsStringAsync().Result);
 
-            Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(deSerializedResult.Count, Is.EqualTo(1));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(deSerializedResult, Has.Count.EqualTo(1));
+            }
         }
 
         [Test]

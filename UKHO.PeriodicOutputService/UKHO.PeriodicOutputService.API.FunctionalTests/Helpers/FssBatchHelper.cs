@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using System.IO.Compression;
+using System.Net;
 using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
@@ -35,7 +36,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
 
             HttpResponseMessage response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
-            Assert.Equals(response.StatusCode, (System.Net.HttpStatusCode)200);
+            Assert.That(response.StatusCode, Is.EqualTo((HttpStatusCode)200));
             Stream stream = await response.Content.ReadAsStreamAsync();
 
             using (FileStream outputFileStream = new(Path.Combine(batchFolderPath, fileName), FileMode.Create))

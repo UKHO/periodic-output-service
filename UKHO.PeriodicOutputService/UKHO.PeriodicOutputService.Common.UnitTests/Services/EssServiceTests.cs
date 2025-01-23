@@ -383,9 +383,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers(), exchangeSetStandard.ToString());
 
-            Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
-            Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href));
-            Assert.That(response?.RequestedProductsNotInExchangeSet == null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href));
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.EqualTo(null));
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -423,8 +426,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             ExchangeSetResponseModel response = await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"), exchangeSetStandard.ToString());
 
-            Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href));
-            Assert.That(response?.RequestedProductsNotInExchangeSet == null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href));
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.EqualTo(null));
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -473,8 +479,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                                                                                                     }
             }, exchangeSetStandard.ToString());
 
-            Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href));
-            Assert.That(response?.RequestedProductsNotInExchangeSet == null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href));
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.EqualTo(null));
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"

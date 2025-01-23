@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static readonly HttpClient httpClient = new();
         private static readonly string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
         private static readonly string currentYear = DateTime.UtcNow.ToString("yy");
-        private static readonly List<string> expectedFileName = new();
+        private static readonly List<string> expectedFileName = [];
         public static async Task<HttpResponseMessage> GetBatchDetailsEndpoint(string baseUrl, string batchId)
         {
             string uri = $"{baseUrl}/batch/{batchId}";
@@ -25,13 +25,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
             //to check status
             string batchStatus = batchDetailsResponse.status;
-            Assert.Equals(batchStatus, "Committed");
+            Assert.That(batchStatus, Is.EqualTo("Committed"));
 
             string businessUnit = batchDetailsResponse.businessUnit;
-            Assert.Equals(businessUnit, "AVCSData");
+            Assert.That(businessUnit, Is.EqualTo("AVCSData"));
 
             string expiryDate = batchDetailsResponse.expiryDate;
-            Assert.That(expiryDate.Contains(expectedExpiryDate));
+            Assert.That(expiryDate, Does.Contain(expectedExpiryDate));
 
             string fileSize = batchDetailsResponse.files[0].fileSize;
             Assert.That(!string.IsNullOrEmpty(fileSize));
@@ -48,10 +48,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 string fileName = batchDetailsResponse.files[0].filename;
                 if (fileName.Contains("UPDATE"))
                 {
-                    Assert.Equals(fileName, string.Format(posDetails.PosUpdateZipFileName, weekNumber, currentYear));
+                    Assert.That(fileName, Is.EqualTo(string.Format(posDetails.PosUpdateZipFileName, weekNumber, currentYear)));
 
                     string responseFileMimeName = batchDetailsResponse.files[0].mimeType;
-                    Assert.Equals(responseFileMimeName, posDetails.ZipFileMimeType);
+                    Assert.That(responseFileMimeName, Is.EqualTo(posDetails.ZipFileMimeType));
                 }
                 else
                 {
@@ -60,10 +60,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     {
                         string folderName = string.Format(posDetails.PosAvcsZipFileName, dvdNumber, weekNumber, currentYear);
                         string responseFileNameZip = batchDetailsResponse.files[responseFileNameContent].filename;
-                        Assert.Equals(responseFileNameZip, folderName);
+                        Assert.That(responseFileNameZip, Is.EqualTo(folderName));
 
                         string responseFileMimeName = batchDetailsResponse.files[responseFileNameContent].mimeType;
-                        Assert.Equals(responseFileMimeName, posDetails.ZipFileMimeType);
+                        Assert.That(responseFileMimeName, Is.EqualTo(posDetails.ZipFileMimeType));
 
                         string fileSize = batchDetailsResponse.files[responseFileNameContent].fileSize;
                         Assert.That(!string.IsNullOrEmpty(fileSize));
@@ -88,13 +88,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 for (int responseFileNameLocation = 0; responseFileNameLocation < expectedFileName.Count; responseFileNameLocation++)
                 {
                     string responseFileName = batchDetailsResponse.files[responseFileNameLocation].filename;
-                    Assert.Equals(responseFileName, expectedFileName[responseFileNameLocation]);
+                    Assert.That(responseFileName, Is.EqualTo(expectedFileName[responseFileNameLocation]));
 
                     string responseFileMimeName = batchDetailsResponse.files[responseFileNameLocation].mimeType;
 
-                    Assert.Equals(responseFileMimeName, responseFileName.Contains(".sha1")
+                    Assert.That(responseFileMimeName, Is.EqualTo(responseFileName.Contains(".sha1")
                         ? posDetails.Sha1FileMimeType
-                        : posDetails.IsoFileMimeType);
+                        : posDetails.IsoFileMimeType));
 
                     string fileSize = batchDetailsResponse.files[responseFileNameLocation].fileSize;
                     Assert.That(!string.IsNullOrEmpty(fileSize));
@@ -118,12 +118,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             switch (responseContent)
             {
                 case "Catalogue":
-                    Assert.Equals(responseFileName, posDetails.AVCSCatalogueFileName);
-                    Assert.Equals(responseFileMimeName, posDetails.AVCSCatalogueFileMimeType);
+                    Assert.That(responseFileName, Is.EqualTo(posDetails.AVCSCatalogueFileName));
+                    Assert.That(responseFileMimeName, Is.EqualTo(posDetails.AVCSCatalogueFileMimeType));
                     break;
                 case "ENC Updates":
-                    Assert.Equals(responseFileName, posDetails.EncUpdateListFileName);
-                    Assert.Equals(responseFileMimeName, posDetails.EncUpdateListFileMimeType);
+                    Assert.That(responseFileName, Is.EqualTo(posDetails.EncUpdateListFileName));
+                    Assert.That(responseFileMimeName, Is.EqualTo(posDetails.EncUpdateListFileMimeType));
                     break;
                 default:
                     Assert.That(responseContent.Contains("Catalogue.xml") || responseContent.Contains("Enc Update list.csv"));
@@ -139,37 +139,37 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
             //to check status
             string actualBatchStatus = batchDetailsResponse.status;
-            Assert.Equals(actualBatchStatus, "Committed");
+            Assert.That(actualBatchStatus, Is.EqualTo("Committed"));
 
             string actualBusinessUnit = batchDetailsResponse.businessUnit;
-            Assert.Equals(actualBusinessUnit, "AVCSData");
+            Assert.That(actualBusinessUnit, Is.EqualTo("AVCSData"));
 
             string actualExpiryDate = batchDetailsResponse.expiryDate;
-            Assert.That(actualExpiryDate.Contains(expectedExpiryDate));
+            Assert.That(actualExpiryDate, Does.Contain(expectedExpiryDate));
 
             string actualProductType = batchDetailsResponse.attributes[0].value;
-            Assert.Equals(actualProductType, "AIO");
+            Assert.That(actualProductType, Is.EqualTo("AIO"));
 
             string actualWeekNumber = batchDetailsResponse.attributes[1].value;
-            Assert.Equals(actualWeekNumber, expectedWeekNumber);
+            Assert.That(actualWeekNumber, Is.EqualTo(expectedWeekNumber));
 
             string actualYear = batchDetailsResponse.attributes[2].value;
-            Assert.Equals(actualYear, expectedYear);
+            Assert.That(actualYear, Is.EqualTo(expectedYear));
 
             string actualYearAndWeek = batchDetailsResponse.attributes[3].value;
-            Assert.Equals(actualYearAndWeek, expectedYear + " / " + expectedWeekNumber);
+            Assert.That(actualYearAndWeek, Is.EqualTo(expectedYear + " / " + expectedWeekNumber));
 
             string actualExchangeSetType = batchDetailsResponse.attributes[4].value;
 
             if (exchangeSetType.Equals("AIO"))
             {
-                Assert.Equals(actualExchangeSetType, "AIO");
+                Assert.That(actualExchangeSetType, Is.EqualTo("AIO"));
             }
             else if (exchangeSetType.Equals("Update"))
             {
-                Assert.Equals(actualExchangeSetType, "Update");
+                Assert.That(actualExchangeSetType, Is.EqualTo("Update"));
                 string actualMediaType = batchDetailsResponse.attributes[5].value;
-                Assert.Equals(actualMediaType, "Zip");
+                Assert.That(actualMediaType, Is.EqualTo("Zip"));
 
             }
         }

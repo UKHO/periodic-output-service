@@ -13,11 +13,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
     public static class FssBatchHelper
     {
         private static FssEndPointHelper FssApiClient { get; }
-        static FssApiConfiguration config = new TestConfiguration().fssConfig;
-        static BessApiConfiguration bessConfig = new TestConfiguration().bessConfig;
-        static readonly TestConfiguration testConfiguration = new();
-        static readonly string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-        static readonly string currentYear = DateTime.UtcNow.Year.ToString();
+        private static readonly FssApiConfiguration config = new TestConfiguration().fssConfig;
+        private static readonly BessApiConfiguration bessConfig = new TestConfiguration().bessConfig;
+        private static readonly TestConfiguration testConfiguration = new();
+        private static readonly string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+        private static readonly string currentYear = DateTime.UtcNow.Year.ToString();
 
         static FssBatchHelper()
         {
@@ -41,7 +41,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(config.BatchCommitWaitTime))
             {
                 HttpResponseMessage batchStatusResponse = await FssApiClient.GetBatchStatusAsync(batchStatusUri);
-                Assert.Equals(batchStatusResponse.StatusCode, (HttpStatusCode)200);
+                Assert.That(batchStatusResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
                 var batchStatusResponseObj = JsonConvert.DeserializeObject<ResponseBatchStatusModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                 batchStatus = batchStatusResponseObj!.Status!;
@@ -78,7 +78,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
 
             var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl);
-            Assert.Equals(response.StatusCode, (HttpStatusCode)200);
+            Assert.That(response.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             Stream stream = await response.Content.ReadAsStreamAsync();
 
@@ -181,7 +181,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             {
                 expectedEncryptionFlag = "0";
             }
-            Assert.Equals(expectedEncryptionFlag, encryptionFlag);
+            Assert.That(expectedEncryptionFlag, Is.EqualTo(encryptionFlag));
 
             return checkFile;
         }
@@ -235,20 +235,13 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             string[] serialEncfileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetSerialEncFile!));
             string serialENCType = serialEncfileContent[0].Split("   ")[1][8..];
-            switch (type)
+            return type switch
             {
-                case "BASE":
-                    return serialENCType.Equals("BASE");
-
-                case "UPDATE":
-                    return serialENCType.Equals("UPDATE");
-
-                case "CHANGE":
-                    return serialENCType.Equals("CHANGE");
-
-                default:
-                    return false;
-            }
+                "BASE" => serialENCType.Equals("BASE"),
+                "UPDATE" => serialENCType.Equals("UPDATE"),
+                "CHANGE" => serialENCType.Equals("CHANGE"),
+                _ => false,
+            };
         }
 
         /// <summary>
@@ -268,14 +261,20 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 for (int row = 1; row < rows; row++)
                 {
                     string[] cellPermitDetails = fileContent[row].Split(",");
-                    Assert.That(cellPermitDetails[1].Equals(ck[(row - 1) / 2]));
-                    Assert.That(cellPermitDetails[2].Equals(cellNames[(row - 1) / 2]));
+                    using (Assert.EnterMultipleScope())
+                    {
+                        Assert.That(cellPermitDetails[1], Is.EqualTo(ck[(row - 1) / 2]));
+                        Assert.That(cellPermitDetails[2], Is.EqualTo(cellNames[(row - 1) / 2]));
+                    }
                     string edition = editions[(row - 1) / 2];
                     edition = row % 2 == 0 ? (int.Parse(edition) + 1).ToString() : edition;
-                    Assert.That(cellPermitDetails[3].Equals(edition));
-                    Assert.That(cellPermitDetails[4].Equals(date));
-                    Assert.That(cellPermitDetails[5].Equals(date));
-                    Assert.That((row % 2 == 0 ? cellPermitDetails[7] == "2:Next" : cellPermitDetails[7] == "1:Active"));
+                    using (Assert.EnterMultipleScope())
+                    {
+                        Assert.That(cellPermitDetails[3], Is.EqualTo(edition));
+                        Assert.That(cellPermitDetails[4], Is.EqualTo(date));
+                        Assert.That(cellPermitDetails[5], Is.EqualTo(date));
+                        Assert.That(row % 2 == 0 ? cellPermitDetails[7] == "2:Next" : cellPermitDetails[7] == "1:Active");
+                    }
                 }
                 check = true;
             }
@@ -383,15 +382,15 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             for (int i = 0; i <= 3; i++)
             {
                 var value = apiResponseData.Attributes.ToArray()[i].Value;
-                Assert.Equals(value, testConfiguration.bessConfig.BessBatchDetails![i]);
+                Assert.That(value, Is.EqualTo(testConfiguration.bessConfig.BessBatchDetails![i]));
             }
 
             var year = apiResponseData.Attributes.ToArray()[4].Value;
-            Assert.Equals(year, currentYear);
+            Assert.That(year, Is.EqualTo(currentYear));
             var weekNumber = apiResponseData.Attributes.ToArray()[5].Value;
-            Assert.Equals(weekNumber, currentWeek);
+            Assert.That(weekNumber, Is.EqualTo(currentWeek));
             var yearWeek = apiResponseData.Attributes.ToArray()[6].Value;
-            Assert.Equals(yearWeek, year + " / " + weekNumber);
+            Assert.That(yearWeek, Is.EqualTo(year + " / " + weekNumber));
         }
 
         /// <summary>

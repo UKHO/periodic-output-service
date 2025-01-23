@@ -12,7 +12,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             FssJwtToken = AuthTokenProvider.GetFssToken();
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
             await CommonHelper.RunWebJob();
         }
 
@@ -22,7 +22,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenExtractedZipAndGeneratedISOAndSha1Files_ThenBatchesAreCreatedAndUploadedForLargeMedia(string batchId)
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, batchId);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
@@ -35,31 +35,31 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallFileDownloadEndpointForFullAVCSExchangeSetWithBatchId_ThenZipFilesAreDownloaded()
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.ZipFilesBatchId);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.ZipFilesBatchId, FssJwtToken, batchDetailsResponse);
-            Assert.Equals(DownloadedFolderPath.Count, 2);
+            Assert.That(DownloadedFolderPath, Has.Count.EqualTo(2));
         }
 
         [Test]
         public async Task WhenICallFileDownloadEndpointForFullAVCSExchangeSetWithBatchId_ThenIsoAndSha1FilesAreDownloaded()
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.IsoSha1BatchId);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             await apiResponse.DeserializeAsyncResponse();
 
             DownloadedFolderPath = await FileContentHelper.CreateExchangeSetFileForIsoAndSha1Files(posDetails.IsoSha1BatchId, FssJwtToken);
-            Assert.Equals(DownloadedFolderPath.Count, 4);
+            Assert.That(DownloadedFolderPath, Has.Count.EqualTo(4));
         }
 
         [Test]
         public async Task WhenDownloadedZipOfUpdateExchangeSetFromFss_ThenNewBatchIsCreatedAndUploadedWithUpdatedBU()
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdateExchangeSetBatchId);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
@@ -72,12 +72,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallFileDownloadEndpointForUpdateExchangeSetWithBatchId_ThenAZipFileIsDownloaded()
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdateExchangeSetBatchId);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             DownloadedFolderPath = await FileContentHelper.DownloadAndExtractExchangeSetZipFileForLargeMedia(posDetails.UpdateExchangeSetBatchId, FssJwtToken, batchDetailsResponse);
-            Assert.Equals(DownloadedFolderPath.Count, 1);
+            Assert.That(DownloadedFolderPath, Has.Count.EqualTo(1));
         }
 
         [Test]
@@ -87,7 +87,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenDownloadedCatalogueXmlAndCsvFromFss_ThenNewBatchIsCreatedAndUploadedWithUpdatedBU(string batchId)
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.CatalogueBatchId);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
@@ -103,12 +103,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallFileDownloadEndpointForCatalogueXmlWithBatchId_ThenAXmlAndCSVFilesAreDownloaded1(string batchId)
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, batchId);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
             DownloadedFolderPath = await FileContentHelper.DownloadCatalogueXmlOrEncUpdatesListCsvFileForLargeMedia(batchId, FssJwtToken, batchDetailsResponse);
-            Assert.Equals(DownloadedFolderPath.Count, 1);
+            Assert.That(DownloadedFolderPath, Has.Count.EqualTo(1));
         }
 
         [OneTimeTearDown]
@@ -119,7 +119,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
         }
     }
 }

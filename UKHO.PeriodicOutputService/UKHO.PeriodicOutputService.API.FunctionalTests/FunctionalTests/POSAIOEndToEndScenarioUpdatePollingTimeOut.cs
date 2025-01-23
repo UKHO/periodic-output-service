@@ -13,7 +13,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             FssJwtToken = AuthTokenProvider.GetFssToken();
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFMAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationUpdatePollingTimeout);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
             await CommonHelper.RunWebJob();
         }
 
@@ -21,11 +21,11 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenExecutedAioWebJobForUpdateTimesOut_ThenCommitInProgressBatchStatusIsReturned()
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.UpdatePollingTimeoutBatchId);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
             string batchStatus = batchDetailsResponse.status;
-            Assert.Equals(batchStatus, "CommitInProgress");
+            Assert.That(batchStatus, Is.EqualTo("CommitInProgress"));
 
             await FileContentHelper.VerifyPosBatches(FssJwtToken);
         }
@@ -38,7 +38,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
         }
     }
 }

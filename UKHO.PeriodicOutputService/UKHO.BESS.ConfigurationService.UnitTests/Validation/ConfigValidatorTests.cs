@@ -47,7 +47,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             BessConfig bessConfig = GetBessConfig();
 
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
-            Assert.That(result.Errors.Count, Is.EqualTo(0));
+            Assert.That(result.Errors, Is.Empty);
         }
 
         [Test]
@@ -73,7 +73,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             };
 
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
-            Assert.That(result.Errors.Count, Is.EqualTo(0));
+            Assert.That(result.Errors, Is.Empty);
         }
 
         [Test]

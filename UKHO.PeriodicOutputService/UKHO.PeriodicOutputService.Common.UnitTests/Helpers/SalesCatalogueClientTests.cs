@@ -33,8 +33,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             var result = salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Get, null, "", httpClient.BaseAddress.ToString());
             var deSerializedResult = JsonConvert.DeserializeObject<HttpResponseMessage>(result.Result.Content.ReadAsStringAsync().Result);
 
-            Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(deSerializedResult != null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(deSerializedResult, Is.Not.EqualTo(null));
+            }
         }
 
         [Test]
@@ -54,8 +57,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             var result = salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Get, "", "", httpClient.BaseAddress.ToString());
             var deSerializedResult = JsonConvert.DeserializeObject<HttpResponseMessage>(result.Result.Content.ReadAsStringAsync().Result);
 
-            Assert.That(result.Result.StatusCode, Is.EqualTo(statusCode));
-            Assert.That(deSerializedResult != null);
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result.Result.StatusCode, Is.EqualTo(statusCode));
+                Assert.That(deSerializedResult, Is.Not.EqualTo(null));
+            }
         }
 
         private HttpResponseMessage GetHttpResponseMessage(HttpStatusCode statusCode) => new()

@@ -9,7 +9,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.PksIntegration
     {
         static readonly TestConfiguration testConfiguration = new();
         public DataHelper dataHelper = new();
-        private List<ProductKeyServiceModel>? productKeyService = new();
+        private List<ProductKeyServiceModel>? productKeyService = [];
 
         [Test]
         public async Task WhenICallPksEndpointWithValidProduct_ThenSuccessStatusCode200IsReturned()
@@ -20,19 +20,19 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.PksIntegration
             }
 
             HttpResponseMessage apiResponse = await PksEndpointHelper.PermitKeysEndpoint(testConfiguration.pksConfig.BaseUrl, productKeyService!);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
         }
 
         [Test]
         [TestCase("GB301910", "5")]
         public async Task WhenICallPksEndpointWithInvalidProduct_ThenBadRequestStatusCode400IsReturned(string productName, string editionNumber)
         {
-            productKeyService = new List<ProductKeyServiceModel> {
+            productKeyService = [
             dataHelper.GetProductKeyServiceData(productName, editionNumber)
-            };
+            ];
 
             HttpResponseMessage apiResponse = await PksEndpointHelper.PermitKeysEndpoint(testConfiguration.pksConfig.BaseUrl, productKeyService);
-            Assert.Equals(apiResponse.StatusCode, (HttpStatusCode)400);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)400));
         }
 
         [TearDown]

@@ -358,7 +358,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             Task<List<string>>? result = _fssService.UploadBlocks("", fileInfo);
 
-            Assert.That(result.Result.Count, Is.GreaterThan(0));
+            Assert.That(result.Result, Is.Not.Empty);
             Assert.That(result.Result.FirstOrDefault(), Does.Contain("Block"));
 
             A.CallTo(_fakeLogger).Where(call =>
@@ -879,8 +879,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var response = await _fssService.SearchReadMeFilePathAsync("1a7537ff-ffa2-4565-8f0e-96e61e70a9fc", readMeSearchFilterQuery);
             string expectedReadMeFilePath = @"batch/a07537ff-ffa2-4565-8f0e-96e61e70a9fc/files/README.TXT";
-            Assert.That(response != null);
-            Assert.That(searchReadMeFileName, Is.EqualTo(expectedReadMeFilePath));
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(actual: response, Is.Not.EqualTo(null));
+                Assert.That(searchReadMeFileName, Is.EqualTo(expectedReadMeFilePath));
+            }
         }
 
         #endregion SearchReadMeFilePath

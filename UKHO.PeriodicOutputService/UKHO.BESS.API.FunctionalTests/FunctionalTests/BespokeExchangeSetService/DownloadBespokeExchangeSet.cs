@@ -25,7 +25,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
         {
             azureBlobStorageClient = new AzureBlobStorageClient(config);
             HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.Identifiers);
-            Assert.That(apiResponse.StatusCode > (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.GreaterThan((HttpStatusCode)200));
         }
 
         //PBI 140039 : BESS BS - Dealing with ancillary files : Get ReadMe.txt from FSS based on config
@@ -39,7 +39,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
         public async Task WhenIUploadAConfigWithCorrectDetails_ThenBespokeExchangeSetShouldBeDownloaded(string exchangeSetStandard, string type, string readMeSearchFilter, string batchId, string keyFileType)
         {
             HttpResponseMessage response = await BessUploadFileHelper.UploadConfigFile(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.ValidConfigPath, testConfiguration.sharedKeyConfig.Key, exchangeSetStandard, type, readMeSearchFilter, keyFileType);
-            Assert.That(response.StatusCode > (HttpStatusCode)201);
+            Assert.That(response.StatusCode, Is.GreaterThan((HttpStatusCode)201));
             Extensions.WaitForDownloadExchangeSet();
             var downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId, true, keyFileType, true);
             var expectedResultReadme = FssBatchHelper.CheckReadMeInBessExchangeSet(downloadFolderPath, readMeSearchFilter);
@@ -89,7 +89,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BespokeExchangeSetServic
         {
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = Extensions.Cleanup(testConfiguration.bessConfig.BaseUrl);
-            Assert.That(apiResponse.StatusCode > (HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.GreaterThan((HttpStatusCode)200));
         }
     }
 }

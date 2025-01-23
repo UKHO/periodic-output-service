@@ -70,7 +70,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 });
 
             List<ProductKeyServiceResponse> response = await pksService.PostProductKeyData(GetProductKeyServiceRequest());
-            Assert.That(response.Count >= 1);
+            Assert.That(response, Is.Not.Empty);
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"

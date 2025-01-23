@@ -28,7 +28,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         {
             if (token == null)
             {
-                ClientSecretCredential csc = new ClientSecretCredential(tennantId, clientId, clientSecret);
+                ClientSecretCredential csc = new(tennantId, clientId, clientSecret);
                 token = csc.GetToken(new TokenRequestContext([$"{scope}/.default"])).Token;
             }
         }
