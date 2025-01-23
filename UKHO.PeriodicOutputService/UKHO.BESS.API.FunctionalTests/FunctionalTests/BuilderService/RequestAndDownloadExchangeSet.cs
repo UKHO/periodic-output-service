@@ -13,7 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         public void SetupAsync()
         {
             HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.Identifiers);
-            Assert.That(apiResponse.StatusCode, Is.GreaterThan((HttpStatusCode)200));
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
         }
 
         //PBI 150897: Testing : BESS BS - Request, wait/poll and download exchange set
@@ -48,7 +48,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         {
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = Extensions.Cleanup(testConfiguration.bessConfig.BaseUrl);
-            Assert.That(apiResponse.StatusCode, Is.GreaterThan((HttpStatusCode)200));
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
         }
     }
 }
