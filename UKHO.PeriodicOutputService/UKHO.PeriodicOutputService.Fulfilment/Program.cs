@@ -103,9 +103,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             //Add logging
             serviceCollection.AddApplicationInsightsTelemetryWorkerService();
 
-#if DEBUG
             serviceCollection.AddLogging(loggingBuilder =>
             {
+#if DEBUG
                 loggingBuilder.AddSerilog(new LoggerConfiguration()
                                 .WriteTo.File("Logs/UKHO.PeriodicOutputService.Fulfilment-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
                                 .MinimumLevel.Information()
