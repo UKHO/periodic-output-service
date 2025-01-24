@@ -5,7 +5,6 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Elastic.Apm;
-using Elastic.Apm.Api;
 using Elastic.Apm.Azure.Storage;
 using Elastic.Apm.DiagnosticSource;
 using Microsoft.ApplicationInsights.Channel;
@@ -50,7 +49,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
                 //Create service provider. This will be used in logging.
                 ServiceProvider serviceProvider = serviceCollection.BuildServiceProvider();
-                                
+
                 try
                 {
                     await serviceProvider.GetService<PosFulfilmentJob>().ProcessFulfilmentJob();
@@ -157,12 +156,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                 serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
                 serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
-                serviceCollection.AddSingleton<IConfiguration>(configuration);
+                serviceCollection.AddSingleton(configuration);
 
                 configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
-
             }
-
 
             serviceCollection.AddDistributedMemoryCache();
 
@@ -190,7 +187,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             {
                 AllowAutoRedirect = false
             }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
-
 
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();
