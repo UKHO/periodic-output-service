@@ -473,4 +473,16 @@
     </notes>
     <vulnerabilityName>CVE-2024-43485</vulnerabilityName>
   </suppress>
+  <suppress>
+   <notes><![CDATA[
+   file name: YamlDotNet.dll
+   ]]></notes>
+   <cve>CVE-2018-1000210</cve>
+</suppress>
+<suppress>
+   <notes><![CDATA[
+   file name: Azure.Identity:1.10.3
+   ]]></notes>
+   <vulnerabilityName>CVE-2024-29992</vulnerabilityName>
+</suppress>
 </suppressions>
