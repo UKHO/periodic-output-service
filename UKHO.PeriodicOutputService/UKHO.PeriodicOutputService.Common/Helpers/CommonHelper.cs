@@ -44,8 +44,20 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return hash;
         }
 
-        public static string GetCurrentWeekNumber(DateTime date)
-        { string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString(); return currentWeek.Length == 1 ? string.Concat("0", currentWeek) : currentWeek; }
+        /// <summary>
+        /// Get the current week number of the year for the given date, based on the standard UKHO week starting on a Thursday.
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        public static string GetCurrentWeekNumber(DateTime date) => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString("00");
+
+        /// <summary>
+        /// Get the current week number of the year for the given date, incremented by the specified number of weeks.
+        /// </summary>
+        /// <param name="date"></param>
+        /// <param name="weeksToIncrement"></param>
+        /// <returns></returns>
+        public static string GetCurrentWeekNumber(DateTime date, int weeksToIncrement) => GetCurrentWeekNumber(date.AddDays(7 * weeksToIncrement));
 
         public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(ILogger logger, string requestType, EventIds eventId, int retryCount, double sleepDuration)
         {
