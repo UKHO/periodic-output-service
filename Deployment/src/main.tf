@@ -54,7 +54,6 @@ module "mock_webapp_service" {
     "ASPNETCORE_ENVIRONMENT"                               = local.env_name
     "WEBSITE_RUN_FROM_PACKAGE"                             = "1"
     "WEBSITE_ENABLE_SYNC_UPDATE_SITE"                      = "true"
-    "APPINSIGHTS_INSTRUMENTATIONKEY"                       = "NOT_CONFIGURED"
   }
   tags                                                     = local.tags
   allowed_ips                                              = var.allowed_ips
@@ -74,7 +73,6 @@ module "webapp_service" {
     "EventHubLoggingConfiguration:Environment"                 = local.env_name
     "EventHubLoggingConfiguration:MinimumLoggingLevel"         = "Warning"
     "EventHubLoggingConfiguration:UkhoMinimumLoggingLevel"     = "Information"
-    "APPINSIGHTS_INSTRUMENTATIONKEY" = module.app_insights.instrumentation_key
     "ASPNETCORE_ENVIRONMENT"                                   = local.env_name
     "WEBSITE_RUN_FROM_PACKAGE"                                 = "1"
     "WEBSITE_ENABLE_SYNC_UPDATE_SITE"                          = "true"

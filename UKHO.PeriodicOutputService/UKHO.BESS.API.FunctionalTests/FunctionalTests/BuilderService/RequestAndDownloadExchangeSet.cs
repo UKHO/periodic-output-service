@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 using NUnit.Framework;
 using UKHO.BESS.API.FunctionalTests.Helpers;
 
@@ -14,7 +13,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         public void SetupAsync()
         {
             HttpResponseMessage apiResponse = Extensions.ConfigureFt(testConfiguration.bessConfig.BaseUrl, testConfiguration.bessConfig.Identifiers);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
         }
 
         //PBI 150897: Testing : BESS BS - Request, wait/poll and download exchange set
@@ -31,7 +30,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
             Extensions.WaitForDownloadExchangeSet();
             string downloadFolderPath = await EssEndpointHelper.CreateExchangeSetFile(batchId);
             bool expectedResulted = FssBatchHelper.CheckFilesInDownloadedZip(downloadFolderPath, exchangeSetStandard);
-            expectedResulted.Should().Be(true);
+            Assert.That(expectedResulted);
         }
 
         [TearDown]
@@ -49,7 +48,7 @@ namespace UKHO.BESS.API.FunctionalTests.FunctionalTests.BuilderService
         {
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = Extensions.Cleanup(testConfiguration.bessConfig.BaseUrl);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
         }
     }
 }

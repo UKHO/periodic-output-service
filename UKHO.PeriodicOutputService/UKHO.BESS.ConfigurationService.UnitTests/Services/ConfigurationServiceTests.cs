@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using FakeItEasy;
-using FluentAssertions;
 using FluentValidation.Results;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -76,33 +75,43 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            nullAzureBlobStorageClient.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageClient");
+            var exception = Assert.Throws<ArgumentNullException>(() => nullAzureBlobStorageClient());
+            Assert.That(exception.ParamName, Is.EqualTo("azureBlobStorageClient"));
 
             Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            nullAzureTableHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureTableStorageHelper");
+            exception = Assert.Throws<ArgumentNullException>(() => nullAzureTableHelper());
+            Assert.That(exception.ParamName, Is.EqualTo("azureTableStorageHelper"));
 
             Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, null, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            nullConfigurationServiceLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
+            exception = Assert.Throws<ArgumentNullException>(() => nullConfigurationServiceLogger());
+            Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             Action nullConfigValidator = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, null, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            nullConfigValidator.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configValidator");
+            exception = Assert.Throws<ArgumentNullException>(() => nullConfigValidator());
+            Assert.That(exception.ParamName, Is.EqualTo("configValidator"));
 
             Action nullSalesCatalogueService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, null, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
-            nullSalesCatalogueService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("salesCatalogueService");
+            exception = Assert.Throws<ArgumentNullException>(() => nullSalesCatalogueService());
+            Assert.That(exception.ParamName, Is.EqualTo("salesCatalogueService"));
 
             Action nullConfigurationServiceConfiguration = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, null, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            nullConfigurationServiceConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
+            exception = Assert.Throws<ArgumentNullException>(() => nullConfigurationServiceConfiguration());
+            Assert.That(exception.ParamName, Is.EqualTo("configuration"));
 
             Action nullAzureBlobStorageService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, null, fakeMacroTransformer);
 
-            nullAzureBlobStorageService.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("azureBlobStorageService");
+            exception = Assert.Throws<ArgumentNullException>(() => nullAzureBlobStorageService());
+            Assert.That(exception.ParamName, Is.EqualTo("azureBlobStorageService"));
+
 
             Action nullMacroTransformer = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, null);
-            nullMacroTransformer.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("macroTransformer");
+            exception = Assert.Throws<ArgumentNullException>(() => nullMacroTransformer());
+            Assert.That(exception.ParamName, Is.EqualTo("macroTransformer"));
+
         }
 
         [Test]
@@ -114,7 +123,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -152,7 +161,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -190,7 +199,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -231,7 +240,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -272,7 +281,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -313,7 +322,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -346,14 +355,15 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenAValidConfigWithValidMacroIsNotTransformed_ThenTransformMacrosThrowsException()
+        public void WhenAValidConfigWithValidMacroIsNotTransformed_ThenTransformMacrosThrowsException()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetValidConfigsWithMacroExpressionJson(ValidConfigWithValidMacroJson));
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Throws<Exception>();
 
-            Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.MacroTransformationFailed.ToEventId());
+            AsyncTestDelegate act = configurationService.ProcessConfigsAsync;
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.MacroTransformationFailed.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -379,7 +389,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -414,7 +424,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -445,7 +455,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -476,7 +486,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -507,7 +517,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -532,12 +542,12 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenGetConfigsInContainerAsyncMethodSendNull_ThenThrowsException()
+        public void WhenGetConfigsInContainerAsyncMethodSendNull_ThenThrowsException()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Throws<Exception>();
 
-            Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
-            await act.Should().ThrowAsync<Exception>();
+            AsyncTestDelegate act = async () => { await configurationService.ProcessConfigsAsync(); };
+            Assert.ThrowsAsync<Exception>(act);
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -554,7 +564,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs not found");
+            Assert.That(result.Result, Is.EqualTo("BESS configs not found"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -586,7 +596,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -627,7 +637,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -638,13 +648,14 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         }
 
         [Test]
-        public async Task WhenInvalidConfigValidating_ThenValidationThrowsException()
+        public void WhenInvalidConfigValidating_ThenValidationThrowsException()
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Throws<Exception>();
 
-            Func<Task> act = async () => { await configurationService.ProcessConfigsAsync(); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessConfigValidationError.ToEventId());
+            AsyncTestDelegate act = async () => { await configurationService.ProcessConfigsAsync(); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.BessConfigValidationError.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -706,16 +717,17 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappened();
-            result.Should().BeTrue();
+            Assert.That(result);
         }
 
         [Test]
-        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncThrowsException_ThenReturnsFalse()
+        public void WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncThrowsException_ThenReturnsFalse()
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Throws<Exception>();
 
-            Func<Task> act = async () => { await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse()); };
-            await act.Should().ThrowAsync<FulfilmentException>().Where(x => x.EventId == EventIds.BessConfigFrequencyProcessingException.ToEventId());
+            AsyncTestDelegate act = async () => { await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse()); };
+            var exception = Assert.ThrowsAsync<FulfilmentException>(act);
+            Assert.That(exception.EventId, Is.EqualTo(EventIds.BessConfigFrequencyProcessingException.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -752,7 +764,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Queue message creation successful for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
-            result.Should().BeTrue();
+            Assert.That(result);
         }
 
         [Test]
@@ -778,7 +790,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Something went wrong while adding message to queue, Bespoke Exchange Set will not be created for file : {FileName} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
-            result.Should().BeTrue();
+            Assert.That(result);
         }
 
         [Test]
@@ -821,7 +833,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             ).MustHaveHappened();
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<IEnumerable<string>>.Ignored, A<long>.Ignored)).MustNotHaveHappened();
 
-            result.Should().BeTrue();
+            Assert.That(result);
         }
 
         [Test]
@@ -837,7 +849,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<long>.Ignored))
                 .MustNotHaveHappened();
 
-            result.Should().BeTrue();
+            Assert.That(result);
         }
 
         [Test]
@@ -850,7 +862,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
-            result.Should().BeTrue();
+            Assert.That(result);
         }
 
         [Test]
@@ -863,7 +875,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() =>
                 fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, A<bool>.Ignored)).MustHaveHappenedOnceOrMore();
 
-            result.Should().BeTrue();
+            Assert.That(result);
         }
 
         [Test]
@@ -874,7 +886,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSettingWithInvalidEncCell(), GetFakeSalesCatalogueDataProductResponse());
 
-            result.Should().BeTrue();
+            Assert.That(result);
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -915,7 +927,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 "Neither listed ENC cell names found nor the pattern matched for any cell, Bespoke Exchange Set will not be created for : {EncCellNames} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
-            result.Should().BeTrue();
+            Assert.That(result);
         }
 
         [Test]
@@ -950,7 +962,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             bool result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), salesCatalogueDataProductResponse);
 
-            result.Should().BeTrue();
+            Assert.That(result);
 
             A.CallTo(fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -974,7 +986,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
 
             var result = configurationService.ProcessConfigsAsync();
 
-            result.Result.Should().Be("BESS configs processing completed");
+            Assert.That(result.Result, Is.EqualTo("BESS configs processing completed"));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"

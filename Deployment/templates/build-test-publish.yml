@@ -6,7 +6,7 @@ parameters:
 
 - name: DotNetVersion
   type: string
-  default: '6.0.x'
+  default: '8.0.x'
 
 jobs:
 - job: Dependencychecker
@@ -48,9 +48,8 @@ jobs:
     - task: UseDotNet@2
       displayName: 'Use .NET SDK'
       inputs:
-        packageType: sdk
-        useGlobalJson: true
-        workingDirectory: '$(Build.SourcesDirectory)'
+        packageType: sdk              
+        version: $(SdkVersion)
 
     - task: DotNetCoreCLI@2
       displayName: ".Net Core - NuGet restore test projects only"
@@ -100,9 +99,8 @@ jobs:
     - task: UseDotNet@2
       displayName: 'Use .NET SDK'
       inputs:
-        packageType: sdk
-        useGlobalJson: true
-        workingDirectory: '$(Build.SourcesDirectory)'
+        packageType: sdk              
+        version: $(SdkVersion)
 
     - task: DotNetCoreCLI@2
       displayName: ".Net Core - NuGet restore"
@@ -219,9 +217,8 @@ jobs:
     - task: UseDotNet@2
       displayName: 'Use .NET SDK'
       inputs:
-        packageType: sdk
-        useGlobalJson: true
-        workingDirectory: '$(Build.SourcesDirectory)'
+        packageType: sdk              
+        version: $(SdkVersion)
 
     - task: DotNetCoreCLI@2
       displayName: ".Net Core - NuGet restore"
@@ -279,9 +276,8 @@ jobs:
     - task: UseDotNet@2
       displayName: 'Use .NET SDK'
       inputs:
-        packageType: sdk
-        useGlobalJson: true
-        workingDirectory: '$(Build.SourcesDirectory)'
+        packageType: sdk              
+        version: $(SdkVersion)
 
     - task: DotNetCoreCLI@2
       displayName: ".Net Core - NuGet restore"
@@ -333,9 +329,8 @@ jobs:
     - task: UseDotNet@2
       displayName: 'Use .NET SDK'
       inputs:
-        packageType: sdk
-        useGlobalJson: true
-        workingDirectory: '$(Build.SourcesDirectory)'
+        packageType: sdk              
+        version: $(SdkVersion)
 
     - task: DotNetCoreCLI@2
       displayName: ".Net Core - NuGet restore"

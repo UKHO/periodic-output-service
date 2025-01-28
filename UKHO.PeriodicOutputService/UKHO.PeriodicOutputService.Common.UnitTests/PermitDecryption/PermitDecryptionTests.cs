@@ -1,5 +1,4 @@
 ﻿using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
@@ -33,13 +32,16 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
             Action nullLogger = () => new Common.PermitDecryption.PermitDecryption(null, fakePksApiConfiguration, fakeS63Crypt);
-            nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
+            var exception = Assert.Throws<ArgumentNullException>(() => nullLogger());
+            Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             Action nullPksApiConfiguration = () => new Common.PermitDecryption.PermitDecryption(fakeLogger, null, fakeS63Crypt);
-            nullPksApiConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("pksApiConfiguration");
+            exception = Assert.Throws<ArgumentNullException>(() => nullPksApiConfiguration());
+            Assert.That(exception.ParamName, Is.EqualTo("pksApiConfiguration"));
 
             Action nullS63Crypt = () => new Common.PermitDecryption.PermitDecryption(fakeLogger, fakePksApiConfiguration, null);
-            nullS63Crypt.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("s63Crypt");
+            exception = Assert.Throws<ArgumentNullException>(() => nullS63Crypt());
+            Assert.That(exception.ParamName, Is.EqualTo("s63Crypt"));
         }
 
         [Test]
@@ -50,8 +52,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
 
             var result = permitDecryption.GetPermitKeys("ID123456202501016326A0EFB11E46406");
 
-            result.ActiveKey.Should().Be("0102030405");
-            result.NextKey.Should().Be("0102030405");
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result.ActiveKey, Is.EqualTo("0102030405"));
+                Assert.That(result.NextKey, Is.EqualTo("0102030405"));
+            }
         }
 
         [Test]
@@ -61,7 +66,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         {
             var result = permitDecryption.GetPermitKeys(permitKey);
 
-            result.Should().BeNull();
+            Assert.That(result, Is.EqualTo(null));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -82,7 +87,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
 
             var result = permitDecryption.GetPermitKeys("ID12");
 
-            result.Should().BeNull();
+            Assert.That(result, Is.EqualTo(null));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -100,7 +105,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
 
             var result = permitDecryption.GetPermitKeys("ID12");
 
-            result.Should().BeNull();
+            Assert.That(result, Is.EqualTo(null));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"

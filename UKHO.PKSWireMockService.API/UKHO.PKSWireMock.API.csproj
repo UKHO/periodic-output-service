@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -9,13 +9,13 @@
   <ItemGroup>
     <PackageReference Include="JsonConverter.Abstractions" Version="0.7.1" />
     <PackageReference Include="JsonConverter.Newtonsoft.Json" Version="0.7.1" />
-    <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="6.0.36" />
+    <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="8.0.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
-    <PackageReference Include="WireMock.Net" Version="1.6.10" />
-    <PackageReference Include="WireMock.Net.Abstractions" Version="1.6.10" />
-    <PackageReference Include="WireMock.Org.Abstractions" Version="1.6.10" />
-    <PackageReference Include="YamlDotNet" Version="15.3.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    <PackageReference Include="WireMock.Net" Version="1.6.11" />
+    <PackageReference Include="WireMock.Net.Abstractions" Version="1.6.11" />
+    <PackageReference Include="WireMock.Org.Abstractions" Version="1.6.11" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
   <ItemGroup>
