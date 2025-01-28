@@ -100,5 +100,46 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                   && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
                   ).MustHaveHappenedTwiceOrMore();
         }
+
+        [TestCase(2025, 12, 24, new string[] { "51", "52", "01", "02" }, new string[] { "52", "01", "02", "03" }, Description = "2025 has 52 weeks. 2025-12-24 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber) + "_2025/26")]
+        [TestCase(2026, 12, 23, new string[] { "51", "52", "53", "01" }, new string[] { "52", "53", "01", "02" }, Description = "2026 has 53 weeks. 2025-12-23 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber) + "_2026/27")]
+        public void Check_GetCurrentWeekNumber(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu)
+        {
+            CheckGetCurrentWeekNumberCommon(startYear, startMonth, startDay, expectedWeekNumberWed, expectedWeekNumberThu, (x) => CommonHelper.GetCurrentWeekNumber(x));
+        }
+
+        [TestCase(2025, 12, 24, new string[] { "52", "01", "02", "03" }, new string[] { "01", "02", "03", "04" }, Description = "2025 has 52 weeks. 2025-12-24 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber_AfterIncrementingWeeks) + "_2025/26")]
+        [TestCase(2026, 12, 23, new string[] { "52", "53", "01", "02" }, new string[] { "53", "01", "02", "03" }, Description = "2026 has 53 weeks. 2025-12-23 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber_AfterIncrementingWeeks) + "_2026/27")]
+        public void Check_GetCurrentWeekNumber_AfterIncrementingWeeks(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu)
+        {
+            CheckGetCurrentWeekNumberCommon(startYear, startMonth, startDay, expectedWeekNumberWed, expectedWeekNumberThu, (x) => CommonHelper.GetCurrentWeekNumber(x, 1));
+        }
+
+        private static void CheckGetCurrentWeekNumberCommon(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu, Func<DateTime, string> getCurrentWeekNumber)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(expectedWeekNumberWed, Has.Length.EqualTo(4), "The test covers a four week period so there must be four expected results.");
+                Assert.That(expectedWeekNumberThu, Has.Length.EqualTo(4), "The test covers a four week period so there must be four expected results.");
+            });
+
+            var checkDateWed = new DateTime(startYear, startMonth, startDay, 8, 0, 0, DateTimeKind.Utc);
+            var checkDateThu = checkDateWed.AddDays(1);
+
+            for (int i = 0; i < 3; i++)
+            {
+                var weekNumberWed = getCurrentWeekNumber(checkDateWed);
+                var weekNumberThu = getCurrentWeekNumber(checkDateThu);
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(weekNumberWed, Is.EqualTo(expectedWeekNumberWed[i]));
+                    Assert.That(weekNumberThu, Is.EqualTo(expectedWeekNumberThu[i]));
+                });
+
+                checkDateWed = checkDateWed.AddDays(7);
+                checkDateThu = checkDateThu.AddDays(7);
+            }
+        }
     }
 }
