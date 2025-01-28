@@ -10,6 +10,7 @@ using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
@@ -24,12 +25,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IConfiguration _configuration;
-
-        private readonly Enum[] _aioBatchTypes = {
-                                            Batch.AioBaseCDZipIsoSha1Batch,
-                                            Batch.AioUpdateZipBatch
-                                      };
-
         private const string ServerHeaderValue = "Windows-Azure-Blob";
 
         public FssService(ILogger<FssService> logger,
@@ -448,11 +443,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
         [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
         {
-            string currentYear = DateTime.UtcNow.Year.ToString();
-            string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
+            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
 
-            CreateBatchRequestModel createBatchRequest = _aioBatchTypes.Contains(batchType) ?
-                AddBatchAttributesForAio(currentWeek, currentYear) : AddBatchAttributesForPos(currentWeek, currentYear);
+            var createBatchRequest = batchType.IsAioBatchType() ? AddBatchAttributesForAio(weekNumber) : AddBatchAttributesForPos(weekNumber);
 
             //This batch attribute is added for fss stub.
             if (bool.Parse(_configuration["IsFTRunning"]))
@@ -505,9 +498,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
         }
 
         [ExcludeFromCodeCoverage]
-        private CreateBatchRequestModel AddBatchAttributesForPos(string currentWeek, string currentYear)
+        private CreateBatchRequestModel AddBatchAttributesForPos(FormattedWeekNumber weekNumber)
         {
-            CreateBatchRequestModel createBatchRequest = new()
+            var createBatchRequest = new CreateBatchRequestModel
             {
                 BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
@@ -516,21 +509,21 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new List<string>() : _fssApiConfiguration.Value.PosReadUsers.Split(","),
                     ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new List<string>() : _fssApiConfiguration.Value.PosReadGroups.Split(","),
                 },
-                Attributes = new List<KeyValuePair<string, string>>
-                {
+                Attributes =
+                [
                     new("Product Type", "AVCS"),
-                    new("Week Number", currentWeek),
-                    new("Year", currentYear),
-                    new("Year / Week", currentYear + " / " + currentWeek)
-                }
+                    new("Week Number", weekNumber.Week),
+                    new("Year", weekNumber.Year),
+                    new("Year / Week", weekNumber.YearWeek)
+                ]
             };
             return createBatchRequest;
         }
 
         [ExcludeFromCodeCoverage]
-        private CreateBatchRequestModel AddBatchAttributesForAio(string currentWeek, string currentYear)
+        private CreateBatchRequestModel AddBatchAttributesForAio(FormattedWeekNumber weekNumber)
         {
-            CreateBatchRequestModel createBatchRequest = new()
+            var createBatchRequest = new CreateBatchRequestModel
             {
                 BusinessUnit = _fssApiConfiguration.Value.AioBusinessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
@@ -539,18 +532,17 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new List<string>() : _fssApiConfiguration.Value.AioReadUsers.Split(","),
                     ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new List<string>() : _fssApiConfiguration.Value.AioReadGroups.Split(","),
                 },
-                Attributes = new List<KeyValuePair<string, string>>
-                {
+                Attributes =
+                [
                     new("Product Type", "AIO"),
-                    new("Week Number", currentWeek),
-                    new("Year", currentYear),
-                    new("Year / Week", currentYear + " / " + currentWeek)
-                }
+                    new("Week Number", weekNumber.Week),
+                    new("Year", weekNumber.Year),
+                    new("Year / Week", weekNumber.YearWeek)
+                ]
             };
             return createBatchRequest;
         }
 
-        //Private Methods
         [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModelForBess(Batch batchType, ConfigQueueMessage configQueueMessage)
         {
@@ -582,13 +574,13 @@ namespace UKHO.PeriodicOutputService.Common.Services
         }
 
         [ExcludeFromCodeCoverage]
-        private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName, Batch batchType)
+        private static AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName, Batch batchType)
         {
-            AddFileToBatchRequestModel addFileToBatchRequestModel = new()
+            var addFileToBatchRequestModel = new AddFileToBatchRequestModel
             {
                 Attributes = new List<KeyValuePair<string, string>>
                 {
-                    new("Product Type", _aioBatchTypes.Contains(batchType) ? "AIO" : "AVCS"),
+                    new("Product Type", batchType.IsAioBatchType() ? "AIO" : "AVCS"),
                     new("File Name", fileName)
                 }
             };

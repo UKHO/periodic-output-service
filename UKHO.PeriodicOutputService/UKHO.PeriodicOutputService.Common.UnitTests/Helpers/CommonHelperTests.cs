@@ -2,15 +2,17 @@
 using FakeItEasy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 {
     public class CommonHelperTests
     {
-        private ILogger<SalesCatalogueService> fakeLogger;
+        private ILogger<SalesCatalogueService> _fakeLogger;
         private const int RetryCount = 3;
         private const double SleepDuration = 2;
         private const string TestClient = "TestClient";
@@ -18,104 +20,105 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         [SetUp]
         public void Setup()
         {
-            fakeLogger = A.Fake<ILogger<SalesCatalogueService>>();
+            _fakeLogger = A.Fake<ILogger<SalesCatalogueService>>();
         }
 
         [Test]
         public async Task WhenTooManyRequests_GetRetryPolicy()
         {
-            IServiceCollection services = new ServiceCollection();
+            var services = new ServiceCollection();
 
             services.AddHttpClient(TestClient)
-                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientScsRequest , RetryCount, SleepDuration))
+                .AddPolicyHandler(CommonHelper.GetRetryPolicy(_fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientScsRequest, RetryCount, SleepDuration))
                 .AddHttpMessageHandler(() => new TooManyRequestsDelegatingHandler());
 
-            HttpClient configuredClient =
+            var configuredClient =
                 services
-                    .BuildServiceProvider()
-                    .GetRequiredService<IHttpClientFactory>()
-                    .CreateClient(TestClient);
+                .BuildServiceProvider()
+                .GetRequiredService<IHttpClientFactory>()
+                .CreateClient(TestClient);
 
             var result = await configuredClient.GetAsync("https://test.com");
 
             Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
 
-            A.CallTo(fakeLogger).Where(call =>
-                  call.Method.Name == "Log"
-                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest .ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
-                  ).MustHaveHappenedTwiceOrMore();
+            A.CallTo(_fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
+                ).MustHaveHappenedTwiceOrMore();
         }
 
         [Test]
         public async Task WhenServiceUnavailable_GetRetryPolicy()
         {
-            IServiceCollection services = new ServiceCollection();
+            var services = new ServiceCollection();
 
             services.AddHttpClient(TestClient)
-                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientScsRequest , RetryCount, SleepDuration))
+                .AddPolicyHandler(CommonHelper.GetRetryPolicy(_fakeLogger, "Sales Catalogue", EventIds.RetryHttpClientScsRequest, RetryCount, SleepDuration))
                 .AddHttpMessageHandler(() => new ServiceUnavailableDelegatingHandler());
 
-            HttpClient configuredClient =
+            var configuredClient =
                 services
-                    .BuildServiceProvider()
-                    .GetRequiredService<IHttpClientFactory>()
-                    .CreateClient(TestClient);
+                .BuildServiceProvider()
+                .GetRequiredService<IHttpClientFactory>()
+                .CreateClient(TestClient);
 
             var result = await configuredClient.GetAsync("https://test.com");
 
             Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.ServiceUnavailable));
 
-            A.CallTo(fakeLogger).Where(call =>
-                  call.Method.Name == "Log"
-                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest .ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
-                  ).MustHaveHappenedTwiceOrMore();
+            A.CallTo(_fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
+                ).MustHaveHappenedTwiceOrMore();
         }
 
         [Test]
         public async Task WhenInternalServerError_GetRetryPolicy()
         {
-            IServiceCollection services = new ServiceCollection();
+            var services = new ServiceCollection();
 
             services.AddHttpClient(TestClient)
-                .AddPolicyHandler(CommonHelper.GetRetryPolicy(fakeLogger, "File Share", EventIds.RetryHttpClientScsRequest , RetryCount, SleepDuration))
+                .AddPolicyHandler(CommonHelper.GetRetryPolicy(_fakeLogger, "File Share", EventIds.RetryHttpClientScsRequest, RetryCount, SleepDuration))
                 .AddHttpMessageHandler(() => new InternalServerErrorDelegatingHandler());
 
-            HttpClient configuredClient =
+            var configuredClient =
                 services
-                    .BuildServiceProvider()
-                    .GetRequiredService<IHttpClientFactory>()
-                    .CreateClient(TestClient);
+                .BuildServiceProvider()
+                .GetRequiredService<IHttpClientFactory>()
+                .CreateClient(TestClient);
 
             var result = await configuredClient.GetAsync("https://test.com");
+
             Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
 
-            A.CallTo(fakeLogger).Where(call =>
-                  call.Method.Name == "Log"
-                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest .ToEventId()
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
-                  ).MustHaveHappenedTwiceOrMore();
+            A.CallTo(_fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
+                ).MustHaveHappenedTwiceOrMore();
         }
 
-        [TestCase(2025, 12, 24, new string[] { "51", "52", "01", "02" }, new string[] { "52", "01", "02", "03" }, Description = "2025 has 52 weeks. 2025-12-24 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber) + "_2025/26")]
-        [TestCase(2026, 12, 23, new string[] { "51", "52", "53", "01" }, new string[] { "52", "53", "01", "02" }, Description = "2026 has 53 weeks. 2025-12-23 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber) + "_2026/27")]
-        public void Check_GetCurrentWeekNumber(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu)
+        [TestCase(2025, 12, 24, new string[] { "51", "52", "01", "02" }, new string[] { "52", "01", "02", "03" }, Description = "2025 has 52 weeks. 2025-12-24 is a Wednesday.", TestName = $"{nameof(GetCurrentWeekNumber_For)}_2025/26")]
+        [TestCase(2026, 12, 23, new string[] { "51", "52", "53", "01" }, new string[] { "52", "53", "01", "02" }, Description = "2026 has 53 weeks. 2025-12-23 is a Wednesday.", TestName = $"{nameof(GetCurrentWeekNumber_For)}_2026/27")]
+        public void GetCurrentWeekNumber_For(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu)
         {
-            CheckGetCurrentWeekNumberCommon(startYear, startMonth, startDay, expectedWeekNumberWed, expectedWeekNumberThu, (x) => CommonHelper.GetCurrentWeekNumber(x));
+            CheckGetCurrentWeekNumberCommon(startYear, startMonth, startDay, expectedWeekNumberWed, expectedWeekNumberThu, CommonHelper.GetCurrentWeekNumber);
         }
 
-        [TestCase(2025, 12, 24, new string[] { "52", "01", "02", "03" }, new string[] { "01", "02", "03", "04" }, Description = "2025 has 52 weeks. 2025-12-24 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber_AfterIncrementingWeeks) + "_2025/26")]
-        [TestCase(2026, 12, 23, new string[] { "52", "53", "01", "02" }, new string[] { "53", "01", "02", "03" }, Description = "2026 has 53 weeks. 2025-12-23 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber_AfterIncrementingWeeks) + "_2026/27")]
-        public void Check_GetCurrentWeekNumber_AfterIncrementingWeeks(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu)
+        [TestCase(2025, 12, 24, new string[] { "52", "01", "02", "03" }, new string[] { "01", "02", "03", "04" }, Description = "2025 has 52 weeks. 2025-12-24 is a Wednesday.", TestName = $"{nameof(GetCurrentWeekNumber_AfterIncrementingWeeks_For)}_2025/26")]
+        [TestCase(2026, 12, 23, new string[] { "52", "53", "01", "02" }, new string[] { "53", "01", "02", "03" }, Description = "2026 has 53 weeks. 2025-12-23 is a Wednesday.", TestName = $"{nameof(GetCurrentWeekNumber_AfterIncrementingWeeks_For)}_2026/27")]
+        public void GetCurrentWeekNumber_AfterIncrementingWeeks_For(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu)
         {
             CheckGetCurrentWeekNumberCommon(startYear, startMonth, startDay, expectedWeekNumberWed, expectedWeekNumberThu, (x) => CommonHelper.GetCurrentWeekNumber(x, 1));
         }
 
-        private static void CheckGetCurrentWeekNumberCommon(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu, Func<DateTime, string> getCurrentWeekNumber)
+        private static void CheckGetCurrentWeekNumberCommon(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu, Func<DateTime, FormattedWeekNumber> getCurrentWeekNumber)
         {
             Assert.Multiple(() =>
             {
@@ -126,20 +129,29 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             var checkDateWed = new DateTime(startYear, startMonth, startDay, 8, 0, 0, DateTimeKind.Utc);
             var checkDateThu = checkDateWed.AddDays(1);
 
-            for (int i = 0; i < 3; i++)
+            for (var i = 0; i < 3; i++)
             {
                 var weekNumberWed = getCurrentWeekNumber(checkDateWed);
                 var weekNumberThu = getCurrentWeekNumber(checkDateThu);
 
                 Assert.Multiple(() =>
                 {
-                    Assert.That(weekNumberWed, Is.EqualTo(expectedWeekNumberWed[i]));
-                    Assert.That(weekNumberThu, Is.EqualTo(expectedWeekNumberThu[i]));
+                    Assert.That(weekNumberWed.Week, Is.EqualTo(expectedWeekNumberWed[i]));
+                    Assert.That(weekNumberThu.Week, Is.EqualTo(expectedWeekNumberThu[i]));
                 });
 
                 checkDateWed = checkDateWed.AddDays(7);
                 checkDateThu = checkDateThu.AddDays(7);
             }
+        }
+
+        [TestCase(Batch.BessBaseZipBatch, false, TestName = $"{nameof(IsAioBatchType)}_{nameof(Batch.BessBaseZipBatch)}")]
+        [TestCase(Batch.AioBaseCDZipIsoSha1Batch, true, TestName = $"{nameof(IsAioBatchType)}_{nameof(Batch.AioBaseCDZipIsoSha1Batch)}")]
+        [TestCase(Batch.EssAioBaseZipBatch, false, TestName = $"{nameof(IsAioBatchType)}_{nameof(Batch.EssAioBaseZipBatch)}")]
+        [TestCase(Batch.AioUpdateZipBatch, true, TestName = $"{nameof(IsAioBatchType)}_{nameof(Batch.AioUpdateZipBatch)}")]
+        public void IsAioBatchType(Batch batchType, bool expectedResult)
+        {
+            Assert.That(batchType.IsAioBatchType(), Is.EqualTo(expectedResult));
         }
     }
 }

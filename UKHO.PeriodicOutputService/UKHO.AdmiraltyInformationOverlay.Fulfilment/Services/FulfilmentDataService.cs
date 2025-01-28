@@ -70,10 +70,10 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _logger.LogInformation(EventIds.GetLatestProductVersionDetailsCompleted.ToEventId(), "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             Task[] tasks = null;
-            
+
             Task aioBaseExchangeSetTask = Task.Run(() => CreateAioBaseExchangeSet());
             Task updateAioExchangeSetTask = Task.Run(() => CreateUpdateAIOExchangeSet(productVersionEntities));
-            
+
             tasks = new Task[] { aioBaseExchangeSetTask, updateAioExchangeSetTask };
 
             await Task.WhenAll(tasks);
@@ -142,7 +142,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 span?.End();
             }
 
-            
+
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
 
@@ -306,22 +306,24 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
         private List<FssBatchFile> RenameFiles(string downloadPath, List<FssBatchFile> files, Batch batchType)
         {
-            foreach (FssBatchFile? file in files)
+            foreach (var file in files)
             {
-                IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
-                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-                string currentYear = DateTime.UtcNow.ToString("yy");
+                var fileInfo = _fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
+                var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
                 file.VolumeIdentifier = "V01X01";
+
                 if (batchType == Batch.EssAioBaseZipBatch)
                 {
-                    file.FileName = string.Format(_configuration["AioBaseZipFileName"], weekNumber, currentYear);
+                    file.FileName = string.Format(_configuration["AioBaseZipFileName"], weekNumber.Week, weekNumber.YearShort);
                 }
                 else
                 {
-                    file.FileName = string.Format(_configuration["AioUpdateZipFileName"], weekNumber, currentYear);
+                    file.FileName = string.Format(_configuration["AioUpdateZipFileName"], weekNumber.Week, weekNumber.YearShort);
                 }
+
                 fileInfo.MoveTo(Path.Combine(downloadPath, file.FileName));
             }
+
             return files;
         }
 
@@ -430,13 +432,13 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         {
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadStarted.ToEventId(), "Downloading of AIO base exchange set ancillary files started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
 
-            IEnumerable<BatchFile> fileDetails = await _fssService.GetAioInfoFolderFilesAsync(batchId, CommonHelper.CorrelationID.ToString());
+            var fileDetails = await _fssService.GetAioInfoFolderFilesAsync(batchId, CommonHelper.CorrelationID.ToString());
 
             if (fileDetails != null && fileDetails.Any())
             {
-                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-                string aioInfoFolderPath = string.Format(_configuration["AIOAdditionalContentFilePath"], weekNumber, DateTime.UtcNow.ToString("yy"));
-                string aioExchangeSetInfoPath = Path.Combine(_homeDirectoryPath, batchId, aioInfoFolderPath);
+                var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
+                var aioInfoFolderPath = string.Format(_configuration["AIOAdditionalContentFilePath"], weekNumber.Week, weekNumber.YearShort);
+                var aioExchangeSetInfoPath = Path.Combine(_homeDirectoryPath, batchId, aioInfoFolderPath);
 
                 Parallel.ForEach(fileDetails, file =>
                 {
@@ -447,24 +449,23 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             {
                 _logger.LogInformation(EventIds.AioAncillaryFilesNotFound.ToEventId(), "Downloading of AIO base exchange set ancillary files not found | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
             }
+
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadCompleted.ToEventId(), "Downloading of AIO base exchange set ancillary files completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
         }
 
         private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] aioCellNames)
         {
-            string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-            string aioInfoFolderPath = string.Format(_configuration["AioUpdateZipFileName"], weekNumber, DateTime.UtcNow.ToString("yy"));
-            string aioExchangeSetInfoPath = Path.Combine(filePath, Path.GetFileNameWithoutExtension(aioInfoFolderPath));
-
-            ProductVersionsRequest productVersionsRequest = new();
-            productVersionsRequest.ProductVersions = new();
+            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
+            var aioInfoFolderPath = string.Format(_configuration["AioUpdateZipFileName"], weekNumber.Week, weekNumber.YearShort);
+            var aioExchangeSetInfoPath = Path.Combine(filePath, Path.GetFileNameWithoutExtension(aioInfoFolderPath));
+            var productVersionsRequest = new ProductVersionsRequest { ProductVersions = [] };
 
             foreach (var aioCellName in aioCellNames)
             {
                 var files = _fileSystemHelper.GetProductVersionsFromDirectory(aioExchangeSetInfoPath, aioCellName);
-
                 productVersionsRequest.ProductVersions.AddRange(files);
             }
+
             return productVersionsRequest;
         }
 
