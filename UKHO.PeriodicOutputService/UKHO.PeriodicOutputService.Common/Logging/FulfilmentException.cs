@@ -7,17 +7,8 @@ namespace UKHO.PeriodicOutputService.Common.Logging
 
     [ExcludeFromCodeCoverage]
     [Serializable]
-    public class FulfilmentException : Exception
+    public class FulfilmentException(EventId eventId) : Exception()
     {
-        public EventId EventId { get; set; }
-
-        public FulfilmentException(EventId eventId) : base()
-        {
-            EventId = eventId;
-        }
-
-        protected FulfilmentException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
+        public EventId EventId { get; set; } = eventId;
     }
 }

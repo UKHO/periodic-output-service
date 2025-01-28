@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
@@ -16,7 +15,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             getcat = new GetCatalogue();
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFM(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidProductIdentifier);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             userCredentialsBytes = CommonHelper.GetBase64EncodedCredentials(fleet.userName, fleet.password);
             return Task.CompletedTask;
@@ -26,7 +25,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheUNPApiWithNullUserName_ThenABadRequestStatusIsReturned()
         {
             HttpResponseMessage unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, null, fleet.subscriptionKey);
-            unpResponse.StatusCode.Should().Be((HttpStatusCode)400);
+            Assert.That(unpResponse.StatusCode, Is.EqualTo((HttpStatusCode)400));
         }
 
         [Test]
@@ -35,10 +34,10 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheUNPApiWithInValidSubscriptionKey_ThenUnauthorizedStatusIsReturned(string subkey, string message)
         {
             HttpResponseMessage unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, subkey);
-            unpResponse.StatusCode.Should().Be((HttpStatusCode)401);
+            Assert.That(unpResponse.StatusCode, Is.EqualTo((HttpStatusCode)401));
 
             string unp_message = await CommonHelper.DeserializeAsyncMessage(unpResponse);
-            unp_message.Should().Be(message);
+            Assert.That(unp_message, Is.EqualTo(message));
         }
 
         [Test]
@@ -47,7 +46,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheCatalogueApiWithInValidUnpToken_ThenForbiddentatusIsReturned(string unpToken)
         {
             HttpResponseMessage Catalogue_Response = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unpToken, fleet.subscriptionKey);
-            Catalogue_Response.StatusCode.Should().Be((HttpStatusCode)403);
+            Assert.That(Catalogue_Response.StatusCode, Is.EqualTo((HttpStatusCode)403));
         }
 
         [Test]
@@ -56,14 +55,14 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallTheCatalogueApiWithInValidSubscriptionKey_ThenUnauthorizedStatusIsReturned(string subsKey, string message)
         {
             HttpResponseMessage unpResponse = await getunp.GetJwtAuthUnpToken(fleet.baseUrl, userCredentialsBytes, fleet.subscriptionKey);
-            unpResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(unpResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             string apiResponseToken = await CommonHelper.DeserializeAsyncToken(unpResponse);
             HttpResponseMessage Catalogue_Response = await getcat.GetCatalogueEndpoint(fleet.baseUrl, apiResponseToken, subsKey);
-            Catalogue_Response.StatusCode.Should().Be((HttpStatusCode)401);
+            Assert.That(Catalogue_Response.StatusCode, Is.EqualTo((HttpStatusCode)401));
 
             string catalogue_message = await CommonHelper.DeserializeAsyncMessage(Catalogue_Response);
-            catalogue_message.Should().Be(message);
+            Assert.That(catalogue_message, Is.EqualTo(message));
         }
 
         [Test]
@@ -73,16 +72,16 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             string unp_token = await CommonHelper.DeserializeAsyncToken(unpResponse);
 
             HttpResponseMessage Catalogue_Response = await getcat.GetCatalogueEndpoint(fleet.baseUrl, unp_token, fleet.subscriptionKey);
-            Catalogue_Response.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(Catalogue_Response.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             string apiResponseDetails_catalogue = await Catalogue_Response.ReadAsStringAsync();
             dynamic apiReadXml = CommonHelper.XmlReadAsynch(apiResponseDetails_catalogue);
 
             string orgName = apiReadXml.UKHOCatalogueFile.BaseFileMetadata.MD_PointOfContact.ResponsibleParty.organisationName;
-            orgName.Should().Be("The United Kingdom Hydrographic Office");
+            Assert.That(orgName, Is.EqualTo("The United Kingdom Hydrographic Office"));
 
             string product = apiReadXml.UKHOCatalogueFile.Products.Digital.ENC[0].ShortName;
-            product.Should().Be("FR570300");
+            Assert.That(product, Is.EqualTo("FR570300"));
         }
     }
 }

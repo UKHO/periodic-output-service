@@ -1,24 +1,23 @@
 ﻿using System.IO.Compression;
 using System.Net;
-using FluentAssertions;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using UKHO.BESS.API.FunctionalTests.Models;
 using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 using System.Xml.Linq;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 using System.Globalization;
+using NUnit.Framework;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
     public static class FssBatchHelper
     {
         private static FssEndPointHelper FssApiClient { get; }
-        static FssApiConfiguration config = new TestConfiguration().fssConfig;
-        static BessApiConfiguration bessConfig = new TestConfiguration().bessConfig;
-        static readonly TestConfiguration testConfiguration = new();
-        static readonly string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-        static readonly string currentYear = DateTime.UtcNow.Year.ToString();
+        private static readonly FssApiConfiguration config = new TestConfiguration().fssConfig;
+        private static readonly BessApiConfiguration bessConfig = new TestConfiguration().bessConfig;
+        private static readonly TestConfiguration testConfiguration = new();
+        private static readonly string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
+        private static readonly string currentYear = DateTime.UtcNow.Year.ToString();
 
         static FssBatchHelper()
         {
@@ -42,7 +41,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             while (DateTime.UtcNow - startTime < TimeSpan.FromMinutes(config.BatchCommitWaitTime))
             {
                 HttpResponseMessage batchStatusResponse = await FssApiClient.GetBatchStatusAsync(batchStatusUri);
-                batchStatusResponse.StatusCode.Should().Be((HttpStatusCode)200);
+                Assert.That(batchStatusResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
                 var batchStatusResponseObj = JsonConvert.DeserializeObject<ResponseBatchStatusModel>(await batchStatusResponse.Content.ReadAsStringAsync());
                 batchStatus = batchStatusResponseObj!.Status!;
@@ -79,7 +78,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
 
             var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl);
-            response.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(response.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             Stream stream = await response.Content.ReadAsStreamAsync();
 
@@ -147,15 +146,15 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             //Checking for the PRODUCTS.TXT file in the downloaded zip
             var checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!), testConfiguration.exchangeSetDetails.ExchangeSetProductFile!);
-            checkFile.Should().Be(true);
+            Assert.That(checkFile);
 
             //Checking for the README.TXT file in the downloaded zip
             checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
-            checkFile.Should().Be(true);
+            Assert.That(checkFile);
 
             //Checking for the CATALOG file in the downloaded zip
             checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile!);
-            checkFile.Should().Be(true);
+            Assert.That(checkFile);
 
             //Checking for the folder of the requested products in the downloaded zip
             foreach (var productName in testConfiguration.bessConfig.ProductsName!)
@@ -164,11 +163,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//" + countryCode + "//" + productName);
                 if (emptyZip)
                 {
-                    checkFile.Should().Be(false);
+                    Assert.That(!checkFile);
                 }
                 else
                 {
-                    checkFile.Should().Be(true);
+                    Assert.That(checkFile);
                 }
             }
 
@@ -182,7 +181,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             {
                 expectedEncryptionFlag = "0";
             }
-            expectedEncryptionFlag.Should().Be(encryptionFlag);
+            Assert.That(expectedEncryptionFlag, Is.EqualTo(encryptionFlag));
 
             return checkFile;
         }
@@ -212,7 +211,8 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                         return readMeType.Equals("AVCS");
                     }
                 case "BLANK":
-                    return readMeFileContent.IsNullOrEmpty();
+                    return readMeFileContent == null || readMeFileContent.Length == 0;
+
             }
             if (!readMeSearchFilter.Contains("Bespoke README"))
             {
@@ -231,24 +231,17 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public static bool CheckInfoFolderAndSerialEncInBessExchangeSet(string? downloadFolderPath, string? type)
         {
             bool checkFolder = CheckForFolderExist(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!);
-            checkFolder.Should().Be(false);
+            Assert.That(!checkFolder);
 
             string[] serialEncfileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetSerialEncFile!));
             string serialENCType = serialEncfileContent[0].Split("   ")[1][8..];
-            switch (type)
+            return type switch
             {
-                case "BASE":
-                    return serialENCType.Equals("BASE");
-
-                case "UPDATE":
-                    return serialENCType.Equals("UPDATE");
-
-                case "CHANGE":
-                    return serialENCType.Equals("CHANGE");
-
-                default:
-                    return false;
-            }
+                "BASE" => serialENCType.Equals("BASE"),
+                "UPDATE" => serialENCType.Equals("UPDATE"),
+                "CHANGE" => serialENCType.Equals("CHANGE"),
+                _ => false,
+            };
         }
 
         /// <summary>
@@ -268,14 +261,20 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 for (int row = 1; row < rows; row++)
                 {
                     string[] cellPermitDetails = fileContent[row].Split(",");
-                    cellPermitDetails[1].Equals(ck[(row - 1) / 2]).Should().Be(true);
-                    cellPermitDetails[2].Equals(cellNames[(row - 1) / 2]).Should().Be(true);
+                    using (Assert.EnterMultipleScope())
+                    {
+                        Assert.That(cellPermitDetails[1], Is.EqualTo(ck[(row - 1) / 2]));
+                        Assert.That(cellPermitDetails[2], Is.EqualTo(cellNames[(row - 1) / 2]));
+                    }
                     string edition = editions[(row - 1) / 2];
                     edition = row % 2 == 0 ? (int.Parse(edition) + 1).ToString() : edition;
-                    cellPermitDetails[3].Equals(edition).Should().Be(true);
-                    cellPermitDetails[4].Equals(date).Should().Be(true);
-                    cellPermitDetails[5].Equals(date).Should().Be(true);
-                    (row % 2 == 0 ? cellPermitDetails[7] == "2:Next" : cellPermitDetails[7] == "1:Active").Should().Be(true);
+                    using (Assert.EnterMultipleScope())
+                    {
+                        Assert.That(cellPermitDetails[3], Is.EqualTo(edition));
+                        Assert.That(cellPermitDetails[4], Is.EqualTo(date));
+                        Assert.That(cellPermitDetails[5], Is.EqualTo(date));
+                        Assert.That(row % 2 == 0 ? cellPermitDetails[7] == "2:Next" : cellPermitDetails[7] == "1:Active");
+                    }
                 }
                 check = true;
             }
@@ -301,11 +300,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                     foreach (var cell in cellKeys)
                     {
                         string? encCell = cell.Element("cellname")?.Value;
-                        encCell?.Equals(cellNames[count]).Should().Be(true);
+                        Assert.That(encCell != null && encCell.Equals(cellNames[count]));
                         string? encCellEdition = cell.Element("edition")?.Value;
-                        encCellEdition?.Equals(editions[count]).Should().Be(true);
+                        Assert.That(encCellEdition != null && encCellEdition.Equals(editions[count]));
                         string? encPermit = cell.Element("permit")?.Value;
-                        encPermit?.Equals(cellPermits[count]).Should().Be(true);
+                        Assert.That(encPermit != null && encPermit.Equals(cellPermits[count]));
                         count++;
                     }
                 }
@@ -353,22 +352,22 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         {
             //Checking for the PRODUCTS.TXT file in the downloaded zip
             var checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetProductFilePath!), testConfiguration.exchangeSetDetails.ExchangeSetProductFile!);
-            checkFile.Should().Be(false);
+            Assert.That(!checkFile);
 
             //Checking for the README.TXT file in the downloaded zip
             checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
-            checkFile.Should().Be(true);
+            Assert.That(checkFile);
 
             //Checking for the CATALOG file in the downloaded zip
             checkFile = CheckForFileExist(Path.Combine(downloadFolderPath!, testConfiguration.exchangeSetDetails.ExchangeSetEncRootFolder!), testConfiguration.exchangeSetDetails.ExchangeSetCatalogueFile!);
-            checkFile.Should().Be(true);
+            Assert.That(checkFile);
 
             //Checking for the folder of the requested products in the downloaded zip
             foreach (var productName in testConfiguration.bessConfig.ProductsName!)
             {
                 var countryCode = productName.Substring(0, 2);
                 checkFile = CheckForFolderExist(downloadFolderPath!, "ENC_ROOT//" + countryCode + "//" + productName);
-                checkFile.Should().Be(false);
+                Assert.That(!checkFile);
             }
         }
 
@@ -383,15 +382,15 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             for (int i = 0; i <= 3; i++)
             {
                 var value = apiResponseData.Attributes.ToArray()[i].Value;
-                value.Should().Be(testConfiguration.bessConfig.BessBatchDetails![i]);
+                Assert.That(value, Is.EqualTo(testConfiguration.bessConfig.BessBatchDetails![i]));
             }
 
             var year = apiResponseData.Attributes.ToArray()[4].Value;
-            year.Should().Be(currentYear);
+            Assert.That(year, Is.EqualTo(currentYear));
             var weekNumber = apiResponseData.Attributes.ToArray()[5].Value;
-            weekNumber.Should().Be(currentWeek);
+            Assert.That(weekNumber, Is.EqualTo(currentWeek));
             var yearWeek = apiResponseData.Attributes.ToArray()[6].Value;
-            yearWeek.Should().Be(year + " / " + weekNumber);
+            Assert.That(yearWeek, Is.EqualTo(year + " / " + weekNumber));
         }
 
         /// <summary>
@@ -430,11 +429,11 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             bool containsReadMeFile = catalogFileContent.Contains(testConfiguration.exchangeSetDetails.ExchangeReadMeFile!);
             if (readMeSearchFilter!.Equals("NONE"))
             {
-                containsReadMeFile.Should().BeFalse();
+                Assert.That(!containsReadMeFile);
             }
             else
             {
-                containsReadMeFile.Should().BeTrue();
+                Assert.That(containsReadMeFile);
             }
         }
     }

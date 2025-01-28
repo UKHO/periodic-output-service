@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using FakeItEasy;
-using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Providers;
 using UKHO.WeekNumberUtils;
@@ -27,7 +26,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             var result = macroTransformer.ExpandMacros(macroExpression);
             if (macroExpression == "$(now.AddDays(1))" | macroExpression == "$(now.AddDays(-1))" | macroExpression == "$(now)") // because of difference in time in seconds hence this
             {
-                result.Substring(0, result.IndexOf("")).Should().Be(output.Substring(0, output.IndexOf("")));
+                Assert.That(result.Substring(0, result.IndexOf("")), Is.EqualTo(output.Substring(0, output.IndexOf(""))));
                 return result;
             }
 
@@ -40,7 +39,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.Year2)";
             string output = DateTime.Now.Year.ToString().Substring(2, 2);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -48,7 +47,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.Year)";
             string output = DateTime.Now.Year.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -56,7 +55,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.Month)";
             string output = DateTime.Now.Month.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -64,7 +63,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.Month2)";
             string output = DateTime.Now.Month.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -72,7 +71,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.MonthName)";
             string output = DateTime.Now.ToString("MMMM");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -80,7 +79,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.MonthShortName)";
             string output = DateTime.Now.ToString("MMM");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -88,7 +87,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.Day)";
             string output = DateTime.Now.Day.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -96,7 +95,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.Day2)";
             string output = DateTime.Now.Day.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -105,7 +104,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             string macroExpression = "$(now.DayName)";
             string output = DateTime.Now.ToString("dddd");
 
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -113,7 +112,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.DayShortName)";
             string output = DateTime.Now.ToString("ddd");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -121,7 +120,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(365).Year)";
             string output = DateTime.Now.AddDays(365).Year.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -129,7 +128,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(365).Year2)";
             string output = DateTime.Now.AddDays(365).Year.ToString().Substring(2, 2);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -137,7 +136,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).Day)";
             string output = DateTime.Now.AddDays(1).Day.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -145,7 +144,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).Day2)";
             string output = DateTime.Now.AddDays(1).Day.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -153,7 +152,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).DayName)";
             string output = DateTime.Now.AddDays(1).ToString("dddd");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -161,7 +160,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).DayShortName)";
             string output = DateTime.Now.AddDays(1).ToString("ddd");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -169,7 +168,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).WeekNumber)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(1)).Week.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -177,7 +176,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).WeekNumber2)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(1)).Week.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -185,7 +184,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).WeekNumber.Year)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(1)).Year.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -193,7 +192,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).WeekNumber.Year2)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(1)).Year.ToString().Substring(2, 2);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -201,7 +200,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).Month)";
             string output = DateTime.Now.AddDays(1).Month.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -209,7 +208,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).Month2)";
             string output = DateTime.Now.AddDays(1).Month.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -217,7 +216,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).MonthName)";
             string output = DateTime.Now.AddDays(1).ToString("MMMM");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -225,7 +224,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1).MonthShortName)";
             string output = DateTime.Now.AddDays(1).ToString("MMM");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -233,7 +232,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).Day)";
             string output = DateTime.Now.AddDays(-1).Day.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -241,7 +240,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).Day2)";
             string output = DateTime.Now.AddDays(-1).Day.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -249,7 +248,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).DayName)";
             string output = DateTime.Now.AddDays(-1).ToString("dddd");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -257,7 +256,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).DayShortName)";
             string output = DateTime.Now.AddDays(-1).ToString("ddd");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -265,7 +264,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).WeekNumber)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(-1)).Week.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -273,7 +272,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).WeekNumber2)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(-1)).Week.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -281,7 +280,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).Year)";
             string output = DateTime.Now.AddDays(-1).Year.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -289,7 +288,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).Year2)";
             string output = DateTime.Now.AddDays(-1).Year.ToString().Substring(2, 2);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -297,7 +296,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).Month)";
             string output = DateTime.Now.AddDays(-1).Month.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -305,7 +304,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).Month2)";
             string output = DateTime.Now.AddDays(-1).Month.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -313,7 +312,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).MonthName)";
             string output = DateTime.Now.AddDays(-1).ToString("MMMM");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -321,7 +320,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1).MonthShortName)";
             string output = DateTime.Now.AddDays(-1).ToString("MMM");
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -329,7 +328,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber -1)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(-1 * 7)).Week.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -337,7 +336,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber -1)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(-1 * 7)).Week.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -345,7 +344,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber2 -1)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(-1 * 7)).Week.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -353,7 +352,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber -200.Year)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(-200 * 7)).Year.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -361,7 +360,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber - 200.Year2)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(-200 * 7)).Year.ToString().Substring(2, 2);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -369,7 +368,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(-1))";
             string output = DateTime.Now.AddDays(-1).ToUniversalTime().ToString(CultureInfo.InvariantCulture);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -377,7 +376,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.AddDays(1))";
             string output = DateTime.Now.AddDays(1).ToUniversalTime().ToString(CultureInfo.InvariantCulture);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -385,7 +384,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now)";
             string output = DateTime.Now.ToUniversalTime().ToString(CultureInfo.InvariantCulture);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -393,7 +392,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now).Week.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -401,7 +400,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber2)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now).Week.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -409,7 +408,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.Year)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now).Year.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -417,7 +416,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.Year2)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now).Year.ToString().Substring(2, 2);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -425,7 +424,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber + 1)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(1 * 7)).Week.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -433,7 +432,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber + 200.Year)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(200 * 7)).Year.ToString();
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -441,7 +440,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber + 200.Year2)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now.AddDays(200 * 7)).Year.ToString().Substring(2, 2);
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -449,7 +448,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             string macroExpression = "$(now.WeekNumber.Year)/$(now.WeekNumber2)";
             string output = WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now).Year + "/" + WeekNumber.GetUKHOWeekFromDateTime(DateTime.Now).Week.ToString().PadLeft(2, '0');
-            MacroTest(macroExpression, output).Should().Be(output);
+            Assert.That(MacroTest(macroExpression, output), Is.EqualTo(output));
         }
 
         [Test]
@@ -467,7 +466,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             foreach (var test in sameValueTests)
             {
                 var result = macroTransformer.ExpandMacros(test.Item1);
-                result.Should().Be(test.Item2);
+                Assert.That(result, Is.EqualTo(test.Item2));
             }
         }
     }
