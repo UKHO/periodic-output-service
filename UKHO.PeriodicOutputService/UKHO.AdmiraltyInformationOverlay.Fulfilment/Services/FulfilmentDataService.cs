@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss;
@@ -60,8 +61,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         public async Task<bool> CreateAioExchangeSetsAsync()
         {
             _fileSystemHelper.CreateDirectory(_homeDirectoryPath);
-
-            bool isSuccess = false;
+            var isSuccess = false;
 
             _logger.LogInformation(EventIds.GetLatestProductVersionDetailsStarted.ToEventId(), "Getting latest product version details started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
@@ -69,12 +69,11 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             _logger.LogInformation(EventIds.GetLatestProductVersionDetailsCompleted.ToEventId(), "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            Task[] tasks = null;
+            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow, 0); //todo hb adjust based on config
+            var aioBaseExchangeSetTask = Task.Run(() => CreateAioBaseExchangeSet(weekNumber));
+            var updateAioExchangeSetTask = Task.Run(() => CreateUpdateAIOExchangeSet(productVersionEntities, weekNumber));
 
-            Task aioBaseExchangeSetTask = Task.Run(() => CreateAioBaseExchangeSet());
-            Task updateAioExchangeSetTask = Task.Run(() => CreateUpdateAIOExchangeSet(productVersionEntities));
-
-            tasks = new Task[] { aioBaseExchangeSetTask, updateAioExchangeSetTask };
+            var tasks = new Task[] { aioBaseExchangeSetTask, updateAioExchangeSetTask };
 
             await Task.WhenAll(tasks);
 
@@ -83,37 +82,28 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             return isSuccess;
         }
 
-        private async Task CreateAioBaseExchangeSet()
+        private async Task CreateAioBaseExchangeSet(FormattedWeekNumber weekNumber)
         {
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationStarted.ToEventId(), "Creation of AIO base exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            bool isFullAvcsDvdBatchCreated = false;
-
-            ISpan span = _currentTransaction?.StartSpan("AioBaseExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+            var isFullAvcsDvdBatchCreated = false;
+            var span = _currentTransaction?.StartSpan("AioBaseExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
                 if (!string.IsNullOrEmpty(_configuration["AioCells"]))
                 {
                     var aioCells = Convert.ToString(_configuration["AioCells"]).Split(',').ToList();
-
-                    string essBatchId = await PostProductIdentifiersToESS(aioCells);
-
-                    (string essFileDownloadPath, List<FssBatchFile> essFiles) =
-                        await DownloadEssExchangeSet(essBatchId, Batch.EssAioBaseZipBatch);
+                    var essBatchId = await PostProductIdentifiersToESS(aioCells);
+                    (var essFileDownloadPath, var essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssAioBaseZipBatch, weekNumber);
 
                     if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
                     {
                         ExtractExchangeSetZip(essFiles, essFileDownloadPath);
-
-                        await DownloadAioAncillaryFilesAsync(essBatchId);
-
+                        await DownloadAioAncillaryFilesAsync(essBatchId, weekNumber);
                         CreateExchangeSetZip(essFiles, essFileDownloadPath);
-
                         CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
-
-                        isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath,
-                            AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION, Batch.AioBaseCDZipIsoSha1Batch);
+                        isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION, Batch.AioBaseCDZipIsoSha1Batch, weekNumber);
                     }
                     else
                     {
@@ -145,36 +135,25 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
 
-        private async Task CreateUpdateAIOExchangeSet(List<ProductVersionEntities> productVersionEntities)
+        private async Task CreateUpdateAIOExchangeSet(List<ProductVersionEntities> productVersionEntities, FormattedWeekNumber weekNumber)
         {
             _logger.LogInformation(EventIds.AioUpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for Productversions - {Productversions} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", productVersionEntities, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            bool isUpdateZipBatchCreated = false;
-
-            ISpan span = _currentTransaction?.StartSpan("UpdateExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+            var isUpdateZipBatchCreated = false;
+            var span = _currentTransaction?.StartSpan("UpdateExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
-                string[] aioCellNames = Convert.ToString(_configuration["AioCells"]).Split(',').ToArray();
-
+                var aioCellNames = Convert.ToString(_configuration["AioCells"]).Split(',').ToArray();
                 var productVersions = GetProductVersionsFromEntities(productVersionEntities, aioCellNames);
-
-                string essBatchId = await GetProductDataVersionFromEss(new ProductVersionsRequest()
-                {
-                    ProductVersions = productVersions
-                });
-
-                (string essFileDownloadPath, List<FssBatchFile> essFiles) =
-                    await DownloadEssExchangeSet(essBatchId, Batch.EssUpdateZipBatch);
+                var essBatchId = await GetProductDataVersionFromEss(new ProductVersionsRequest { ProductVersions = productVersions });
+                (var essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssUpdateZipBatch, weekNumber);
 
                 if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
                 {
                     ExtractExchangeSetZip(essFiles, essFileDownloadPath);
-
-                    var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, aioCellNames);
-
-                    isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath,
-                        UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch);
+                    var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, aioCellNames, weekNumber);
+                    isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch, weekNumber);
 
                     if (isUpdateZipBatchCreated)
                     {
@@ -246,7 +225,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             return essBatchId;
         }
 
-        private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId, Batch batchType)
+        private async Task<(string, List<FssBatchFile>)> DownloadEssExchangeSet(string essBatchId, Batch batchType, FormattedWeekNumber weekNumber)
         {
             string downloadPath = Path.Combine(_homeDirectoryPath, essBatchId);
             List<FssBatchFile> files = new();
@@ -261,7 +240,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                     files = await GetBatchFiles(essBatchId);
                     DownloadFiles(files, downloadPath);
 
-                    files = RenameFiles(downloadPath, files, batchType);
+                    files = RenameFiles(downloadPath, files, batchType, weekNumber);
                 }
                 else
                 {
@@ -303,12 +282,11 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             });
         }
 
-        private List<FssBatchFile> RenameFiles(string downloadPath, List<FssBatchFile> files, Batch batchType)
+        private List<FssBatchFile> RenameFiles(string downloadPath, List<FssBatchFile> files, Batch batchType, FormattedWeekNumber weekNumber)
         {
             foreach (var file in files)
             {
                 var fileInfo = _fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
-                var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
                 file.VolumeIdentifier = "V01X01";
 
                 if (batchType == Batch.EssAioBaseZipBatch)
@@ -388,14 +366,13 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             });
         }
 
-        private async Task<bool> CreatePosBatch(string downloadPath, string fileExtension, Batch batchType)
+        private async Task<bool> CreatePosBatch(string downloadPath, string fileExtension, Batch batchType, FormattedWeekNumber weekNumber)
         {
             var isCommitted = false;
             var span = _currentTransaction?.StartSpan("CreateAIOBatch", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
-                var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow); //todo hb adjust based on config
                 var batchId = await _fssService.CreateBatch(batchType, weekNumber);
                 var filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePaths, batchId, batchType);
@@ -427,7 +404,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             });
         }
 
-        private async Task DownloadAioAncillaryFilesAsync(string batchId)
+        private async Task DownloadAioAncillaryFilesAsync(string batchId, FormattedWeekNumber weekNumber)
         {
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadStarted.ToEventId(), "Downloading of AIO base exchange set ancillary files started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
 
@@ -435,7 +412,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             if (fileDetails != null && fileDetails.Any())
             {
-                var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
                 var aioInfoFolderPath = string.Format(_configuration["AIOAdditionalContentFilePath"], weekNumber.Week, weekNumber.YearShort);
                 var aioExchangeSetInfoPath = Path.Combine(_homeDirectoryPath, batchId, aioInfoFolderPath);
 
@@ -452,9 +428,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadCompleted.ToEventId(), "Downloading of AIO base exchange set ancillary files completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
         }
 
-        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] aioCellNames)
+        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] aioCellNames, FormattedWeekNumber weekNumber)
         {
-            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
             var aioInfoFolderPath = string.Format(_configuration["AioUpdateZipFileName"], weekNumber.Week, weekNumber.YearShort);
             var aioExchangeSetInfoPath = Path.Combine(filePath, Path.GetFileNameWithoutExtension(aioInfoFolderPath));
             var productVersionsRequest = new ProductVersionsRequest { ProductVersions = [] };
