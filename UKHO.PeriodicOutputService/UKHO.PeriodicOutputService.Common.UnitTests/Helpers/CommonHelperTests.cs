@@ -106,16 +106,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         [TestCase(2026, 12, 23, new string[] { "51", "52", "53", "01" }, new string[] { "52", "53", "01", "02" }, Description = "2026 has 53 weeks. 2025-12-23 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber) + "_2026/27")]
         public void Check_GetCurrentWeekNumber(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu)
         {
-            static string GetCurrentWeekNumber(DateTime date) => CommonHelper.GetCurrentWeekNumber(date);
-            CheckGetCurrentWeekNumberCommon(startYear, startMonth, startDay, expectedWeekNumberWed, expectedWeekNumberThu, GetCurrentWeekNumber);
+            CheckGetCurrentWeekNumberCommon(startYear, startMonth, startDay, expectedWeekNumberWed, expectedWeekNumberThu, (x) => CommonHelper.GetCurrentWeekNumber(x));
         }
 
         [TestCase(2025, 12, 24, new string[] { "52", "01", "02", "03" }, new string[] { "01", "02", "03", "04" }, Description = "2025 has 52 weeks. 2025-12-24 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber_AfterIncrementingWeeks) + "_2025/26")]
         [TestCase(2026, 12, 23, new string[] { "52", "53", "01", "02" }, new string[] { "53", "01", "02", "03" }, Description = "2026 has 53 weeks. 2025-12-23 is a Wednesday.", TestName = nameof(Check_GetCurrentWeekNumber_AfterIncrementingWeeks) + "_2026/27")]
         public void Check_GetCurrentWeekNumber_AfterIncrementingWeeks(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu)
         {
-            static string GetCurrentWeekNumber(DateTime date) => CommonHelper.GetCurrentWeekNumber(date, 1);
-            CheckGetCurrentWeekNumberCommon(startYear, startMonth, startDay, expectedWeekNumberWed, expectedWeekNumberThu, GetCurrentWeekNumber);
+            CheckGetCurrentWeekNumberCommon(startYear, startMonth, startDay, expectedWeekNumberWed, expectedWeekNumberThu, (x) => CommonHelper.GetCurrentWeekNumber(x, 1));
         }
 
         private static void CheckGetCurrentWeekNumberCommon(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu, Func<DateTime, string> getCurrentWeekNumber)
