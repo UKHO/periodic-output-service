@@ -1,6 +1,6 @@
 ﻿using System.IO.Abstractions;
-using Elastic.Apm.Api;
 using Elastic.Apm;
+using Elastic.Apm.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
@@ -141,7 +141,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 _currentTransaction?.SetLabel("AIOFullAvcsDvdBatchCreated", isFullAvcsDvdBatchCreated);
                 span?.End();
             }
-
 
             _logger.LogInformation(EventIds.AioBaseExchangeSetCreationCompleted.ToEventId(), "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
@@ -391,14 +390,14 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
         private async Task<bool> CreatePosBatch(string downloadPath, string fileExtension, Batch batchType)
         {
-            bool isCommitted = false;
-
-            ISpan span = _currentTransaction?.StartSpan("CreateAIOBatch", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+            var isCommitted = false;
+            var span = _currentTransaction?.StartSpan("CreateAIOBatch", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
-                string batchId = await _fssService.CreateBatch(batchType);
-                IEnumerable<string> filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow); //todo hb adjust based on config
+                var batchId = await _fssService.CreateBatch(batchType, weekNumber);
+                var filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePaths, batchId, batchType);
                 isCommitted = await _fssService.CommitBatch(batchId, filePaths, batchType);
             }

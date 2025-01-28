@@ -196,20 +196,20 @@ namespace UKHO.PeriodicOutputService.Common.Services
             throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
         }
 
-        public async Task<string> CreateBatch(Batch batchType)
+        public async Task<string> CreateBatch(Batch batchType, FormattedWeekNumber weekNumber)
         {
             _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            var uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
+            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(batchType);
-            string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
-            HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
+            var createBatchRequest = CreateBatchRequestModel(batchType, weekNumber);
+            var payloadJson = JsonConvert.SerializeObject(createBatchRequest);
+            var httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                CreateBatchResponseModel? createBatchResponse = JsonConvert.DeserializeObject<CreateBatchResponseModel>(await httpResponse.Content.ReadAsStringAsync());
+                var createBatchResponse = JsonConvert.DeserializeObject<CreateBatchResponseModel>(await httpResponse.Content.ReadAsStringAsync());
                 _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse!.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 return createBatchResponse.BatchId;
             }
@@ -441,10 +441,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         //Private Methods
         [ExcludeFromCodeCoverage]
-        private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
+        private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType, FormattedWeekNumber weekNumber)
         {
-            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
-
             var createBatchRequest = batchType.IsAioBatchType() ? AddBatchAttributesForAio(weekNumber) : AddBatchAttributesForPos(weekNumber);
 
             //This batch attribute is added for fss stub.

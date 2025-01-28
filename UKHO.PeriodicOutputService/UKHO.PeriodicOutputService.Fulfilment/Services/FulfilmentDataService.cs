@@ -396,15 +396,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task<bool> CreatePosBatch(string downloadPath, string fileExtension, Batch batchType)
         {
-            bool isCommitted = false;
-
-            ISpan span = _currentTransaction?.StartSpan("CreatePOSBatch", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+            var isCommitted = false;
+            var span = _currentTransaction?.StartSpan("CreatePOSBatch", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
-                string batchId = await _fssService.CreateBatch(batchType);
-                IEnumerable<string> filePaths =
-                    _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
+                var batchId = await _fssService.CreateBatch(batchType, weekNumber);
+                var filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePaths, batchId, batchType);
                 isCommitted = await _fssService.CommitBatch(batchId, filePaths, batchType);
             }
