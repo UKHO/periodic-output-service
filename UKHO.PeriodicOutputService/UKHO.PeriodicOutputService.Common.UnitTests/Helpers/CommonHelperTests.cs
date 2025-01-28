@@ -145,13 +145,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             }
         }
 
-        [TestCase(Batch.BessBaseZipBatch, false, TestName = $"{nameof(IsAioBatchType)}_{nameof(Batch.BessBaseZipBatch)}")]
-        [TestCase(Batch.AioBaseCDZipIsoSha1Batch, true, TestName = $"{nameof(IsAioBatchType)}_{nameof(Batch.AioBaseCDZipIsoSha1Batch)}")]
-        [TestCase(Batch.EssAioBaseZipBatch, false, TestName = $"{nameof(IsAioBatchType)}_{nameof(Batch.EssAioBaseZipBatch)}")]
-        [TestCase(Batch.AioUpdateZipBatch, true, TestName = $"{nameof(IsAioBatchType)}_{nameof(Batch.AioUpdateZipBatch)}")]
-        public void IsAioBatchType(Batch batchType, bool expectedResult)
+        [TestCase(Batch.BessBaseZipBatch, false, TestName = $"{nameof(IsAio_BatchType)}_{nameof(Batch.BessBaseZipBatch)}")]
+        [TestCase(Batch.AioBaseCDZipIsoSha1Batch, true, TestName = $"{nameof(IsAio_BatchType)}_{nameof(Batch.AioBaseCDZipIsoSha1Batch)}")]
+        [TestCase(Batch.EssAioBaseZipBatch, false, TestName = $"{nameof(IsAio_BatchType)}_{nameof(Batch.EssAioBaseZipBatch)}")]
+        [TestCase(Batch.AioUpdateZipBatch, true, TestName = $"{nameof(IsAio_BatchType)}_{nameof(Batch.AioUpdateZipBatch)}")]
+        public void IsAio_BatchType(Batch batchType, bool expectedResult)
         {
-            Assert.That(batchType.IsAioBatchType(), Is.EqualTo(expectedResult));
+            Assert.That(batchType.IsAio(), Is.EqualTo(expectedResult));
         }
     }
 }

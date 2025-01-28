@@ -443,7 +443,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType, FormattedWeekNumber weekNumber)
         {
-            var createBatchRequest = batchType.IsAioBatchType() ? AddBatchAttributesForAio(weekNumber) : AddBatchAttributesForPos(weekNumber);
+            var createBatchRequest = batchType.IsAio() ? AddBatchAttributesForAio(weekNumber) : AddBatchAttributesForPos(weekNumber);
 
             //This batch attribute is added for fss stub.
             if (bool.Parse(_configuration["IsFTRunning"]))
@@ -578,7 +578,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             {
                 Attributes = new List<KeyValuePair<string, string>>
                 {
-                    new("Product Type", batchType.IsAioBatchType() ? "AIO" : "AVCS"),
+                    new("Product Type", batchType.IsAio() ? "AIO" : "AVCS"),
                     new("File Name", fileName)
                 }
             };

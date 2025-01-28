@@ -109,6 +109,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         /// </summary>
         /// <param name="batchType"></param>
         /// <returns></returns>
-        public static bool IsAioBatchType(this Batch batchType) => batchType == Batch.AioBaseCDZipIsoSha1Batch || batchType == Batch.AioUpdateZipBatch;
+        public static bool IsAio(this Batch batchType) => batchType == Batch.AioBaseCDZipIsoSha1Batch || batchType == Batch.AioUpdateZipBatch;
     }
 }
