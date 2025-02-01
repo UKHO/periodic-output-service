@@ -45,6 +45,11 @@ variable "agent_prd_subnet" {
   type = string
 }
 
+variable "table_name" {
+  type = string
+  default = "aiojobconfiguration"
+}
+
 variable "is_enabled" {
   type = bool
   default = true
