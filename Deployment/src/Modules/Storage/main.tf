@@ -24,7 +24,8 @@ resource "azurerm_storage_table_entity" "aio_weekly" {
   storage_table_id = azurerm_storage_table.aio_config_table.id
   partition_key    = "job"
   row_key          = "1"
-  entiry {
+
+  entity {
             BusinessUnit    = "ADDSSupport"
             ReadUsers       = ""
             ReadGroups      = "public"
@@ -36,7 +37,8 @@ resource "azurerm_storage_table_entity" "aio_printing" {
 storage_table_id = azurerm_storage_table.aio_config_table.id
 partition_key    = "job"
 row_key          = "2"
-entiry {
+
+entity {
             BusinessUnit    = "ADDSSupport"
             ReadUsers       = ""
             ReadGroups      = "public"
