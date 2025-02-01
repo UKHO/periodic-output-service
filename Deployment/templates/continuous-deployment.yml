@@ -33,6 +33,8 @@ steps:
       TF_VAR_agent_2204_subnet: $(agent2204SubnetId)
       TF_VAR_agent_prd_subnet: $(agentprdSubnetId)
       TF_VAR_BessContainerName: $(BessContainerForWebjob)
+      TF_VAR_aio_weekly_configuration: "{ 'business_unit': $(AioJobIdWeekly.BusinessUnit), 'read_users': $(AioJobIdWeekly.ReadUser), 'read_group': $(AioJobIdWeekly.ReadGroup), 'is_enabled': 'true' }"
+      TF_VAR_aio_printing_configuration: "{ 'business_unit': $(AioJobIdPrinting.BusinessUnit), 'read_users': $(AioJobIdPrinting.ReadUser), 'read_group': $(AioJobIdPrinting.ReadGroup), 'is_enabled': 'true' }"       
 
   - task: FileTransform@2
     displayName: "File Transform: Mock API WebApp"
@@ -70,11 +72,23 @@ steps:
         **/POS*/appsettings.json
         **/BESS*/appsettings.json        
 
-  - bash: echo "##vso[task.setvariable variable=schedule]$(AioSchedule)"
+  - bash: echo "##vso[task.setvariable variable=schedule]$(AioJobIdWeekly.Schedule)"
     displayName: "Set AIO weekly job schedule"
 
-  - bash: echo "##vso[task.setvariable variable=FSSApiConfiguration.AioBusinessUnit]$(FSSApiConfiguration.AIOBusinessUnit)"
-    displayName: "Set AIO weekly Business Unit"
+  - bash: echo "##vso[task.setvariable variable=AioJobId]$(AioJobIdWeekly)"
+    displayName: "Set AIO weekly job id"
+
+  - bash: echo "##vso[task.setvariable variable=AzureStorageConfiguration.AioProductVersionDetailsTableName]$(AioJobIdWeekly.AioProductVersionDetailsTableName)"
+    displayName: "Set AIO weekly job product version details table name"
+
+  - bash: echo "##vso[task.setvariable variable=FSSApiConfiguration.AioBusinessUnit]$(AioJobIdWeekly.BusinessUnit)"
+    displayName: "Set AIO weekly business unit"
+
+  - bash: echo "##vso[task.setvariable variable=FSSApiConfiguration.AioPosReadGroups]$(AioJobIdWeekly.ReadGroup)"
+    displayName: "Set AIO weekly read group"
+
+  - bash: echo "##vso[task.setvariable variable=FSSApiConfiguration.AioPosReadUsers]$(AioJobIdWeekly.ReadUser)"
+    displayName: "Set AIO weekly read user"
     
   - task: FileTransform@2   
     displayName: "File Transform: AIO weekly settings Config"
@@ -85,11 +99,23 @@ steps:
         **/AIOFulfilmentWebJob/settings.job
         **/AIOFulfilmentWebJob/appsettings.json
       
-  - bash: echo "##vso[task.setvariable variable=schedule]$(AioSchedulePrinting)"
+  - bash: echo "##vso[task.setvariable variable=schedule]$(AioJobIdWeekly.Schedule)"
     displayName: "Set AIO printing job schedule"
 
-  - bash: echo "##vso[task.setvariable variable=FSSApiConfiguration.AioBusinessUnit]$(FSSApiConfiguration.AIOPrintBusinessUnit)"
-    displayName: "Set AIO printing Business Unit"
+  - bash: echo "##vso[task.setvariable variable=AioJobId]$(AioJobIdPrinting)"
+    displayName: "Set AIO printing job id"
+
+  - bash: echo "##vso[task.setvariable variable=AzureStorageConfiguration.AioProductVersionDetailsTableName]$(AioJobIdWeekly.AioProductVersionDetailsTableName)"
+    displayName: "Set AIO printing job product version details table name"
+
+  - bash: echo "##vso[task.setvariable variable=FSSApiConfiguration.AioBusinessUnit]$(AioJobIdPrinting.BusinessUnit)"
+    displayName: "Set AIO printing business unit"
+
+  - bash: echo "##vso[task.setvariable variable=FSSApiConfiguration.AioPosReadGroups]$(AioJobIdPrinting.ReadGroup)"
+    displayName: "Set AIO printing read group"
+
+  - bash: echo "##vso[task.setvariable variable=FSSApiConfiguration.AioPosReadUsers]$(AioJobIdPrinting.ReadUser)"
+    displayName: "Set AIO printing read user"
     
   - task: FileTransform@2   
     displayName: "File Transform: AIO printing settings Config"

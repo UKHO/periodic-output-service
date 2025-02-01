@@ -22,27 +22,27 @@ resource "azurerm_storage_table" "aio_config_table" {
 
 resource "azurerm_storage_table_entity" "aio_weekly" {
   storage_table_id = azurerm_storage_table.aio_config_table.id
-  partition_key    = "job"
-  row_key          = "1"
+  partition_key    = var.aio_weekly_configuration["job_name"]
+  row_key          = var.aio_weekly_configuration["job_id"]
 
   entity = {
-            BusinessUnit    = "ADDSSupport"
-            ReadUsers       = ""
-            ReadGroups      = "public"
-            IsEnabled       =  var.is_enabled
+            BusinessUnit    = var.aio_weekly_configuration["business_unit"]
+            ReadUsers       = var.aio_weekly_configuration["read_users"]
+            ReadGroups      = var.aio_weekly_configuration["read_group"]
+            IsEnabled       = var.aio_weekly_configuration["is_enabled"]
     }
 }
 
 resource "azurerm_storage_table_entity" "aio_printing" {
 storage_table_id = azurerm_storage_table.aio_config_table.id
-partition_key    = "job"
-row_key          = "2"
+partition_key    = var.aio_printing_configuration["job_name"]
+row_key          = var.aio_printing_configuration["job_id"]
 
 entity = {
-            BusinessUnit    = "ADDSSupport"
-            ReadUsers       = ""
-            ReadGroups      = "public"
-            IsEnabled       = var.is_enabled
+            BusinessUnit    = var.aio_printing_configuration["business_unit"]
+            ReadUsers       = var.aio_printing_configuration["read_users"]
+            ReadGroups      = var.aio_printing_configuration["read_group"]
+            IsEnabled       = var.aio_printing_configuration["is_enabled"]
     }
 }
 

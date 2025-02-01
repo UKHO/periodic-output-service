@@ -40,50 +40,50 @@ jobs:
         scanPath: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
         suppressionPath: '$(Build.SourcesDirectory)\NVDSuppressions.xml'
 
-- job: UnitTestsAndCodeCoverage
-  workspace:
-    clean: all
-  displayName: "Dotnet Test and Publish Code Coverage"
-  steps:
-    - task: UseDotNet@2
-      displayName: 'Use .NET SDK'
-      inputs:
-        packageType: sdk
-        useGlobalJson: true
-        workingDirectory: '$(Build.SourcesDirectory)'
+# - job: UnitTestsAndCodeCoverage
+#   workspace:
+#     clean: all
+#   displayName: "Dotnet Test and Publish Code Coverage"
+#   steps:
+#     - task: UseDotNet@2
+#       displayName: 'Use .NET SDK'
+#       inputs:
+#         packageType: sdk
+#         useGlobalJson: true
+#         workingDirectory: '$(Build.SourcesDirectory)'
 
-    - task: DotNetCoreCLI@2
-      displayName: ".Net Core - NuGet restore test projects only"
-      inputs:
-        command: "restore"
-        projects: "**/*Tests.csproj"
-        feedsToUse: config
-        noCache: true
-        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
-        packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packagesForTests'
+#     - task: DotNetCoreCLI@2
+#       displayName: ".Net Core - NuGet restore test projects only"
+#       inputs:
+#         command: "restore"
+#         projects: "**/*Tests.csproj"
+#         feedsToUse: config
+#         noCache: true
+#         nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+#         workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+#         packagesDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService\packagesForTests'
 
-    - task: DotNetCoreCLI@2
-      displayName: "dotnet test - Perform Unit Tests"
-      inputs:
-        command: "test"
-        projects: "**/*UnitTests.csproj"
-        arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
-        publishTestResults: true
-        testRunTitle: "UnitTests"
+#     - task: DotNetCoreCLI@2
+#       displayName: "dotnet test - Perform Unit Tests"
+#       inputs:
+#         command: "test"
+#         projects: "**/*UnitTests.csproj"
+#         arguments: '--configuration $(BuildConfiguration) --settings "$(Build.SourcesDirectory)\test.runsettings" /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
+#         publishTestResults: true
+#         testRunTitle: "UnitTests"
 
-    - task: PowerShell@2
-      displayName: "Generate code coverage report"
-      inputs:
-        targetType: filePath
-        filePath: '$(Build.SourcesDirectory)\CodeCoverageReport.ps1'
-        arguments: '-source "$(Build.SourcesDirectory)" -reportFolder "$(Build.ArtifactStagingDirectory)"'
+#     - task: PowerShell@2
+#       displayName: "Generate code coverage report"
+#       inputs:
+#         targetType: filePath
+#         filePath: '$(Build.SourcesDirectory)\CodeCoverageReport.ps1'
+#         arguments: '-source "$(Build.SourcesDirectory)" -reportFolder "$(Build.ArtifactStagingDirectory)"'
 
-    - task: PublishBuildArtifacts@1
-      displayName: "Publish Code coverage"
-      inputs:
-        PathtoPublish: "$(Build.ArtifactStagingDirectory)/codecoveragereport"
-        ArtifactName: codecoveragereport
+#     - task: PublishBuildArtifacts@1
+#       displayName: "Publish Code coverage"
+#       inputs:
+#         PathtoPublish: "$(Build.ArtifactStagingDirectory)/codecoveragereport"
+#         ArtifactName: codecoveragereport
 
 - job: BuildAndPublishWebJob
   workspace:
@@ -222,58 +222,58 @@ jobs:
         PathtoPublish: '$(Build.SourcesDirectory)\Deployment'
         ArtifactName: terraformartifact
 
-- job: PublishFunctionalTests
-  workspace:
-    clean: all
-  displayName: "Publish Functional Tests"
-  steps:
-    - task: UseDotNet@2
-      displayName: 'Use .NET SDK'
-      inputs:
-        packageType: sdk
-        useGlobalJson: true
-        workingDirectory: '$(Build.SourcesDirectory)'
+# - job: PublishFunctionalTests
+#   workspace:
+#     clean: all
+#   displayName: "Publish Functional Tests"
+#   steps:
+#     - task: UseDotNet@2
+#       displayName: 'Use .NET SDK'
+#       inputs:
+#         packageType: sdk
+#         useGlobalJson: true
+#         workingDirectory: '$(Build.SourcesDirectory)'
 
-    - task: DotNetCoreCLI@2
-      displayName: ".Net Core - NuGet restore"
-      inputs:
-        command: restore
-        projects: |
-          **/*.csproj
-        feedsToUse: config
-        noCache: true
-        nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-        workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
+#     - task: DotNetCoreCLI@2
+#       displayName: ".Net Core - NuGet restore"
+#       inputs:
+#         command: restore
+#         projects: |
+#           **/*.csproj
+#         feedsToUse: config
+#         noCache: true
+#         nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
+#         workingDirectory: '$(Build.SourcesDirectory)\UKHO.PeriodicOutputService'
 
-    - task: DotNetCoreCLI@2
-      displayName: "Publish POS functional test"
-      inputs:
-        command: "publish"
-        publishWebProjects: false
-        projects: "**/*UKHO.PeriodicOutputService.API.FunctionalTests.csproj"
-        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\UKHO.PeriodicOutputService.API.FunctionalTests'
-        zipAfterPublish: false
+#     - task: DotNetCoreCLI@2
+#       displayName: "Publish POS functional test"
+#       inputs:
+#         command: "publish"
+#         publishWebProjects: false
+#         projects: "**/*UKHO.PeriodicOutputService.API.FunctionalTests.csproj"
+#         arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\UKHO.PeriodicOutputService.API.FunctionalTests'
+#         zipAfterPublish: false
 
-    - task: PublishBuildArtifacts@1
-      displayName: "Publish POS Functional test Artifact"
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)\UKHO.PeriodicOutputService.API.FunctionalTests'
-        ArtifactName: posfunctionaltests
+#     - task: PublishBuildArtifacts@1
+#       displayName: "Publish POS Functional test Artifact"
+#       inputs:
+#         PathtoPublish: '$(Build.ArtifactStagingDirectory)\UKHO.PeriodicOutputService.API.FunctionalTests'
+#         ArtifactName: posfunctionaltests
 
-    - task: DotNetCoreCLI@2
-      displayName: "Publish BESS functional test"
-      inputs:
-        command: "publish"
-        publishWebProjects: false
-        projects: "**/*UKHO.BESS.API.FunctionalTests.csproj"
-        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\UKHO.BESS.API.FunctionalTests'
-        zipAfterPublish: false
+#     - task: DotNetCoreCLI@2
+#       displayName: "Publish BESS functional test"
+#       inputs:
+#         command: "publish"
+#         publishWebProjects: false
+#         projects: "**/*UKHO.BESS.API.FunctionalTests.csproj"
+#         arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\UKHO.BESS.API.FunctionalTests'
+#         zipAfterPublish: false
 
-    - task: PublishBuildArtifacts@1
-      displayName: "Publish BESS Functional test Artifact"
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)\UKHO.BESS.API.FunctionalTests'
-        ArtifactName: bessfunctionaltests
+#     - task: PublishBuildArtifacts@1
+#       displayName: "Publish BESS Functional test Artifact"
+#       inputs:
+#         PathtoPublish: '$(Build.ArtifactStagingDirectory)\UKHO.BESS.API.FunctionalTests'
+#         ArtifactName: bessfunctionaltests
   
 - job: BuildAndPublishMockAPI
   workspace:

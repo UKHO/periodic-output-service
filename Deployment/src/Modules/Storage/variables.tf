@@ -54,3 +54,11 @@ variable "is_enabled" {
   type = bool
   default = true
 }
+
+variable "aio_weekly_configuration" {
+  type = map(string)
+}
+
+variable "aio_printing_configuration" {
+  type = map(string)
+}

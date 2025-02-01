@@ -113,6 +113,8 @@ module "storage" {
   service_name_bess   = local.service_name_bess
   container_name      = local.container_name
   tags                = local.tags
+  aio_weekly_configuration      = var.aio_weekly_configuration
+  aio_printing_configuration    = var.aio_printing_configuration
 }
 
 module "key_vault" {

@@ -81,3 +81,11 @@ variable "agent_prd_subnet" {
 variable "BessContainerName" {
   type = string
 }
+
+variable "aio_weekly_configuration" {
+  type = map(string)
+}
+
+variable "aio_printing_configuration" {
+  type = map(string)
+}

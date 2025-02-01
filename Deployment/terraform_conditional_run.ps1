@@ -8,6 +8,12 @@ param (
     [Parameter(Mandatory = $true)] [string] $elasticApmApiKey
 )
 
+write-Host "aio_weekly_configuration"
+write-Host $env.TF_VAR_aio_weekly_configuration
+
+write-Host "aio_printing_configuration"
+write-Host $env.TF_VAR_aio_printing_configuration
+
 cd $env:AGENT_BUILDDIRECTORY/terraformartifact/src
 
 terraform --version
