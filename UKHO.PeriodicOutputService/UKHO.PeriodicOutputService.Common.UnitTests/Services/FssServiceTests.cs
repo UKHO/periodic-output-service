@@ -30,7 +30,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         private IFileSystem _fakeFileSystem;
         private IConfiguration _fakeconfiguration;
         private const string readMeSearchFilterQuery = "$batch(Product Type) eq 'AVCS' and businessUnit eq 'ADDS'";
-
+        private IAzureTableStorageHelper _fakeAzureTableStorageHelper;
+        
         [SetUp]
         public void Setup()
         {
@@ -57,40 +58,41 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             _fileSystemHelper = A.Fake<IFileSystemHelper>();
             _fakeFileSystem = A.Fake<IFileSystem>();
             _fakeconfiguration = A.Fake<IConfiguration>();
+            _fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
 
-            _fssService = new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration);
+            _fssService = new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper);
         }
 
         [Test]
         public void When_Paramter_Is_Null_Then_Constructor_Throws_ArgumentNullException_()
         {
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
+                () => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper))
                 .ParamName
                 .Should().Be("logger");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
+                () => new FssService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper))
                 .ParamName
                 .Should().Be("fssApiConfiguration");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration))
+                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper))
                 .ParamName
                 .Should().Be("fssApiClient");
 
             Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null, _fileSystemHelper, _fakeconfiguration))
+                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper))
                 .ParamName
                 .Should().Be("authFssTokenProvider");
 
             Assert.Throws<ArgumentNullException>(
-                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, null, _fakeconfiguration))
+                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, null, _fakeconfiguration, _fakeAzureTableStorageHelper))
                  .ParamName
                  .Should().Be("fileSystemHelper");
 
             Assert.Throws<ArgumentNullException>(
-                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, null))
+                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, null, _fakeAzureTableStorageHelper))
                  .ParamName
                  .Should().Be("configuration");
         }

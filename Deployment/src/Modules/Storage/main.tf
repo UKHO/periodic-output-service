@@ -15,6 +15,33 @@ resource "azurerm_storage_account" "pos_storage" {
 }
 }
 
+resource "azurerm_storage_table" "aio_config_table" {
+  name                  = var.table_name
+  storage_account_name  = azurerm_storage_account.pos_storage.name
+}
+
+resource "azurerm_storage_table_entity" "aio_weekly" {
+  storage_table_id = azurerm_storage_table.aio_config_table.id
+  partition_key    = "job"
+  row_key          = "1"
+  entiry {
+    BusinessUnit    = "ADDSSupport"
+    ReadUsers       = ""
+    ReadGroups      = "public"
+    IsEnabled       =  var.is_enabled
+  }
+
+  resource "azurerm_storage_table_entity" "aio_printing" {
+  storage_table_id = azurerm_storage_table.aio_config_table.id
+  partition_key    = "job"
+  row_key          = "2"
+  entiry {
+    BusinessUnit    = "ADDSSupport"
+    ReadUsers       = ""
+    ReadGroups      = "public"
+    IsEnabled       = var.is_enabled
+  }
+
 resource "azurerm_storage_account" "bess_storage" {
   name                              = lower("${var.service_name_bess}${var.env_name}storageukho")
   resource_group_name               = var.resource_group_name
@@ -36,3 +63,4 @@ resource "azurerm_storage_container" "bess_config_container" {
   name                  = var.container_name
   storage_account_name  = azurerm_storage_account.bess_storage.name  
 }
+

@@ -21,5 +21,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         Task<List<ProductVersionEntities>> GetLatestBessProductVersionDetailsAsync();
 
         Task SaveBessProductVersionDetailsAsync(List<ProductVersion> bessProductVersions, string name, string exchangeSetStandard);
+        AioJobConfigurationEntities? GetAioJobConfiguration();
     }
 }

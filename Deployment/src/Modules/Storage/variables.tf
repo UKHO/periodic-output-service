@@ -44,3 +44,8 @@ variable "agent_2204_subnet" {
 variable "agent_prd_subnet" {
   type = string
 }
+
+variable "is_enabled" {
+  type = bool
+  default = true
+}
