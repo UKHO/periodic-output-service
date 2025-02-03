@@ -16,7 +16,7 @@ resource "azurerm_storage_account" "pos_storage" {
 }
 
 resource "azurerm_storage_table" "aio_config_table" {
-  name                  = var.table_name
+  name                  = var.aio_config_table_name
   storage_account_name  = azurerm_storage_account.pos_storage.name
 }
 

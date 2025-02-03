@@ -100,33 +100,20 @@ locals {
 }
 
 module "storage" {
-  source              = "./Modules/Storage"
-  resource_group_name = azurerm_resource_group.webapp_rg.name
-  location            = azurerm_resource_group.webapp_rg.location
-  allowed_ips         = var.allowed_ips
-  m_spoke_subnet      = data.azurerm_subnet.main_subnet.id
-  mock_spoke_subnet   = local.mock_main_subnet_id
-  agent_2204_subnet   = var.agent_2204_subnet
-  agent_prd_subnet    = var.agent_prd_subnet
-  env_name            = local.env_name
-  service_name        = local.service_name
-  service_name_bess   = local.service_name_bess
-  container_name      = local.container_name
-  tags                = local.tags
-  aio_weekly_configuration     = {
-    "job_name"      = var.aio_weekly_job_name
-    "job_id"        = var.aio_weekly_job_id
-    "business_unit" = var.aio_weekly_business_unit
-    "read_users"    = var.aio_weekly_read_users
-    "read_group"    = var.aio_weekly_read_group        
-  }
-  aio_printing_configuration     = {
-    "job_name"      = var.aio_printing_job_name
-    "job_id"        = var.aio_printing_job_id
-    "business_unit" = var.aio_printing_business_unit
-    "read_users"    = var.aio_printing_read_users
-    "read_group"    = var.aio_printing_read_group
-  }
+  source                = "./Modules/Storage"
+  resource_group_name   = azurerm_resource_group.webapp_rg.name
+  location              = azurerm_resource_group.webapp_rg.location
+  allowed_ips           = var.allowed_ips
+  m_spoke_subnet        = data.azurerm_subnet.main_subnet.id
+  mock_spoke_subnet     = local.mock_main_subnet_id
+  agent_2204_subnet     = var.agent_2204_subnet
+  agent_prd_subnet      = var.agent_prd_subnet
+  env_name              = local.env_name
+  service_name          = local.service_name
+  service_name_bess     = local.service_name_bess
+  container_name        = local.container_name
+  tags                  = local.tags
+  aio_config_table_name = var.aio_config_table_name
 }
 
 module "key_vault" {

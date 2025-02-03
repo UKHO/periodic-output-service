@@ -33,14 +33,7 @@ steps:
       TF_VAR_agent_2204_subnet: $(agent2204SubnetId)
       TF_VAR_agent_prd_subnet: $(agentprdSubnetId)
       TF_VAR_BessContainerName: $(BessContainerForWebjob)
-      TF_VAR_aio_weekly_business_unit: $(AioJobIdWeekly.BusinessUnit)      
-      TF_VAR_aio_weekly_job_id: $(AioJobIdWeekly)      
-      TF_VAR_aio_weekly_read_users: $(AioJobIdWeekly.ReadUser)
-      TF_VAR_aio_weekly_read_group: $(AioJobIdWeekly.ReadGroup)
-      TF_VAR_aio_printing_job_id: $(AioJobIdPrinting)      
-      TF_VAR_aio_printing_business_unit: $(AioJobIdPrinting.BusinessUnit)
-      TF_VAR_aio_printing_read_users: $(AioJobIdPrinting.ReadUser)      
-      TF_VAR_aio_printing_read_group: $(AioJobIdPrinting.ReadGroup)
+      TF_VAR_aio_config_table_name: $(AioJobConfigurationTableName)            
 
   - task: FileTransform@2
     displayName: "File Transform: Mock API WebApp"
