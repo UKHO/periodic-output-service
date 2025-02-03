@@ -146,7 +146,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                         }
 
                         var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
-                        var encUpdateListFilePath = Path.Combine(essFileDownloadPath, string.Format(_configuration["EncUpdateListFilePath"], weekNumber.Week, weekNumber.Year));
+                        var encUpdateListFilePath = Path.Combine(essFileDownloadPath, string.Format(_configuration["EncUpdateListFilePath"], weekNumber.Week, weekNumber.YearShort));
                         isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath, ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
 
                         if (isEncUpdateFileBatchCreated)
