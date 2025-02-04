@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Azure.Data.Tables;
-using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
@@ -14,7 +13,6 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
     public class AzureTableStorageHelper : IAzureTableStorageHelper
     {
         private const string WEBJOB_HISTORY_TABLE_NAME = "poswebjobhistory";
-        //private const string AIO_PRODUCT_VERSION_DETAILS_TABLE_NAME = "aioproductversiondetails";
         private const string BESS_SCHEDULE_DETAILS_TABLE_NAME = "bessconfigscheduledetails";
         private const string BESS_PRODUCT_VERSION_DETAILS_TABLE_NAME = "bessproductversiondetails";
 

@@ -531,7 +531,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return createBatchRequest;
         }
 
-        [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel AddBatchAttributesForAio(string currentWeek, string currentYear)
         {
             AioJobConfigurationEntities? aioJobConfigurationEntities = _azureTableStorageHelper.GetAioJobConfiguration();

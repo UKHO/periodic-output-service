@@ -12,7 +12,9 @@ using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
 using Attribute = UKHO.PeriodicOutputService.Common.Models.Fss.Response.Attribute;
 
@@ -481,6 +483,119 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
              ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        [TestCase(Batch.AioBaseCDZipIsoSha1Batch, true )]
+        [TestCase(Batch.AioUpdateZipBatch, true)]
+        [TestCase(Batch.AioBaseCDZipIsoSha1Batch, false)]
+        [TestCase(Batch.AioUpdateZipBatch, false)]
+        public async Task DoesCreateBatch_Returns_BatchId_If_BatchTypeIsAio(Batch batchType, bool azureTableConfigurationExist)
+        {
+            _fakeconfiguration["IsFTRunning"] = "true";
+
+            (string businessUnit, string readUsers, string readGroups) =
+                ("BusinessUnit", "User1,User2", "Group1,Group2");
+
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+
+                    RequestMessage = new HttpRequestMessage()
+                    {
+                        RequestUri = new Uri("http://test.com")
+                    },
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\"}")))
+                });
+            
+            if (azureTableConfigurationExist)
+            {
+                A.CallTo(() => _fakeAzureTableStorageHelper.GetAioJobConfiguration()).Returns(new AioJobConfigurationEntities
+                {
+                    BusinessUnit = businessUnit,
+                    ReadUsers = readUsers,
+                    ReadGroups = readGroups
+                });
+            }
+            else
+            {
+                A.CallTo(() => _fakeAzureTableStorageHelper.GetAioJobConfiguration()).Returns(null);
+
+                _fakeFssApiConfiguration.Value.AioBusinessUnit = businessUnit;
+                _fakeFssApiConfiguration.Value.AioReadUsers = readUsers;
+                _fakeFssApiConfiguration.Value.AioReadGroups = readGroups;
+            }
+
+            string result = await _fssService.CreateBatch(batchType);
+
+            Assert.That(result, Is.EqualTo("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+            
+            A.CallTo(() => _fakeAzureTableStorageHelper.GetAioJobConfiguration())
+                .MustHaveHappenedOnceExactly();
+
+            Func<string, bool> match = requestBody =>
+            {
+                CreateBatchRequestModel createBatchRequestModel = JsonConvert.DeserializeObject<CreateBatchRequestModel>(requestBody);
+
+                return createBatchRequestModel.BusinessUnit.Equals(businessUnit) &&
+                       createBatchRequestModel.Acl.ReadGroups.SequenceEqual(readGroups.Split(",")) &&
+                       createBatchRequestModel.Acl.ReadUsers.SequenceEqual(readUsers.Split(","));
+            };
+
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(
+                    A<string>.Ignored,
+                    A<string>.That.Matches(r => match(r)),
+                    A<string>.Ignored,
+                    A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
+        }
+
+        [Test]
+        public async Task DoesCreateBatch_Returns_BatchId_If_BatchTypeIsAioAndTableConfigurationPropertiesAreNull()
+        {
+            _fakeconfiguration["IsFTRunning"] = "true";
+
+            (string businessUnit, string readUsers, string readGroups) =
+                ("BusinessUnit", "User1,User2", "Group1,Group2");
+
+            _fakeFssApiConfiguration.Value.AioBusinessUnit = businessUnit;
+            _fakeFssApiConfiguration.Value.AioReadUsers = readUsers;
+            _fakeFssApiConfiguration.Value.AioReadGroups = readGroups;
+
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                .Returns(new HttpResponseMessage
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\"}")))
+                });
+
+            A.CallTo(() => _fakeAzureTableStorageHelper.GetAioJobConfiguration()).Returns(new AioJobConfigurationEntities
+                {
+                    BusinessUnit = null,
+                    ReadUsers = null,
+                    ReadGroups = null
+                });
+            
+            string result = await _fssService.CreateBatch(Batch.AioBaseCDZipIsoSha1Batch);
+
+            Assert.That(result, Is.EqualTo("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+            
+            Func<string, bool> match = requestBody =>
+            {
+                CreateBatchRequestModel createBatchRequestModel = JsonConvert.DeserializeObject<CreateBatchRequestModel>(requestBody);
+
+                return createBatchRequestModel.BusinessUnit.Equals(businessUnit) &&
+                       createBatchRequestModel.Acl.ReadGroups.SequenceEqual(readGroups.Split(",")) &&
+                       createBatchRequestModel.Acl.ReadUsers.SequenceEqual(readUsers.Split(","));
+            };
+
+            A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(
+                    A<string>.Ignored,
+                    A<string>.That.Matches(r => match(r)),
+                    A<string>.Ignored,
+                    A<string>.Ignored))
+                .MustHaveHappenedOnceExactly();
         }
 
         [Test]
