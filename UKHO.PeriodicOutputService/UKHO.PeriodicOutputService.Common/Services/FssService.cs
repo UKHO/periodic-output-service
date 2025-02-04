@@ -524,9 +524,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         private CreateBatchRequestModel AddBatchAttributesForAio(FormattedWeekNumber weekNumber)
         {
-            AioJobConfigurationEntities? aioJobConfigurationEntities = _azureTableStorageHelper.GetAioJobConfiguration();
+            var aioJobConfigurationEntities = _azureTableStorageHelper.GetAioJobConfiguration();
 
-            (string businessUnit, string readUsers, string readGroups) = (
+            (var businessUnit, var readUsers, var readGroups) = (
                 aioJobConfigurationEntities?.BusinessUnit ?? _fssApiConfiguration.Value.AioBusinessUnit,
                 aioJobConfigurationEntities?.ReadUsers ?? _fssApiConfiguration.Value.AioReadUsers,
                 aioJobConfigurationEntities?.ReadGroups ?? _fssApiConfiguration.Value.AioReadGroups

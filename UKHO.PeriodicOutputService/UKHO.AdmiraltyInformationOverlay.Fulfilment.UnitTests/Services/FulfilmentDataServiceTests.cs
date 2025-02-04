@@ -17,7 +17,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
     [TestFixture]
     public class FulfilmentDataServiceTests
     {
-        private IFulfilmentDataService _fulfilmentDataService;
+        private FulfilmentDataService _fulfilmentDataService;
         private IEssService _fakeEssService;
         private IFssService _fakeFssService;
         private ILogger<FulfilmentDataService> _fakeLogger;
@@ -39,6 +39,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 
             _fakeconfiguration["IsFTRunning"] = "false";
             _fakeconfiguration["AioCells"] = "GB800001";
+            _fakeconfiguration["WeeksToIncrement"] = "1";
 
             _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
         }

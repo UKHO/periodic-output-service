@@ -69,7 +69,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             _logger.LogInformation(EventIds.GetLatestProductVersionDetailsCompleted.ToEventId(), "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow, 0); //todo hb adjust based on config
+            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow, GetWeeksToIncrement());
             var aioBaseExchangeSetTask = Task.Run(() => CreateAioBaseExchangeSet(weekNumber));
             var updateAioExchangeSetTask = Task.Run(() => CreateUpdateAIOExchangeSet(productVersionEntities, weekNumber));
 
@@ -80,6 +80,13 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             isSuccess = true;
 
             return isSuccess;
+        }
+
+        private int GetWeeksToIncrement()
+        {
+            var aioJobConfigurationEntities = _azureTableStorageHelper.GetAioJobConfiguration();
+            var weeksToIncrement = aioJobConfigurationEntities?.WeeksToIncrement ?? int.Parse(_configuration["WeeksToIncrement"]);
+            return weeksToIncrement;
         }
 
         private async Task CreateAioBaseExchangeSet(FormattedWeekNumber weekNumber)
