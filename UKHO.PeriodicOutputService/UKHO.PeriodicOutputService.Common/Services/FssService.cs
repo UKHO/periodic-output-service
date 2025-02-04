@@ -13,6 +13,7 @@ using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 
 namespace UKHO.PeriodicOutputService.Common.Services
 {
@@ -24,6 +25,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAuthFssTokenProvider _authFssTokenProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IConfiguration _configuration;
+        private readonly IAzureTableStorageHelper _azureTableStorageHelper;
 
         private readonly Enum[] _aioBatchTypes = {
                                             Batch.AioBaseCDZipIsoSha1Batch,
@@ -37,7 +39,8 @@ namespace UKHO.PeriodicOutputService.Common.Services
                                IFssApiClient fssApiClient,
                                IAuthFssTokenProvider authFssTokenProvider,
                                IFileSystemHelper fileSystemHelper,
-                               IConfiguration configuration)
+                               IConfiguration configuration,
+                               IAzureTableStorageHelper azureTableStorageHelper)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _fssApiConfiguration = fssApiConfiguration ?? throw new ArgumentNullException(nameof(fssApiConfiguration));
@@ -45,6 +48,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _authFssTokenProvider = authFssTokenProvider ?? throw new ArgumentNullException(nameof(authFssTokenProvider));
             _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
         }
 
         public async Task<FssBatchStatus> CheckIfBatchCommitted(string batchId, RequestType requestType, string? correlationId = null)
@@ -527,17 +531,24 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return createBatchRequest;
         }
 
-        [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel AddBatchAttributesForAio(string currentWeek, string currentYear)
         {
+            AioJobConfigurationEntities? aioJobConfigurationEntities = _azureTableStorageHelper.GetAioJobConfiguration();
+
+            (string businessUnit, string readUsers, string readGroups) = (
+                aioJobConfigurationEntities?.BusinessUnit ?? _fssApiConfiguration.Value.AioBusinessUnit,
+                aioJobConfigurationEntities?.ReadUsers ?? _fssApiConfiguration.Value.AioReadUsers,
+                aioJobConfigurationEntities?.ReadGroups ?? _fssApiConfiguration.Value.AioReadGroups
+            );
+
             CreateBatchRequestModel createBatchRequest = new()
             {
-                BusinessUnit = _fssApiConfiguration.Value.AioBusinessUnit,
+                BusinessUnit = businessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Acl = new Acl
                 {
-                    ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadUsers) ? new List<string>() : _fssApiConfiguration.Value.AioReadUsers.Split(","),
-                    ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.AioReadGroups) ? new List<string>() : _fssApiConfiguration.Value.AioReadGroups.Split(","),
+                    ReadUsers = string.IsNullOrEmpty(readUsers) ? new List<string>() : readUsers.Split(","),
+                    ReadGroups = string.IsNullOrEmpty(readGroups) ? new List<string>() : readGroups.Split(","),
                 },
                 Attributes = new List<KeyValuePair<string, string>>
                 {
