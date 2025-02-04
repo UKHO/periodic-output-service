@@ -81,3 +81,8 @@ variable "agent_prd_subnet" {
 variable "BessContainerName" {
   type = string
 }
+
+variable "aio_config_table_name" {
+  type = string
+  default = "aiojobconfiguration"
+}

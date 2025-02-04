@@ -38,6 +38,11 @@ output "pos_storage_name" {
 value = module.storage.pos_storage_name
 }
 
+output pos_storage_access_key {
+  value = module.storage.pos_storage_access_key
+  sensitive = true
+}
+
 output "pos_storage_connection_string"{
   value = module.storage.pos_storage_connection_string
   sensitive = true

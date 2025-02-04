@@ -44,3 +44,7 @@ variable "agent_2204_subnet" {
 variable "agent_prd_subnet" {
   type = string
 }
+
+variable "aio_config_table_name" {
+  type = string
+}
