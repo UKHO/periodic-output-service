@@ -413,6 +413,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         public void DoesCreateBatch_Throws_Exception_If_InValidRequest()
         {
             _fakeconfiguration["IsFTRunning"] = "true";
+            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
 
             A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -424,13 +425,13 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CreateBatch(Batch.PosFullAvcsIsoSha1Batch));
+            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CreateBatch(Batch.PosFullAvcsIsoSha1Batch, weekNumber));
 
             A.CallTo(_fakeLogger).Where(call =>
-            call.Method.Name == "Log"
-            && call.GetArgument<LogLevel>(0) == LogLevel.Error
-            && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
-            ).MustHaveHappenedOnceExactly();
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Error
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+                ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
@@ -446,6 +447,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         public async Task DoesCreateBatch_Returns_BatchId_If_ValidRequest(Batch batchType)
         {
             _fakeconfiguration["IsFTRunning"] = "true";
+            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
 
             A.CallTo(() => _fakeFssApiClient.CreateBatchAsync(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                 .Returns(new HttpResponseMessage()
@@ -459,21 +461,21 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\":\"4c5397d5-8a05-43fa-9009-9c38b2007f81\"}")))
                 });
 
-            string result = await _fssService.CreateBatch(batchType);
+            var result = await _fssService.CreateBatch(batchType, weekNumber);
 
             Assert.That(result, Is.EqualTo("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
 
             A.CallTo(_fakeLogger).Where(call =>
-             call.Method.Name == "Log"
-             && call.GetArgument<LogLevel>(0) == LogLevel.Information
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
-             ).MustHaveHappenedOnceOrMore();
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}"
+                ).MustHaveHappenedOnceOrMore();
 
             A.CallTo(_fakeLogger).Where(call =>
-             call.Method.Name == "Log"
-             && call.GetArgument<LogLevel>(0) == LogLevel.Information
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-             ).MustHaveHappenedOnceExactly();
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
+                ).MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
