@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using System.IO.Abstractions;
 using FakeItEasy;
-using FluentAssertions;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Pks;
@@ -37,20 +36,17 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
-            Assert.Throws<ArgumentNullException>(
-               () => new FileSystemHelper(null, _fakeZipHelper, _fakeFileUtility))
-               .ParamName
-               .Should().Be("fileSystem");
+            var exception = Assert.Throws<ArgumentNullException>(
+               () => new FileSystemHelper(null, _fakeZipHelper, _fakeFileUtility));
+            Assert.That(exception.ParamName, Is.EqualTo("fileSystem"));
 
-            Assert.Throws<ArgumentNullException>(
-              () => new FileSystemHelper(_fakefileSystem, null, _fakeFileUtility))
-              .ParamName
-              .Should().Be("zipHelper");
+            exception = Assert.Throws<ArgumentNullException>(
+              () => new FileSystemHelper(_fakefileSystem, null, _fakeFileUtility));
+            Assert.That(exception.ParamName, Is.EqualTo("zipHelper"));
 
-            Assert.Throws<ArgumentNullException>(
-             () => new FileSystemHelper(_fakefileSystem, _fakeZipHelper, null))
-             .ParamName
-             .Should().Be("fileUtility");
+            exception = Assert.Throws<ArgumentNullException>(
+             () => new FileSystemHelper(_fakefileSystem, _fakeZipHelper, null));
+            Assert.That(exception.ParamName, Is.EqualTo("fileUtility"));
         }
 
         [Test]
@@ -102,7 +98,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             Assert.Multiple(() =>
             {
-                Assert.That(result.Count, Is.EqualTo(1));
+                Assert.That(result, Has.Count.EqualTo(1));
                 Assert.That(result.FirstOrDefault().FileName, Is.EqualTo(fileName));
                 Assert.That(result.FirstOrDefault().Hash, Is.Not.Null);
             });
@@ -169,7 +165,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             var result = _fileSystemHelper.CreateXmlFromObject(pKSXml, "C:\\Test", "test.txt");
 
-            result.Should().Be(Task.CompletedTask);
+            Assert.That(result, Is.EqualTo(Task.CompletedTask));
         }
 
         [Test]
@@ -194,7 +190,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             byte[] result = _fileSystemHelper.GetFileInBytes(GetUploadFileBlockRequestModel());
 
-            Assert.That(result.Length, Is.EqualTo(100000));
+            Assert.That(result, Has.Length.EqualTo(100000));
         }
 
         [Test]

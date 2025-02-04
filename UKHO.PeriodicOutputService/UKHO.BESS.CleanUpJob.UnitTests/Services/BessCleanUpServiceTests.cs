@@ -1,6 +1,5 @@
 ﻿using System.IO.Abstractions;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -38,16 +37,20 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
             Action nullLogger = () => new CleanUpService(fakeConfiguration, null, fakeCleanUpConfig, fakeFileSystem);
-            nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
+            var exception = Assert.Throws<ArgumentNullException>(() => nullLogger());
+            Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             Action nullCleanupConfiguration = () => new CleanUpService(fakeConfiguration, fakeLogger, null, fakeFileSystem);
-            nullCleanupConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("cleanUpConfig");
+            exception = Assert.Throws<ArgumentNullException>(() => nullCleanupConfiguration());
+            Assert.That(exception.ParamName, Is.EqualTo("cleanUpConfig"));
 
             Action nullFileSystem = () => new CleanUpService(fakeConfiguration, fakeLogger, fakeCleanUpConfig, null);
-            nullFileSystem.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("fileSystem");
+            exception = Assert.Throws<ArgumentNullException>(() => nullFileSystem());
+            Assert.That(exception.ParamName, Is.EqualTo("fileSystem"));
 
             Action nullConfiguration = () => new CleanUpService(null, fakeLogger, fakeCleanUpConfig, fakeFileSystem);
-            nullConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("configuration");
+            exception = Assert.Throws<ArgumentNullException>(() => nullConfiguration());
+            Assert.That(exception.ParamName, Is.EqualTo("configuration"));
         }
 
         [Test]
@@ -57,7 +60,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(fakeDateTime);
 
             var result = bessCleanUpService.CleanUpHistoricFoldersAndFiles();
-            result.Should().Be("Successfully cleaned the folder");
+            Assert.That(result, Is.EqualTo("Successfully cleaned the folder"));
             A.CallTo(() => fakeFileSystem.Directory.Delete(A<string>.Ignored, A<bool>.Ignored)).MustHaveHappenedTwiceOrMore();
 
             A.CallTo(fakeLogger).Where(call =>
@@ -71,10 +74,10 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         [Test]
         public void WhenFolderPathsNotFound_ThenCleanupProcessIsNotPerformed()
         {
-            A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(new string[] { });
+            A.CallTo(() => fakeFileSystem.Directory.GetDirectories(A<string>.Ignored)).Returns(Array.Empty<string>());
 
             var result = bessCleanUpService.CleanUpHistoricFoldersAndFiles();
-            result.Should().Be("No folders to delete");
+            Assert.That(result, Is.EqualTo("No folders to delete"));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -91,7 +94,7 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
             A.CallTo(() => fakeFileSystem.Directory.GetLastWriteTimeUtc(A<string>.Ignored)).Returns(DateTime.UtcNow);
 
             var result = bessCleanUpService.CleanUpHistoricFoldersAndFiles();
-            result.Should().Be("No folders to delete");
+            Assert.That(result, Is.EqualTo("No folders to delete"));
 
             A.CallTo(fakeLogger).Where(call =>
             call.Method.Name == "Log"

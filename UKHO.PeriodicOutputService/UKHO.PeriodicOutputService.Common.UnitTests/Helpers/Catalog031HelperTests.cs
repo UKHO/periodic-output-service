@@ -1,5 +1,4 @@
 ﻿using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
@@ -67,25 +66,29 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             Action nullFileSystemHelper = () =>
                 new Catalog031Helper(null, _fakeFssApiConfiguration, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory, _fakeLogger);
-            nullFileSystemHelper.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should()
-                .Be("fileSystemHelper");
+            var exception = Assert.Throws<ArgumentNullException>(() => nullFileSystemHelper());
+            Assert.That(exception.ParamName, Is.EqualTo("fileSystemHelper"));
 
             Action nullFssApiConfiguration = () =>
                 new Catalog031Helper(_fakeFileSystemHelper, null, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory, _fakeLogger);
-            nullFssApiConfiguration.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should()
-                .Be("fssApiConfig");
+            exception = Assert.Throws<ArgumentNullException>(() => nullFssApiConfiguration());
+            Assert.That(exception.ParamName, Is.EqualTo("fssApiConfig"));
 
             Action nullCatalog031BuilderFactory = () =>
                 new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, null, _fakeCatalog031ReaderFactory, _fakeLogger);
-            nullCatalog031BuilderFactory.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031BuilderFactory");
+            exception = Assert.Throws<ArgumentNullException>(() => nullCatalog031BuilderFactory());
+            Assert.That(exception.ParamName, Is.EqualTo("catalog031BuilderFactory"));
 
             Action nullCatalog031ReaderFactory = () =>
                 new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeCatalog031BuilderFactory, null, _fakeLogger);
-            nullCatalog031ReaderFactory.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("catalog031ReaderFactory");
+            exception = Assert.Throws<ArgumentNullException>(() => nullCatalog031ReaderFactory());
+            Assert.That(exception.ParamName, Is.EqualTo("catalog031ReaderFactory"));
+
 
             Action nullLogger = () =>
                 new Catalog031Helper(_fakeFileSystemHelper, _fakeFssApiConfiguration, _fakeCatalog031BuilderFactory, _fakeCatalog031ReaderFactory, null);
-            nullLogger.Should().ThrowExactly<ArgumentNullException>().And.ParamName.Should().Be("logger");
+            exception = Assert.Throws<ArgumentNullException>(() => nullLogger());
+            Assert.That(exception.ParamName, Is.EqualTo("logger"));
         }
 
         [Test]
@@ -155,7 +158,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakeFileSystemHelper.CreateFileCopy(_catalogFilePath, A<MemoryStream>._)).DoesNothing();
 
             _catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(_catalogFilePath);
-            
+
             A.CallTo(() => _fakeCatalogBuilder.Add(A<CatalogEntry>.That.Matches(x => x.FileLocation == "README.TXT" || x.FileLocation == "CATALOG.031")))
                 .MustNotHaveHappened();
             VerifyCatalogEntriesAdded(new List<CatalogEntry> { catalogEntries[2] });
@@ -180,7 +183,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             Action action = () => _catalog031Helper.RemoveReadmeEntryAndUpdateCatalogFile(_catalogFilePath);
 
-            action.Should().Throw<Exception>().WithMessage("An error occurred while deleting the catalog file.");
+            var exception = Assert.Throws<Exception>(() => action());
+            Assert.That(exception.Message, Is.EqualTo("An error occurred while deleting the catalog file."));
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"
                 && call.GetArgument<LogLevel>(0) == LogLevel.Error

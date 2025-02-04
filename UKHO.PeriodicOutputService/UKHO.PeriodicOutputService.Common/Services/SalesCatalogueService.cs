@@ -35,7 +35,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             var uri = $"{salesCatalogueConfig.Value.BaseUrl}/{salesCatalogueConfig.Value.Version}/productData/{salesCatalogueConfig.Value.ProductType}/catalogue/{salesCatalogueConfig.Value.CatalogueType}";
 
-            var httpResponse = await salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Get, null, accessToken, uri);
+            var httpResponse = await salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Get, null!, accessToken, uri);
 
             var response = await CreateSalesCatalogueDataResponse(httpResponse);
 
@@ -51,9 +51,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             if (httpResponse.StatusCode != HttpStatusCode.OK)
             {
-                logger.LogError(EventIds.ScsGetSalesCatalogueDataNonOkResponse.ToEventId(), "Request to Sales Catalogue Service catalogue end point with uri:{RequestUri} FAILED.| {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponse.RequestMessage.RequestUri, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.ScsGetSalesCatalogueDataNonOkResponse.ToEventId(), "Request to Sales Catalogue Service catalogue end point with uri:{RequestUri} FAILED.| {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", httpResponse.RequestMessage?.RequestUri, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode, CommonHelper.CorrelationID);
                 response.ResponseCode = httpResponse.StatusCode;
-                response.ResponseBody = null;
+                response.ResponseBody = null!;
                 throw new FulfilmentException(EventIds.ScsGetSalesCatalogueDataNonOkResponse.ToEventId());
             }
             else

@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -39,7 +38,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = await configuredClient.GetAsync("https://test.com");
 
-            result.StatusCode.Should().Be(HttpStatusCode.TooManyRequests);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -66,7 +65,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = await configuredClient.GetAsync("https://test.com");
 
-            result.StatusCode.Should().Be(HttpStatusCode.ServiceUnavailable);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.ServiceUnavailable));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
@@ -92,7 +91,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                     .CreateClient(TestClient);
 
             var result = await configuredClient.GetAsync("https://test.com");
-            result.StatusCode.Should().Be(HttpStatusCode.InternalServerError);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"

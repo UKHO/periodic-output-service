@@ -178,7 +178,7 @@ jobs:
       displayName: 'Use .NET SDK'
       inputs:
         packageType: sdk
-        version: 6.0.x
+        version: 8.0.x
 
     - task: DotNetCoreCLI@2
       displayName: "Run POS Functional tests"
@@ -255,7 +255,7 @@ jobs:
       displayName: 'Use .NET SDK'
       inputs:
         packageType: sdk
-        version: 6.0.x
+        version: 8.0.x
 
     - task: DotNetCoreCLI@2
       displayName: "Run BESS Functional tests"
