@@ -34,20 +34,20 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var configuredClient =
                 services
-                .BuildServiceProvider()
-                .GetRequiredService<IHttpClientFactory>()
-                .CreateClient(TestClient);
+                    .BuildServiceProvider()
+                    .GetRequiredService<IHttpClientFactory>()
+                    .CreateClient(TestClient);
 
             var result = await configuredClient.GetAsync("https://test.com");
 
             Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.TooManyRequests));
 
             A.CallTo(_fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
-                ).MustHaveHappenedTwiceOrMore();
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
+                  ).MustHaveHappenedTwiceOrMore();
         }
 
         [Test]
@@ -61,20 +61,20 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var configuredClient =
                 services
-                .BuildServiceProvider()
-                .GetRequiredService<IHttpClientFactory>()
-                .CreateClient(TestClient);
+                    .BuildServiceProvider()
+                    .GetRequiredService<IHttpClientFactory>()
+                    .CreateClient(TestClient);
 
             var result = await configuredClient.GetAsync("https://test.com");
 
             Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.ServiceUnavailable));
 
             A.CallTo(_fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
-                ).MustHaveHappenedTwiceOrMore();
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
+                  ).MustHaveHappenedTwiceOrMore();
         }
 
         [Test]
@@ -88,20 +88,20 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var configuredClient =
                 services
-                .BuildServiceProvider()
-                .GetRequiredService<IHttpClientFactory>()
-                .CreateClient(TestClient);
+                    .BuildServiceProvider()
+                    .GetRequiredService<IHttpClientFactory>()
+                    .CreateClient(TestClient);
 
             var result = await configuredClient.GetAsync("https://test.com");
 
             Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.InternalServerError));
 
             A.CallTo(_fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest.ToEventId()
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
-                ).MustHaveHappenedTwiceOrMore();
+                  call.Method.Name == "Log"
+                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                  && call.GetArgument<EventId>(1) == EventIds.RetryHttpClientScsRequest.ToEventId()
+                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Re-trying {requestType} service request with uri {RequestUri} and delay {delay}ms and retry attempt {retry} with _X-Correlation-ID:{correlationId} as previous request was responded with {StatusCode}."
+                  ).MustHaveHappenedTwiceOrMore();
         }
 
         [TestCase(2025, 12, 24, new string[] { "51", "52", "01", "02" }, new string[] { "52", "01", "02", "03" }, Description = "2025 has 52 weeks. 2025-12-24 is a Wednesday.", TestName = $"{nameof(GetCurrentWeekNumber_For)}_2025/26")]
