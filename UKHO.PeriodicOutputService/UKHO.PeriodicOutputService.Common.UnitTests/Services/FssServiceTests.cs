@@ -488,6 +488,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         public async Task DoesCreateBatch_Returns_BatchId_If_BatchTypeIsAio(Batch batchType, bool azureTableConfigurationExist)
         {
             _fakeconfiguration["IsFTRunning"] = "true";
+            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
 
             (string businessUnit, string readUsers, string readGroups) =
                 ("BusinessUnit", "User1,User2", "Group1,Group2");
@@ -522,7 +523,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 _fakeFssApiConfiguration.Value.AioReadGroups = readGroups;
             }
 
-            string result = await _fssService.CreateBatch(batchType);
+            string result = await _fssService.CreateBatch(batchType, weekNumber);
 
             Assert.That(result, Is.EqualTo("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
             
@@ -550,6 +551,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         public async Task DoesCreateBatch_Returns_BatchId_If_BatchTypeIsAioAndTableConfigurationPropertiesAreNull()
         {
             _fakeconfiguration["IsFTRunning"] = "true";
+            var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
 
             (string businessUnit, string readUsers, string readGroups) =
                 ("BusinessUnit", "User1,User2", "Group1,Group2");
@@ -572,7 +574,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     ReadGroups = null
                 });
             
-            string result = await _fssService.CreateBatch(Batch.AioBaseCDZipIsoSha1Batch);
+            string result = await _fssService.CreateBatch(Batch.AioBaseCDZipIsoSha1Batch, weekNumber);
 
             Assert.That(result, Is.EqualTo("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
             
