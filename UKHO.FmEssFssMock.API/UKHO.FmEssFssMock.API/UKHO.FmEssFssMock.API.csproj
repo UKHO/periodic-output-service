@@ -60,7 +60,7 @@
     <None Update="Data\10D40DD5-DDFB-497A-BB67-D99FB1658320\distributors.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_WK34_22_Only.zip">
+    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_Update_WK34_22_Only.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\27067A02-DF4B-49A1-8699-442B265A75D2\V01X01.zip">
@@ -156,13 +156,13 @@
     <None Update="Data\D2B46C4F-415A-4CA3-B844-6577254F39E5\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.iso">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_CD_WK34_22.iso">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.iso.sha1">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_CD_WK34_22.iso.sha1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.zip">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_CD_WK34_22.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\F8FD2FB4-3DD6-425D-B34F-3059E262FEED\V01X01.zip">
