@@ -10,6 +10,7 @@ using Elastic.Apm;
 using Elastic.Apm.Api;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -91,7 +92,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
 #endif
             //Add environment variables
             configBuilder.AddEnvironmentVariables();
-
+            
             return configBuilder.Build();
         }
 
