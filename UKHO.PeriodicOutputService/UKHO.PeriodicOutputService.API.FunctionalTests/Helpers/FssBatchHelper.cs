@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Net;
 using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
@@ -11,12 +10,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static readonly FssApiClient s_fssApiClient;
         private static readonly POSFileDetails s_posDetails = new TestConfiguration().posFileDetails;
         private static readonly TestConfiguration s_config = new();
-        private static readonly string s_weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString("00");
-        private static readonly string s_currentYear = DateTime.UtcNow.ToString("yy");
+        private static readonly string s_weekNumber;
+        private static readonly string s_currentYearShort;
 
         static FssBatchHelper()
         {
-            s_fssApiClient = new FssApiClient();
+            (s_weekNumber, _, s_currentYearShort) = CommonHelper.GetCurrentWeekAndYear();
         }
 
         public static async Task<string> DownloadFileForLargeMedia(string downloadFileUrl, string jwtToken)
@@ -76,7 +75,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<string> ExtractDownloadedAioFolder(string downloadFileUrl, string jwtToken)
         {
-            var fileName = $"AIO_CD_WK{s_weekNumber}_{s_currentYear}.zip";
+            var fileName = $"AIO_CD_WK{s_weekNumber}_{s_currentYearShort}.zip";
             var posFolderPath = Path.Combine(Path.GetTempPath(), s_posDetails.TempFolderName);
 
             if (!Directory.Exists(posFolderPath))

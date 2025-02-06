@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Net;
+﻿using System.Net;
 using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
@@ -9,8 +8,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     {
         private static readonly TestConfiguration s_config = new();
         private static readonly POSFileDetails s_posDetails = new TestConfiguration().posFileDetails;
-        private static readonly string s_weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString("00");
-        private static readonly string s_currentYear = DateTime.UtcNow.ToString("yy");
+        private static readonly string s_weekNumber;
+        private static readonly string s_currentYearShort;
+
+        static FileContentHelper()
+        {
+            (s_weekNumber, _, s_currentYearShort) = CommonHelper.GetCurrentWeekAndYear();
+        }
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string batchId, string fssJwtToken)
         {
@@ -18,7 +22,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
             for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
             {
-                string zipFileName = string.Format(s_posDetails.PosAvcsZipFileName, dvdNumber, s_weekNumber, s_currentYear);
+                string zipFileName = string.Format(s_posDetails.PosAvcsZipFileName, dvdNumber, s_weekNumber, s_currentYearShort);
                 string downloadFileUrl = $"{s_config.FssConfig.BaseUrl}/batch/{batchId}/files/{zipFileName}";
 
                 string downloadedFolder = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
@@ -47,9 +51,9 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             if (mediaType.ToLower().Equals("zip"))
             {
                 string fileName = batchDetailsResponse.files[0].filename;
-                if (fileName.Equals(string.Format(s_posDetails.PosUpdateZipFileName, s_weekNumber, s_currentYear)))
+                if (fileName.Equals(string.Format(s_posDetails.PosUpdateZipFileName, s_weekNumber, s_currentYearShort)))
                 {
-                    string zipFileName = string.Format(s_posDetails.PosUpdateZipFileName, s_weekNumber, s_currentYear);
+                    string zipFileName = string.Format(s_posDetails.PosUpdateZipFileName, s_weekNumber, s_currentYearShort);
                     string downloadFileUrl = $"{s_config.FssConfig.BaseUrl}/batch/{batchId}/files/{zipFileName}";
                     string zipPath = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
                     string extractDownloadedFolder = FssBatchHelper.ExtractDownloadedFileForLargeMedia(zipPath, zipFileName);
@@ -59,7 +63,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 {
                     for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
                     {
-                        string zipFileName = string.Format(s_posDetails.PosAvcsZipFileName, dvdNumber, s_weekNumber, s_currentYear);
+                        string zipFileName = string.Format(s_posDetails.PosAvcsZipFileName, dvdNumber, s_weekNumber, s_currentYearShort);
                         string downloadFileUrl = $"{s_config.FssConfig.BaseUrl}/batch/{batchId}/files/{zipFileName}";
 
                         string zipPath = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
@@ -76,13 +80,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
             for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
             {
-                string folderNameIso = string.Format(s_posDetails.PosAvcsIsoFileName, dvdNumber, s_weekNumber, s_currentYear);
+                string folderNameIso = string.Format(s_posDetails.PosAvcsIsoFileName, dvdNumber, s_weekNumber, s_currentYearShort);
 
                 string downloadFileUrl = $"{s_config.FssConfig.BaseUrl}/batch/{batchId}/files/{folderNameIso}";
 
                 string downloadedFolder = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrl, fssJwtToken);
 
-                string FolderNameSha1 = string.Format(s_posDetails.PosAvcsIsoSha1FileName, dvdNumber, s_weekNumber, s_currentYear);
+                string FolderNameSha1 = string.Format(s_posDetails.PosAvcsIsoSha1FileName, dvdNumber, s_weekNumber, s_currentYearShort);
                 string downloadFileUrlSha1 = $"{s_config.FssConfig.BaseUrl}/batch/{batchId}/files/{FolderNameSha1}";
 
                 string downloadedFolderSha1 = await FssBatchHelper.DownloadFileForLargeMedia(downloadFileUrlSha1, fssJwtToken);
@@ -124,7 +128,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<string> DownloadAndExtractAioZip(string fssJwtToken, string batchId)
         {
-            var fileName = $"AIO_CD_WK{s_weekNumber}_{s_currentYear}";
+            var fileName = $"AIO_CD_WK{s_weekNumber}_{s_currentYearShort}";
             var downloadFileUrl = $"{s_config.FssConfig.BaseUrl}/batch/{batchId}/files/{fileName}.zip";
 
             var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedAioFolder(downloadFileUrl.ToString(), fssJwtToken);
