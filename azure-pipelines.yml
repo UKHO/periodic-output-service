@@ -9,6 +9,10 @@ parameters:
     displayName: "Disable Stryker"
     type: boolean
     default: false
+  - name: disableBessFunctionalTests
+    displayName: "Disable BESS Functional tests"
+    type: boolean
+    default: true
 
 trigger:
   - main
@@ -655,6 +659,7 @@ stages:
               workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
 
       - job: BESSFunctionalTests
+        condition: and(succeeded(), eq('${{ parameters.disableBessFunctionalTests }}', 'false'))
         dependsOn:
          - DevDeployApp
          - CheckInfra
