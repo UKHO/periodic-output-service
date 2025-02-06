@@ -136,7 +136,7 @@
     <cve>CVE-2020-22475</cve>
     <cve>CVE-2022-39349</cve>
   </suppress>
-  <suppress>
+  <!--<suppress>
     <notes>
       <![CDATA[
    file name: System.Threading.Tasks.Extensions:Various
@@ -146,7 +146,7 @@
     <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
     <cve>CVE-2020-22475</cve>
     <cve>CVE-2022-39349</cve>
-  </suppress>
+  </suppress>-->
   <suppress>
     <notes>
       <![CDATA[
@@ -440,14 +440,14 @@
     </notes>
     <cve>CVE-2024-35255</cve>
   </suppress>
-  <suppress>
+  <!--<suppress>
     <notes>
       <![CDATA[
    file name: System.Text.Json:8.0.0
    ]]>
     </notes>
     <vulnerabilityName>CVE-2024-30105</vulnerabilityName>
-  </suppress>
+  </suppress>-->
   <suppress>
     <notes>
       <![CDATA[
@@ -456,14 +456,14 @@
     </notes>
     <cve>CVE-2024-43591</cve>
   </suppress>
-  <suppress>
+  <!--<suppress>
     <notes>
       <![CDATA[
    file name: Microsoft.Extensions.Caching.Memory:8.0.0
    ]]>
     </notes>
     <vulnerabilityName>CVE-2024-43483</vulnerabilityName>
-  </suppress>
+  </suppress>-->
   <suppress>
     <notes>
       <![CDATA[
@@ -473,16 +473,16 @@
     </notes>
     <vulnerabilityName>CVE-2024-43485</vulnerabilityName>
   </suppress>
-  <suppress>
+  <!--<suppress>
    <notes><![CDATA[
    file name: YamlDotNet.dll
    ]]></notes>
    <cve>CVE-2018-1000210</cve>
-</suppress>
-<suppress>
+</suppress>-->
+  <!--<suppress>
    <notes><![CDATA[
    file name: Azure.Identity:1.10.3
    ]]></notes>
    <vulnerabilityName>CVE-2024-29992</vulnerabilityName>
-</suppress>
+</suppress>-->
 </suppressions>
