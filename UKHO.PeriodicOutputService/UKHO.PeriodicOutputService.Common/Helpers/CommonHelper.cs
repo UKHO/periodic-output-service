@@ -1,9 +1,11 @@
-﻿using System.Globalization;
-using System.Net;
+﻿using System.Net;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Polly;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
+using UKHO.WeekNumberUtils;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
 {
@@ -44,8 +46,20 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return hash;
         }
 
-        public static string GetCurrentWeekNumber(DateTime date)
-        { string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(date, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString(); return currentWeek.Length == 1 ? string.Concat("0", currentWeek) : currentWeek; }
+        /// <summary>
+        /// Get the current week number of the year for the given date, based on the standard UKHO week starting on a Thursday.
+        /// </summary>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        public static FormattedWeekNumber GetCurrentWeekNumber(DateTime date) => new(WeekNumber.GetUKHOWeekFromDateTime(date));
+
+        /// <summary>
+        /// Get the current week number of the year for the given date, incremented by the specified number of weeks.
+        /// </summary>
+        /// <param name="date"></param>
+        /// <param name="weeksToIncrement"></param>
+        /// <returns></returns>
+        public static FormattedWeekNumber GetCurrentWeekNumber(DateTime date, int weeksToIncrement) => GetCurrentWeekNumber(date.AddDays(7 * weeksToIncrement));
 
         public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy(ILogger logger, string requestType, EventIds eventId, int retryCount, double sleepDuration)
         {
@@ -89,5 +103,12 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             };
             return mimeTypes;
         }
+
+        /// <summary>
+        /// Check if the batch type is AIO.
+        /// </summary>
+        /// <param name="batchType"></param>
+        /// <returns></returns>
+        public static bool IsAio(this Batch batchType) => batchType == Batch.AioBaseCDZipIsoSha1Batch || batchType == Batch.AioUpdateZipBatch;
     }
 }

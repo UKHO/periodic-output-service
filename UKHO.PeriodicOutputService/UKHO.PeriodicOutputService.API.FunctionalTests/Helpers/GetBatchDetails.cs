@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
@@ -7,17 +6,24 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
     public static class GetBatchDetails
     {
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly HttpClient httpClient = new();
-        private static readonly string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-        private static readonly string currentYear = DateTime.UtcNow.ToString("yy");
+        private static readonly HttpClient s_httpClient = new();
+        private static readonly string s_weekNumber;
+        private static readonly string s_currentYear;
+        private static readonly string s_currentYearShort;
         private static readonly List<string> expectedFileName = [];
+
+        static GetBatchDetails()
+        {
+            (s_weekNumber, s_currentYear, s_currentYearShort) = CommonHelper.GetCurrentWeekAndYear();
+        }
+
         public static async Task<HttpResponseMessage> GetBatchDetailsEndpoint(string baseUrl, string batchId)
         {
             string uri = $"{baseUrl}/batch/{batchId}";
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
-            return await httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
+            return await s_httpClient.SendAsync(httpRequestMessage, CancellationToken.None);
         }
 
         public static void GetBatchDetailsResponseValidation(dynamic batchDetailsResponse)
@@ -43,12 +49,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         public static void GetBatchDetailsResponseValidationForFullAVCSExchangeSet(dynamic batchDetailsResponse)
         {
             string mediaType = batchDetailsResponse.attributes[5].value;
+
             if (mediaType.ToLower().Equals("zip"))
             {
                 string fileName = batchDetailsResponse.files[0].filename;
                 if (fileName.Contains("UPDATE"))
                 {
-                    Assert.That(fileName, Is.EqualTo(string.Format(posDetails.PosUpdateZipFileName, weekNumber, currentYear)));
+                    Assert.That(fileName, Is.EqualTo(string.Format(posDetails.PosUpdateZipFileName, s_weekNumber, s_currentYearShort)));
 
                     string responseFileMimeName = batchDetailsResponse.files[0].mimeType;
                     Assert.That(responseFileMimeName, Is.EqualTo(posDetails.ZipFileMimeType));
@@ -58,7 +65,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                     int responseFileNameContent = 0;
                     for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
                     {
-                        string folderName = string.Format(posDetails.PosAvcsZipFileName, dvdNumber, weekNumber, currentYear);
+                        string folderName = string.Format(posDetails.PosAvcsZipFileName, dvdNumber, s_weekNumber, s_currentYearShort);
                         string responseFileNameZip = batchDetailsResponse.files[responseFileNameContent].filename;
                         Assert.That(responseFileNameZip, Is.EqualTo(folderName));
 
@@ -79,8 +86,8 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             {
                 for (int dvdNumber = 1; dvdNumber <= 2; dvdNumber++)
                 {
-                    string folderNameIso = string.Format(posDetails.PosAvcsIsoFileName, dvdNumber, weekNumber, currentYear);
-                    string FolderNameSha1 = string.Format(posDetails.PosAvcsIsoSha1FileName, dvdNumber, weekNumber, currentYear);
+                    string folderNameIso = string.Format(posDetails.PosAvcsIsoFileName, dvdNumber, s_weekNumber, s_currentYearShort);
+                    string FolderNameSha1 = string.Format(posDetails.PosAvcsIsoSha1FileName, dvdNumber, s_weekNumber, s_currentYearShort);
                     expectedFileName.Add(folderNameIso);
                     expectedFileName.Add(FolderNameSha1);
                 }
@@ -133,9 +140,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static void GetBatchDetailsResponseValidationForAio(dynamic batchDetailsResponse, string exchangeSetType)
         {
-            string expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
-            string expectedWeekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-            string expectedYear = DateTime.UtcNow.Year.ToString();
+            var expectedExpiryDate = DateTime.UtcNow.Date.AddDays(28).ToString("MM/dd/yyyy");
 
             //to check status
             string actualBatchStatus = batchDetailsResponse.status;
@@ -151,13 +156,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             Assert.That(actualProductType, Is.EqualTo("AIO"));
 
             string actualWeekNumber = batchDetailsResponse.attributes[1].value;
-            Assert.That(actualWeekNumber, Is.EqualTo(expectedWeekNumber));
+            Assert.That(actualWeekNumber, Is.EqualTo(s_weekNumber));
 
             string actualYear = batchDetailsResponse.attributes[2].value;
-            Assert.That(actualYear, Is.EqualTo(expectedYear));
+            Assert.That(actualYear, Is.EqualTo(s_currentYear));
 
             string actualYearAndWeek = batchDetailsResponse.attributes[3].value;
-            Assert.That(actualYearAndWeek, Is.EqualTo(expectedYear + " / " + expectedWeekNumber));
+            Assert.That(actualYearAndWeek, Is.EqualTo(s_currentYear + " / " + s_weekNumber));
 
             string actualExchangeSetType = batchDetailsResponse.attributes[4].value;
 
@@ -170,7 +175,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 Assert.That(actualExchangeSetType, Is.EqualTo("Update"));
                 string actualMediaType = batchDetailsResponse.attributes[5].value;
                 Assert.That(actualMediaType, Is.EqualTo("Zip"));
-
             }
         }
     }

@@ -1,6 +1,6 @@
 ﻿using System.IO.Abstractions;
-using Elastic.Apm.Api;
 using Elastic.Apm;
+using Elastic.Apm.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
@@ -109,32 +109,26 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
         {
             _logger.LogInformation(EventIds.FullAvcsExchangeSetCreationStarted.ToEventId(), "Creation of full AVCS exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            bool isFullAvcsDvdBatchCreated = false;
-            bool isFullAvcsZipBatchCreated = false;
-            bool isCatalogueFileBatchCreated = false;
-            bool isEncUpdateFileBatchCreated = false;
+            var isFullAvcsDvdBatchCreated = false;
+            var isFullAvcsZipBatchCreated = false;
+            var isCatalogueFileBatchCreated = false;
+            var isEncUpdateFileBatchCreated = false;
 
-            ISpan span = _currentTransaction?.StartSpan("FullAVCSExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
+            var span = _currentTransaction?.StartSpan("FullAVCSExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
-                List<string> productIdentifiers = await GetFleetManagerProductIdentifiers();
-
-                string essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
-
-                (string essFileDownloadPath, List<FssBatchFile> essFiles) =
-                    await DownloadEssExchangeSet(essBatchId, Batch.EssFullAvcsZipBatch);
+                var productIdentifiers = await GetFleetManagerProductIdentifiers();
+                var essBatchId = await PostProductIdentifiersToESS(productIdentifiers);
+                (var essFileDownloadPath, var essFiles) = await DownloadEssExchangeSet(essBatchId, Batch.EssFullAvcsZipBatch);
 
                 if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
                 {
                     ExtractExchangeSetZip(essFiles, essFileDownloadPath);
-
                     CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
 
-                    isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath,
-                        FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION, Batch.PosFullAvcsIsoSha1Batch);
-                    isFullAvcsZipBatchCreated = await CreatePosBatch(essFileDownloadPath,
-                        FULLAVCSZIPEXCHANGESETFILEEXTENSION, Batch.PosFullAvcsZipBatch);
+                    isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION, Batch.PosFullAvcsIsoSha1Batch);
+                    isFullAvcsZipBatchCreated = await CreatePosBatch(essFileDownloadPath, FULLAVCSZIPEXCHANGESETFILEEXTENSION, Batch.PosFullAvcsZipBatch);
 
                     if (isFullAvcsDvdBatchCreated && isFullAvcsZipBatchCreated)
                     {
@@ -142,8 +136,8 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                             "Full AVCS exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}",
                             DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-                        isCatalogueFileBatchCreated = await CreatePosBatch(_homeDirectoryPath, CATALOGUEFILEEXTENSION,
-                            Batch.PosCatalogueBatch);
+                        isCatalogueFileBatchCreated = await CreatePosBatch(_homeDirectoryPath, CATALOGUEFILEEXTENSION, Batch.PosCatalogueBatch);
+
                         if (isCatalogueFileBatchCreated)
                         {
                             _logger.LogInformation(EventIds.BatchCreationForCatalogueCompleted.ToEventId(),
@@ -151,14 +145,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
                                 DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
                         }
 
-                        string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-                        string currentYear = DateTime.UtcNow.ToString("yy");
+                        var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
+                        var encUpdateListFilePath = Path.Combine(essFileDownloadPath, string.Format(_configuration["EncUpdateListFilePath"], weekNumber.Week, weekNumber.YearShort));
+                        isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath, ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
 
-                        string encUpdateListFilePath = Path.Combine(essFileDownloadPath,
-                            string.Format(_configuration["EncUpdateListFilePath"], weekNumber, currentYear));
-
-                        isEncUpdateFileBatchCreated = await CreatePosBatch(encUpdateListFilePath,
-                            ENCUPDATELISTFILEEXTENSION, Batch.PosEncUpdateBatch);
                         if (isEncUpdateFileBatchCreated)
                         {
                             _logger.LogInformation(EventIds.BatchCreationForENCUpdateCompleted.ToEventId(),
@@ -195,7 +185,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
             _logger.LogInformation(EventIds.UpdateExchangeSetCreationStarted.ToEventId(), "Creation of update exchange set for SinceDateTime - {SinceDateTime} started | {DateTime} | _X-Correlation-ID : {CorrelationId}", sinceDateTime, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             bool isUpdateZipBatchCreated = false;
-            
+
             ISpan span = _currentTransaction?.StartSpan("UpdateExchangeSet", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
@@ -358,24 +348,25 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private List<FssBatchFile> RenameFiles(string downloadPath, List<FssBatchFile> files, Batch batchType)
         {
-            foreach (FssBatchFile? file in files)
+            foreach (var file in files)
             {
-                IFileInfo fileInfo = _fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
-                string weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow).ToString();
-                string currentYear = DateTime.UtcNow.ToString("yy");
+                var fileInfo = _fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
+                var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
 
                 if (batchType == Batch.EssFullAvcsZipBatch)
                 {
-                    int dvdNumber = int.Parse(file.FileName.Substring(1, 2));
-                    file.FileName = string.Format(_configuration["PosAvcsZipFileName"], dvdNumber, weekNumber, currentYear);
+                    var dvdNumber = int.Parse(file.FileName.Substring(1, 2));
+                    file.FileName = string.Format(_configuration["PosAvcsZipFileName"], dvdNumber, weekNumber.Week, weekNumber.YearShort);
                     file.VolumeIdentifier = string.Format(_configuration["PosDVDVolumeIdentifier"], dvdNumber);
                 }
                 else
                 {
-                    file.FileName = string.Format(_configuration["PosUpdateZipFileName"], weekNumber, currentYear);
+                    file.FileName = string.Format(_configuration["PosUpdateZipFileName"], weekNumber.Week, weekNumber.YearShort);
                 }
+
                 fileInfo.MoveTo(Path.Combine(downloadPath, file.FileName));
             }
+
             return files;
         }
 
@@ -405,15 +396,14 @@ namespace UKHO.PeriodicOutputService.Fulfilment.Services
 
         private async Task<bool> CreatePosBatch(string downloadPath, string fileExtension, Batch batchType)
         {
-            bool isCommitted = false;
-
-            ISpan span = _currentTransaction?.StartSpan("CreatePOSBatch", ApiConstants.TypeApp,ApiConstants.SubTypeInternal);
+            var isCommitted = false;
+            var span = _currentTransaction?.StartSpan("CreatePOSBatch", ApiConstants.TypeApp, ApiConstants.SubTypeInternal);
 
             try
             {
-                string batchId = await _fssService.CreateBatch(batchType);
-                IEnumerable<string> filePaths =
-                    _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
+                var weekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
+                var batchId = await _fssService.CreateBatch(batchType, weekNumber);
+                var filePaths = _fileSystemHelper.GetFiles(downloadPath, fileExtension, SearchOption.TopDirectoryOnly);
                 UploadBatchFiles(filePaths, batchId, batchType);
                 isCommitted = await _fssService.CommitBatch(batchId, filePaths, batchType);
             }
