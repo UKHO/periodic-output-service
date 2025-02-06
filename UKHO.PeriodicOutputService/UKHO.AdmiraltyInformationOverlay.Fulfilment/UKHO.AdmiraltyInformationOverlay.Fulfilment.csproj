@@ -30,6 +30,7 @@
     <PackageReference Include="Serilog" Version="4.2.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    <PackageReference Include="System.IO.Abstractions" Version="21.3.1" />
     <PackageReference Include="UKHO.Logging.EventHubLogProvider" Version="1.24163.8" />
   </ItemGroup>
 
