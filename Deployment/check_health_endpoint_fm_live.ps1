@@ -1,7 +1,7 @@
 Param(
 	[Parameter(mandatory=$true)][string]$healthEndPointUrl,
     [Parameter(mandatory=$true)][string]$waitTimeInMinute,
-    [Parameter(mandatory=$true)][string]$ocpapimsubscriptionkey
+    [Parameter(mandatory=$true)][string]$ocpapimsubscriptionkey = $null
 )
 
 $sleepTimeInSecond = 15
@@ -16,7 +16,9 @@ do
     Write-Host "Polling url: $healthEndPointUrl ..."
     try{
         $HttpRequest  = [System.Net.WebRequest]::Create("$healthEndPointUrl")
-        $HttpRequest.Headers.Add('Ocp-Apim-Subscription-Key', "$ocpapimsubscriptionkey")
+        if ($null -ne $ocpapimsubscriptionkey) {
+            $HttpRequest.Headers.Add('Ocp-Apim-Subscription-Key', "$ocpapimsubscriptionkey")
+        }
         $HttpResponse = $HttpRequest.GetResponse() 
         $HttpStatus   = $HttpResponse.StatusCode
         Write-Host "Status code of web is $HttpStatus ..."

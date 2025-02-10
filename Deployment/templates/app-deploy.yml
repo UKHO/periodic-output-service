@@ -72,7 +72,7 @@ jobs:
 
 
 - job: CheckFMNonLive
-  displayName: "Check Fleet Manager Health"
+  displayName: "Check Fleet Manager Health - ${{parameters.Environment}}"
   dependsOn: DeployApp
   condition: ne('${{ parameters.Environment }}', 'Live')
   steps:
@@ -84,7 +84,7 @@ jobs:
         arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
 - job: CheckFMLive
-  displayName: "Check Fleet Manager Health"
+  displayName: "Check Fleet Manager Health - ${{parameters.Environment}}"
   dependsOn: DeployApp
   condition: eq('${{ parameters.Environment }}', 'Live')
   steps:
