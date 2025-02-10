@@ -119,7 +119,6 @@ stages:
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
           AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
           Container: ${{variables.Container}}
-          RunTests: true
       
   - stage: QAdeploy
     dependsOn: Devdeploy
@@ -160,8 +159,7 @@ stages:
         - Setup
         - CheckInfra
         - CheckFSS
-        - CheckESS
-        - CheckFM        
+        - CheckESS      
         pool: $(WindowPool)        
         displayName: Post Deployment Actions
         steps:

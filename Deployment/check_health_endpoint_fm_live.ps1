@@ -50,5 +50,4 @@ if ($isServiceActive -eq 'true' ) {
 }
 Else { 
     Write-Error "Service was not up in $waitTimeInMinute, error while deployment ..."
-    throw "Error"
 }

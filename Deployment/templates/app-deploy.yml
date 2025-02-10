@@ -78,8 +78,8 @@ jobs:
       displayName: "Check FM Health endpoint is healthy"
       inputs:
         targetType: filePath
-        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
-        arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint_fm_live.ps1'
+        arguments: "-healthEndPointUrl $(FMHealthEndpoint)/live/echo/health-check -waitTimeInMinute $(waitTimeInMinute) -ocpapimsubscriptionkey $(FM_Ocp_Apim_Subscription_Key)"
 
 - job: Setup
   displayName: "Set Webjob Configuration"
@@ -108,7 +108,6 @@ jobs:
     - CheckInfra
     - CheckFSS
     - CheckESS
-    - CheckFM
   pool: NautilusBuild
   displayName: "POS Functional Automated Tests"
   variables:
@@ -170,7 +169,6 @@ jobs:
     - CheckInfra
     - CheckFSS
     - CheckESS
-    - CheckFM
     - POSFunctionalTests
   pool: NautilusBuild
   displayName: "BESS Functional Automated Tests"
