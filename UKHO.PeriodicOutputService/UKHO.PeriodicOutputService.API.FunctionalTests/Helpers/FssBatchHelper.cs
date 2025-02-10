@@ -15,6 +15,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         static FssBatchHelper()
         {
+            s_fssApiClient = new FssApiClient();
             (s_weekNumber, _, s_currentYearShort) = CommonHelper.GetCurrentWeekAndYear();
         }
 
