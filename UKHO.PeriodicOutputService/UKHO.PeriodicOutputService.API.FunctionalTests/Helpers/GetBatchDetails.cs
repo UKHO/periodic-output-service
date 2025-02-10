@@ -8,13 +8,15 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
         private static readonly HttpClient s_httpClient = new();
         private static readonly string s_weekNumber;
-        private static readonly string s_currentYear;
         private static readonly string s_currentYearShort;
+        private static readonly string s_weekNumberAio;
+        private static readonly string s_currentYearAio;
         private static readonly List<string> expectedFileName = [];
 
         static GetBatchDetails()
         {
-            (s_weekNumber, s_currentYear, s_currentYearShort) = CommonHelper.GetCurrentWeekAndYear();
+            (s_weekNumber, _, s_currentYearShort) = CommonHelper.GetCurrentWeekAndYear();
+            (s_weekNumberAio, s_currentYearAio, _) = CommonHelper.GetCurrentWeekAndYearAio();
         }
 
         public static async Task<HttpResponseMessage> GetBatchDetailsEndpoint(string baseUrl, string batchId)
@@ -156,13 +158,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             Assert.That(actualProductType, Is.EqualTo("AIO"));
 
             string actualWeekNumber = batchDetailsResponse.attributes[1].value;
-            Assert.That(actualWeekNumber, Is.EqualTo(s_weekNumber));
+            Assert.That(actualWeekNumber, Is.EqualTo(s_weekNumberAio));
 
             string actualYear = batchDetailsResponse.attributes[2].value;
-            Assert.That(actualYear, Is.EqualTo(s_currentYear));
+            Assert.That(actualYear, Is.EqualTo(s_currentYearAio));
 
             string actualYearAndWeek = batchDetailsResponse.attributes[3].value;
-            Assert.That(actualYearAndWeek, Is.EqualTo(s_currentYear + " / " + s_weekNumber));
+            Assert.That(actualYearAndWeek, Is.EqualTo(s_currentYearAio + " / " + s_weekNumberAio));
 
             string actualExchangeSetType = batchDetailsResponse.attributes[4].value;
 

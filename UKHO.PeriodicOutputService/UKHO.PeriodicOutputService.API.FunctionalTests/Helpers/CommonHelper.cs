@@ -85,9 +85,12 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             }
         }
 
-        public static (string CurrentWeek, string CurrentYear, string CurrentYearShort) GetCurrentWeekAndYear()
+        public static (string CurrentWeek, string CurrentYear, string CurrentYearShort) GetCurrentWeekAndYear() => GetCurrentWeekAndYearCommon(DateTime.UtcNow);
+
+        public static (string CurrentWeek, string CurrentYear, string CurrentYearShort) GetCurrentWeekAndYearAio() => GetCurrentWeekAndYearCommon(DateTime.UtcNow.AddDays(7));
+
+        private static (string CurrentWeek, string CurrentYear, string CurrentYearShort) GetCurrentWeekAndYearCommon(DateTime now)
         {
-            var now = DateTime.UtcNow;
             var currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(now, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
             var currentYear = now.Year;
 
