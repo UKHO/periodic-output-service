@@ -10,13 +10,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static readonly FssApiClient s_fssApiClient;
         private static readonly POSFileDetails s_posDetails = new TestConfiguration().posFileDetails;
         private static readonly TestConfiguration s_config = new();
-        private static readonly string s_weekNumber;
-        private static readonly string s_currentYearShort;
+        private static readonly string s_weekNumberAio;
+        private static readonly string s_currentYearShortAio;
 
         static FssBatchHelper()
         {
             s_fssApiClient = new FssApiClient();
-            (s_weekNumber, _, s_currentYearShort) = CommonHelper.GetCurrentWeekAndYear();
+            (s_weekNumberAio, _, s_currentYearShortAio) = CommonHelper.GetCurrentWeekAndYearAio();
         }
 
         public static async Task<string> DownloadFileForLargeMedia(string downloadFileUrl, string jwtToken)
@@ -76,7 +76,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<string> ExtractDownloadedAioFolder(string downloadFileUrl, string jwtToken)
         {
-            var fileName = $"AIO_CD_WK{s_weekNumber}_{s_currentYearShort}.zip";
+            var fileName = $"AIO_CD_WK{s_weekNumberAio}_{s_currentYearShortAio}.zip";
             var posFolderPath = Path.Combine(Path.GetTempPath(), s_posDetails.TempFolderName);
 
             if (!Directory.Exists(posFolderPath))
