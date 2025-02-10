@@ -71,7 +71,7 @@ jobs:
         arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
 
 
-- job: CheckFM
+- job: "CheckFM - non Live"
   displayName: "Check Fleet Manager Health"
   dependsOn: DeployApp
   condition: ne('${{ parameters.Environment }}', 'Live')
@@ -83,7 +83,7 @@ jobs:
         filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
         arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
 
-- job: CheckFM
+- job: CheckFM - Live
   displayName: "Check Fleet Manager Health"
   dependsOn: DeployApp
   condition: eq('${{ parameters.Environment }}', 'Live')
