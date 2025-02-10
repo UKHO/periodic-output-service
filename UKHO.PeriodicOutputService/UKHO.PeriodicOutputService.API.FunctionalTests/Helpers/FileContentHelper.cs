@@ -10,10 +10,13 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         private static readonly POSFileDetails s_posDetails = new TestConfiguration().posFileDetails;
         private static readonly string s_weekNumber;
         private static readonly string s_currentYearShort;
+        private static readonly string s_weekNumberAio;
+        private static readonly string s_currentYearShortAio;
 
         static FileContentHelper()
         {
             (s_weekNumber, _, s_currentYearShort) = CommonHelper.GetCurrentWeekAndYear();
+            (s_weekNumberAio, _, s_currentYearShortAio) = CommonHelper.GetCurrentWeekAndYearAio();
         }
 
         public static async Task<List<string>> CreateExchangeSetFileForLargeMedia(string batchId, string fssJwtToken)
@@ -128,7 +131,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<string> DownloadAndExtractAioZip(string fssJwtToken, string batchId)
         {
-            var fileName = $"AIO_CD_WK{s_weekNumber}_{s_currentYearShort}";
+            var fileName = $"AIO_CD_WK{s_weekNumberAio}_{s_currentYearShortAio}";
             var downloadFileUrl = $"{s_config.FssConfig.BaseUrl}/batch/{batchId}/files/{fileName}.zip";
 
             var extractDownloadedFolder = await FssBatchHelper.ExtractDownloadedAioFolder(downloadFileUrl.ToString(), fssJwtToken);
