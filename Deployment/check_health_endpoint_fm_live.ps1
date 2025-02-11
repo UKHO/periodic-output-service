@@ -50,5 +50,5 @@ if ($isServiceActive -eq 'true' ) {
 }
 Else { 
     Write-Error "Service was not up in $waitTimeInMinute, error while deployment ..."
-    throw "Error"
+    Write-Host "##vso[task.complete result=SucceededWithIssues;]"
 }

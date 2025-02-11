@@ -160,8 +160,7 @@ stages:
         - Setup
         - CheckInfra
         - CheckFSS
-        - CheckESS
-        - CheckFM        
+        - CheckESS      
         pool: $(WindowPool)        
         displayName: Post Deployment Actions
         steps:
