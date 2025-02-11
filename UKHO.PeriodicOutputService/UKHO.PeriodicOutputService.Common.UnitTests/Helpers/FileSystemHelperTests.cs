@@ -15,9 +15,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         private IZipHelper _fakeZipHelper;
         private IFileUtility _fakeFileUtility;
         private IFileInfo _fakeFileInfo;
-        private const string FilePath = @"d:\Test";
-        private const string FileName = "M01X01.zip";
-        private const string VolumeIdentifier = "M01X01";
+
+        private const string filePath = @"d:\Test";
+        private const string fileName = "M01X01.zip";
+        private const string volumeIdentifier = "M01X01";
+
+        private string content = "test";
 
         [SetUp]
         public void Setup()
@@ -26,59 +29,68 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             _fakeZipHelper = A.Fake<IZipHelper>();
             _fakeFileUtility = A.Fake<IFileUtility>();
             _fakeFileInfo = A.Fake<IFileInfo>();
+
             _fileSystemHelper = new FileSystemHelper(_fakefileSystem, _fakeZipHelper, _fakeFileUtility);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new FileSystemHelper(null, _fakeZipHelper, _fakeFileUtility));
+            var exception = Assert.Throws<ArgumentNullException>(
+               () => new FileSystemHelper(null, _fakeZipHelper, _fakeFileUtility));
             Assert.That(exception.ParamName, Is.EqualTo("fileSystem"));
 
-            exception = Assert.Throws<ArgumentNullException>(() => new FileSystemHelper(_fakefileSystem, null, _fakeFileUtility));
+            exception = Assert.Throws<ArgumentNullException>(
+              () => new FileSystemHelper(_fakefileSystem, null, _fakeFileUtility));
             Assert.That(exception.ParamName, Is.EqualTo("zipHelper"));
 
-            exception = Assert.Throws<ArgumentNullException>(() => new FileSystemHelper(_fakefileSystem, _fakeZipHelper, null));
+            exception = Assert.Throws<ArgumentNullException>(
+             () => new FileSystemHelper(_fakefileSystem, _fakeZipHelper, null));
             Assert.That(exception.ParamName, Is.EqualTo("fileUtility"));
         }
 
         [Test]
         public void Does_CreateDirectory_DeleteAndCreate_Folder_When_Directory_Exists()
         {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(FilePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
 
-            _fileSystemHelper.CreateDirectory(FilePath);
+            _fileSystemHelper.CreateDirectory(filePath);
 
-            A.CallTo(() => _fakefileSystem.Directory.Delete(FilePath, true)).MustHaveHappened();
-            A.CallTo(() => _fakefileSystem.Directory.CreateDirectory(FilePath)).MustHaveHappened();
+            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath, true))
+                            .MustHaveHappened();
+            A.CallTo(() => _fakefileSystem.Directory.CreateDirectory(filePath))
+                            .MustHaveHappened();
         }
 
         [Test]
         public void Does_CreateFolder_Create_Folder_When_Directory_Doesnot_Exists()
         {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(FilePath)).Returns(false);
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(false);
 
-            _fileSystemHelper.CreateDirectory(FilePath);
+            _fileSystemHelper.CreateDirectory(filePath);
 
-            A.CallTo(() => _fakefileSystem.Directory.CreateDirectory(FilePath)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakefileSystem.Directory.CreateDirectory(filePath))
+                            .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void Does_ExtractZipFile_Completed_When_DirectoryExists()
         {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(FilePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
 
-            _fileSystemHelper.ExtractZipFile(FilePath, FilePath, true);
+            _fileSystemHelper.ExtractZipFile(filePath, filePath, true);
 
-            A.CallTo(() => _fakefileSystem.Directory.Delete(FilePath, true)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath, true))
+                            .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void Does_GetFileMD5_Returns_FileDetails_With_Hash()
         {
-            var fileNames = new List<string> { FileName };
-            var fileInfo = _fakefileSystem.FileInfo.New(FileName);
-            A.CallTo(() => fileInfo.Name).Returns(FileName);
+            IEnumerable<string> fileNames = new List<string> { fileName };
+
+            var fileInfo = _fakefileSystem.FileInfo.New(fileName);
+            A.CallTo(() => fileInfo.Name).Returns(fileName);
             A.CallTo(() => fileInfo.OpenRead()).Returns(new MockFileSystemStream(new MemoryStream(new byte[10]), "Test", default));
             A.CallTo(() => _fakefileSystem.FileInfo.New(A<string>.Ignored)).Returns(fileInfo);
 
@@ -87,28 +99,34 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             Assert.Multiple(() =>
             {
                 Assert.That(result, Has.Count.EqualTo(1));
-                Assert.That(result.FirstOrDefault().FileName, Is.EqualTo(FileName));
+                Assert.That(result.FirstOrDefault().FileName, Is.EqualTo(fileName));
                 Assert.That(result.FirstOrDefault().Hash, Is.Not.Null);
             });
+
         }
 
         [Test]
         public void Does_GetFiles_Call_EnumerateFiles_To_Get_Directory_Files()
         {
-            _fileSystemHelper.GetFiles(FilePath, "*.zip", SearchOption.TopDirectoryOnly);
+            _fileSystemHelper.GetFiles(filePath, "*.zip", SearchOption.TopDirectoryOnly);
 
-            A.CallTo(() => _fakefileSystem.Directory.EnumerateFiles(FilePath, "*.*", SearchOption.TopDirectoryOnly)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakefileSystem.Directory.EnumerateFiles(filePath, "*.*", SearchOption.TopDirectoryOnly)).MustHaveHappenedOnceExactly();
         }
+
 
         [Test]
         public void Does_CreateIsoAndSha1_Executes_Successfully()
         {
-            A.CallTo(() => _fakefileSystem.Directory.EnumerateFiles(FilePath, "*.*", SearchOption.AllDirectories)).Returns(new List<string> { "Test1", "Test2" });
+            A.CallTo(() => _fakefileSystem.Directory.EnumerateFiles(filePath, "*.*", SearchOption.AllDirectories)).Returns(new List<string> { "Test1", "Test2" });
 
-            _fileSystemHelper.CreateIsoAndSha1(FilePath, FilePath, VolumeIdentifier);
+            _fileSystemHelper.CreateIsoAndSha1(filePath, filePath, volumeIdentifier);
 
-            A.CallTo(() => _fakeFileUtility.CreateISOImage(A<IEnumerable<string>>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
-            A.CallTo(() => _fakeFileUtility.CreateSha1File(FilePath)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeFileUtility.CreateISOImage(A<IEnumerable<string>>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                           .MustHaveHappenedOnceExactly();
+
+
+            A.CallTo(() => _fakeFileUtility.CreateSha1File(filePath))
+                           .MustHaveHappenedOnceExactly();
         }
 
         [Test]
@@ -116,34 +134,36 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             var byteContent = new byte[100];
 
-            _fileSystemHelper.CreateXmlFile(byteContent, FilePath);
+            _fileSystemHelper.CreateXmlFile(byteContent, filePath);
 
-            A.CallTo(() => _fakeFileUtility.CreateXmlFile(A<byte[]>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakeFileUtility.CreateXmlFile(A<byte[]>.Ignored, A<string>.Ignored))
+                           .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void WhenValidPermitXmlDataPassed_ThenCreateXmlFromObject_Executes_Successfully()
         {
-            var pksXml = new PksXml
+            PksXml pKSXml = new()
             {
                 Date = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture),
                 Cellkeys = new()
                 {
-                    ProductKeyServiceResponses =
-                    [
+                    ProductKeyServiceResponses = new List<ProductKeyServiceResponse>()
+                    {
                         new()
                         {
                             Edition = "10",
                             ProductName = "test",
                             Key = "12345"
                         }
-                    ],
+                    },
                 }
             };
 
-            A.CallTo(() => _fakefileSystem.File.OpenWrite(A<string>.Ignored)).Returns(new MockFileSystemStream(new MemoryStream(), "C:\\Test.xml", false));
+            A.CallTo(() => _fakefileSystem.File.OpenWrite(A<string>.Ignored))
+                           .Returns(new MockFileSystemStream(new MemoryStream(), "C:\\Test.xml", false));
 
-            var result = _fileSystemHelper.CreateXmlFromObject(pksXml, "C:\\Test", "test.txt");
+            var result = _fileSystemHelper.CreateXmlFromObject(pKSXml, "C:\\Test", "test.txt");
 
             Assert.That(result, Is.EqualTo(Task.CompletedTask));
         }
@@ -153,14 +173,19 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             _fileSystemHelper.CreateTextFile("C:\\Test", "test.txt", "test");
 
-            A.CallTo(() => _fakefileSystem.File.AppendAllText(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakefileSystem.File.AppendAllText(A<string>.Ignored, A<string>.Ignored))
+                           .MustHaveHappenedOnceExactly();
         }
 
         [Test]
         public void Does_GetFileInBytes_Returns_Bytes_Passing_Stream()
         {
             Stream stream = new MemoryStream(new byte[10]);
-            A.CallTo(() => _fakefileSystem.FileInfo.New(A<string>.Ignored)).Returns(_fakeFileInfo);
+
+
+            A.CallTo(() => _fakefileSystem.FileInfo.New(A<string>.Ignored))
+                            .Returns(_fakeFileInfo);
+
             A.CallTo(() => _fakeFileInfo.Open(A<FileMode>.Ignored, A<FileAccess>.Ignored, A<FileShare>.Ignored)).Returns(new MockFileSystemStream(stream, "Test", default));
 
             var result = _fileSystemHelper.GetFileInBytes(GetUploadFileBlockRequestModel());
@@ -171,10 +196,10 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         [Test]
         public void Does_GetFileInfo_Executes_Successfully()
         {
-            A.CallTo(() => _fakefileSystem.FileInfo.New(FilePath)).Returns(_fakeFileInfo);
-            A.CallTo(() => _fakeFileInfo.Name).Returns(FileName);
+            A.CallTo(() => _fakefileSystem.FileInfo.New(filePath)).Returns(_fakeFileInfo);
+            A.CallTo(() => _fakeFileInfo.Name).Returns(fileName);
 
-            var result = _fileSystemHelper.GetFileInfo(FilePath);
+            var result = _fileSystemHelper.GetFileInfo(filePath);
 
             Assert.Multiple(() =>
             {
@@ -185,63 +210,76 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
         private static UploadFileBlockRequestModel GetUploadFileBlockRequestModel() => new()
         {
-            FileName = FileName,
-            FullFileName = Path.Combine(FilePath, FileName),
+            FileName = fileName,
+            FullFileName = Path.Combine(filePath, fileName),
             Length = 100000
         };
 
         [Test]
         public void Does_ReadFileText_Executes_Successfully()
         {
-            A.CallTo(() => _fakefileSystem.File.Exists(FilePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.File.Exists(filePath)).Returns(true);
 
-            _fileSystemHelper.ReadFileText(FilePath);
+            _fileSystemHelper.ReadFileText(filePath);
 
-            A.CallTo(() => _fakefileSystem.File.ReadAllText(FilePath)).MustHaveHappened();
+            A.CallTo(() => _fakefileSystem.File.ReadAllText(filePath))
+                .MustHaveHappened();
+
         }
 
         [Test]
         public void Does_CreateFileContent_Executes_Successfully_WhenContentIsPresent()
         {
-            const string content = "test";
-            A.CallTo(() => _fakefileSystem.File.Exists(FilePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.File.Exists(filePath)).Returns(true);
 
-            _fileSystemHelper.CreateFileContent(FilePath, content);
+            _fileSystemHelper.CreateFileContent(filePath, content);
 
-            A.CallTo(() => _fakefileSystem.File.WriteAllText(FilePath, content)).MustHaveHappened();
+            A.CallTo(() => _fakefileSystem.File.WriteAllText(filePath, content))
+                .MustHaveHappened();
         }
 
         [Test]
         public void Does_CreateFileContent_Execution_Fails_WhenContentIsNotPresent()
         {
-            const string content = "";
-            A.CallTo(() => _fakefileSystem.Directory.Exists(FilePath)).Returns(true);
+            content = "";
 
-            _fileSystemHelper.CreateFileContent(FilePath, content);
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
 
-            A.CallTo(() => _fakefileSystem.File.WriteAllText(FilePath, content)).MustNotHaveHappened();
+            _fileSystemHelper.CreateFileContent(filePath, content);
+
+            A.CallTo(() => _fakefileSystem.File.WriteAllText(filePath, content))
+                .MustNotHaveHappened();
         }
 
         [Test]
         public void Does_DeleteFile_Executes_Successfully()
         {
-            A.CallTo(() => _fakefileSystem.File.Exists(FilePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.File.Exists(filePath)).Returns(true);
 
-            _fileSystemHelper.DeleteFile(FilePath);
+            _fileSystemHelper.DeleteFile(filePath);
 
-            A.CallTo(() => _fakefileSystem.File.Delete(FilePath)).MustHaveHappened();
+            A.CallTo(() => _fakefileSystem.File.Delete(filePath))
+                .MustHaveHappened();
+
         }
 
         [Test]
         public void Does_DeleteFolder_Executes_Successfully()
         {
-            A.CallTo(() => _fakefileSystem.Directory.Exists(FilePath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.Directory.Exists(filePath)).Returns(true);
 
-            _fileSystemHelper.DeleteFolder(FilePath);
+            _fileSystemHelper.DeleteFolder(filePath);
 
-            A.CallTo(() => _fakefileSystem.Directory.Delete(FilePath)).MustHaveHappened();
+            A.CallTo(() => _fakefileSystem.Directory.Delete(filePath))
+                .MustHaveHappened();
+
         }
     }
 
-    public class MockFileSystemStream(Stream stream, string path, bool isAsync) : FileSystemStream(stream, path, isAsync) { }
+    public class MockFileSystemStream : FileSystemStream
+    {
+        public MockFileSystemStream(Stream stream, string path, bool isAsync) : base(stream, path, isAsync)
+        {
+        }
+    }
 }
