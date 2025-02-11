@@ -6,7 +6,7 @@ using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Pks;
 using UKHO.PeriodicOutputService.Common.Utilities;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
+namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 {
     public class FileSystemHelperTests
     {
@@ -89,12 +89,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         {
             IEnumerable<string> fileNames = new List<string> { fileName };
 
-            IFileInfo fileInfo = _fakefileSystem.FileInfo.New(fileName);
+            var fileInfo = _fakefileSystem.FileInfo.New(fileName);
             A.CallTo(() => fileInfo.Name).Returns(fileName);
             A.CallTo(() => fileInfo.OpenRead()).Returns(new MockFileSystemStream(new MemoryStream(new byte[10]), "Test", default));
             A.CallTo(() => _fakefileSystem.FileInfo.New(A<string>.Ignored)).Returns(fileInfo);
 
-            List<FileDetail>? result = _fileSystemHelper.GetFileMD5(fileNames);
+            var result = _fileSystemHelper.GetFileMD5(fileNames);
 
             Assert.Multiple(() =>
             {
@@ -132,7 +132,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void Does_CreateXmlFile_Executes_Successfully()
         {
-            byte[] byteContent = new byte[100];
+            var byteContent = new byte[100];
 
             _fileSystemHelper.CreateXmlFile(byteContent, filePath);
 
@@ -188,7 +188,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             A.CallTo(() => _fakeFileInfo.Open(A<FileMode>.Ignored, A<FileAccess>.Ignored, A<FileShare>.Ignored)).Returns(new MockFileSystemStream(stream, "Test", default));
 
-            byte[] result = _fileSystemHelper.GetFileInBytes(GetUploadFileBlockRequestModel());
+            var result = _fileSystemHelper.GetFileInBytes(GetUploadFileBlockRequestModel());
 
             Assert.That(result, Has.Length.EqualTo(100000));
         }
@@ -199,7 +199,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
             A.CallTo(() => _fakefileSystem.FileInfo.New(filePath)).Returns(_fakeFileInfo);
             A.CallTo(() => _fakeFileInfo.Name).Returns(fileName);
 
-            IFileInfo result = _fileSystemHelper.GetFileInfo(filePath);
+            var result = _fileSystemHelper.GetFileInfo(filePath);
 
             Assert.Multiple(() =>
             {

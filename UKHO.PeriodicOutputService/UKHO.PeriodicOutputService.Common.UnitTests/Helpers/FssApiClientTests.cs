@@ -2,14 +2,14 @@
 using System.Text;
 using FakeItEasy;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler;
+using UKHO.PeriodicOutputService.Common.UnitTests.Handler;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
+namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 {
     [TestFixture]
     public class FssApiClientTests
     {
-        private IFssApiClient? _fakeFssApiClient;
+        private FssApiClient? _fakeFssApiClient;
         private IHttpClientFactory _fakeHttpClientFactory;
         private readonly string _authToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVh";
 
@@ -19,7 +19,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesGetBatchStatusAsync_Returns_OK()
         {
-            HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                _authToken, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
@@ -31,7 +31,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = _fakeFssApiClient.GetBatchStatusAsync("http://test.com", _authToken);
+            var result = _fakeFssApiClient.GetBatchStatusAsync("http://test.com", _authToken);
 
             Assert.Multiple(() =>
             {
@@ -44,9 +44,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesCreateBatchAsync_Returns_OK()
         {
-            string content = "";
+            var content = "";
 
-            HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                content, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
@@ -58,7 +58,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = _fakeFssApiClient.CreateBatchAsync("http://test.com", content, _authToken);
+            var result = _fakeFssApiClient.CreateBatchAsync("http://test.com", content, _authToken);
 
             Assert.Multiple(() =>
             {
@@ -70,9 +70,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesAddFileInBatchAsync_Returns_OK()
         {
-            string content = "";
+            var content = "";
 
-            HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                content, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
@@ -84,7 +84,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = _fakeFssApiClient.AddFileToBatchAsync("http://test.com", content, _authToken, 1231231, "application/octet-stream");
+            var result = _fakeFssApiClient.AddFileToBatchAsync("http://test.com", content, _authToken, 1231231, "application/octet-stream");
 
             Assert.Multiple(() =>
             {
@@ -96,9 +96,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesUploadFileBlockAsync_Returns_OK()
         {
-            string content = "";
+            var content = "";
 
-            HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                content, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
@@ -110,7 +110,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = _fakeFssApiClient.UploadFileBlockAsync("http://test.com", Encoding.UTF8.GetBytes("whatever"), Encoding.UTF8.GetBytes("whatever"), _authToken, "application/octet-stream");
+            var result = _fakeFssApiClient.UploadFileBlockAsync("http://test.com", Encoding.UTF8.GetBytes("whatever"), Encoding.UTF8.GetBytes("whatever"), _authToken, "application/octet-stream");
 
             Assert.Multiple(() =>
             {
@@ -122,9 +122,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesWriteBlockInFileAsync_Returns_OK()
         {
-            string content = "";
+            var content = "";
 
-            HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                content, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
@@ -136,7 +136,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = _fakeFssApiClient.WriteBlockInFileAsync("http://test.com", content, _authToken, "application/octet-stream");
+            var result = _fakeFssApiClient.WriteBlockInFileAsync("http://test.com", content, _authToken, "application/octet-stream");
 
             Assert.Multiple(() =>
             {
@@ -148,9 +148,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesCommitBatchAsync_Returns_OK()
         {
-            string content = "";
+            var content = "";
 
-            HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                content, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
@@ -162,7 +162,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = _fakeFssApiClient.CommitBatchAsync("http://test.com", content, _authToken);
+            var result = _fakeFssApiClient.CommitBatchAsync("http://test.com", content, _authToken);
 
             Assert.Multiple(() =>
             {
@@ -174,9 +174,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesDownloadFile_Returns_OK()
         {
-            string content = "";
+            var content = "";
 
-            HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                content, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
@@ -188,7 +188,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = _fakeFssApiClient.DownloadFile("http://test.com", _authToken, "bytes=1-1024");
+            var result = _fakeFssApiClient.DownloadFile("http://test.com", _authToken, "bytes=1-1024");
 
             Assert.Multiple(() =>
             {
@@ -200,9 +200,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesDownloadFile_With_Client_That_Allow_Redirect_As_False_Returns_OK()
         {
-            string content = "";
+            var content = "";
 
-            HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                content, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
@@ -214,7 +214,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = _fakeFssApiClient.DownloadFile("http://test.com", _authToken);
+            var result = _fakeFssApiClient.DownloadFile("http://test.com", _authToken);
 
             Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
@@ -222,9 +222,9 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesGetBatchDetailsAsync_Returns_OK()
         {
-            string content = "";
+            var content = "";
 
-            HttpMessageHandler messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
+            var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                content, HttpStatusCode.OK);
 
             var httpClient = new HttpClient(messageHandler)
@@ -236,7 +236,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
 
             _fakeFssApiClient = new FssApiClient(_fakeHttpClientFactory);
 
-            Task<HttpResponseMessage> result = _fakeFssApiClient.GetBatchDetailsAsync("http://test.com", _authToken);
+            var result = _fakeFssApiClient.GetBatchDetailsAsync("http://test.com", _authToken);
 
             Assert.Multiple(() =>
             {

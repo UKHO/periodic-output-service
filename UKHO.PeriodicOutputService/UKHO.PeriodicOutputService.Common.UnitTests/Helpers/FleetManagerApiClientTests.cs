@@ -2,9 +2,9 @@
 using FakeItEasy;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
-using UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler;
+using UKHO.PeriodicOutputService.Common.UnitTests.Handler;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
+namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 {
     [TestFixture]
     public class FleetManagerClientTests
@@ -21,7 +21,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
         [Test]
         public void DoesGetJwtAuthUnpToken_Returns_OK()
         {
-            string AuthToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVh";
+            var AuthToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IjJaUXBKM1VwYmpBWVh";
 
             var messageHandler = FakeHttpMessageHandler.GetHttpMessageHandler(
                                AuthToken, HttpStatusCode.OK);
