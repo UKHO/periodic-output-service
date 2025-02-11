@@ -6,6 +6,7 @@ using UKHO.AdmiraltyInformationOverlay.Fulfilment.Services;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
@@ -16,7 +17,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
     [TestFixture]
     public class FulfilmentDataServiceTests
     {
-        private IFulfilmentDataService fulfilmentDataService;
+        private FulfilmentDataService _fulfilmentDataService;
         private IEssService _fakeEssService;
         private IFssService _fakeFssService;
         private ILogger<FulfilmentDataService> _fakeLogger;
@@ -38,8 +39,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 
             _fakeconfiguration["IsFTRunning"] = "false";
             _fakeconfiguration["AioCells"] = "GB800001";
+            _fakeconfiguration["WeeksToIncrement"] = "1";
 
-            fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
+            _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
         }
 
         [Test]
@@ -88,7 +90,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.GetFiles(A<string>.Ignored, A<string>.Ignored, A<SearchOption>.Ignored))
                            .Returns([@"D:\Test"]);
 
-            A.CallTo(() => _fakeFssService.CreateBatch(A<Batch>.Ignored))
+            A.CallTo(() => _fakeFssService.CreateBatch(A<Batch>.Ignored, A<FormattedWeekNumber>.Ignored))
                            .Returns(Guid.NewGuid().ToString());
 
             A.CallTo(() => _fakeFileInfo.Name).Returns("AIO.zip");
@@ -106,7 +108,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored, A<string>.Ignored))
               .Returns(true);
 
-            bool result = await fulfilmentDataService.CreateAioExchangeSetsAsync();
+            var result = await _fulfilmentDataService.CreateAioExchangeSetsAsync();
 
             Assert.That(result, Is.True);
 
@@ -224,7 +226,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(FssBatchStatus.CommitInProgress);
 
             Assert.ThrowsAsync<FulfilmentException>(
-                 () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(_fakeLogger).Where(call =>
                call.Method.Name == "Log"
@@ -248,7 +250,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
             Assert.ThrowsAsync<ArgumentNullException>(
-                () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
@@ -287,9 +289,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<ArgumentNullException>();
 
             Assert.ThrowsAsync<ArgumentNullException>(
-                () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
-            A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored,  A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
@@ -320,7 +322,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakeconfiguration["AioCells"] = string.Empty;
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(_fakeLogger).Where(call =>
                call.Method.Name == "Log"
@@ -348,7 +350,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetBatchResponseModelWithFileNameError());
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -373,7 +375,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetBatchResponseModelWithFileNameV01X01());
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -403,7 +405,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeAzureTableStorageHelper.SaveProductVersionDetails(A<List<ProductVersion>>.Ignored)).Throws<Exception>();
 
             Assert.ThrowsAsync<Exception>(
-               () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+               () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(_fakeLogger).Where(call =>
               call.Method.Name == "Log"
@@ -427,7 +429,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<ArgumentNullException>();
 
             Assert.ThrowsAsync<ArgumentNullException>(
-                () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
@@ -464,7 +466,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetInValidExchangeSetGetBatchRespGetProductDataProductVersionsonseWithZeroAIOCells());
 
             Assert.ThrowsAsync<FulfilmentException>(
-              () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+              () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(_fakeLogger).Where(call =>
                call.Method.Name == "Log"
@@ -483,7 +485,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetInValidExchangeSetGetBatchResponseWithRequestedInvalidProductsNotInExchangeSet());
 
             Assert.ThrowsAsync<FulfilmentException>(
-             () => fulfilmentDataService.CreateAioExchangeSetsAsync());
+             () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(_fakeLogger).Where(call =>
                call.Method.Name == "Log"

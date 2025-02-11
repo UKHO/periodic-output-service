@@ -11,7 +11,7 @@ namespace UKHO.PeriodicOutputService.Common.Models.TableEntities
         public string ReadUsers { get; set; }
         public string ReadGroups { get; set; }
         public bool IsEnabled { get; set; }
-        public int WeeksToIncrement { get; set; }
+        public int? WeeksToIncrement { get; set; }
         public DateTimeOffset? Timestamp { get; set; } = DateTime.UtcNow;
         public ETag ETag { get; set; }
     }
