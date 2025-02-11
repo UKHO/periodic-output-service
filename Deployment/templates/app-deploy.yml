@@ -97,9 +97,11 @@ jobs:
         filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
         arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
 
-- job: CheckFM
-  displayName: "Check Fleet Manager Health"
+
+- job: CheckFMNonLive
+  displayName: "Check Fleet Manager Health - ${{parameters.Environment}}"
   dependsOn: DeployApp
+  condition: ne('${{ parameters.Environment }}', 'Live')
   steps:
     - task: PowerShell@2
       displayName: "Check FM Health endpoint is healthy"
@@ -107,6 +109,18 @@ jobs:
         targetType: filePath
         filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
         arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+
+- job: CheckFMLive
+  displayName: "Check Fleet Manager Health - Live"
+  dependsOn: DeployApp
+  condition: eq('${{ parameters.Environment }}', 'Live')
+  steps:
+    - task: PowerShell@2
+      displayName: "Check FM Health endpoint is healthy"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint_fm_live.ps1'
+        arguments: "-healthEndPointUrl $(FMHealthEndpoint)/live/echo/health-check -waitTimeInMinute $(waitTimeInMinute) -ocpapimsubscriptionkey $(FM_Ocp_Apim_Subscription_Key)"
 
 
 
@@ -137,7 +151,6 @@ jobs:
     - CheckInfra
     - CheckFSS
     - CheckESS
-    - CheckFM
   pool: NautilusBuild
   displayName: "POS Functional Automated Tests"
   variables:
@@ -199,7 +212,6 @@ jobs:
     - CheckInfra
     - CheckFSS
     - CheckESS
-    - CheckFM
     - POSFunctionalTests
   pool: NautilusBuild
   displayName: "BESS Functional Automated Tests"
