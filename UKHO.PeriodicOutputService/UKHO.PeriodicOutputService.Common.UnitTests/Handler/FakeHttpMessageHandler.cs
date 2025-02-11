@@ -1,12 +1,11 @@
-﻿using Azure;
-using System.Net;
+﻿using System.Net;
 using System.Text;
 
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Handler
 {
-    public class FakeHttpMessageHandler : HttpMessageHandler
+    public class FakeHttpMessageHandler(HttpResponseMessage response) : HttpMessageHandler
     {
-        private readonly HttpResponseMessage response;
+        private readonly HttpResponseMessage _response = response;
 
         public static HttpMessageHandler GetHttpMessageHandler(string content, HttpStatusCode httpStatusCode)
         {
@@ -21,16 +20,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Handler
             return messageHandler;
         }
 
-        public FakeHttpMessageHandler(HttpResponseMessage response)
-        {
-            this.response = response;
-        }
-
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<HttpResponseMessage>();
 
-            tcs.SetResult(response);
+            tcs.SetResult(_response);
 
             return tcs.Task;
         }
