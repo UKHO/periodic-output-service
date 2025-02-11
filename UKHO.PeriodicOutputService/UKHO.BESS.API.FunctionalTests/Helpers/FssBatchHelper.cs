@@ -1,12 +1,12 @@
-﻿using System.IO.Compression;
+﻿using System.Globalization;
+using System.IO.Compression;
 using System.Net;
-using Newtonsoft.Json;
-using UKHO.BESS.API.FunctionalTests.Models;
-using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 using System.Xml.Linq;
-using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
-using System.Globalization;
+using Newtonsoft.Json;
 using NUnit.Framework;
+using UKHO.BESS.API.FunctionalTests.Models;
+using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using static UKHO.BESS.API.FunctionalTests.Helpers.TestConfiguration;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
 {
@@ -16,12 +16,23 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         private static readonly FssApiConfiguration config = new TestConfiguration().fssConfig;
         private static readonly BessApiConfiguration bessConfig = new TestConfiguration().bessConfig;
         private static readonly TestConfiguration testConfiguration = new();
-        private static readonly string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-        private static readonly string currentYear = DateTime.UtcNow.Year.ToString();
+        private static readonly string s_weekNumber;
+        private static readonly string s_currentYear;
 
         static FssBatchHelper()
         {
             FssApiClient = new FssEndPointHelper();
+            var now = DateTime.UtcNow;
+            var currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(now, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
+            var currentYear = now.Year;
+
+            if (currentWeek > 5 && now.Month < 2)
+            {
+                currentYear--;
+            }
+
+            s_weekNumber = currentWeek.ToString("00");
+            s_currentYear = currentYear.ToString("0000");
         }
 
         static readonly List<string>? cellNames = testConfiguration.bessConfig.ProductsName;
@@ -206,10 +217,10 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
                 case null:
                     return false;
                 case "AVCS":
-                    {
-                        readMeType = readMeFileContent[0].Split(" ")[0];
-                        return readMeType.Equals("AVCS");
-                    }
+                {
+                    readMeType = readMeFileContent[0].Split(" ")[0];
+                    return readMeType.Equals("AVCS");
+                }
                 case "BLANK":
                     return readMeFileContent == null || readMeFileContent.Length == 0;
 
@@ -386,9 +397,9 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             }
 
             var year = apiResponseData.Attributes.ToArray()[4].Value;
-            Assert.That(year, Is.EqualTo(currentYear));
+            Assert.That(year, Is.EqualTo(s_currentYear));
             var weekNumber = apiResponseData.Attributes.ToArray()[5].Value;
-            Assert.That(weekNumber, Is.EqualTo(currentWeek));
+            Assert.That(weekNumber, Is.EqualTo(s_weekNumber));
             var yearWeek = apiResponseData.Attributes.ToArray()[6].Value;
             Assert.That(yearWeek, Is.EqualTo(year + " / " + weekNumber));
         }

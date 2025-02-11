@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.IO.Compression;
+﻿using System.IO.Compression;
 using System.Net;
 using NUnit.Framework;
 using static UKHO.PeriodicOutputService.API.FunctionalTests.Helpers.TestConfiguration;
@@ -8,14 +7,16 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 {
     public static class FssBatchHelper
     {
-        private static FssApiClient FssApiClient { get; set; }
-        private static readonly POSFileDetails posDetails = new TestConfiguration().posFileDetails;
-        private static readonly TestConfiguration config = new();
-        private static readonly string weekNumber = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-        private static readonly string currentYear = DateTime.UtcNow.ToString("yy");
+        private static readonly FssApiClient s_fssApiClient;
+        private static readonly POSFileDetails s_posDetails = new TestConfiguration().posFileDetails;
+        private static readonly TestConfiguration s_config = new();
+        private static readonly string s_weekNumberAio;
+        private static readonly string s_currentYearShortAio;
+
         static FssBatchHelper()
         {
-            FssApiClient = new FssApiClient();
+            s_fssApiClient = new FssApiClient();
+            (s_weekNumberAio, _, s_currentYearShortAio) = CommonHelper.GetCurrentWeekAndYearAio();
         }
 
         public static async Task<string> DownloadFileForLargeMedia(string downloadFileUrl, string jwtToken)
@@ -23,7 +24,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             string batchId = downloadFileUrl.Split('/')[5];
             string fileName = downloadFileUrl.Split('/')[7];
 
-            string posFolderPath = Path.Combine(Path.GetTempPath(), posDetails.TempFolderName);
+            string posFolderPath = Path.Combine(Path.GetTempPath(), s_posDetails.TempFolderName);
             if (!Directory.Exists(posFolderPath))
             {
                 Directory.CreateDirectory(posFolderPath);
@@ -35,7 +36,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
                 Directory.CreateDirectory(batchFolderPath);
             }
 
-            HttpResponseMessage response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
+            HttpResponseMessage response = await s_fssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
             Assert.That(response.StatusCode, Is.EqualTo((HttpStatusCode)200));
             Stream stream = await response.Content.ReadAsStreamAsync();
 
@@ -61,45 +62,46 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
 
         public static async Task<HttpResponseMessage> VerifyErrorTxtExist(string jwtToken)
         {
-            string downloadFileUrl = $"{config.FssConfig.BaseUrl}/batch/{posDetails.InvalidProductIdentifierBatchId}/files/error.txt";
-            HttpResponseMessage response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
+            string downloadFileUrl = $"{s_config.FssConfig.BaseUrl}/batch/{s_posDetails.InvalidProductIdentifierBatchId}/files/error.txt";
+            HttpResponseMessage response = await s_fssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
             return response;
         }
 
         public static async Task<HttpResponseMessage> PosBatchesVerification(string jwtToken, string batchId)
         {
-            string downloadFileUrl = $"{config.FssConfig.BaseUrl}/batch/{batchId}";
-            HttpResponseMessage response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
+            string downloadFileUrl = $"{s_config.FssConfig.BaseUrl}/batch/{batchId}";
+            HttpResponseMessage response = await s_fssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
             return response;
-          }
+        }
 
         public static async Task<string> ExtractDownloadedAioFolder(string downloadFileUrl, string jwtToken)
         {
-            string filename = "AIO_S631-1_CD_WK" + weekNumber+"_"+currentYear+".zip";
-            
-            string posFolderPath = Path.Combine(Path.GetTempPath(), posDetails.TempFolderName);
+            var fileName = $"AIO_CD_WK{s_weekNumberAio}_{s_currentYearShortAio}.zip";
+            var posFolderPath = Path.Combine(Path.GetTempPath(), s_posDetails.TempFolderName);
+
             if (!Directory.Exists(posFolderPath))
             {
                 Directory.CreateDirectory(posFolderPath);
             }
-            string tempFilePath = Path.Combine(posFolderPath, filename);
 
-            var response = await FssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
+            var tempFilePath = Path.Combine(posFolderPath, fileName);
+
+            var response = await s_fssApiClient.GetFileDownloadAsync(downloadFileUrl, accessToken: jwtToken);
             Assert.That((int)response.StatusCode, Is.EqualTo(200), $"Incorrect status code File Download api returned {response.StatusCode} for the url {downloadFileUrl}, instead of the expected 200.");
 
-            Stream stream = await response.Content.ReadAsStreamAsync();
+            var stream = await response.Content.ReadAsStreamAsync();
 
-            using (FileStream outputFileStream = new FileStream(tempFilePath, FileMode.Create))
+            using (var outputFileStream = new FileStream(tempFilePath, FileMode.Create))
             {
                 stream.CopyTo(outputFileStream);
             }
 
-            string zipPath = tempFilePath;
-            string extractPath = Path.Combine(posFolderPath,RenameFolder(tempFilePath));
+            var zipPath = tempFilePath;
+            var extractPath = Path.Combine(posFolderPath, RenameFolder(tempFilePath));
 
             ZipFile.ExtractToDirectory(zipPath, extractPath);
 
             return extractPath;
         }
     }
- }
+}

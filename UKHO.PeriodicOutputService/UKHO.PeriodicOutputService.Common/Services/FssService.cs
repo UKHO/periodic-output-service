@@ -10,6 +10,7 @@ using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
@@ -26,12 +27,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IConfiguration _configuration;
         private readonly IAzureTableStorageHelper _azureTableStorageHelper;
-
-        private readonly Enum[] _aioBatchTypes = {
-                                            Batch.AioBaseCDZipIsoSha1Batch,
-                                            Batch.AioUpdateZipBatch
-                                      };
-
         private const string ServerHeaderValue = "Windows-Azure-Blob";
 
         public FssService(ILogger<FssService> logger,
@@ -205,20 +200,20 @@ namespace UKHO.PeriodicOutputService.Common.Services
             throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
         }
 
-        public async Task<string> CreateBatch(Batch batchType)
+        public async Task<string> CreateBatch(Batch batchType, FormattedWeekNumber weekNumber)
         {
             _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            string? uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
-            string accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
+            var uri = $"{_fssApiConfiguration.Value.BaseUrl}/batch";
+            var accessToken = await _authFssTokenProvider.GetManagedIdentityAuthAsync(_fssApiConfiguration.Value.FssClientId);
 
-            CreateBatchRequestModel createBatchRequest = CreateBatchRequestModel(batchType);
-            string payloadJson = JsonConvert.SerializeObject(createBatchRequest);
-            HttpResponseMessage? httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
+            var createBatchRequest = CreateBatchRequestModel(batchType, weekNumber);
+            var payloadJson = JsonConvert.SerializeObject(createBatchRequest);
+            var httpResponse = await _fssApiClient.CreateBatchAsync(uri, payloadJson, accessToken);
 
             if (httpResponse.IsSuccessStatusCode)
             {
-                CreateBatchResponseModel? createBatchResponse = JsonConvert.DeserializeObject<CreateBatchResponseModel>(await httpResponse.Content.ReadAsStringAsync());
+                var createBatchResponse = JsonConvert.DeserializeObject<CreateBatchResponseModel>(await httpResponse.Content.ReadAsStringAsync());
                 _logger.LogInformation(EventIds.CreateBatchCompleted.ToEventId(), "New batch for {BatchType} created in FSS. Batch ID is {BatchID} | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, createBatchResponse!.BatchId, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.CorrelationID);
                 return createBatchResponse.BatchId;
             }
@@ -450,13 +445,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
         //Private Methods
         [ExcludeFromCodeCoverage]
-        private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType)
+        private CreateBatchRequestModel CreateBatchRequestModel(Batch batchType, FormattedWeekNumber weekNumber)
         {
-            string currentYear = DateTime.UtcNow.Year.ToString();
-            string currentWeek = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow);
-
-            CreateBatchRequestModel createBatchRequest = _aioBatchTypes.Contains(batchType) ?
-                AddBatchAttributesForAio(currentWeek, currentYear) : AddBatchAttributesForPos(currentWeek, currentYear);
+            var createBatchRequest = batchType.IsAio() ? AddBatchAttributesForAio(weekNumber) : AddBatchAttributesForPos(weekNumber);
 
             //This batch attribute is added for fss stub.
             if (bool.Parse(_configuration["IsFTRunning"]))
@@ -509,9 +500,9 @@ namespace UKHO.PeriodicOutputService.Common.Services
         }
 
         [ExcludeFromCodeCoverage]
-        private CreateBatchRequestModel AddBatchAttributesForPos(string currentWeek, string currentYear)
+        private CreateBatchRequestModel AddBatchAttributesForPos(FormattedWeekNumber weekNumber)
         {
-            CreateBatchRequestModel createBatchRequest = new()
+            var createBatchRequest = new CreateBatchRequestModel
             {
                 BusinessUnit = _fssApiConfiguration.Value.BusinessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
@@ -520,28 +511,28 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     ReadUsers = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadUsers) ? new List<string>() : _fssApiConfiguration.Value.PosReadUsers.Split(","),
                     ReadGroups = string.IsNullOrEmpty(_fssApiConfiguration.Value.PosReadGroups) ? new List<string>() : _fssApiConfiguration.Value.PosReadGroups.Split(","),
                 },
-                Attributes = new List<KeyValuePair<string, string>>
-                {
+                Attributes =
+                [
                     new("Product Type", "AVCS"),
-                    new("Week Number", currentWeek),
-                    new("Year", currentYear),
-                    new("Year / Week", currentYear + " / " + currentWeek)
-                }
+                    new("Week Number", weekNumber.Week),
+                    new("Year", weekNumber.Year),
+                    new("Year / Week", weekNumber.YearWeek)
+                ]
             };
             return createBatchRequest;
         }
 
-        private CreateBatchRequestModel AddBatchAttributesForAio(string currentWeek, string currentYear)
+        private CreateBatchRequestModel AddBatchAttributesForAio(FormattedWeekNumber weekNumber)
         {
-            AioJobConfigurationEntities? aioJobConfigurationEntities = _azureTableStorageHelper.GetAioJobConfiguration();
+            var aioJobConfigurationEntities = _azureTableStorageHelper.GetAioJobConfiguration();
 
-            (string businessUnit, string readUsers, string readGroups) = (
+            (var businessUnit, var readUsers, var readGroups) = (
                 aioJobConfigurationEntities?.BusinessUnit ?? _fssApiConfiguration.Value.AioBusinessUnit,
                 aioJobConfigurationEntities?.ReadUsers ?? _fssApiConfiguration.Value.AioReadUsers,
                 aioJobConfigurationEntities?.ReadGroups ?? _fssApiConfiguration.Value.AioReadGroups
             );
 
-            CreateBatchRequestModel createBatchRequest = new()
+            var createBatchRequest = new CreateBatchRequestModel
             {
                 BusinessUnit = businessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
@@ -550,18 +541,17 @@ namespace UKHO.PeriodicOutputService.Common.Services
                     ReadUsers = string.IsNullOrEmpty(readUsers) ? new List<string>() : readUsers.Split(","),
                     ReadGroups = string.IsNullOrEmpty(readGroups) ? new List<string>() : readGroups.Split(","),
                 },
-                Attributes = new List<KeyValuePair<string, string>>
-                {
+                Attributes =
+                [
                     new("Product Type", "AIO"),
-                    new("Week Number", currentWeek),
-                    new("Year", currentYear),
-                    new("Year / Week", currentYear + " / " + currentWeek)
-                }
+                    new("Week Number", weekNumber.Week),
+                    new("Year", weekNumber.Year),
+                    new("Year / Week", weekNumber.YearWeek)
+                ]
             };
             return createBatchRequest;
         }
 
-        //Private Methods
         [ExcludeFromCodeCoverage]
         private CreateBatchRequestModel CreateBatchRequestModelForBess(Batch batchType, ConfigQueueMessage configQueueMessage)
         {
@@ -593,13 +583,13 @@ namespace UKHO.PeriodicOutputService.Common.Services
         }
 
         [ExcludeFromCodeCoverage]
-        private AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName, Batch batchType)
+        private static AddFileToBatchRequestModel CreateAddFileRequestModel(string fileName, Batch batchType)
         {
-            AddFileToBatchRequestModel addFileToBatchRequestModel = new()
+            var addFileToBatchRequestModel = new AddFileToBatchRequestModel
             {
                 Attributes = new List<KeyValuePair<string, string>>
                 {
-                    new("Product Type", _aioBatchTypes.Contains(batchType) ? "AIO" : "AVCS"),
+                    new("Product Type", batchType.IsAio() ? "AIO" : "AVCS"),
                     new("File Name", fileName)
                 }
             };
