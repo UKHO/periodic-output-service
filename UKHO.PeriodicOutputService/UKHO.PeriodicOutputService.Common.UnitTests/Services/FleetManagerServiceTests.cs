@@ -7,10 +7,9 @@ using Microsoft.Extensions.Options;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
-using UKHO.PeriodicOutputService.Common.Models.Fm.Response;
 using UKHO.PeriodicOutputService.Common.Services;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
+namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 {
     [TestFixture]
     public class FleetManagerServiceTests
@@ -21,7 +20,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
         private IFileSystemHelper _fakefileSystemHelper;
         private IConfiguration _fakeconfiguration;
 
-        private IFleetManagerService _fleetManagerService;
+        private FleetManagerService _fleetManagerService;
 
         [SetUp]
         public void Setup()
@@ -49,7 +48,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6I1234212CJ9.VLSE9fRk0ifQ.fd73LguLf_6VBefVQqu0nj8j3dovfUNVeqZDYGZ1234\",\"expiration\":\"2022-06-15T16:02:52Z\"}")))
                 });
 
-            FleetMangerGetAuthTokenResponseModel result = await _fleetManagerService.GetJwtAuthUnpToken();
+            var result = await _fleetManagerService.GetJwtAuthUnpToken();
 
             Assert.Multiple(() =>
             {
@@ -105,7 +104,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                             .Returns(response);
             A.CallTo(() => _fakefileSystemHelper.CreateXmlFile(response.Content.ReadAsByteArrayAsync().Result, Path.Combine(_fakeconfiguration["HOME"], _fakeconfiguration["AVCSCatalogFileName"])));
 
-            FleetManagerGetCatalogueResponseModel result = await _fleetManagerService.GetCatalogue("JwtAuthJwtAccessToken");
+            var result = await _fleetManagerService.GetCatalogue("JwtAuthJwtAccessToken");
             Assert.Multiple(() =>
             {
                 Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));

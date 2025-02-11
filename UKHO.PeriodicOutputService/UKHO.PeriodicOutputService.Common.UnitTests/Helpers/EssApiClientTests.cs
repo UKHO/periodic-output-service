@@ -3,14 +3,14 @@ using FakeItEasy;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
-using UKHO.PeriodicOutputService.Fulfilment.UnitTests.Handler;
+using UKHO.PeriodicOutputService.Common.UnitTests.Handler;
 
-namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Helpers
+namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 {
     [TestFixture]
     public class EssApiClientTests
     {
-        private IEssApiClient? _essApiClient;
+        private EssApiClient? _essApiClient;
         private IHttpClientFactory _fakeHttpClientFactory;
 
         [SetUp]
