@@ -1,6 +1,6 @@
 ﻿using System.Text;
-using FluentAssertions;
 using Newtonsoft.Json;
+using NUnit.Framework;
 using UKHO.BESS.API.FunctionalTests.Models;
 
 namespace UKHO.BESS.API.FunctionalTests.Helpers
@@ -62,7 +62,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             string finalBatchStatusUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/status";
             string batchStatus = await FssBatchHelper.CheckBatchIsCommitted(finalBatchStatusUrl);
 
-            batchStatus.Contains("Committed").Should().Be(true);
+            Assert.That(batchStatus, Does.Contain("Committed"));
             string downloadFileUrl = $"{configs.fssConfig.BaseUrl}/batch/{batchId}/files/{configs.exchangeSetDetails.ExchangeSetFileName}";
             if (isBessBatch)
             {

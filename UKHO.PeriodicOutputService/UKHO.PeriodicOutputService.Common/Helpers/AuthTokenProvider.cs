@@ -52,7 +52,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             var tokenCredential = new DefaultAzureCredential();
             AccessToken accessToken = await tokenCredential.GetTokenAsync(
-                new TokenRequestContext(scopes: new string[] { resource + "/.default" }) { }
+                new TokenRequestContext(scopes: [resource + "/.default"]) { }
             );
 
             _logger.LogInformation(EventIds.GetNewAccessTokenCompleted.ToEventId(), "New access token to call external endpoint generated successfully | {DateTime} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));

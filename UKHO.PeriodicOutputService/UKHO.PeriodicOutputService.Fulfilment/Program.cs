@@ -5,7 +5,6 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using Elastic.Apm;
-using Elastic.Apm.Api;
 using Elastic.Apm.Azure.Storage;
 using Elastic.Apm.DiagnosticSource;
 using Microsoft.ApplicationInsights.Channel;
@@ -103,16 +102,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment
         {
             
             //Add logging
+            serviceCollection.AddApplicationInsightsTelemetryWorkerService();
+
             serviceCollection.AddLogging(loggingBuilder =>
             {
-               loggingBuilder.AddConfiguration(configuration.GetSection("Logging"));
-
-                string instrumentationKey = configuration["APPINSIGHTS_INSTRUMENTATIONKEY"];
-                if (!string.IsNullOrEmpty(instrumentationKey))
-                {
-                    loggingBuilder.AddApplicationInsights(instrumentationKey);
-                }
-               
 #if DEBUG
                 loggingBuilder.AddSerilog(new LoggerConfiguration()
                                 .WriteTo.File("Logs/UKHO.PeriodicOutputService.Fulfilment-Logs-.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level}] [{SourceContext}] {Message}{NewLine}{Exception}")
@@ -164,12 +157,10 @@ namespace UKHO.PeriodicOutputService.Fulfilment
                 serviceCollection.Configure<FssApiConfiguration>(configuration.GetSection("FSSApiConfiguration"));
                 serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
                 serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("AzureStorageConfiguration"));
-                serviceCollection.AddSingleton<IConfiguration>(configuration);
+                serviceCollection.AddSingleton(configuration);
 
                 configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
-
             }
-
 
             serviceCollection.AddDistributedMemoryCache();
 
@@ -197,7 +188,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment
             {
                 AllowAutoRedirect = false
             }).SetHandlerLifetime(Timeout.InfiniteTimeSpan);
-
 
             serviceCollection.AddTransient<IEssApiClient, EssApiClient>();
             serviceCollection.AddTransient<IFleetManagerApiClient, FleetManagerApiClient>();

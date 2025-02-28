@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using FluentAssertions;
 using NUnit.Framework;
 using UKHO.PeriodicOutputService.API.FunctionalTests.Helpers;
 
@@ -12,7 +11,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task Setup()
         {
             HttpResponseMessage apiResponse = MockHelper.ConfigureFMAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidAIOProductIdentifier);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
             await CommonHelper.RunWebJobAio();
         }
 
@@ -20,7 +19,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         public async Task WhenICallBatchDetailsEndpointForFullExchangeSetTypeWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.AIOFullValidBatchId);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
@@ -33,14 +32,14 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
             string DownloadedFolderPath = await FileContentHelper.DownloadAndExtractAioZip(FssJwtToken, posDetails.AioExchangeSetBatchId);
 
             int fileCount = Directory.GetFiles(Path.Combine(DownloadedFolderPath, posDetails.AioFolderName, posDetails.InfoFolderName), "*.*", SearchOption.TopDirectoryOnly).Length;
-            Assert.That(fileCount > 0, $"File count is {fileCount} in the specified folder path.");
+            Assert.That(fileCount, Is.GreaterThan(0), $"File count is {fileCount} in the specified folder path.");
         }
 
         [Test]
         public async Task WhenICallBatchDetailsEndpointForUpdateExchangeSetTypeWithValidAioBatchId_ThenBatchDetailsShouldBeCorrect()
         {
             HttpResponseMessage apiResponse = await GetBatchDetails.GetBatchDetailsEndpoint(FSSAuth.BaseUrl, posDetails.AIOUpdateValidBatchId);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
 
             dynamic batchDetailsResponse = await apiResponse.DeserializeAsyncResponse();
 
@@ -55,7 +54,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             //cleaning up the stub home directory
             HttpResponseMessage apiResponse = MockHelper.Cleanup(posWebJob.MockApiBaseUrl);
-            apiResponse.StatusCode.Should().Be((HttpStatusCode)200);
+            Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
         }
     }
 }

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fm.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
@@ -17,7 +18,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
     [TestFixture]
     public class FulfilmentDataServiceTests
     {
-        private IFulfilmentDataService _fulfilmentDataService;
+        private FulfilmentDataService _fulfilmentDataService;
         private IFleetManagerService _fakeFleetManagerService;
         private IEssService _fakeEssService;
         private IFssService _fakeFssService;
@@ -57,7 +58,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             FleetManagerGetCatalogueResponseModel fleetManagerGetCatalogue = new()
             {
                 StatusCode = HttpStatusCode.OK,
-                ProductIdentifiers = new() { "Product1", "Product2" }
+                ProductIdentifiers = ["Product1", "Product2"]
             };
 
             A.CallTo(() => _fakeFleetManagerService.GetJwtAuthUnpToken())
@@ -81,7 +82,7 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.GetFiles(A<string>.Ignored, A<string>.Ignored, A<SearchOption>.Ignored))
                            .Returns(new List<string> { @"D:\Test" });
 
-            A.CallTo(() => _fakeFssService.CreateBatch(A<Batch>.Ignored))
+            A.CallTo(() => _fakeFssService.CreateBatch(A<Batch>.Ignored, A<FormattedWeekNumber>.Ignored))
                            .Returns(Guid.NewGuid().ToString());
 
             A.CallTo(() => _fakeFileInfo.Name).Returns("M01X01.zip");
@@ -95,12 +96,12 @@ namespace UKHO.PeriodicOutputService.Fulfilment.UnitTests.Services
                 .Returns(true);
 
             A.CallTo(() => _fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored, A<string>.Ignored))
-                .Returns(new List<string> { "Block_00001" });
+                .Returns(["Block_00001"]);
 
             A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored,A<string>.Ignored))
               .Returns(true);
 
-            bool result = await _fulfilmentDataService.CreatePosExchangeSets();
+            var result = await _fulfilmentDataService.CreatePosExchangeSets();
 
             Assert.That(result, Is.True);
 

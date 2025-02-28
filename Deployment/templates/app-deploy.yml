@@ -1,0 +1,321 @@
+parameters:
+- name: RunTests
+  type: boolean
+  default: false
+- name: Environment
+  type: string
+- name: AzureSubscription
+  type: string
+- name: ContinueEvenIfResourcesAreGettingDestroyed
+  type: boolean
+  default: false
+- name: Container
+  type: string
+
+jobs:
+- deployment: DeployApp
+  displayName: "${{parameters.Environment}} - Deploy Terraform and Dotnet App"
+  environment: "Ess-${{parameters.Environment}}"
+  pool: $(DeploymentPool)
+  container: ${{parameters.Container}}
+  workspace:
+    clean: all
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+          - template: continuous-deployment.yml
+            parameters:
+              ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+              AzureSubscription: ${{parameters.AzureSubscription}}
+              RunTests: ${{parameters.RunTests}}
+
+- job: InsertAioJobConfigurationEntityInTable
+  displayName: "Insert AIO job configuration in Table"
+  dependsOn: DeployApp
+  variables:    
+    - name: AccountName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.AioAzureStorageAccountName']  ]
+    - name: AccountKey
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.AioAzureStorageAccountKey']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Insert Weekly job configuration in Table"
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az storage entity insert --entity PartitionKey=weekly RowKey=$(AioJobIdWeekly) BusinessUnit=$(AioJobIdWeekly.BusinessUnit) ReadUsers=$(AioJobIdWeekly.ReadUser) ReadGroups=$(AioJobIdWeekly.ReadGroup) IsEnabled=true IsEnabled@odata.type=Edm.Boolean WeeksToIncrement=$(AioJobIdWeekly.WeeksToIncrement) WeeksToIncrement@odata.type=Edm.Int32 --account-name $(AccountName) --account-key $(AccountKey) --if-exists replace --table-name $(AioJobConfigurationTableName)
+
+    - task: AzureCLI@2
+      displayName: "Insert Printing job configuration in Table"
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az storage entity insert --entity PartitionKey=printing RowKey=$(AioJobIdPrinting) BusinessUnit=$(AioJobIdPrinting.BusinessUnit) ReadUsers=$(AioJobIdPrinting.ReadUser) ReadGroups=$(AioJobIdPrinting.ReadGroup) IsEnabled=true IsEnabled@odata.type=Edm.Boolean WeeksToIncrement=$(AioJobIdPrinting.WeeksToIncrement) WeeksToIncrement@odata.type=Edm.Int32 --account-name $(AccountName) --account-key $(AccountKey) --if-exists replace --table-name $(AioJobConfigurationTableName)
+
+- job: CheckInfra
+  displayName: "Check Infrastructure Health"
+  dependsOn: DeployApp
+  variables:
+    - name: WEB_APP_NAME
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
+    - name: RGName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Check Infrastructure is healthy"
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: '$(Build.SourcesDirectory)/Deployment/check_service_status_webjob.ps1'
+        arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'
+
+- job: CheckFSS
+  displayName: "Check FSS Health"
+  dependsOn: DeployApp
+  steps:
+    - task: PowerShell@2
+      displayName: "Check FSS Health endpoint is healthy"
+      inputs:
+        targetType: filePath
+        filePath: "$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1"
+        arguments: "-healthEndPointUrl $(FSSHealthEndpoint)/heartbeat -waitTimeInMinute $(waitTimeInMinute)"
+
+- job: CheckESS
+  displayName: "Check ESS Health"
+  dependsOn: DeployApp
+  steps:
+    - task: PowerShell@2
+      displayName: "Check ESS Health endpoint is healthy"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
+        arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
+
+
+- job: CheckFMNonLive
+  displayName: "Check Fleet Manager Health - ${{parameters.Environment}}"
+  dependsOn: DeployApp
+  condition: ne('${{ parameters.Environment }}', 'Live')
+  steps:
+    - task: PowerShell@2
+      displayName: "Check FM Health endpoint is healthy"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
+        arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
+
+- job: CheckFMLive
+  displayName: "Check Fleet Manager Health - Live"
+  dependsOn: DeployApp
+  condition: eq('${{ parameters.Environment }}', 'Live')
+  steps:
+    - task: PowerShell@2
+      displayName: "Check FM Health endpoint is healthy"
+      inputs:
+        targetType: filePath
+        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint_fm_live.ps1'
+        arguments: "-healthEndPointUrl $(FMHealthEndpoint)/live/echo/health-check -waitTimeInMinute $(waitTimeInMinute) -ocpapimsubscriptionkey $(FM_Ocp_Apim_Subscription_Key)"
+
+
+
+- job: Setup
+  displayName: "Set Webjob Configuration"
+  condition: not(${{parameters.RunTests}}) # Run only if tests are not running
+  dependsOn: DeployApp
+  variables:
+    - name: WEB_APP_NAME
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
+    - name: RGName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Swap Webjob Configuration"
+      condition: always()
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: "$(Build.SourcesDirectory)/Deployment/set_webjob_configuration.ps1"
+        arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning false -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
+- job: POSFunctionalTests
+  condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
+  dependsOn:
+    - DeployApp
+    - CheckInfra
+    - CheckFSS
+    - CheckESS
+  pool: NautilusBuild
+  displayName: "POS Functional Automated Tests"
+  variables:
+    - name: POSWebjobApiConfiguration.UserName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobUsername']  ]
+    - name: POSWebjobApiConfiguration.Password
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.webJobPassword']  ]
+    - name: mockWebAppName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebApp']  ]
+    - name: mockWebAppResourceGroup
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+  steps:
+    - task: AzureCLI@2
+      displayName: "Set Subnet Configuration"
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
+        arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
+
+    - task: DownloadBuildArtifacts@0
+      displayName: "Download POS Functional test Artifact"
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'posfunctionaltests'
+        downloadPath: '$(Build.SourcesDirectory)'
+
+    - task: FileTransform@2
+      displayName: "File Transform: functionaltests"
+      inputs:
+        folderPath: '$(Build.SourcesDirectory)/posfunctionaltests/'
+        xmlTransformationRules:
+        jsonTargetFiles: '**/appsettings.json'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK'
+      inputs:
+        packageType: sdk
+        version: 8.0.x
+
+    - task: DotNetCoreCLI@2
+      displayName: "Run POS Functional tests"
+      inputs:
+        command: "test"
+        projects: |
+                  **/*FunctionalTest*.dll
+                  !**/*TestAdapter.dll
+                  !**/obj/**
+        arguments: '--filter Category~CallEssEndPoint|Category~GetAVCSCatalogue|Category~POSEndToEndScenarioFullAvcsPollingTimeOut|Category~POSEndToEndScenarioUpdatePollingTimeOut|Category~POSEndToEndScenarioWithInvalidProductIdentifier|Category~POSEndToEndValidFunctionalScenarios|Category~POSAIOValidFunctionalScenarios|Category~POSAIOScenarioWithInvalidProductIdentifier|Category~POSAIOScenarioPollingTimeOut'
+        testRunTitle: "${{parameters.Environment}}-POSAutomationTests"
+        workingDirectory: '$(Build.SourcesDirectory)/posfunctionaltests'
+
+- job: BESSFunctionalTests
+  condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
+  dependsOn:
+    - DeployApp
+    - CheckInfra
+    - CheckFSS
+    - CheckESS
+    - POSFunctionalTests
+  pool: NautilusBuild
+  displayName: "BESS Functional Automated Tests"
+  variables:
+    - name: AzureWebJobsStorage
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
+    - name: WEB_APP_NAME
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
+    - name: mockWebAppName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebApp']  ]
+    - name: mockWebAppResourceGroup
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
+    - name: RGName
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
+    - name: BessStorageConfiguration.ConnectionString
+      value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.AzureWebJobsStorageName']  ]
+  steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: "Download Terraform Artifact"
+      condition: always()
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'terraformartifact'
+        downloadPath: '$(Build.SourcesDirectory)'
+
+    - task: AzureCLI@2
+      displayName: "Swap Storage Container Configuration"
+      condition: always()
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: "$(Build.SourcesDirectory)/terraformartifact/swap_container_config.ps1"
+        arguments: '-containername $(BessContainerForFT) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
+    - task: DownloadBuildArtifacts@0
+      displayName: "Download BESS Functional test Artifact"
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'bessfunctionaltests'
+        downloadPath: '$(Build.SourcesDirectory)'
+
+    - task: FileTransform@2
+      displayName: "File Transform: functionaltests"
+      inputs:
+        folderPath: '$(Build.SourcesDirectory)/bessfunctionaltests/'
+        xmlTransformationRules:
+        jsonTargetFiles: '**/appsettings.json'
+
+    - task: UseDotNet@2
+      displayName: 'Use .NET SDK'
+      inputs:
+        packageType: sdk
+        version: 8.0.x
+
+    - task: DotNetCoreCLI@2
+      displayName: "Run BESS Functional tests"
+      inputs:
+        command: "test"
+        projects: |
+          **/*FunctionalTest*.dll
+          !**/*TestAdapter.dll
+          !**/obj/**
+        testRunTitle: "${{parameters.Environment}}-BESSAutomationTests"
+        workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
+
+- job: SwapAppConfigsconfiguration
+  condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
+  dependsOn:
+    - DeployApp
+    - POSFunctionalTests
+    - BESSFunctionalTests
+  pool: NautilusBuild
+  displayName: "Swap App Configs configuration"
+  variables:
+  - name: WEB_APP_NAME
+    value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.WEBAPP']  ]
+  - name: RGName
+    value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.ResourceGroup']  ]
+  steps:
+    - task: DownloadBuildArtifacts@0
+      displayName: "Download Terraform Artifact"
+      condition: always()
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'terraformartifact'
+        downloadPath: '$(Build.SourcesDirectory)'
+
+    - task: PowerShell@2
+      displayName: "Print Resource Group Name"
+      inputs:
+        targetType: 'inline'
+        script: |
+          Write-Output "Resource Group Name: $(RGName)"
+
+    - task: AzureCLI@2
+      displayName: "Swap Storage Container Configuration"
+      condition: always()
+      inputs:
+        azureSubscription: ${{parameters.AzureSubscription}}
+        scriptType: 'pscore'
+        scriptLocation: 'scriptPath'
+        scriptPath: "$(Build.SourcesDirectory)/terraformartifact/swap_container_config.ps1"
+        arguments: '-containername $(BessContainerForWebjob) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'

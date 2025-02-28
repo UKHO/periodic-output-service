@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -11,11 +11,11 @@
     <NoWarn>1701;1702;8618;8602;8604;8600;8603</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.21.2" />
-    <PackageReference Include="FluentValidation" Version="11.9.2" />
-    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="6.0.33" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="8.0.12" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.2.0" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="appsettings.json">
@@ -61,6 +61,19 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_WK34_22_Only.zip">
+    <None Update="Data\0D91FB1A-CBE2-4443-8F61-E9A925FA00C9\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\0F13A253-DB5D-4B77-A165-643F4B4A77FC\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\10D40DD5-DDFB-497A-BB67-D99FB1658320\ACCatalogs.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\10D40DD5-DDFB-497A-BB67-D99FB1658320\distributors.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_Update_WK34_22_Only.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\27067A02-DF4B-49A1-8699-442B265A75D2\V01X01.zip">
@@ -156,13 +169,28 @@
     <None Update="Data\D2B46C4F-415A-4CA3-B844-6577254F39E5\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.iso">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_CD_WK34_22.iso">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.iso.sha1">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_CD_WK34_22.iso.sha1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_S631-1_CD_WK34_22.zip">
+    <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_CD_WK34_22.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\F8FD2FB4-3DD6-425D-B34F-3059E262FEED\V01X01.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESConfig.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESS_PortOfIndia.zip">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\Permit.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\F8FD2FB4-3DD6-425D-B34F-3059E262FEED\V01X01.zip">

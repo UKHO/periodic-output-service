@@ -296,6 +296,14 @@ namespace UKHO.BESS.BuilderService.Services
             });
         }
 
+        /// <summary>
+        ///     This method will create, upload and commit BESS batch to FSS.
+        /// </summary>
+        /// <param name="downloadPath"></param>
+        /// <param name="fileExtension"></param>
+        /// <param name="configQueueMessage"></param>
+        /// <returns>Return true or false</returns>
+        /// <exception cref="FulfilmentException"></exception>
         private async Task<bool> CreateBessBatchAsync(string downloadPath, string fileExtension, ConfigQueueMessage configQueueMessage)
         {
             try
@@ -492,6 +500,9 @@ namespace UKHO.BESS.BuilderService.Services
         /// <summary>
         /// This method will handle add/update/delete of README.txt file based on ReadmeSearchFilter.
         /// </summary>
+        /// <param name="batchId"></param>
+        /// <param name="correlationId"></param>
+        /// <param name="readMeSearchFilter"></param>
         /// <param name="exchangeSetRootPath"></param>
         /// <param name="readMeFilePath"></param>
         /// <param name="readMeSearchFilter"></param>

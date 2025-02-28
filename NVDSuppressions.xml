@@ -106,15 +106,6 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: Various
-   False positive - applies to https://www.drupal.org
-   ]]>
-    </notes>
-    <cve>CVE-2014-9152</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: System.Threading.Tasks.Dataflow.dll
    False positive - applies to Tasks.org Android app
    ]]>
@@ -148,17 +139,6 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: System.Threading.Tasks.Extensions:Various
-   False positive - applies to Tasks.org Android app
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
-    <cve>CVE-2020-22475</cve>
-    <cve>CVE-2022-39349</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: System.Threading.Tasks.dll
    False positive - applies to Tasks.org Android app
    ]]>
@@ -179,6 +159,310 @@
     <cve>CVE-2022-39349</cve>
     <cve>CVE-2019-20138</cve>
     <cve>CVE-2023-36415</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Security.Cryptography.X509Certificates:4.1.0
+   .NET Core 1.0, 1.1, and 2.0 allow an unauthenticated attacker to remotely cause a denial of service attack against a .NET Core web application by improperly parsing certificate data.
+   POS is pinned to .Net core SDK 6.0.419 which is not vulnerable.
+   ]]>
+    </notes>
+    <cve>CVE-2017-11770</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+	file name: Microsoft.Extensions.Hosting.Abstractions.dll
+	See https://nvd.nist.gov/vuln/detail/CVE-2020-1147 for details on this CVE.
+	This is a temporary suppression pending a fix being available.
+	Bug to track the fix - https://dev.azure.com/ukhydro/Abzu/_boards/board/t/Abzu%20Delivery%20Team/Stories/?workitem=58192
+	]]>
+    </notes>
+    <cve>CVE-2020-1147</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Newtonsoft.Json.Bson.dll
+   ]]>
+    </notes>
+    <cve>CVE-2024-21907</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Parallel.dll
+   Vunerability due to permissions on VoiceCommandActivity application component, no applicable.
+   ]]>
+    </notes>
+    <cve>CVE-2020-22475</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: System.Threading.Tasks.Parallel.dll
+   ]]>
+    </notes>
+    <cve>CVE-2022-39349</cve>
+  </suppress>
+  <!-- Below suppression are for wire mock and should be removed when wire mock is removed from POS -->
+  <suppress>
+    <notes>
+      <![CDATA[
+   As this vulnerability is due to string input and this service will be run locally with no outside requests, this vulnerability is not applicable
+   file name: Handlebars.Net.Helpers.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/Handlebars\.Net\.Helpers@.*$</packageUrl>
+    <cve>CVE-2020-7661</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   As this vulnerability is due to string input and this service will be run locally with no outside requests, this vulnerability is not applicable
+   file name: Handlebars.Net.Helpers.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/Handlebars\.Net\.Helpers@.*$</packageUrl>
+    <cve>CVE-2022-21195</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: JsonConverter.Abstractions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/JsonConverter\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2020-12762</cve>
+    <cve>CVE-2013-6370</cve>
+    <cve>CVE-2013-6371</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+      As this vulnerability is due to string input and this service will be run locally with no outside requests, this vulnerability is not applicable
+   file name: JsonConverter.Newtonsoft.Json.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/JsonConverter\.Newtonsoft\.Json@.*$</packageUrl>
+    <cve>CVE-2020-12762</cve>
+    <cve>CVE-2013-6370</cve>
+    <cve>CVE-2013-6371</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+	Not applicable for our use
+   file name: NJsonSchema.Extensions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/NJsonSchema\.Extensions@.*$</packageUrl>
+    <cve>CVE-2021-3918</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+      As this vulnerability is due to string input and this service will be run locally with no outside requests, this vulnerability is not applicable
+   file name: ProtoBufJsonConverter.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/ProtoBufJsonConverter@.*$</packageUrl>
+    <cve>CVE-2020-12762</cve>
+    <cve>CVE-2013-6370</cve>
+    <cve>CVE-2013-6371</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   False positive, vulnerability is for package "wire" not wire mock
+   file name: WireMock.Net.Abstractions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2020-27853</cve>
+    <cve>CVE-2021-41093</cve>
+    <cve>CVE-2020-15258</cve>
+    <cve>CVE-2018-8909</cve>
+    <cve>CVE-2021-32665</cve>
+    <cve>CVE-2021-32666</cve>
+    <cve>CVE-2022-23625</cve>
+    <cve>CVE-2022-23625</cve>
+    <cve>CVE-2022-31009</cve>
+    <cve>CVE-2023-22737</cve>
+    <cve>CVE-2022-43673</cve>
+    <cve>CVE-2021-21301</cve>
+    <cve>CVE-2021-32755</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   False positive, vulnerability is for package "wire" not wire mock
+   file name: WireMock.Net.OpenApiParser.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.OpenApiParser@.*$</packageUrl>
+    <cve>CVE-2020-27853</cve>
+    <cve>CVE-2021-41093</cve>
+    <cve>CVE-2020-15258</cve>
+    <cve>CVE-2018-8909</cve>
+    <cve>CVE-2021-32665</cve>
+    <cve>CVE-2021-32665</cve>
+    <cve>CVE-2021-32666</cve>
+    <cve>CVE-2022-23625</cve>
+    <cve>CVE-2022-31009</cve>
+    <cve>CVE-2023-22737</cve>
+    <cve>CVE-2022-43673</cve>
+    <cve>CVE-2021-21301</cve>
+    <cve>CVE-2021-32755</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   False positive, vulnerability is for package "wire" not wire mock
+   file name: WireMock.Net.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net@.*$</packageUrl>
+    <cve>CVE-2020-27853</cve>
+    <cve>CVE-2021-41093</cve>
+    <cve>CVE-2021-41100</cve>
+    <cve>CVE-2022-23610</cve>
+    <cve>CVE-2022-31122</cve>
+    <cve>CVE-2020-15258</cve>
+    <cve>CVE-2018-8909</cve>
+    <cve>CVE-2021-41119</cve>
+    <cve>CVE-2021-32665</cve>
+    <cve>CVE-2021-32666</cve>
+    <cve>CVE-2022-23625</cve>
+    <cve>CVE-2022-31009</cve>
+    <cve>CVE-2023-22737</cve>
+    <cve>CVE-2021-41101</cve>
+    <cve>CVE-2022-43673</cve>
+    <cve>CVE-2021-21301</cve>
+    <cve>CVE-2021-32755</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   Vulnerability not applicable as we run wire mock locally
+   file name: WireMock.Net.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net@.*$</packageUrl>
+    <cve>CVE-2018-9116</cve>
+    <cve>CVE-2023-41329</cve>
+    <cve>CVE-2018-9117</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   Vulnerability not applicable as we run wire mock locally
+   file name: WireMock.Net.OpenApiParser.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.OpenApiParser@.*$</packageUrl>
+    <cve>CVE-2018-9116</cve>
+    <cve>CVE-2023-41329</cve>
+    <cve>CVE-2018-9117</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   Vulnerability not applicable as we run wire mock locally
+   file name: WireMock.Net.Abstractions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2018-9116</cve>
+    <cve>CVE-2018-9117</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   Vulnerability for java version of wire mock
+   file name: WireMock.Net.Abstractions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Net\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2023-41329</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   False positive, vulnerability is for package "wire" not wire mock
+   file name: WireMock.Org.Abstractions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Org\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2020-27853</cve>
+    <cve>CVE-2021-41093</cve>
+    <cve>CVE-2020-15258</cve>
+    <cve>CVE-2018-8909</cve>
+    <cve>CVE-2021-32665</cve>
+    <cve>CVE-2021-32666</cve>
+    <cve>CVE-2022-23625</cve>
+    <cve>CVE-2022-31009</cve>
+    <cve>CVE-2023-22737</cve>
+    <cve>CVE-2021-41101</cve>
+    <cve>CVE-2022-43673</cve>
+    <cve>CVE-2021-21301</cve>
+    <cve>CVE-2021-32755</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   Vulnerability not applicable as we run wire mock locally
+   file name: WireMock.Org.Abstractions.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/WireMock\.Org\.Abstractions@.*$</packageUrl>
+    <cve>CVE-2018-9116</cve>
+    <cve>CVE-2023-41329</cve>
+    <cve>CVE-2018-9117</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Azure.Identity.dll
+   ]]>
+    </notes>
+    <cve>CVE-2024-35255</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Azure.Core.dll
+   ]]>
+    </notes>
+    <cve>CVE-2024-43591</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+	  file name: System.Text.Json:6.0.0
+	  file name: System.Text.Json:8.0.0
+	  ]]>
+    </notes>
+    <vulnerabilityName>CVE-2024-43485</vulnerabilityName>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: YamlDotNet.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/YamlDotNet@.*$</packageUrl>
+    <cve>CVE-2018-1000210</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Azure.Identity:1.10.3
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Azure\.Identity@.*$</packageUrl>
+    <vulnerabilityName>CVE-2024-29992</vulnerabilityName>
   </suppress>
   <suppress>
     <notes>

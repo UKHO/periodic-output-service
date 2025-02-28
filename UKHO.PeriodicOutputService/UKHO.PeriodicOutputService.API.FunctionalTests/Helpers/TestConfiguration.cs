@@ -82,16 +82,16 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             public string AioExchangeSetBatchId { get; set; }
             public string InfoFolderName { get; set; }
             public string AioFolderName { get; set; }
-
         }
 
         public class AioWebjobApiConfiguration
         {
             public string BaseUrl { get; set; }
             public int WebjobRunningStatusDelayTime { get; set; }
+            public int WeeksToIncrement { get; set; }
         }
 
-            public TestConfiguration()
+        public TestConfiguration()
         {
             ConfigurationRoot = new ConfigurationBuilder()
                                .AddJsonFile("appsettings.json", false)
