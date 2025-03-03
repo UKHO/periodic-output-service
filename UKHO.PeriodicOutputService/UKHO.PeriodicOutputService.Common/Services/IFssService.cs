@@ -1,5 +1,6 @@
 ﻿using System.IO.Abstractions;
 using UKHO.PeriodicOutputService.Common.Enums;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
 
@@ -10,7 +11,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
         public Task<FssBatchStatus> CheckIfBatchCommitted(string batchId, RequestType requestType, string? correlationId = null);
         public Task<GetBatchResponseModel> GetBatchDetails(string batchId, string? correlationId = null);
         public Task<bool> DownloadFileAsync(string fileName, string fileLink, long fileSize, string filePath, string? correlationId = null);
-        public Task<string> CreateBatch(Batch batchType);
+        public Task<string> CreateBatch(Batch batchType, FormattedWeekNumber weekNumber);
         public Task<string> CreateBatch(Batch batchType, ConfigQueueMessage configQueueMessage, string? correlationId = null);
         public Task<bool> AddFileToBatch(string batchId, string fileName, long fileLength, string mimeType, Batch batchType, string? correlationId = null);
         public Task<List<string>> UploadBlocks(string batchId, IFileInfo fileInfo, string? correlationId = null);

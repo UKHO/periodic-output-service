@@ -1,7 +1,7 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Text;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -40,25 +40,21 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
-            Assert.Throws<ArgumentNullException>(
-                () => new EssService(null, _fakeEssApiConfiguration, _fakeEssApiClient, _fakeAuthTokenProvider))
-                .ParamName
-                .Should().Be("logger");
+            var execption = Assert.Throws<ArgumentNullException>(
+                () => new EssService(null, _fakeEssApiConfiguration, _fakeEssApiClient, _fakeAuthTokenProvider));
+            Assert.That(execption.ParamName, Is.EqualTo("logger"));
 
-            Assert.Throws<ArgumentNullException>(
-                () => new EssService(_fakeLogger, null, _fakeEssApiClient, _fakeAuthTokenProvider))
-                .ParamName
-                .Should().Be("essApiConfiguration");
+            execption = Assert.Throws<ArgumentNullException>(
+                () => new EssService(_fakeLogger, null, _fakeEssApiClient, _fakeAuthTokenProvider));
+            Assert.That(execption.ParamName, Is.EqualTo("essApiConfiguration"));
 
-            Assert.Throws<ArgumentNullException>(
-               () => new EssService(_fakeLogger, _fakeEssApiConfiguration, null, _fakeAuthTokenProvider))
-               .ParamName
-               .Should().Be("essApiClient");
+            execption = Assert.Throws<ArgumentNullException>(
+               () => new EssService(_fakeLogger, _fakeEssApiConfiguration, null, _fakeAuthTokenProvider));
+            Assert.That(execption.ParamName, Is.EqualTo("essApiClient"));
 
-            Assert.Throws<ArgumentNullException>(
-               () => new EssService(_fakeLogger, _fakeEssApiConfiguration, _fakeEssApiClient, null))
-               .ParamName
-               .Should().Be("authEssTokenProvider");
+            execption = Assert.Throws<ArgumentNullException>(
+               () => new EssService(_fakeLogger, _fakeEssApiConfiguration, _fakeEssApiClient, null));
+            Assert.That(execption.ParamName, Is.EqualTo("authEssTokenProvider"));
         }
 
         [Test]
@@ -387,9 +383,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers(), exchangeSetStandard.ToString());
 
-            response.ExchangeSetCellCount.Should().Be(GetProductIdentifiers().Count);
-            response?.Links?.ExchangeSetFileUri?.Href.Should().NotBeNullOrEmpty();
-            response?.RequestedProductsNotInExchangeSet.Should().BeNull();
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(response.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href));
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.EqualTo(null));
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -427,8 +426,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             ExchangeSetResponseModel response = await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"), exchangeSetStandard.ToString());
 
-            response?.Links?.ExchangeSetFileUri?.Href.Should().NotBeNullOrEmpty();
-            response?.RequestedProductsNotInExchangeSet.Should().BeNull();
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href));
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.EqualTo(null));
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -477,8 +479,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                                                                                                     }
             }, exchangeSetStandard.ToString());
 
-            response?.Links?.ExchangeSetFileUri?.Href.Should().NotBeNullOrEmpty();
-            response?.RequestedProductsNotInExchangeSet.Should().BeNull();
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href));
+                Assert.That(response?.RequestedProductsNotInExchangeSet, Is.EqualTo(null));
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -542,7 +547,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         public void DoesGetProductDataSinceDateTime_Returns_FulfilmentException_When_Response_Status_Is_Not_Ok(HttpStatusCode statusCode, string content)
         {
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns("InvalidToken");
-            
+
             A.CallTo(() => _fakeEssApiClient.GetProductDataSinceDateTime
             (A<string>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
                   .Returns(new HttpResponseMessage()

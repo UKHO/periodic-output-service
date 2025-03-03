@@ -10,7 +10,7 @@ namespace UKHO.FmEssFssMock.API.Services
     public class FileShareService
     {
         private readonly IOptions<FileShareServiceConfiguration> fssConfiguration;
-        private readonly string aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";  
+        private readonly string aioInfoFilesBatchId = "649C902D-5282-4CCF-924A-2B548EF42179";
         private readonly Dictionary<string, string> mimeTypes = new()
         {
             { ".zip", "application/zip" },
@@ -61,26 +61,39 @@ namespace UKHO.FmEssFssMock.API.Services
             return new BatchResponse() { BatchId = Guid.Parse(batchId) };
         }
 
+        private (string CurrentWeek, string CurrentYear) GetWeekNumber(bool isAioBatchType)
+        {
+            var now = isAioBatchType ? DateTime.UtcNow.AddDays(fssConfiguration.Value.WeeksToIncrement * 7) : DateTime.UtcNow;
+            var currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(now, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday);
+            var currentYear = now.Year;
+
+            if (currentWeek > 5 && now.Month < 2)
+            {
+                currentYear--;
+            }
+
+            return (currentWeek.ToString("00"), currentYear.ToString("0000"));
+        }
+
         public BatchDetail GetBatchDetails(string batchId, string homeDirectoryPath)
         {
             batchId = batchId.ToLower();
-            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
-            string currentWeek = CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(DateTime.UtcNow, CalendarWeekRule.FirstFullWeek, DayOfWeek.Thursday).ToString().PadLeft(2, '0');
-            string currentYear = DateTime.UtcNow.Year.ToString();
-            string path = Path.Combine(homeDirectoryPath, batchId);
-            string businessUnit = "AVCSData";
-            List<BatchFile> files = new();
+            var isAioBatchType = aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId));
+            (var currentWeek, var currentYear) = GetWeekNumber(isAioBatchType);
+            var path = Path.Combine(homeDirectoryPath, batchId);
+            var businessUnit = "AVCSData";
+            List<BatchFile> files = [];
 
-            foreach (string? filePath in Directory.GetFiles(path))
+            foreach (var filePath in Directory.GetFiles(path))
             {
-                FileInfo fileInfo = new(filePath);
+                var fileInfo = new FileInfo(filePath);
 
-                files.Add(new BatchFile()
+                files.Add(new BatchFile
                 {
                     Attributes = new List<Models.Response.Attribute>
                     {
-                        new Models.Response.Attribute { Key = "Product Type", Value = aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)) ? "AIO" : "AVCS" },
-                        new Models.Response.Attribute { Key = "File Name", Value = fileInfo.Name }
+                        new() { Key = "Product Type", Value = isAioBatchType ? "AIO" : "AVCS" },
+                        new() { Key = "File Name", Value = fileInfo.Name }
                     },
                     MimeType = mimeTypes.ContainsKey(fileInfo.Extension.ToLower()) ? mimeTypes[fileInfo.Extension.ToLower()] : DEFAULTMIMETYPE,
                     FileSize = fileInfo.Length,
@@ -138,7 +151,7 @@ namespace UKHO.FmEssFssMock.API.Services
 
             List<KeyValuePair<string, string>> attributes = new()
             {
-                new("Product Type", aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId)) ? "AIO" : "AVCS"),
+                new("Product Type", isAioBatchType ? "AIO" : "AVCS"),
                 new("Week Number", currentWeek),
                 new("Year", currentYear),
                 new("Year / Week", currentYear + " / " + currentWeek), };

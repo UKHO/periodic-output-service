@@ -106,15 +106,6 @@
   <suppress>
     <notes>
       <![CDATA[
-   file name: Various
-   False positive - applies to https://www.drupal.org
-   ]]>
-    </notes>
-    <cve>CVE-2014-9152</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
    file name: System.Threading.Tasks.Dataflow.dll
    False positive - applies to Tasks.org Android app
    ]]>
@@ -142,17 +133,6 @@
    ]]>
     </notes>
     <packageUrl regex="true">^pkg:generic/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
-    <cve>CVE-2020-22475</cve>
-    <cve>CVE-2022-39349</cve>
-  </suppress>
-  <suppress>
-    <notes>
-      <![CDATA[
-   file name: System.Threading.Tasks.Extensions:Various
-   False positive - applies to Tasks.org Android app
-   ]]>
-    </notes>
-    <packageUrl regex="true">^pkg:nuget/System\.Threading\.Tasks\.Extensions@.*$</packageUrl>
     <cve>CVE-2020-22475</cve>
     <cve>CVE-2022-39349</cve>
   </suppress>
@@ -442,34 +422,46 @@
     <cve>CVE-2018-9117</cve>
   </suppress>
   <suppress>
-   <notes><![CDATA[
+    <notes>
+      <![CDATA[
    file name: Azure.Identity.dll
-   ]]></notes>
-   <cve>CVE-2024-35255</cve>
-</suppress>
-<suppress>
-   <notes><![CDATA[
-   file name: System.Text.Json:8.0.0
-   ]]></notes>
-   <vulnerabilityName>CVE-2024-30105</vulnerabilityName>
-</suppress>
-<suppress>
-   <notes><![CDATA[
+   ]]>
+    </notes>
+    <cve>CVE-2024-35255</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
    file name: Azure.Core.dll
-   ]]></notes>
-   <cve>CVE-2024-43591</cve>
-</suppress>
-<suppress>
-   <notes><![CDATA[
-   file name: Microsoft.Extensions.Caching.Memory:8.0.0
-   ]]></notes>
-   <vulnerabilityName>CVE-2024-43483</vulnerabilityName>
-</suppress>
-<suppress>
-	  <notes><![CDATA[
+   ]]>
+    </notes>
+    <cve>CVE-2024-43591</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
 	  file name: System.Text.Json:6.0.0
 	  file name: System.Text.Json:8.0.0
-	  ]]></notes>
-	  <vulnerabilityName>CVE-2024-43485</vulnerabilityName>
-</suppress>
+	  ]]>
+    </notes>
+    <vulnerabilityName>CVE-2024-43485</vulnerabilityName>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: YamlDotNet.dll
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:generic/YamlDotNet@.*$</packageUrl>
+    <cve>CVE-2018-1000210</cve>
+  </suppress>
+  <suppress>
+    <notes>
+      <![CDATA[
+   file name: Azure.Identity:1.10.3
+   ]]>
+    </notes>
+    <packageUrl regex="true">^pkg:nuget/Azure\.Identity@.*$</packageUrl>
+    <vulnerabilityName>CVE-2024-29992</vulnerabilityName>
+  </suppress>
 </suppressions>

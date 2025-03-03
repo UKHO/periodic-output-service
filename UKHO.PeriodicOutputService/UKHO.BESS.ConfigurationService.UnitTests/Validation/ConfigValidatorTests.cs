@@ -1,5 +1,4 @@
 ﻿using FakeItEasy;
-using FluentAssertions;
 using FluentValidation;
 using FluentValidation.TestHelper;
 using UKHO.BESS.ConfigurationService.Validation;
@@ -48,7 +47,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             BessConfig bessConfig = GetBessConfig();
 
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
-            result.Errors.Count.Should().Be(0);
+            Assert.That(result.Errors, Is.Empty);
         }
 
         [Test]
@@ -74,7 +73,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             };
 
             TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
-            result.Errors.Count.Should().Be(0);
+            Assert.That(result.Errors, Is.Empty);
         }
 
         [Test]

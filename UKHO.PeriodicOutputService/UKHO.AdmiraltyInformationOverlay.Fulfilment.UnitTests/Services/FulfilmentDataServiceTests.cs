@@ -1,12 +1,12 @@
 ﻿using System.IO.Abstractions;
 using FakeItEasy;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.AdmiraltyInformationOverlay.Fulfilment.Services;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
+using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
@@ -17,7 +17,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
     [TestFixture]
     public class FulfilmentDataServiceTests
     {
-        private IFulfilmentDataService _fulfilmentDataService;
+        private FulfilmentDataService _fulfilmentDataService;
         private IEssService _fakeEssService;
         private IFssService _fakeFssService;
         private ILogger<FulfilmentDataService> _fakeLogger;
@@ -39,6 +39,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 
             _fakeconfiguration["IsFTRunning"] = "false";
             _fakeconfiguration["AioCells"] = "GB800001";
+            _fakeconfiguration["WeeksToIncrement"] = "1";
 
             _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
         }
@@ -46,35 +47,29 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
-            Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
-                .ParamName
-                .Should().Be("fileSystemHelper");
+            var exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("fileSystemHelper"));
 
-            Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
-                .ParamName
-                .Should().Be("essService");
+            exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("essService"));
 
-            Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper))
-                .ParamName
-                .Should().Be("fssService");
+            exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("fssService"));
 
-            Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper))
-                .ParamName
-                .Should().Be("logger");
+            exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
-            Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper))
-                 .ParamName
-                 .Should().Be("configuration");
+            exception = Assert.Throws<ArgumentNullException>(
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper));
+            Assert.That(exception.ParamName, Is.EqualTo("configuration"));
 
-            Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null))
-                 .ParamName
-                 .Should().Be("azureTableStorageHelper");
+            exception = Assert.Throws<ArgumentNullException>(
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null));
+            Assert.That(exception.ParamName, Is.EqualTo("azureTableStorageHelper"));
         }
 
         [Test]
@@ -93,9 +88,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetValidBatchResponseModel());
 
             A.CallTo(() => _fakefileSystemHelper.GetFiles(A<string>.Ignored, A<string>.Ignored, A<SearchOption>.Ignored))
-                           .Returns(new List<string> { @"D:\Test" });
+                           .Returns([@"D:\Test"]);
 
-            A.CallTo(() => _fakeFssService.CreateBatch(A<Batch>.Ignored))
+            A.CallTo(() => _fakeFssService.CreateBatch(A<Batch>.Ignored, A<FormattedWeekNumber>.Ignored))
                            .Returns(Guid.NewGuid().ToString());
 
             A.CallTo(() => _fakeFileInfo.Name).Returns("AIO.zip");
@@ -108,12 +103,12 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 .Returns(true);
 
             A.CallTo(() => _fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored, A<string>.Ignored))
-                .Returns(new List<string> { "Block_00001" });
+                .Returns(["Block_00001"]);
 
             A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored, A<string>.Ignored))
               .Returns(true);
 
-            bool result = await _fulfilmentDataService.CreateAioExchangeSetsAsync();
+            var result = await _fulfilmentDataService.CreateAioExchangeSetsAsync();
 
             Assert.That(result, Is.True);
 
@@ -254,7 +249,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
-            Assert.ThrowsAsync<AggregateException>(
+            Assert.ThrowsAsync<ArgumentNullException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
@@ -291,12 +286,12 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
             .Returns(GetValidBatchResponseModel());
 
-            A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<AggregateException>();
+            A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<ArgumentNullException>();
 
-            Assert.ThrowsAsync<AggregateException>(
+            Assert.ThrowsAsync<ArgumentNullException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
-            A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored,  A<string>.Ignored))
+            A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
@@ -431,9 +426,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
             .Returns(GetValidBatchResponseModel());
 
-            A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<AggregateException>();
+            A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<ArgumentNullException>();
 
-            Assert.ThrowsAsync<AggregateException>(
+            Assert.ThrowsAsync<ArgumentNullException>(
                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
@@ -499,7 +494,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                ).MustHaveHappenedOnceExactly();
         }
 
-        private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
+        private static ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()
         {
             ExchangeSetCellCount = 3,
             RequestedProductCount = 3,
@@ -519,11 +514,11 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 }
             },
             AioExchangeSetCellCount = 1,
-            RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>(),
+            RequestedProductsNotInExchangeSet = [],
             ResponseDateTime = DateTime.UtcNow
         };
 
-        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchRespGetProductDataProductVersionsonseWithZeroAIOCells() => new()
+        private static ExchangeSetResponseModel GetInValidExchangeSetGetBatchRespGetProductDataProductVersionsonseWithZeroAIOCells() => new()
         {
             ExchangeSetCellCount = 3,
             RequestedProductCount = 3,
@@ -543,11 +538,11 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 }
             },
             AioExchangeSetCellCount = 0,
-            RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>(),
+            RequestedProductsNotInExchangeSet = [],
             ResponseDateTime = DateTime.UtcNow
         };
 
-        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponseWithRequestedProductsNotInExchangeSet() => new()
+        private static ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponseWithRequestedInvalidProductsNotInExchangeSet() => new()
         {
             ExchangeSetCellCount = 3,
             RequestedProductCount = 3,
@@ -567,53 +562,22 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 }
             },
             AioExchangeSetCellCount = 1,
-            RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>
-                                                    {
-                                                        new RequestedProductsNotInExchangeSet
-                                                            {
-                                                            ProductName="ABC00001",
-                                                            Reason= "noDataAvailableForCancelledProduct"
-                                                        }
-                                                    },
-            ResponseDateTime = DateTime.UtcNow
-        };
-
-        private ExchangeSetResponseModel GetInValidExchangeSetGetBatchResponseWithRequestedInvalidProductsNotInExchangeSet() => new()
-        {
-            ExchangeSetCellCount = 3,
-            RequestedProductCount = 3,
-            Links = new PeriodicOutputService.Common.Models.Ess.Response.Links
-            {
-                ExchangeSetBatchDetailsUri = new LinkSetBatchDetailsUri
-                {
-                    Href = "http://test1.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
-                },
-                ExchangeSetBatchStatusUri = new LinkSetBatchStatusUri
-                {
-                    Href = "http://test2.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
-                },
-                ExchangeSetFileUri = new LinkSetFileUri
-                {
-                    Href = "http://test3.com/621E8D6F-9950-4BA6-BFB4-92415369AAEE"
-                }
-            },
-            AioExchangeSetCellCount = 1,
-            RequestedProductsNotInExchangeSet = new List<RequestedProductsNotInExchangeSet>
-                                                    {
+            RequestedProductsNotInExchangeSet =
+                                                    [
                                                         new RequestedProductsNotInExchangeSet
                                                             {
                                                             ProductName="ABC00001",
                                                             Reason= "Invalid"
                                                         }
-                                                    },
+                                                    ],
             ResponseDateTime = DateTime.UtcNow
         };
 
         private static GetBatchResponseModel GetValidBatchResponseModel() => new()
         {
             BatchId = Guid.NewGuid().ToString(),
-            Files = new List<BatchFile>
-            {
+            Files =
+            [
                new BatchFile
                {
                    Filename = "AIO.zip",
@@ -625,14 +589,14 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                        }
                    }
                }
-            }
+            ]
         };
 
         private static GetBatchResponseModel GetBatchResponseModelWithFileNameError() => new()
         {
             BatchId = Guid.NewGuid().ToString(),
-            Files = new List<BatchFile>
-            {
+            Files =
+            [
                new BatchFile
                {
                    Filename = "Error.txt",
@@ -644,16 +608,15 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                        }
                    }
                }
-            }
+            ]
         };
 
         private static GetBatchResponseModel GetBatchResponseModelWithFileNameV01X01() => new()
         {
             BatchId = Guid.NewGuid().ToString(),
-            Files = new List<BatchFile>
-            {
-               new BatchFile
-               {
+            Files =
+            [
+               new() {
                    Filename = "V01X01.zip",
                    Links = new PeriodicOutputService.Common.Models.Fss.Response.Links
                    {
@@ -663,7 +626,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                        }
                    }
                }
-            }
+            ]
         };
     }
 }
