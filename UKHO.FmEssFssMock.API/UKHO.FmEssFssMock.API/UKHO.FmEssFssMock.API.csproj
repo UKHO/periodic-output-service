@@ -60,7 +60,7 @@
     <None Update="Data\10D40DD5-DDFB-497A-BB67-D99FB1658320\distributors.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_WK34_22_Only.zip">
+    <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_S63_WK34_22_Only.zip"></None>
     <None Update="Data\0D91FB1A-CBE2-4443-8F61-E9A925FA00C9\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
