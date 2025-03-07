@@ -21,7 +21,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public AuthTokenProvider(IOptions<EssManagedIdentityConfiguration> essManagedIdentityConfiguration,
                                  IDistributedCache cache,
-                                 ILogger<AuthTokenProvider> logger, IOptions<PksApiConfiguration> pksApiConfiguration)
+                                 ILogger<AuthTokenProvider> logger)
         {
             _essManagedIdentityConfiguration = essManagedIdentityConfiguration;
             _cache = cache;

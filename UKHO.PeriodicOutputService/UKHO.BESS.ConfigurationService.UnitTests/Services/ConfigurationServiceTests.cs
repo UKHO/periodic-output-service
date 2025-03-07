@@ -75,7 +75,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            var exception = Assert.Throws<ArgumentNullException>(() => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer));
+            var exception = Assert.Throws<ArgumentNullException>(() => nullAzureBlobStorageClient());
             Assert.That(exception.ParamName, Is.EqualTo("azureBlobStorageClient"));
 
             Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);

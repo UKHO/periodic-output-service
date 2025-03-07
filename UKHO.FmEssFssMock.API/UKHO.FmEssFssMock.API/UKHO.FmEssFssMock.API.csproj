@@ -76,9 +76,6 @@
     <None Update="Data\15B38135-AA92-4D1A-9B6B-846462A18362\AIO_Update_WK34_22_Only.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\27067A02-DF4B-49A1-8699-442B265A75D2\V01X01.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Data\38EBEB5C-2FAA-47F5-B3AC-B196D411FA75\CommitInProgress.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -176,21 +173,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\EB74B68E-95A7-4D3B-A162-1444EFE43257\AIO_CD_WK34_22.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\F8FD2FB4-3DD6-425D-B34F-3059E262FEED\V01X01.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESConfig.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESS_PortOfIndia.zip">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\Permit.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\V01X01.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\F8FD2FB4-3DD6-425D-B34F-3059E262FEED\V01X01.zip">

@@ -100,7 +100,6 @@ namespace UKHO.PeriodicOutputService.Fulfilment
 
         private static void ConfigureServices(IServiceCollection serviceCollection, IConfiguration configuration)
         {
-            
             //Add logging
             serviceCollection.AddApplicationInsightsTelemetryWorkerService();
 

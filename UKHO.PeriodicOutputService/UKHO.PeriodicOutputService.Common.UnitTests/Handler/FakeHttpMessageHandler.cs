@@ -1,5 +1,4 @@
-﻿using Azure;
-using System.Net;
+﻿using System.Net;
 using System.Text;
 
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Handler

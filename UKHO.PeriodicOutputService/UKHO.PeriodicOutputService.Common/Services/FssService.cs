@@ -29,11 +29,6 @@ namespace UKHO.PeriodicOutputService.Common.Services
         private readonly IAzureTableStorageHelper _azureTableStorageHelper;
         private const string ServerHeaderValue = "Windows-Azure-Blob";
 
-        private readonly Enum[] _aioBatchTypes = {
-                                            Batch.AioBaseCDZipIsoSha1Batch,
-                                            Batch.AioUpdateZipBatch
-                                      };
-
         public FssService(ILogger<FssService> logger,
                                IOptions<FssApiConfiguration> fssApiConfiguration,
                                IFssApiClient fssApiClient,
@@ -183,7 +178,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             return true;
         }
 
-       public async Task<string> CreateBatch(Batch batchType, ConfigQueueMessage configQueueMessage, string? correlationId = null)
+        public async Task<string> CreateBatch(Batch batchType, ConfigQueueMessage configQueueMessage, string? correlationId = null)
         {
             _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), CommonHelper.GetCorrelationId(correlationId));
 
@@ -204,7 +199,7 @@ namespace UKHO.PeriodicOutputService.Common.Services
             _logger.LogError(EventIds.CreateBatchFailed.ToEventId(), "Request to create batch for {BatchType} in FSS failed | {DateTime} | StatusCode : {StatusCode} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), httpResponse.StatusCode.ToString(), CommonHelper.GetCorrelationId(correlationId));
             throw new FulfilmentException(EventIds.CreateBatchFailed.ToEventId());
         }
-        
+
         public async Task<string> CreateBatch(Batch batchType, FormattedWeekNumber weekNumber)
         {
             _logger.LogInformation(EventIds.CreateBatchStarted.ToEventId(), "Request to create batch for {BatchType} in FSS started | {DateTime} | _X-Correlation-ID : {CorrelationId}", batchType, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
