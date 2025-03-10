@@ -38,9 +38,9 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly string homeDirectoryPath;
 
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
-        private const string PERMITTEXTFILE = "Permit.txt";
+        private const string KEYTEXTFILE = "Key.txt";
         private const string PERMITXMLFILE = "Permit.xml";
-        private const string PERMITTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
+        private const string KEYTEXTFILEHEADER = "Key ID,Key,Name,Edition,Created,Issued,Expired,Status";
         private const string DEFAULTMIMETYPE = "application/octet-stream";
         private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
@@ -668,7 +668,7 @@ namespace UKHO.BESS.BuilderService.Services
             if (keyFileType == KeyFileType.KEY_TEXT)
             {
                 int rowNumber = 1;
-                string permitFileContent = PERMITTEXTFILEHEADER;
+                string keyFileContent = KEYTEXTFILEHEADER;
 
                 foreach (var productKeyServiceResponse in productKeyServiceResponses)
                 {
@@ -678,14 +678,14 @@ namespace UKHO.BESS.BuilderService.Services
                     {
                         string date = DateTime.UtcNow.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
 
-                        permitFileContent += Environment.NewLine;
-                        permitFileContent += $"{rowNumber++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,1:Active";
-                        permitFileContent += Environment.NewLine;
-                        permitFileContent += $"{rowNumber++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{Convert.ToInt16(productKeyServiceResponse.Edition) + 1},{date},{date},,2:Next";
+                        keyFileContent += Environment.NewLine;
+                        keyFileContent += $"{rowNumber++},{permitKey.ActiveKey},{productKeyServiceResponse.ProductName},{productKeyServiceResponse.Edition},{date},{date},,1:Active";
+                        keyFileContent += Environment.NewLine;
+                        keyFileContent += $"{rowNumber++},{permitKey.NextKey},{productKeyServiceResponse.ProductName},{Convert.ToInt16(productKeyServiceResponse.Edition) + 1},{date},{date},,2:Next";
                     }
                 }
 
-                fileSystemHelper.CreateTextFile(filePath, PERMITTEXTFILE, permitFileContent);
+                fileSystemHelper.CreateTextFile(filePath, KEYTEXTFILE, keyFileContent);
             }
             else if (keyFileType == KeyFileType.PERMIT_XML)
             {
