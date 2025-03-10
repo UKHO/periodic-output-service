@@ -87,7 +87,7 @@
     <None Update="Data\9F19B71E-2DCA-42FD-B7DD-A68792A2AA27\BESS_PortOfIndia.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\9F19B71E-2DCA-42FD-B7DD-A68792A2AA27\Permit.txt">
+    <None Update="Data\9F19B71E-2DCA-42FD-B7DD-A68792A2AA27\Key.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\A7FB95F0-B3FF-4EF2-9B76-A74C7D3C3C8F\BESConfig.zip">
@@ -174,7 +174,7 @@
     <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\BESS_PortOfIndia.zip">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\Permit.txt">
+    <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\Key.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Data\FA741049-7A78-4EC3-8737-1B3FB8D1CC3F\V01X01.zip">

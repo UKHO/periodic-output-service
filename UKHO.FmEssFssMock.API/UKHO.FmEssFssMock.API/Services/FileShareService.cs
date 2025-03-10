@@ -41,7 +41,7 @@ namespace UKHO.FmEssFssMock.API.Services
         private readonly string bessMultipleFilesBatchId = "10D40DD5-DDFB-497A-BB67-D99FB1658320";
         private const string BESPOKEREADME = "BESPOKE README";
         private const string MULTIPLEFILES = "MULTIPLE";
-        private const string PERMITTXTFILENAME = "Permit.txt";
+        private const string KEYTXTFILENAME = "Key.txt";
         private const string PERMITXMLFILENAME = "Permit.xml";
 
         public FileShareService(IOptions<FileShareServiceConfiguration> fssConfig)
@@ -247,7 +247,7 @@ namespace UKHO.FmEssFssMock.API.Services
                 File.Copy(srcFile, destFile, true);
 
                 string permitXmlFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITXMLFILENAME);
-                string permitTxtFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, PERMITTXTFILENAME);
+                string permitTxtFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, KEYTXTFILENAME);
                 if (File.Exists(permitXmlFile))
                 {
                     srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(PERMITXMLFILENAME));
@@ -256,8 +256,8 @@ namespace UKHO.FmEssFssMock.API.Services
                 }
                 if (File.Exists(permitTxtFile))
                 {
-                    srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(PERMITTXTFILENAME));
-                    destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), PERMITTXTFILENAME);
+                    srcFile = Path.Combine(Environment.CurrentDirectory, @"Data", batchId, RenameFiles(KEYTXTFILENAME));
+                    destFile = Path.Combine(Path.Combine(homeDirectoryPath, batchId), KEYTXTFILENAME);
                     File.Copy(srcFile, destFile, true);
                 }
                 return true;
