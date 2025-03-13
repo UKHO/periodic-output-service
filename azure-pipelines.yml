@@ -9,10 +9,6 @@ parameters:
     displayName: "Disable Stryker"
     type: boolean
     default: false
-  - name: DisableDependencyCheck
-    displayName: "Disable OWASP dependency checking"
-    type: boolean
-    default: false
 
 trigger:
   - main
@@ -46,14 +42,6 @@ variables:
     value: "NautilusBuild"
   - name: SdkVersion
     value: "8.0.x"
-
-resources:
-  repositories:
-  - repository: UKHOTemplates
-    type: github
-    name: UKHO/devops-pipelinetemplates
-    endpoint: UKHO
-    ref: refs/heads/main
 
 stages:
   - stage: Stryker_Mutator
@@ -101,7 +89,6 @@ stages:
     jobs:
     - template: Deployment/templates/build-test-publish.yml  
       parameters:
-        DisableDependencyCheck: ${{ parameters.DisableDependencyCheck }}
         DotNetVersion: '8.0.x'
 
   - stage: Devdeploy
