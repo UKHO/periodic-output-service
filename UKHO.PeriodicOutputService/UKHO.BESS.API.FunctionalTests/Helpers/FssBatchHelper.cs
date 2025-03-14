@@ -256,18 +256,18 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         }
 
         /// <summary>
-        /// This method is used to check the Permit Txt file and its content
+        /// This method is used to check the Key Txt file and its content
         /// </summary>
         /// <param name="downloadFolderPath">Sets the path of the folder where the required file is downloaded</param>
         /// <returns></returns>
-        public static bool CheckPermitTxtFile(string? downloadFolderPath)
+        public static bool CheckKeyTxtFile(string? downloadFolderPath)
         {
             bool check = false;
-            string? permitTxt = testConfiguration.bessConfig.PermitTxtFile;
+            string? keyTxt = testConfiguration.bessConfig.KeyTxtFile;
             string? date = testConfiguration.bessConfig.PermitDate;
-            if (cellNames != null && ck != null && cellPermits != null && editions != null && permitTxt != null)
+            if (cellNames != null && ck != null && cellPermits != null && editions != null && keyTxt != null)
             {
-                string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, permitTxt));
+                string[] fileContent = File.ReadAllLines(Path.Combine(downloadFolderPath!, keyTxt));
                 int rows = fileContent.Length;
                 for (int row = 1; row < rows; row++)
                 {
@@ -333,7 +333,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static async Task<bool> ExtractDownloadedPermit(string downloadFileUrl, string? keyFileType, string batchFolderPath)
         {
-            string? permitTxt = testConfiguration.bessConfig.PermitTxtFile;
+            string? permitTxt = testConfiguration.bessConfig.KeyTxtFile;
             string? permitXml = testConfiguration.bessConfig.PermitXmlFile;
             keyFileType = keyFileType switch
             {
@@ -412,12 +412,12 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <returns></returns>
         public static bool VerifyPermitFile(string? downloadFolderPath, string? keyFileType)
         {
-            if (File.Exists(Path.Combine(downloadFolderPath!, testConfiguration.bessConfig.PermitTxtFile!)) || File.Exists(Path.Combine(downloadFolderPath!, testConfiguration.bessConfig.PermitXmlFile!)))
+            if (File.Exists(Path.Combine(downloadFolderPath!, testConfiguration.bessConfig.KeyTxtFile!)) || File.Exists(Path.Combine(downloadFolderPath!, testConfiguration.bessConfig.PermitXmlFile!)))
             {
                 bool permitVerified = false;
                 if (keyFileType == "KEY_TEXT")
                 {
-                    permitVerified = CheckPermitTxtFile(downloadFolderPath);
+                    permitVerified = CheckKeyTxtFile(downloadFolderPath);
                 }
                 else if (keyFileType == "PERMIT_XML")
                 {

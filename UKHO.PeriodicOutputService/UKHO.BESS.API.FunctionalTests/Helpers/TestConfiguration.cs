@@ -28,7 +28,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? Identifiers { get; set; }
             public List<string>? Keys { get; set; }
             public List<string>? Permits { get; set; }
-            public string? PermitTxtFile { get; set; }
+            public string? KeyTxtFile { get; set; }
             public string? PermitXmlFile { get; set; }
             public string? PermitDate { get; set; }
             public List<string>? BessBatchDetails { get; set; }
