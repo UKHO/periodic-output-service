@@ -85,16 +85,6 @@ jobs:
         arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
 
     - task: DotNetCoreCLI@2
-      displayName: "Publish POS Fulfilment Service Code"
-      inputs:
-        command: "publish"
-        publishWebProjects: false
-        projects: "**/*UKHO.PeriodicOutputService.Fulfilment.csproj"
-        arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob'
-        zipAfterPublish: false
-        modifyOutputPath: false
-
-    - task: DotNetCoreCLI@2
       displayName: "Publish AIO Fulfilment Service Code"
       inputs:
         command: "publish"
@@ -165,7 +155,7 @@ jobs:
       inputs:
         targetType: filePath
         filePath: '$(Build.SourcesDirectory)\Utility\XmlToRtfTransformation.ps1'
-        arguments: '-xmlFilePath $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\POSFulfilmentWebJob\UKHO.PeriodicOutputService.Common.xml -xsltFilePath $(Build.SourcesDirectory)\Utility\EventIdXmlTransformation.xslt -outputFileName Runbook-EventId'
+        arguments: '-xmlFilePath $(Build.ArtifactStagingDirectory)\PeriodicOutputFulfilmentService\App_Data\jobs\triggered\AIOFulfilmentWebJob\UKHO.PeriodicOutputService.Common.xml -xsltFilePath $(Build.SourcesDirectory)\Utility\EventIdXmlTransformation.xslt -outputFileName Runbook-EventId'
     
     - task: PublishBuildArtifacts@1
       displayName: "Publish event id runbook"

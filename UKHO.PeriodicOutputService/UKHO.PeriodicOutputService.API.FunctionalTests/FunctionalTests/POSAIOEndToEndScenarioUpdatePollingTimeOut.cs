@@ -14,7 +14,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
 
             HttpResponseMessage apiResponse = MockHelper.ConfigureFMAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationUpdatePollingTimeout);
             Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
-            await CommonHelper.RunWebJob();
+            await CommonHelper.RunWebJobAio();
         }
 
         [Test]
