@@ -10,6 +10,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [OneTimeSetUp]
         public async Task Setup()
         {
+            getproductIdentifier = new GetProductIdentifiers();
             EssJwtToken = await AuthTokenProvider.GetEssToken();
         }
 
