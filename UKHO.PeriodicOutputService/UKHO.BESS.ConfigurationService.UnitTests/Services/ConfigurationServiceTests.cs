@@ -5,9 +5,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using UKHO.BESS.ConfigurationService.Services;
 using UKHO.BESS.ConfigurationService.Validation;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
+using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Scs.Response;
 using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
@@ -829,7 +831,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<EventId>(1) == EventIds.BessSizeExceedsThreshold.ToEventId()
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2)!.ToDictionary(c => c.Key, c => c.Value)[
                     "{OriginalFormat}"].ToString() ==
-                "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file : {FileName} | " + "_X-Correlation-ID : {CorrelationId}"
+                "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set for type : {Type} will not be created for file : {FileName} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
             A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<IEnumerable<string>>.Ignored, A<long>.Ignored)).MustNotHaveHappened();
 
@@ -1031,6 +1033,83 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             return history;
         }
 
+        [Test]
+        public async Task WhenCheckConfigFrequencyAndSaveQueueDetailsAsyncWithBessTypeUpdateReturnsTrueAndScheduleDetailsAddedToQueue_ThenLogWithMessagAdded()
+        {
+            var fakeScsList = GetFakeSalesCatalogueDataProductResponse();
+            fakeScsList[0].FileSize = 734108057;
+
+            A.CallTo(() => fakeAzureTableStorageHelper.GetLatestBessProductVersionDetailsAsync()).Returns(GetFakeProductVersionEntitiesList());
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Returns(GetFakeScheduleDetailsToAddInQueue());
+            A.CallTo(() => fakeConfiguration["BessSizeInMB"]).Returns("700");
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<long>.Ignored)).Returns(true);
+            A.CallTo(() => fakeSalesCatalogueService.PostProductVersionsAsync(A<List<ProductVersion>>.Ignored))
+                .Returns(GetFakeSalesCatalogueResponse());
+
+            var result = await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(BessType.UPDATE), fakeScsList);
+
+            A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync(A<string>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(() =>
+                fakeAzureTableStorageHelper.UpsertScheduleDetailAsync(A<DateTime>.Ignored, A<BessConfig>.Ignored, true)).MustHaveHappenedOnceOrMore();
+
+            A.CallTo(() => fakeAzureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(A<BessConfig>.Ignored, A<List<string>>.Ignored, A<long>.Ignored))
+                .MustHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BessQueueMessageSuccessful.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Queue message creation successful for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+
+            Assert.That(result);
+        }
+
+        private static List<ProductVersionEntities> GetFakeProductVersionEntitiesList()
+        {
+            var productVersionEntities = new List<ProductVersionEntities>
+            {
+                new() { PartitionKey = "BESS-1", RowKey = "s63|1U320240", EditionNumber = 1, UpdateNumber = 1 },
+                new() { PartitionKey = "BESS-1", RowKey = "s63|US5NY3DD", EditionNumber = 4, UpdateNumber = 6 },
+                new() { PartitionKey = "BESS-1", RowKey = "s63|US4AK3KR", EditionNumber = 5, UpdateNumber = 6 }
+            };
+            return productVersionEntities;
+        }
+
+        private static SalesCatalogueResponse GetFakeSalesCatalogueResponse()
+        {
+            var oneMegaByte = (long)Math.Pow(1024, 2);
+
+            var fakeSalesCatalogueResponse = new SalesCatalogueResponse
+            {
+                ResponseCode = HttpStatusCode.OK,
+                ResponseBody = new SalesCatalogueProductResponse
+                {
+                    Products = new List<Products>
+                    {
+                        new()
+                        {
+                            ProductName = "1U320240", EditionNumber = 1, UpdateNumbers = new List<int?> { 0, 1 },
+                            FileSize = oneMegaByte * 5
+                        },
+                        new()
+                        {
+                            ProductName = "US5NY3DD", EditionNumber = 4, UpdateNumbers = new List<int?> { 6 },
+                            FileSize = oneMegaByte * 6
+                        },
+                        new()
+                        {
+                            ProductName = "US4AK3KR", EditionNumber = 5, UpdateNumbers = new List<int?> { 6 },
+                            FileSize = oneMegaByte * 7
+                        }
+                    }
+                }
+            };
+            return fakeSalesCatalogueResponse;
+        }
+
         private ScheduleDetailEntity GetFakeScheduleDetailsNotToAddInQueue()
         {
             var history = new ScheduleDetailEntity
@@ -1059,7 +1138,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             return history;
         }
 
-        private List<BessConfig> GetFakeConfigurationSetting()
+        private List<BessConfig> GetFakeConfigurationSetting(BessType type = BessType.BASE)
         {
             int todayDay = DateTime.UtcNow.Day;
             List<BessConfig> configurations = new()
@@ -1070,7 +1149,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                     ExchangeSetStandard = "s63",
                     EncCellNames = new List<string> { "1U320240", "US*", "US123456", "US78910", "GB*" },
                     Frequency = $"0 * {todayDay} * *",
-                    Type = "",
+                    Type = type.ToString(),
                     KeyFileType = "",
                     AllowedUsers = new List<string>(),
                     AllowedUserGroups = new List<string>(),

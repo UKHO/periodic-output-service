@@ -5,6 +5,8 @@ using Polly;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models;
+using UKHO.PeriodicOutputService.Common.Models.Ess;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.WeekNumberUtils;
 
 namespace UKHO.PeriodicOutputService.Common.Helpers
@@ -110,5 +112,47 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         /// <param name="batchType"></param>
         /// <returns></returns>
         public static bool IsAio(this Batch batchType) => batchType == Batch.AioBaseCDZipIsoSha1Batch || batchType == Batch.AioUpdateZipBatch;
+
+        /// <summary>
+        /// This method will return list of product versions from product version azure table entities.
+        /// </summary>
+        /// <param name="productVersionEntities"></param>
+        /// <param name="cellNames"></param>
+        /// <param name="configName"></param>
+        /// <param name="exchangeSetStandard"></param>
+        /// <returns></returns>
+        public static List<ProductVersion> GetProductVersionsFromEntities(IEnumerable<ProductVersionEntities> productVersionEntities, IEnumerable<string> cellNames, string configName, string exchangeSetStandard)
+        {
+            var productVersions = new List<ProductVersion>();
+
+            var entityLookup = productVersionEntities
+                .Where(p => p.PartitionKey == configName)
+                .ToDictionary(p => p.RowKey, p => p);
+
+            foreach (var cellName in cellNames)
+            {
+                var rowKey = $"{exchangeSetStandard}|{cellName}";
+                if (entityLookup.TryGetValue(rowKey, out var entity))
+                {
+                    productVersions.Add(new ProductVersion
+                    {
+                        ProductName = cellName,
+                        EditionNumber = entity.EditionNumber,
+                        UpdateNumber = entity.UpdateNumber
+                    });
+                }
+                else
+                {
+                    productVersions.Add(new ProductVersion
+                    {
+                        ProductName = cellName,
+                        EditionNumber = 0,
+                        UpdateNumber = 0
+                    });
+                }
+            }
+
+            return productVersions;
+        }
     }
 }

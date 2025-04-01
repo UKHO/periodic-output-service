@@ -868,7 +868,22 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809172 - Remove ReadMe entry from Catalog file request failed for ReadMeSearchFilter is None
         /// </summary>
-        RemoveReadMeEntryAndUpdateCatalogFileProcessFailed = 809172
+        RemoveReadMeEntryAndUpdateCatalogFileProcessFailed = 809172,
+
+        /// <summary>
+        /// 809173 - Request for sales catalogue service product versions endpoint is started.
+        /// </summary>
+        ScsPostProductVersionsRequestStart = 809173,
+
+        /// <summary>
+        /// 809174 - Request for sales catalogue service product versions endpoint is completed.
+        /// </summary>
+        ScsPostProductVersionsRequestCompleted = 809174,
+
+        /// <summary>
+        /// 809175 - Request for sales catalogue service endpoint is failed due to non ok response.
+        /// </summary>
+        SalesCatalogueServiceNonOkResponse = 809175
     }
 
     public static class EventIdExtensions
