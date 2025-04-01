@@ -50,11 +50,11 @@ namespace UKHO.PeriodicOutputService.Common.Services
 
             var accessToken = await authScsTokenProvider.GetManagedIdentityAuthAsync(salesCatalogueConfig.Value.ResourceId);
 
-            var uri = $"/{salesCatalogueConfig.Value.Version}/productData/{salesCatalogueConfig.Value.ProductType}/products/productVersions";
+            var uri = $"{salesCatalogueConfig.Value.BaseUrl}/{salesCatalogueConfig.Value.Version}/productData/{salesCatalogueConfig.Value.ProductType}/products/productVersions";
 
             var payloadJson = JsonConvert.SerializeObject(productVersions);
 
-            var httpResponse = await salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Get, payloadJson, accessToken, uri);
+            var httpResponse = await salesCatalogueClient.CallSalesCatalogueServiceApi(HttpMethod.Post, payloadJson, accessToken, uri);
 
             var response = await CreateSalesCatalogueServiceResponse(httpResponse);
 

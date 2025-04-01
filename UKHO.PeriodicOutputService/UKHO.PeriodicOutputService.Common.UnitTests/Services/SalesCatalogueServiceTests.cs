@@ -28,7 +28,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             fakeLogger = A.Fake<ILogger<SalesCatalogueService>>();
             fakeAuthScsTokenProvider = A.Fake<IAuthScsTokenProvider>();
-            fakeSaleCatalogueConfig = Options.Create(new SalesCatalogueConfiguration() { ProductType = "Test", Version = "t1", CatalogueType = "essTest" });
+            fakeSaleCatalogueConfig = Options.Create(new SalesCatalogueConfiguration() { BaseUrl = "baseSCSUrl", ProductType = "Test", Version = "t1", CatalogueType = "essTest" });
             fakeSalesCatalogueClient = A.Fake<ISalesCatalogueClient>();
             salesCatalogueService = new SalesCatalogueService(fakeLogger, fakeSaleCatalogueConfig, fakeAuthScsTokenProvider, fakeSalesCatalogueClient);
         }
@@ -156,7 +156,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             {
                 Assert.That(response.ResponseCode, Is.EqualTo(HttpStatusCode.OK));
                 Assert.That(httpMethodParam, Is.EqualTo(HttpMethod.Get));
-                Assert.That(uriParam, Is.EqualTo($"/{fakeSaleCatalogueConfig.Value.Version}/productData/{fakeSaleCatalogueConfig.Value.ProductType}/catalogue/{fakeSaleCatalogueConfig.Value.CatalogueType}"));
+                Assert.That(uriParam, Is.EqualTo($"{fakeSaleCatalogueConfig.Value.BaseUrl}/{fakeSaleCatalogueConfig.Value.Version}/productData/{fakeSaleCatalogueConfig.Value.ProductType}/catalogue/{fakeSaleCatalogueConfig.Value.CatalogueType}"));
                 Assert.That(accessTokenParam, Is.EqualTo(actualAccessToken));
             }
 
@@ -180,6 +180,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public async Task WhenPostProductVersionsAsyncIsCalled_ThenReturnsExpectedResponse()
         {
+            var actualAccessToken = "notRequiredDuringTesting";
+            string? accessTokenParam = null;
+            string? uriParam = null;
+            HttpMethod? httpMethodParam = null;
+
+
             var productVersions = new List<ProductVersion>
             {
                 new() { ProductName = "TestProduct", EditionNumber = 1, UpdateNumber = 1 }
@@ -203,14 +209,28 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var jsonResponse = JsonConvert.SerializeObject(expectedResponse.ResponseBody);
 
-            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(NotRequiredAccessToken);
+            A.CallTo(() => fakeAuthScsTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).Returns(actualAccessToken);
             A.CallTo(() => fakeSalesCatalogueClient.CallSalesCatalogueServiceApi(A<HttpMethod>.Ignored, A<string>.Ignored, A<string>.Ignored, A<string>.Ignored))
+                .Invokes((HttpMethod method, string postBody, string accessToken, string uri) =>
+                {
+                    accessTokenParam = accessToken;
+                    uriParam = uri;
+                    httpMethodParam = method;
+                })
                 .Returns(new HttpResponseMessage { StatusCode = HttpStatusCode.OK, Content = new StringContent(jsonResponse) });
 
             var response = await salesCatalogueService.PostProductVersionsAsync(productVersions);
 
             Assert.That(response.ResponseCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(JsonConvert.SerializeObject(response.ResponseBody), Is.EqualTo(jsonResponse));
+
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(response.ResponseCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(httpMethodParam, Is.EqualTo(HttpMethod.Post));
+                Assert.That(uriParam, Is.EqualTo($"{fakeSaleCatalogueConfig.Value.BaseUrl}/{fakeSaleCatalogueConfig.Value.Version}/productData/{fakeSaleCatalogueConfig.Value.ProductType}/products/productVersions"));
+                Assert.That(accessTokenParam, Is.EqualTo(actualAccessToken));
+            }
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"
