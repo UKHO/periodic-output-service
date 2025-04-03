@@ -68,7 +68,6 @@ steps:
       folderPath: '$(Pipeline.Workspace)/PeriodicOutputService/*.zip'
       xmlTransformationRules:
       jsonTargetFiles: | 
-        **/POS*/appsettings.json
         **/BESS*/appsettings.json        
 
   - bash: |
