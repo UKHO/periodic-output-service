@@ -1,0 +1,218 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35919.96
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Stub", "Stub", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.FmEssFssMock.API", "UKHO.FmEssFssMock.API\UKHO.FmEssFssMock.API\UKHO.FmEssFssMock.API.csproj", "{AF56CE4F-C9B1-CB28-736C-572B76D9CB9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.PKSWireMock.API", "UKHO.PKSWireMockService.API\UKHO.PKSWireMock.API.csproj", "{E041089A-0808-8187-5035-A487C80D2BDA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{052DA573-6B91-4F04-953B-25DC17EAF09C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests", "UKHO.PeriodicOutputService\UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests\UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.csproj", "{442C029C-964A-5CB0-CCA4-26A718708669}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.API.FunctionalTests", "UKHO.PeriodicOutputService\UKHO.BESS.API.FunctionalTests\UKHO.BESS.API.FunctionalTests.csproj", "{5FF5BA80-EE1B-3525-4971-D921FE600A70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.BuilderService.UnitTests", "UKHO.PeriodicOutputService\UKHO.BESS.BuilderService.UnitTests\UKHO.BESS.BuilderService.UnitTests.csproj", "{32686111-0D47-2E2A-EA65-62F20DC8F408}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.CleanUpJob.UnitTests", "UKHO.PeriodicOutputService\UKHO.BESS.CleanUpJob.UnitTests\UKHO.BESS.CleanUpJob.UnitTests.csproj", "{A8B71121-22D1-F3FF-D948-A5D89192D395}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.ConfigurationService.UnitTests", "UKHO.PeriodicOutputService\UKHO.BESS.ConfigurationService.UnitTests\UKHO.BESS.ConfigurationService.UnitTests.csproj", "{724816F4-EFCF-6959-EE36-22DF1E751456}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.PeriodicOutputService.API.FunctionalTests", "UKHO.PeriodicOutputService\UKHO.PeriodicOutputService.API.FunctionalTests\UKHO.PeriodicOutputService.API.FunctionalTests.csproj", "{58D3137A-17B3-4AE1-9C98-6C05EFB08559}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.PeriodicOutputService.Common.UnitTests", "UKHO.PeriodicOutputService\UKHO.PeriodicOutputService.Common.UnitTests\UKHO.PeriodicOutputService.Common.UnitTests.csproj", "{9D2030FC-CA11-3E18-B4EC-AA8ED747F81B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebJobs", "WebJobs", "{D82844B1-1F55-4009-A857-D5A3D3983141}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.AdmiraltyInformationOverlay.Fulfilment", "UKHO.PeriodicOutputService\UKHO.AdmiraltyInformationOverlay.Fulfilment\UKHO.AdmiraltyInformationOverlay.Fulfilment.csproj", "{8BD620C4-6D67-9148-1A26-68A2032D0168}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.BuilderService", "UKHO.PeriodicOutputService\UKHO.BESS.BuilderService\UKHO.BESS.BuilderService.csproj", "{64E75F18-B964-1A6B-0936-4D600EA97795}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.CleanUpJob", "UKHO.PeriodicOutputService\UKHO.BESS.CleanUpJob\UKHO.BESS.CleanUpJob.csproj", "{17C19B31-32AC-9EAE-00A9-5CAE4C6378C9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.ConfigurationService", "UKHO.PeriodicOutputService\UKHO.BESS.ConfigurationService\UKHO.BESS.ConfigurationService.csproj", "{3D087B3C-D03C-6277-1BD2-D17562E27BBD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{C0075B67-0A62-4476-B71D-A3BE28E3DFDE}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\add-lease.ps1 = Deployment\add-lease.ps1
+		Deployment\check_health_endpoint.ps1 = Deployment\check_health_endpoint.ps1
+		Deployment\check_health_endpoint_fm_live.ps1 = Deployment\check_health_endpoint_fm_live.ps1
+		Deployment\check_service_status_webjob.ps1 = Deployment\check_service_status_webjob.ps1
+		Deployment\mock_api_deployment.ps1 = Deployment\mock_api_deployment.ps1
+		Deployment\set_stub_configuration.ps1 = Deployment\set_stub_configuration.ps1
+		Deployment\set_subnet_configuration.ps1 = Deployment\set_subnet_configuration.ps1
+		Deployment\set_webjob_configuration.ps1 = Deployment\set_webjob_configuration.ps1
+		Deployment\swap_container_config.ps1 = Deployment\swap_container_config.ps1
+		Deployment\terraform_conditional_run.ps1 = Deployment\terraform_conditional_run.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A20083E9-08BE-4BA5-A707-5E5803CC7B52}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\src\azure.tf = Deployment\src\azure.tf
+		Deployment\src\main.tf = Deployment\src\main.tf
+		Deployment\src\outputs.tf = Deployment\src\outputs.tf
+		Deployment\src\resource-group.tf = Deployment\src\resource-group.tf
+		Deployment\src\variables.tf = Deployment\src\variables.tf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Modules", "Modules", "{46C145A6-0235-4A5F-ACC4-270FD4AD6493}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppInsights", "AppInsights", "{B6953E7A-D7C2-4CA1-9CA3-88851941EE03}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\src\Modules\AppInsights\main.tf = Deployment\src\Modules\AppInsights\main.tf
+		Deployment\src\Modules\AppInsights\outputs.tf = Deployment\src\Modules\AppInsights\outputs.tf
+		Deployment\src\Modules\AppInsights\variables.tf = Deployment\src\Modules\AppInsights\variables.tf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EventHub", "EventHub", "{36DC973E-4DC7-48D1-BC49-40D2E339054A}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\src\Modules\EventHub\main.tf = Deployment\src\Modules\EventHub\main.tf
+		Deployment\src\Modules\EventHub\outputs.tf = Deployment\src\Modules\EventHub\outputs.tf
+		Deployment\src\Modules\EventHub\variables.tf = Deployment\src\Modules\EventHub\variables.tf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "KeyVault", "KeyVault", "{08AA76AE-4019-45E5-B9C9-CD0F06390049}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\src\Modules\KeyVault\main.tf = Deployment\src\Modules\KeyVault\main.tf
+		Deployment\src\Modules\KeyVault\outputs.tf = Deployment\src\Modules\KeyVault\outputs.tf
+		Deployment\src\Modules\KeyVault\variables.tf = Deployment\src\Modules\KeyVault\variables.tf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MockWebApp", "MockWebApp", "{873C76A9-9F74-4816-98BD-7F6AA51F5100}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\src\Modules\MockWebApp\main.tf = Deployment\src\Modules\MockWebApp\main.tf
+		Deployment\src\Modules\MockWebApp\outputs.tf = Deployment\src\Modules\MockWebApp\outputs.tf
+		Deployment\src\Modules\MockWebApp\variables.tf = Deployment\src\Modules\MockWebApp\variables.tf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storage", "Storage", "{AA2D6F77-DC92-44DE-8489-1ECCEACF2656}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\src\Modules\Storage\main.tf = Deployment\src\Modules\Storage\main.tf
+		Deployment\src\Modules\Storage\outputs.tf = Deployment\src\Modules\Storage\outputs.tf
+		Deployment\src\Modules\Storage\variables.tf = Deployment\src\Modules\Storage\variables.tf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WebApp", "WebApp", "{BA7AA33A-E74E-4487-93C9-4AC858E56BA3}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\src\Modules\WebApp\main.tf = Deployment\src\Modules\WebApp\main.tf
+		Deployment\src\Modules\WebApp\outputs.tf = Deployment\src\Modules\WebApp\outputs.tf
+		Deployment\src\Modules\WebApp\variables.tf = Deployment\src\Modules\WebApp\variables.tf
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{DDEFB846-65FA-48A7-A828-489B030FBD99}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\templates\app-deploy.yml = Deployment\templates\app-deploy.yml
+		Deployment\templates\build-test-publish.yml = Deployment\templates\build-test-publish.yml
+		Deployment\templates\continuous-deployment.yml = Deployment\templates\continuous-deployment.yml
+		Deployment\templates\retain-pipeline.yml = Deployment\templates\retain-pipeline.yml
+		Deployment\templates\variables.yml = Deployment\templates\variables.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Pipeline", "Pipeline", "{2F01EC96-71D7-468F-BC0B-F261D5F08838}"
+	ProjectSection(SolutionItems) = preProject
+		Apply-AssemblyVersionAndDefaults.ps1 = Apply-AssemblyVersionAndDefaults.ps1
+		azure-pipelines.yml = azure-pipelines.yml
+		BuildNuget.config = BuildNuget.config
+		CodeCoverageReport.ps1 = CodeCoverageReport.ps1
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.PeriodicOutputService.Common", "UKHO.PeriodicOutputService\UKHO.PeriodicOutputService.Common\UKHO.PeriodicOutputService.Common.csproj", "{55D0E42C-8910-635E-E1BC-3A2989248AB0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AF56CE4F-C9B1-CB28-736C-572B76D9CB9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF56CE4F-C9B1-CB28-736C-572B76D9CB9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF56CE4F-C9B1-CB28-736C-572B76D9CB9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF56CE4F-C9B1-CB28-736C-572B76D9CB9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E041089A-0808-8187-5035-A487C80D2BDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E041089A-0808-8187-5035-A487C80D2BDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E041089A-0808-8187-5035-A487C80D2BDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E041089A-0808-8187-5035-A487C80D2BDA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{442C029C-964A-5CB0-CCA4-26A718708669}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{442C029C-964A-5CB0-CCA4-26A718708669}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{442C029C-964A-5CB0-CCA4-26A718708669}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{442C029C-964A-5CB0-CCA4-26A718708669}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FF5BA80-EE1B-3525-4971-D921FE600A70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FF5BA80-EE1B-3525-4971-D921FE600A70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FF5BA80-EE1B-3525-4971-D921FE600A70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FF5BA80-EE1B-3525-4971-D921FE600A70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32686111-0D47-2E2A-EA65-62F20DC8F408}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32686111-0D47-2E2A-EA65-62F20DC8F408}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32686111-0D47-2E2A-EA65-62F20DC8F408}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32686111-0D47-2E2A-EA65-62F20DC8F408}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8B71121-22D1-F3FF-D948-A5D89192D395}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8B71121-22D1-F3FF-D948-A5D89192D395}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8B71121-22D1-F3FF-D948-A5D89192D395}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8B71121-22D1-F3FF-D948-A5D89192D395}.Release|Any CPU.Build.0 = Release|Any CPU
+		{724816F4-EFCF-6959-EE36-22DF1E751456}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{724816F4-EFCF-6959-EE36-22DF1E751456}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{724816F4-EFCF-6959-EE36-22DF1E751456}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{724816F4-EFCF-6959-EE36-22DF1E751456}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58D3137A-17B3-4AE1-9C98-6C05EFB08559}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58D3137A-17B3-4AE1-9C98-6C05EFB08559}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58D3137A-17B3-4AE1-9C98-6C05EFB08559}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58D3137A-17B3-4AE1-9C98-6C05EFB08559}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D2030FC-CA11-3E18-B4EC-AA8ED747F81B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D2030FC-CA11-3E18-B4EC-AA8ED747F81B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D2030FC-CA11-3E18-B4EC-AA8ED747F81B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D2030FC-CA11-3E18-B4EC-AA8ED747F81B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BD620C4-6D67-9148-1A26-68A2032D0168}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BD620C4-6D67-9148-1A26-68A2032D0168}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BD620C4-6D67-9148-1A26-68A2032D0168}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BD620C4-6D67-9148-1A26-68A2032D0168}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64E75F18-B964-1A6B-0936-4D600EA97795}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64E75F18-B964-1A6B-0936-4D600EA97795}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64E75F18-B964-1A6B-0936-4D600EA97795}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64E75F18-B964-1A6B-0936-4D600EA97795}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17C19B31-32AC-9EAE-00A9-5CAE4C6378C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17C19B31-32AC-9EAE-00A9-5CAE4C6378C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17C19B31-32AC-9EAE-00A9-5CAE4C6378C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17C19B31-32AC-9EAE-00A9-5CAE4C6378C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D087B3C-D03C-6277-1BD2-D17562E27BBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D087B3C-D03C-6277-1BD2-D17562E27BBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D087B3C-D03C-6277-1BD2-D17562E27BBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D087B3C-D03C-6277-1BD2-D17562E27BBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55D0E42C-8910-635E-E1BC-3A2989248AB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55D0E42C-8910-635E-E1BC-3A2989248AB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55D0E42C-8910-635E-E1BC-3A2989248AB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55D0E42C-8910-635E-E1BC-3A2989248AB0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{AF56CE4F-C9B1-CB28-736C-572B76D9CB9B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{E041089A-0808-8187-5035-A487C80D2BDA} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{442C029C-964A-5CB0-CCA4-26A718708669} = {052DA573-6B91-4F04-953B-25DC17EAF09C}
+		{5FF5BA80-EE1B-3525-4971-D921FE600A70} = {052DA573-6B91-4F04-953B-25DC17EAF09C}
+		{32686111-0D47-2E2A-EA65-62F20DC8F408} = {052DA573-6B91-4F04-953B-25DC17EAF09C}
+		{A8B71121-22D1-F3FF-D948-A5D89192D395} = {052DA573-6B91-4F04-953B-25DC17EAF09C}
+		{724816F4-EFCF-6959-EE36-22DF1E751456} = {052DA573-6B91-4F04-953B-25DC17EAF09C}
+		{58D3137A-17B3-4AE1-9C98-6C05EFB08559} = {052DA573-6B91-4F04-953B-25DC17EAF09C}
+		{9D2030FC-CA11-3E18-B4EC-AA8ED747F81B} = {052DA573-6B91-4F04-953B-25DC17EAF09C}
+		{8BD620C4-6D67-9148-1A26-68A2032D0168} = {D82844B1-1F55-4009-A857-D5A3D3983141}
+		{64E75F18-B964-1A6B-0936-4D600EA97795} = {D82844B1-1F55-4009-A857-D5A3D3983141}
+		{17C19B31-32AC-9EAE-00A9-5CAE4C6378C9} = {D82844B1-1F55-4009-A857-D5A3D3983141}
+		{3D087B3C-D03C-6277-1BD2-D17562E27BBD} = {D82844B1-1F55-4009-A857-D5A3D3983141}
+		{C0075B67-0A62-4476-B71D-A3BE28E3DFDE} = {2F01EC96-71D7-468F-BC0B-F261D5F08838}
+		{A20083E9-08BE-4BA5-A707-5E5803CC7B52} = {C0075B67-0A62-4476-B71D-A3BE28E3DFDE}
+		{46C145A6-0235-4A5F-ACC4-270FD4AD6493} = {A20083E9-08BE-4BA5-A707-5E5803CC7B52}
+		{B6953E7A-D7C2-4CA1-9CA3-88851941EE03} = {46C145A6-0235-4A5F-ACC4-270FD4AD6493}
+		{36DC973E-4DC7-48D1-BC49-40D2E339054A} = {46C145A6-0235-4A5F-ACC4-270FD4AD6493}
+		{08AA76AE-4019-45E5-B9C9-CD0F06390049} = {46C145A6-0235-4A5F-ACC4-270FD4AD6493}
+		{873C76A9-9F74-4816-98BD-7F6AA51F5100} = {46C145A6-0235-4A5F-ACC4-270FD4AD6493}
+		{AA2D6F77-DC92-44DE-8489-1ECCEACF2656} = {46C145A6-0235-4A5F-ACC4-270FD4AD6493}
+		{BA7AA33A-E74E-4487-93C9-4AC858E56BA3} = {46C145A6-0235-4A5F-ACC4-270FD4AD6493}
+		{DDEFB846-65FA-48A7-A828-489B030FBD99} = {C0075B67-0A62-4476-B71D-A3BE28E3DFDE}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {73FAE6DC-A5B8-4117-9B05-0ADF07C8036E}
+	EndGlobalSection
+EndGlobal
