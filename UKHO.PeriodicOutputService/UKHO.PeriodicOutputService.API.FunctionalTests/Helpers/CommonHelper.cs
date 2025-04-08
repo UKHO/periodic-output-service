@@ -57,20 +57,6 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
             return response;
         }
 
-        public static async Task RunWebJob()
-        {
-            s_webJob = new POSWebJob();
-            if (!s_posWebJobApiConfiguration.IsRunningOnLocalMachine)
-            {
-                string POSWebJobUserCredentialsBytes = GetBase64EncodedCredentials(s_posWebJobApiConfiguration.UserName, s_posWebJobApiConfiguration.Password);
-                s_posWebJobApiResponse = await s_webJob.POSWebJobEndPoint(s_posWebJobApiConfiguration.BaseUrl, POSWebJobUserCredentialsBytes);
-                Assert.That(s_posWebJobApiResponse.StatusCode, Is.EqualTo((HttpStatusCode)202));
-
-                //As there is no way to check if webjob execution is completed or not, we have added below delay to wait till the execution completes and files get downloaded.
-                await Task.Delay(s_posWebJobApiConfiguration.WebjobRunningStatusDelayTime);
-            }
-        }
-
         public static async Task RunWebJobAio()
         {
             s_webJob = new POSWebJob();
@@ -104,4 +90,3 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         }
     }
 }
-
