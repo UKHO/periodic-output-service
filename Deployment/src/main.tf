@@ -28,13 +28,13 @@ module "eventhub" {
   env_name            = local.env_name
 }
 
-data "azurerm_app_service_plan" "essft_asp" {
+data "azurerm_service_plan" "essft_asp" {
   count = "${local.env_name}" == "dev" ? 1 : 0
   name                = "essft-qc-yh3r1-asp"
   resource_group_name = "essft-qc-webapp-rg"
 }
 
-data "azurerm_app_service_plan" "ess_asp" {
+data "azurerm_service_plan" "ess_asp" {
   name                = "ess-${local.env_name}-lxs-1-asp"
   resource_group_name = "ess-${local.env_name}-rg"
 }
@@ -46,7 +46,7 @@ module "mock_webapp_service" {
   pks_name            = local.pks_mock_web_app_name
   env_name            = local.env_name
   resource_group_name = azurerm_resource_group.mock_webapp_rg.name
-  service_plan_id     = data.azurerm_app_service_plan.essft_asp[0].id
+  service_plan_id     = data.azurerm_service_plan.essft_asp[0].id
   location            = azurerm_resource_group.mock_webapp_rg.location
   subnet_id           = data.azurerm_subnet.mock_main_subnet[0].id
   main_subnet_id      = data.azurerm_subnet.main_subnet.id
@@ -63,7 +63,7 @@ module "webapp_service" {
   source                    = "./Modules/WebApp"
   name                      = local.web_app_name
   resource_group_name       = azurerm_resource_group.webapp_rg.name
-  service_plan_id           = data.azurerm_app_service_plan.ess_asp.id
+  service_plan_id           = data.azurerm_service_plan.ess_asp.id
   env_name                  = local.env_name
   location                  = azurerm_resource_group.webapp_rg.location
   subnet_id                 = data.azurerm_subnet.main_subnet.id
