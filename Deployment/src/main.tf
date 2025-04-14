@@ -62,6 +62,7 @@ module "mock_webapp_service" {
 module "webapp_service" {
   source                    = "./Modules/WebApp"
   name                      = local.web_app_name
+  slot_name                 = local.web_app_slot_name
   resource_group_name       = azurerm_resource_group.webapp_rg.name
   service_plan_id           = data.azurerm_service_plan.ess_asp.id
   env_name                  = local.env_name
