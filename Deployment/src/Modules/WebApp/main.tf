@@ -43,7 +43,7 @@ resource "azurerm_windows_web_app" "webapp_service" {
   virtual_network_subnet_id = var.subnet_id
 }
 
-resource "azurerm_windows_web_app" "staging" {
+resource "azurerm_windows_web_app_slot" "staging" {
   name                = var.slot_name
   app_service_id      = azurerm_windows_web_app.webapp_service.id
   tags                = azurerm_windows_web_app.webapp_service.tags
