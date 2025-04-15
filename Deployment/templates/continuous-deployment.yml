@@ -118,14 +118,14 @@ steps:
       deployToSlotOrASE: true
       slotName: $(WEB_APP_SLOT_NAME)
 
-  # - task: AzureCLI@2
-  #   displayName: Check the status of staging slot
-  #   inputs:
-  #     azureSubscription: ${{parameters.AzureSubscription}}
-  #     scriptType: 'pscore'
-  #     scriptLocation: 'scriptPath'
-  #     scriptPath: '$(Pipeline.Workspace)/terraformartifact/check_service_status_webjob.ps1'
-  #     arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME)/$(WEB_APP_SLOT_NAME) -waitTimeInMinute $(waitTimeInMinute)'
+  - task: AzureCLI@2
+    displayName: Check the status of staging slot
+    inputs:
+      azureSubscription: ${{parameters.AzureSubscription}}
+      scriptType: 'pscore'
+      scriptLocation: 'scriptPath'
+      scriptPath: '$(Pipeline.Workspace)/terraformartifact/check_service_status_webjob.ps1'
+      arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute) -SlotName $(WEB_APP_SLOT_NAME)'
 
   - task: AzureAppServiceManage@0
     displayName: Swap with production slot
