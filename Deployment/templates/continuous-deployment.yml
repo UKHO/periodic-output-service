@@ -125,7 +125,7 @@ steps:
       scriptType: 'pscore'
       scriptLocation: 'scriptPath'
       scriptPath: '$(Pipeline.Workspace)/terraformartifact/check_service_status_webjob.ps1'
-      arguments: '-RGName $(RGName) -webAppName $(WEB_APP_SLOT_NAME) -waitTimeInMinute $(waitTimeInMinute)'
+      arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME)/$(WEB_APP_SLOT_NAME) -waitTimeInMinute $(waitTimeInMinute)'
 
   - task: AzureAppServiceManage@0
     displayName: Swap with production slot
