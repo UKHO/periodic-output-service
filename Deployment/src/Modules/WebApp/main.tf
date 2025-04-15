@@ -36,10 +36,6 @@ resource "azurerm_windows_web_app" "webapp_service" {
     type = "SystemAssigned"
   }
 
-  #lifecycle {
-  #  ignore_changes = [ virtual_network_subnet_id ]
-  #}
-
   https_only                = true
   virtual_network_subnet_id = var.subnet_id
 }
@@ -76,21 +72,6 @@ resource "azurerm_windows_web_app_slot" "staging" {
     type = "SystemAssigned"
   }
 
-  #lifecycle {
-  #  ignore_changes = [ virtual_network_subnet_id ]
-  #}
-
   https_only                = azurerm_windows_web_app.webapp_service.https_only
   virtual_network_subnet_id = var.subnet_id
 }
-
-#resource "azurerm_app_service_virtual_network_swift_connection" "webapp_vnet_integration" {
-#  app_service_id = azurerm_windows_web_app.webapp_service.id
-#  subnet_id      = var.subnet_id
-#}
-
-#resource "azurerm_app_service_slot_virtual_network_swift_connection" "slot_vnet_integration" {
-#  app_service_id = azurerm_windows_web_app.webapp_service.id
-#  subnet_id      = var.subnet_id
-#  slot_name      = azurerm_windows_web_app_slot.staging.name
-#}
