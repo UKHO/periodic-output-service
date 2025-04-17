@@ -109,9 +109,39 @@ steps:
         **/AIOFulfilmentWebJobPrinting/appsettings.json
 
   - task: AzureWebApp@1
-    displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp"
+    displayName: "Azure LXS App Deploy: pos-$(Environment)-lxs-webapp (staging slot)"
     inputs:
-      azureSubscription: "${{ parameters.AzureSubscription }}"
+      azureSubscription: ${{ parameters.AzureSubscription }}
       appType: webApp
-      appName: "$(WEB_APP_NAME)"
-      package: "$(Pipeline.Workspace)/PeriodicOutputService/PeriodicOutputFulfilmentService.zip"
+      appName: $(WEB_APP_NAME)
+      package: '$(Pipeline.Workspace)/PeriodicOutputService/PeriodicOutputFulfilmentService.zip'
+      deployToSlotOrASE: true
+      slotName: $(WEB_APP_SLOT_NAME)
+
+  - task: AzureCLI@2
+    displayName: Check the status of staging slot
+    inputs:
+      azureSubscription: ${{parameters.AzureSubscription}}
+      scriptType: 'pscore'
+      scriptLocation: 'scriptPath'
+      scriptPath: '$(Pipeline.Workspace)/terraformartifact/check_service_status_webjob.ps1'
+      arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute) -SlotName $(WEB_APP_SLOT_NAME)'
+
+  - task: AzureAppServiceManage@0
+    displayName: Swap with production slot
+    inputs:
+      azureSubscription: ${{ parameters.AzureSubscription }}
+      resourceGroupName: $(RGName)
+      webAppName: $(WEB_APP_NAME)
+      action: Swap Slots
+      swapWithProduction: true
+      sourceSlot: $(WEB_APP_SLOT_NAME)
+
+  - task: AzureCLI@2
+    displayName: Check the status of production slot
+    inputs:
+      azureSubscription: ${{parameters.AzureSubscription}}
+      scriptType: 'pscore'
+      scriptLocation: 'scriptPath'
+      scriptPath: '$(Pipeline.Workspace)/terraformartifact/check_service_status_webjob.ps1'
+      arguments: '-RGName $(RGName) -webAppName $(WEB_APP_NAME) -waitTimeInMinute $(waitTimeInMinute)'

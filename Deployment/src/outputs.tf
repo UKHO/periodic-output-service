@@ -18,6 +18,10 @@ output "web_app_name" {
   value = local.web_app_name
 }
 
+output "web_app_slot_name" {
+  value = local.web_app_slot_name
+}
+
 output "env_name" {
   value = local.env_name
 }
