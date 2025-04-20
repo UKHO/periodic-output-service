@@ -883,7 +883,57 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809175 - Request for sales catalogue service endpoint is failed due to non ok response.
         /// </summary>
-        SalesCatalogueServiceNonOkResponse = 809175
+        SalesCatalogueServiceNonOkResponse = 809175,
+
+        /// <summary>
+        /// 809176 - Adding config message to queue started.
+        /// </summary>
+        AddConfigMessageToQueueStarted = 809176,
+
+        /// <summary>
+        /// 809177 - Adding config message to queue completed.
+        /// </summary>
+        AddConfigMessageToQueueCompleted = 809177,
+
+        /// <summary>
+        /// 809178 - Adding config message to queue completed.
+        /// </summary>
+        AddConfigMessageToQueueFailed = 809178,
+
+        /// <summary>
+        /// 809179 - Uploading config message detail to blob started
+        /// </summary>
+        UploadConfigMessageDetailToBlobStarted = 809179,
+
+        /// <summary>
+        /// 809180 - Uploading config message detail to blob completed
+        /// </summary>
+        UploadConfigMessageDetailToBlobCompleted = 809180,
+
+        /// <summary>
+        /// 809181 - Uploading config message detail to blob failed
+        /// </summary>
+        UploadConfigMessageDetailToBlobFailed = 809181,
+
+        /// <summary>
+        /// 809182 - Downloading config message detail started
+        /// </summary>
+        DownloadConfigMessageDetailStarted = 809182,
+
+        /// <summary>
+        /// 809183 - Downloading config message detail completed
+        /// </summary>
+        DownloadConfigMessageDetailCompleted = 809183,
+
+        /// <summary>
+        /// 809184 - Downloading config message detail failed
+        /// </summary>
+        DownloadConfigMessageDetailFailed = 809184,
+
+        /// <summary>
+        /// 809185 - Config message detail is null
+        /// </summary>
+        ConfigMessageDetailNull = 809185
     }
 
     public static class EventIdExtensions

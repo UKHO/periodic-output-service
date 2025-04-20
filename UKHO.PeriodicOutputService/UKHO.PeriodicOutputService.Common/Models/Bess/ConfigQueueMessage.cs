@@ -17,4 +17,10 @@ public class ConfigQueueMessage
     public string FileName { get; set; }
     public long? FileSize { get; set; }
     public string CorrelationId { get; set; }
+    public string MessageDetailUri { get; set; }
+}
+
+public class MessageDetail
+{
+    public IEnumerable<string> EncCellNames { get; set; }
 }

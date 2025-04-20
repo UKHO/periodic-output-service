@@ -21,7 +21,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        // Constructer added to use in FT.
+        // Constructor added to use in FT.
         public AzureBlobStorageClient(IOptions<BessStorageConfiguration> bessStorageConfiguration)
         {
             this.bessStorageConfiguration = bessStorageConfiguration.Value ?? throw new ArgumentNullException(nameof(bessStorageConfiguration));
@@ -33,13 +33,13 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             try
             {
-                BlobContainerClient blobContainerClient = await GetBlobContainerClientAsync();
+                var blobContainerClient = await GetBlobContainerClientAsync(bessStorageConfiguration.ContainerName);
 
-                await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
+                await foreach (var blobItem in blobContainerClient.GetBlobsAsync())
                 {
                     if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                     {
-                        BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
+                        var blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
                         configs.Add(blobItem.Name, await DownloadBlobContentAsync(blobClient));
                     }
                 }
@@ -53,27 +53,27 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         //Private Methods
 
-        private async Task<BlobContainerClient> GetBlobContainerClientAsync()
+        private async Task<BlobContainerClient> GetBlobContainerClientAsync(string containerName)
         {
-            BlobContainerClient blobContainerClient = new(bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName);
+            BlobContainerClient blobContainerClient = new(bessStorageConfiguration.ConnectionString, containerName);
 
             try
             {
-                Response<BlobContainerInfo>? containerCreated = await blobContainerClient.CreateIfNotExistsAsync();
+                var containerCreated = await blobContainerClient.CreateIfNotExistsAsync();
 
-                if (containerCreated != null && containerCreated.HasValue)
+                if (containerCreated is { HasValue: true })
                 {
                     logger.LogInformation(EventIds.BlobContainerCreated.ToEventId(),
-                        $"Created blob container {bessStorageConfiguration.ContainerName}");
-                    this.logger.LogInformation(EventIds.BlobContainerCreated.ToEventId(),
+                        $"Created blob container {containerName}");
+                    logger.LogInformation(EventIds.BlobContainerCreated.ToEventId(),
                         "Blob created:{blob} and _X-Correlation-ID:{CorrelationId}",
-                        bessStorageConfiguration.ContainerName, CommonHelper.CorrelationID);
+                        containerName, CommonHelper.CorrelationID);
                 }
             }
             catch (Exception e)
             {
-                this.logger.LogError(EventIds.ContainerCreationFailure.ToEventId(), "Error occurred retrieving or creating blob with connection string {connectionString} and name {containersName} and _X-Correlation-ID:{correlationId}", bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName, CommonHelper.CorrelationID);
-                this.logger.LogError(EventIds.ContainerCreationFailure.ToEventId(), "Stack trace {message}, {inner} and _X-Correlation-ID:{correlationId}", e.Message, e.InnerException, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.ContainerCreationFailure.ToEventId(), "Error occurred retrieving or creating blob with connection string {connectionString} and name {containersName} and _X-Correlation-ID:{correlationId}", bessStorageConfiguration.ConnectionString, bessStorageConfiguration.ContainerName, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.ContainerCreationFailure.ToEventId(), "Stack trace {message}, {inner} and _X-Correlation-ID:{correlationId}", e.Message, e.InnerException, CommonHelper.CorrelationID);
             }
 
             return blobContainerClient;
@@ -84,7 +84,19 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return blobContainerClient.GetBlobClient(blobName);
         }
 
-        private static async Task<string> DownloadBlobContentAsync(BlobClient blobClient)
+        public async Task<BlobClient> GetBlobClientAsync(string containerName, string blobName)
+        {
+            return (await GetBlobContainerClientAsync(containerName)).GetBlobClient(blobName);
+        }
+
+        public async Task<BlobClient> GetBlobClientByUriAsync(string uri)
+        {
+            var tempBlobClient = new BlobClient(new Uri(uri));
+            
+            return await GetBlobClientAsync(tempBlobClient.BlobContainerName, tempBlobClient.Name);
+        }
+
+        public async Task<string> DownloadBlobContentAsync(BlobClient blobClient)
         {
             BlobDownloadInfo response = await blobClient.DownloadAsync();
 
@@ -98,13 +110,13 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
             try
             {
-                BlobContainerClient blobContainerClient = await GetBlobContainerClientAsync();
+                var blobContainerClient = await GetBlobContainerClientAsync(bessStorageConfiguration.ContainerName);
 
-                await foreach (BlobItem blobItem in blobContainerClient.GetBlobsAsync())
+                await foreach (var blobItem in blobContainerClient.GetBlobsAsync())
                 {
                     if (blobItem.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                     {
-                        BlobClient blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
+                        var blobClient = GetBlobClient(blobContainerClient, blobItem.Name);
                         await blobClient.DeleteIfExistsAsync();
                     }
                 }
@@ -116,5 +128,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             }
             return configs;
         }
+
+        public async Task DeleteBlobContentAsync(BlobClient blobClient)
+        {
+            await blobClient.DeleteIfExistsAsync();
+        }
+
     }
 }
