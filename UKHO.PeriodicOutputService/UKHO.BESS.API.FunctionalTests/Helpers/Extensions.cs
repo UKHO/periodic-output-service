@@ -1,4 +1,5 @@
 ﻿using Azure.Data.Tables;
+using Azure.Storage.Blobs;
 using Azure.Storage.Queues;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
@@ -74,18 +75,44 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <param name="exchangeSetStandard">Sets the value as s63 or s57 of the exchangeSetStandard as per config</param>
         /// <param name="webjobConnectionString">Sets the connectionString of the webJob</param>
         /// <param name="queueName">Sets the name of the table for queue</param>
+        /// <param name="messageDetailUri">Sets the uri of message detail blob storage</param>
         /// <param name="keyFileType">Sets the Permit file type for the queue. Default is set to NONE</param>
         public static void AddQueueMessage(string type, string? exchangeSetStandard, string? webjobConnectionString, string? queueName, string? keyFileType = "NONE")
         {
+            var messageDetailUri = StoreMessageDetail(webjobConnectionString);
             var queueMessage = JsonConvert.DeserializeObject<ConfigQueueMessage>(File.ReadAllText("./TestData/BSQueueMessage.txt"));
             queueMessage!.Type = type;
             queueMessage.ExchangeSetStandard = exchangeSetStandard!;
             queueMessage.KeyFileType = keyFileType!;
-            string jsonString = JsonConvert.SerializeObject(queueMessage);
+            queueMessage.MessageDetailUri = messageDetailUri!;
+            var jsonString = JsonConvert.SerializeObject(queueMessage);
 
             QueueClientOptions queueOptions = new() { MessageEncoding = QueueMessageEncoding.Base64 };
             QueueClient queue = new(webjobConnectionString, queueName, queueOptions);
             queue.SendMessage(jsonString);
+        }
+
+        private static string StoreMessageDetail(string? webJobConnectionString)
+        {
+            var fileName = "BSQueueMessageDetail";
+            var blobName = $"{fileName}{DateTime.UtcNow:yyyyMMddHHmmss}.json";
+            var messageDetail = JsonConvert.DeserializeObject<MessageDetail>(File.ReadAllText($"./TestData/{fileName}.txt"));
+            var jsonString = JsonConvert.SerializeObject(messageDetail);
+            using var ms = new MemoryStream();
+
+            LoadStreamWithJson(ms, jsonString);
+            BlobClient blobClient = new(webJobConnectionString, testConfiguration.bessStorageConfig.MessageContainerName, blobName);
+            blobClient.Upload(jsonString);
+
+            return blobClient.Uri.AbsoluteUri;
+        }
+
+        private static void LoadStreamWithJson(Stream ms, object obj)
+        {
+            var writer = new StreamWriter(ms);
+            writer.Write(obj);
+            writer.Flush();
+            ms.Position = 0;
         }
 
         /// <summary>

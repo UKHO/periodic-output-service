@@ -64,6 +64,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
             public string? ContainerName { get; set; }
             public string? TableName { get; set; }
             public string? QueueName { get; set; }
+            public string? MessageContainerName { get; set; }
         }
 
         public class ExchangeSetDetails
