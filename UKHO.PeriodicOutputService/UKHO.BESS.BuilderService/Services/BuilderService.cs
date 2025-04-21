@@ -111,11 +111,17 @@ namespace UKHO.BESS.BuilderService.Services
 
             await SaveLatestProductVersionDetailsAsync(configQueueMessage, latestProductVersions);
 
-            await azureBlobStorageClient.DeleteBlobContentAsync(blobClient);
+            await DeleteConfigMessageDetail(blobClient, configQueueMessage);
 
             return true;
         }
 
+        /// <summary>
+        /// Retrieves Config Message Detail from blob storage
+        /// </summary>
+        /// <param name="configQueueMessage"></param>
+        /// <returns>Message detail and blob client</returns>
+        /// <exception cref="FulfilmentException"></exception>
         private async Task<(MessageDetail messageDetail, BlobClient messageBlobClient)> GetConfigMessageDetail(ConfigQueueMessage configQueueMessage)
         {
             logger.LogInformation(EventIds.DownloadConfigMessageDetailStarted.ToEventId(),
@@ -130,9 +136,11 @@ namespace UKHO.BESS.BuilderService.Services
 
                 var messageDetail =  JsonConvert.DeserializeObject<MessageDetail>(messageDetailString);
 
-                return messageDetail == null ?
-                    throw new FulfilmentException(EventIds.ConfigMessageDetailNull.ToEventId())
-                    : (messageDetail,  messageBlobClient);
+                logger.LogInformation(EventIds.DownloadConfigMessageDetailCompleted.ToEventId(),
+                        "Downloaded message: {name} from Uri: {uri} | _X-Correlation-ID:{CorrelationId}",
+                        configQueueMessage.Name, configQueueMessage.MessageDetailUri, configQueueMessage.CorrelationId);
+                
+                return (messageDetail!,  messageBlobClient);
 
             }
             catch (Exception ex)
@@ -143,6 +151,25 @@ namespace UKHO.BESS.BuilderService.Services
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Deletes config message detail from blob storage
+        /// </summary>
+        /// <param name="blobClient"></param>
+        /// <param name="configQueueMessage"></param>
+        /// <returns></returns>
+        private async Task DeleteConfigMessageDetail(BlobClient blobClient, ConfigQueueMessage configQueueMessage)
+        {
+            logger.LogInformation(EventIds.DeleteConfigMessageDetailStarted.ToEventId(),
+                "Downloading message: {name} from Uri: {uri} | _X-Correlation-ID:{CorrelationId}",
+                configQueueMessage.Name, configQueueMessage.MessageDetailUri, configQueueMessage.CorrelationId);
+
+            await azureBlobStorageClient.DeleteBlobContentAsync(blobClient);
+
+            logger.LogInformation(EventIds.DeleteConfigMessageDetailCompleted.ToEventId(),
+                "Downloading message: {name} from Uri: {uri} | _X-Correlation-ID:{CorrelationId}",
+                configQueueMessage.Name, configQueueMessage.MessageDetailUri, configQueueMessage.CorrelationId);
         }
 
         /// <summary>

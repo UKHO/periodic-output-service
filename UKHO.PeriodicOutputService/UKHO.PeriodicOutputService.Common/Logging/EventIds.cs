@@ -929,11 +929,16 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// 809184 - Downloading config message detail failed
         /// </summary>
         DownloadConfigMessageDetailFailed = 809184,
+        
+        /// <summary>
+        /// 809185 - Deleting config message detail started
+        /// </summary>
+        DeleteConfigMessageDetailStarted = 809185,
 
         /// <summary>
-        /// 809185 - Config message detail is null
+        /// 809186 - Deleting config message detail completed
         /// </summary>
-        ConfigMessageDetailNull = 809185
+        DeleteConfigMessageDetailCompleted = 809186
     }
 
     public static class EventIdExtensions
