@@ -12,6 +12,7 @@ locals {
   env_name               = lower(terraform.workspace)
   service_name           = "pos"
   web_app_name           = "${local.service_name}-${local.env_name}-lxs-webapp"
+  web_app_slot_name      = "staging"
   mock_web_app_name      = "${local.service_name}-${local.env_name}-mock-webapp"
   pks_mock_web_app_name  = "${local.service_name}-${local.env_name}-pks-mock-webapp"
   key_vault_name         = "${local.service_name}-ukho-${local.env_name}-kv"
