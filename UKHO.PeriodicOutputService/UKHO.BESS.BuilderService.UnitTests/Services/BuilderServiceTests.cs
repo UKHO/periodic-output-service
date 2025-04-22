@@ -2622,7 +2622,6 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             {
                 Name = "test",
                 ExchangeSetStandard = exchangeSetStandard.ToString(),
-                EncCellNames = type == BessType.BASE ? new List<string> { "testcell" } : new string[] { "testcellforversion" },
                 Frequency = "30 13 * * *",
                 Type = type.ToString(),
                 KeyFileType = keyFileType.ToString(),

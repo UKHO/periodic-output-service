@@ -101,7 +101,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (bool.Parse(configuration["IsFTRunning"]))
             {
-                configQueueMessage = await CheckEmptyBatchTypeForMock(configQueueMessage);
+                configQueueMessage = await CheckEmptyBatchTypeForMock(configQueueMessage, messageDetail);
             }
 
             if (!CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result)
@@ -130,7 +130,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             try
             {
-                var messageBlobClient = await azureBlobStorageClient.GetBlobClientByUriAsync(configQueueMessage.MessageDetailUri);
+                var messageBlobClient = azureBlobStorageClient.GetBlobClientByUriAsync(configQueueMessage.MessageDetailUri);
 
                 var messageDetailString = await azureBlobStorageClient.DownloadBlobContentAsync(messageBlobClient);
 
@@ -726,11 +726,11 @@ namespace UKHO.BESS.BuilderService.Services
 
         // This method is for mock only
         [ExcludeFromCodeCoverage]
-        private async Task<ConfigQueueMessage> CheckEmptyBatchTypeForMock(ConfigQueueMessage configQueueMessage)
+        private async Task<ConfigQueueMessage> CheckEmptyBatchTypeForMock(ConfigQueueMessage configQueueMessage, MessageDetail messageDetail)
         {
             var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
-            var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames,
+            var productVersions = GetProductVersionsFromEntities(productVersionEntities, messageDetail.EncCellNames,
             configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
 
             var product = productVersions.Any(x => x.EditionNumber > 0);

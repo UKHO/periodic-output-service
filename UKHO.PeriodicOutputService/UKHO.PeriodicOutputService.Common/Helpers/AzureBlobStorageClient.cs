@@ -1,5 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using Azure;
+using Azure.Storage;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
@@ -89,11 +91,15 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return (await GetBlobContainerClientAsync(containerName)).GetBlobClient(blobName);
         }
 
-        public async Task<BlobClient> GetBlobClientByUriAsync(string uri)
+        public BlobClient GetBlobClientByUriAsync(string uri)
         {
-            var tempBlobClient = new BlobClient(new Uri(uri));
-            
-            return await GetBlobClientAsync(tempBlobClient.BlobContainerName, tempBlobClient.Name);
+            var blobServiceClient = new BlobServiceClient(bessStorageConfiguration.ConnectionString);
+
+            var blobUriBuilder = new BlobUriBuilder(new Uri(uri));
+
+            var containerClient = blobServiceClient.GetBlobContainerClient(blobUriBuilder.BlobContainerName);
+
+            return containerClient.GetBlobClient(blobUriBuilder.BlobName);
         }
 
         public async Task<string> DownloadBlobContentAsync(BlobClient blobClient)

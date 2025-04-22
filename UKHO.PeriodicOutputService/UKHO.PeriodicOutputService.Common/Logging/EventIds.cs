@@ -938,7 +938,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809186 - Deleting config message detail completed
         /// </summary>
-        DeleteConfigMessageDetailCompleted = 809186
+        DeleteConfigMessageDetailCompleted = 809186,
+
+        /// <summary>
+        /// 809187 - File size calculated for Base ESS
+        /// </summary>
+        BaseExchangeSetSizeCalculated = 809187,
+
+        /// <summary>
+        /// 809188 - File size calculated for Update/Change
+        /// </summary>
+        UpdateExchangeSetSizeCalculated = 809188
     }
 
     public static class EventIdExtensions

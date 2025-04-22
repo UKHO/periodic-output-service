@@ -102,7 +102,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
 
             LoadStreamWithJson(ms, jsonString);
             BlobClient blobClient = new(webJobConnectionString, testConfiguration.bessStorageConfig.MessageContainerName, blobName);
-            blobClient.Upload(jsonString);
+            blobClient.Upload(ms);
 
             return blobClient.Uri.AbsoluteUri;
         }

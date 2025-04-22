@@ -39,7 +39,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
 
         var messageDetail = new MessageDetail { EncCellNames = encCellNames };
 
-        var (uploaded, messageBlobUri) = await UploadMessageDetailToBlobAsync(messageDetail);
+        var (uploaded, messageBlobUri) = await UploadMessageDetailToBlobAsync(messageDetail, bessConfig.Name);
 
         if (uploaded && messageBlobUri != null)
         {   
@@ -48,7 +48,6 @@ public class AzureBlobStorageService : IAzureBlobStorageService
                 Name = bessConfig.Name,
                 ExchangeSetStandard = bessConfig.ExchangeSetStandard,
                 MessageDetailUri = messageBlobUri,
-                //EncCellNames = encCellNames,
                 Frequency = bessConfig.Frequency,
                 Type = bessConfig.Type,
                 KeyFileType = bessConfig.KeyFileType,
@@ -79,12 +78,12 @@ public class AzureBlobStorageService : IAzureBlobStorageService
         return uploaded;
     }
 
-    private async Task<(bool uploadSuccess, string? messageBlobUri)> UploadMessageDetailToBlobAsync(MessageDetail messageDetail)
+    private async Task<(bool uploadSuccess, string? messageBlobUri)> UploadMessageDetailToBlobAsync(MessageDetail messageDetail, string bessConfigName)
     {
         var uploadSuccess = false;
         string messageBlobUri = null;
         var messageDetailJson = JsonConvert.SerializeObject(messageDetail);
-        var blobName = $"bessConfig.Name{DateTime.UtcNow:yyyyMMddHHmmss}.json";
+        var blobName = $"{bessConfigName}{DateTime.UtcNow:yyyyMMddHHmmss}.json";
 
         logger.LogInformation(EventIds.UploadConfigMessageDetailToBlobStarted.ToEventId(),
             "Uploading started for Message : {message} to blob: {blob} | _X-Correlation-ID: {CorrelationId}",

@@ -8,7 +8,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         Task<BlobClient> GetBlobClientAsync(string containerName, string blobName);
 
-        Task<BlobClient> GetBlobClientByUriAsync(string uri);
+        BlobClient GetBlobClientByUriAsync(string uri);
 
         Task<string> DownloadBlobContentAsync(BlobClient blobClient);
 
