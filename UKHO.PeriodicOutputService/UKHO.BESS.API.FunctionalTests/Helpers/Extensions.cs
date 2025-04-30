@@ -75,7 +75,6 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         /// <param name="exchangeSetStandard">Sets the value as s63 or s57 of the exchangeSetStandard as per config</param>
         /// <param name="webjobConnectionString">Sets the connectionString of the webJob</param>
         /// <param name="queueName">Sets the name of the table for queue</param>
-        /// <param name="messageDetailUri">Sets the uri of message detail blob storage</param>
         /// <param name="keyFileType">Sets the Permit file type for the queue. Default is set to NONE</param>
         public static void AddQueueMessage(string type, string? exchangeSetStandard, string? webjobConnectionString, string? queueName, string? keyFileType = "NONE")
         {
