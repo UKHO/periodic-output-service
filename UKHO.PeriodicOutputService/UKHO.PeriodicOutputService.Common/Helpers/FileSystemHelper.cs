@@ -146,45 +146,53 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath, string cellName)
         {
-            string searchPath = $"ENC_ROOT/{cellName[..2]}";
-            string currentPath = Path.Combine(sourcePath, searchPath);
-
-            List<ProductVersion> productVersions = new();
-
-            if (!_fileSystem.Directory.Exists(currentPath))
+            try
             {
+                string searchPath = $"ENC_ROOT/{cellName[..2]}";
+                string currentPath = Path.Combine(sourcePath, searchPath);
+
+                List<ProductVersion> productVersions = new();
+
+                if (!_fileSystem.Directory.Exists(currentPath))
+                {
+                    return productVersions;
+                }
+
+                var folders = _fileSystem.Directory.GetDirectories(currentPath, cellName, SearchOption.AllDirectories).ToList();
+
+                if (folders.Count == 0)
+                {
+                    return productVersions;
+                }
+
+                var editionFolders = _fileSystem.Directory.GetDirectories(folders[0]).Select(Path.GetFileName).ToList();
+
+                foreach (var editionFolder in editionFolders)
+                {
+                    ProductVersion productVersion = new();
+
+                    productVersion.ProductName = cellName;
+
+                    productVersion.EditionNumber = Convert.ToInt32(editionFolder);
+
+                    var updateNumberFolders = _fileSystem.Directory.GetDirectories(Path.Combine(currentPath, cellName, editionFolder));
+
+                    var maxDirectory = updateNumberFolders.Select(d => new { Path = d, Number = int.Parse(Path.GetFileName(d)) })
+                        .OrderByDescending(d => d.Number)
+                        .FirstOrDefault();
+
+                    productVersion.UpdateNumber = Convert.ToInt32(maxDirectory!.Number);
+
+                    productVersions.Add(productVersion);
+                }
+
                 return productVersions;
             }
-
-            var folders = _fileSystem.Directory.GetDirectories(currentPath, cellName, SearchOption.AllDirectories).ToList();
-
-            if (folders.Count == 0)
+            catch (Exception e)
             {
-                return productVersions;
+                Console.WriteLine(e);
+                throw;
             }
-
-            var editionFolders = _fileSystem.Directory.GetDirectories(folders[0]).Select(Path.GetFileName).ToList();
-
-            foreach (var editionFolder in editionFolders)
-            {
-                ProductVersion productVersion = new();
-
-                productVersion.ProductName = cellName;
-
-                productVersion.EditionNumber = Convert.ToInt32(editionFolder);
-
-                var updateNumberFolders = _fileSystem.Directory.GetDirectories(Path.Combine(currentPath, cellName, editionFolder));
-
-                var maxDirectory = updateNumberFolders.Select(d => new { Path = d, Number = int.Parse(Path.GetFileName(d)) })
-                                               .OrderByDescending(d => d.Number)
-                                               .FirstOrDefault();
-
-                productVersion.UpdateNumber = Convert.ToInt32(maxDirectory!.Number);
-
-                productVersions.Add(productVersion);
-            }
-
-            return productVersions;
         }
 
         public bool CreateEmptyFileContent(string filePath)

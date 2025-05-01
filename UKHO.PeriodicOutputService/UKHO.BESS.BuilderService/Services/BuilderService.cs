@@ -93,7 +93,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
 
-            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName);
+            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName, configQueueMessage.CorrelationId);
 
             await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
 
@@ -202,21 +202,44 @@ namespace UKHO.BESS.BuilderService.Services
         /// <returns></returns>
         private async Task RequestCellKeysFromPksAsync(ConfigQueueMessage configQueueMessage, string essFileDownloadPath, ProductVersionsRequest latestProductVersions)
         {
-            if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            var latestVersions = string.Join(",", latestProductVersions.ProductVersions); 
+
+            logger.LogInformation(EventIds.RequestCellKeysFromPksAsyncStarted.ToEventId(),
+                "Request cell keys from pks started at for {latestVersions} at {DateTime} | _X-Correlation-ID: {CorrelationId}", latestVersions, DateTime.UtcNow,
+                configQueueMessage.CorrelationId);
+
+            try
             {
-                if (latestProductVersions.ProductVersions.Any())
+                if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
                 {
-                    List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
+                    if (latestProductVersions.ProductVersions.Any())
+                    {
+                        List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
 
-                    List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest, configQueueMessage.CorrelationId);
+                        List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest, configQueueMessage.CorrelationId);
 
-                    CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse, configQueueMessage.CorrelationId);
-                }
-                else
-                {
-                    logger.LogInformation(EventIds.SkipPksAsEmptyExchangeSetFoundForProducts.ToEventId(), "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                        CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse, configQueueMessage.CorrelationId);
+                    }
+                    else
+                    {
+                        logger.LogInformation(EventIds.SkipPksAsEmptyExchangeSetFoundForProducts.ToEventId(), "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.RequestCellKeysFromPksAsyncFailed.ToEventId(),
+                    "Request cell keys from pks failed with Exception: {ex} at {DateTime} | _X - Correlation - ID:{CorrelationId}",
+                    ex, DateTime.UtcNow, configQueueMessage.CorrelationId);
+                throw new FulfilmentException(EventIds.GetTheLatestUpdateNumberFailed.ToEventId());
+            }
+
+
+            
+
+            logger.LogInformation(EventIds.RequestCellKeysFromPksAsyncCompleted.ToEventId(),
+                "Request cell keys from pks completed at for {latestVersions} at {DateTime} | _X-Correlation-ID: {CorrelationId}", latestVersions, DateTime.UtcNow,
+                configQueueMessage.CorrelationId);
         }
 
         /// <summary>
@@ -500,22 +523,42 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="cellNames"></param>
         /// <param name="bessZipFileName"></param>
         /// <returns></returns>
-        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName)
+        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName, string correlationId)
         {
-            string exchangeSetPath = Path.Combine(filePath, bessZipFileName);
+            logger.LogInformation(EventIds.GetTheLatestUpdateNumberStarted.ToEventId(),
+                "Get Latest Update Number : {bessZipFileName} | _X-Correlation-ID:{CorrelationId}",
+                bessZipFileName, correlationId);
 
-            ProductVersionsRequest productVersionsRequest = new()
+            try
             {
-                ProductVersions = new()
-            };
+                string exchangeSetPath = Path.Combine(filePath, bessZipFileName);
 
-            foreach (var cellName in cellNames)
-            {
-                var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath, cellName);
+                ProductVersionsRequest productVersionsRequest = new()
+                {
+                    ProductVersions = new()
+                };
 
-                productVersionsRequest.ProductVersions.AddRange(productVersions);
+                foreach (var cellName in cellNames)
+                {
+                    var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath, cellName);
+
+                    productVersionsRequest.ProductVersions.AddRange(productVersions);
+                }
+
+                logger.LogInformation(EventIds.GetTheLatestUpdateNumberCompleted.ToEventId(),
+                    "Get Latest Update Number : {bessZipFileName} | _X-Correlation-ID:{CorrelationId}",
+                    bessZipFileName, correlationId);
+
+
+                return productVersionsRequest;
             }
-            return productVersionsRequest;
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.GetTheLatestUpdateNumberFailed.ToEventId(),
+                    "Get Latest Update Number failed with Exception: {ex} at {DateTime} | _X - Correlation - ID:{CorrelationId}",
+                    ex, DateTime.UtcNow, correlationId);
+                throw new FulfilmentException(EventIds.GetTheLatestUpdateNumberFailed.ToEventId());
+            }
         }
 
         /// <summary>

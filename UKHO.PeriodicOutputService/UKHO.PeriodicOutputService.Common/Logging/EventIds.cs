@@ -948,7 +948,37 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809188 - File size calculated for Update/Change
         /// </summary>
-        UpdateExchangeSetSizeCalculated = 809188
+        UpdateExchangeSetSizeCalculated = 809188,
+
+        /// <summary>
+        /// 809189 - Getting latest update number started
+        /// </summary>
+        GetTheLatestUpdateNumberStarted = 809189,
+
+        /// <summary>
+        /// 809190 - Getting latest update number completed
+        /// </summary>
+        GetTheLatestUpdateNumberCompleted = 809190,
+
+        /// <summary>
+        /// 809191 - Getting latest update number failed
+        /// </summary>
+        GetTheLatestUpdateNumberFailed = 809191,
+
+        /// <summary>
+        /// 809192 - Request cellKeys from pks started started
+        /// </summary>
+        RequestCellKeysFromPksAsyncStarted = 809192,
+
+        /// <summary>
+        /// 809193 - Request cellKeys from pks started completed
+        /// </summary>
+        RequestCellKeysFromPksAsyncCompleted = 809193,
+
+        /// <summary>
+        /// 809194 - Request cellKeys from pks started failed
+        /// </summary>
+        RequestCellKeysFromPksAsyncFailed = 809194
     }
 
     public static class EventIdExtensions
