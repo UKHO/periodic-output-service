@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
@@ -439,12 +440,16 @@ namespace UKHO.BESS.BuilderService.Services
                 ProductVersions = new()
             };
 
-            foreach (var cellName in cellNames)
-            {
-                var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath, cellName);
 
-                productVersionsRequest.ProductVersions.AddRange(productVersions);
-            }
+            var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath);
+
+            productVersionsRequest.ProductVersions.AddRange(
+                  from pv in productVersions
+                  join cellName in cellNames on pv.ProductName equals cellName into matchedCells
+                  from matchedCell in matchedCells
+                  select pv
+               );
+
             return productVersionsRequest;
         }
 

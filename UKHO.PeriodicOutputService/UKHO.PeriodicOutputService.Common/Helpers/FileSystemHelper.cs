@@ -187,6 +187,43 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             return productVersions;
         }
 
+
+        public IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath)
+        {
+            var currentPath = Path.Combine(sourcePath, "ENC_ROOT");
+
+            if (!_fileSystem.Directory.Exists(currentPath))
+            {
+                return Enumerable.Empty<ProductVersion>();
+            }
+
+            var productVersions = new List<ProductVersion>();
+
+            foreach (var countryFolder in _fileSystem.Directory.GetDirectories(currentPath, "*", SearchOption.TopDirectoryOnly))
+            {
+                foreach (var encFolder in _fileSystem.Directory.GetDirectories(countryFolder, "*", SearchOption.TopDirectoryOnly))
+                {
+                    foreach (var editionFolder in _fileSystem.Directory.GetDirectories(encFolder)
+                        .Select(Path.GetFileName)
+                        .Where(name => int.TryParse(name, out _)))
+                    {
+                        var maxUpdateNumber = _fileSystem.Directory.GetDirectories(Path.Combine(encFolder, editionFolder))
+                            .Select(d => int.TryParse(Path.GetFileName(d), out var number) ? number : 0)
+                            .DefaultIfEmpty(0)
+                            .Max();
+
+                        productVersions.Add(new ProductVersion
+                        {
+                            ProductName = Path.GetFileName(encFolder),
+                            EditionNumber = int.Parse(editionFolder),
+                            UpdateNumber = maxUpdateNumber
+                        });
+                    }
+                }
+            }
+
+            return productVersions;
+        }
         public bool CreateEmptyFileContent(string filePath)
         {
             if (string.IsNullOrEmpty(filePath))
