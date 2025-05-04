@@ -538,12 +538,14 @@ namespace UKHO.BESS.BuilderService.Services
                     ProductVersions = new()
                 };
 
-                foreach (var cellName in cellNames)
-                {
-                    var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath, cellName);
+                var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath);
 
-                    productVersionsRequest.ProductVersions.AddRange(productVersions);
-                }
+                productVersionsRequest.ProductVersions.AddRange(
+                    from pv in productVersions
+                    join cellName in cellNames on pv.ProductName equals cellName into matchedCells
+                    from matchedCell in matchedCells
+                    select pv
+                );
 
                 logger.LogInformation(EventIds.GetTheLatestUpdateNumberCompleted.ToEventId(),
                     "Get Latest Update Number : {bessZipFileName} | _X-Correlation-ID:{CorrelationId}",
