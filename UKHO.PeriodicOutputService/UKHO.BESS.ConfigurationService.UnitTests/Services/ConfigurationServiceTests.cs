@@ -1064,6 +1064,20 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
                 && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Queue message creation successful for file:{FileName} | _X-Correlation-ID : {CorrelationId}"
             ).MustHaveHappened();
 
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.BaseExchangeSetSizeCalculated.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Base exchange set size for file:{FileName} is: {fileSizeInMb} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+
+            A.CallTo(fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == LogLevel.Information
+                && call.GetArgument<EventId>(1) == EventIds.UpdateExchangeSetSizeCalculated.ToEventId()
+                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "{Type} exchange set size for file:{FileName} is: {fileSizeInMb} | _X-Correlation-ID : {CorrelationId}"
+            ).MustHaveHappened();
+
             Assert.That(result);
         }
 

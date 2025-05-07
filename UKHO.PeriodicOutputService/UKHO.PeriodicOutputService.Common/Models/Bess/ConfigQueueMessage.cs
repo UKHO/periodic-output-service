@@ -4,7 +4,6 @@ public class ConfigQueueMessage
 {
     public string Name { get; set; }
     public string ExchangeSetStandard { get; set; }
-    public IEnumerable<string> EncCellNames { get; set; }
     public string Frequency { get; set; }
     public string Type { get; set; }
     public string KeyFileType { get; set; }
@@ -17,4 +16,10 @@ public class ConfigQueueMessage
     public string FileName { get; set; }
     public long? FileSize { get; set; }
     public string CorrelationId { get; set; }
+    public string MessageDetailUri { get; set; }
+}
+
+public class MessageDetail
+{
+    public IEnumerable<string> EncCellNames { get; set; }
 }

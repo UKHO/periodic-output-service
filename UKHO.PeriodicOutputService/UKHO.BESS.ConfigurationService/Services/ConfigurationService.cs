@@ -268,6 +268,8 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         var BESSize = Convert.ToInt16(configuration["BessSizeInMB"]);
 
+                        logger.LogInformation(EventIds.BaseExchangeSetSizeCalculated.ToEventId(), "Base exchange set size for file:{FileName} is: {fileSizeInMb} | _X-Correlation-ID : {CorrelationId}", config.FileName, fileSizeInMb, CommonHelper.CorrelationID);
+
                         //Bespoke will not create if size is large
                         if (fileSizeInMb > BESSize)
                         {
@@ -276,6 +278,8 @@ namespace UKHO.BESS.ConfigurationService.Services
                             {
                                 totalFileSize = await GetTotalFileSizeForUpdateAsync(encCells, productVersionEntities, config);
                                 fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize);
+
+                                logger.LogInformation(EventIds.UpdateExchangeSetSizeCalculated.ToEventId(), "{Type} exchange set size for file:{FileName} is: {fileSizeInMb} | _X-Correlation-ID : {CorrelationId}", config.Type.ToUpper(), config.FileName, fileSizeInMb, CommonHelper.CorrelationID);
                             }
 
                             if (fileSizeInMb > BESSize)

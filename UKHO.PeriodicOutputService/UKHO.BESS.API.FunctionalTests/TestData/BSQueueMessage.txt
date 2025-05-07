@@ -1,14 +1,6 @@
 {
     "Name": "PortOfIndia",
-    "ExchangeSetStandard": "s57",
-    "EncCellNames": [
-        "AU220150",
-        "AU5PTL01",
-        "CA570182",
-        "CA570226",
-        "CN484220",
-        "GB301910"
-    ],
+    "ExchangeSetStandard": "s57",    
     "Frequency": "23 10 * * *",
     "Type": "UPDATE",
     "KeyFileType": "NONE",
