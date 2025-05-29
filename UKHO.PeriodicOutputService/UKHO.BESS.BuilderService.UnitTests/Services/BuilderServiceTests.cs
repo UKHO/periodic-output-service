@@ -1374,9 +1374,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
         [Test]
         [TestCase(BessType.UPDATE, ExchangeSetStandard.S63)]
-        //[TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
-        //[TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
-        //[TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.UPDATE, ExchangeSetStandard.S57)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S63)]
+        [TestCase(BessType.CHANGE, ExchangeSetStandard.S57)]
         public async Task WhenTypeIsUpdateOrChangeAndValidReadmeSearchFilter_ThenStandardReadmeIsReplacedAndBespokeExchangeSetIsCreated(BessType type, ExchangeSetStandard exchangeSetStandard)
         {
             var filePath = @"D:\\Downloads";
@@ -2168,7 +2168,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
         [Test]
         [TestCase(ExchangeSetStandard.S63)]
-        // [TestCase(ExchangeSetStandard.S57)]
+        [TestCase(ExchangeSetStandard.S57)]
         public async Task WhenTypeIsBaseAndKeyFileTypeIsKey_Text_ThenPostProductIdentifiersEndpointIsCalledAndBespokeExchangeSetIsCreated(ExchangeSetStandard exchangeSetStandard)
         {
             var messageDetail = GetMessageDetail(BessType.BASE);
