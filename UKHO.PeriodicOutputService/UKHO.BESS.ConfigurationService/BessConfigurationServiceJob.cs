@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using Elastic.Apm;
+using Elastic.Apm.Api;
 using Microsoft.Extensions.Logging;
 using UKHO.BESS.ConfigurationService.Services;
 using UKHO.PeriodicOutputService.Common.Extensions;
@@ -23,17 +25,31 @@ namespace UKHO.BESS.ConfigurationService
         {
             try
             {
-                await logger.LogStartEndAndElapsedTimeAsync(EventIds.BessConfigurationServiceStarted,
+                await Elastic.Apm.Agent.Tracer
+                    .CaptureTransaction("BessConfigurationTransaction", ApiConstants.TypeRequest, async () =>
+                    {
+                        //application code that is captured as a transaction
+                        await logger.LogStartEndAndElapsedTimeAsync(EventIds.BessConfigurationServiceStarted,
                             EventIds.BessConfigurationServiceCompleted,
                             "BESS Configuration Service Started | _X-Correlation-ID : {CorrelationId}",
                             "BESS Configuration Service Completed | _X-Correlation-ID : {CorrelationId}",
                             async () => await configurationService.ProcessConfigsAsync(),
-                             CommonHelper.CorrelationID);
+                            CommonHelper.CorrelationID);
+                    });
             }
             catch (Exception ex)
             {
-                logger.LogError(EventIds.UnhandledException.ToEventId(), "Exception occurred while processing BESS Configuration Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}", ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+                logger.LogError(EventIds.UnhandledException.ToEventId(),
+                    "Exception occurred while processing BESS Configuration Service webjob with Exception Message : {Message} | StackTrace : {StackTrace} | _X-Correlation-ID : {CorrelationId}",
+                    ex.Message, ex.StackTrace, CommonHelper.CorrelationID);
+
+                Agent.Tracer.CurrentTransaction?.CaptureException(ex);
+
                 throw;
+            }
+            finally
+            {
+                Agent.Tracer.CurrentTransaction?.End();
             }
         }
     }
