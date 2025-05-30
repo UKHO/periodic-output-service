@@ -871,15 +871,124 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         RemoveReadMeEntryAndUpdateCatalogFileProcessFailed = 809172,
 
         /// <summary>
-        /// 809173 - SERIAL.AIO file updated 
+        /// 809173 - Request for sales catalogue service product versions endpoint is started.
         /// </summary>
-        SerialAioUpdated = 809173,
+        ScsPostProductVersionsRequestStart = 809173,
 
         /// <summary>
-        /// 809174 - SERIAL.AIO file update failed
+        /// 809174 - Request for sales catalogue service product versions endpoint is completed.
         /// </summary>
-        SerialAioUpdateFailed = 809174
+        ScsPostProductVersionsRequestCompleted = 809174,
 
+        /// <summary>
+        /// 809175 - Request for sales catalogue service endpoint is failed due to non ok response.
+        /// </summary>
+        SalesCatalogueServiceNonOkResponse = 809175,
+
+        /// <summary>
+        /// 809176 - Adding config message to queue started.
+        /// </summary>
+        AddConfigMessageToQueueStarted = 809176,
+
+        /// <summary>
+        /// 809177 - Adding config message to queue completed.
+        /// </summary>
+        AddConfigMessageToQueueCompleted = 809177,
+
+        /// <summary>
+        /// 809178 - Adding config message to queue completed.
+        /// </summary>
+        AddConfigMessageToQueueFailed = 809178,
+
+        /// <summary>
+        /// 809179 - Uploading config message detail to blob started
+        /// </summary>
+        UploadConfigMessageDetailToBlobStarted = 809179,
+
+        /// <summary>
+        /// 809180 - Uploading config message detail to blob completed
+        /// </summary>
+        UploadConfigMessageDetailToBlobCompleted = 809180,
+
+        /// <summary>
+        /// 809181 - Uploading config message detail to blob failed
+        /// </summary>
+        UploadConfigMessageDetailToBlobFailed = 809181,
+
+        /// <summary>
+        /// 809182 - Downloading config message detail started
+        /// </summary>
+        DownloadConfigMessageDetailStarted = 809182,
+
+        /// <summary>
+        /// 809183 - Downloading config message detail completed
+        /// </summary>
+        DownloadConfigMessageDetailCompleted = 809183,
+
+        /// <summary>
+        /// 809184 - Downloading config message detail failed
+        /// </summary>
+        DownloadConfigMessageDetailFailed = 809184,
+        
+        /// <summary>
+        /// 809185 - Deleting config message detail started
+        /// </summary>
+        DeleteConfigMessageDetailStarted = 809185,
+
+        /// <summary>
+        /// 809186 - Deleting config message detail completed
+        /// </summary>
+        DeleteConfigMessageDetailCompleted = 809186,
+
+        /// <summary>
+        /// 809187 - File size calculated for Base ESS
+        /// </summary>
+        BaseExchangeSetSizeCalculated = 809187,
+
+        /// <summary>
+        /// 809188 - File size calculated for Update/Change
+        /// </summary>
+        UpdateExchangeSetSizeCalculated = 809188,
+
+        /// <summary>
+        /// 809189 - Getting latest update number started
+        /// </summary>
+        GetTheLatestUpdateNumberStarted = 809189,
+
+        /// <summary>
+        /// 809190 - Getting latest update number completed
+        /// </summary>
+        GetTheLatestUpdateNumberCompleted = 809190,
+
+        /// <summary>
+        /// 809191 - Getting latest update number failed
+        /// </summary>
+        GetTheLatestUpdateNumberFailed = 809191,
+
+        /// <summary>
+        /// 809192 - Request cellKeys from pks started started
+        /// </summary>
+        RequestCellKeysFromPksAsyncStarted = 809192,
+
+        /// <summary>
+        /// 809193 - Request cellKeys from pks started completed
+        /// </summary>
+        RequestCellKeysFromPksAsyncCompleted = 809193,
+
+        /// <summary>
+        /// 809194 - Request cellKeys from pks started failed
+        /// </summary>
+        RequestCellKeysFromPksAsyncFailed = 809194,
+
+        /// <summary>
+        /// 809195 - SERIAL.AIO file updated 
+        /// </summary>
+        SerialAioUpdated = 809195,
+
+        /// <summary>
+        /// 809196 - SERIAL.AIO file update failed
+        /// </summary>
+        SerialAioUpdateFailed = 809196
     }
 
     public static class EventIdExtensions

@@ -1226,7 +1226,6 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             Name = "test",
             ExchangeSetStandard = "s63",
-            EncCellNames = new List<string> { "testcell" },
             Frequency = "30 13 * * *",
             Type = type,
             KeyFileType = "NONE",

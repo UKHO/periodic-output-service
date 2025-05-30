@@ -46,6 +46,9 @@
     <None Update="TestData\BSQueueMessage.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="TestData\BSQueueMessageDetail.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="TestData\ConfigFile.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

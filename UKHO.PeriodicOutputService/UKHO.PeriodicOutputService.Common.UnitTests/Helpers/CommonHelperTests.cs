@@ -6,6 +6,7 @@ using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
@@ -166,6 +167,83 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             var extractedAccessToken = CommonHelper.ExtractAccessToken("{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6I1234212CJ9.VLSE9fRk1234.fd73LguLf_6VBefVQqu0nj8j3dovfUNVeqZDYGZ1234\",\"expiration\":\"2022-06-15T16:02:52Z\"}");
             Assert.That(extractedAccessToken, Is.EqualTo("eyJhbGciOiJIUzI1NiIsInR5cCI6I1234212CJ9.VLSE9fRk1234.fd73LguLf_6VBefVQqu0nj8j3dovfUNVeqZDYGZ1234"));
+        }
+        [Test]
+        public void GetProductVersionsFromEntities_ReturnsCorrectProductVersions()
+        {
+            var productVersionEntities = new List<ProductVersionEntities>
+            {
+                new() { PartitionKey = "config1", RowKey = "standard1|cell1", EditionNumber = 1, UpdateNumber = 1 },
+                new() { PartitionKey = "config1", RowKey = "standard1|cell2", EditionNumber = 2, UpdateNumber = 2 }
+            };
+
+            var cellNames = new List<string> { "cell1", "cell2", "cell3" };
+            var configName = "config1";
+            var exchangeSetStandard = "standard1";
+
+            var result = CommonHelper.GetProductVersionsFromEntities(productVersionEntities, cellNames, configName, exchangeSetStandard);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Has.Count.EqualTo(3));
+                Assert.That(result[0].ProductName, Is.EqualTo("cell1"));
+                Assert.That(result[0].EditionNumber, Is.EqualTo(1));
+                Assert.That(result[0].UpdateNumber, Is.EqualTo(1));
+                Assert.That(result[1].ProductName, Is.EqualTo("cell2"));
+                Assert.That(result[1].EditionNumber, Is.EqualTo(2));
+                Assert.That(result[1].UpdateNumber, Is.EqualTo(2));
+                Assert.That(result[2].ProductName, Is.EqualTo("cell3"));
+                Assert.That(result[2].EditionNumber, Is.EqualTo(0));
+                Assert.That(result[2].UpdateNumber, Is.EqualTo(0));
+            });
+        }
+
+        [Test]
+        public void GetProductVersionsFromEntities_EmptyEntities_ReturnsDefaultProductVersions()
+        {
+            var productVersionEntities = new List<ProductVersionEntities>();
+            var cellNames = new List<string> { "cell1", "cell2" };
+            var configName = "config1";
+            var exchangeSetStandard = "standard1";
+
+            var result = CommonHelper.GetProductVersionsFromEntities(productVersionEntities, cellNames, configName, exchangeSetStandard);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Has.Count.EqualTo(2));
+                Assert.That(result[0].ProductName, Is.EqualTo("cell1"));
+                Assert.That(result[0].EditionNumber, Is.EqualTo(0));
+                Assert.That(result[0].UpdateNumber, Is.EqualTo(0));
+                Assert.That(result[1].ProductName, Is.EqualTo("cell2"));
+                Assert.That(result[1].EditionNumber, Is.EqualTo(0));
+                Assert.That(result[1].UpdateNumber, Is.EqualTo(0));
+            });
+        }
+
+        [Test]
+        public void GetProductVersionsFromEntities_NoMatchingEntities_ReturnsDefaultProductVersions()
+        {
+            var productVersionEntities = new List<ProductVersionEntities>
+            {
+                new() { PartitionKey = "config2", RowKey = "standard2|cell1", EditionNumber = 1, UpdateNumber = 1 }
+            };
+
+            var cellNames = new List<string> { "cell1", "cell2" };
+            var configName = "config1";
+            var exchangeSetStandard = "standard1";
+
+            var result = CommonHelper.GetProductVersionsFromEntities(productVersionEntities, cellNames, configName, exchangeSetStandard);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Has.Count.EqualTo(2));
+                Assert.That(result[0].ProductName, Is.EqualTo("cell1"));
+                Assert.That(result[0].EditionNumber, Is.EqualTo(0));
+                Assert.That(result[0].UpdateNumber, Is.EqualTo(0));
+                Assert.That(result[1].ProductName, Is.EqualTo("cell2"));
+                Assert.That(result[1].EditionNumber, Is.EqualTo(0));
+                Assert.That(result[1].UpdateNumber, Is.EqualTo(0));
+            });
         }
     }
 }

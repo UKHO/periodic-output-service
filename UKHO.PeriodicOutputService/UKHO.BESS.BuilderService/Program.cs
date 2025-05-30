@@ -5,6 +5,9 @@ using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Elastic.Apm.Azure.Storage;
+using Elastic.Apm.DiagnosticSource;
+using Elastic.Apm;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -35,6 +38,10 @@ namespace UKHO.BESS.BuilderService
         {
             try
             {
+                // Elastic APM
+                Agent.Subscribe(new HttpDiagnosticsSubscriber());
+                Agent.Subscribe(new AzureBlobStorageDiagnosticsSubscriber());
+
                 HostBuilder hostBuilder = BuildHostConfiguration();
                 IHost host = hostBuilder.Build();
 
@@ -150,6 +157,7 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddScoped<IFileSystem, FileSystem>();
                  serviceCollection.AddScoped<IZipHelper, ZipHelper>();
                  serviceCollection.AddScoped<IFileUtility, FileUtility>();
+                 serviceCollection.AddScoped<IAzureBlobStorageClient, AzureBlobStorageClient>();
                  serviceCollection.AddScoped<IAzureTableStorageHelper, AzureTableStorageHelper>();
                  serviceCollection.AddScoped<IPermitDecryption, PermitDecryption>();
                  serviceCollection.AddScoped<IS63Crypt, S63Crypt>();
