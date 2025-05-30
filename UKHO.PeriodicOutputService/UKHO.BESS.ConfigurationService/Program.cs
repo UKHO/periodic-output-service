@@ -4,6 +4,9 @@ using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Elastic.Apm;
+using Elastic.Apm.Azure.Storage;
+using Elastic.Apm.DiagnosticSource;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +38,10 @@ namespace UKHO.BESS.ConfigurationService
 
             try
             {
+                // Elastic APM
+                Agent.Subscribe(new HttpDiagnosticsSubscriber());
+                Agent.Subscribe(new AzureBlobStorageDiagnosticsSubscriber());
+
                 //Build configuration
                 IConfigurationRoot configuration = BuildConfiguration();
 

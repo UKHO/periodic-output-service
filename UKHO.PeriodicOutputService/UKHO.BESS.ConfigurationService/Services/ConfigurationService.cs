@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Net;
+using System.Text;
 using FluentValidation.Results;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -6,6 +7,7 @@ using NCrontab;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using UKHO.BESS.ConfigurationService.Validation;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
@@ -230,6 +232,8 @@ namespace UKHO.BESS.ConfigurationService.Services
         {
             try
             {
+                var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
+
                 foreach (var config in bessConfigs)
                 {
                     // Parse the cron expression using NCronTab library
@@ -246,7 +250,7 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         await azureTableStorageHelper.UpsertScheduleDetailAsync(nextOccurrence, config, true);
 
-                        var encCells = GetEncCells(config.EncCellNames, salesCatalogueDataProducts);
+                        var encCells = GetEncCells(config.EncCellNames, salesCatalogueDataProducts).ToList();
 
                         if (!encCells.Any()) //If cells are not found then bespoke exchange set will not create
                         {
@@ -258,28 +262,39 @@ namespace UKHO.BESS.ConfigurationService.Services
 
                         long totalFileSize = 0;
 
-                        foreach (var encCell in encCells)
-                        {
-                            totalFileSize += (long)encCell.Item2!;
-                        }
+                        totalFileSize = GetTotalFileSizeForBase(encCells);
+                        
+                        var fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize!);
 
-                        double fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize!);
+                        var BESSize = Convert.ToInt16(configuration["BessSizeInMB"]);
 
-                        int BESSize = Convert.ToInt16(configuration["BessSizeInMB"]);
+                        logger.LogInformation(EventIds.BaseExchangeSetSizeCalculated.ToEventId(), "Base exchange set size for file:{FileName} is: {fileSizeInMb} | _X-Correlation-ID : {CorrelationId}", config.FileName, fileSizeInMb, CommonHelper.CorrelationID);
 
                         //Bespoke will not create if size is large
                         if (fileSizeInMb > BESSize)
                         {
-                            logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(), "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set will not be created for file : {FileName} |" +
-                                " _X-Correlation-ID : {CorrelationId}", Math.Round(fileSizeInMb, 2), BESSize, config.FileName, CommonHelper.CorrelationID);
+                            if (config.Type == BessType.UPDATE.ToString() ||
+                                config.Type == BessType.CHANGE.ToString())
+                            {
+                                totalFileSize = await GetTotalFileSizeForUpdateAsync(encCells, productVersionEntities, config);
+                                fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(totalFileSize);
 
-                            continue;
+                                logger.LogInformation(EventIds.UpdateExchangeSetSizeCalculated.ToEventId(), "{Type} exchange set size for file:{FileName} is: {fileSizeInMb} | _X-Correlation-ID : {CorrelationId}", config.Type.ToUpper(), config.FileName, fileSizeInMb, CommonHelper.CorrelationID);
+                            }
+
+                            if (fileSizeInMb > BESSize)
+                            {
+                                logger.LogWarning(EventIds.BessSizeExceedsThreshold.ToEventId(),
+                                    "Bespoke Exchange Set size {fileSizeInMb}MB which is more than the threshold :{BESSize}MB, Bespoke Exchange Set for type : {Type} will not be created for file : {FileName} | _X-Correlation-ID : {CorrelationId}",
+                                    Math.Round(fileSizeInMb, 2), BESSize, config.Type, config.FileName, CommonHelper.CorrelationID);
+                                continue;
+                            }
                         }
 
                         //--save details to message queue --
                         var encCellNames = encCells.Select(i => i.Item1).ToList();
 
-                        bool success = await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(config, encCellNames, totalFileSize);
+                        var success = await azureBlobStorageService.SetConfigQueueMessageModelAndAddToQueueAsync(config, encCellNames, totalFileSize);
 
                         if (success)
                         {
@@ -306,7 +321,30 @@ namespace UKHO.BESS.ConfigurationService.Services
                 throw new FulfilmentException(EventIds.BessConfigFrequencyProcessingException.ToEventId());
             }
         }
+        
+        private  async Task<long> GetTotalFileSizeForUpdateAsync(IEnumerable<(string, int?)> encCells,
+            List<ProductVersionEntities> productVersionEntities, BessConfig config)
+        {
+            long totalFileSize = 0;
 
+            var productVersions = CommonHelper.GetProductVersionsFromEntities(productVersionEntities, encCells.Select(i => i.Item1), config.Name, config.ExchangeSetStandard);
+
+            var salesCatalogueResponse = await salesCatalogueService.PostProductVersionsAsync(productVersions);
+
+            if (salesCatalogueResponse.ResponseCode == HttpStatusCode.OK)
+            {
+                totalFileSize = salesCatalogueResponse.ResponseBody.Products?.Sum(p => p.FileSize.GetValueOrDefault()) ?? 0;
+            }
+
+            return totalFileSize;
+        }
+
+
+        private static long GetTotalFileSizeForBase(IEnumerable<(string, int?)> encCells)
+        {
+            return encCells.Sum(encCell => (long)encCell.Item2!);
+        }
+        
         /// <summary>
         /// If schedule details is different from table then update details
         /// </summary>

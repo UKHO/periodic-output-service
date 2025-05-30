@@ -2,9 +2,11 @@
 using System.Globalization;
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
+using Azure.Storage.Blobs;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Extensions;
@@ -35,6 +37,7 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly IPksService pksService;
         private readonly IPermitDecryption permitDecryption;
         private readonly ICatalog031Helper catalog031Helper;
+        private readonly IAzureBlobStorageClient azureBlobStorageClient;
         private readonly string homeDirectoryPath;
 
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
@@ -45,7 +48,12 @@ namespace UKHO.BESS.BuilderService.Services
         private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration, IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger, IAzureTableStorageHelper azureTableStorageHelper, IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService, IPermitDecryption permitDecryption, ICatalog031Helper catalog031Helper)
+        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration,
+            IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger,
+            IAzureTableStorageHelper azureTableStorageHelper,
+            IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService,
+            IPermitDecryption permitDecryption, ICatalog031Helper catalog031Helper,
+            IAzureBlobStorageClient azureBlobStorageClient)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
@@ -57,6 +65,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.pksService = pksService ?? throw new ArgumentNullException(nameof(pksService));
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
             this.catalog031Helper = catalog031Helper ?? throw new ArgumentNullException(nameof(catalog031Helper));
+            this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
 
             homeDirectoryPath = Path.Combine(configuration[HOME]!, configuration[BESSFOLDERNAME]!);
         }
@@ -70,11 +79,13 @@ namespace UKHO.BESS.BuilderService.Services
         /// <returns>Returns true/false</returns>
         public async Task<bool> CreateBespokeExchangeSetAsync(ConfigQueueMessage configQueueMessage)
         {
-            string essBatchId = await RequestExchangeSetAsync(configQueueMessage);
+            var (messageDetail, blobClient) = await GetConfigMessageDetail(configQueueMessage);
 
-            (string essFileDownloadPath, List<FssBatchFile> essFiles) = await DownloadEssExchangeSetAsync(essBatchId, configQueueMessage.CorrelationId);
+            var essBatchId = await RequestExchangeSetAsync(configQueueMessage, messageDetail);
 
-            string bessZipFileName = string.Format(fssApiConfig.Value.BessZipFileName, configQueueMessage.Name);
+            var (essFileDownloadPath, essFiles) = await DownloadEssExchangeSetAsync(essBatchId, configQueueMessage.CorrelationId);
+
+            var bessZipFileName = string.Format(fssApiConfig.Value.BessZipFileName, configQueueMessage.Name);
 
             RenameFile(essFileDownloadPath, essFiles, bessZipFileName, configQueueMessage.CorrelationId);
 
@@ -82,7 +93,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
 
-            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, configQueueMessage.EncCellNames.ToArray(), bessZipFileName);
+            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName, configQueueMessage.CorrelationId);
 
             await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
 
@@ -90,7 +101,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             if (bool.Parse(configuration["IsFTRunning"]))
             {
-                configQueueMessage = await CheckEmptyBatchTypeForMock(configQueueMessage);
+                configQueueMessage = await CheckEmptyBatchTypeForMock(configQueueMessage, messageDetail);
             }
 
             if (!CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result)
@@ -100,7 +111,65 @@ namespace UKHO.BESS.BuilderService.Services
 
             await SaveLatestProductVersionDetailsAsync(configQueueMessage, latestProductVersions);
 
+            await DeleteConfigMessageDetail(blobClient, configQueueMessage);
+
             return true;
+        }
+
+        /// <summary>
+        /// Retrieves Config Message Detail from blob storage
+        /// </summary>
+        /// <param name="configQueueMessage"></param>
+        /// <returns>Message detail and blob client</returns>
+        /// <exception cref="FulfilmentException"></exception>
+        private async Task<(MessageDetail messageDetail, BlobClient messageBlobClient)> GetConfigMessageDetail(ConfigQueueMessage configQueueMessage)
+        {
+            logger.LogInformation(EventIds.DownloadConfigMessageDetailStarted.ToEventId(),
+                "Downloading message: {name} from Uri: {uri} | _X-Correlation-ID:{CorrelationId}",
+                configQueueMessage.Name, configQueueMessage.MessageDetailUri, configQueueMessage.CorrelationId);
+
+            try
+            {
+                var messageBlobClient = azureBlobStorageClient.GetBlobClientByUriAsync(configQueueMessage.MessageDetailUri);
+
+                var messageDetailString = await azureBlobStorageClient.DownloadBlobContentAsync(messageBlobClient);
+
+                var messageDetail = JsonConvert.DeserializeObject<MessageDetail>(messageDetailString);
+
+                logger.LogInformation(EventIds.DownloadConfigMessageDetailCompleted.ToEventId(),
+                        "Downloaded message: {name} from Uri: {uri} | _X-Correlation-ID:{CorrelationId}",
+                        configQueueMessage.Name, configQueueMessage.MessageDetailUri, configQueueMessage.CorrelationId);
+
+                return (messageDetail!, messageBlobClient);
+
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.DownloadConfigMessageDetailFailed.ToEventId(),
+                    "An error: {error } occurred while downloading message from Uri: {uri} | _X-Correlation-ID:{CorrelationId}",
+                    ex.Message, configQueueMessage.MessageDetailUri, configQueueMessage.CorrelationId);
+
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Deletes config message detail from blob storage
+        /// </summary>
+        /// <param name="blobClient"></param>
+        /// <param name="configQueueMessage"></param>
+        /// <returns></returns>
+        private async Task DeleteConfigMessageDetail(BlobClient blobClient, ConfigQueueMessage configQueueMessage)
+        {
+            logger.LogInformation(EventIds.DeleteConfigMessageDetailStarted.ToEventId(),
+                "Downloading message: {name} from Uri: {uri} | _X-Correlation-ID:{CorrelationId}",
+                configQueueMessage.Name, configQueueMessage.MessageDetailUri, configQueueMessage.CorrelationId);
+
+            await azureBlobStorageClient.DeleteBlobContentAsync(blobClient);
+
+            logger.LogInformation(EventIds.DeleteConfigMessageDetailCompleted.ToEventId(),
+                "Downloading message: {name} from Uri: {uri} | _X-Correlation-ID:{CorrelationId}",
+                configQueueMessage.Name, configQueueMessage.MessageDetailUri, configQueueMessage.CorrelationId);
         }
 
         /// <summary>
@@ -133,41 +202,65 @@ namespace UKHO.BESS.BuilderService.Services
         /// <returns></returns>
         private async Task RequestCellKeysFromPksAsync(ConfigQueueMessage configQueueMessage, string essFileDownloadPath, ProductVersionsRequest latestProductVersions)
         {
-            if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
+            var latestVersions = string.Join(",", latestProductVersions.ProductVersions);
+
+            logger.LogInformation(EventIds.RequestCellKeysFromPksAsyncStarted.ToEventId(),
+                "Request cell keys from pks started at for {latestVersions} at {DateTime} | _X-Correlation-ID: {CorrelationId}", latestVersions, DateTime.UtcNow,
+                configQueueMessage.CorrelationId);
+
+            try
             {
-                if (latestProductVersions.ProductVersions.Any())
+                if (Enum.TryParse(configQueueMessage.KeyFileType, false, out KeyFileType fileType) && !string.Equals(configQueueMessage.KeyFileType, KeyFileType.NONE.ToString(), StringComparison.OrdinalIgnoreCase))
                 {
-                    List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
+                    if (latestProductVersions.ProductVersions.Any())
+                    {
+                        List<ProductKeyServiceRequest> productKeyServiceRequest = ProductKeyServiceRequest(latestProductVersions);
 
-                    List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest, configQueueMessage.CorrelationId);
+                        List<ProductKeyServiceResponse> productKeyServiceResponse = await pksService.PostProductKeyData(productKeyServiceRequest, configQueueMessage.CorrelationId);
 
-                    CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse, configQueueMessage.CorrelationId);
-                }
-                else
-                {
-                    logger.LogInformation(EventIds.SkipPksAsEmptyExchangeSetFoundForProducts.ToEventId(), "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                        CreatePermitFile(fileType, essFileDownloadPath, productKeyServiceResponse, configQueueMessage.CorrelationId);
+                    }
+                    else
+                    {
+                        logger.LogInformation(EventIds.SkipPksAsEmptyExchangeSetFoundForProducts.ToEventId(), "Product Key Service request was skipped because an Empty Exchange Set was found for the requested product(s) | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, configQueueMessage.CorrelationId);
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.RequestCellKeysFromPksAsyncFailed.ToEventId(),
+                    "Request cell keys from pks failed with Exception: {ex} at {DateTime} | _X - Correlation - ID:{CorrelationId}",
+                    ex, DateTime.UtcNow, configQueueMessage.CorrelationId);
+                throw new FulfilmentException(EventIds.GetTheLatestUpdateNumberFailed.ToEventId());
+            }
+
+
+
+
+            logger.LogInformation(EventIds.RequestCellKeysFromPksAsyncCompleted.ToEventId(),
+                "Request cell keys from pks completed at for {latestVersions} at {DateTime} | _X-Correlation-ID: {CorrelationId}", latestVersions, DateTime.UtcNow,
+                configQueueMessage.CorrelationId);
         }
 
         /// <summary>
         ///     This method will request exchange set to ESS.
         /// </summary>
         /// <param name="configQueueMessage"></param>
+        /// <param name="messageDetail"></param>
         /// <returns>will return batch id from ESS</returns>
-        private async Task<string> RequestExchangeSetAsync(ConfigQueueMessage configQueueMessage)
+        private async Task<string> RequestExchangeSetAsync(ConfigQueueMessage configQueueMessage, MessageDetail messageDetail)
         {
             ExchangeSetResponseModel exchangeSetResponseModel = new();
             if (configQueueMessage.Type == BessType.BASE.ToString())
             {
-                exchangeSetResponseModel = await essService.PostProductIdentifiersData((List<string>)configQueueMessage.EncCellNames, configQueueMessage.ExchangeSetStandard, configQueueMessage.CorrelationId);
+                exchangeSetResponseModel = await essService.PostProductIdentifiersData((List<string>)messageDetail.EncCellNames, configQueueMessage.ExchangeSetStandard, configQueueMessage.CorrelationId);
             }
             else if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                      configQueueMessage.Type == BessType.CHANGE.ToString())
             {
                 var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
-                var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
+                var productVersions = GetProductVersionsFromEntities(productVersionEntities, messageDetail.EncCellNames, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
 
                 exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest
                 {
@@ -177,7 +270,7 @@ namespace UKHO.BESS.BuilderService.Services
 
             logger.LogInformation(EventIds.ProductsFetchedFromESS.ToEventId(),
                 "No of Products requested to ESS : {productCount}, No of valid Cells count received from ESS: {cellCount} and Invalid cells count: {invalidCellCount} | DateTime: {DateTime} | _X-Correlation-ID:{CorrelationId}",
-                configQueueMessage.EncCellNames.Count(), exchangeSetResponseModel.ExchangeSetCellCount, exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), DateTime.UtcNow, configQueueMessage.CorrelationId);
+                messageDetail.EncCellNames.Count(), exchangeSetResponseModel.ExchangeSetCellCount, exchangeSetResponseModel.RequestedProductsNotInExchangeSet.Count(), DateTime.UtcNow, configQueueMessage.CorrelationId);
 
             return CommonHelper.ExtractBatchId(exchangeSetResponseModel.Links.ExchangeSetBatchDetailsUri.Href);
         }
@@ -430,22 +523,44 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="cellNames"></param>
         /// <param name="bessZipFileName"></param>
         /// <returns></returns>
-        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName)
+        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName, string correlationId)
         {
-            string exchangeSetPath = Path.Combine(filePath, bessZipFileName);
+            logger.LogInformation(EventIds.GetTheLatestUpdateNumberStarted.ToEventId(),
+                "Get Latest Update Number : {bessZipFileName} | _X-Correlation-ID:{CorrelationId}",
+                bessZipFileName, correlationId);
 
-            ProductVersionsRequest productVersionsRequest = new()
+            try
             {
-                ProductVersions = new()
-            };
+                string exchangeSetPath = Path.Combine(filePath, bessZipFileName);
 
-            foreach (var cellName in cellNames)
-            {
-                var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath, cellName);
+                ProductVersionsRequest productVersionsRequest = new()
+                {
+                    ProductVersions = new()
+                };
 
-                productVersionsRequest.ProductVersions.AddRange(productVersions);
+                var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath);
+
+                productVersionsRequest.ProductVersions.AddRange(
+                    from pv in productVersions
+                    join cellName in cellNames on pv.ProductName equals cellName into matchedCells
+                    from matchedCell in matchedCells
+                    select pv
+                );
+
+                logger.LogInformation(EventIds.GetTheLatestUpdateNumberCompleted.ToEventId(),
+                    "Get Latest Update Number : {bessZipFileName} | _X-Correlation-ID:{CorrelationId}",
+                    bessZipFileName, correlationId);
+
+
+                return productVersionsRequest;
             }
-            return productVersionsRequest;
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.GetTheLatestUpdateNumberFailed.ToEventId(),
+                    "Get Latest Update Number failed with Exception: {ex} at {DateTime} | _X - Correlation - ID:{CorrelationId}",
+                    ex, DateTime.UtcNow, correlationId);
+                throw new FulfilmentException(EventIds.GetTheLatestUpdateNumberFailed.ToEventId());
+            }
         }
 
         /// <summary>
@@ -656,11 +771,11 @@ namespace UKHO.BESS.BuilderService.Services
 
         // This method is for mock only
         [ExcludeFromCodeCoverage]
-        private async Task<ConfigQueueMessage> CheckEmptyBatchTypeForMock(ConfigQueueMessage configQueueMessage)
+        private async Task<ConfigQueueMessage> CheckEmptyBatchTypeForMock(ConfigQueueMessage configQueueMessage, MessageDetail messageDetail)
         {
             var productVersionEntities = await azureTableStorageHelper.GetLatestBessProductVersionDetailsAsync();
 
-            var productVersions = GetProductVersionsFromEntities(productVersionEntities, configQueueMessage.EncCellNames,
+            var productVersions = GetProductVersionsFromEntities(productVersionEntities, messageDetail.EncCellNames,
             configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
 
             var product = productVersions.Any(x => x.EditionNumber > 0);

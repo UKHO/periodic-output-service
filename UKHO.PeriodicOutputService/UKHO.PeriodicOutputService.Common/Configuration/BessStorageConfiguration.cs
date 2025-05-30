@@ -7,6 +7,8 @@
         public string ContainerName { get; set; }
 
         public string QueueName { get; set; }
+
+        public string MessageContainerName { get; set; }
     }
 }
 

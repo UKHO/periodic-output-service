@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.IO.Abstractions;
 using FakeItEasy;
+using Microsoft.Extensions.DependencyInjection;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Pks;
@@ -273,6 +274,59 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             A.CallTo(() => _fakefileSystem.Directory.Delete(filePath))
                 .MustHaveHappened();
 
+        }
+
+        [Test]
+        public void Does_GetProductVersionsFromDirectory_Returns_ProductVersions_When_Directories_Exist()
+        {
+            // Arrange
+            var sourcePath = @"C:\TestSource";
+            var currentPath = Path.Combine(sourcePath, "ENC_ROOT");
+
+            var countryFolder = Path.Combine(currentPath, "Country1");
+            var encFolder = Path.Combine(countryFolder, "ENC1");
+            var editionFolder = Path.Combine(encFolder, "001");
+            var updateFolder1 = Path.Combine(editionFolder, "01");
+            var updateFolder2 = Path.Combine(editionFolder, "02");
+
+            A.CallTo(() => _fakefileSystem.Directory.Exists(currentPath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(currentPath, "*", SearchOption.TopDirectoryOnly))
+                .Returns(new[] { countryFolder });
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(countryFolder, "*", SearchOption.TopDirectoryOnly))
+                .Returns(new[] { encFolder });
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(encFolder))
+                .Returns(new[] { editionFolder });
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(editionFolder))
+                .Returns(new[] { updateFolder1, updateFolder2 });
+
+            // Act
+            var result = _fileSystemHelper.GetProductVersionsFromDirectory(sourcePath);
+
+            // Assert
+            Assert.Multiple(() =>
+            {
+                Assert.That(result, Is.Not.Null);
+                Assert.That(result.Count(), Is.EqualTo(1));
+                Assert.That(result.First().ProductName, Is.EqualTo("ENC1"));
+                Assert.That(result.First().EditionNumber, Is.EqualTo(1));
+                Assert.That(result.First().UpdateNumber, Is.EqualTo(2));
+            });
+        }
+
+        [Test]
+        public void Does_GetProductVersionsFromDirectory_Returns_Empty_When_No_Directories_Exist()
+        {
+            // Arrange
+            var sourcePath = @"C:\TestSource";
+            var currentPath = Path.Combine(sourcePath, "ENC_ROOT");
+
+            A.CallTo(() => _fakefileSystem.Directory.Exists(currentPath)).Returns(false);
+
+            // Act
+            var result = _fileSystemHelper.GetProductVersionsFromDirectory(sourcePath);
+
+            // Assert
+            Assert.That(result, Is.Empty);
         }
     }
 
