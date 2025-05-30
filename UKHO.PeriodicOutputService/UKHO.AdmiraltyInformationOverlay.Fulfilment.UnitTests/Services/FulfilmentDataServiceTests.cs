@@ -2,7 +2,9 @@
 using FakeItEasy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using UKHO.AdmiraltyInformationOverlay.Fulfilment.Services;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -25,6 +27,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         private IConfiguration _fakeconfiguration;
         private IFileInfo _fakeFileInfo;
         private IAzureTableStorageHelper _fakeAzureTableStorageHelper;
+        private IOptions<FssApiConfiguration> _fakeFssApiConfiguration;
 
         [SetUp]
         public void Setup()
@@ -41,35 +44,46 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakeconfiguration["AioCells"] = "GB800001";
             _fakeconfiguration["WeeksToIncrement"] = "1";
 
-            _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
+            _fakeFssApiConfiguration = Options.Create(new FssApiConfiguration()
+            {
+                SerialFileName = "SERIAL.AIO"
+            });
+
+            _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             var exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("fileSystemHelper"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("essService"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("fssService"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper));
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("configuration"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null));
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("azureTableStorageHelper"));
+
+            exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, null));
+            Assert.That(exception.ParamName, Is.EqualTo("fssApiConfig"));
+
+
         }
 
         [Test]

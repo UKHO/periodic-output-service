@@ -868,7 +868,18 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809172 - Remove ReadMe entry from Catalog file request failed for ReadMeSearchFilter is None
         /// </summary>
-        RemoveReadMeEntryAndUpdateCatalogFileProcessFailed = 809172
+        RemoveReadMeEntryAndUpdateCatalogFileProcessFailed = 809172,
+
+        /// <summary>
+        /// 809173 - SERIAL.AIO file updated 
+        /// </summary>
+        SerialAioUpdated = 809173,
+
+        /// <summary>
+        /// 809174 - SERIAL.AIO file update failed
+        /// </summary>
+        SerialAioUpdateFailed = 809174
+
     }
 
     public static class EventIdExtensions

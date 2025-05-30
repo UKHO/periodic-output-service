@@ -3,6 +3,8 @@ using Elastic.Apm;
 using Elastic.Apm.Api;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -24,6 +26,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         private readonly ILogger<FulfilmentDataService> _logger;
         private readonly IConfiguration _configuration;
         private readonly IAzureTableStorageHelper _azureTableStorageHelper;
+        private readonly IOptions<FssApiConfiguration> _fssApiConfig;
 
         private readonly string _homeDirectoryPath;
 
@@ -46,7 +49,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                                      IFssService fssService,
                                      ILogger<FulfilmentDataService> logger,
                                      IConfiguration configuration,
-                                     IAzureTableStorageHelper azureTableStorageHelper)
+                                     IAzureTableStorageHelper azureTableStorageHelper,
+                                     IOptions<FssApiConfiguration> fssApiConfig)
         {
             _fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
             _essService = essService ?? throw new ArgumentNullException(nameof(essService));
@@ -56,6 +60,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _azureTableStorageHelper = azureTableStorageHelper ?? throw new ArgumentNullException(nameof(azureTableStorageHelper));
 
             _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["AIOFolderName"]);
+            _fssApiConfig = fssApiConfig ?? throw new ArgumentNullException(nameof(fssApiConfig));
         }
 
         public async Task<bool> CreateAioExchangeSetsAsync()
@@ -108,6 +113,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                     {
                         ExtractExchangeSetZip(essFiles, essFileDownloadPath);
                         await DownloadAioAncillaryFilesAsync(essBatchId, weekNumber);
+                        await UpdateSerialAioFile(essFiles, essFileDownloadPath, "BASE", weekNumber);
                         CreateExchangeSetZip(essFiles, essFileDownloadPath);
                         CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
                         isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION, Batch.AioBaseCDZipIsoSha1Batch, weekNumber);
@@ -159,6 +165,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
                 {
                     ExtractExchangeSetZip(essFiles, essFileDownloadPath);
+                    await UpdateSerialAioFile(essFiles, essFileDownloadPath, "UPDATE", weekNumber);
                     var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, aioCellNames, weekNumber);
                     isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch, weekNumber);
 
@@ -433,6 +440,34 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             }
 
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadCompleted.ToEventId(), "Downloading of AIO base exchange set ancillary files completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
+        }
+
+        private async Task UpdateSerialAioFile(List<FssBatchFile> fileDetails, string downloadPath, string cdType, FormattedWeekNumber weekNumber)
+        {
+            var serialFileName = _fssApiConfig.Value.SerialFileName;
+           
+            Parallel.ForEach(fileDetails, file =>
+            {
+                var serialFilePath = Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName), serialFileName);
+
+                try
+                {
+                   if (File.Exists(serialFilePath))
+                   {
+                       var serialFileContent = $"GBWK{weekNumber.Week}-{DateTime.UtcNow:yy}   {DateTime.UtcNow.Year:D4}{DateTime.UtcNow.Month:D2}{DateTime.UtcNow.Day:D2}{cdType,-10}{2:D2}.00\x0b\x0d\x0a";
+
+                       _fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
+
+                       _logger.LogInformation(EventIds.SerialAioUpdated.ToEventId(), "SERIAL.AIO file at {serialFilePath} updated with week number {weekNumber} | _X-Correlation-ID:{CorrelationId}", serialFilePath, weekNumber.Week, CommonHelper.CorrelationID);
+                   }   
+                    
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(EventIds.SerialAioUpdateFailed.ToEventId(), "SERIAL.AIO file update operation failed at {DateTime} | {ErrorMessage} | {serialFilePath} | _X-Correlation-ID:{CorrelationId}", DateTime.Now.ToUniversalTime(), ex.Message, serialFilePath, CommonHelper.CorrelationID);
+                    throw new FulfilmentException(EventIds.SerialAioUpdateFailed.ToEventId());
+                }
+            });
         }
 
         private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] aioCellNames, FormattedWeekNumber weekNumber)
