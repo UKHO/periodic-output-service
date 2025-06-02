@@ -442,6 +442,16 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             _logger.LogInformation(EventIds.AioAncillaryFilesDownloadCompleted.ToEventId(), "Downloading of AIO base exchange set ancillary files completed | {DateTime} | _X-Correlation-ID : {CorrelationId}", DateTime.UtcNow, CommonHelper.CorrelationID);
         }
 
+        /// <summary>
+        /// Update the content of serial.aio file to fix
+        /// https://dev.azure.com/ukhydro/Abzu/_workitems/edit/220298
+        /// </summary>
+        /// <param name="fileDetails"></param>
+        /// <param name="downloadPath"></param>
+        /// <param name="cdType"></param>
+        /// <param name="weekNumber"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
         private async Task UpdateSerialAioFile(List<FssBatchFile> fileDetails, string downloadPath, string cdType, FormattedWeekNumber weekNumber)
         {
             var serialFileName = _fssApiConfig.Value.SerialFileName;
