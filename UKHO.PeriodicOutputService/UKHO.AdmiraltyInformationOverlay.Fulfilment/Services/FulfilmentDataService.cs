@@ -113,7 +113,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                     {
                         ExtractExchangeSetZip(essFiles, essFileDownloadPath);
                         await DownloadAioAncillaryFilesAsync(essBatchId, weekNumber);
-                        await UpdateSerialAioFile(essFiles, essFileDownloadPath, "BASE", weekNumber);
+                        UpdateSerialAioFile(essFiles, essFileDownloadPath, "BASE", weekNumber);
                         CreateExchangeSetZip(essFiles, essFileDownloadPath);
                         CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
                         isFullAvcsDvdBatchCreated = await CreatePosBatch(essFileDownloadPath, AIOBASEZIPISOSHA1EXCHANGESETFILEEXTENSION, Batch.AioBaseCDZipIsoSha1Batch, weekNumber);
@@ -165,7 +165,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                 if (!string.IsNullOrEmpty(essFileDownloadPath) && essFiles.Count > 0)
                 {
                     ExtractExchangeSetZip(essFiles, essFileDownloadPath);
-                    await UpdateSerialAioFile(essFiles, essFileDownloadPath, "UPDATE", weekNumber);
+                    UpdateSerialAioFile(essFiles, essFileDownloadPath, "UPDATE", weekNumber);
                     var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, aioCellNames, weekNumber);
                     isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch, weekNumber);
 
@@ -452,7 +452,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         /// <param name="weekNumber"></param>
         /// <returns></returns>
         /// <exception cref="FulfilmentException"></exception>
-        private async Task UpdateSerialAioFile(List<FssBatchFile> fileDetails, string downloadPath, string cdType, FormattedWeekNumber weekNumber)
+        private void UpdateSerialAioFile(List<FssBatchFile> fileDetails, string downloadPath, string cdType, FormattedWeekNumber weekNumber)
         {
             var serialFileName = _fssApiConfig.Value.SerialFileName;
            
