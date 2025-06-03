@@ -978,7 +978,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809194 - Request cellKeys from pks started failed
         /// </summary>
-        RequestCellKeysFromPksAsyncFailed = 809194
+        RequestCellKeysFromPksAsyncFailed = 809194,
+
+        /// <summary>
+        /// 809195 - SERIAL.AIO file updated 
+        /// </summary>
+        SerialAioUpdated = 809195,
+
+        /// <summary>
+        /// 809196 - SERIAL.AIO file update failed
+        /// </summary>
+        SerialAioUpdateFailed = 809196
     }
 
     public static class EventIdExtensions
