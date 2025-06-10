@@ -142,7 +142,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
              .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
-              .MustHaveHappenedOnceExactly();
+                .MustHaveHappened(2, Times.Exactly);
 
             A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceOrMore();
@@ -219,13 +219,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               call.Method.Name == "Log"
               && call.GetArgument<LogLevel>(0) == LogLevel.Information
               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-              ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-              call.Method.Name == "Log"
-              && call.GetArgument<LogLevel>(0) == LogLevel.Information
-              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-              ).MustHaveHappenedOnceExactly();
+              ).MustHaveHappened(2, Times.Exactly);
 
             #endregion Log checks
         }

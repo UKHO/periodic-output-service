@@ -167,6 +167,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                     ExtractExchangeSetZip(essFiles, essFileDownloadPath);
                     UpdateSerialAioFile(essFiles, essFileDownloadPath, "UPDATE", weekNumber);
                     var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, aioCellNames, weekNumber);
+                    CreateExchangeSetZip(essFiles, essFileDownloadPath);
                     isUpdateZipBatchCreated = await CreatePosBatch(essFileDownloadPath, UPDATEZIPEXCHANGESETFILEEXTENSION, Batch.AioUpdateZipBatch, weekNumber);
 
                     if (isUpdateZipBatchCreated)
