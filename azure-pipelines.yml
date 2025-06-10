@@ -195,7 +195,7 @@ stages:
     dependsOn: 
        - Devdeploy
     displayName: IAT Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/Feature/')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
       - name: Environment
         value: "iat"
@@ -214,7 +214,7 @@ stages:
     dependsOn: 
       - IatDeploy
     displayName: PreProd Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/Feature/')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
       - name: Environment
         value: "preprod"
