@@ -18,9 +18,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.Helpers
         protected static POSFileDetails posDetails = testConfiguration.posFileDetails;
         protected static FSSApiConfiguration FSSAuth = testConfiguration.FssConfig;    
         protected static ESSApiConfiguration ESSAuth = new TestConfiguration().EssConfig;
-        protected readonly FleetManagerB2BApiConfiguration fleet = new TestConfiguration().fleetManagerB2BConfig;
-
-
+        
         protected List<string> productIdentifiers = new();
         protected List<string> productIdentifiersAIO = new();
         protected List<string> DownloadedFolderPath;

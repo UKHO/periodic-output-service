@@ -30,36 +30,6 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         FullAvcsExchangeSetCreationCompleted = 809004,
 
         /// <summary>
-        /// 809005 - Getting fleet manager access token started
-        /// </summary>
-        GetFleetMangerAuthTokenStarted = 809005,
-
-        /// <summary>
-        /// 809006 - Getting fleet manager access token failed
-        /// </summary>
-        GetFleetMangerAuthTokenFailed = 809006,
-
-        /// <summary>
-        /// 809007 - Getting fleet manager access token completed
-        /// </summary>
-        GetFleetMangerAuthTokenCompleted = 809007,
-
-        /// <summary>
-        /// 809008 - Getting fleet manager catalogue started
-        /// </summary>
-        GetFleetMangerCatalogueStarted = 809008,
-
-        /// <summary>
-        /// 809009 - Getting fleet manager catalogue failed
-        /// </summary>
-        GetFleetMangerCatalogueFailed = 809009,
-
-        /// <summary>
-        /// 809010 - Getting fleet manager catalogue completed
-        /// </summary>
-        GetFleetMangerCatalogueCompleted = 809010,
-
-        /// <summary>
         /// 809011 - Get access token to call external api started.
         /// </summary>
         GetAccessTokenStarted = 809011,
