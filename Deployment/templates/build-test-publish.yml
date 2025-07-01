@@ -236,7 +236,7 @@ jobs:
       inputs:
         targetType: filePath
         filePath: '$(Build.SourcesDirectory)\Apply-AssemblyVersionAndDefaults.ps1'
-        arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
+        arguments: '-buildNumber "$(Build.BuildNumber)" -solutionDirectory "$(Build.SourcesDirectory)\UKHO.EssFssMock.API\" -UKHOAssemblyCompany "$env:UKHOAssemblyCompany" -UKHOAssemblyCopyright "$(UKHOAssemblyCopyright)" -UKHOAssemblyVersionPrefix "$env:UKHOAssemblyVersionPrefix" -UKHOAssemblyProduct "$(UKHOAssemblyProduct) Mock"'
 
     - task: UseDotNet@2
       displayName: 'Use .NET SDK'
@@ -253,22 +253,22 @@ jobs:
         feedsToUse: config
         noCache: true
         nugetConfigPath: '$(Build.SourcesDirectory)\BuildNuget.config'
-        workingDirectory: '$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API'
+        workingDirectory: '$(Build.SourcesDirectory)\UKHO.EssFssMock.API'
 
     - task: DotNetCoreCLI@2
       displayName: "dotnet build task"
       inputs:
         command: "build"
-        projects: "**/*UKHO.FmEssFssMock.API.csproj"
+        projects: "**/*UKHO.EssFssMock.API.csproj"
         arguments: '--configuration $(BuildConfiguration) --output $(Build.BinariesDirectory)'
-        workingDirectory: '$(Build.SourcesDirectory)\UKHO.FmEssFssMock.API'
+        workingDirectory: '$(Build.SourcesDirectory)\UKHO.EssFssMock.API'
 
     - task: DotNetCoreCLI@2
       displayName: "Publish MockWebAPI"
       inputs:
         command: "publish"
         publishWebProjects: false
-        projects: '**/*UKHO.FmEssFssMock.API.csproj'
+        projects: '**/*UKHO.EssFssMock.API.csproj'
         arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)\MockWebAPI'
         zipAfterPublish: true
         modifyOutputPath: true

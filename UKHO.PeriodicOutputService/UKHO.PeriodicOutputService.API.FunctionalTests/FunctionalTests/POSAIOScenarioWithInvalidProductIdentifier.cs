@@ -12,7 +12,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         {
             FssJwtToken = await AuthTokenProvider.GetFssToken();
 
-            HttpResponseMessage apiResponse = MockHelper.ConfigureFMAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationInValidProductIdentifier);
+            HttpResponseMessage apiResponse = MockHelper.ConfigureAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationInValidProductIdentifier);
             Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
             await CommonHelper.RunWebJobAio();
         }
