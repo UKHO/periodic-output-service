@@ -101,7 +101,9 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 { ".zip", "application/zip" },
                 { ".xml", "text/xml" },
                 { ".csv", "text/csv" },
-                { ".txt", "text/plain" }
+                { ".txt", "text/plain" },
+                { ".iso", "application/x-raw-disk-image" },
+                { ".sha1", "text/plain" }
             };
             return mimeTypes;
         }

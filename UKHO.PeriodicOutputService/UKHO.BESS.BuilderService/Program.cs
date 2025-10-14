@@ -5,9 +5,9 @@ using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Elastic.Apm;
 using Elastic.Apm.Azure.Storage;
 using Elastic.Apm.DiagnosticSource;
-using Elastic.Apm;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
 using UKHO.BESS.BuilderService.Services;
+using UKHO.ExchangeSetService.Common.Configuration;
 using UKHO.Logging.EventHubLogProvider;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -140,7 +141,8 @@ namespace UKHO.BESS.BuilderService
                      serviceCollection.Configure<EssApiConfiguration>(configuration.GetSection("ESSApiConfiguration"));
                      serviceCollection.Configure<AzureStorageConfiguration>(configuration.GetSection("BessStorageConfiguration"));
                      serviceCollection.Configure<PksApiConfiguration>(configuration.GetSection("PksApiConfiguration"));
-
+                     serviceCollection.Configure<PeriodicOutputServiceConfiguration>(configuration.GetSection("PeriodicOutputServiceConfiguration"));
+                     
                      configuration.Bind("FSSApiConfiguration", fssApiConfiguration);
                  }
 
@@ -207,3 +209,4 @@ namespace UKHO.BESS.BuilderService
         }
     }
 }
+

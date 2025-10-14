@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using UKHO.ExchangeSetService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Extensions;
@@ -39,6 +40,7 @@ namespace UKHO.BESS.BuilderService.Services
         private readonly ICatalog031Helper catalog031Helper;
         private readonly IAzureBlobStorageClient azureBlobStorageClient;
         private readonly string homeDirectoryPath;
+        private readonly IOptions<PeriodicOutputServiceConfiguration> periodicOutputServiceConfig;
 
         private const string BESSBATCHFILEEXTENSION = "zip;xml;txt;csv";
         private const string KEYTEXTFILE = "Key.txt";
@@ -47,13 +49,15 @@ namespace UKHO.BESS.BuilderService.Services
         private const string DEFAULTMIMETYPE = "application/octet-stream";
         private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
+        private const string FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION = "iso;sha1";
 
         public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration,
             IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger,
             IAzureTableStorageHelper azureTableStorageHelper,
             IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService,
             IPermitDecryption permitDecryption, ICatalog031Helper catalog031Helper,
-            IAzureBlobStorageClient azureBlobStorageClient)
+            IAzureBlobStorageClient azureBlobStorageClient,
+            IOptions<PeriodicOutputServiceConfiguration> periodicOutputServiceConfig)
         {
             this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
@@ -66,6 +70,7 @@ namespace UKHO.BESS.BuilderService.Services
             this.permitDecryption = permitDecryption ?? throw new ArgumentNullException(nameof(permitDecryption));
             this.catalog031Helper = catalog031Helper ?? throw new ArgumentNullException(nameof(catalog031Helper));
             this.azureBlobStorageClient = azureBlobStorageClient ?? throw new ArgumentNullException(nameof(azureBlobStorageClient));
+            this.periodicOutputServiceConfig = periodicOutputServiceConfig ?? throw new ArgumentNullException(nameof(periodicOutputServiceConfig));
 
             homeDirectoryPath = Path.Combine(configuration[HOME]!, configuration[BESSFOLDERNAME]!);
         }
@@ -81,6 +86,10 @@ namespace UKHO.BESS.BuilderService.Services
         {
             var (messageDetail, blobClient) = await GetConfigMessageDetail(configQueueMessage);
 
+            var fileSizeInMb = CommonHelper.ConvertBytesToMegabytes(configQueueMessage.FileSize ?? 0);
+
+            var isPeriodicOutputService = fileSizeInMb >= periodicOutputServiceConfig.Value.LargeMediaExchangeSetSizeInMB;
+
             var essBatchId = await RequestExchangeSetAsync(configQueueMessage, messageDetail);
 
             var (essFileDownloadPath, essFiles) = await DownloadEssExchangeSetAsync(essBatchId, configQueueMessage.CorrelationId);
@@ -91,25 +100,37 @@ namespace UKHO.BESS.BuilderService.Services
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath, configQueueMessage.CorrelationId);
 
-            await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
-
-            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName, configQueueMessage.CorrelationId);
-
-            await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
-
-            CreateZipFile(essFiles, essFileDownloadPath, configQueueMessage.CorrelationId);
-
-            if (bool.Parse(configuration["IsFTRunning"]))
+            if (isPeriodicOutputService)
             {
-                configQueueMessage = await CheckEmptyBatchTypeForMock(configQueueMessage, messageDetail);
-            }
+                CreateIsoAndSha1ForExchangeSet(essFiles, essFileDownloadPath);
 
-            if (!CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result)
+                if (!CreateBessBatchAsync(essFileDownloadPath, FULLAVCSISOSHA1EXCHANGESETFILEEXTENSION, configQueueMessage).Result)
+                {
+                    return false;
+                }
+            }
+            else
             {
-                return false;
-            }
+                await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
 
-            await SaveLatestProductVersionDetailsAsync(configQueueMessage, latestProductVersions);
+                var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName, configQueueMessage.CorrelationId);
+
+                await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
+
+                CreateZipFile(essFiles, essFileDownloadPath, configQueueMessage.CorrelationId);
+
+                if (bool.Parse(configuration["IsFTRunning"]))
+                {
+                    configQueueMessage = await CheckEmptyBatchTypeForMock(configQueueMessage, messageDetail);
+                }
+
+                if (!CreateBessBatchAsync(essFileDownloadPath, BESSBATCHFILEEXTENSION, configQueueMessage).Result)
+                {
+                    return false;
+                }
+
+                await SaveLatestProductVersionDetailsAsync(configQueueMessage, latestProductVersions);
+            }
 
             await DeleteConfigMessageDetail(blobClient, configQueueMessage);
 
@@ -857,6 +878,27 @@ namespace UKHO.BESS.BuilderService.Services
                     Edition = item.EditionNumber.ToString()
                 }));
             return productKeyServiceRequest;
+        }
+
+        private void CreateIsoAndSha1ForExchangeSet(List<FssBatchFile> fileDetails, string downloadPath)
+        {
+            Parallel.ForEach(fileDetails, file =>
+            {
+                try
+                {
+                    logger.LogInformation(EventIds.CreateIsoAndSha1Started.ToEventId(), "Creating ISO and Sha1 file of {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+                    fileSystemHelper.CreateIsoAndSha1(Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension), file.VolumeIdentifier);
+
+                    logger.LogInformation(EventIds.CreateIsoAndSha1Completed.ToEventId(), "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(EventIds.CreateIsoAndSha1Failed.ToEventId(), "Creating ISO and Sha1 file of {fileName} failed at {DateTime} | {ErrorMessage} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), ex.Message, CommonHelper.CorrelationID);
+                    throw new Exception($"Creating ISO and Sha1 file of {file.FileName} failed at {DateTime.Now.ToUniversalTime()} | _X-Correlation-ID:{CommonHelper.CorrelationID}", ex);
+                }
+            });
         }
     }
 }

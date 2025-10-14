@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.BESS.BuilderService.Services;
+using UKHO.ExchangeSetService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -41,7 +42,8 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         private IPksService fakePksService;
         private ICatalog031Helper fakeCatalog031Helper;
         private IAzureBlobStorageClient fakeAzureBlobStorageClient;
-
+        private IOptions<PeriodicOutputServiceConfiguration> fakePeriodicOutputServiceConfiguration;
+        
         [SetUp]
         public void Setup()
         {
@@ -67,6 +69,11 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 BespokeExchangeSetFileFolder = "V01X01"
             });
 
+            fakePeriodicOutputServiceConfiguration = Options.Create(new PeriodicOutputServiceConfiguration()
+            {
+                LargeExchangeSetFolderName = "testFolder", LargeMediaExchangeSetSizeInMB = 700d
+            });
+
             fakeEssService = A.Fake<IEssService>();
             fakeFssService = A.Fake<IFssService>();
             fakeFileSystemHelper = A.Fake<IFileSystemHelper>();
@@ -80,7 +87,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             fakePksService = A.Fake<IPksService>();
             fakeCatalog031Helper = A.Fake<ICatalog031Helper>();
             fakeAzureBlobStorageClient = A.Fake<IAzureBlobStorageClient>();
-            builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient);
+
+
+            builderService = new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
 
             var fakeBlobClient = A.Fake<BlobClient>();
             var messageDetail = GetMessageDetail(BessType.BASE);
@@ -99,43 +108,43 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         [Test]
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
-            Action nullEssService = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient);
+            Action nullEssService = () => new BuilderService.Services.BuilderService(null, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
             var exception = Assert.Throws<ArgumentNullException>(() => nullEssService());
             Assert.That(exception.ParamName, Is.EqualTo("essService"));
 
-            Action nullFssService = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient);
+            Action nullFssService = () => new BuilderService.Services.BuilderService(fakeEssService, null, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
             exception = Assert.Throws<ArgumentNullException>(() => nullFssService());
             Assert.That(exception.ParamName, Is.EqualTo("fssService"));
 
-            Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient);
+            Action nullFileSystemHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, null, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
             exception = Assert.Throws<ArgumentNullException>(() => nullFileSystemHelper());
             Assert.That(exception.ParamName, Is.EqualTo("fileSystemHelper"));
 
-            Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient);
+            Action nullLogger = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, null, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
             exception = Assert.Throws<ArgumentNullException>(() => nullLogger());
             Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
-            Action nullAzureTableStorageHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, null, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient);
+            Action nullAzureTableStorageHelper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, null, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
             exception = Assert.Throws<ArgumentNullException>(() => nullAzureTableStorageHelper());
             Assert.That(exception.ParamName, Is.EqualTo("azureTableStorageHelper"));
 
-            Action nullFssApiConfiguration = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, null, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient);
+            Action nullFssApiConfiguration = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, null, fakePksService, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
             exception = Assert.Throws<ArgumentNullException>(() => nullFssApiConfiguration());
             Assert.That(exception.ParamName, Is.EqualTo("fssApiConfig"));
 
-            Action nullPksService = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, null, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient);
+            Action nullPksService = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, null, fakePermitDecryption, fakeCatalog031Helper, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
             exception = Assert.Throws<ArgumentNullException>(() => nullPksService());
             Assert.That(exception.ParamName, Is.EqualTo("pksService"));
 
-            Action nullPermitDecryption = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, null, fakeCatalog031Helper, fakeAzureBlobStorageClient);
+            Action nullPermitDecryption = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, null, fakeCatalog031Helper, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
             exception = Assert.Throws<ArgumentNullException>(() => nullPermitDecryption());
             Assert.That(exception.ParamName, Is.EqualTo("permitDecryption"));
 
-            Action nullCatalog031Helper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, null, fakeAzureBlobStorageClient);
+            Action nullCatalog031Helper = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, null, fakeAzureBlobStorageClient, fakePeriodicOutputServiceConfiguration);
             exception = Assert.Throws<ArgumentNullException>(() => nullCatalog031Helper());
             Assert.That(exception.ParamName, Is.EqualTo("catalog031Helper"));
 
-            Action nullAzureBlobStorageClient = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, null);
+            Action nullAzureBlobStorageClient = () => new BuilderService.Services.BuilderService(fakeEssService, fakeFssService, fakeConfiguration, fakeFileSystemHelper, fakeLogger, fakeAzureTableStorageHelper, fakeFssApiConfiguration, fakePksService, fakePermitDecryption, fakeCatalog031Helper, null, fakePeriodicOutputServiceConfiguration);
             exception = Assert.Throws<ArgumentNullException>(() => nullAzureBlobStorageClient());
             Assert.That(exception.ParamName, Is.EqualTo("azureBlobStorageClient"));
         }
