@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.IO.Abstractions;
 using FakeItEasy;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Pks;
@@ -16,6 +16,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         private IZipHelper _fakeZipHelper;
         private IFileUtility _fakeFileUtility;
         private IFileInfo _fakeFileInfo;
+        private ILogger<FileSystemHelper> _fakeLogger;
 
         private const string filePath = @"d:\Test";
         private const string fileName = "M01X01.zip";
@@ -30,23 +31,24 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             _fakeZipHelper = A.Fake<IZipHelper>();
             _fakeFileUtility = A.Fake<IFileUtility>();
             _fakeFileInfo = A.Fake<IFileInfo>();
+            _fakeLogger = A.Fake<ILogger<FileSystemHelper>>();
 
-            _fileSystemHelper = new FileSystemHelper(_fakefileSystem, _fakeZipHelper, _fakeFileUtility);
+            _fileSystemHelper = new FileSystemHelper(_fakefileSystem, _fakeZipHelper, _fakeFileUtility, _fakeLogger);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             var exception = Assert.Throws<ArgumentNullException>(
-               () => new FileSystemHelper(null, _fakeZipHelper, _fakeFileUtility));
+               () => new FileSystemHelper(null, _fakeZipHelper, _fakeFileUtility, _fakeLogger));
             Assert.That(exception.ParamName, Is.EqualTo("fileSystem"));
 
             exception = Assert.Throws<ArgumentNullException>(
-              () => new FileSystemHelper(_fakefileSystem, null, _fakeFileUtility));
+              () => new FileSystemHelper(_fakefileSystem, null, _fakeFileUtility, _fakeLogger));
             Assert.That(exception.ParamName, Is.EqualTo("zipHelper"));
 
             exception = Assert.Throws<ArgumentNullException>(
-             () => new FileSystemHelper(_fakefileSystem, _fakeZipHelper, null));
+             () => new FileSystemHelper(_fakefileSystem, _fakeZipHelper, null, _fakeLogger));
             Assert.That(exception.ParamName, Is.EqualTo("fileUtility"));
         }
 
