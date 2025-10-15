@@ -978,7 +978,37 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809194 - Request cellKeys from pks started failed
         /// </summary>
-        RequestCellKeysFromPksAsyncFailed = 809194
+        RequestCellKeysFromPksAsyncFailed = 809194,
+
+        /// <summary>
+        /// 809195 - FileName without extension completed
+        /// </summary>
+        FileNameWithoutExtensionCompleted = 809195,
+
+        /// <summary>
+        /// 809196 - VolumeIdentifier is Missing
+        /// </summary>
+        VolumeIdentifierMissing = 809196,
+
+        /// <summary>
+        /// 809197 - Create Iso And Sha1 In File System Helper Started
+        /// </summary>
+        CreateIsoAndSha1InFileSystemHelperStarted = 809197,
+
+        /// <summary>
+        /// 809198 - Create Iso And Sha1 In File System Helper Completed
+        /// </summary>
+        CreateIsoAndSha1InFileSystemHelperCompleted = 809198,
+
+        /// <summary>
+        /// 809199 - Create Iso In File System Helper started
+        /// </summary>
+        CreateISOImageInFileSystemHelperStarted = 809199,
+
+        /// <summary>
+        /// 809200 - Create Iso In File System Helper Completed
+        /// </summary>
+        CreateISOImageInFileSystemHelperCompleted = 809200
     }
 
     public static class EventIdExtensions

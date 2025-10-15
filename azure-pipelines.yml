@@ -172,9 +172,7 @@ stages:
   #         AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
   #         Container: ${{variables.Container}} 
 
-  - stage: vnexte2eDeploy
-    dependsOn: 
-       - Devdeploy
+  - stage: vnexte2eDeploy   
     displayName: vNext E2E Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:

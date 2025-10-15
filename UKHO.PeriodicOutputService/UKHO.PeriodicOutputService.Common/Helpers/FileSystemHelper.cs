@@ -2,6 +2,8 @@
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
+using Microsoft.Extensions.Logging;
+using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Utilities;
@@ -13,12 +15,14 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         private readonly IFileSystem _fileSystem;
         private readonly IZipHelper _zipHelper;
         private readonly IFileUtility _fileUtility;
+        private readonly ILogger<FileSystemHelper> _logger;
 
-        public FileSystemHelper(IFileSystem fileSystem, IZipHelper zipHelper, IFileUtility fileUtility)
+        public FileSystemHelper(IFileSystem fileSystem, IZipHelper zipHelper, IFileUtility fileUtility, ILogger<FileSystemHelper> logger)
         {
             _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _zipHelper = zipHelper ?? throw new ArgumentNullException(nameof(zipHelper));
             _fileUtility = fileUtility ?? throw new ArgumentNullException(nameof(fileUtility));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public void CreateDirectory(string folderPath)
@@ -110,11 +114,26 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public void CreateIsoAndSha1(string targetPath, string directoryPath, string volumeIdentifier)
         {
-            IEnumerable<string>? srcFiles = GetAllFiles(directoryPath, SearchOption.AllDirectories);
+            _logger.LogInformation(EventIds.CreateIsoAndSha1InFileSystemHelperStarted.ToEventId(), "Creating ISO and Sha1 started with target path {targetPath}, directory path {directoryPath} and volume identifier {VolumeIdentifier} started at {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                targetPath, directoryPath, volumeIdentifier, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-            _fileUtility.CreateISOImage(srcFiles, targetPath, directoryPath, volumeIdentifier);
+            var srcFiles = GetAllFiles(directoryPath, SearchOption.AllDirectories) ?? Enumerable.Empty<string>();
+
+            var files = srcFiles.ToList();
+            var srcFilesCommaSeparated = string.Join(",", files);
+
+            _logger.LogInformation(EventIds.CreateISOImageInFileSystemHelperStarted.ToEventId(), "Creating ISO image started with files {srcFilesCommaSeparated}, target path {targetPath}, directory path {directoryPath} and volume identifier {VolumeIdentifier} started at {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                srcFilesCommaSeparated, targetPath, directoryPath, volumeIdentifier, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
+            _fileUtility.CreateISOImage(files, targetPath, directoryPath, volumeIdentifier);
+
+            _logger.LogInformation(EventIds.CreateISOImageInFileSystemHelperCompleted.ToEventId(), "Creating ISO ISO image completed with target path {targetPath}, directory path {directoryPath} and volume identifier {VolumeIdentifier} started at {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                targetPath, directoryPath, volumeIdentifier, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
             _fileUtility.CreateSha1File(targetPath);
+
+            _logger.LogInformation(EventIds.CreateIsoAndSha1InFileSystemHelperCompleted.ToEventId(), "Creating ISO and Sha1 started with target path {targetPath}, directory path {directoryPath} and volume identifier {VolumeIdentifier} started at {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                targetPath, directoryPath, volumeIdentifier, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
         }
 
         public void CreateXmlFile(byte[] fileContent, string targetPath)

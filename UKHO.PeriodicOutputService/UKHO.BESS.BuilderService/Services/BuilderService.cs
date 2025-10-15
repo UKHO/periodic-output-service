@@ -886,9 +886,20 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 try
                 {
-                    logger.LogInformation(EventIds.CreateIsoAndSha1Started.ToEventId(), "Creating ISO and Sha1 file of {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+                    logger.LogInformation(EventIds.CreateIsoAndSha1Started.ToEventId(), "Creating ISO and Sha1 file of {fileName} with volume identifier {VolumeIdentifier} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, string.IsNullOrEmpty(file.VolumeIdentifier) ?  "-1": file.VolumeIdentifier, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
 
-                    string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+                    var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file.FileName);
+
+                    if (string.IsNullOrEmpty(file.VolumeIdentifier))
+                    {
+                        // If VolumeIdentifier is null or empty, use the filename without extension as VolumeIdentifier
+                        file.VolumeIdentifier = fileNameWithoutExtension;
+                        // Log a warning message indicating that VolumeIdentifier was missing and has been set to filename without extension
+                        logger.LogWarning(EventIds.VolumeIdentifierMissing.ToEventId(), "VolumeIdentifier is missing for file {fileName}. Using filename without extension as VolumeIdentifier: {VolumeIdentifier} | _X-Correlation-ID:{CorrelationId}", file.FileName, file.VolumeIdentifier, CommonHelper.CorrelationID);
+                    }
+
+                    logger.LogInformation(EventIds.FileNameWithoutExtensionCompleted.ToEventId(), "Filename without extension completed {fileNameWithoutExtension} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", fileNameWithoutExtension, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
                     fileSystemHelper.CreateIsoAndSha1(Path.Combine(downloadPath, fileNameWithoutExtension + ".iso"), Path.Combine(downloadPath, fileNameWithoutExtension), file.VolumeIdentifier);
 
                     logger.LogInformation(EventIds.CreateIsoAndSha1Completed.ToEventId(), "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", file.FileName, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
