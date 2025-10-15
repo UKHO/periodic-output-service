@@ -91,7 +91,25 @@ stages:
       parameters:
         DotNetVersion: '8.0.x'
 
+  - stage: vnexte2eDeploy   
+    displayName: vNext E2E Deploy (inc terraform, webapp deploy)
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
+    variables:
+      - name: Environment
+        value: "vnexte2e"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+    jobs:
+      - template: Deployment/templates/app-deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+          Container: ${{variables.Container}}
+
   - stage: Devdeploy
+    dependsOn: vnexte2eDeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
     variables:
       - name: Environment
@@ -172,22 +190,22 @@ stages:
   #         AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
   #         Container: ${{variables.Container}} 
 
-  - stage: vnexte2eDeploy   
-    displayName: vNext E2E Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
-    variables:
-      - name: Environment
-        value: "vnexte2e"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
-          Container: ${{variables.Container}}
+  # - stage: vnexte2eDeploy   
+  #   displayName: vNext E2E Deploy (inc terraform, webapp deploy)
+  #   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
+  #   variables:
+  #     - name: Environment
+  #       value: "vnexte2e"
+  #     - template: Deployment/templates/variables.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #   jobs:
+  #     - template: Deployment/templates/app-deploy.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #         ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+  #         AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+  #         Container: ${{variables.Container}}
 
   - stage: IatDeploy
     dependsOn: 
