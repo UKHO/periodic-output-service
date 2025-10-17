@@ -524,7 +524,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
             {
                 ProductVersion productVersion = new();
 
-                var result = productVersionEntities.Where(p => p.ProductName == item);
+                var result = productVersionEntities.Where(p => p.ProductName == item)
+                    .OrderByDescending(p => p.EditionNumber);
 
                 if (result != null && result.Count() > 0)
                 {
