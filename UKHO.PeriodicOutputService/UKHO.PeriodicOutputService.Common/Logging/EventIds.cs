@@ -958,7 +958,17 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809196 - SERIAL.AIO file update failed
         /// </summary>
-        SerialAioUpdateFailed = 809196
+        SerialAioUpdateFailed = 809196,
+
+        /// <summary>
+        /// 809197 - Get product versions from entities started
+        /// </summary>
+        GetProductVersionsFromEntitiesStarted = 809197,
+
+        /// <summary>
+        /// 809198 - Get product versions from entities completed
+        /// </summary>
+        GetProductVersionsFromEntitiesCompleted = 809198
     }
 
     public static class EventIdExtensions
