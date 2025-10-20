@@ -12,6 +12,7 @@ using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
@@ -28,6 +29,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         private IFileInfo _fakeFileInfo;
         private IAzureTableStorageHelper _fakeAzureTableStorageHelper;
         private IOptions<FssApiConfiguration> _fakeFssApiConfiguration;
+        private static readonly string _aioProductName = "GB800001";
 
         [SetUp]
         public void Setup()
@@ -41,7 +43,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
 
             _fakeconfiguration["IsFTRunning"] = "false";
-            _fakeconfiguration["AioCells"] = "GB800001";
+            _fakeconfiguration["AioCells"] = _aioProductName;
             _fakeconfiguration["WeeksToIncrement"] = "1";
 
             _fakeFssApiConfiguration = Options.Create(new FssApiConfiguration()
@@ -89,11 +91,18 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         [Test]
         public async Task Does_CreateAioExchangeSets_Executes_Successfully()
         {
+            A.CallTo(() => _fakeAzureTableStorageHelper.GetLatestProductVersionDetails())
+                .Returns(GetProductVersionEntities());
+
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
-
-            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
-             .Returns(GetValidExchangeSetGetBatchResponse());
+            
+            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(
+                    A<ProductVersionsRequest>.That.Matches(r =>
+                        r.ProductVersions.Count == 1 && r.ProductVersions[0].ProductName == _aioProductName &&
+                        r.ProductVersions[0].EditionNumber == 33 && r.ProductVersions[0].UpdateNumber == 00
+                    ), A<string>.Ignored, A<string>.Ignored))
+                .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -635,6 +644,22 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                    }
                }
             ]
+        };
+
+        private static List<ProductVersionEntities>  GetProductVersionEntities() => new()
+        {
+            new ProductVersionEntities
+            {
+                ProductName = _aioProductName,
+                EditionNumber = 32,
+                UpdateNumber = 90
+            },
+            new ProductVersionEntities
+            {
+                ProductName = _aioProductName,
+                EditionNumber = 33,
+                UpdateNumber = 0
+            }
         };
     }
 }
