@@ -522,11 +522,14 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
             foreach (var item in aioCellNames)
             {
+                _logger.LogInformation(EventIds.GetProductVersionsFromEntitiesStarted.ToEventId(), "Get product versions from entities started for {item} | {DateTime} | _X-Correlation-ID : {CorrelationId}", item, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
+
                 ProductVersion productVersion = new();
 
-                var result = productVersionEntities.Where(p => p.ProductName == item);
+                var result = productVersionEntities.Where(p => p.ProductName == item)
+                    .OrderByDescending(p => p.EditionNumber).ToList();
 
-                if (result != null && result.Count() > 0)
+                if (result.Count > 0)
                 {
                     productVersion.ProductName = result.FirstOrDefault().ProductName;
                     productVersion.EditionNumber = result.FirstOrDefault().EditionNumber;
@@ -539,6 +542,10 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
                     productVersion.UpdateNumber = 0;
                 }
                 productVersions.Add(productVersion);
+
+                _logger.LogInformation(EventIds.GetProductVersionsFromEntitiesCompleted.ToEventId(), "Get product versions from entities completed for {item}, " +
+                    "product name: {ProductName}, edition number: {EditionNumber}, update number: {UpdateNumber} | {DateTime} | _X-Correlation-ID : {CorrelationId}",
+                    item, productVersion.ProductName, productVersion.EditionNumber, productVersion.UpdateNumber, DateTime.Now.ToUniversalTime(), CommonHelper.CorrelationID);
             }
 
             return productVersions;
