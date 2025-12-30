@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using UKHO.PeriodicOutputService.Common.Configuration;
+using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Logging;
 using UKHO.PeriodicOutputService.Common.Models.Bess;
 
@@ -47,6 +48,7 @@ public class AzureBlobStorageService : IAzureBlobStorageService
             {
                 Name = bessConfig.Name,
                 ExchangeSetStandard = bessConfig.ExchangeSetStandard,
+                ExchangeSetLayout = bessConfig.ExchangeSetLayout ?? ExchangeSetLayout.Standard.ToString(),
                 MessageDetailUri = messageBlobUri,
                 Frequency = bessConfig.Frequency,
                 Type = bessConfig.Type,

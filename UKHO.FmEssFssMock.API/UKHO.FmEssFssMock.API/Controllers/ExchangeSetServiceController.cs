@@ -63,7 +63,7 @@ namespace UKHO.FmEssFssMock.API.Controllers
             }
             return BadRequest();
         }
-
+        
         [HttpPost]
         [Route("/ess/productData/productVersions")]
         public IActionResult PostProductVersions([FromBody] List<ProductVersionRequest> productVersionRequest, [FromQuery] string? exchangeSetStandard)
@@ -86,6 +86,27 @@ namespace UKHO.FmEssFssMock.API.Controllers
                 }
             }
             return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("/ess/productBuilder")]
+        public IActionResult GetProductDataSinceDateTime([FromQuery] string sinceDateTime, [FromQuery] string? exchangeSetStandard, [FromQuery] string? exchangeSetLayout)
+        {
+            return GetProductDataSinceDateTime(sinceDateTime, exchangeSetStandard);
+        }
+
+        [HttpPost]
+        [Route("/ess/productBuilder/productIdentifiers")]
+        public IActionResult PostProductIdentifiers([FromBody] string[] productIdentifiers, [FromQuery] string? exchangeSetStandard, [FromQuery] string? exchangeSetLayout)
+        {
+            return PostProductIdentifiers(productIdentifiers, exchangeSetStandard);
+        }
+
+        [HttpPost]
+        [Route("/ess/productBuilder/productVersions")]
+        public IActionResult PostProductVersions([FromBody] List<ProductVersionRequest> productVersionRequest, [FromQuery] string? exchangeSetStandard, [FromQuery] string? exchangeSetLayout)
+        {
+            return PostProductVersions(productVersionRequest, exchangeSetStandard);
         }
     }
 }

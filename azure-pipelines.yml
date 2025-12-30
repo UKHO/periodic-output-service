@@ -91,92 +91,92 @@ stages:
       parameters:
         DotNetVersion: '8.0.x'
 
-  - stage: Devdeploy
-    displayName: "Devdeploy (inc terraform, webapp deploy)"
-    variables:
-      - name: Environment
-        value: "dev"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
-          Container: ${{variables.Container}}
-          RunTests: true
+  # - stage: Devdeploy
+  #   displayName: "Devdeploy (inc terraform, webapp deploy)"
+  #   variables:
+  #     - name: Environment
+  #       value: "dev"
+  #     - template: Deployment/templates/variables.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #   jobs:
+  #     - template: Deployment/templates/app-deploy.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #         ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+  #         AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
+  #         Container: ${{variables.Container}}
+  #         RunTests: true
       
-  - stage: QAdeploy
-    dependsOn: Devdeploy
-    displayName: "QAdeploy (inc terraform, webapp deploy)"
-    variables:
-      - name: Environment
-        value: "qa"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
-          Container: ${{variables.Container}} 
+  # - stage: QAdeploy
+  #   # dependsOn: Devdeploy
+  #   displayName: "QAdeploy (inc terraform, webapp deploy)"
+  #   variables:
+  #     - name: Environment
+  #       value: "qa"
+  #     - template: Deployment/templates/variables.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #   jobs:
+  #     - template: Deployment/templates/app-deploy.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #         ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+  #         AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
+  #         Container: ${{variables.Container}} 
 
-  - stage: Livedeploy
-    displayName: "Livedeploy (inc terraform, webapp deploy)"
-    variables:
-      - name: Environment
-        value: "Live"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
-          Container: ${{variables.Container}} 
+  # - stage: Livedeploy
+  #   displayName: "Livedeploy (inc terraform, webapp deploy)"
+  #   variables:
+  #     - name: Environment
+  #       value: "Live"
+  #     - template: Deployment/templates/variables.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #   jobs:
+  #     - template: Deployment/templates/app-deploy.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #         ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+  #         AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
+  #         Container: ${{variables.Container}} 
    
-      - job: PostDeploymentActions
-        dependsOn:
-        - DeployApp
-        - Setup
-        - CheckInfra
-        - CheckFSS
-        - CheckESS      
-        pool: $(WindowPool)        
-        displayName: Post Deployment Actions
-        steps:
-          - template: Deployment/templates/retain-pipeline.yml
+  #     - job: PostDeploymentActions
+  #       dependsOn:
+  #       - DeployApp
+  #       - Setup
+  #       - CheckInfra
+  #       - CheckFSS
+  #       - CheckESS      
+  #       pool: $(WindowPool)        
+  #       displayName: Post Deployment Actions
+  #       steps:
+  #         - template: Deployment/templates/retain-pipeline.yml
 
-  - stage: vNextIATDeploy
-    dependsOn: 
-      - Devdeploy
-    displayName: vNext IAT Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
-    variables:
-      - name: Environment
-        value: "vnextiat"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
-          Container: ${{variables.Container}} 
+  # - stage: vNextIATDeploy
+  #   dependsOn: 
+  #     - Devdeploy
+  #   displayName: vNext IAT Deploy (inc terraform, webapp deploy)
+  #   condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
+  #   variables:
+  #     - name: Environment
+  #       value: "vnextiat"
+  #     - template: Deployment/templates/variables.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #   jobs:
+  #     - template: Deployment/templates/app-deploy.yml
+  #       parameters:
+  #         Environment: ${{variables.Environment}}
+  #         ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+  #         AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
+  #         Container: ${{variables.Container}} 
 
   - stage: vnexte2eDeploy
-    dependsOn: 
-       - vNextIATDeploy
+    # dependsOn: 
+    #    - Devdeploy
     displayName: vNext E2E Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
       - name: Environment
         value: "vnexte2e"
@@ -192,8 +192,8 @@ stages:
           Container: ${{variables.Container}}
 
   - stage: IatDeploy
-    dependsOn: 
-       - Devdeploy
+    # dependsOn: 
+    #    - Devdeploy
     displayName: IAT Deploy (inc terraform, webapp deploy)
     condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:

@@ -32,6 +32,10 @@ namespace UKHO.BESS.ConfigurationService.Validation
                         .WithMessage("Attribute value is invalid. Expected value is either s63 or s57");
                 });
 
+            RuleFor(config => config.ExchangeSetLayout)
+                .Must(exchangeSetLayout => IsValidExchangeSetLayout(exchangeSetLayout))
+                .WithMessage("Attribute value is invalid. Expected value is either Large or Standard");
+
             RuleFor(config => config.EncCellNames)
                 .Must(encs => encs != null && encs.Any() && encs.All(enc => !string.IsNullOrWhiteSpace(enc)))
                 .WithMessage(ValidationMessageInvalidOrNullAttribute);
@@ -138,6 +142,17 @@ namespace UKHO.BESS.ConfigurationService.Validation
         private static bool IsValidExchangeSetStandard(string exchangeSetStandard)
         {
             return Enum.IsDefined(typeof(ExchangeSetStandard), exchangeSetStandard);
+        }
+
+        private static bool IsValidExchangeSetLayout(string? exchangeSetLayout)
+        {
+            if (string.IsNullOrWhiteSpace(exchangeSetLayout))
+            {
+                return true;
+            }
+
+            return Enum.TryParse<ExchangeSetLayout>(exchangeSetLayout, ignoreCase: true, out var result) &&
+                   Enum.IsDefined(result);
         }
 
         private static bool IsValidCron(string frequency)

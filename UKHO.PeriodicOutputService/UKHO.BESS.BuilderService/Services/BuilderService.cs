@@ -27,7 +27,7 @@ namespace UKHO.BESS.BuilderService.Services
 {
     public class BuilderService : IBuilderService
     {
-        private readonly IEssService essService;
+        private readonly IEssBuilderService essBuilderService;
         private readonly IFssService fssService;
         private readonly IConfiguration configuration;
         private readonly IFileSystemHelper fileSystemHelper;
@@ -48,14 +48,14 @@ namespace UKHO.BESS.BuilderService.Services
         private const string BESSFOLDERNAME = "BessFolderName";
         private const string HOME = "HOME";
 
-        public BuilderService(IEssService essService, IFssService fssService, IConfiguration configuration,
+        public BuilderService(IEssBuilderService essBuilderService, IFssService fssService, IConfiguration configuration,
             IFileSystemHelper fileSystemHelper, ILogger<BuilderService> logger,
             IAzureTableStorageHelper azureTableStorageHelper,
             IOptions<FssApiConfiguration> fssApiConfig, IPksService pksService,
             IPermitDecryption permitDecryption, ICatalog031Helper catalog031Helper,
             IAzureBlobStorageClient azureBlobStorageClient)
         {
-            this.essService = essService ?? throw new ArgumentNullException(nameof(essService));
+            this.essBuilderService = essBuilderService ?? throw new ArgumentNullException(nameof(essBuilderService));
             this.fssService = fssService ?? throw new ArgumentNullException(nameof(fssService));
             this.configuration = configuration;
             this.fileSystemHelper = fileSystemHelper ?? throw new ArgumentNullException(nameof(fileSystemHelper));
@@ -87,12 +87,15 @@ namespace UKHO.BESS.BuilderService.Services
 
             var bessZipFileName = string.Format(fssApiConfig.Value.BessZipFileName, configQueueMessage.Name);
 
-            RenameFile(essFileDownloadPath, essFiles, bessZipFileName, configQueueMessage.CorrelationId);
+            RenameFile(essFileDownloadPath, essFiles, bessZipFileName, configQueueMessage.CorrelationId, configQueueMessage.ExchangeSetLayout);
 
             ExtractExchangeSetZip(essFiles, essFileDownloadPath, configQueueMessage.CorrelationId);
 
-            await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
-
+            if (!configQueueMessage.ExchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+                await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
+            }
+            
             var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName, configQueueMessage.CorrelationId);
 
             await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
@@ -253,7 +256,7 @@ namespace UKHO.BESS.BuilderService.Services
             ExchangeSetResponseModel exchangeSetResponseModel = new();
             if (configQueueMessage.Type == BessType.BASE.ToString())
             {
-                exchangeSetResponseModel = await essService.PostProductIdentifiersData((List<string>)messageDetail.EncCellNames, configQueueMessage.ExchangeSetStandard, configQueueMessage.CorrelationId);
+                exchangeSetResponseModel = await essBuilderService.PostProductIdentifiersData((List<string>)messageDetail.EncCellNames, configQueueMessage.ExchangeSetStandard, configQueueMessage.ExchangeSetLayout, configQueueMessage.CorrelationId);
             }
             else if (configQueueMessage.Type == BessType.UPDATE.ToString() ||
                      configQueueMessage.Type == BessType.CHANGE.ToString())
@@ -262,10 +265,10 @@ namespace UKHO.BESS.BuilderService.Services
 
                 var productVersions = GetProductVersionsFromEntities(productVersionEntities, messageDetail.EncCellNames, configQueueMessage.Name, configQueueMessage.ExchangeSetStandard);
 
-                exchangeSetResponseModel = await essService.GetProductDataProductVersions(new ProductVersionsRequest
+                exchangeSetResponseModel = await essBuilderService.GetProductDataProductVersions(new ProductVersionsRequest
                 {
                     ProductVersions = productVersions
-                }, configQueueMessage.ExchangeSetStandard, configQueueMessage.CorrelationId);
+                }, configQueueMessage.ExchangeSetStandard, configQueueMessage.ExchangeSetLayout, configQueueMessage.CorrelationId);
             }
 
             logger.LogInformation(EventIds.ProductsFetchedFromESS.ToEventId(),
@@ -830,14 +833,22 @@ namespace UKHO.BESS.BuilderService.Services
             logger.LogInformation(EventIds.PermitFileCreationCompleted.ToEventId(), "Permit file creation completed for {KeyFileType} | {DateTime} | _X-Correlation-ID : {CorrelationId}", keyFileType, DateTime.UtcNow, correlationId);
         }
 
-        private void RenameFile(string downloadPath, List<FssBatchFile> files, string bessZipFileName, string correlationId)
+        private void RenameFile(string downloadPath, List<FssBatchFile> files, string bessZipFileName, string correlationId, string exchangeSetLayout)
         {
+            // Large media files will be renamed as
+            // 1. M01X02.zip -> <bessZipFileName>_M01X02.zip
+            // 2. M02X02.zip -> <bessZipFileNameE>_M02X02.zip
+            
             foreach (var file in files)
             {
                 IFileInfo fileInfo = fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
                 if (fileInfo != null)
                 {
-                    file.FileName = file.FileName.Replace(fssApiConfig.Value.BespokeExchangeSetFileFolder, bessZipFileName);
+                    file.FileName = exchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(),
+                        StringComparison.OrdinalIgnoreCase) ?
+                        $"{bessZipFileName}_{Path.GetFileNameWithoutExtension(file.FileName)}{Path.GetExtension(file.FileName)}" 
+                        : file.FileName.Replace(fssApiConfig.Value.BespokeExchangeSetFileFolder, bessZipFileName);
+
 
                     logger.LogInformation(EventIds.ZipFileRenamed.ToEventId(), "Zip file {fileName} renamed to file {newFileName} at {DateTime} | _X-Correlation-ID:{CorrelationId}", fssApiConfig.Value.BespokeExchangeSetFileFolder, file.FileName, DateTime.UtcNow, correlationId);
                 }

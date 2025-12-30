@@ -28,6 +28,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             {
                 Name = "BES-1",
                 ExchangeSetStandard = "S63",
+                ExchangeSetLayout = "Standard",
                 EncCellNames = new List<string> { "GB123456", "GB234567" },
                 Frequency = "15 16 2 2 *",
                 Type = "BASE",
@@ -60,6 +61,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             {
                 Name = "BES-1",
                 ExchangeSetStandard = exchangeSetStandard,
+                ExchangeSetLayout = "Standard",
                 EncCellNames = new List<string> { "GB123456", "GB234567", "GB*" },
                 Frequency = "15 16 2 2 *",
                 Type = type,
@@ -77,12 +79,46 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
         }
 
         [Test]
+        [TestCase("Large", Description = "Valid ExchangeSetLayout: Large")]
+        [TestCase("large", Description = "Valid ExchangeSetLayout (case-insensitive): large")]
+        [TestCase("LARGE", Description = "Valid ExchangeSetLayout (case-insensitive): LARGE")]
+        [TestCase("Standard", Description = "Valid ExchangeSetLayout: Standard")]
+        [TestCase("standard", Description = "Valid ExchangeSetLayout (case-insensitive): standard")]
+        [TestCase("STANDARD", Description = "Valid ExchangeSetLayout (case-insensitive): STANDARD")]
+        [TestCase("", Description = "Empty ExchangeSetLayout is allowed")]
+        [TestCase(null, Description = "Null ExchangeSetLayout is allowed")]
+        public void WhenConfigContainsValidExchangeSetLayout_ThenNoValidationErrorsAreFound(string? exchangeSetLayout)
+        {
+            BessConfig bessConfig = GetBessConfig();
+            bessConfig.ExchangeSetLayout = exchangeSetLayout;
+
+            TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
+            Assert.That(result.Errors, Is.Empty);
+        }
+
+        [Test]
+        [TestCase("big")]
+        [TestCase("LARGE_")]
+        [TestCase("123")]
+        public void WhenConfigContainsInvalidExchangeSetLayout_ThenThrowValidationError(string exchangeSetLayout)
+        {
+            BessConfig bessConfig = GetBessConfig();
+            bessConfig.ExchangeSetLayout = exchangeSetLayout;
+
+            TestValidationResult<BessConfig> result = configValidator.TestValidate(bessConfig);
+
+            result.ShouldHaveValidationErrorFor(x => x.ExchangeSetLayout)
+                .WithErrorMessage("Attribute value is invalid. Expected value is either Large or Standard");
+        }
+
+        [Test]
         [TestCase("1")]
         public void WhenConfigContainsInvalidIsEnabledAttribute_ThenThrowValidationErrorForIsEnabledOnly(string isEnabled)
         {
             var bessConfig = new BessConfig
             {
                 Name = null,
+                ExchangeSetLayout = null,
                 ExchangeSetStandard = null,
                 EncCellNames = new List<string>(),
                 Frequency = "",
@@ -108,6 +144,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             var bessConfig = new BessConfig
             {
                 Name = null,
+                ExchangeSetLayout = "invalid",
                 ExchangeSetStandard = null,
                 EncCellNames = new List<string>(),
                 Frequency = null,
@@ -165,6 +202,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Validation
             var bessConfig = new BessConfig
             {
                 Name = null,
+                ExchangeSetLayout = null,
                 ExchangeSetStandard = null,
                 EncCellNames = new List<string>(),
                 Frequency = "",
