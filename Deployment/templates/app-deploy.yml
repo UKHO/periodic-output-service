@@ -11,6 +11,9 @@ parameters:
   default: false
 - name: Container
   type: string
+- name: RetainPipeline
+  type: boolean
+  default: false
 
 jobs:
 - deployment: DeployApp
@@ -292,3 +295,18 @@ jobs:
         scriptLocation: 'scriptPath'
         scriptPath: "$(Build.SourcesDirectory)/terraformartifact/swap_container_config.ps1"
         arguments: '-containername $(BessContainerForWebjob) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
+- ${{ if eq(parameters.RetainPipeline, true) }}:
+  - job: RetainPipeline
+    displayName: Retain pipeline
+    dependsOn:
+      - InsertAioJobConfigurationEntityInTable
+      - CheckInfra
+      - CheckFSS
+      - CheckESS
+      - Setup
+    steps:
+      - checkout: UKHOTemplates
+      - template: retain-pipelinerun/retain-pipelinerun.yml@UKHOTemplates
+        parameters:
+          DaysValid: 365
