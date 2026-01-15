@@ -46,7 +46,7 @@ variables:
     value: "Mare Nectaris"
   - name: Container
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.9.6"
-  - name: WindowPool
+  - name: WindowsPool1
     value: "NautilusBuild"
   - name: WindowsPool2
     value: "Mare Nubium"
@@ -54,6 +54,14 @@ variables:
     value: "8.0.x"
   - name: snykAbzuOrganizationId
     value: aeb7543b-8394-457c-8334-a31493d8910d
+
+resources:
+  repositories:
+    - repository: UKHOTemplates
+      type: github
+      name: UKHO/devops-pipelinetemplates
+      endpoint: UKHO
+      ref: refs/heads/main
 
 stages:
   - stage: VulnerabilityChecks
@@ -89,7 +97,7 @@ stages:
             command: custom
             custom: tool
             workingDirectory: $(Agent.TempDirectory)
-            arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools
+            arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools --configfile $(Build.SourcesDirectory)/BuildNuget.config
 
         - task: Powershell@2
           displayName: "Run Stryker"
@@ -128,6 +136,20 @@ stages:
           AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
           Container: ${{variables.Container}}
           RunTests: true
+
+      - job: RetainPipeline
+        displayName: Retain pipeline
+        dependsOn:
+          - DeployApp
+          - Setup
+          - CheckInfra
+          - CheckFSS
+          - CheckESS
+        steps:
+          - checkout: UKHOTemplates
+          - template: retain-pipelinerun/retain-pipelinerun.yml@UKHOTemplates
+            parameters:
+              DaysValid: 365
       
   - stage: QAdeploy
     dependsOn: Devdeploy
@@ -160,19 +182,21 @@ stages:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
           AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
-          Container: ${{variables.Container}} 
-   
-      - job: PostDeploymentActions
+          Container: ${{variables.Container}}
+
+      - job: RetainPipeline
+        displayName: Retain pipeline
         dependsOn:
-        - DeployApp
-        - Setup
-        - CheckInfra
-        - CheckFSS
-        - CheckESS      
-        pool: $(WindowPool)        
-        displayName: Post Deployment Actions
+          - DeployApp
+          - Setup
+          - CheckInfra
+          - CheckFSS
+          - CheckESS
         steps:
-          - template: Deployment/templates/retain-pipeline.yml
+          - checkout: UKHOTemplates
+          - template: retain-pipelinerun/retain-pipelinerun.yml@UKHOTemplates
+            parameters:
+              DaysValid: 365
 
   - stage: vNextIATDeploy
     dependsOn: 
