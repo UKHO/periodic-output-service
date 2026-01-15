@@ -5,6 +5,7 @@ updates:
     schedule:
       interval: "monthly"
     ignore:
+      - dependency-name: "UKHO.WeekNumberUtils"
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
     groups:
