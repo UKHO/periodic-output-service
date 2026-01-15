@@ -52,6 +52,8 @@ variables:
     value: "Mare Nubium"
   - name: SdkVersion
     value: "8.0.x"
+  - name: snykAbzuOrganizationId
+    value: aeb7543b-8394-457c-8334-a31493d8910d
 
 stages:
   - stage: VulnerabilityChecks
