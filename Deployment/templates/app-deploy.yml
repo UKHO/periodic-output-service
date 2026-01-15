@@ -304,6 +304,8 @@ jobs:
       - CheckInfra
       - CheckFSS
       - CheckESS
+      - ${{ if ne(parameters.RunTests, true) }}:
+        - Setup
     steps:
       - checkout: UKHOTemplates
       - template: retain-pipelinerun/retain-pipelinerun.yml@UKHOTemplates
