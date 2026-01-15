@@ -304,7 +304,6 @@ jobs:
       - CheckInfra
       - CheckFSS
       - CheckESS
-      - Setup
     steps:
       - checkout: UKHOTemplates
       - template: retain-pipelinerun/retain-pipelinerun.yml@UKHOTemplates
