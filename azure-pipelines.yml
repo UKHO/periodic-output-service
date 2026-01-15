@@ -97,7 +97,7 @@ stages:
             command: custom
             custom: tool
             workingDirectory: $(Agent.TempDirectory)
-            arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools --configfile $(Build.SourcesDirectory)/BuildNuget.config
+            arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools --configfile $(Build.SourcesDirectory)/BuildNuget.config --version 4.8.1
 
         - task: Powershell@2
           displayName: "Run Stryker"
@@ -105,7 +105,7 @@ stages:
             workingDirectory: '$(Build.SourcesDirectory)'
             targetType: 'inline'
             pwsh: true
-            script: $(Agent.BuildDirectory)/tools/dotnet-stryker --concurrency 1
+            script: $(Agent.BuildDirectory)/tools/dotnet-stryker --configfile $(Build.SourcesDirectory)/BuildNuget.config
 
         - task: PublishMutationReport@1
           displayName: 'Publish Stryker Mutator Report'
