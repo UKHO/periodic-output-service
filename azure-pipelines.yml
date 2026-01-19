@@ -103,7 +103,7 @@ stages:
             workingDirectory: $(Agent.TempDirectory)
             arguments: >
               install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools --configfile $(Build.SourcesDirectory)/BuildNuget.config
-              ${{ if ne(parameters.StrykerVersion, '') }} --version ${{ parameters.StrykerVersion }}
+              ${{ if ne(parameters.StrykerVersion, '') }}: --version ${{ parameters.StrykerVersion }}
 
         - task: Powershell@2
           displayName: "Run Stryker"
