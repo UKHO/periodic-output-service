@@ -12,6 +12,9 @@ parameters:
   - name: StrykerVersion
     displayName: "Stryker version"
     type: string
+    values:
+      - 'latest'
+      - '4.8.1'
     default: 'latest'
   - name: SnykOnlyFailIfFixable
     displayName: "Snyk - fail only if an issue has an available fix"
