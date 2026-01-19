@@ -10,9 +10,9 @@ parameters:
     type: boolean
     default: false
   - name: StrykerVersion
-    displayName: "Stryker version (blank for latest)"
+    displayName: "Stryker version"
     type: string
-    default: ''
+    default: 'latest'
   - name: SnykOnlyFailIfFixable
     displayName: "Snyk - fail only if an issue has an available fix"
     type: boolean
@@ -101,7 +101,7 @@ stages:
             command: custom
             custom: tool
             workingDirectory: $(Agent.TempDirectory)
-            ${{ if eq(parameters.StrykerVersion, '') }}:
+            ${{ if eq(parameters.StrykerVersion, 'latest') }}:
               arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools --configfile $(Build.SourcesDirectory)/BuildNuget.config
             ${{ else }}:
               arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools --configfile $(Build.SourcesDirectory)/BuildNuget.config --version ${{ parameters.StrykerVersion }}
