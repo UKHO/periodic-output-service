@@ -11,6 +11,9 @@ parameters:
   default: false
 - name: Container
   type: string
+- name: RetainPipeline
+  type: boolean
+  default: false
 
 jobs:
 - deployment: DeployApp
@@ -97,33 +100,6 @@ jobs:
         filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
         arguments: "-healthEndPointUrl $(ESSHealthEndpoint)/health -waitTimeInMinute $(waitTimeInMinute)"
 
-
-- job: CheckFMNonLive
-  displayName: "Check Fleet Manager Health - ${{parameters.Environment}}"
-  dependsOn: DeployApp
-  condition: ne('${{ parameters.Environment }}', 'Live')
-  steps:
-    - task: PowerShell@2
-      displayName: "Check FM Health endpoint is healthy"
-      inputs:
-        targetType: filePath
-        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint.ps1'
-        arguments: "-healthEndPointUrl $(FMHealthEndpoint)/health-check -waitTimeInMinute $(waitTimeInMinute)"
-
-- job: CheckFMLive
-  displayName: "Check Fleet Manager Health - Live"
-  dependsOn: DeployApp
-  condition: eq('${{ parameters.Environment }}', 'Live')
-  steps:
-    - task: PowerShell@2
-      displayName: "Check FM Health endpoint is healthy"
-      inputs:
-        targetType: filePath
-        filePath: '$(Build.SourcesDirectory)/Deployment/check_health_endpoint_fm_live.ps1'
-        arguments: "-healthEndPointUrl $(FMHealthEndpoint)/live/echo/health-check -waitTimeInMinute $(waitTimeInMinute) -ocpapimsubscriptionkey $(FM_Ocp_Apim_Subscription_Key)"
-
-
-
 - job: Setup
   displayName: "Set Webjob Configuration"
   condition: not(${{parameters.RunTests}}) # Run only if tests are not running
@@ -142,7 +118,7 @@ jobs:
         scriptType: 'pscore'
         scriptLocation: 'scriptPath'
         scriptPath: "$(Build.SourcesDirectory)/Deployment/set_webjob_configuration.ps1"
-        arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -fleetmanagerbaseurl $(FleetManagerB2BApiConfiguration.BaseUrl) -ftrunning false -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+        arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -ftrunning false -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
 - job: POSFunctionalTests
   condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
@@ -319,3 +295,19 @@ jobs:
         scriptLocation: 'scriptPath'
         scriptPath: "$(Build.SourcesDirectory)/terraformartifact/swap_container_config.ps1"
         arguments: '-containername $(BessContainerForWebjob) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
+
+- ${{ if eq(parameters.RetainPipeline, true) }}:
+  - job: RetainPipeline
+    displayName: Retain pipeline
+    dependsOn:
+      - InsertAioJobConfigurationEntityInTable
+      - CheckInfra
+      - CheckFSS
+      - CheckESS
+      - ${{ if ne(parameters.RunTests, true) }}:
+        - Setup
+    steps:
+      - checkout: UKHOTemplates
+      - template: retain-pipelinerun/retain-pipelinerun.yml@UKHOTemplates
+        parameters:
+          DaysValid: 365

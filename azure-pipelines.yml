@@ -9,6 +9,21 @@ parameters:
     displayName: "Disable Stryker"
     type: boolean
     default: false
+  - name: StrykerVersion
+    displayName: "Stryker version"
+    type: string
+    values:
+      - 'latest'
+      - '4.8.1'
+    default: 'latest'
+  - name: SnykOnlyFailIfFixable
+    displayName: "Snyk - fail only if an issue has an available fix"
+    type: boolean
+    default: false
+  - name: SnykPassOnIssues
+    displayName: "Snyk - don't fail if issues found"
+    type: boolean
+    default: true
 
 trigger:
   - main
@@ -38,10 +53,22 @@ variables:
     value: "Mare Nectaris"
   - name: Container
     value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.9.6"
-  - name: WindowPool
+  - name: WindowsPool1
     value: "NautilusBuild"
+  - name: WindowsPool2
+    value: "Mare Nubium"
   - name: SdkVersion
     value: "8.0.x"
+  - name: snykAbzuOrganizationId
+    value: aeb7543b-8394-457c-8334-a31493d8910d
+
+resources:
+  repositories:
+    - repository: UKHOTemplates
+      type: github
+      name: UKHO/devops-pipelinetemplates
+      endpoint: UKHO
+      ref: refs/heads/main
 
 stages:
   - stage: Stryker_Mutator
@@ -68,7 +95,10 @@ stages:
             command: custom
             custom: tool
             workingDirectory: $(Agent.TempDirectory)
-            arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools
+            ${{ if eq(parameters.StrykerVersion, 'latest') }}:
+              arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools --configfile $(Build.SourcesDirectory)/BuildNuget.config
+            ${{ else }}:
+              arguments: install dotnet-stryker --tool-path $(Agent.BuildDirectory)/tools --configfile $(Build.SourcesDirectory)/BuildNuget.config --version ${{ parameters.StrykerVersion }}
 
         - task: Powershell@2
           displayName: "Run Stryker"
@@ -83,6 +113,15 @@ stages:
           inputs:
             reportPattern: '**/mutation-report.html'
 
+  - stage: VulnerabilityChecks
+    displayName: Snyk checks
+    dependsOn: []
+    jobs:
+    - template: Deployment/templates/vulnerability-checks.yml
+      parameters:
+        SnykOnlyFailIfFixable: ${{ parameters.SnykOnlyFailIfFixable }}
+        SnykPassOnIssues: ${{ parameters.SnykPassOnIssues }}
+
   - stage: BuildTestPublish
     displayName: "Build, test and publish"
     dependsOn: []
@@ -93,6 +132,9 @@ stages:
 
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
+    dependsOn:
+      - VulnerabilityChecks
+      - BuildTestPublish
     variables:
       - name: Environment
         value: "dev"
@@ -107,95 +149,12 @@ stages:
           AzureSubscription: "Exchange-Set-Service-Dev-A-008-02"
           Container: ${{variables.Container}}
           RunTests: true
-      
-  - stage: QAdeploy
-    dependsOn: Devdeploy
-    displayName: "QAdeploy (inc terraform, webapp deploy)"
-    variables:
-      - name: Environment
-        value: "qa"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
-          Container: ${{variables.Container}} 
-
-  - stage: Livedeploy
-    displayName: "Livedeploy (inc terraform, webapp deploy)"
-    variables:
-      - name: Environment
-        value: "Live"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
-          Container: ${{variables.Container}} 
-   
-      - job: PostDeploymentActions
-        dependsOn:
-        - DeployApp
-        - Setup
-        - CheckInfra
-        - CheckFSS
-        - CheckESS      
-        pool: $(WindowPool)        
-        displayName: Post Deployment Actions
-        steps:
-          - template: Deployment/templates/retain-pipeline.yml
-
-  - stage: vNextIATDeploy
-    dependsOn: 
-      - Devdeploy
-    displayName: vNext IAT Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
-    variables:
-      - name: Environment
-        value: "vnextiat"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
-          Container: ${{variables.Container}} 
-
-  - stage: vnexte2eDeploy
-    dependsOn: 
-       - vNextIATDeploy
-    displayName: vNext E2E Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
-    variables:
-      - name: Environment
-        value: "vnexte2e"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
-          Container: ${{variables.Container}}
 
   - stage: IatDeploy
     dependsOn: 
-       - Devdeploy
+      - Devdeploy
     displayName: IAT Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     variables:
       - name: Environment
         value: "iat"
@@ -214,7 +173,7 @@ stages:
     dependsOn: 
       - IatDeploy
     displayName: PreProd Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
     variables:
       - name: Environment
         value: "preprod"
@@ -227,4 +186,81 @@ stages:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
           AzureSubscription: "Exchange-Set-Service-Pre-A.011.08"
-          Container: ${{variables.Container}} 
+          Container: ${{variables.Container}}
+
+  - stage: Livedeploy
+    dependsOn:
+      - PreprodDeploy
+    displayName: "Livedeploy (inc terraform, webapp deploy)"
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+    variables:
+      - name: Environment
+        value: "Live"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+    jobs:
+      - template: Deployment/templates/app-deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-Live-A-008-02"
+          Container: ${{variables.Container}}
+          RetainPipeline: true
+
+  - stage: vNextIATDeploy
+    dependsOn: 
+      - Devdeploy
+    displayName: vNext IAT Deploy (inc terraform, webapp deploy)
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
+    variables:
+      - name: Environment
+        value: "vnextiat"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+    jobs:
+      - template: Deployment/templates/app-deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-vNext-IAT-A.011.08"
+          Container: ${{variables.Container}}
+
+  - stage: vnexte2eDeploy
+    dependsOn: 
+      - vNextIATDeploy
+    displayName: vNext E2E Deploy (inc terraform, webapp deploy)
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    variables:
+      - name: Environment
+        value: "vnexte2e"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+    jobs:
+      - template: Deployment/templates/app-deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
+          Container: ${{variables.Container}}
+
+  - stage: QAdeploy
+    dependsOn:
+      - Devdeploy
+    displayName: "QAdeploy (inc terraform, webapp deploy)"
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
+    variables:
+      - name: Environment
+        value: "qa"
+      - template: Deployment/templates/variables.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+    jobs:
+      - template: Deployment/templates/app-deploy.yml
+        parameters:
+          Environment: ${{variables.Environment}}
+          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
+          AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
+          Container: ${{variables.Container}}
