@@ -50,7 +50,7 @@ steps:
       scriptType: 'pscore'
       scriptLocation: 'scriptPath'
       scriptPath: '$(Pipeline.Workspace)/terraformartifact/mock_api_deployment.ps1'
-      arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.FmEssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
+      arguments: '-mockWebAppName $(mockWebAppName) -mockApipackagePath "$(Pipeline.Workspace)/MockWebAPI/UKHO.EssFssMock.API.zip" -mockWebAppResourceGroup $(mockWebAppResourceGroup)'
 
   - task: AzureCLI@2
     condition: ${{parameters.RunTests}}

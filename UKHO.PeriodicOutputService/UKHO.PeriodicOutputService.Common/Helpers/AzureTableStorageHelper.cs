@@ -46,8 +46,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             {
                 ProductVersionEntities productVersionEntities = productVersionDetailsEntityClient
                                                                     .Query<ProductVersionEntities>()
-                                                                    .FirstOrDefault(p => p.ProductName == item.ProductName &&
-                                                                        p.EditionNumber == item.EditionNumber);
+                                                                    .FirstOrDefault(p => p.ProductName == item.ProductName);
 
                 if (productVersionEntities == null)
                 {

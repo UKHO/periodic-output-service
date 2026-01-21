@@ -2,7 +2,9 @@
 using FakeItEasy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using UKHO.AdmiraltyInformationOverlay.Fulfilment.Services;
+using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Logging;
@@ -10,6 +12,7 @@ using UKHO.PeriodicOutputService.Common.Models;
 using UKHO.PeriodicOutputService.Common.Models.Ess;
 using UKHO.PeriodicOutputService.Common.Models.Ess.Response;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Response;
+using UKHO.PeriodicOutputService.Common.Models.TableEntities;
 using UKHO.PeriodicOutputService.Common.Services;
 
 namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
@@ -25,6 +28,8 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         private IConfiguration _fakeconfiguration;
         private IFileInfo _fakeFileInfo;
         private IAzureTableStorageHelper _fakeAzureTableStorageHelper;
+        private IOptions<FssApiConfiguration> _fakeFssApiConfiguration;
+        private static readonly string _aioProductName = "GB800001";
 
         [SetUp]
         public void Setup()
@@ -38,48 +43,66 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakeAzureTableStorageHelper = A.Fake<IAzureTableStorageHelper>();
 
             _fakeconfiguration["IsFTRunning"] = "false";
-            _fakeconfiguration["AioCells"] = "GB800001";
+            _fakeconfiguration["AioCells"] = _aioProductName;
             _fakeconfiguration["WeeksToIncrement"] = "1";
 
-            _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper);
+            _fakeFssApiConfiguration = Options.Create(new FssApiConfiguration()
+            {
+                SerialFileName = "SERIAL.AIO"
+            });
+
+            _fulfilmentDataService = new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration);
         }
 
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             var exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("fileSystemHelper"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("essService"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("fssService"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper));
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("configuration"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null));
+                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null, _fakeFssApiConfiguration));
             Assert.That(exception.ParamName, Is.EqualTo("azureTableStorageHelper"));
+
+            exception = Assert.Throws<ArgumentNullException>(
+                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, null));
+            Assert.That(exception.ParamName, Is.EqualTo("fssApiConfig"));
+
+
         }
 
         [Test]
         public async Task Does_CreateAioExchangeSets_Executes_Successfully()
         {
+            A.CallTo(() => _fakeAzureTableStorageHelper.GetLatestProductVersionDetails())
+                .Returns(GetProductVersionEntities());
+
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
-
-            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(A<ProductVersionsRequest>.Ignored, A<string>.Ignored, A<string>.Ignored))
-             .Returns(GetValidExchangeSetGetBatchResponse());
+            
+            A.CallTo(() => _fakeEssService.GetProductDataProductVersions(
+                    A<ProductVersionsRequest>.That.Matches(r =>
+                        r.ProductVersions.Count == 1 && r.ProductVersions[0].ProductName == _aioProductName &&
+                        r.ProductVersions[0].EditionNumber == 33 && r.ProductVersions[0].UpdateNumber == 00
+                    ), A<string>.Ignored, A<string>.Ignored))
+                .Returns(GetValidExchangeSetGetBatchResponse());
 
             A.CallTo(() => _fakeFssService.CheckIfBatchCommitted(A<string>.Ignored, A<RequestType>.Ignored, A<string>.Ignored))
               .Returns(FssBatchStatus.Committed);
@@ -128,7 +151,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
              .MustHaveHappenedOnceExactly();
 
             A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored))
-              .MustHaveHappenedOnceExactly();
+                .MustHaveHappened(2, Times.Exactly);
 
             A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceOrMore();
@@ -205,13 +228,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               call.Method.Name == "Log"
               && call.GetArgument<LogLevel>(0) == LogLevel.Information
               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-              ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-              call.Method.Name == "Log"
-              && call.GetArgument<LogLevel>(0) == LogLevel.Information
-              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-              ).MustHaveHappenedOnceExactly();
+              ).MustHaveHappened(2, Times.Exactly);
 
             #endregion Log checks
         }
@@ -627,6 +644,22 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                    }
                }
             ]
+        };
+
+        private static List<ProductVersionEntities>  GetProductVersionEntities() => new()
+        {
+            new ProductVersionEntities
+            {
+                ProductName = _aioProductName,
+                EditionNumber = 32,
+                UpdateNumber = 90
+            },
+            new ProductVersionEntities
+            {
+                ProductName = _aioProductName,
+                EditionNumber = 33,
+                UpdateNumber = 0
+            }
         };
     }
 }
