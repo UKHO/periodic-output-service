@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.13.35919.96
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11408.102 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Stub", "Stub", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.FmEssFssMock.API", "UKHO.FmEssFssMock.API\UKHO.FmEssFssMock.API\UKHO.FmEssFssMock.API.csproj", "{AF56CE4F-C9B1-CB28-736C-572B76D9CB9B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.EssFssMock.API", "UKHO.EssFssMock.API\UKHO.EssFssMock.API\UKHO.EssFssMock.API.csproj", "{AF56CE4F-C9B1-CB28-736C-572B76D9CB9B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.PKSWireMock.API", "UKHO.PKSWireMockService.API\UKHO.PKSWireMock.API.csproj", "{E041089A-0808-8187-5035-A487C80D2BDA}"
 EndProject
@@ -37,7 +37,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UKHO.BESS.ConfigurationServ
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{C0075B67-0A62-4476-B71D-A3BE28E3DFDE}"
 	ProjectSection(SolutionItems) = preProject
-		Deployment\add-lease.ps1 = Deployment\add-lease.ps1
 		Deployment\check_health_endpoint.ps1 = Deployment\check_health_endpoint.ps1
 		Deployment\check_health_endpoint_fm_live.ps1 = Deployment\check_health_endpoint_fm_live.ps1
 		Deployment\check_service_status_webjob.ps1 = Deployment\check_service_status_webjob.ps1
@@ -108,7 +107,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "templates", "templates", "{
 		Deployment\templates\app-deploy.yml = Deployment\templates\app-deploy.yml
 		Deployment\templates\build-test-publish.yml = Deployment\templates\build-test-publish.yml
 		Deployment\templates\continuous-deployment.yml = Deployment\templates\continuous-deployment.yml
-		Deployment\templates\retain-pipeline.yml = Deployment\templates\retain-pipeline.yml
 		Deployment\templates\variables.yml = Deployment\templates\variables.yml
 	EndProjectSection
 EndProject

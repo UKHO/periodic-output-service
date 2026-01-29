@@ -10,7 +10,7 @@ namespace UKHO.PeriodicOutputService.API.FunctionalTests.FunctionalTests
         [OneTimeSetUp]
         public async Task Setup()
         {
-            HttpResponseMessage apiResponse = MockHelper.ConfigureFMAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidAIOProductIdentifier);
+            HttpResponseMessage apiResponse = MockHelper.ConfigureAio(posWebJob.MockApiBaseUrl, posWebJob.FMConfigurationValidAIOProductIdentifier);
             Assert.That(apiResponse.StatusCode, Is.EqualTo((HttpStatusCode)200));
             await CommonHelper.RunWebJobAio();
         }
