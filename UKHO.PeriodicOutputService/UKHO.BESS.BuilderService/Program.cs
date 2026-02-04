@@ -149,7 +149,7 @@ namespace UKHO.BESS.BuilderService
                  serviceCollection.AddSingleton<IAuthFssTokenProvider, AuthTokenProvider>();
                  serviceCollection.AddSingleton<IAuthEssTokenProvider, AuthTokenProvider>();
                  serviceCollection.AddScoped<IBuilderService, Services.BuilderService>();
-                 serviceCollection.AddScoped<IEssService, EssService>();
+                 serviceCollection.AddScoped<IEssBuilderService, EssBuilderService>();
                  serviceCollection.AddScoped<IFssService, FssService>();
                  serviceCollection.AddHttpClient();
 
