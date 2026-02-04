@@ -4,6 +4,7 @@ public class ConfigQueueMessage
 {
     public string Name { get; set; }
     public string ExchangeSetStandard { get; set; }
+    public string ExchangeSetLayout { get; set; }
     public string Frequency { get; set; }
     public string Type { get; set; }
     public string KeyFileType { get; set; }

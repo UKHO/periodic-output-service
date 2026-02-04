@@ -1226,6 +1226,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         {
             Name = "test",
             ExchangeSetStandard = "s63",
+            ExchangeSetLayout = "Standard",
             Frequency = "30 13 * * *",
             Type = type,
             KeyFileType = "NONE",

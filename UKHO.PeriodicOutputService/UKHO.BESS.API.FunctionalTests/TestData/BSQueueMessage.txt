@@ -1,6 +1,7 @@
 {
     "Name": "PortOfIndia",
-    "ExchangeSetStandard": "s57",    
+    "ExchangeSetStandard": "s57",
+    "ExchangeSetLayout": "Standard",
     "Frequency": "23 10 * * *",
     "Type": "UPDATE",
     "KeyFileType": "NONE",
