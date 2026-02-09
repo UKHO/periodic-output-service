@@ -96,7 +96,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
 
             A.CallTo(() => _fakeEssService.PostProductIdentifiersData(A<List<string>>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .Returns(GetValidExchangeSetGetBatchResponse());
-            
+
             A.CallTo(() => _fakeEssService.GetProductDataProductVersions(
                     A<ProductVersionsRequest>.That.Matches(r =>
                         r.ProductVersions.Count == 1 && r.ProductVersions[0].ProductName == _aioProductName &&
@@ -646,7 +646,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             ]
         };
 
-        private static List<ProductVersionEntities>  GetProductVersionEntities() => new()
+        private static List<ProductVersionEntities> GetProductVersionEntities() => new()
         {
             new ProductVersionEntities
             {
