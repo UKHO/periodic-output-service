@@ -47,5 +47,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
         Task CreateXmlFromObject<T>(T obj, string filePath, string fileName);
 
         void CreateTextFile(string filePath, string fileName, string content);
+
+        bool FileExists(string filePath);
     }
 }

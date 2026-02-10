@@ -463,13 +463,13 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
 
                 try
                 {
-                   if (File.Exists(serialFilePath))
+                   if (_fileSystemHelper.FileExists(serialFilePath))
                    {
                        var serialFileContent = $"GBWK{weekNumber.Week}-{DateTime.UtcNow:yy}   {DateTime.UtcNow.Year:D4}{DateTime.UtcNow.Month:D2}{DateTime.UtcNow.Day:D2}{cdType,-10}{2:D2}.00\x0b\x0d\x0a";
 
                        _fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
 
-                       _logger.LogInformation(EventIds.SerialAioUpdated.ToEventId(), "SERIAL.AIO file at {serialFilePath} updated with week number {weekNumber} | _X-Correlation-ID:{CorrelationId}", serialFilePath, weekNumber.Week, CommonHelper.CorrelationID);
+                       _logger.LogInformation(EventIds.SerialAioUpdated.ToEventId(), "SERIAL.AIO file at {serialFilePath} updated with year {year} and week number {weekNumber} | _X-Correlation-ID:{CorrelationId}", serialFilePath, DateTime.UtcNow.ToString("yy"), weekNumber.Week, CommonHelper.CorrelationID);
                    }   
                     
                 }

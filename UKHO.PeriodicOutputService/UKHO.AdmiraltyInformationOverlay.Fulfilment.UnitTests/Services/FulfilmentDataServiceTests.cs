@@ -30,6 +30,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         private IAzureTableStorageHelper _fakeAzureTableStorageHelper;
         private IOptions<FssApiConfiguration> _fakeFssApiConfiguration;
         private static readonly string _aioProductName = "GB800001";
+        private FormattedWeekNumber _formattedWeekNumber;
 
         [SetUp]
         public void Setup()
@@ -45,6 +46,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakeconfiguration["IsFTRunning"] = "false";
             _fakeconfiguration["AioCells"] = _aioProductName;
             _fakeconfiguration["WeeksToIncrement"] = "1";
+            _formattedWeekNumber = CommonHelper.GetCurrentWeekNumber(DateTime.UtcNow, 1);
 
             _fakeFssApiConfiguration = Options.Create(new FssApiConfiguration()
             {
@@ -84,8 +86,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             exception = Assert.Throws<ArgumentNullException>(
                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, null));
             Assert.That(exception.ParamName, Is.EqualTo("fssApiConfig"));
-
-
         }
 
         [Test]
@@ -131,6 +131,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored, A<string>.Ignored))
               .Returns(true);
 
+            A.CallTo(() => _fakefileSystemHelper.FileExists(A<string>.Ignored))
+                .Returns(true);
+
             var result = await _fulfilmentDataService.CreateAioExchangeSetsAsync();
 
             Assert.That(result, Is.True);
@@ -156,81 +159,28 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceOrMore();
 
-            #region Log checks
+            A.CallTo(() => _fakefileSystemHelper.FileExists(A<string>.Ignored))
+                .MustHaveHappened(2, Times.Exactly);
 
-            A.CallTo(_fakeLogger).Where(call =>
-                  call.Method.Name == "Log"
-                  && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                  && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Getting latest product version details started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-                  ).MustHaveHappenedOnceExactly();
+            A.CallTo(() => _fakefileSystemHelper.CreateFileContent(A<string>.Ignored, A<string>.Ignored))
+                .MustHaveHappened(2, Times.Exactly);
 
-            A.CallTo(_fakeLogger).Where(call =>
-              call.Method.Name == "Log"
-              && call.GetArgument<LogLevel>(0) == LogLevel.Information
-              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-              ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-             call.Method.Name == "Log"
-             && call.GetArgument<LogLevel>(0) == LogLevel.Information
-             && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creation of update exchange set for Productversions - {Productversions} started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-             ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-              call.Method.Name == "Log"
-              && call.GetArgument<LogLevel>(0) == LogLevel.Information
-              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Update exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-              ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creation of AIO base exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-                ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-                ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Batch for AIO base CD created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-                ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-                call.Method.Name == "Log"
-                && call.GetArgument<LogLevel>(0) == LogLevel.Information
-                && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-                ).MustHaveHappened(2, Times.Exactly);
-
-            A.CallTo(_fakeLogger).Where(call =>
-               call.Method.Name == "Log"
-               && call.GetArgument<LogLevel>(0) == LogLevel.Information
-               && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-               ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-              call.Method.Name == "Log"
-              && call.GetArgument<LogLevel>(0) == LogLevel.Information
-              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Logging product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-              ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-              call.Method.Name == "Log"
-              && call.GetArgument<LogLevel>(0) == LogLevel.Information
-              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Logging product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId}"
-              ).MustHaveHappenedOnceExactly();
-
-            A.CallTo(_fakeLogger).Where(call =>
-              call.Method.Name == "Log"
-              && call.GetArgument<LogLevel>(0) == LogLevel.Information
-              && call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2).ToDictionary(c => c.Key, c => c.Value)["{OriginalFormat}"].ToString() == "Creating zip file of directory {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}"
-              ).MustHaveHappened(2, Times.Exactly);
-
-            #endregion Log checks
+            CheckLog(EventIds.GetLatestProductVersionDetailsStarted, "Getting latest product version details started | {DateTime} | _X-Correlation-ID : {CorrelationId}");
+            CheckLog(EventIds.GetLatestProductVersionDetailsCompleted, "Getting latest product version details completed | {DateTime} | _X-Correlation-ID : {CorrelationId}");
+            CheckLog(EventIds.AioUpdateExchangeSetCreationStarted, "Creation of update exchange set for Productversions - {Productversions} started | {DateTime} | _X-Correlation-ID : {CorrelationId}");
+            CheckLog(EventIds.AioUpdateExchangeSetCreationCompleted, "Update exchange set created successfully | {DateTime} | _X-Correlation-ID : {CorrelationId}");
+            CheckLog(EventIds.AioBaseExchangeSetCreationStarted, "Creation of AIO base exchange set started | {DateTime} | _X-Correlation-ID : {CorrelationId}");
+            CheckLog(EventIds.AioBaseExchangeSetCreationCompleted, "Creation of AIO base exchange set completed | {DateTime} | _X-Correlation-ID : {CorrelationId}");
+            CheckLog(EventIds.BatchCreatedInESS, "Batch for AIO base CD created by ESS successfully with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID : {CorrelationId}");
+            CheckLog(EventIds.ExtractZipFileStarted, "Extracting zip file {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", numberOfTimes: 2);
+            CheckLog(EventIds.ExtractZipFileCompleted, "Extracting zip file {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", numberOfTimes: 2);
+            CheckLog(EventIds.CreateIsoAndSha1Started, "Creating ISO and Sha1 file of {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}");
+            CheckLog(EventIds.CreateIsoAndSha1Completed, "Creating ISO and Sha1 file of {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}");
+            CheckLog(EventIds.LoggingProductVersionsStarted, "Logging product version started | {DateTime} | _X-Correlation-ID : {CorrelationId}");
+            CheckLog(EventIds.LoggingProductVersionsCompleted, "Logging product version completed | {DateTime} | _X-Correlation-ID : {CorrelationId}");
+            CheckLog(EventIds.ZipFileCreationStarted, "Creating zip file of directory {fileName} started at {DateTime} | _X-Correlation-ID:{CorrelationId}", numberOfTimes: 2);
+            CheckLog(EventIds.ZipFileCreationCompleted, "Creating zip file of directory {fileName} completed at {DateTime} | _X-Correlation-ID:{CorrelationId}", numberOfTimes: 2);
+            CheckLog(EventIds.SerialAioUpdated, "SERIAL.AIO file at {serialFilePath} updated with year {year} and week number {weekNumber} | _X-Correlation-ID:{CorrelationId}", numberOfTimes: 2, additionalParmsToCheck: [new("year", _formattedWeekNumber.YearShort), new("weekNumber", _formattedWeekNumber.Week)]);
         }
 
         [Test]
@@ -661,5 +611,38 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 UpdateNumber = 0
             }
         };
+
+        private void CheckLog(EventIds eventIds, string originalFormat, LogLevel logLevel = LogLevel.Information, int numberOfTimes = 1, List<KeyValuePair<string, object>> additionalParmsToCheck = null)
+        {
+            var eventId = eventIds.ToEventId();
+            A.CallTo(_fakeLogger).Where(call =>
+                call.Method.Name == "Log"
+                && call.GetArgument<LogLevel>(0) == logLevel
+                && call.GetArgument<EventId>(1) == eventId
+                && CheckLogParameters(call.GetArgument<IEnumerable<KeyValuePair<string, object>>>(2), originalFormat, additionalParmsToCheck)
+                ).MustHaveHappened(numberOfTimes, Times.Exactly);
+        }
+
+        private static bool CheckLogParameters(IEnumerable<KeyValuePair<string, object>> keyValuePairs, string originalFormat, List<KeyValuePair<string, object>> additionalParmsToCheck)
+        {
+            var dictionary = keyValuePairs.ToDictionary(c => c.Key, c => c.Value, StringComparer.OrdinalIgnoreCase);
+
+            if (additionalParmsToCheck is null)
+            {
+                return dictionary["{OriginalFormat}"].ToString() == originalFormat;
+            }
+            else
+            {
+                var result = dictionary["{OriginalFormat}"].ToString() == originalFormat;
+
+                foreach (var additionalParm in additionalParmsToCheck)
+                {
+                    var keyFound = dictionary.TryGetValue(additionalParm.Key, out var value);
+                    result = result && keyFound && value.ToString() == additionalParm.Value.ToString();
+                }
+
+                return result;
+            }
+        }
     }
 }
