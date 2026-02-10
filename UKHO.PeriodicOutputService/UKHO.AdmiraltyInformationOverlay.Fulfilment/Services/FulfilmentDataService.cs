@@ -456,22 +456,21 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.Services
         private void UpdateSerialAioFile(List<FssBatchFile> fileDetails, string downloadPath, string cdType, FormattedWeekNumber weekNumber)
         {
             var serialFileName = _fssApiConfig.Value.SerialFileName;
-           
+
             Parallel.ForEach(fileDetails, file =>
             {
                 var serialFilePath = Path.Combine(downloadPath, Path.GetFileNameWithoutExtension(file.FileName), serialFileName);
 
                 try
                 {
-                   if (_fileSystemHelper.FileExists(serialFilePath))
-                   {
-                       var serialFileContent = $"GBWK{weekNumber.Week}-{DateTime.UtcNow:yy}   {DateTime.UtcNow.Year:D4}{DateTime.UtcNow.Month:D2}{DateTime.UtcNow.Day:D2}{cdType,-10}{2:D2}.00\x0b\x0d\x0a";
+                    if (_fileSystemHelper.FileExists(serialFilePath))
+                    {
+                        var serialFileContent = $"GBWK{weekNumber.Week}-{weekNumber.YearShort}   {DateTime.UtcNow.Year:D4}{DateTime.UtcNow.Month:D2}{DateTime.UtcNow.Day:D2}{cdType,-10}{2:D2}.00\x0b\x0d\x0a";
 
-                       _fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
+                        _fileSystemHelper.CreateFileContent(serialFilePath, serialFileContent);
 
-                       _logger.LogInformation(EventIds.SerialAioUpdated.ToEventId(), "SERIAL.AIO file at {serialFilePath} updated with year {year} and week number {weekNumber} | _X-Correlation-ID:{CorrelationId}", serialFilePath, DateTime.UtcNow.ToString("yy"), weekNumber.Week, CommonHelper.CorrelationID);
-                   }   
-                    
+                        _logger.LogInformation(EventIds.SerialAioUpdated.ToEventId(), "SERIAL.AIO file at {serialFilePath} updated with year {year} and week number {weekNumber} | _X-Correlation-ID:{CorrelationId}", serialFilePath, weekNumber.YearShort, weekNumber.Week, CommonHelper.CorrelationID);
+                    }
                 }
                 catch (Exception ex)
                 {
