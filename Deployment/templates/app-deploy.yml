@@ -18,7 +18,7 @@ parameters:
 jobs:
 
 - job: WaitForValidation
-  displayName: Live Deploy - Review before continuing 
+  displayName: Review and Approve Deployment 
   timeoutInMinutes: 120 # job times out in 2 hours
   pool: server
   steps:
