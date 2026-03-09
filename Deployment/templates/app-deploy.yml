@@ -22,6 +22,7 @@ jobs:
   pool: server
   steps:
   - task: ManualValidation@0
+    displayName: 'Wait for manual validation'
     timeoutInMinutes: 60 # task times out in 1 hour
     inputs:
       notifyUsers: |
