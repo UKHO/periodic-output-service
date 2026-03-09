@@ -18,8 +18,7 @@ parameters:
 jobs:
 
 - job: WaitForValidation
-  displayName: Live Deploy - Review before continuing
-  pool: $(DeploymentPool)
+  displayName: Live Deploy - Review before continuing 
   timeoutInMinutes: 120 # job times out in 2 hours
   steps:
   - task: ManualValidation@1
