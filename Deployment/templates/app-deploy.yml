@@ -19,7 +19,6 @@ jobs:
 
 - job: WaitForValidation
   displayName: Review and Approve Deployment 
-  timeoutInMinutes: 120 # job times out in 2 hours
   pool: server
   steps:
   - task: ManualValidation@0
