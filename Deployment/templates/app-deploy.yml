@@ -20,6 +20,7 @@ jobs:
 - job: WaitForValidation
   displayName: Live Deploy - Review before continuing 
   timeoutInMinutes: 120 # job times out in 2 hours
+  pool: server
   steps:
   - task: ManualValidation@0
     timeoutInMinutes: 60 # task times out in 1 hour
