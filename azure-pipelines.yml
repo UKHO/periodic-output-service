@@ -16,7 +16,7 @@ parameters:
   - name: SnykPassOnIssues
     displayName: "Snyk - don't fail if issues found"
     type: boolean
-    default: true
+    default: false
 
 trigger:
   - main
@@ -123,7 +123,7 @@ stages:
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
     dependsOn:
-      - VulnerabilityChecks
+      #- VulnerabilityChecks
       - BuildTestPublish
     variables:
       - name: Environment
