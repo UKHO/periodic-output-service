@@ -77,18 +77,6 @@ namespace UKHO.EssFssMock.API.Services
 
         public BatchDetail GetBatchDetails(string batchId, string homeDirectoryPath)
         {
-            if (string.IsNullOrWhiteSpace(batchId))
-            {
-                throw new ArgumentException($"Invalid batchId {batchId}", nameof(batchId));
-            }
-
-            batchId = batchId.Trim().ToLowerInvariant();
-
-            if (!Guid.TryParse(batchId, out _))
-            {
-                throw new ArgumentException($"Invalid batchId format {batchId}", nameof(batchId));
-            }
-
             var isAioBatchType = aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId));
             (var currentWeek, var currentYear) = GetWeekNumber(isAioBatchType);
             var path = Path.Combine(homeDirectoryPath, batchId);
