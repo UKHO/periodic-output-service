@@ -76,15 +76,14 @@ namespace UKHO.EssFssMock.API.Controllers
         {
             if (!string.IsNullOrWhiteSpace(batchId))
             {
-                batchId = batchId.Trim().ToLowerInvariant();
-
-                if (Guid.TryParse(batchId, out _))
+                if (Guid.TryParse(batchId, out var value))
                 {
-                    var fullPath = Path.Combine(_homeDirectoryPath, batchId);
+                    var cleanBatchId = value.ToString();
+                    var fullPath = Path.Combine(_homeDirectoryPath, cleanBatchId);
 
                     if (Directory.Exists(fullPath))
                     {
-                        var response = _fileShareService.GetBatchDetails(batchId, fullPath);
+                        var response = _fileShareService.GetBatchDetails(cleanBatchId, fullPath);
 
                         if (response != null)
                         {
