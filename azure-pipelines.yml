@@ -114,9 +114,7 @@ stages:
 
   - stage: BuildTestPublish
     displayName: "Build, test and publish"
-    #dependsOn: []
-    dependsOn:
-      - VulnerabilityChecks
+    dependsOn: []
     jobs:
     - template: Deployment/templates/build-test-publish.yml  
       parameters:
@@ -125,7 +123,7 @@ stages:
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"
     dependsOn:
-      #- VulnerabilityChecks
+      - VulnerabilityChecks
       - BuildTestPublish
     variables:
       - name: Environment

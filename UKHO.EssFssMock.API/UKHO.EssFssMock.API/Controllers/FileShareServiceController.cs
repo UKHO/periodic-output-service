@@ -51,7 +51,7 @@ namespace UKHO.EssFssMock.API.Controllers
                 { "description","Error while creating file" }
             };
             _configuration = configuration;
-            _homeDirectoryPath = Path.GetFullPath(Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]));
+            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
 
         }
 
@@ -78,12 +78,12 @@ namespace UKHO.EssFssMock.API.Controllers
             {
                 if (Guid.TryParse(batchId, out var value))
                 {
-                    var cleanBatchId = value.ToString();
-                    var fullPath = Path.Combine(_homeDirectoryPath, cleanBatchId);
+                    var validBatchId = value.ToString();
+                    var fullPath = Path.Combine(_homeDirectoryPath, validBatchId);
 
                     if (Directory.Exists(fullPath))
                     {
-                        var response = _fileShareService.GetBatchDetails(cleanBatchId, fullPath);
+                        var response = _fileShareService.GetBatchDetails(validBatchId, fullPath);
 
                         if (response != null)
                         {
