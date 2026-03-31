@@ -114,7 +114,9 @@ stages:
 
   - stage: BuildTestPublish
     displayName: "Build, test and publish"
-    dependsOn: []
+    #dependsOn: []
+    dependsOn:
+      - VulnerabilityChecks
     jobs:
     - template: Deployment/templates/build-test-publish.yml  
       parameters:

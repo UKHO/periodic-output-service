@@ -51,7 +51,7 @@ namespace UKHO.EssFssMock.API.Controllers
                 { "description","Error while creating file" }
             };
             _configuration = configuration;
-            _homeDirectoryPath = Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]);
+            _homeDirectoryPath = Path.GetFullPath(Path.Combine(_configuration["HOME"], _configuration["POSFolderName"]));
 
         }
 
