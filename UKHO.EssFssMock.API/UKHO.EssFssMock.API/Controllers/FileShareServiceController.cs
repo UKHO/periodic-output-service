@@ -80,11 +80,11 @@ namespace UKHO.EssFssMock.API.Controllers
 
                 if (Guid.TryParse(batchId, out _))
                 {
-                    var path = Path.Combine(_homeDirectoryPath, batchId);
+                    var fullPath = Path.Combine(_homeDirectoryPath, batchId);
 
-                    if (Directory.Exists(path))
+                    if (Directory.Exists(fullPath))
                     {
-                        var response = _fileShareService.GetBatchDetails(batchId, _homeDirectoryPath);
+                        var response = _fileShareService.GetBatchDetails(batchId, fullPath);
 
                         if (response != null)
                         {
