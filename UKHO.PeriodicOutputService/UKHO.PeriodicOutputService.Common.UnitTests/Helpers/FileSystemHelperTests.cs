@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using System.IO.Abstractions;
 using FakeItEasy;
-using Microsoft.Extensions.DependencyInjection;
 using UKHO.PeriodicOutputService.Common.Helpers;
 using UKHO.PeriodicOutputService.Common.Models.Fss.Request;
 using UKHO.PeriodicOutputService.Common.Models.Pks;
@@ -327,6 +326,17 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             // Assert
             Assert.That(result, Is.Empty);
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void Does_FileExists_Return_Correct_Value(bool fileExists)
+        {
+            A.CallTo(() => _fakefileSystem.File.Exists(filePath)).Returns(fileExists);
+
+            var result = _fileSystemHelper.FileExists(filePath);
+
+            Assert.That(result, Is.EqualTo(fileExists));
         }
     }
 

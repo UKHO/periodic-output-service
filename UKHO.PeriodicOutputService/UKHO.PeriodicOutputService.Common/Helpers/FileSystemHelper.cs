@@ -276,5 +276,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 _fileSystem.Directory.Delete(folderPath);
             }
         }
+
+        public bool FileExists(string filePath) => _fileSystem.File.Exists(filePath);
     }
 }
