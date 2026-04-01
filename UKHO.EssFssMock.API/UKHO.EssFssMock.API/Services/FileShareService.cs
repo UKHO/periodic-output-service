@@ -75,16 +75,14 @@ namespace UKHO.EssFssMock.API.Services
             return (currentWeek.ToString("00"), currentYear.ToString("0000"));
         }
 
-        public BatchDetail GetBatchDetails(string batchId, string homeDirectoryPath)
+        public BatchDetail GetBatchDetails(string batchId, string fullPath)
         {
-            batchId = batchId.ToLower();
             var isAioBatchType = aioBatchTypes.Contains(EnumHelper.GetValueFromDescription<Batch>(batchId));
             (var currentWeek, var currentYear) = GetWeekNumber(isAioBatchType);
-            var path = Path.Combine(homeDirectoryPath, batchId);
             var businessUnit = "AVCSData";
             List<BatchFile> files = [];
 
-            foreach (var filePath in Directory.GetFiles(path))
+            foreach (var filePath in Directory.GetFiles(fullPath))
             {
                 var fileInfo = new FileInfo(filePath);
 
@@ -129,9 +127,9 @@ namespace UKHO.EssFssMock.API.Services
                 }
                 };
 
-                List<KeyValuePair<string, string>> batchAttributes = new();
+                List<KeyValuePair<string, string>> batchAttributes = [];
 
-                foreach (Tag tag in message.Tags)
+                foreach (var tag in message.Tags)
                 {
                     batchAttributes.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
                 }
@@ -139,7 +137,7 @@ namespace UKHO.EssFssMock.API.Services
                 return new BatchDetail
                 {
                     BatchId = batchId,
-                    Status = GetBatchStatus(path),
+                    Status = GetBatchStatus(fullPath),
                     BusinessUnit = "AVCSCustomExchangeSets",
                     ExpiryDate = DateTime.UtcNow.AddDays(message.BatchExpiryInDays).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                     Attributes = batchAttributes,
@@ -149,12 +147,13 @@ namespace UKHO.EssFssMock.API.Services
 
             //BESS - batch attributes from Queue message - end
 
-            List<KeyValuePair<string, string>> attributes = new()
-            {
+            List<KeyValuePair<string, string>> attributes =
+            [
                 new("Product Type", isAioBatchType ? "AIO" : "AVCS"),
                 new("Week Number", currentWeek),
                 new("Year", currentYear),
-                new("Year / Week", currentYear + " / " + currentWeek), };
+                new("Year / Week", currentYear + " / " + currentWeek)
+            ];
 
             switch (EnumHelper.GetValueFromDescription<Batch>(batchId))
             {
@@ -197,12 +196,12 @@ namespace UKHO.EssFssMock.API.Services
                 default:
                     businessUnit = "AVCSCustomExchangeSets";
                     break;
-            };
+            }
 
             return new BatchDetail
             {
                 BatchId = batchId,
-                Status = GetBatchStatus(path),
+                Status = GetBatchStatus(fullPath),
                 BusinessUnit = businessUnit,
                 ExpiryDate = DateTime.UtcNow.AddDays(28).ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 Attributes = attributes,

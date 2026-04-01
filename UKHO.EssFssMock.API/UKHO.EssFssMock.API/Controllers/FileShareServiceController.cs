@@ -74,12 +74,15 @@ namespace UKHO.EssFssMock.API.Controllers
         [Route("/fss/batch/{batchId}")]
         public IActionResult GetBatchDetails([FromRoute] string batchId)
         {
-            if (!string.IsNullOrEmpty(batchId))
+            if (!string.IsNullOrWhiteSpace(batchId) && Guid.TryParse(batchId, out var value))
             {
-                string path = Path.Combine(_homeDirectoryPath, batchId);
-                if (Directory.Exists(path))
+                var validBatchId = value.ToString();
+                var fullPath = Path.Combine(_homeDirectoryPath, validBatchId);
+
+                if (Directory.Exists(fullPath))
                 {
-                    BatchDetail response = _fileShareService.GetBatchDetails(batchId, _homeDirectoryPath);
+                    var response = _fileShareService.GetBatchDetails(validBatchId, fullPath);
+
                     if (response != null)
                     {
                         return Ok(response);
@@ -90,6 +93,7 @@ namespace UKHO.EssFssMock.API.Controllers
                     return NotFound();
                 }
             }
+
             return BadRequest();
         }
 
