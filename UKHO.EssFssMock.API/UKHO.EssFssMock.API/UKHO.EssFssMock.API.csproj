@@ -11,9 +11,9 @@
     <NoWarn>1701;1702;8618;8602;8604;8600;8603</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Blobs" Version="12.27.0" />
+    <PackageReference Include="Azure.Storage.Blobs" Version="12.28.0" />
     <PackageReference Include="FluentValidation" Version="11.12.0" />
-    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="8.0.25" />
+    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="8.0.27" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="8.1.4" />
   </ItemGroup>
