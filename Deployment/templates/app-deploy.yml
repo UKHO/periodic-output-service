@@ -179,7 +179,7 @@ jobs:
     - CheckInfra
     - CheckFSS
     - CheckESS
-    - POSFunctionalTests
+    #- POSFunctionalTests
   pool: NautilusBuild
   displayName: "BESS Functional Automated Tests"
   variables:
