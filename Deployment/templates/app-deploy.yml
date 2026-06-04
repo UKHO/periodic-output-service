@@ -139,15 +139,6 @@ jobs:
     - name: mockWebAppResourceGroup
       value: $[ dependencies.DeployApp.outputs['DeployApp.TerraformDeploy.mockWebAppResourceGroupName']  ]
   steps:
-    # - task: AzureCLI@2
-    #   displayName: "Set Subnet Configuration"
-    #   inputs:
-    #     azureSubscription: ${{parameters.AzureSubscription}}
-    #     scriptType: 'pscore'
-    #     scriptLocation: 'scriptPath'
-    #     scriptPath: '$(Build.SourcesDirectory)/Deployment/set_subnet_configuration.ps1'
-    #     arguments: '-mockresourcegroup $(mockWebAppResourceGroup) -mockwebappname $(mockWebAppName) -subscriptionid $(POSESSQASubscriptionId) -vnetresourcegroup $(spokeRG) -vnetname $(POSESSQAspokeVnetName) -subnetname $(POSESSspokeSubnetName)'
-
     - task: DownloadBuildArtifacts@0
       displayName: "Download POS Functional test Artifact"
       inputs:
@@ -255,6 +246,7 @@ jobs:
           !**/obj/**
         testRunTitle: "${{parameters.Environment}}-BESSAutomationTests"
         workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
+        arguments: '--filter Category==HbRunOnly'
 
 - job: SwapAppConfigsconfiguration
   condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
