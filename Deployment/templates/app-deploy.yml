@@ -121,7 +121,7 @@ jobs:
         arguments: '-essapibaseurl $(ESSApiConfiguration.BaseUrl) -fssapibaseurl $(FSSApiConfiguration.BaseUrl) -ftrunning false -fssapipollingcutoffime $(FSSApiConfiguration.BatchStatusPollingCutoffTime) -fssapipollingdelaytime $(FSSApiConfiguration.BatchStatusPollingDelayTime) -resourcegroup $(RGName) -webappname $(WEB_APP_NAME)'
 
 - job: POSFunctionalTests
-  condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'), false)
+  condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))
   dependsOn:
     - DeployApp
     - CheckInfra
