@@ -25,7 +25,7 @@ locals {
     SERVICE_OWNER             = "UKHO"
     RESPONSIBLE_TEAM          = "Abzu"
     CALLOUT_TEAM              = "On-Call_N/A"
-    COST_CENTRE               = local.env_name == "dev" || local.env_name == "qa" || local.env_name == "prod" ? "A.008.02" : "A.011.08"
+    COST_CENTRE               = local.env_name == "dev" || local.env_name == "prod" ? "A.008.02" : "A.011.08"
   }
 }
 
