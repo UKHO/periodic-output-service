@@ -246,7 +246,6 @@ jobs:
           !**/obj/**
         testRunTitle: "${{parameters.Environment}}-BESSAutomationTests"
         workingDirectory: '$(Build.SourcesDirectory)/bessfunctionaltests'
-        arguments: '--filter Category==HbRunOnly'
 
 - job: SwapAppConfigsconfiguration
   condition: and(succeeded(), eq('${{ parameters.RunTests }}', 'true'))

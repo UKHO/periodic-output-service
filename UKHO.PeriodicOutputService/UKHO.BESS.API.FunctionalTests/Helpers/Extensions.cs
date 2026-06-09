@@ -46,8 +46,7 @@ namespace UKHO.BESS.API.FunctionalTests.Helpers
         public static void WaitForDownloadExchangeSet()
         {
             //The below sleep is to give time to BuilderService to download the exchangeSet.
-            //Thread.Sleep(210000);
-            Thread.Sleep(310000);
+            Thread.Sleep(210000);
         }
 
         /// <summary>
