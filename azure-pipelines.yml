@@ -20,7 +20,6 @@ parameters:
 
 trigger:
   - main
-  - release/*
   - develop
 
 pool: 
@@ -234,23 +233,4 @@ stages:
           Environment: ${{variables.Environment}}
           ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
           AzureSubscription: "Exchange-Set-Service-vNext-E2E-A.011.08"
-          Container: ${{variables.Container}}
-
-  - stage: QAdeploy
-    dependsOn:
-      - Devdeploy
-    displayName: "QAdeploy (inc terraform, webapp deploy)"
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), startsWith(variables['Build.SourceBranch'], 'refs/heads/release/')))
-    variables:
-      - name: Environment
-        value: "qa"
-      - template: Deployment/templates/variables.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-    jobs:
-      - template: Deployment/templates/app-deploy.yml
-        parameters:
-          Environment: ${{variables.Environment}}
-          ContinueEvenIfResourcesAreGettingDestroyed: ${{ parameters.ContinueEvenIfResourcesAreGettingDestroyed }}
-          AzureSubscription: "Exchange-Set-Service-QA-A-008-02"
           Container: ${{variables.Container}}
