@@ -121,11 +121,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
         private static void CheckGetCurrentWeekNumberCommon(int startYear, int startMonth, int startDay, string[] expectedWeekNumberWed, string[] expectedWeekNumberThu, Func<DateTime, FormattedWeekNumber> getCurrentWeekNumber)
         {
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(expectedWeekNumberWed, Has.Length.EqualTo(4), "The test covers a four week period so there must be four expected results.");
                 Assert.That(expectedWeekNumberThu, Has.Length.EqualTo(4), "The test covers a four week period so there must be four expected results.");
-            });
+            }
 
             var checkDateWed = new DateTime(startYear, startMonth, startDay, 8, 0, 0, DateTimeKind.Utc);
             var checkDateThu = checkDateWed.AddDays(1);
@@ -135,11 +135,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 var weekNumberWed = getCurrentWeekNumber(checkDateWed);
                 var weekNumberThu = getCurrentWeekNumber(checkDateThu);
 
-                Assert.Multiple(() =>
+                using (Assert.EnterMultipleScope())
                 {
                     Assert.That(weekNumberWed.Week, Is.EqualTo(expectedWeekNumberWed[i]));
                     Assert.That(weekNumberThu.Week, Is.EqualTo(expectedWeekNumberThu[i]));
-                });
+                }
 
                 checkDateWed = checkDateWed.AddDays(7);
                 checkDateThu = checkDateThu.AddDays(7);
@@ -183,7 +183,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = CommonHelper.GetProductVersionsFromEntities(productVersionEntities, cellNames, configName, exchangeSetStandard);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Has.Count.EqualTo(3));
                 Assert.That(result[0].ProductName, Is.EqualTo("cell1"));
@@ -195,7 +195,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 Assert.That(result[2].ProductName, Is.EqualTo("cell3"));
                 Assert.That(result[2].EditionNumber, Is.EqualTo(0));
                 Assert.That(result[2].UpdateNumber, Is.EqualTo(0));
-            });
+            }
         }
 
         [Test]
@@ -208,7 +208,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = CommonHelper.GetProductVersionsFromEntities(productVersionEntities, cellNames, configName, exchangeSetStandard);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Has.Count.EqualTo(2));
                 Assert.That(result[0].ProductName, Is.EqualTo("cell1"));
@@ -217,7 +217,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 Assert.That(result[1].ProductName, Is.EqualTo("cell2"));
                 Assert.That(result[1].EditionNumber, Is.EqualTo(0));
                 Assert.That(result[1].UpdateNumber, Is.EqualTo(0));
-            });
+            }
         }
 
         [Test]
@@ -234,7 +234,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = CommonHelper.GetProductVersionsFromEntities(productVersionEntities, cellNames, configName, exchangeSetStandard);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Has.Count.EqualTo(2));
                 Assert.That(result[0].ProductName, Is.EqualTo("cell1"));
@@ -243,7 +243,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 Assert.That(result[1].ProductName, Is.EqualTo("cell2"));
                 Assert.That(result[1].EditionNumber, Is.EqualTo(0));
                 Assert.That(result[1].UpdateNumber, Is.EqualTo(0));
-            });
+            }
         }
     }
 }

@@ -33,12 +33,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fakeFssApiClient.GetBatchStatusAsync("http://test.com", _authToken);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
                 Assert.That(result.Result.Content.ReadAsStringAsync().Result, Is.EqualTo(_authToken));
 
-            });
+            }
         }
 
         [Test]
@@ -60,11 +60,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fakeFssApiClient.CreateBatchAsync("http://test.com", content, _authToken);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            });
+            }
         }
 
         [Test]
@@ -86,11 +86,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fakeFssApiClient.AddFileToBatchAsync("http://test.com", content, _authToken, 1231231, "application/octet-stream");
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            });
+            }
         }
 
         [Test]
@@ -112,11 +112,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fakeFssApiClient.UploadFileBlockAsync("http://test.com", Encoding.UTF8.GetBytes("whatever"), Encoding.UTF8.GetBytes("whatever"), _authToken, "application/octet-stream");
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            });
+            }
         }
 
         [Test]
@@ -138,11 +138,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fakeFssApiClient.WriteBlockInFileAsync("http://test.com", content, _authToken, "application/octet-stream");
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            });
+            }
         }
 
         [Test]
@@ -164,11 +164,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fakeFssApiClient.CommitBatchAsync("http://test.com", content, _authToken);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            });
+            }
         }
 
         [Test]
@@ -190,11 +190,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fakeFssApiClient.DownloadFile("http://test.com", _authToken, "bytes=1-1024");
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            });
+            }
         }
 
         [Test]
@@ -238,11 +238,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fakeFssApiClient.GetBatchDetailsAsync("http://test.com", _authToken);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            });
+            }
         }
     }
 }

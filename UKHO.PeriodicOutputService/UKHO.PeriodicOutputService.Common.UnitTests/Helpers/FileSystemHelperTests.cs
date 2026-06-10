@@ -37,15 +37,15 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             var exception = Assert.Throws<ArgumentNullException>(
-               () => new FileSystemHelper(null, _fakeZipHelper, _fakeFileUtility));
+               (Action)(() => new FileSystemHelper(null, _fakeZipHelper, _fakeFileUtility)));
             Assert.That(exception.ParamName, Is.EqualTo("fileSystem"));
 
             exception = Assert.Throws<ArgumentNullException>(
-              () => new FileSystemHelper(_fakefileSystem, null, _fakeFileUtility));
+              (Action)(() => new FileSystemHelper(_fakefileSystem, null, _fakeFileUtility)));
             Assert.That(exception.ParamName, Is.EqualTo("zipHelper"));
 
             exception = Assert.Throws<ArgumentNullException>(
-             () => new FileSystemHelper(_fakefileSystem, _fakeZipHelper, null));
+             (Action)(() => new FileSystemHelper(_fakefileSystem, _fakeZipHelper, null)));
             Assert.That(exception.ParamName, Is.EqualTo("fileUtility"));
         }
 
@@ -96,12 +96,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fileSystemHelper.GetFileMD5(fileNames);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Has.Count.EqualTo(1));
                 Assert.That(result.FirstOrDefault().FileName, Is.EqualTo(fileName));
                 Assert.That(result.FirstOrDefault().Hash, Is.Not.Null);
-            });
+            }
 
         }
 
@@ -201,11 +201,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var result = _fileSystemHelper.GetFileInfo(filePath);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result, Is.SameAs(_fakeFileInfo));
-            });
+            }
         }
 
         private static UploadFileBlockRequestModel GetUploadFileBlockRequestModel() => new()
@@ -302,14 +302,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             var result = _fileSystemHelper.GetProductVersionsFromDirectory(sourcePath);
 
             // Assert
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result, Is.Not.Null);
                 Assert.That(result.Count(), Is.EqualTo(1));
                 Assert.That(result.First().ProductName, Is.EqualTo("ENC1"));
                 Assert.That(result.First().EditionNumber, Is.EqualTo(1));
                 Assert.That(result.First().UpdateNumber, Is.EqualTo(2));
-            });
+            }
         }
 
         [Test]

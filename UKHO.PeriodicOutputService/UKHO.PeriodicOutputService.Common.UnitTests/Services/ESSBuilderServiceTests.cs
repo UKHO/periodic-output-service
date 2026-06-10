@@ -4,7 +4,6 @@ using FakeItEasy;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using NUnit.Framework;
 using UKHO.PeriodicOutputService.Common.Configuration;
 using UKHO.PeriodicOutputService.Common.Enums;
 using UKHO.PeriodicOutputService.Common.Helpers;
@@ -39,16 +38,16 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         [Test]
         public void Does_Constructor_Throws_ArgumentNullException_When_Parameter_Is_Null()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new EssBuilderService(null, _fakeEssApiConfiguration, _fakeEssApiClient, _fakeAuthTokenProvider));
+            var exception = Assert.Throws<ArgumentNullException>((Action)(() => new EssBuilderService(null, _fakeEssApiConfiguration, _fakeEssApiClient, _fakeAuthTokenProvider)));
             Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
-            exception = Assert.Throws<ArgumentNullException>(() => new EssBuilderService(_fakeLogger, null, _fakeEssApiClient, _fakeAuthTokenProvider));
+            exception = Assert.Throws<ArgumentNullException>((Action)(() => new EssBuilderService(_fakeLogger, null, _fakeEssApiClient, _fakeAuthTokenProvider)));
             Assert.That(exception.ParamName, Is.EqualTo("essApiConfiguration"));
 
-            exception = Assert.Throws<ArgumentNullException>(() => new EssBuilderService(_fakeLogger, _fakeEssApiConfiguration, null, _fakeAuthTokenProvider));
+            exception = Assert.Throws<ArgumentNullException>((Action)(() => new EssBuilderService(_fakeLogger, _fakeEssApiConfiguration, null, _fakeAuthTokenProvider)));
             Assert.That(exception.ParamName, Is.EqualTo("essApiClient"));
 
-            exception = Assert.Throws<ArgumentNullException>(() => new EssBuilderService(_fakeLogger, _fakeEssApiConfiguration, _fakeEssApiClient, null));
+            exception = Assert.Throws<ArgumentNullException>((Action)(() => new EssBuilderService(_fakeLogger, _fakeEssApiConfiguration, _fakeEssApiClient, null)));
             Assert.That(exception.ParamName, Is.EqualTo("authEssTokenProvider"));
         }
 
@@ -65,12 +64,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var response = await _essBuilderService.PostProductIdentifiersData(GetProductIdentifiers(), ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Standard.ToString());
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(response?.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
                 Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
                 Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
-            });
+            }
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -88,11 +87,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var response = await _essBuilderService.PostProductIdentifiersData(GetProductIdentifiers(), ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Large.ToString());
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(response?.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
                 Assert.That(response?.RequestedProductsNotInExchangeSet, !Is.Null);
-            });
+            }
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -108,7 +107,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _essBuilderService.PostProductIdentifiersData(GetProductIdentifiers(), ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Standard.ToString()));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _essBuilderService.PostProductIdentifiersData(GetProductIdentifiers(), ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Standard.ToString())));
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -124,7 +123,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _essBuilderService.PostProductIdentifiersData(GetProductIdentifiers(), ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Large.ToString()));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _essBuilderService.PostProductIdentifiersData(GetProductIdentifiers(), ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Large.ToString())));
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -143,11 +142,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var response = await _essBuilderService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"), ExchangeSetStandard.S57.ToString(), ExchangeSetLayout.Standard.ToString());
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
                 Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
-            });
+            }
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -166,11 +165,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             var response = await _essBuilderService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-1).ToString("R"), ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Large.ToString());
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(response?.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
                 Assert.That(response?.RequestedProductsNotInExchangeSet, !Is.Null);
-            });
+            }
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -187,7 +186,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _essBuilderService.GetProductDataSinceDateTime(DateTime.UtcNow.ToString("R"), ExchangeSetStandard.S57.ToString(), ExchangeSetLayout.Standard.ToString()));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _essBuilderService.GetProductDataSinceDateTime(DateTime.UtcNow.ToString("R"), ExchangeSetStandard.S57.ToString(), ExchangeSetLayout.Standard.ToString())));
         }
 
         [Test]
@@ -211,11 +210,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     }
                 }, ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Standard.ToString());
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
                 Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
-            });
+            }
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -231,14 +230,14 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse()))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _essBuilderService.GetProductDataProductVersions(
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _essBuilderService.GetProductDataProductVersions(
                 new ProductVersionsRequest
                 {
                     ProductVersions = new List<ProductVersion>
                     {
                         new ProductVersion { ProductName = "ABC000001", EditionNumber = 31, UpdateNumber = 10 }
                     }
-                }, ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Large.ToString()));
+                }, ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Large.ToString())));
 
             A.CallTo(() => _fakeAuthTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored)).MustHaveHappenedOnceExactly();
         }
@@ -259,7 +258,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 });
 
             Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                async delegate { await _essBuilderService.PostProductIdentifiersData(new List<string> { }, ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Standard.ToString()); });
+                (Func<Task>)(async () => await _essBuilderService.PostProductIdentifiersData(new List<string> { }, ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Standard.ToString())));
         }
 
         [Test]
@@ -278,7 +277,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 });
 
             Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                async delegate { await _essBuilderService.GetProductDataSinceDateTime(DateTime.UtcNow.ToString("R"), ExchangeSetStandard.S57.ToString(), ExchangeSetLayout.Large.ToString()); });
+                (Func<Task>)(async () => await _essBuilderService.GetProductDataSinceDateTime(DateTime.UtcNow.ToString("R"), ExchangeSetStandard.S57.ToString(), ExchangeSetLayout.Large.ToString())));
         }
 
         [Test]
@@ -297,7 +296,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 });
 
             Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                async delegate
+                (Func<Task>)(async () =>
                 {
                     await _essBuilderService.GetProductDataProductVersions(new ProductVersionsRequest
                     {
@@ -306,7 +305,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                             new ProductVersion { ProductName = "ABC000001", EditionNumber = 3, UpdateNumber = 10 }
                         }
                     }, ExchangeSetStandard.S63.ToString(), ExchangeSetLayout.Standard.ToString());
-                });
+                }));
         }
 
         private ExchangeSetResponseModel GetValidExchangeSetGetBatchResponse() => new()

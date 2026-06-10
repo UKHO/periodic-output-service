@@ -1,5 +1,4 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Text;
 using FakeItEasy;
 using Microsoft.Extensions.Logging;
@@ -41,19 +40,19 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             var execption = Assert.Throws<ArgumentNullException>(
-                () => new EssService(null, _fakeEssApiConfiguration, _fakeEssApiClient, _fakeAuthTokenProvider));
+                (Action)(() => new EssService(null, _fakeEssApiConfiguration, _fakeEssApiClient, _fakeAuthTokenProvider)));
             Assert.That(execption.ParamName, Is.EqualTo("logger"));
 
             execption = Assert.Throws<ArgumentNullException>(
-                () => new EssService(_fakeLogger, null, _fakeEssApiClient, _fakeAuthTokenProvider));
+                (Action)(() => new EssService(_fakeLogger, null, _fakeEssApiClient, _fakeAuthTokenProvider)));
             Assert.That(execption.ParamName, Is.EqualTo("essApiConfiguration"));
 
             execption = Assert.Throws<ArgumentNullException>(
-               () => new EssService(_fakeLogger, _fakeEssApiConfiguration, null, _fakeAuthTokenProvider));
+               (Action)(() => new EssService(_fakeLogger, _fakeEssApiConfiguration, null, _fakeAuthTokenProvider)));
             Assert.That(execption.ParamName, Is.EqualTo("essApiClient"));
 
             execption = Assert.Throws<ArgumentNullException>(
-               () => new EssService(_fakeLogger, _fakeEssApiConfiguration, _fakeEssApiClient, null));
+               (Action)(() => new EssService(_fakeLogger, _fakeEssApiConfiguration, _fakeEssApiClient, null)));
             Assert.That(execption.ParamName, Is.EqualTo("authEssTokenProvider"));
         }
 
@@ -73,12 +72,12 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                   });
 
             ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(response?.ExchangeSetCellCount, Is.EqualTo(GetProductIdentifiers().Count));
                 Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
                 Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
-            });
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -107,11 +106,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             ExchangeSetResponseModel response = await _essService.PostProductIdentifiersData(GetProductIdentifiers());
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(response?.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
                 Assert.That(response?.RequestedProductsNotInExchangeSet, !Is.Null);
-            });
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -139,7 +138,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                   });
 
             Assert.ThrowsAsync<FulfilmentException>(
-                 () => _essService.PostProductIdentifiersData(GetProductIdentifiers()));
+                 (Func<Task>)(async () => await _essService.PostProductIdentifiersData(GetProductIdentifiers())));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -168,7 +167,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                   });
 
             Assert.ThrowsAsync<FulfilmentException>(
-                 () => _essService.PostProductIdentifiersData(GetProductIdentifiers()));
+                 (Func<Task>)(async () => await _essService.PostProductIdentifiersData(GetProductIdentifiers())));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -199,11 +198,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             ExchangeSetResponseModel response = await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"));
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
                 Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
-            });
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -232,11 +231,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                   });
 
             ExchangeSetResponseModel response = await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"));
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(response?.ExchangeSetCellCount, !Is.EqualTo(GetProductIdentifiers().Count));
                 Assert.That(response?.RequestedProductsNotInExchangeSet, !Is.Null);
-            });
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -263,7 +262,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                       Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
                   });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R")));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.AddDays(-7).ToString("R"))));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -304,11 +303,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                                                                                                     }
             });
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(!string.IsNullOrEmpty(response?.Links?.ExchangeSetFileUri?.Href), Is.True);
                 Assert.That(response?.RequestedProductsNotInExchangeSet, Is.Null);
-            });
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -341,7 +340,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                      Content = new StringContent(JsonConvert.SerializeObject(GetValidExchangeSetGetBatchResponse())),
                  });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _essService.GetProductDataProductVersions(new ProductVersionsRequest
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _essService.GetProductDataProductVersions(new ProductVersionsRequest
             {
                 ProductVersions = new List<ProductVersion>
                                                                                                     {
@@ -352,7 +351,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                                                                                                              UpdateNumber = 10
                                                                                                          }
                                                                                                     }
-            }));
+            })));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -521,7 +520,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                   });
 
             Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                 async delegate { await _essService.PostProductIdentifiersData(new List<string> { }, ExchangeSetStandard.S63.ToString()); });
+                 (Func<Task>)(async () => await _essService.PostProductIdentifiersData(new List<string> { }, ExchangeSetStandard.S63.ToString())));
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -561,7 +560,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                   });
 
             Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                 async delegate { await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.ToString("R"), ExchangeSetStandard.S63.ToString()); });
+                 (Func<Task>)(async () => await _essService.GetProductDataSinceDateTime(DateTime.UtcNow.ToString("R"), ExchangeSetStandard.S63.ToString())));
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -596,8 +595,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                  });
 
             Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                async delegate
-                {
+                (Func<Task>)(async () =>
                     await _essService.GetProductDataProductVersions(new ProductVersionsRequest
                     {
                         ProductVersions = new List<ProductVersion>
@@ -609,8 +607,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                                                                                                              UpdateNumber = 10
                                                                                                          }
                                                                                                     }
-                    }, ExchangeSetStandard.S63.ToString());
-                });
+                    }, ExchangeSetStandard.S63.ToString())
+                ));
 
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"

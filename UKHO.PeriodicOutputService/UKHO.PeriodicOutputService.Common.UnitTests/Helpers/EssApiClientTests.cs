@@ -38,11 +38,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var deSerializedResult = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(result.Result.Content.ReadAsStringAsync().Result);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
                 Assert.That(deSerializedResult, Is.Not.Null);
-            });
+            }
         }
 
         [Test]
@@ -64,11 +64,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
 
             var deSerializedResult = JsonConvert.DeserializeObject<ExchangeSetResponseModel>(result.Result.Content.ReadAsStringAsync().Result);
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.Result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
                 Assert.That(deSerializedResult, Is.Not.Null);
-            });
+            }
         }
 
         private List<string> GetProductIdentifiers()
