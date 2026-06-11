@@ -68,27 +68,27 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         public void When_Paramter_Is_Null_Then_Constructor_Throws_ArgumentNullException_()
         {
             var execption = Assert.Throws<ArgumentNullException>(
-                () => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                (Action)(() => new FssService(null, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper)));
             Assert.That(execption.ParamName, Is.EqualTo("logger"));
 
             execption = Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                (Action)(() => new FssService(_fakeLogger, null, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper)));
             Assert.That(execption.ParamName, Is.EqualTo("fssApiConfiguration"));
 
             execption = Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                (Action)(() => new FssService(_fakeLogger, _fakeFssApiConfiguration, null, _fakeAuthFssTokenProvider, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper)));
             Assert.That(execption.ParamName, Is.EqualTo("fssApiClient"));
 
             execption = Assert.Throws<ArgumentNullException>(
-                () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                (Action)(() => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, null, _fileSystemHelper, _fakeconfiguration, _fakeAzureTableStorageHelper)));
             Assert.That(execption.ParamName, Is.EqualTo("authFssTokenProvider"));
 
             execption = Assert.Throws<ArgumentNullException>(
-                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, null, _fakeconfiguration, _fakeAzureTableStorageHelper));
+                 (Action)(() => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, null, _fakeconfiguration, _fakeAzureTableStorageHelper)));
             Assert.That(execption.ParamName, Is.EqualTo("fileSystemHelper"));
 
             execption = Assert.Throws<ArgumentNullException>(
-                 () => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, null, _fakeAzureTableStorageHelper));
+                 (Action)(() => new FssService(_fakeLogger, _fakeFssApiConfiguration, _fakeFssApiClient, _fakeAuthFssTokenProvider, _fileSystemHelper, null, _fakeAzureTableStorageHelper)));
             Assert.That(execption.ParamName, Is.EqualTo("configuration"));
         }
 
@@ -152,7 +152,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"statusCode\":\"401\",\"message\":\"Authorization token is missing or invalid\"}")))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType)));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -181,7 +181,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 });
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType));
+                (Func<Task>)(async () => await _fssService.CheckIfBatchCommitted("http://test.com/4c5397d5-8a05-43fa-9009-9c38b2007f81/status", requestType)));
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -206,11 +206,11 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             Common.Models.Fss.Response.GetBatchResponseModel? result = await _fssService.GetBatchDetails("4c5397d5-8a05-43fa-9009-9c38b2007f81");
 
-            Assert.Multiple(() =>
+            using (Assert.EnterMultipleScope())
             {
                 Assert.That(result.BatchId, Is.EqualTo("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
                 Assert.That(result.Status, Is.EqualTo(FssBatchStatus.Committed.ToString()));
-            });
+            }
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -240,7 +240,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.GetBatchDetails("4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _fssService.GetBatchDetails("4c5397d5-8a05-43fa-9009-9c38b2007f81")));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -325,7 +325,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes("{\"batchId\": \"4c5397d5-8a05-43fa-9009-9c38b2007f81\",\"status\": \"Committed\",\"allFilesZipSize\": 11323697,\"attributes\": [{\"key\": \"Product Type\",\"value\": \"AVCS\"}],\"businessUnit\": \"AVCSCustomExchangeSets\",\"batchPublishedDate\": \"2022-07-13T10:53:58.98Z\",\"expiryDate\": \"2022-08-12T10:53:06Z\",\"files\": [{\"filename\": \"M01X02.zip\",\"fileSize\": 5095731,\"mimeType\": \"application/zip\",\"hash\": \"TLwn4f5J36mvWvrTafkXYA==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip\"}}},{\"filename\": \"M02X02.zip\",\"fileSize\": 6267757,\"mimeType\": \"application/zip\",\"hash\": \"7tP0BwgbMdKZT8koKakR+w==\",\"attributes\": [],\"links\": {\"get\": {\"href\": \"/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M02X02.zip\"}}}]}")))
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\", null));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _fssService.DownloadFileAsync("M01X02", "/batch/621e8d6f-9950-4ba6-bfb4-92415369aaee/files/M01X02.zip", 10000, @"D:\", null)));
 
             A.CallTo(_fakeLogger).Where(call =>
              call.Method.Name == "Log"
@@ -397,7 +397,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                   },
               });
 
-            Assert.ThrowsAsync<AggregateException>(() => _fssService.UploadBlocks("", fileInfo));
+            Assert.ThrowsAsync<AggregateException>((Func<Task>)(async () => await _fssService.UploadBlocks("", fileInfo)));
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
@@ -425,7 +425,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CreateBatch(Batch.PosFullAvcsIsoSha1Batch, weekNumber));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _fssService.CreateBatch(Batch.PosFullAvcsIsoSha1Batch, weekNumber)));
 
             A.CallTo(_fakeLogger).Where(call =>
                 call.Method.Name == "Log"
@@ -642,7 +642,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 });
 
             Assert.ThrowsAsync<FulfilmentException>(
-            () => _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream", Batch.PosFullAvcsIsoSha1Batch));
+            (Func<Task>)(async () => await _fssService.AddFileToBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", 2453443233, "application/octet-stream", Batch.PosFullAvcsIsoSha1Batch)));
 
             A.CallTo(() => _fakeAuthFssTokenProvider.GetManagedIdentityAuthAsync(A<string>.Ignored, A<string>.Ignored))
                 .MustHaveHappenedOnceExactly();
@@ -704,7 +704,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             IEnumerable<string> blockIds = new List<string> { "Block_00001", "Block_00001" };
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.WriteBlockFile("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", blockIds));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _fssService.WriteBlockFile("4c5397d5-8a05-43fa-9009-9c38b2007f81", "filename.txt", blockIds)));
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -766,7 +766,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
 
             IEnumerable<string> fileNames = new List<string> { "MX0101.zip", "MX0201.zip" };
 
-            Assert.ThrowsAsync<FulfilmentException>(() => _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames, Batch.EssFullAvcsZipBatch));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _fssService.CommitBatch("4c5397d5-8a05-43fa-9009-9c38b2007f81", fileNames, Batch.EssFullAvcsZipBatch)));
 
             A.CallTo(_fakeLogger).Where(call =>
             call.Method.Name == "Log"
@@ -798,7 +798,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
             IEnumerable<BatchFile> response = await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81");
 
             Assert.That(response, Is.Not.Null);
-            Assert.That(response.Count, Is.EqualTo(1));
+            Assert.That(response.Count(), Is.EqualTo(1));
 
             A.CallTo(_fakeLogger).Where(call => call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Information
@@ -826,7 +826,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(async () => await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81")));
 
             A.CallTo(_fakeLogger).Where(call => call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -850,7 +850,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(async () => await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81")));
 
             A.CallTo(_fakeLogger).Where(call => call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -874,7 +874,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            Assert.ThrowsAsync<FulfilmentException>(async () => await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81"));
+            Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await _fssService.GetAioInfoFolderFilesAsync("4c5397d5-8a05-43fa-9009-9c38b2007f81", "4c5397d5-8a05-43fa-9009-9c38b2007f81")));
 
             A.CallTo(_fakeLogger).Where(call => call.Method.Name == "Log"
             && call.GetArgument<LogLevel>(0) == LogLevel.Error
@@ -906,7 +906,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            AsyncTestDelegate act = async () => { await _fssService.SearchReadMeFilePathAsync("8k0997d5-8905-43fa-9009-9c38b2007f81", invalidReadMeSearchFilterQuery); };
+            var act = async () => await _fssService.SearchReadMeFilePathAsync("8k0997d5-8905-43fa-9009-9c38b2007f81", invalidReadMeSearchFilterQuery);
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.QueryFileShareServiceReadMeFileNonOkResponse.ToEventId()));
 
@@ -935,7 +935,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            AsyncTestDelegate act = async () => { await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery); };
+            var act = async () => await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery);
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.ReadMeTextFileNotFound.ToEventId()));
 
@@ -964,7 +964,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     },
                 });
 
-            AsyncTestDelegate act = async () => { await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery); };
+            var act = async () => await _fssService.SearchReadMeFilePathAsync(string.Empty, readMeSearchFilterQuery);
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.QueryFileShareServiceMultipleFilesFound.ToEventId()));
 
@@ -1072,7 +1072,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                })
                .Returns(httpResponse);
 
-            AsyncTestDelegate act = async () => { await _fssService.DownloadReadMeFileAsync(readMeFilePath, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc"); };
+            var act = async () => await _fssService.DownloadReadMeFileAsync(readMeFilePath, exchangeSetRootPath, "1a7537ff-ffa2-4565-8f0e-96e61e70a9fc");
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.DownloadReadMeFileNonOkResponse.ToEventId()));
 
@@ -1178,7 +1178,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     break;
             }
 
-            AsyncTestDelegate act = async () => await _fssService.CreateBatch(batchType, GetConfigQueueMessage(type));
+            var act = async () => await _fssService.CreateBatch(batchType, GetConfigQueueMessage(type));
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.CreateBatchFailed.ToEventId()));
 

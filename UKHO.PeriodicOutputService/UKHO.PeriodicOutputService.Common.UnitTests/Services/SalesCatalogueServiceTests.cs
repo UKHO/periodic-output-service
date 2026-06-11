@@ -75,7 +75,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                 .Returns(new HttpResponseMessage() { StatusCode = statusCode, RequestMessage = new HttpRequestMessage() { RequestUri = new Uri("http://abc.com") }, Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(content))) });
 
             Assert.ThrowsAsync(Is.TypeOf<FulfilmentException>(),
-                 async delegate { await salesCatalogueService.GetSalesCatalogueData(); });
+                 (Func<Task>)(async () => await salesCatalogueService.GetSalesCatalogueData()));
 
             A.CallTo(fakeLogger).Where(call =>
                   call.Method.Name == "Log"

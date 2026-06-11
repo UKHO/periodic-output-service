@@ -32,15 +32,15 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.PermitDecryption
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
             Action nullLogger = () => new Common.PermitDecryption.PermitDecryption(null, fakePksApiConfiguration, fakeS63Crypt);
-            var exception = Assert.Throws<ArgumentNullException>(() => nullLogger());
+            var exception = Assert.Throws<ArgumentNullException>(nullLogger);
             Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             Action nullPksApiConfiguration = () => new Common.PermitDecryption.PermitDecryption(fakeLogger, null, fakeS63Crypt);
-            exception = Assert.Throws<ArgumentNullException>(() => nullPksApiConfiguration());
+            exception = Assert.Throws<ArgumentNullException>(nullPksApiConfiguration);
             Assert.That(exception.ParamName, Is.EqualTo("pksApiConfiguration"));
 
             Action nullS63Crypt = () => new Common.PermitDecryption.PermitDecryption(fakeLogger, fakePksApiConfiguration, null);
-            exception = Assert.Throws<ArgumentNullException>(() => nullS63Crypt());
+            exception = Assert.Throws<ArgumentNullException>(nullS63Crypt);
             Assert.That(exception.ParamName, Is.EqualTo("s63Crypt"));
         }
 

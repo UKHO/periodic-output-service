@@ -38,19 +38,19 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
             Action nullPksLogger = () => new PksService(null, fakePksApiConfiguration, fakeAuthPksTokenProvider, fakePksApiClient);
-            var exception = Assert.Throws<ArgumentNullException>(() => nullPksLogger());
+            var exception = Assert.Throws<ArgumentNullException>(nullPksLogger);
             Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             Action nullPksApiConfiguration = () => new PksService(fakeLogger, null, fakeAuthPksTokenProvider, fakePksApiClient);
-            exception = Assert.Throws<ArgumentNullException>(() => nullPksApiConfiguration());
+            exception = Assert.Throws<ArgumentNullException>(nullPksApiConfiguration);
             Assert.That(exception.ParamName, Is.EqualTo("pksApiConfiguration"));
 
             Action nullAuthPksTokenProvider = () => new PksService(fakeLogger, fakePksApiConfiguration, null, fakePksApiClient);
-            exception = Assert.Throws<ArgumentNullException>(() => nullAuthPksTokenProvider());
+            exception = Assert.Throws<ArgumentNullException>(nullAuthPksTokenProvider);
             Assert.That(exception.ParamName, Is.EqualTo("authPksTokenProvider"));
 
             Action nullPksApiClient = () => new PksService(fakeLogger, fakePksApiConfiguration, fakeAuthPksTokenProvider, null);
-            exception = Assert.Throws<ArgumentNullException>(() => nullPksApiClient());
+            exception = Assert.Throws<ArgumentNullException>(nullPksApiClient);
             Assert.That(exception.ParamName, Is.EqualTo("pksApiClient"));
         }
 
@@ -102,7 +102,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StringContent(BadRequestError)
                 });
 
-            var exception = Assert.ThrowsAsync<FulfilmentException>(() => pksService.PostProductKeyData(new List<ProductKeyServiceRequest>()));
+            var exception = Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await pksService.PostProductKeyData(new List<ProductKeyServiceRequest>())));
             Assert.That(EventIds.PostProductKeyDataToPksFailed.ToEventId(), Is.EqualTo(exception.EventId));
 
             A.CallTo(fakeLogger).Where(call =>
@@ -139,7 +139,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Services
                     Content = new StreamContent(new MemoryStream(Encoding.UTF8.GetBytes(content)))
                 });
 
-            var exception = Assert.ThrowsAsync<FulfilmentException>(() => pksService.PostProductKeyData(new List<ProductKeyServiceRequest>()));
+            var exception = Assert.ThrowsAsync<FulfilmentException>((Func<Task>)(async () => await pksService.PostProductKeyData(new List<ProductKeyServiceRequest>())));
             Assert.That(exception.EventId, Is.EqualTo(EventIds.PostProductKeyDataToPksFailed.ToEventId()));
 
             A.CallTo(fakeLogger).Where(call =>

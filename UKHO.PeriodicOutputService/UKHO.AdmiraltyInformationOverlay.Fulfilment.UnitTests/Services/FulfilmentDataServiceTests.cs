@@ -60,31 +60,31 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
         public void Does_Constructor_Throws_ArgumentNullException_When_Paramter_Is_Null()
         {
             var exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
+                (Action)(() => new FulfilmentDataService(null, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration)));
             Assert.That(exception.ParamName, Is.EqualTo("fileSystemHelper"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
+                (Action)(() => new FulfilmentDataService(_fakefileSystemHelper, null, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration)));
             Assert.That(exception.ParamName, Is.EqualTo("essService"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
+                (Action)(() => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, null, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration)));
             Assert.That(exception.ParamName, Is.EqualTo("fssService"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
+                (Action)(() => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, null, _fakeconfiguration, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration)));
             Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration));
+                 (Action)(() => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, null, _fakeAzureTableStorageHelper, _fakeFssApiConfiguration)));
             Assert.That(exception.ParamName, Is.EqualTo("configuration"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                 () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null, _fakeFssApiConfiguration));
+                 (Action)(() => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, null, _fakeFssApiConfiguration)));
             Assert.That(exception.ParamName, Is.EqualTo("azureTableStorageHelper"));
 
             exception = Assert.Throws<ArgumentNullException>(
-                () => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, null));
+                (Action)(() => new FulfilmentDataService(_fakefileSystemHelper, _fakeEssService, _fakeFssService, _fakeLogger, _fakeconfiguration, _fakeAzureTableStorageHelper, null)));
             Assert.That(exception.ParamName, Is.EqualTo("fssApiConfig"));
         }
 
@@ -196,7 +196,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
                 .Returns(FssBatchStatus.CommitInProgress);
 
             Assert.ThrowsAsync<FulfilmentException>(
-                 () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+                 (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             CheckLog(EventIds.FssPollingCutOffTimeout, "Batch is not committed within given polling cut off time | {DateTime} | Batch Status : {BatchStatus} | _X-Correlation-ID : {CorrelationId}", LogLevel.Error, timesOption: Times.OrMore);
         }
@@ -216,7 +216,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.ExtractZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<Exception>();
 
             Assert.ThrowsAsync<ArgumentNullException>(
-                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+                (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
@@ -241,7 +241,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.CreateIsoAndSha1(A<string>.Ignored, A<string>.Ignored, A<string>.Ignored)).Throws<ArgumentNullException>();
 
             Assert.ThrowsAsync<ArgumentNullException>(
-                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+                (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
@@ -260,7 +260,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             _fakeconfiguration["AioCells"] = string.Empty;
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+                (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             CheckLog(EventIds.AioCellsConfigurationMissing, "AIO cells are empty in configuration | {DateTime} | _X-Correlation-ID : {CorrelationId}", LogLevel.Error);
 
@@ -284,7 +284,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetBatchResponseModelWithFileNameError());
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+                (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             CheckLog(EventIds.ErrorFileFoundInBatch, "Either no files found or error file found in batch with BatchID - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", LogLevel.Error, timesOption: Times.OrMore);
         }
@@ -305,7 +305,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetBatchResponseModelWithFileNameV01X01());
 
             Assert.ThrowsAsync<FulfilmentException>(
-                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+                (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             CheckLog(EventIds.V01X01FileFoundInAIOBatch, "The configuration of the AIO cell is not synchronized with the ESS. V01X01 file found in AIO batch - {BatchID} | {DateTime} | _X-Correlation-ID:{CorrelationId}", LogLevel.Error, timesOption: Times.OrMore);
         }
@@ -331,7 +331,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakeAzureTableStorageHelper.SaveProductVersionDetails(A<List<ProductVersion>>.Ignored)).Throws<Exception>();
 
             Assert.ThrowsAsync<Exception>(
-               () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+               (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             CheckLog(EventIds.LoggingProductVersionsFailed, "Logging product version failed | {DateTime} | _X-Correlation-ID : {CorrelationId}", LogLevel.Error);
         }
@@ -351,7 +351,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
             A.CallTo(() => _fakefileSystemHelper.CreateZipFile(A<string>.Ignored, A<string>.Ignored, A<bool>.Ignored)).Throws<ArgumentNullException>();
 
             Assert.ThrowsAsync<ArgumentNullException>(
-                () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+                (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             A.CallTo(() => _fakeFssService.DownloadFileAsync(A<string>.Ignored, A<string>.Ignored, A<long>.Ignored, A<string>.Ignored, A<string>.Ignored))
               .MustHaveHappenedOnceExactly();
@@ -374,7 +374,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetInValidExchangeSetGetBatchRespGetProductDataProductVersionsonseWithZeroAIOCells());
 
             Assert.ThrowsAsync<FulfilmentException>(
-              () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+              (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             CheckLog(EventIds.EssValidationFailed, "Due to the empty exchange set, ESS validation failed while producing an update | {DateTime} | _X-Correlation-ID : {CorrelationId}", LogLevel.Error);
         }
@@ -389,7 +389,7 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment.UnitTests.Services
               .Returns(GetInValidExchangeSetGetBatchResponseWithRequestedInvalidProductsNotInExchangeSet());
 
             Assert.ThrowsAsync<FulfilmentException>(
-             () => _fulfilmentDataService.CreateAioExchangeSetsAsync());
+             (Func<Task>)(async () => await _fulfilmentDataService.CreateAioExchangeSetsAsync()));
 
             CheckLog(EventIds.EssValidationFailed, "ESS validation failed for {Count} products [{Products}] while creating update exchange set {DateTime} | _X-Correlation-ID : {CorrelationId}", LogLevel.Error);
         }

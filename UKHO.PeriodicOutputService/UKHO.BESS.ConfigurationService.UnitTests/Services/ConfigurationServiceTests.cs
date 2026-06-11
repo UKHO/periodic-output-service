@@ -80,41 +80,41 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             Action nullAzureBlobStorageClient = () => new ConfigurationService.Services.ConfigurationService(null, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            var exception = Assert.Throws<ArgumentNullException>(() => nullAzureBlobStorageClient());
+            var exception = Assert.Throws<ArgumentNullException>(nullAzureBlobStorageClient);
             Assert.That(exception.ParamName, Is.EqualTo("azureBlobStorageClient"));
 
             Action nullAzureTableHelper = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, null, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            exception = Assert.Throws<ArgumentNullException>(() => nullAzureTableHelper());
+            exception = Assert.Throws<ArgumentNullException>(nullAzureTableHelper);
             Assert.That(exception.ParamName, Is.EqualTo("azureTableStorageHelper"));
 
             Action nullConfigurationServiceLogger = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, null, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            exception = Assert.Throws<ArgumentNullException>(() => nullConfigurationServiceLogger());
+            exception = Assert.Throws<ArgumentNullException>(nullConfigurationServiceLogger);
             Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             Action nullConfigValidator = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, null, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            exception = Assert.Throws<ArgumentNullException>(() => nullConfigValidator());
+            exception = Assert.Throws<ArgumentNullException>(nullConfigValidator);
             Assert.That(exception.ParamName, Is.EqualTo("configValidator"));
 
             Action nullSalesCatalogueService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, null, fakeConfiguration, fakeAzureBlobStorageService, fakeMacroTransformer);
-            exception = Assert.Throws<ArgumentNullException>(() => nullSalesCatalogueService());
+            exception = Assert.Throws<ArgumentNullException>(nullSalesCatalogueService);
             Assert.That(exception.ParamName, Is.EqualTo("salesCatalogueService"));
 
             Action nullConfigurationServiceConfiguration = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, null, fakeAzureBlobStorageService, fakeMacroTransformer);
 
-            exception = Assert.Throws<ArgumentNullException>(() => nullConfigurationServiceConfiguration());
+            exception = Assert.Throws<ArgumentNullException>(nullConfigurationServiceConfiguration);
             Assert.That(exception.ParamName, Is.EqualTo("configuration"));
 
             Action nullAzureBlobStorageService = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, null, fakeMacroTransformer);
 
-            exception = Assert.Throws<ArgumentNullException>(() => nullAzureBlobStorageService());
+            exception = Assert.Throws<ArgumentNullException>(nullAzureBlobStorageService);
             Assert.That(exception.ParamName, Is.EqualTo("azureBlobStorageService"));
 
 
             Action nullMacroTransformer = () => new ConfigurationService.Services.ConfigurationService(fakeAzureBlobStorageClient, fakeAzureTableStorageHelper, fakeLogger, fakeConfigValidator, fakeSalesCatalogueService, fakeConfiguration, fakeAzureBlobStorageService, null);
-            exception = Assert.Throws<ArgumentNullException>(() => nullMacroTransformer());
+            exception = Assert.Throws<ArgumentNullException>(nullMacroTransformer);
             Assert.That(exception.ParamName, Is.EqualTo("macroTransformer"));
 
         }
@@ -366,7 +366,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Returns(new ValidationResult(new List<ValidationFailure>()));
             A.CallTo(() => fakeMacroTransformer.ExpandMacros(A<string>.Ignored)).Throws<Exception>();
 
-            AsyncTestDelegate act = configurationService.ProcessConfigsAsync;
+            var act = async () => await configurationService.ProcessConfigsAsync();
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.MacroTransformationFailed.ToEventId()));
 
@@ -551,7 +551,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Throws<Exception>();
 
-            AsyncTestDelegate act = async () => { await configurationService.ProcessConfigsAsync(); };
+            var act = async () => await configurationService.ProcessConfigsAsync();
             Assert.ThrowsAsync<Exception>(act);
 
             A.CallTo(fakeLogger).Where(call =>
@@ -658,7 +658,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
             A.CallTo(() => fakeAzureBlobStorageClient.GetConfigsInContainerAsync()).Returns(GetConfigJsonWithIncorrectExchangeSetStandard());
             A.CallTo(() => fakeConfigValidator.Validate(A<BessConfig>.Ignored)).Throws<Exception>();
 
-            AsyncTestDelegate act = async () => { await configurationService.ProcessConfigsAsync(); };
+            var act = async () => await configurationService.ProcessConfigsAsync();
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.BessConfigValidationError.ToEventId()));
 
@@ -750,7 +750,7 @@ namespace UKHO.BESS.ConfigurationService.UnitTests.Services
         {
             A.CallTo(() => fakeAzureTableStorageHelper.GetScheduleDetailAsync("BESS-1")).Throws<Exception>();
 
-            AsyncTestDelegate act = async () => { await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse()); };
+            var act = async () => await configurationService.CheckConfigFrequencyAndSaveQueueDetailsAsync(GetFakeConfigurationSetting(), GetFakeSalesCatalogueDataProductResponse());
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.BessConfigFrequencyProcessingException.ToEventId()));
 

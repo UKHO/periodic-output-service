@@ -37,19 +37,19 @@ namespace UKHO.BESS.CleanUpJob.UnitTests.Services
         public void WhenParameterIsNull_ThenConstructorThrowsArgumentNullException()
         {
             Action nullLogger = () => new CleanUpService(fakeConfiguration, null, fakeCleanUpConfig, fakeFileSystem);
-            var exception = Assert.Throws<ArgumentNullException>(() => nullLogger());
+            var exception = Assert.Throws<ArgumentNullException>(nullLogger);
             Assert.That(exception.ParamName, Is.EqualTo("logger"));
 
             Action nullCleanupConfiguration = () => new CleanUpService(fakeConfiguration, fakeLogger, null, fakeFileSystem);
-            exception = Assert.Throws<ArgumentNullException>(() => nullCleanupConfiguration());
+            exception = Assert.Throws<ArgumentNullException>(nullCleanupConfiguration);
             Assert.That(exception.ParamName, Is.EqualTo("cleanUpConfig"));
 
             Action nullFileSystem = () => new CleanUpService(fakeConfiguration, fakeLogger, fakeCleanUpConfig, null);
-            exception = Assert.Throws<ArgumentNullException>(() => nullFileSystem());
+            exception = Assert.Throws<ArgumentNullException>(nullFileSystem);
             Assert.That(exception.ParamName, Is.EqualTo("fileSystem"));
 
             Action nullConfiguration = () => new CleanUpService(null, fakeLogger, fakeCleanUpConfig, fakeFileSystem);
-            exception = Assert.Throws<ArgumentNullException>(() => nullConfiguration());
+            exception = Assert.Throws<ArgumentNullException>(nullConfiguration);
             Assert.That(exception.ParamName, Is.EqualTo("configuration"));
         }
 
