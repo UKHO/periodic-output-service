@@ -44,13 +44,13 @@ variables:
   - name: DeploymentPool
     value: "Mare Nectaris"
   - name: Container
-    value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.9.6"
+    value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.15.7"
   - name: WindowsPool1
     value: "NautilusBuild"
   - name: WindowsPool2
     value: "Mare Nubium"
   - name: SdkVersion
-    value: "8.0.x"
+    value: "10.x"
   - name: snykAbzuOrganizationId
     value: aeb7543b-8394-457c-8334-a31493d8910d
 
