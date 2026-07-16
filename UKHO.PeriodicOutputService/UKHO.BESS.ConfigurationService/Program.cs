@@ -28,7 +28,6 @@ namespace UKHO.BESS.ConfigurationService
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static readonly InMemoryChannel aiChannel = new();
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         private const string BESSConfigurationService = "BESSConfigurationService";
 
@@ -58,8 +57,6 @@ namespace UKHO.BESS.ConfigurationService
                 }
                 finally
                 {
-                    //Ensure all buffered app insights logs are flushed into Azure
-                    aiChannel.Flush();
                     await Task.Delay(delayTime);
                 }
             }
@@ -139,13 +136,6 @@ namespace UKHO.BESS.ConfigurationService
                     });
                 }
             });
-
-            serviceCollection.Configure<TelemetryConfiguration>(
-                (config) =>
-                {
-                    config.TelemetryChannel = aiChannel;
-                }
-            );
 
             if (configuration != null)
             {
