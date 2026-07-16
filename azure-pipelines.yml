@@ -44,7 +44,7 @@ variables:
   - name: DeploymentPool
     value: "Mare Nectaris"
   - name: Container
-    value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.15.7"
+    value: "ukhydrographicoffice/terraform-azure-powershell-unzip:1.15.8"
   - name: WindowsPool1
     value: "NautilusBuild"
   - name: WindowsPool2
