@@ -69,7 +69,7 @@ stages:
     dependsOn: []
     variables:
     - name: StrykerDotNetVersion
-      value: 8.0.x
+      value: 10.0.x
     jobs:
     - job: Stryker
       workspace:
@@ -117,7 +117,7 @@ stages:
     jobs:
     - template: Deployment/templates/build-test-publish.yml  
       parameters:
-        DotNetVersion: '8.0.x'
+        DotNetVersion: '10.0.x'
 
   - stage: Devdeploy
     displayName: "Devdeploy (inc terraform, webapp deploy)"

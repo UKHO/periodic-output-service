@@ -1,7 +1,7 @@
 parameters:
 - name: DotNetVersion
   type: string
-  default: '8.0.x'
+  default: '10.0.x'
 
 jobs:
 - job: UnitTestsAndCodeCoverage
