@@ -7,10 +7,7 @@ using Azure.Security.KeyVault.Secrets;
 using Elastic.Apm.Azure.Storage;
 using Elastic.Apm.DiagnosticSource;
 using Elastic.Apm;
-using Elastic.Apm.Api;
-using Microsoft.ApplicationInsights.Channel;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Extensions.Azure;
+using Microsoft.ApplicationInsights;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -28,7 +25,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static readonly InMemoryChannel s_aIChannel = new();
         private static readonly string s_assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
 
         public static async Task Main()
@@ -56,8 +52,9 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                 }
                 finally
                 {
-                    //Ensure all buffered app insights logs are flushed into Azure
-                    s_aIChannel.Flush();
+                    //Ensure all buffered app insights telemetry is flushed to Azure before the short-lived job exits
+                    var telemetryClient = serviceProvider.GetService<TelemetryClient>();
+                    telemetryClient?.Flush();
                     await Task.Delay(delayTime);
                 }
             }
@@ -139,12 +136,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                 }
 
             });
-
-            serviceCollection.Configure<TelemetryConfiguration>(
-             (config) =>
-             {
-                 config.TelemetryChannel = s_aIChannel;
-             });
 
             var fssApiConfiguration = new FssApiConfiguration();
 

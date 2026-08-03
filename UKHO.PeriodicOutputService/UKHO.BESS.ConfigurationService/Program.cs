@@ -7,8 +7,7 @@ using Azure.Security.KeyVault.Secrets;
 using Elastic.Apm;
 using Elastic.Apm.Azure.Storage;
 using Elastic.Apm.DiagnosticSource;
-using Microsoft.ApplicationInsights.Channel;
-using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -28,7 +27,6 @@ namespace UKHO.BESS.ConfigurationService
     [ExcludeFromCodeCoverage]
     public static class Program
     {
-        private static readonly InMemoryChannel aiChannel = new();
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
         private const string BESSConfigurationService = "BESSConfigurationService";
 
@@ -58,8 +56,9 @@ namespace UKHO.BESS.ConfigurationService
                 }
                 finally
                 {
-                    //Ensure all buffered app insights logs are flushed into Azure
-                    aiChannel.Flush();
+                    //Ensure all buffered app insights telemetry is flushed to Azure before the short-lived job exits
+                    var telemetryClient = serviceProvider.GetService<TelemetryClient>();
+                    telemetryClient?.Flush();
                     await Task.Delay(delayTime);
                 }
             }
@@ -139,13 +138,6 @@ namespace UKHO.BESS.ConfigurationService
                     });
                 }
             });
-
-            serviceCollection.Configure<TelemetryConfiguration>(
-                (config) =>
-                {
-                    config.TelemetryChannel = aiChannel;
-                }
-            );
 
             if (configuration != null)
             {

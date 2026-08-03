@@ -4,8 +4,7 @@ using System.Reflection;
 using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
-using Microsoft.ApplicationInsights.Channel;
-using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.ApplicationInsights;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -23,7 +22,6 @@ namespace UKHO.BESS.CleanUpJob
     public static class Program
     {
         private static readonly string assemblyVersion = Assembly.GetExecutingAssembly().GetCustomAttributes<AssemblyFileVersionAttribute>().Single().Version;
-        private static readonly InMemoryChannel aiChannel = new();
 
         private static async Task Main()
         {
@@ -50,8 +48,9 @@ namespace UKHO.BESS.CleanUpJob
                 }
                 finally
                 {
-                    //Ensure all buffered app insights logs are flushed into Azure
-                    aiChannel.Flush();
+                    //Ensure all buffered app insights telemetry is flushed to Azure before the short-lived job exits
+                    var telemetryClient = serviceProvider.GetService<TelemetryClient>();
+                    telemetryClient?.Flush();
                     await Task.Delay(delayTime);
                 }
             }
@@ -135,13 +134,6 @@ namespace UKHO.BESS.CleanUpJob
                     });
                 }
             });
-
-            serviceCollection.Configure<TelemetryConfiguration>(
-                (config) =>
-                {
-                    config.TelemetryChannel = aiChannel;
-                }
-            );
 
             if (configuration != null)
             {
