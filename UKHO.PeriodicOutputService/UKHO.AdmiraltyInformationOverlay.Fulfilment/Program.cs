@@ -128,7 +128,6 @@ namespace UKHO.AdmiraltyInformationOverlay.Fulfilment
                         config.System = eventHubConfig.System;
                         config.Service = eventHubConfig.Service;
                         config.AdditionalValuesProvider = additionalValues =>
-                        config.AdditionalValuesProvider = additionalValues =>
                         {
                             additionalValues["_AssemblyVersion"] = s_assemblyVersion;
                         };
