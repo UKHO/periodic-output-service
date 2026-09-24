@@ -30,6 +30,6 @@ removed {
 }
 
 import {
-  to = module.module.storageBESS.azurerm_storage_account.bess_storage
+  to = module.storageBESS.azurerm_storage_account.bess_storage
   id = "${azurerm_resource_group.rg.id}/providers/Microsoft.Storage/storageAccounts/${lower("${var.service_name_bess}${var.env_name}storageukho")}"
 }
