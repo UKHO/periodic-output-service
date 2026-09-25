@@ -61,6 +61,10 @@ variable "allowed_ips" {
   type = list
 }
 
+variable "allowed_storage_ips" {
+  type = list
+}
+
 variable "elastic_apm_server_url" {
 }
 
