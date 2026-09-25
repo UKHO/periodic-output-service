@@ -17,6 +17,7 @@ removed {
 }
 
 import {
+  for_each = local.env_name == "dev" ? {} : { pos = true }
   to = module.storagePOS.azurerm_storage_account.pos_storage
   id = "${azurerm_resource_group.webapp_rg.id}/providers/Microsoft.Storage/storageAccounts/${lower("${local.service_name}${local.env_name}storageukho")}"
 }
@@ -30,6 +31,7 @@ removed {
 }
 
 import {
+  for_each = local.env_name == "dev" ? {} : { bess = true }
   to = module.storageBESS.azurerm_storage_account.bess_storage
   id = "${azurerm_resource_group.webapp_rg.id}/providers/Microsoft.Storage/storageAccounts/${lower("${local.service_name_bess}${local.env_name}storageukho")}"
 }
