@@ -18,7 +18,7 @@ removed {
 
 import {
   to = module.storagePOS.azurerm_storage_account.pos_storage
-  id = "${azurerm_resource_group.webapp_rg.id}/providers/Microsoft.Storage/storageAccounts/${lower("${locals.service_name}${locals.env_name}storageukho")}"
+  id = "${azurerm_resource_group.webapp_rg.id}/providers/Microsoft.Storage/storageAccounts/${lower("${local.service_name}${local.env_name}storageukho")}"
 }
 
 removed {
@@ -31,5 +31,5 @@ removed {
 
 import {
   to = module.storageBESS.azurerm_storage_account.bess_storage
-  id = "${azurerm_resource_group.webapp_rg.id}/providers/Microsoft.Storage/storageAccounts/${lower("${locals.service_name_bess}${locals.env_name}storageukho")}"
+  id = "${azurerm_resource_group.webapp_rg.id}/providers/Microsoft.Storage/storageAccounts/${lower("${local.service_name_bess}${local.env_name}storageukho")}"
 }
