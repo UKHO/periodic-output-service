@@ -39,21 +39,21 @@ output "kv_name" {
 }
 
 output "pos_storage_name" {
-value = module.storage.pos_storage_name
+value = module.storagePOS.pos_storage_name
 }
 
-output pos_storage_access_key {
-  value = module.storage.pos_storage_access_key
+output "pos_storage_access_key" {
+  value = module.storagePOS.pos_storage_access_key
   sensitive = true
 }
 
-output "pos_storage_connection_string"{
-  value = module.storage.pos_storage_connection_string
+output "pos_storage_connection_string" {
+  value = module.storagePOS.pos_storage_connection_string
   sensitive = true
 }
 
-output "bess_storage_connection_string"{
-  value = module.storage.bess_storage_connection_string
+output "bess_storage_connection_string" {
+  value = module.storageBESS.bess_storage_connection_string
   sensitive = true
 }
 
@@ -82,6 +82,6 @@ output "connection_string" {
   sensitive = true
 }
 
-output "keyvault_uri"{
+output "keyvault_uri" {
   value = module.key_vault.keyvault_uri
 }

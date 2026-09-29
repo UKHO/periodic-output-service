@@ -98,8 +98,8 @@ locals {
   mock_main_subnet_id = (length(data.azurerm_subnet.mock_main_subnet) > 0 ? data.azurerm_subnet.mock_main_subnet[0].id : null)
 }
 
-module "storage" {
-  source                = "./Modules/Storage"
+module "storagePOS" {
+  source                = "./Modules/StoragePOS"
   resource_group_name   = azurerm_resource_group.webapp_rg.name
   location              = azurerm_resource_group.webapp_rg.location
   allowed_ips           = var.allowed_ips
@@ -109,10 +109,24 @@ module "storage" {
   agent_prd_subnet      = var.agent_prd_subnet
   env_name              = local.env_name
   service_name          = local.service_name
+  tags                  = local.tags
+  aio_config_table_name = var.aio_config_table_name
+}
+
+module "storageBESS" {
+  source                = "./Modules/StorageBESS"
+  resource_group_name   = azurerm_resource_group.webapp_rg.name
+  location              = azurerm_resource_group.webapp_rg.location
+  allowed_ips           = var.allowed_ips
+  allowed_storage_ips   = var.allowed_storage_ips
+  m_spoke_subnet        = data.azurerm_subnet.main_subnet.id
+  mock_spoke_subnet     = local.mock_main_subnet_id
+  agent_2204_subnet     = var.agent_2204_subnet
+  agent_prd_subnet      = var.agent_prd_subnet
+  env_name              = local.env_name
   service_name_bess     = local.service_name_bess
   container_name        = local.container_name
   tags                  = local.tags
-  aio_config_table_name = var.aio_config_table_name
 }
 
 module "key_vault" {
@@ -133,8 +147,8 @@ module "key_vault" {
       "EventHubLoggingConfiguration--ConnectionString"       = module.eventhub.log_primary_connection_string
       "EventHubLoggingConfiguration--EntityPath"             = module.eventhub.entity_path
       "ApplicationInsights--ConnectionString"                = module.app_insights.connection_string
-      "BessStorageConfiguration--ConnectionString"           = module.storage.bess_storage_connection_string
-      "AzureWebJobsStorage"                                  = module.storage.bess_storage_connection_string
+      "BessStorageConfiguration--ConnectionString"           = module.storageBESS.bess_storage_connection_string
+      "AzureWebJobsStorage"                                  = module.storageBESS.bess_storage_connection_string
       "PKSApiConfiguration--PermitDecryptionHardwareId"      = var.permitdecryptionhardwareid
  }
   tags                                                       = local.tags
