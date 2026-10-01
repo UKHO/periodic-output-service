@@ -8,30 +8,22 @@ removed {
 }
 
 #storage POS and BESS
-removed {
+moved {
   from = module.storage.azurerm_storage_account.pos_storage
-
-  lifecycle {
-    destroy = false
-  }
+  to   = module.storagePOS.azurerm_storage_account.pos_storage
 }
 
-import {
-  for_each = local.env_name == "dev" ? {} : { pos = true }
-  to = module.storagePOS.azurerm_storage_account.pos_storage
-  id = "${azurerm_resource_group.webapp_rg.id}/providers/Microsoft.Storage/storageAccounts/${lower("${local.service_name}${local.env_name}storageukho")}"
+moved {
+  from = module.storage.azurerm_storage_table.aio_config_table
+  to   = module.storagePOS.azurerm_storage_table.aio_config_table
 }
 
-removed {
+moved {
   from = module.storage.azurerm_storage_account.bess_storage
-
-  lifecycle {
-    destroy = false
-  }
+  to   = module.storageBESS.azurerm_storage_account.bess_storage
 }
 
-import {
-  for_each = local.env_name == "dev" ? {} : { bess = true }
-  to = module.storageBESS.azurerm_storage_account.bess_storage
-  id = "${azurerm_resource_group.webapp_rg.id}/providers/Microsoft.Storage/storageAccounts/${lower("${local.service_name_bess}${local.env_name}storageukho")}"
+moved {
+  from = module.storage.azurerm_storage_container.bess_config_container
+  to   = module.storageBESS.azurerm_storage_container.bess_config_container
 }
