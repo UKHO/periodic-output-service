@@ -111,6 +111,7 @@ module "storagePOS" {
   service_name          = local.service_name
   tags                  = local.tags
   aio_config_table_name = var.aio_config_table_name
+  storage_account_pos_name = local.storage_account_pos_name
 }
 
 module "storageBESS" {
@@ -127,6 +128,7 @@ module "storageBESS" {
   service_name_bess     = local.service_name_bess
   container_name        = local.container_name
   tags                  = local.tags
+  storage_account_bess_name = local.storage_account_bess_name
 }
 
 module "key_vault" {

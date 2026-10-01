@@ -9,15 +9,17 @@ variable "resource_group_name" {
 }
 
 locals {
-  env_name               = lower(terraform.workspace)
-  service_name           = "pos"
-  web_app_name           = "${local.service_name}-${local.env_name}-lxs-webapp"
-  web_app_slot_name      = "staging"
-  mock_web_app_name      = "${local.service_name}-${local.env_name}-mock-webapp"
-  pks_mock_web_app_name  = "${local.service_name}-${local.env_name}-pks-mock-webapp"
-  key_vault_name         = "${local.service_name}-ukho-${local.env_name}-kv"
-  service_name_bess      = "bess"
-  container_name         = "bess-configs"
+  env_name                  = lower(terraform.workspace)
+  service_name              = "pos"
+  web_app_name              = "${local.service_name}-${local.env_name}-lxs-webapp"
+  web_app_slot_name         = "staging"
+  mock_web_app_name         = "${local.service_name}-${local.env_name}-mock-webapp"
+  pks_mock_web_app_name     = "${local.service_name}-${local.env_name}-pks-mock-webapp"
+  key_vault_name            = "${local.service_name}-ukho-${local.env_name}-kv"
+  service_name_bess         = "bess"
+  container_name            = "bess-configs"
+  storage_account_bess_name = lower("${local.service_name_bess}${local.env_name}storageukho")
+  storage_account_pos_name  = lower("${local.service_name}${local.env_name}storageukho")
 
   tags = {
     SERVICE                   = "Periodic Output Service"
