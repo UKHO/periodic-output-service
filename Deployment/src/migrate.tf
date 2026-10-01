@@ -13,7 +13,7 @@ removed {
 # during the previous failed module migration.
 import {
 for_each = local.env_name == "iat" ? toset(["iat"]) : toset([])
- 
+
 to = module.storagePOS.azurerm_storage_table.aio_config_table
 
 id = "https://${local.storage_account_pos_name}.table.core.windows.net/Tables('${var.aio_config_table_name}')"

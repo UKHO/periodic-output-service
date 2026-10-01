@@ -12,48 +12,157 @@ cd $env:AGENT_BUILDDIRECTORY/terraformartifact/src
 
 terraform --version
 
-Write-output "Executing terraform scripts for deployment in $workSpace enviroment"
-terraform init -backend-config="resource_group_name=$deploymentResourceGroupName" -backend-config="storage_account_name=$deploymentStorageAccountName" -backend-config="key=posterraform.deployment.tfplan"
-if ( !$? ) { echo "Something went wrong during terraform initialization"; throw "Error" }
+Write-Output "Executing terraform scripts for deployment in $workSpace environment"
 
-Write-output "Selecting workspace"
+terraform init `
+    -backend-config="resource_group_name=$deploymentResourceGroupName" `
+    -backend-config="storage_account_name=$deploymentStorageAccountName" `
+    -backend-config="key=posterraform.deployment.tfplan"
+
+if (!$?) {
+    Write-Output "Something went wrong during terraform initialization"
+    throw "Error"
+}
+
+Write-Output "Selecting workspace"
 
 $ErrorActionPreference = 'SilentlyContinue'
-terraform workspace new $WorkSpace 2>&1 > $null
+terraform workspace new $workSpace 2>&1 > $null
 $ErrorActionPreference = 'Continue'
 
 terraform workspace select $workSpace
-if ( !$? ) { echo "Error while selecting workspace"; throw "Error" }
 
-Write-output "Validating terraform"
+if (!$?) {
+    Write-Output "Error while selecting workspace"
+    throw "Error"
+}
+
+
+# -------------------------------------------------------------------------
+# IAT-only recovery migration
+#
+# aiojobconfiguration was removed from Terraform state during the previous
+# IAT storage module migration, but the Azure Storage Table still exists.
+#
+# Import it into the new module.storagePOS address if it is not already
+# present in Terraform state.
+#
+# This code does nothing in DEV/PRE/PRD or on subsequent successful IAT runs.
+# -------------------------------------------------------------------------
+
+if ($workSpace -ieq "iat") {
+
+    Write-Output "Checking whether IAT aiojobconfiguration table requires recovery import"
+
+    $aioTableTerraformAddress = "module.storagePOS.azurerm_storage_table.aio_config_table"
+
+    # These values correspond to the IAT resources involved in the failed
+    # migration. This recovery is intentionally IAT-specific.
+    $aioStorageAccountName = "posiatstorageukho"
+    $aioTableName = "aiojobconfiguration"
+
+    $aioTableImportId = "https://$aioStorageAccountName.table.core.windows.net/Tables('$aioTableName')"
+
+    # terraform state list does not change infrastructure/state.
+    # Capture the current state and check whether the destination address
+    # already exists before attempting the import.
+    $terraformState = @(terraform state list)
+
+    if (!$?) {
+        Write-Output "Unable to read Terraform state before IAT recovery import"
+        throw "Error"
+    }
+
+    if ($terraformState -contains $aioTableTerraformAddress) {
+
+        Write-Output "IAT aiojobconfiguration table is already present at the new Terraform address"
+        Write-Output "No recovery import is required"
+
+    }
+    else {
+
+        Write-Output "IAT aiojobconfiguration table is not present at the new Terraform address"
+        Write-Output "Importing existing Azure Storage Table into Terraform state"
+        Write-Output "Terraform address: $aioTableTerraformAddress"
+
+        terraform import `
+            -var "elastic_apm_server_url=$elasticApmServerUrl" `
+            -var "elastic_apm_api_key=$elasticApmApiKey" `
+            $aioTableTerraformAddress `
+            $aioTableImportId
+
+        if (!$?) {
+            Write-Output "Something went wrong while importing the IAT aiojobconfiguration table"
+            throw "Error"
+        }
+
+        Write-Output "IAT aiojobconfiguration table successfully imported into Terraform state"
+    }
+}
+
+
+Write-Output "Validating terraform"
+
 terraform validate
-if ( !$? ) { echo "Something went wrong during terraform validation" ; throw "Error" }
 
-Write-output "Execute Terraform plan"
-terraform plan -out "posterraform.deployment.tfplan" -var elastic_apm_server_url=$elasticApmServerUrl -var elastic_apm_api_key=$elasticApmApiKey | tee terraform_output.txt
-if ( !$? ) { echo "Something went wrong during terraform plan" ; throw "Error" }
+if (!$?) {
+    Write-Output "Something went wrong during terraform validation"
+    throw "Error"
+}
 
-$totalDestroyLines=(Get-Content -Path terraform_output.txt | Select-String -Pattern "destroy" -CaseSensitive |  where {$_ -ne ""}).length
-if($totalDestroyLines -ge 2) 
-{
-    write-Host("Terraform is destroying some resources, please verify...................")
-    if ( !$ContinueEvenIfResourcesAreGettingDestroyed) 
-    {
-        write-Host("exiting...................")
+
+Write-Output "Execute Terraform plan"
+
+terraform plan `
+    -out "posterraform.deployment.tfplan" `
+    -var elastic_apm_server_url=$elasticApmServerUrl `
+    -var elastic_apm_api_key=$elasticApmApiKey |
+    Tee-Object terraform_output.txt
+
+if (!$?) {
+    Write-Output "Something went wrong during terraform plan"
+    throw "Error"
+}
+
+
+$totalDestroyLines = (
+    Get-Content -Path terraform_output.txt |
+    Select-String -Pattern "destroy" -CaseSensitive |
+    Where-Object { $_ -ne "" }
+).Length
+
+if ($totalDestroyLines -ge 2) {
+
+    Write-Host "Terraform is destroying some resources, please verify..................."
+
+    if (!$continueEvenIfResourcesAreGettingDestroyed) {
+
+        Write-Host "exiting..................."
         Write-Output $_
         exit 1
     }
-    write-host("Continue executing terraform apply - as continueEvenIfResourcesAreGettingDestroyed param is set to true in pipeline")
+
+    Write-Host "Continue executing terraform apply - as continueEvenIfResourcesAreGettingDestroyed param is set to true in pipeline"
 }
 
-Write-output "Executing terraform apply"
-terraform apply  "posterraform.deployment.tfplan"
-if ( !$? ) { echo "Something went wrong during terraform apply" ; throw "Error" }
 
-Write-output "Terraform output as json"
+Write-Output "Executing terraform apply"
+
+terraform apply "posterraform.deployment.tfplan"
+
+if (!$?) {
+    Write-Output "Something went wrong during terraform apply"
+    throw "Error"
+}
+
+
+Write-Output "Terraform output as json"
+
 $terraformOutput = terraform output -json | ConvertFrom-Json
 
-write-output "Set JSON output into pipeline variables"
+
+Write-Output "Set JSON output into pipeline variables"
+
 Write-Host "##vso[task.setvariable variable=Website_Url]$($terraformOutput.Website_Url.value)"
 Write-Host "##vso[task.setvariable variable=WEB_APP_NAME]$($terraformOutput.web_app_name.value)"
 Write-Host "##vso[task.setvariable variable=WEB_APP_SLOT_NAME]$($terraformOutput.web_app_slot_name.value)"
