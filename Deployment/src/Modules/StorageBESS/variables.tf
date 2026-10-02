@@ -43,3 +43,7 @@ variable "agent_2204_subnet" {
 variable "agent_prd_subnet" {
   type = string
 }
+
+variable "storage_account_bess_name" {
+  type = string
+}
