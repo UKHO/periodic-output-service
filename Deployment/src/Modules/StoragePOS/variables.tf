@@ -40,3 +40,7 @@ variable "agent_prd_subnet" {
 variable "aio_config_table_name" {
   type = string
 }
+
+variable "storage_account_pos_name" {
+  type = string
+}
