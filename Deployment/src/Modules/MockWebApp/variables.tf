@@ -40,3 +40,7 @@ variable "main_subnet_id" {
 variable "allowed_ips" {
 
 }
+
+variable "agent_prd_subnet" {
+  type = string
+}

@@ -10,8 +10,12 @@ resource "azurerm_windows_web_app" "mock_webapp_service" {
       current_stack = "dotnet"
       dotnet_version = "v8.0"
     }
-    always_on  = true
-    ftps_state = "Disabled"
+    always_on                         = true
+    ftps_state                        = "Disabled"
+    ip_restriction_default_action     = "Deny"
+    scm_ip_restriction_default_action = "Deny"
+    scm_use_main_ip_restriction       = true
+    vnet_route_all_enabled            = false
 
     ip_restriction {
       virtual_network_subnet_id = var.subnet_id
@@ -19,6 +23,10 @@ resource "azurerm_windows_web_app" "mock_webapp_service" {
 
     ip_restriction {
       virtual_network_subnet_id = var.main_subnet_id
+    }
+
+     ip_restriction {
+      virtual_network_subnet_id = var.agent_prd_subnet
     }
 
     dynamic "ip_restriction" {
@@ -59,8 +67,12 @@ resource "azurerm_windows_web_app" "pks_mock_webapp_service" {
       current_stack = "dotnet"
       dotnet_version = "v8.0"
     }
-    always_on  = true
-    ftps_state = "Disabled"
+    always_on                         = true
+    ftps_state                        = "Disabled"
+    ip_restriction_default_action     = "Deny"
+    scm_ip_restriction_default_action = "Deny"
+    scm_use_main_ip_restriction       = true
+    vnet_route_all_enabled            = false
 
     ip_restriction {
       virtual_network_subnet_id = var.subnet_id
@@ -68,6 +80,10 @@ resource "azurerm_windows_web_app" "pks_mock_webapp_service" {
 
     ip_restriction {
       virtual_network_subnet_id = var.main_subnet_id
+    }
+
+    ip_restriction {
+      virtual_network_subnet_id = var.agent_prd_subnet
     }
 
     dynamic "ip_restriction" {
