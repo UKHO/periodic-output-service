@@ -40,6 +40,8 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         IEnumerable<ProductVersion> GetProductVersionsFromDirectory(string sourcePath);
 
+        IEnumerable<ProductVersion> GetProductVersionsFromDirectoryForLarge(string sourcePath);
+
         bool CreateEmptyFileContent(string filePath);
 
         bool DownloadReadmeFile(string filePath, Stream fileStream);

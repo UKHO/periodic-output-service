@@ -95,8 +95,8 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
             }
-            
-            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName, configQueueMessage.CorrelationId);
+
+            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName, configQueueMessage);
 
             await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
 
@@ -525,23 +525,44 @@ namespace UKHO.BESS.BuilderService.Services
         /// <param name="filePath"></param>
         /// <param name="cellNames"></param>
         /// <param name="bessZipFileName"></param>
+        /// <param name="configQueueMessage"></param>
         /// <returns></returns>
-        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName, string correlationId)
+        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName, ConfigQueueMessage configQueueMessage)
         {
+            var correlationId = configQueueMessage.CorrelationId;
+
             logger.LogInformation(EventIds.GetTheLatestUpdateNumberStarted.ToEventId(),
                 "Get Latest Update Number : {bessZipFileName} | _X-Correlation-ID:{CorrelationId}",
                 bessZipFileName, correlationId);
 
             try
             {
-                string exchangeSetPath = Path.Combine(filePath, bessZipFileName);
+                var exchangeSetPath = Path.Combine(filePath, bessZipFileName);
+
+                var isLargeUpdateOrChange = configQueueMessage.ExchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(), StringComparison.OrdinalIgnoreCase)
+                    && (configQueueMessage.Type == BessType.UPDATE.ToString() || configQueueMessage.Type == BessType.CHANGE.ToString());
+
+                if (isLargeUpdateOrChange && Directory.Exists(exchangeSetPath))
+                {
+                    foreach (var folder in Directory.GetDirectories(exchangeSetPath))
+                    {
+                        if (Directory.Exists(Path.Combine(folder, "ENC_ROOT")))
+                        {
+                            string subfolder = Path.GetFileName(folder);
+                            exchangeSetPath = Path.Combine(exchangeSetPath, subfolder);
+                            break;
+                        }
+                    }
+                }
+
+                var productVersions = isLargeUpdateOrChange
+                   ? fileSystemHelper.GetProductVersionsFromDirectoryForLarge(exchangeSetPath)
+                   : fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath);
 
                 ProductVersionsRequest productVersionsRequest = new()
                 {
                     ProductVersions = new()
                 };
-
-                var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath);
 
                 productVersionsRequest.ProductVersions.AddRange(
                     from pv in productVersions
@@ -838,7 +859,7 @@ namespace UKHO.BESS.BuilderService.Services
             // Large media files will be renamed as
             // 1. M01X02.zip -> <bessZipFileName>_M01X02.zip
             // 2. M02X02.zip -> <bessZipFileNameE>_M02X02.zip
-            
+
             foreach (var file in files)
             {
                 IFileInfo fileInfo = fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
@@ -846,7 +867,7 @@ namespace UKHO.BESS.BuilderService.Services
                 {
                     file.FileName = exchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(),
                         StringComparison.OrdinalIgnoreCase) ?
-                        $"{bessZipFileName}_{Path.GetFileNameWithoutExtension(file.FileName)}{Path.GetExtension(file.FileName)}" 
+                        $"{bessZipFileName}_{Path.GetFileNameWithoutExtension(file.FileName)}{Path.GetExtension(file.FileName)}"
                         : file.FileName.Replace(fssApiConfig.Value.BespokeExchangeSetFileFolder, bessZipFileName);
 
 

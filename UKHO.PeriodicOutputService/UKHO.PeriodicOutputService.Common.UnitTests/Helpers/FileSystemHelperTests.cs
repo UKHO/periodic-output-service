@@ -328,6 +328,74 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
             Assert.That(result, Is.Empty);
         }
 
+        [Test]
+        public void Does_GetProductVersionsFromDirectory_Returns_Max_FileExtension_When_LargeExchangeSetUpdateOrChange()
+        {
+            // Arrange
+            var sourcePath = @"C:\TestSource";
+            var currentPath = Path.Combine(sourcePath, "ENC_ROOT");
+
+            var countryFolder = Path.Combine(currentPath, "Country1");
+            var encFolder = Path.Combine(countryFolder, "test");
+            var editionFolder = Path.Combine(encFolder, "12");
+            var cellFiles = new[]
+            {
+                Path.Combine(editionFolder, "test.000"),
+                Path.Combine(editionFolder, "test.001"),
+                Path.Combine(editionFolder, "test.002")
+            };
+
+            A.CallTo(() => _fakefileSystem.Directory.Exists(currentPath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(currentPath, "*", SearchOption.TopDirectoryOnly))
+                .Returns([countryFolder]);
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(countryFolder, "*", SearchOption.TopDirectoryOnly))
+                .Returns([encFolder]);
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(encFolder))
+                .Returns([editionFolder]);
+            A.CallTo(() => _fakefileSystem.Directory.GetFiles(editionFolder, "test.*"))
+                .Returns(cellFiles);
+
+            // Act
+            var result = _fileSystemHelper.GetProductVersionsFromDirectoryForLarge(sourcePath);
+
+            // Assert
+            using (Assert.EnterMultipleScope())
+            {
+                Assert.That(result.Count(), Is.EqualTo(1));
+                Assert.That(result.First().ProductName, Is.EqualTo("test"));
+                Assert.That(result.First().EditionNumber, Is.EqualTo(12));
+                Assert.That(result.First().UpdateNumber, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public void Does_GetProductVersionsFromDirectory_Uses_Directories_When_LargeExchangeSetUpdateOrChange_Is_Default()
+        {
+            // Arrange
+            var sourcePath = @"C:\TestSource";
+            var currentPath = Path.Combine(sourcePath, "ENC_ROOT");
+
+            var countryFolder = Path.Combine(currentPath, "Country1");
+            var encFolder = Path.Combine(countryFolder, "ENC1");
+            var editionFolder = Path.Combine(encFolder, "001");
+
+            A.CallTo(() => _fakefileSystem.Directory.Exists(currentPath)).Returns(true);
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(currentPath, "*", SearchOption.TopDirectoryOnly))
+                .Returns([countryFolder]);
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(countryFolder, "*", SearchOption.TopDirectoryOnly))
+                .Returns([encFolder]);
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(encFolder))
+                .Returns([editionFolder]);
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(editionFolder))
+                .Returns([Path.Combine(editionFolder, "01"), Path.Combine(editionFolder, "03")]);
+
+            // Act
+            var result = _fileSystemHelper.GetProductVersionsFromDirectory(sourcePath);
+
+            // Assert
+            Assert.That(result.First().UpdateNumber, Is.EqualTo(3));
+        }
+
         [TestCase(true)]
         [TestCase(false)]
         public void Does_FileExists_Return_Correct_Value(bool fileExists)

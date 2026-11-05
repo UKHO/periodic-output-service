@@ -318,7 +318,14 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 .Returns(new List<string> { "Block_00001" });
             A.CallTo(() => fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
                 .Returns(true);
-            A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored)).Returns(GetProductVersions);
+            if (exchangeSetLayout == ExchangeSetLayout.Large)
+            {
+                A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectoryForLarge(A<string>.Ignored)).Returns(GetProductVersions);
+            }
+            else
+            {
+                A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored)).Returns(GetProductVersions);
+            }
             A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
               .Returns(GetProductKeyServiceResponse());
 
@@ -742,7 +749,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetBatchResponseModelWithNoBatchFiles());
 
-            var act = async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML));;
+            var act = async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML)); ;
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.ErrorFileFoundInBatch.ToEventId()));
 
