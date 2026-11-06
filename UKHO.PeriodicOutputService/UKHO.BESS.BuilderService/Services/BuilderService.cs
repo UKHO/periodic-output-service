@@ -541,19 +541,6 @@ namespace UKHO.BESS.BuilderService.Services
 
                 var isLargeUpdateOrChange = configQueueMessage.ExchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(), StringComparison.OrdinalIgnoreCase);
 
-                if (isLargeUpdateOrChange && Directory.Exists(exchangeSetPath))
-                {
-                    foreach (var folder in Directory.GetDirectories(exchangeSetPath))
-                    {
-                        if (Directory.Exists(Path.Combine(folder, "ENC_ROOT")))
-                        {
-                            string subfolder = Path.GetFileName(folder);
-                            exchangeSetPath = Path.Combine(exchangeSetPath, subfolder);
-                            break;
-                        }
-                    }
-                }
-
                 var productVersions = isLargeUpdateOrChange
                    ? fileSystemHelper.GetProductVersionsFromDirectoryForLarge(exchangeSetPath)
                    : fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath);

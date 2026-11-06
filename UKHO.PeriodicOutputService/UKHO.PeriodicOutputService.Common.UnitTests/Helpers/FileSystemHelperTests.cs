@@ -333,7 +333,8 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         {
             // Arrange
             var sourcePath = @"C:\TestSource";
-            var currentPath = Path.Combine(sourcePath, "ENC_ROOT");
+            var subfolder = Path.Combine(sourcePath, "Subfolder1");
+            var currentPath = Path.Combine(subfolder, "ENC_ROOT");
 
             var countryFolder = Path.Combine(currentPath, "Country1");
             var encFolder = Path.Combine(countryFolder, "test");
@@ -345,6 +346,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 Path.Combine(editionFolder, "test.002")
             };
 
+            A.CallTo(() => _fakefileSystem.Directory.GetDirectories(sourcePath)).Returns([subfolder]);
             A.CallTo(() => _fakefileSystem.Directory.Exists(currentPath)).Returns(true);
             A.CallTo(() => _fakefileSystem.Directory.GetDirectories(currentPath, "*", SearchOption.TopDirectoryOnly))
                 .Returns([countryFolder]);

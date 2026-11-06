@@ -226,36 +226,39 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public IEnumerable<ProductVersion> GetProductVersionsFromDirectoryForLarge(string sourcePath)
         {
-            var currentPath = Path.Combine(sourcePath, "ENC_ROOT");
-
-            if (!_fileSystem.Directory.Exists(currentPath))
-            {
-                return [];
-            }
-
             var productVersions = new List<ProductVersion>();
 
-            foreach (var countryFolder in _fileSystem.Directory.GetDirectories(currentPath, "*", SearchOption.TopDirectoryOnly))
+            foreach (var folder in _fileSystem.Directory.GetDirectories(sourcePath))
             {
-                foreach (var encFolder in _fileSystem.Directory.GetDirectories(countryFolder, "*", SearchOption.TopDirectoryOnly))
+                var exchangeSetPath = Path.Combine(folder, "ENC_ROOT");
+
+                if (!_fileSystem.Directory.Exists(exchangeSetPath))
                 {
-                    var cellName = Path.GetFileName(encFolder);
+                    continue;
+                }
 
-                    foreach (var editionFolder in _fileSystem.Directory.GetDirectories(encFolder)
-                                 .Select(Path.GetFileName)
-                                 .Where(name => int.TryParse(name, out _)))
+                foreach (var countryFolder in _fileSystem.Directory.GetDirectories(exchangeSetPath, "*", SearchOption.TopDirectoryOnly))
+                {
+                    foreach (var encFolder in _fileSystem.Directory.GetDirectories(countryFolder, "*", SearchOption.TopDirectoryOnly))
                     {
-                        var maxUpdateNumber = _fileSystem.Directory.GetFiles(Path.Combine(encFolder, editionFolder!), cellName + ".*")
-                            .Select(f => int.TryParse(Path.GetExtension(f).TrimStart('.'), out var number) ? number : 0)
-                            .DefaultIfEmpty(0)
-                            .Max();
+                        var cellName = Path.GetFileName(encFolder);
 
-                        productVersions.Add(new ProductVersion
+                        foreach (var editionFolder in _fileSystem.Directory.GetDirectories(encFolder)
+                                     .Select(Path.GetFileName)
+                                     .Where(name => int.TryParse(name, out _)))
                         {
-                            ProductName = cellName,
-                            EditionNumber = int.Parse(editionFolder!),
-                            UpdateNumber = maxUpdateNumber
-                        });
+                            var maxUpdateNumber = _fileSystem.Directory.GetFiles(Path.Combine(encFolder, editionFolder!), cellName + ".*")
+                                .Select(f => int.TryParse(Path.GetExtension(f).TrimStart('.'), out var number) ? number : 0)
+                                .DefaultIfEmpty(0)
+                                .Max();
+
+                            productVersions.Add(new ProductVersion
+                            {
+                                ProductName = cellName,
+                                EditionNumber = int.Parse(editionFolder!),
+                                UpdateNumber = maxUpdateNumber
+                            });
+                        }
                     }
                 }
             }
