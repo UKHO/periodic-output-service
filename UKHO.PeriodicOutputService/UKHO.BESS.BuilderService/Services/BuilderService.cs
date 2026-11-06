@@ -539,8 +539,7 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 var exchangeSetPath = Path.Combine(filePath, bessZipFileName);
 
-                var isLargeUpdateOrChange = configQueueMessage.ExchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(), StringComparison.OrdinalIgnoreCase)
-                    && (configQueueMessage.Type == BessType.UPDATE.ToString() || configQueueMessage.Type == BessType.CHANGE.ToString());
+                var isLargeUpdateOrChange = configQueueMessage.ExchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(), StringComparison.OrdinalIgnoreCase);
 
                 if (isLargeUpdateOrChange && Directory.Exists(exchangeSetPath))
                 {
