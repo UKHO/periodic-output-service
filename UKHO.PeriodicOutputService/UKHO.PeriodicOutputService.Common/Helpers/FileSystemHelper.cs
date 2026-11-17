@@ -127,7 +127,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
             var serializer = new XmlSerializer(typeof(T));
             var namespaces = new XmlSerializerNamespaces();
             namespaces.Add("xsi", "http://www.w3.org/2001/XMLSchema-instance");
-                       
+
             using (var fileStream = _fileSystem.File.OpenWrite(Path.Combine(filePath, fileName)))
             {
                 using (var xmlTextWriter = new XmlTextWriter(fileStream, Encoding.UTF8) { Formatting = Formatting.Indented })
@@ -136,7 +136,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                 }
             }
 
-           return Task.CompletedTask;
+            return Task.CompletedTask;
         }
 
         public void CreateTextFile(string filePath, string fileName, string content)
@@ -217,6 +217,48 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                             EditionNumber = int.Parse(editionFolder),
                             UpdateNumber = maxUpdateNumber
                         });
+                    }
+                }
+            }
+
+            return productVersions;
+        }
+
+        public IEnumerable<ProductVersion> GetProductVersionsFromDirectoryForLarge(string sourcePath)
+        {
+            var productVersions = new List<ProductVersion>();
+
+            foreach (var folder in _fileSystem.Directory.GetDirectories(sourcePath))
+            {
+                var exchangeSetPath = Path.Combine(folder, "ENC_ROOT");
+
+                if (!_fileSystem.Directory.Exists(exchangeSetPath))
+                {
+                    continue;
+                }
+
+                foreach (var countryFolder in _fileSystem.Directory.GetDirectories(exchangeSetPath, "*", SearchOption.TopDirectoryOnly))
+                {
+                    foreach (var encFolder in _fileSystem.Directory.GetDirectories(countryFolder, "*", SearchOption.TopDirectoryOnly))
+                    {
+                        var cellName = Path.GetFileName(encFolder);
+
+                        foreach (var editionFolder in _fileSystem.Directory.GetDirectories(encFolder)
+                                     .Select(Path.GetFileName)
+                                     .Where(name => int.TryParse(name, out _)))
+                        {
+                            var maxUpdateNumber = _fileSystem.Directory.GetFiles(Path.Combine(encFolder, editionFolder!), cellName + ".*")
+                                .Select(f => int.TryParse(Path.GetExtension(f).TrimStart('.'), out var number) ? number : 0)
+                                .DefaultIfEmpty(0)
+                                .Max();
+
+                            productVersions.Add(new ProductVersion
+                            {
+                                ProductName = cellName,
+                                EditionNumber = int.Parse(editionFolder!),
+                                UpdateNumber = maxUpdateNumber
+                            });
+                        }
                     }
                 }
             }
