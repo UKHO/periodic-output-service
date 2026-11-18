@@ -558,8 +558,8 @@ namespace UKHO.BESS.BuilderService.Services
                 );
 
                 logger.LogInformation(EventIds.GetTheLatestUpdateNumberCompleted.ToEventId(),
-                    "Get Latest Update Number : {bessZipFileName} | _X-Correlation-ID:{CorrelationId}",
-                    bessZipFileName, correlationId);
+                    "Get Latest Update Number : {bessZipFileName} | ProductVersionsRequest:{ProductVersionsRequest} | _X-Correlation-ID:{CorrelationId}",
+                    bessZipFileName, JsonConvert.SerializeObject(productVersionsRequest.ProductVersions), correlationId);
 
 
                 return productVersionsRequest;
