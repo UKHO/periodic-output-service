@@ -125,6 +125,7 @@ stages:
     dependsOn:
       - VulnerabilityChecks
       - BuildTestPublish
+    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/Feature/317261-pipeline-deployement-branch'))
     variables:
       - name: Environment
         value: "dev"
@@ -202,7 +203,7 @@ stages:
     dependsOn: 
       - Devdeploy
     displayName: vNext IAT Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/'), eq(variables['Build.SourceBranch'], 'refs/heads/Feature/317261-pipeline-deployement-branch')))
+    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), startsWith(variables['Build.SourceBranch'], 'refs/heads/dev/')))
     variables:
       - name: Environment
         value: "vnextiat"
@@ -219,9 +220,9 @@ stages:
 
   - stage: vnexte2eDeploy
     dependsOn: 
-      - vNextIATDeploy
+      - BuildTestPublish
     displayName: vNext E2E Deploy (inc terraform, webapp deploy)
-    condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.SourceBranch'], 'refs/heads/Feature/317261-pipeline-deployement-branch')))
+    condition: and(succeeded('BuildTestPublish'), or(eq(variables['Build.SourceBranch'], 'refs/heads/Feature/317261-pipeline-deployement-branch'), eq(variables['Build.SourceBranch'], 'refs/heads/develop')))
     variables:
       - name: Environment
         value: "vnexte2e"
