@@ -329,6 +329,21 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         }
 
         [Test]
+        public void Does_GetProductVersionsFromDirectoryForLarge_Returns_Empty_When_SourcePath_Does_Not_Exist()
+        {
+            // Arrange
+            var sourcePath = @"C:\TestSource";
+
+            A.CallTo(() => _fakefileSystem.Directory.Exists(sourcePath)).Returns(false);
+
+            // Act
+            var result = _fileSystemHelper.GetProductVersionsFromDirectoryForLarge(sourcePath);
+
+            // Assert
+            Assert.That(result, Is.Empty);
+        }
+
+        [Test]
         public void Does_GetProductVersionsFromDirectory_Returns_Max_FileExtension_When_LargeExchangeSetUpdateOrChange()
         {
             // Arrange
@@ -346,6 +361,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
                 Path.Combine(editionFolder, "test.002")
             };
 
+            A.CallTo(() => _fakefileSystem.Directory.Exists(sourcePath)).Returns(true);
             A.CallTo(() => _fakefileSystem.Directory.GetDirectories(sourcePath)).Returns([subfolder]);
             A.CallTo(() => _fakefileSystem.Directory.Exists(currentPath)).Returns(true);
             A.CallTo(() => _fakefileSystem.Directory.GetDirectories(currentPath, "*", SearchOption.TopDirectoryOnly))

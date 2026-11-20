@@ -520,6 +520,52 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
+        /// This method will return the name of the unzipped (extracted) file/folder available at the given file path.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
+        private string GetUnzippedFileName(string filePath, string correlationId)
+        {
+            logger.LogInformation(EventIds.GetUnzippedFileNameStarted.ToEventId(),
+                "Get unzipped file name started for path: {filePath} | _X-Correlation-ID:{CorrelationId}",
+                filePath, correlationId);
+
+            try
+            {
+                var unzippedFileName = fileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly)
+                    .Select(Path.GetFileNameWithoutExtension)
+                    .FirstOrDefault();
+
+                if (string.IsNullOrEmpty(unzippedFileName))
+                {
+                    logger.LogError(EventIds.GetUnzippedFileNameFailed.ToEventId(),
+                        "No unzipped file found at path: {filePath} | _X-Correlation-ID:{CorrelationId}",
+                        filePath, correlationId);
+                    throw new FulfilmentException(EventIds.GetUnzippedFileNameFailed.ToEventId());
+                }
+
+                logger.LogInformation(EventIds.GetUnzippedFileNameCompleted.ToEventId(),
+                    "Get unzipped file name completed : {unzippedFileName} | _X-Correlation-ID:{CorrelationId}",
+                    unzippedFileName, correlationId);
+
+                return Path.Combine(filePath, unzippedFileName);
+            }
+            catch (FulfilmentException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.GetUnzippedFileNameFailed.ToEventId(),
+                    "Get unzipped file name failed with Exception: {ex} at {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                    ex, DateTime.UtcNow, correlationId);
+                throw new FulfilmentException(EventIds.GetUnzippedFileNameFailed.ToEventId());
+            }
+        }
+
+        /// <summary>
         /// This method will return the latest edition and update number of products from directory.
         /// </summary>
         /// <param name="filePath"></param>
@@ -537,13 +583,11 @@ namespace UKHO.BESS.BuilderService.Services
 
             try
             {
-                var exchangeSetPath = Path.Combine(filePath, bessZipFileName);
-
                 var isLargeUpdateOrChange = configQueueMessage.ExchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(), StringComparison.OrdinalIgnoreCase);
 
                 var productVersions = isLargeUpdateOrChange
-                   ? fileSystemHelper.GetProductVersionsFromDirectoryForLarge(exchangeSetPath)
-                   : fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath);
+                   ? fileSystemHelper.GetProductVersionsFromDirectoryForLarge(GetUnzippedFileName(filePath, correlationId))
+                   : fileSystemHelper.GetProductVersionsFromDirectory(Path.Combine(filePath, bessZipFileName));
 
                 ProductVersionsRequest productVersionsRequest = new()
                 {
