@@ -226,6 +226,11 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
         public IEnumerable<ProductVersion> GetProductVersionsFromDirectoryForLarge(string sourcePath)
         {
+            if (!_fileSystem.Directory.Exists(sourcePath))
+            {
+                return Enumerable.Empty<ProductVersion>();
+            }
+
             var productVersions = new List<ProductVersion>();
 
             foreach (var folder in _fileSystem.Directory.GetDirectories(sourcePath))

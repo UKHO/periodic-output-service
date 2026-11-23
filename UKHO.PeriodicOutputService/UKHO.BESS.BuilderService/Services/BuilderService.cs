@@ -520,6 +520,53 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
+        /// This method will return the full path of the unzipped (extracted) file/folder available at the given file path.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
+        private string GetExtractedFilePath(string filePath, string correlationId)
+        {
+            logger.LogInformation(EventIds.GetExtractedFilePathStarted.ToEventId(),
+                "Get extracted file path started for path: {filePath} | _X-Correlation-ID:{CorrelationId}",
+                filePath, correlationId);
+
+            try
+            {
+                var unzippedFileName = fileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly)
+                    .Select(Path.GetFileNameWithoutExtension)
+                    .FirstOrDefault();
+
+                if (string.IsNullOrEmpty(unzippedFileName))
+                {
+                    logger.LogError(EventIds.GetExtractedFilePathFailed.ToEventId(),
+                        "No unzipped file found at path: {filePath} | _X-Correlation-ID:{CorrelationId}",
+                        filePath, correlationId);
+                    throw new FulfilmentException(EventIds.GetExtractedFilePathFailed.ToEventId());
+                }
+
+                logger.LogInformation(EventIds.GetExtractedFilePathCompleted.ToEventId(),
+                    "Get extracted file path completed : {unzippedFileName} | _X-Correlation-ID:{CorrelationId}",
+                    unzippedFileName, correlationId);
+
+                return Path.Combine(filePath, unzippedFileName);
+            }
+            catch (FulfilmentException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(EventIds.GetExtractedFilePathFailed.ToEventId(),
+                    "Get extracted file path failed with Exception: {ex} at {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                    ex, DateTime.UtcNow, correlationId);
+                throw new FulfilmentException(EventIds.GetExtractedFilePathFailed.ToEventId());
+            }
+        }
+
+
+        /// <summary>
         /// This method will return the latest edition and update number of products from directory.
         /// </summary>
         /// <param name="filePath"></param>
@@ -537,13 +584,11 @@ namespace UKHO.BESS.BuilderService.Services
 
             try
             {
-                var exchangeSetPath = Path.Combine(filePath, bessZipFileName);
-
                 var isLargeUpdateOrChange = configQueueMessage.ExchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(), StringComparison.OrdinalIgnoreCase);
 
                 var productVersions = isLargeUpdateOrChange
-                   ? fileSystemHelper.GetProductVersionsFromDirectoryForLarge(exchangeSetPath)
-                   : fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath);
+                   ? fileSystemHelper.GetProductVersionsFromDirectoryForLarge(GetExtractedFilePath(filePath, correlationId))
+                   : fileSystemHelper.GetProductVersionsFromDirectory(Path.Combine(filePath, bessZipFileName));
 
                 ProductVersionsRequest productVersionsRequest = new()
                 {

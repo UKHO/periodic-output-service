@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System.Reflection;
 using Azure.Storage.Blobs;
 using FakeItEasy;
 using Microsoft.Extensions.Configuration;
@@ -93,6 +94,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             A.CallTo(() => fakeAzureBlobStorageClient.DeleteBlobContentAsync(A<BlobClient>.Ignored))
                 .Returns(Task.CompletedTask);
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(A<string>.Ignored, A<SearchOption>.Ignored))
+                .Returns(new List<string> { @"D:\Test\BESS_test.zip" });
         }
 
         [Test]
@@ -2830,6 +2834,55 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                    Key = "test123"
                 }
         };
+
+        [Test]
+        public void WhenUnzippedFileExistsAtPath_ThenGetExtractedFilePathReturnsFileName()
+        {
+            var filePath = @"D:\Test";
+            var fileName = "test.zip";
+            var expectedResult = Path.Combine(filePath, Path.GetFileNameWithoutExtension(fileName));
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly))
+                .Returns(new List<string> { Path.Combine(filePath, fileName) });
+
+            var methodInfo = typeof(BuilderService.Services.BuilderService).GetMethod("GetExtractedFilePath", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var result = methodInfo!.Invoke(builderService, new object[] { filePath, "correlationId" }) as string;
+
+            Assert.That(result, Is.EqualTo(expectedResult));
+        }
+
+        [Test]
+        public void WhenNoFileExistsAtPath_ThenGetExtractedFilePathThrowsFulfilmentException()
+        {
+            var filePath = @"D:\Test";
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly))
+                .Returns(new List<string>());
+
+            var methodInfo = typeof(BuilderService.Services.BuilderService).GetMethod("GetExtractedFilePath", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var exception = Assert.Throws<TargetInvocationException>(() =>
+                methodInfo!.Invoke(builderService, new object[] { filePath, "correlationId" }));
+
+            Assert.That(exception!.InnerException, Is.TypeOf<FulfilmentException>());
+        }
+
+        [Test]
+        public void WhenGetAllFilesThrowsException_ThenGetExtractedFilePathThrowsFulfilmentException()
+        {
+            var filePath = @"D:\Test";
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly))
+                .Throws(new IOException("Directory not found"));
+
+            var methodInfo = typeof(BuilderService.Services.BuilderService).GetMethod("GetExtractedFilePath", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var exception = Assert.Throws<TargetInvocationException>(() =>
+                methodInfo!.Invoke(builderService, new object[] { filePath, "correlationId" }));
+
+            Assert.That(exception!.InnerException, Is.TypeOf<FulfilmentException>());
+        }
 
         #endregion PrivateMethods
     }
