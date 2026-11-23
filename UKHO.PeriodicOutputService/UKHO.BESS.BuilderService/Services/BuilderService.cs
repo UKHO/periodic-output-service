@@ -552,11 +552,7 @@ namespace UKHO.BESS.BuilderService.Services
 
                 return Path.Combine(filePath, unzippedFileName);
             }
-            catch (FulfilmentException)
-            {
-                throw;
-            }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not FulfilmentException)
             {
                 logger.LogError(EventIds.GetExtractedFilePathFailed.ToEventId(),
                     "Get extracted file path failed with Exception: {ex} at {DateTime} | _X-Correlation-ID:{CorrelationId}",

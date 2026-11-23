@@ -2869,6 +2869,27 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
         }
 
         [Test]
+        public void WhenOneZipAndOneUnzippedFileExistsAtPath_ThenGetExtractedFilePathReturnsUnzippedFileName()
+        {
+            var filePath = @"D:\Test";
+            var fileName = "test.zip";
+            var expectedResult = Path.Combine(filePath, Path.GetFileNameWithoutExtension(fileName));
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly))
+                .Returns(new List<string>
+                {
+                    Path.Combine(filePath, "test"),
+                    Path.Combine(filePath, fileName)
+                });
+
+            var methodInfo = typeof(BuilderService.Services.BuilderService).GetMethod("GetExtractedFilePath", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var result = methodInfo!.Invoke(builderService, new object[] { filePath, "correlationId" }) as string;
+
+            Assert.That(result, Is.EqualTo(expectedResult));
+        }
+
+        [Test]
         public void WhenGetAllFilesThrowsException_ThenGetExtractedFilePathThrowsFulfilmentException()
         {
             var filePath = @"D:\Test";

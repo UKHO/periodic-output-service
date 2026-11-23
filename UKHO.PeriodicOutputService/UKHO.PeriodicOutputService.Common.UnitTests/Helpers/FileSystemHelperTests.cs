@@ -344,7 +344,7 @@ namespace UKHO.PeriodicOutputService.Common.UnitTests.Helpers
         }
 
         [Test]
-        public void Does_GetProductVersionsFromDirectory_Returns_Max_FileExtension_When_LargeExchangeSetUpdateOrChange()
+        public void Does_GetProductVersionsFromDirectoryForLarge_Returns_Max_FileExtension_When_LargeExchangeSetUpdateOrChange()
         {
             // Arrange
             var sourcePath = @"C:\TestSource";

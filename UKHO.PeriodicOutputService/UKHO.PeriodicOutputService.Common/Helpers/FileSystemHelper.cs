@@ -250,9 +250,16 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
 
                         foreach (var editionFolder in _fileSystem.Directory.GetDirectories(encFolder)
                                      .Select(Path.GetFileName)
-                                     .Where(name => int.TryParse(name, out _)))
+                                     .Where(name => !string.IsNullOrEmpty(name))
+                                     .Select(name => new
+                                     {
+                                         EditionFolder = name!,
+                                         IsValidEdition = int.TryParse(name, out var editionNumber),
+                                         EditionNumber = editionNumber
+                                     })
+                                     .Where(folder => folder.IsValidEdition))
                         {
-                            var maxUpdateNumber = _fileSystem.Directory.GetFiles(Path.Combine(encFolder, editionFolder!), cellName + ".*")
+                            var maxUpdateNumber = _fileSystem.Directory.GetFiles(Path.Combine(encFolder, editionFolder.EditionFolder), cellName + ".*")
                                 .Select(f => int.TryParse(Path.GetExtension(f).TrimStart('.'), out var number) ? number : 0)
                                 .DefaultIfEmpty(0)
                                 .Max();
@@ -260,7 +267,7 @@ namespace UKHO.PeriodicOutputService.Common.Helpers
                             productVersions.Add(new ProductVersion
                             {
                                 ProductName = cellName,
-                                EditionNumber = int.Parse(editionFolder!),
+                                EditionNumber = editionFolder.EditionNumber,
                                 UpdateNumber = maxUpdateNumber
                             });
                         }
