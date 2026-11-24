@@ -1,4 +1,5 @@
 ﻿using System.IO.Abstractions;
+using System.Reflection;
 using Azure.Storage.Blobs;
 using FakeItEasy;
 using Microsoft.Extensions.Configuration;
@@ -93,6 +94,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
 
             A.CallTo(() => fakeAzureBlobStorageClient.DeleteBlobContentAsync(A<BlobClient>.Ignored))
                 .Returns(Task.CompletedTask);
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(A<string>.Ignored, A<SearchOption>.Ignored))
+                .Returns(new List<string> { @"D:\Test\BESS_test.zip" });
         }
 
         [Test]
@@ -167,8 +171,9 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.CommitBatch(A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<Batch>.Ignored, A<string>.Ignored))
              .Returns(true);
             A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored)).Returns(GetProductVersionsForBase);
+            A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectoryForLarge(A<string>.Ignored)).Returns(GetProductVersionsForBase);
             A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
-              .Returns(GetProductKeyServiceResponse());
+               .Returns(GetProductKeyServiceResponse());
             A.CallTo(() => fakeFssService.UploadBlocks(A<string>.Ignored, A<IFileInfo>.Ignored, A<string>.Ignored))
                 .Returns(new List<string> { "Block_00001" });
             A.CallTo(() => fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
@@ -318,7 +323,14 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                 .Returns(new List<string> { "Block_00001" });
             A.CallTo(() => fakeFssService.WriteBlockFile(A<string>.Ignored, A<string>.Ignored, A<IEnumerable<string>>.Ignored, A<string>.Ignored))
                 .Returns(true);
-            A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored)).Returns(GetProductVersions);
+            if (exchangeSetLayout == ExchangeSetLayout.Large)
+            {
+                A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectoryForLarge(A<string>.Ignored)).Returns(GetProductVersions);
+            }
+            else
+            {
+                A.CallTo(() => fakeFileSystemHelper.GetProductVersionsFromDirectory(A<string>.Ignored)).Returns(GetProductVersions);
+            }
             A.CallTo(() => fakePksService.PostProductKeyData(A<List<ProductKeyServiceRequest>>.Ignored, A<string>.Ignored))
               .Returns(GetProductKeyServiceResponse());
 
@@ -742,7 +754,7 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
             A.CallTo(() => fakeFssService.GetBatchDetails(A<string>.Ignored, A<string>.Ignored))
               .Returns(GetBatchResponseModelWithNoBatchFiles());
 
-            var act = async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML));;
+            var act = async () => await builderService.CreateBespokeExchangeSetAsync(GetConfigQueueMessage(type, exchangeSetStandard, ReadMeSearchFilter.AVCS.ToString(), KeyFileType.PERMIT_XML));
             var exception = Assert.ThrowsAsync<FulfilmentException>(act);
             Assert.That(exception.EventId, Is.EqualTo(EventIds.ErrorFileFoundInBatch.ToEventId()));
 
@@ -2822,6 +2834,76 @@ namespace UKHO.BESS.BuilderService.UnitTests.Services
                    Key = "test123"
                 }
         };
+
+        [Test]
+        public void WhenUnzippedFileExistsAtPath_ThenGetExtractedFilePathReturnsFileName()
+        {
+            var filePath = @"D:\Test";
+            var fileName = "test.zip";
+            var expectedResult = Path.Combine(filePath, Path.GetFileNameWithoutExtension(fileName));
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly))
+                .Returns(new List<string> { Path.Combine(filePath, fileName) });
+
+            var methodInfo = typeof(BuilderService.Services.BuilderService).GetMethod("GetExtractedFilePath", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var result = methodInfo!.Invoke(builderService, new object[] { filePath, "correlationId" }) as string;
+
+            Assert.That(result, Is.EqualTo(expectedResult));
+        }
+
+        [Test]
+        public void WhenNoFileExistsAtPath_ThenGetExtractedFilePathThrowsFulfilmentException()
+        {
+            var filePath = @"D:\Test";
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly))
+                .Returns(new List<string>());
+
+            var methodInfo = typeof(BuilderService.Services.BuilderService).GetMethod("GetExtractedFilePath", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var exception = Assert.Throws<TargetInvocationException>(() =>
+                methodInfo!.Invoke(builderService, new object[] { filePath, "correlationId" }));
+
+            Assert.That(exception!.InnerException, Is.TypeOf<FulfilmentException>());
+        }
+
+        [Test]
+        public void WhenOneZipAndOneUnzippedFileExistsAtPath_ThenGetExtractedFilePathReturnsUnzippedFileName()
+        {
+            var filePath = @"D:\Test";
+            var fileName = "test.zip";
+            var expectedResult = Path.Combine(filePath, Path.GetFileNameWithoutExtension(fileName));
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly))
+                .Returns(new List<string>
+                {
+                    Path.Combine(filePath, "test"),
+                    Path.Combine(filePath, fileName)
+                });
+
+            var methodInfo = typeof(BuilderService.Services.BuilderService).GetMethod("GetExtractedFilePath", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var result = methodInfo!.Invoke(builderService, new object[] { filePath, "correlationId" }) as string;
+
+            Assert.That(result, Is.EqualTo(expectedResult));
+        }
+
+        [Test]
+        public void WhenGetAllFilesThrowsException_ThenGetExtractedFilePathThrowsFulfilmentException()
+        {
+            var filePath = @"D:\Test";
+
+            A.CallTo(() => fakeFileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly))
+                .Throws(new IOException("Directory not found"));
+
+            var methodInfo = typeof(BuilderService.Services.BuilderService).GetMethod("GetExtractedFilePath", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            var exception = Assert.Throws<TargetInvocationException>(() =>
+                methodInfo!.Invoke(builderService, new object[] { filePath, "correlationId" }));
+
+            Assert.That(exception!.InnerException, Is.TypeOf<FulfilmentException>());
+        }
 
         #endregion PrivateMethods
     }

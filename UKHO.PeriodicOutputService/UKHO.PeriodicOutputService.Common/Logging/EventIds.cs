@@ -968,7 +968,22 @@ namespace UKHO.PeriodicOutputService.Common.Logging
         /// <summary>
         /// 809198 - Get product versions from entities completed
         /// </summary>
-        GetProductVersionsFromEntitiesCompleted = 809198
+        GetProductVersionsFromEntitiesCompleted = 809198,
+
+        /// <summary>
+        /// 809199 - Get extracted file path started
+        /// </summary>
+        GetExtractedFilePathStarted = 809199,
+
+        /// <summary>
+        /// 809200 - Get extracted file path completed
+        /// </summary>
+        GetExtractedFilePathCompleted = 809200,
+
+        /// <summary>
+        /// 809201 - Get extracted file path failed
+        /// </summary>
+        GetExtractedFilePathFailed = 809201
     }
 
     public static class EventIdExtensions

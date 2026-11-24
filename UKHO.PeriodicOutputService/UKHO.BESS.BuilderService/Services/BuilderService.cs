@@ -95,8 +95,8 @@ namespace UKHO.BESS.BuilderService.Services
             {
                 await PerformAncillaryFilesOperationsAsync(essBatchId, configQueueMessage, essFileDownloadPath, bessZipFileName);
             }
-            
-            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName, configQueueMessage.CorrelationId);
+
+            var latestProductVersions = GetTheLatestUpdateNumber(essFileDownloadPath, messageDetail.EncCellNames.ToArray(), bessZipFileName, configQueueMessage);
 
             await RequestCellKeysFromPksAsync(configQueueMessage, essFileDownloadPath, latestProductVersions);
 
@@ -520,28 +520,76 @@ namespace UKHO.BESS.BuilderService.Services
         }
 
         /// <summary>
+        /// This method will return the full path of the unzipped (extracted) file/folder available at the given file path.
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="correlationId"></param>
+        /// <returns></returns>
+        /// <exception cref="FulfilmentException"></exception>
+        private string GetExtractedFilePath(string filePath, string correlationId)
+        {
+            logger.LogInformation(EventIds.GetExtractedFilePathStarted.ToEventId(),
+                "Get extracted file path started for path: {filePath} | _X-Correlation-ID:{CorrelationId}",
+                filePath, correlationId);
+
+            try
+            {
+                var unzippedFileName = fileSystemHelper.GetAllFiles(filePath, SearchOption.TopDirectoryOnly)
+                    .Select(Path.GetFileNameWithoutExtension)
+                    .FirstOrDefault();
+
+                if (string.IsNullOrEmpty(unzippedFileName))
+                {
+                    logger.LogError(EventIds.GetExtractedFilePathFailed.ToEventId(),
+                        "No unzipped file found at path: {filePath} | _X-Correlation-ID:{CorrelationId}",
+                        filePath, correlationId);
+                    throw new FulfilmentException(EventIds.GetExtractedFilePathFailed.ToEventId());
+                }
+
+                logger.LogInformation(EventIds.GetExtractedFilePathCompleted.ToEventId(),
+                    "Get extracted file path completed : {unzippedFileName} | _X-Correlation-ID:{CorrelationId}",
+                    unzippedFileName, correlationId);
+
+                return Path.Combine(filePath, unzippedFileName);
+            }
+            catch (Exception ex) when (ex is not FulfilmentException)
+            {
+                logger.LogError(EventIds.GetExtractedFilePathFailed.ToEventId(),
+                    "Get extracted file path failed with Exception: {ex} at {DateTime} | _X-Correlation-ID:{CorrelationId}",
+                    ex, DateTime.UtcNow, correlationId);
+                throw new FulfilmentException(EventIds.GetExtractedFilePathFailed.ToEventId());
+            }
+        }
+
+
+        /// <summary>
         /// This method will return the latest edition and update number of products from directory.
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="cellNames"></param>
         /// <param name="bessZipFileName"></param>
+        /// <param name="configQueueMessage"></param>
         /// <returns></returns>
-        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName, string correlationId)
+        private ProductVersionsRequest GetTheLatestUpdateNumber(string filePath, string[] cellNames, string bessZipFileName, ConfigQueueMessage configQueueMessage)
         {
+            var correlationId = configQueueMessage.CorrelationId;
+
             logger.LogInformation(EventIds.GetTheLatestUpdateNumberStarted.ToEventId(),
                 "Get Latest Update Number : {bessZipFileName} | _X-Correlation-ID:{CorrelationId}",
                 bessZipFileName, correlationId);
 
             try
             {
-                string exchangeSetPath = Path.Combine(filePath, bessZipFileName);
+                var isLargeUpdateOrChange = configQueueMessage.ExchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(), StringComparison.OrdinalIgnoreCase);
+
+                var productVersions = isLargeUpdateOrChange
+                   ? fileSystemHelper.GetProductVersionsFromDirectoryForLarge(GetExtractedFilePath(filePath, correlationId))
+                   : fileSystemHelper.GetProductVersionsFromDirectory(Path.Combine(filePath, bessZipFileName));
 
                 ProductVersionsRequest productVersionsRequest = new()
                 {
                     ProductVersions = new()
                 };
-
-                var productVersions = fileSystemHelper.GetProductVersionsFromDirectory(exchangeSetPath);
 
                 productVersionsRequest.ProductVersions.AddRange(
                     from pv in productVersions
@@ -551,8 +599,8 @@ namespace UKHO.BESS.BuilderService.Services
                 );
 
                 logger.LogInformation(EventIds.GetTheLatestUpdateNumberCompleted.ToEventId(),
-                    "Get Latest Update Number : {bessZipFileName} | _X-Correlation-ID:{CorrelationId}",
-                    bessZipFileName, correlationId);
+                    "Get Latest Update Number : {bessZipFileName} | ProductVersionsRequest:{ProductVersionsRequest} | _X-Correlation-ID:{CorrelationId}",
+                    bessZipFileName, JsonConvert.SerializeObject(productVersionsRequest.ProductVersions), correlationId);
 
 
                 return productVersionsRequest;
@@ -838,7 +886,7 @@ namespace UKHO.BESS.BuilderService.Services
             // Large media files will be renamed as
             // 1. M01X02.zip -> <bessZipFileName>_M01X02.zip
             // 2. M02X02.zip -> <bessZipFileNameE>_M02X02.zip
-            
+
             foreach (var file in files)
             {
                 IFileInfo fileInfo = fileSystemHelper.GetFileInfo(Path.Combine(downloadPath, file.FileName));
@@ -846,7 +894,7 @@ namespace UKHO.BESS.BuilderService.Services
                 {
                     file.FileName = exchangeSetLayout.Equals(ExchangeSetLayout.Large.ToString(),
                         StringComparison.OrdinalIgnoreCase) ?
-                        $"{bessZipFileName}_{Path.GetFileNameWithoutExtension(file.FileName)}{Path.GetExtension(file.FileName)}" 
+                        $"{bessZipFileName}_{Path.GetFileNameWithoutExtension(file.FileName)}{Path.GetExtension(file.FileName)}"
                         : file.FileName.Replace(fssApiConfig.Value.BespokeExchangeSetFileFolder, bessZipFileName);
 
 

@@ -11,6 +11,7 @@
     <PackageReference Include="JsonConverter.Newtonsoft.Json" Version="0.13.0" />
     <PackageReference Include="Microsoft.AspNetCore.AzureAppServices.HostingStartup" Version="10.0.10" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="Scriban.Signed" Version="7.6.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
     <PackageReference Include="WireMock.Net" Version="2.12.0" />
     <PackageReference Include="WireMock.Net.Abstractions" Version="2.12.0" />
